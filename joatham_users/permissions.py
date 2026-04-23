@@ -61,14 +61,16 @@ def get_user_role(user):
 def user_has_permission(user, permission_code):
     if not user or not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_superuser", False):
-        return True
+
+    user_role = get_user_role(user)
+    if user_role == ROLE_SUPER_ADMIN:
+        return permission_code.startswith("superadmin.")
 
     allowed_roles = PERMISSIONS.get(permission_code)
     if allowed_roles is None:
         raise KeyError(f"Permission inconnue: {permission_code}")
 
-    return get_user_role(user) in allowed_roles
+    return user_role in allowed_roles
 
 
 def require_permission(user, permission_code, message="Vous n'avez pas les droits pour cette action."):

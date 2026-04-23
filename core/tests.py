@@ -27,6 +27,7 @@ from .services.subscription import (
     refuse_subscription_payment,
     validate_subscription_payment,
 )
+from joatham_users.permissions import user_has_permission
 
 
 class TenancyServiceTests(TestCase):
@@ -47,6 +48,20 @@ class TenancyServiceTests(TestCase):
 
         with self.assertRaises(PermissionDenied):
             get_user_entreprise_or_raise(user_without_company)
+
+    def test_get_user_entreprise_or_raise_rejects_super_admin_platform_user(self):
+        super_admin = create_user("platform-admin", "super_admin", self.entreprise_a)
+
+        with self.assertRaises(PermissionDenied):
+            get_user_entreprise_or_raise(super_admin)
+
+    def test_super_admin_permissions_remain_platform_only(self):
+        super_admin = create_user("platform-root", "super_admin", self.entreprise_a)
+        super_admin.is_superuser = True
+        super_admin.save(update_fields=["is_superuser"])
+
+        self.assertTrue(user_has_permission(super_admin, "superadmin.view"))
+        self.assertFalse(user_has_permission(super_admin, "clients.view"))
 
     def test_scope_queryset_to_entreprise_filters_cross_tenant_rows(self):
         scoped = scope_queryset_to_entreprise(self.client_a.__class__.objects.all(), self.entreprise_a)

@@ -18,7 +18,7 @@ class CompanySettingsTests(TestCase):
         self.client.force_login(self.owner)
         allowed = self.client.get(reverse("company_settings"))
         self.assertEqual(allowed.status_code, 200)
-        self.assertContains(allowed, "Parametres entreprise")
+        self.assertContains(allowed, "Profil de l'organisation")
 
     def test_owner_can_update_company_identity(self):
         self.client.force_login(self.owner)

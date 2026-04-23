@@ -1,8 +1,8 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Super admin | JOATHAM Manager{% endblock %}
-{% block content_title %}Super admin{% endblock %}
-{% block content_subtitle %}Pilotage global des entreprises, des abonnements et de l'etat SaaS de la plateforme.{% endblock %}
+{% block page_title %}Pilotage SaaS | JOATHAM Manager{% endblock %}
+{% block content_title %}Pilotage SaaS{% endblock %}
+{% block content_subtitle %}Vue plateforme reservee aux abonnements, essais, paiements et statuts des comptes clients.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">Rafraichir</a>
@@ -241,8 +241,8 @@
 
 <div class="super-grid">
     <div class="super-kpi">
-        <span class="label">Entreprises</span>
-        <span class="value">{{ counts.total_entreprises }}</span>
+        <span class="label">Comptes clients</span>
+        <span class="value">{{ counts.total_accounts }}</span>
     </div>
     <div class="super-kpi essai">
         <span class="label">En essai</span>
@@ -261,8 +261,8 @@
         <span class="value">{{ counts.suspendu }}</span>
     </div>
     <div class="super-kpi future">
-        <span class="label">Revenu estime futur</span>
-        <span class="value">A venir</span>
+        <span class="label">Revenus valides</span>
+        <span class="value">{{ counts.validated_revenue }}</span>
     </div>
 </div>
 
@@ -324,8 +324,8 @@
 <div class="toolbar">
     <form method="get" class="filter-form">
         <div>
-            <label for="id_q">Rechercher une entreprise</label>
-            <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom ou raison sociale">
+            <label for="id_q">Rechercher un compte client</label>
+            <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email proprietaire">
         </div>
         <div>
             <label for="id_statut">Filtrer par statut</label>
@@ -347,13 +347,12 @@
     <table class="super-table">
         <thead>
             <tr>
-                <th>Entreprise</th>
-                <th>Pays</th>
-                <th>Devise</th>
+                <th>Compte client</th>
+                <th>Contact principal</th>
                 <th>Plan</th>
                 <th>Statut abonnement</th>
-                <th>Date expiration</th>
-                <th>Utilisateurs</th>
+                <th>Echeance</th>
+                <th>Derniere demande</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -369,8 +368,14 @@
                         {% endif %}
                     </div>
                 </td>
-                <td>{{ entreprise.pays|default:"-" }}</td>
-                <td>{{ entreprise.devise|default:"-" }}</td>
+                <td>
+                    <div class="stacked">
+                        <strong>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</strong>
+                        {% if entreprise.owner_username %}
+                        <span class="muted">@{{ entreprise.owner_username }}</span>
+                        {% endif %}
+                    </div>
+                </td>
                 <td>{% if subscription %}{{ subscription.plan.nom }}{% else %}-{% endif %}</td>
                 <td>
                     {% if subscription %}
@@ -386,7 +391,16 @@
                         -
                     {% endif %}
                 </td>
-                <td>{{ entreprise.user_count }}</td>
+                <td>
+                    <div class="stacked">
+                        {% if entreprise.last_payment_created_at %}
+                        <strong>{{ entreprise.last_payment_created_at|date:"d/m/Y" }}</strong>
+                        <span class="muted">{{ entreprise.last_payment_amount|default:"0" }} - {{ entreprise.last_payment_status|default:"-" }}</span>
+                        {% else %}
+                        <span class="muted">Aucune demande</span>
+                        {% endif %}
+                    </div>
+                </td>
                 <td>
                     <div class="row-actions">
                         <form method="post">
@@ -437,7 +451,7 @@
             {% endwith %}
             {% empty %}
             <tr>
-                <td colspan="8">Aucune entreprise n'est encore enregistree.</td>
+                <td colspan="7">Aucun compte client n'est encore enregistre.</td>
             </tr>
             {% endfor %}
         </tbody>

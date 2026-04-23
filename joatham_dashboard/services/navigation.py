@@ -10,7 +10,7 @@ from joatham_users.permissions import (
 
 NAV_ITEMS = [
     {
-        "label": "Super admin",
+        "label": "Pilotage SaaS",
         "url_name": "super_admin_dashboard",
         "permission": "superadmin.view",
         "module": None,
@@ -31,7 +31,7 @@ NAV_ITEMS = [
         ],
     },
     {
-        "label": "Entreprise",
+        "label": "Organisation",
         "url_name": "company_settings",
         "permission": "company.manage",
         "module": None,
@@ -102,7 +102,7 @@ NAV_ITEMS = [
         "prefixes": ["/audit/"],
     },
     {
-        "label": "Abonnement",
+        "label": "Mon abonnement",
         "url_name": "subscription_overview",
         "permission": "subscription.view",
         "module": "subscription",

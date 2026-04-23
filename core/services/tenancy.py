@@ -10,6 +10,8 @@ def get_user_entreprise(user):
 
 
 def get_user_entreprise_or_raise(user):
+    if getattr(user, "is_super_admin", False):
+        raise PermissionDenied("Le super admin plateforme n'accede pas aux espaces entreprise.")
     entreprise = get_user_entreprise(user)
     if entreprise is None:
         raise PermissionDenied("Aucune entreprise n'est associee a cet utilisateur.")

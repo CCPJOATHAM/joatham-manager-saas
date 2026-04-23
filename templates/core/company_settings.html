@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Parametres entreprise</title>
+    <title>Organisation | JOATHAM Manager</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
         .container { max-width: 960px; margin: 0 auto; }
@@ -24,7 +24,10 @@
 {{ country_currency_map|json_script:"company-country-currency-map" }}
 <div class="container">
     <div class="topbar">
-        <h1>Parametres entreprise</h1>
+        <div>
+            <h1 style="margin:0;">Profil de l'organisation</h1>
+            <p style="margin:8px 0 0; color:#64748b;">Espace interne de votre entreprise pour les coordonnees, la facturation et les references legales.</p>
+        </div>
         <a href="{% url 'admin_dashboard' %}">Retour au dashboard</a>
     </div>
     {% if messages %}
@@ -38,7 +41,7 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="grid">
-                <div class="field"><label for="{{ form.nom.id_for_label }}">Nom de l'entreprise</label>{{ form.nom }}</div>
+                <div class="field"><label for="{{ form.nom.id_for_label }}">Nom de l'organisation</label>{{ form.nom }}</div>
                 <div class="field"><label for="{{ form.raison_sociale.id_for_label }}">Raison sociale</label>{{ form.raison_sociale }}</div>
                 <div class="field field-full"><label for="{{ form.adresse.id_for_label }}">Adresse</label>{{ form.adresse }}</div>
                 <div class="field"><label for="{{ form.ville.id_for_label }}">Ville</label>{{ form.ville }}</div>
@@ -61,8 +64,8 @@
                     {% endif %}
                 </div>
             </div>
-            <p style="margin:16px 0 0; color:#64748b; font-size:13px;">La devise, la TVA par defaut et le referentiel comptable choisis servent de base aux documents et parametres financiers de l'entreprise.</p>
-            <button type="submit">Enregistrer les coordonnees</button>
+            <p style="margin:16px 0 0; color:#64748b; font-size:13px;">Ces informations servent a vos documents et reglages internes. Le super admin plateforme ne les utilise pas comme console metier.</p>
+            <button type="submit">Enregistrer le profil</button>
         </form>
     </div>
 </div>
