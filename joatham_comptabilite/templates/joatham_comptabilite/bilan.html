@@ -1,0 +1,94 @@
+{% extends "joatham_comptabilite/compta_base.html" %}
+
+{% block content %}
+<section class="summary-grid">
+    <article class="metric">
+        <div class="label">Total actif</div>
+        <div class="value">{{ actif|floatformat:2 }} FC</div>
+    </article>
+    <article class="metric">
+        <div class="label">Total passif</div>
+        <div class="value">{{ passif|floatformat:2 }} FC</div>
+    </article>
+    <article class="metric">
+        <div class="label">Statut du bilan</div>
+        <div class="value {% if equilibre %}status-positive{% else %}status-negative{% endif %}">{% if equilibre %}Equilibre{% else %}A verifier{% endif %}</div>
+    </article>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <h3 class="section-title">Actif</h3>
+        {% for section in actif_sections %}
+            <div style="margin-bottom:18px;">
+                <h4 style="margin:0 0 10px;">{{ section.label }}</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Numero</th>
+                                <th>Compte</th>
+                                <th class="number">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.rows %}
+                                <tr>
+                                    <td>{{ row.numero }}</td>
+                                    <td>{{ row.nom }}</td>
+                                    <td class="number">{{ row.montant|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2">Sous-total {{ section.label|lower }}</th>
+                                <th class="number">{{ section.subtotal|floatformat:2 }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty">Aucun poste d'actif sur cette periode.</div>
+        {% endfor %}
+    </article>
+
+    <article class="panel">
+        <h3 class="section-title">Passif</h3>
+        {% for section in passif_sections %}
+            <div style="margin-bottom:18px;">
+                <h4 style="margin:0 0 10px;">{{ section.label }}</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Numero</th>
+                                <th>Compte</th>
+                                <th class="number">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.rows %}
+                                <tr>
+                                    <td>{{ row.numero }}</td>
+                                    <td>{{ row.nom }}</td>
+                                    <td class="number">{{ row.montant|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2">Sous-total {{ section.label|lower }}</th>
+                                <th class="number">{{ section.subtotal|floatformat:2 }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty">Aucun poste de passif sur cette periode.</div>
+        {% endfor %}
+    </article>
+</section>
+{% endblock %}

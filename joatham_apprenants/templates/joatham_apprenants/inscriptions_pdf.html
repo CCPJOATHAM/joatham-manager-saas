@@ -1,0 +1,63 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.document-title {
+    margin: 16px 0 12px;
+    font-size: 15px;
+    text-align: center;
+}
+.total-box {
+    margin-top: 12px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 12px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="pdf-header">
+    <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
+    <p>{{ entreprise.nom }}</p>
+    <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
+    <p>Edition du {{ date_generation }}</p>
+</div>
+
+<div class="document-title">{{ report_title }}</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Apprenant</th>
+            <th>Formation</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th class="text-right">Montant prevu</th>
+            <th class="text-right">Montant paye</th>
+            <th class="text-right">Solde</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inscription in inscriptions %}
+            <tr>
+                <td>{{ inscription.apprenant }}</td>
+                <td>{{ inscription.formation }}</td>
+                <td>{{ inscription.date_inscription|date:"d/m/Y" }}</td>
+                <td>{{ inscription.get_statut_display }}</td>
+                <td class="text-right">{{ inscription.montant_prevu|floatformat:2 }}</td>
+                <td class="text-right">{{ inscription.montant_paye|floatformat:2 }}</td>
+                <td class="text-right">{{ inscription.solde|floatformat:2 }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7">Aucune inscription enregistree.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pdf-footer">
+    Document genere le {{ date_footer }}
+</div>
+{% endblock %}

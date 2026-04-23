@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Acces abonnement</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f8d7da;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 640px;
+        }
+
+        h1 {
+            color: #b42318;
+        }
+
+        p {
+            color: #344054;
+            line-height: 1.5;
+        }
+
+        .message {
+            background: #fff3cd;
+            border: 1px solid #f1c40f;
+            border-radius: 8px;
+            color: #6b4f00;
+            margin: 16px 0;
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>Acces abonnement limite</h1>
+    {% if module_label %}
+    <p>Le module <strong>{{ module_label }}</strong> n'est pas accessible avec l'etat actuel de votre abonnement.</p>
+    {% else %}
+    <p>Votre acces est actuellement limite par l'etat de votre abonnement.</p>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if show_subscription_link %}
+    <a href="{% url 'subscription_overview' %}">Voir mon abonnement</a>
+    {% endif %}
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Parametres entreprise</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
+        .container { max-width: 960px; margin: 0 auto; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .topbar a { color: #0f766e; text-decoration: none; font-weight: bold; }
+        .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field-full { grid-column: 1 / -1; }
+        label { font-weight: bold; color: #334155; font-size: 14px; }
+        input, select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        button { margin-top: 20px; padding: 12px 16px; background: #0f766e; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        .messages { margin-bottom: 16px; }
+        .message { padding: 10px 14px; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 8px; }
+        .logo-preview img { max-height: 72px; max-width: 180px; border: 1px solid #e2e8f0; padding: 6px; background: #fff; }
+    </style>
+</head>
+<body>
+{{ country_currency_map|json_script:"company-country-currency-map" }}
+<div class="container">
+    <div class="topbar">
+        <h1>Parametres entreprise</h1>
+        <a href="{% url 'admin_dashboard' %}">Retour au dashboard</a>
+    </div>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="grid">
+                <div class="field"><label for="{{ form.nom.id_for_label }}">Nom de l'entreprise</label>{{ form.nom }}</div>
+                <div class="field"><label for="{{ form.raison_sociale.id_for_label }}">Raison sociale</label>{{ form.raison_sociale }}</div>
+                <div class="field field-full"><label for="{{ form.adresse.id_for_label }}">Adresse</label>{{ form.adresse }}</div>
+                <div class="field"><label for="{{ form.ville.id_for_label }}">Ville</label>{{ form.ville }}</div>
+                <div class="field"><label for="{{ form.pays.id_for_label }}">Pays</label>{{ form.pays }}</div>
+                <div class="field"><label for="{{ form.devise.id_for_label }}">Devise</label>{{ form.devise }}</div>
+                <div class="field"><label for="{{ form.taux_tva_defaut.id_for_label }}">TVA par defaut (%)</label>{{ form.taux_tva_defaut }}</div>
+                <div class="field"><label for="{{ form.referentiel_comptable.id_for_label }}">Referentiel comptable</label>{{ form.referentiel_comptable }}</div>
+                <div class="field"><label for="{{ form.telephone.id_for_label }}">Telephone</label>{{ form.telephone }}</div>
+                <div class="field"><label for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}</div>
+                <div class="field"><label for="{{ form.banque.id_for_label }}">Banque</label>{{ form.banque }}</div>
+                <div class="field"><label for="{{ form.compte_bancaire.id_for_label }}">Compte bancaire</label>{{ form.compte_bancaire }}</div>
+                <div class="field"><label for="{{ form.rccm.id_for_label }}">RCCM</label>{{ form.rccm }}</div>
+                <div class="field"><label for="{{ form.id_nat.id_for_label }}">ID NAT</label>{{ form.id_nat }}</div>
+                <div class="field"><label for="{{ form.numero_impot.id_for_label }}">Numero d'impot</label>{{ form.numero_impot }}</div>
+                <div class="field">
+                    <label for="{{ form.logo.id_for_label }}">Logo</label>
+                    {{ form.logo }}
+                    {% if entreprise.logo %}
+                    <div class="logo-preview"><img src="{{ entreprise.logo.url }}" alt="Logo entreprise"></div>
+                    {% endif %}
+                </div>
+            </div>
+            <p style="margin:16px 0 0; color:#64748b; font-size:13px;">La devise, la TVA par defaut et le referentiel comptable choisis servent de base aux documents et parametres financiers de l'entreprise.</p>
+            <button type="submit">Enregistrer les coordonnees</button>
+        </form>
+    </div>
+</div>
+<script>
+    const companyCountryCurrencyMap = JSON.parse(document.getElementById("company-country-currency-map").textContent);
+    const companyCountryField = document.getElementById("id_pays");
+    const companyCurrencyField = document.getElementById("id_devise");
+    let companyCurrencyTouched = false;
+
+    if (companyCurrencyField) {
+        companyCurrencyField.addEventListener("change", function () {
+            companyCurrencyTouched = true;
+        });
+    }
+
+    if (companyCountryField && companyCurrencyField) {
+        companyCountryField.addEventListener("change", function () {
+            const suggested = companyCountryCurrencyMap[companyCountryField.value];
+            if (suggested && (!companyCurrencyTouched || !companyCurrencyField.value)) {
+                companyCurrencyField.value = suggested;
+            }
+        });
+    }
+</script>
+</body>
+</html>

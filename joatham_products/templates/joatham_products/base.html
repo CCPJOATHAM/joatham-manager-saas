@@ -1,0 +1,12 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Produits | JOATHAM Manager{% endblock %}
+{% block content_title %}{% block products_title %}Produits{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block products_subtitle %}Gestion des produits et du stock de votre entreprise.{% endblock %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'product_list' %}" class="btn-link">Liste des produits</a>
+{% if can_manage_products_ui %}
+<a href="{% url 'product_create' %}" class="btn-link primary">Ajouter un produit</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "joatham_comptabilite/compta_base.html" %}
+
+{% block content %}
+{% for account in accounts %}
+    <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+            <div>
+                <h3 class="section-title" style="margin-bottom:6px;">{{ account.numero }} - {{ account.nom }}</h3>
+                <div class="muted">Solde d'ouverture debit {{ account.ouverture_debit|floatformat:2 }} / credit {{ account.ouverture_credit|floatformat:2 }}</div>
+            </div>
+            <div class="summary-grid" style="grid-template-columns:repeat(3,minmax(140px,1fr));gap:10px;">
+                <div class="metric">
+                    <div class="label">Debit periode</div>
+                    <div class="value" style="font-size:18px;">{{ account.total_debit|floatformat:2 }}</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Credit periode</div>
+                    <div class="value" style="font-size:18px;">{{ account.total_credit|floatformat:2 }}</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Solde final</div>
+                    <div class="value" style="font-size:18px;">D {{ account.solde_debit|floatformat:2 }} / C {{ account.solde_credit|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Journal</th>
+                        <th>Piece</th>
+                        <th>Libelle</th>
+                        <th class="number">Debit</th>
+                        <th class="number">Credit</th>
+                        <th class="number">Solde debit</th>
+                        <th class="number">Solde credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in account.lignes %}
+                        <tr>
+                            <td>{{ line.date_piece|date:"d/m/Y" }}</td>
+                            <td>{{ line.journal }}</td>
+                            <td>{{ line.numero_piece }}</td>
+                            <td>{{ line.libelle }}</td>
+                            <td class="number">{{ line.debit|floatformat:2 }}</td>
+                            <td class="number">{{ line.credit|floatformat:2 }}</td>
+                            <td class="number">{{ line.solde_debit|floatformat:2 }}</td>
+                            <td class="number">{{ line.solde_credit|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="empty">Aucun mouvement sur ce compte.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% empty %}
+    <section class="panel">
+        <div class="empty">Aucune ecriture comptable sur cette periode.</div>
+    </section>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirmation email | JOATHAM Manager</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            color: #10233f;
+        }
+        .card {
+            width: 100%;
+            max-width: 640px;
+            background: #fff;
+            border-radius: 28px;
+            padding: 40px 34px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+            border: 1px solid rgba(255,255,255,0.75);
+        }
+        h1 {
+            margin: 0 0 12px;
+            font-size: 2rem;
+            letter-spacing: -0.03em;
+        }
+        p {
+            color: #64748b;
+            line-height: 1.7;
+        }
+        .email-box {
+            margin: 20px 0;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #dde7f0;
+            font-weight: 700;
+            color: #10233f;
+        }
+        .email-box small {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .email-box a {
+            color: #0f766e;
+            word-break: break-all;
+            text-decoration: none;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #10233f;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn.primary {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <h1>Confirmez votre adresse email</h1>
+        <p>Un email de confirmation a été envoyé. Veuillez cliquer sur le lien reçu avant d’utiliser JOATHAM Manager.</p>
+        {% if pending_email %}
+        <div class="email-box">{{ pending_email }}</div>
+        {% endif %}
+        <p>Le lien reste valable pendant environ {{ expiration_minutes }} minute{{ expiration_minutes|pluralize:"s" }}. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.</p>
+        {% if debug_verification_url %}
+        <div class="email-box">
+            <small>Lien local de vérification</small>
+            <a href="{{ debug_verification_url }}">{{ debug_verification_url }}</a>
+        </div>
+        {% endif %}
+        <div class="actions">
+            <form method="post" action="{% url 'email_verification_resend' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn primary">Renvoyer l’email</button>
+            </form>
+            <a href="{% url 'login' %}" class="btn">Retour à la connexion</a>
+        </div>
+    </main>
+</body>
+</html>

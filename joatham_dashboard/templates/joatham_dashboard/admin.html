@@ -1,0 +1,585 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Dashboard Proprietaire | JOATHAM Manager{% endblock %}
+{% block content_title %}Dashboard proprietaire{% endblock %}
+{% block content_subtitle %}Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'company_settings' %}" class="btn-link">Entreprise</a>
+<a href="{% url 'user_list' %}" class="btn-link">Utilisateurs</a>
+<a href="{% url 'user_create' %}" class="btn-link primary">Ajouter un utilisateur</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">Abonnement</a>
+<a href="{% url 'activity_log_list' %}" class="btn-link">Controle des flux</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 26px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 760px;
+        line-height: 1.6;
+    }
+
+    .hero-summary {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .premium-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .premium-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .premium-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: #2563eb;
+    }
+
+    .premium-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .premium-label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
+    .premium-value {
+        display: block;
+        margin-top: 3px;
+        color: #10233f;
+        font-size: 1.08rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .premium-meta {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .quick-action-card {
+        display: block;
+        text-decoration: none;
+        padding: 18px;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #dde7f0;
+        color: #10233f;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+    }
+
+    .quick-action-card strong {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .quick-action-card span {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.92rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .section-card {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .section-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .section-subtitle {
+        margin: 0 0 16px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .list-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .list-card + .list-card {
+        margin-top: 14px;
+    }
+
+    .list-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    .list-card li {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .list-card li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .activity-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .activity-item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f8fbff;
+        border: 1px solid #d9e6fb;
+    }
+
+    .activity-item strong {
+        display: block;
+        color: #10233f;
+    }
+
+    .activity-meta {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .activity-desc {
+        margin-top: 6px;
+        color: #334155;
+        line-height: 1.6;
+        font-size: 0.92rem;
+    }
+
+    .stock-alert-shell {
+        display: grid;
+        gap: 14px;
+    }
+
+    .stock-alert-summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .stock-alert-card {
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid transparent;
+    }
+
+    .stock-alert-card strong {
+        display: block;
+        font-size: 1.7rem;
+        letter-spacing: -0.03em;
+        margin-top: 6px;
+    }
+
+    .stock-alert-card small {
+        display: block;
+        margin-top: 4px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    .stock-alert-card.rupture {
+        background: linear-gradient(180deg, #fff4f3 0%, #fff8f7 100%);
+        border-color: #fecaca;
+        color: #9f1239;
+    }
+
+    .stock-alert-card.low {
+        background: linear-gradient(180deg, #fff8ed 0%, #fffbf5 100%);
+        border-color: #fed7aa;
+        color: #b45309;
+    }
+
+    .stock-alert-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    .stock-alert-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stock-alert-item strong {
+        display: block;
+        color: #10233f;
+        margin-bottom: 3px;
+    }
+
+    .stock-alert-item span {
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .stock-alert-badge {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+
+    .stock-alert-badge.rupture {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .stock-alert-badge.low {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .empty-hint {
+        padding: 18px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 1180px) {
+        .premium-kpis,
+        .quick-actions {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .premium-kpis,
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Bienvenue dans votre cockpit JOATHAM Manager</h2>
+        <p>Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour.</p>
+    </div>
+    <div class="hero-summary">
+        <span class="hero-pill">Devise : {{ entreprise_identity.currency_code }}</span>
+        <span class="hero-pill">Clients : {{ nombre_clients }}</span>
+        <span class="hero-pill">Factures : {{ nombre_factures }}</span>
+        {% if subscription %}
+        <span class="hero-pill">Abonnement : {{ subscription.get_statut_display }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="premium-kpis">
+    <div class="premium-card">
+        <div class="premium-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2v20"></path>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Chiffre d'affaires</span>
+            <span class="premium-value">{{ total_ca }}</span>
+            <span class="premium-meta">Facturation emise a date</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#eefcf6; color:#047857;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20 7 9 18l-5-5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Encaissements</span>
+            <span class="premium-value">{{ total_encaisse }}</span>
+            <span class="premium-meta">{{ payees }} facture{{ payees|pluralize:"s" }} soldee{{ payees|pluralize:"s" }}</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#fff7ed; color:#c2410c;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 8v5"></path>
+                <path d="M12 16h.01"></path>
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Reste a encaisser</span>
+            <span class="premium-value">{{ reste_encaisser }}</span>
+            <span class="premium-meta">{{ impayees }} facture{{ impayees|pluralize:"s" }} a suivre</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#eef6ff; color:#1d4ed8;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="10" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Portefeuille client</span>
+            <span class="premium-value">{{ nombre_clients }}</span>
+            <span class="premium-meta">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="{% url 'company_settings' %}" class="quick-action-card">
+        <strong>Entreprise</strong>
+        <span>Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise.</span>
+    </a>
+    <a href="{% url 'user_list' %}" class="quick-action-card">
+        <strong>Utilisateurs</strong>
+        <span>Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire.</span>
+    </a>
+    <a href="{% url 'client_list' %}" class="quick-action-card">
+        <strong>Clients</strong>
+        <span>Accedez rapidement au portefeuille client et a la relation commerciale.</span>
+    </a>
+    <a href="{% url 'depenses' %}" class="quick-action-card">
+        <strong>Depenses</strong>
+        <span>Consultez les sorties financieres et les rapports PDF correspondants.</span>
+    </a>
+    <a href="{% url 'facture_list' %}" class="quick-action-card">
+        <strong>Factures</strong>
+        <span>Suivez la facturation, les PDF et les paiements dans un espace premium.</span>
+    </a>
+    <a href="{% url 'apprenant_list' %}" class="quick-action-card">
+        <strong>Apprenants</strong>
+        <span>Pilotez les apprenants, formations, inscriptions et paiements de formation.</span>
+    </a>
+    <a href="{% url 'activity_log_list' %}" class="quick-action-card">
+        <strong>Audit</strong>
+        <span>Relisez les actions sensibles et gardez une trace claire des operations produit.</span>
+    </a>
+    <a href="{% url 'subscription_overview' %}" class="quick-action-card">
+        <strong>Abonnement</strong>
+        <span>Consultez le plan en cours, le statut SaaS et la periode d'acces active.</span>
+    </a>
+</div>
+
+<div class="dashboard-grid">
+    <div>
+        <section class="section-card">
+            <h3>Vue de pilotage</h3>
+            <p class="section-subtitle">Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien.</p>
+
+            <div class="list-card">
+                <ul>
+                    <li><span>Depenses cumulees</span><strong>{{ total_depenses }}</strong></li>
+                    <li><span>Benefice estime</span><strong>{{ benefice }}</strong></li>
+                    <li><span>TVA cumulee</span><strong>{{ total_tva }}</strong></li>
+                    <li><span>Facturation aujourd'hui</span><strong>{{ total_jour }}</strong></li>
+                    <li><span>Facturation ce mois</span><strong>{{ total_mois }}</strong></li>
+                    <li><span>Depenses ce mois</span><strong>{{ depense_mois }}</strong></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-card" style="margin-top:20px;">
+            <h3>Activite recente</h3>
+            <p class="section-subtitle">Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe.</p>
+
+            {% if recent_activity %}
+            <div class="activity-list">
+                {% for log in recent_activity %}
+                <div class="activity-item">
+                    <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                    <div class="activity-meta">
+                        {{ log.date_creation|date:"d/m/Y H:i" }}
+                        {% if log.utilisateur %} | {{ log.utilisateur.username }}{% endif %}
+                    </div>
+                    <div class="activity-desc">{{ log.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-hint">Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone.</div>
+            {% endif %}
+        </section>
+    </div>
+
+    <div>
+        <section class="section-card">
+            <h3>Resume abonnement</h3>
+            <p class="section-subtitle">Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise.</p>
+
+            {% if subscription %}
+            <div class="list-card">
+                <ul>
+                    <li><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></li>
+                    <li><span>Statut</span><strong>{{ subscription.get_statut_display }}</strong></li>
+                    <li><span>Date de debut</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></li>
+                    <li><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="empty-hint">Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit.</div>
+            {% endif %}
+        </section>
+
+        <section class="section-card" style="margin-top:20px;">
+            <h3>Alertes stock</h3>
+            <p class="section-subtitle">Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque.</p>
+
+            <div class="stock-alert-shell">
+                <div class="stock-alert-summary">
+                    <div class="stock-alert-card rupture">
+                        <span>Produits en rupture</span>
+                        <strong>{{ rupture_products_count }}</strong>
+                        <small>Quantite en stock inferieure ou egale a 0.</small>
+                    </div>
+                    <div class="stock-alert-card low">
+                        <span>Produits en stock faible</span>
+                        <strong>{{ low_stock_products_count }}</strong>
+                        <small>Stock positif mais inferieur ou egal au seuil d'alerte.</small>
+                    </div>
+                </div>
+
+                {% if rupture_products or low_stock_products %}
+                <div class="list-card">
+                    <ul class="stock-alert-list">
+                        {% for product in rupture_products %}
+                        <li class="stock-alert-item">
+                            <div>
+                                <strong>{{ product.nom }}</strong>
+                                <span>Stock actuel : {{ product.quantite_stock }} | Seuil : {{ product.seuil_alerte }}</span>
+                            </div>
+                            <span class="stock-alert-badge rupture">Rupture</span>
+                        </li>
+                        {% endfor %}
+                        {% for product in low_stock_products %}
+                        <li class="stock-alert-item">
+                            <div>
+                                <strong>{{ product.nom }}</strong>
+                                <span>Stock actuel : {{ product.quantite_stock }} | Seuil : {{ product.seuil_alerte }}</span>
+                            </div>
+                            <span class="stock-alert-badge low">Stock faible</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div class="empty-hint">Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance.</div>
+                {% endif %}
+
+                <div>
+                    <a href="{% url 'product_list' %}" class="btn-link">Ouvrir le module Produits</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card" style="margin-top:20px;">
+            <h3>Demarrage rapide</h3>
+            <p class="section-subtitle">Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus.</p>
+            <div class="list-card">
+                <ul>
+                    <li><span>Ajouter un gestionnaire ou comptable</span><strong><a href="{% url 'user_create' %}" style="text-decoration:none; color:#0f766e;">Creer</a></strong></li>
+                    <li><span>Completer l'identite entreprise</span><strong><a href="{% url 'company_settings' %}" style="text-decoration:none; color:#0f766e;">Ouvrir</a></strong></li>
+                    <li><span>Creer une facture</span><strong><a href="{% url 'add_facture' %}" style="text-decoration:none; color:#0f766e;">Facturer</a></strong></li>
+                    <li><span>Analyser le journal d'activites</span><strong><a href="{% url 'activity_log_list' %}" style="text-decoration:none; color:#0f766e;">Consulter</a></strong></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

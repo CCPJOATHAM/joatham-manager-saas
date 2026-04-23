@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f3f6fb;
+            --panel: #ffffff;
+            --panel-soft: rgba(255, 255, 255, 0.76);
+            --text: #10233f;
+            --muted: #64748b;
+            --line: #d9e2ec;
+            --brand: #0f766e;
+            --brand-strong: #115e59;
+            --accent: #c0841a;
+            --danger-bg: #fee2e2;
+            --danger-text: #991b1b;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(192, 132, 26, 0.16), transparent 25%),
+                linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .login-shell {
+            width: 100%;
+            max-width: 1080px;
+            display: grid;
+            grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 0.9fr);
+            background: var(--panel-soft);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-panel {
+            padding: 54px 48px;
+            background:
+                linear-gradient(155deg, rgba(16, 35, 63, 0.96), rgba(15, 118, 110, 0.9)),
+                linear-gradient(120deg, #10233f, #0f766e);
+            color: white;
+            position: relative;
+        }
+
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            inset: auto -80px -80px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-panel h1 {
+            margin: 26px 0 14px;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.04;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-panel p {
+            max-width: 480px;
+            color: rgba(255, 255, 255, 0.84);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .feature-list {
+            margin: 34px 0 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-list li {
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .login-card {
+            background: var(--panel);
+            padding: 52px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-card h2 {
+            margin: 0 0 10px;
+            font-size: 1.9rem;
+        }
+
+        .login-card .subtitle {
+            margin: 0 0 28px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .error-box {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            font-size: 0.95rem;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 14px 48px 14px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #fbfdff;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: rgba(15, 118, 110, 0.7);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 6px 8px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 28px rgba(15, 118, 110, 0.24);
+        }
+
+        .submit-btn:hover {
+            filter: brightness(1.03);
+        }
+
+        .helper-links {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 16px;
+            font-size: 0.94rem;
+        }
+
+        .helper-links a {
+            color: var(--brand);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footnote {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-panel,
+            .login-card {
+                padding: 34px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell">
+        <section class="brand-panel">
+            <div class="brand-kicker">JOATHAM Manager</div>
+            <h1>Pilotez votre entreprise dans une interface SaaS claire et professionnelle.</h1>
+            <p>
+                Facturation, dépenses, comptabilité, apprenants, audit et abonnement dans un environnement
+                unique, structuré pour une gestion multi-entreprises propre et fiable.
+            </p>
+            <ul class="feature-list">
+                <li>Navigation adaptée au rôle après connexion</li>
+                <li>Documents professionnels et paramètres d'entreprise centralisés</li>
+                <li>Base SaaS progressive, maintenable et sécurisée</li>
+            </ul>
+        </section>
+
+        <section class="login-card">
+            <div>
+                <h2>Connexion</h2>
+                <p class="subtitle">Accédez à votre espace JOATHAM Manager pour gérer votre activité selon votre rôle, ou créer votre entreprise si vous démarrez.</p>
+            </div>
+
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="field">
+                    <label for="id_username">Email ou nom d'utilisateur</label>
+                    <div class="input-wrap">
+                        <input id="id_username" type="text" name="username" autocomplete="username" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="id_password">Mot de passe</label>
+                    <div class="input-wrap">
+                        <input id="id_password" type="password" name="password" autocomplete="current-password" required>
+                        <button type="button" class="toggle-password" id="togglePassword">Afficher</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Se connecter</button>
+            </form>
+
+            <div class="helper-links">
+                <span>Nouveau sur JOATHAM Manager ? <a href="{% url 'signup' %}">Créer mon entreprise et commencer mon essai gratuit</a></span>
+                <span><a href="{% url 'password_reset' %}">Mot de passe oublie ?</a></span>
+            </div>
+
+            <p class="footnote">Connexion sécurisée à l’espace entreprise JOATHAM Manager.</p>
+        </section>
+    </main>
+
+    <script>
+        const passwordInput = document.getElementById("id_password");
+        const togglePasswordButton = document.getElementById("togglePassword");
+
+        if (passwordInput && togglePasswordButton) {
+            togglePasswordButton.addEventListener("click", function () {
+                const isHidden = passwordInput.type === "password";
+                passwordInput.type = isHidden ? "text" : "password";
+                togglePasswordButton.textContent = isHidden ? "Masquer" : "Afficher";
+            });
+        }
+    </script>
+</body>
+</html>

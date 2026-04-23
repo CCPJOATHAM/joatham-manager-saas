@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Formations - JOATHAM Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        th { background: #f9fafb; }
+        .actions { margin-bottom: 16px; }
+        .actions a { display: inline-block; padding: 10px 14px; background: #0f766e; color: white; border-radius: 6px; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="actions">
+        <a href="{% url 'apprenant_list' %}">Retour aux apprenants</a>
+        {% if can_manage_apprenants_ui %}
+        <a href="{% url 'formation_create' %}" style="margin-left:8px;">Nouvelle formation</a>
+        {% endif %}
+        <a href="{% url 'formations_pdf' %}" style="margin-left:8px;">Export PDF</a>
+        <a href="{% url 'formations_excel' %}" style="margin-left:8px;">Export Excel</a>
+    </div>
+    <h1>Formations</h1>
+    <p>Entreprise: {{ entreprise.nom }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Prix</th>
+                <th>Duree</th>
+                <th>Actif</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for formation in formations %}
+            <tr>
+                <td>{{ formation.nom }}</td>
+                <td>{{ formation.description|default:"-" }}</td>
+                <td>{{ formation.prix }}</td>
+                <td>{{ formation.duree|default:"-" }}</td>
+                <td>{% if formation.actif %}Oui{% else %}Non{% endif %}</td>
+                <td>
+                    {% if can_manage_apprenants_ui %}
+                    <a href="{% url 'formation_update' formation.id %}">Modifier</a>
+                    <form method="post" action="{% url 'formation_toggle_status' formation.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="margin-left:6px;">
+                            {% if formation.actif %}Desactiver{% else %}Activer{% endif %}
+                        </button>
+                    </form>
+                    {% else %}
+                    <span style="color:#64748b;">Lecture seule</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Aucune formation disponible.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

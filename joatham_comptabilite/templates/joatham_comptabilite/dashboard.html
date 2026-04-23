@@ -1,0 +1,79 @@
+{% extends "joatham_comptabilite/compta_base.html" %}
+
+{% block content %}
+<section class="summary-grid">
+    <article class="metric">
+        <div class="label">Produits</div>
+        <div class="value">{{ produits|floatformat:2 }} FC</div>
+        <div class="meta">Total des comptes de classe 7</div>
+    </article>
+    <article class="metric">
+        <div class="label">Charges</div>
+        <div class="value">{{ charges|floatformat:2 }} FC</div>
+        <div class="meta">Total des comptes de classe 6</div>
+    </article>
+    <article class="metric">
+        <div class="label">Resultat net</div>
+        <div class="value {% if resultat > 0 %}status-positive{% elif resultat < 0 %}status-negative{% else %}status-neutral{% endif %}">{{ resultat|floatformat:2 }} FC</div>
+        <div class="meta">{{ resultat_label }}</div>
+    </article>
+    <article class="metric">
+        <div class="label">Bilan</div>
+        <div class="value">{{ actif|floatformat:2 }} / {{ passif|floatformat:2 }} FC</div>
+        <div class="meta">{% if equilibre_bilan %}Actif et passif equilibres{% else %}Difference a verifier{% endif %}</div>
+    </article>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <h3 class="section-title">Balance comptable</h3>
+            <a class="subtle-badge" href="{% url 'balance' %}{{ filter_query }}">Voir le detail</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Compte</th>
+                        <th class="number">Debit</th>
+                        <th class="number">Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in balance_preview %}
+                        <tr>
+                            <td>{{ row.numero }} - {{ row.nom }}</td>
+                            <td class="number">{{ row.debit|floatformat:2 }}</td>
+                            <td class="number">{{ row.credit|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3" class="empty">Aucun mouvement comptable sur cette periode.</td></tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th class="number">{{ total_debit|floatformat:2 }}</th>
+                        <th class="number">{{ total_credit|floatformat:2 }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <h3 class="section-title">Grand livre</h3>
+            <a class="subtle-badge" href="{% url 'grand_livre' %}{{ filter_query }}">Voir le detail</a>
+        </div>
+        {% for account in grand_livre_preview %}
+            <div style="padding:14px 0;border-bottom:1px solid #d8dfeb;">
+                <strong>{{ account.numero }} - {{ account.nom }}</strong>
+                <div class="muted" style="margin-top:6px;">Mouvements: {{ account.lignes|length }} | Solde final debit {{ account.solde_debit|floatformat:2 }} | credit {{ account.solde_credit|floatformat:2 }}</div>
+            </div>
+        {% empty %}
+            <div class="empty">Aucune ecriture a afficher.</div>
+        {% endfor %}
+    </article>
+</section>
+{% endblock %}

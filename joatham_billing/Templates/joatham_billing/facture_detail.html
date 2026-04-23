@@ -1,0 +1,577 @@
+{% extends "joatham_billing/base.html" %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero-meta {
+        margin-top: 8px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .hero-actions .btn {
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+    }
+
+    .hero-actions .btn-print {
+        background: #fff;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .hero-actions .btn-add {
+        background: #eef6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .hero-actions .btn-download {
+        background: #10233f;
+        border: 1px solid #10233f;
+        color: #fff;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .summary-card {
+        padding: 18px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .summary-card .label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
+    .summary-card strong {
+        display: block;
+        margin-top: 4px;
+        color: #10233f;
+        font-size: 1.04rem;
+        letter-spacing: -0.02em;
+    }
+
+    .summary-card .helper {
+        display: block;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .status-brouillon {
+        background: #eef2f7;
+        border-color: #d7dee7;
+        color: #52606d;
+    }
+
+    .status-emise {
+        background: #e0f2fe;
+        border-color: #bae6fd;
+        color: #075985;
+    }
+
+    .status-payee {
+        background: #dcfce7;
+        border-color: #bbf7d0;
+        color: #166534;
+    }
+
+    .status-annulee {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+    }
+
+    .status-partial {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #9a3412;
+    }
+
+    .page-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel + .panel {
+        margin-top: 20px;
+    }
+
+    .panel h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .panel-subtitle {
+        margin: 0 0 18px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .facture-table,
+    .payment-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .facture-table thead,
+    .payment-table thead {
+        background: #f8fafc;
+    }
+
+    .facture-table th,
+    .facture-table td,
+    .payment-table th,
+    .payment-table td {
+        padding: 15px 16px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .facture-table th,
+    .payment-table th {
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .facture-table tbody tr:hover,
+    .payment-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .amount-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .amount-pill.total {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .amount-pill.paid {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .amount-pill.remaining {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .origin-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        margin-bottom: 8px;
+    }
+
+    .source-product {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .source-service {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .source-free {
+        background: #eef2f7;
+        border-color: #d7dee7;
+        color: #52606d;
+    }
+
+    .source-name {
+        display: block;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 0.82rem;
+    }
+
+    .inline-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+        font-size: 0.95rem;
+    }
+
+    .inline-form input,
+    .inline-form select,
+    .inline-form textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+    }
+
+    .inline-form button {
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .inline-form .btn-print {
+        background: #fff;
+        border-color: #d7dee7;
+        color: #10233f;
+    }
+
+    .inline-form .btn-paid {
+        background: linear-gradient(135deg, #0f766e, #115e59);
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .history-item {
+        padding: 14px 0;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .history-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .history-item strong {
+        display: block;
+        color: #10233f;
+    }
+
+    .history-meta {
+        color: #64748b;
+        font-size: 0.86rem;
+        margin-top: 4px;
+    }
+
+    .history-desc {
+        margin-top: 6px;
+        color: #334155;
+        line-height: 1.6;
+    }
+
+    .empty-row td {
+        text-align: center;
+        color: #64748b;
+    }
+
+    @media (max-width: 1180px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+
+        .page-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>{{ facture.numero }}</h2>
+        <div class="hero-meta">
+            Client : <strong>{{ facture.client_display }}</strong><br>
+            Emise le {{ facture.date|date:"d/m/Y H:i:s" }}
+        </div>
+        <div style="margin-top:12px;">
+            {% if est_partiellement_payee %}
+                <span class="status-chip status-partial">Partiellement payee</span>
+            {% elif facture.statut == "brouillon" %}
+                <span class="status-chip status-brouillon">Brouillon</span>
+            {% elif facture.statut == "emise" %}
+                <span class="status-chip status-emise">Emise</span>
+            {% elif facture.statut == "payee" %}
+                <span class="status-chip status-payee">Payee</span>
+            {% elif facture.statut == "annulee" %}
+                <span class="status-chip status-annulee">Annulee</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-actions">
+        <a href="{% url 'facture_list' %}" class="btn btn-print">Retour</a>
+        {% if can_manage_factures_ui and facture.statut == "brouillon" %}
+        <a href="{% url 'edit_facture' facture.id %}" class="btn btn-add">Modifier</a>
+        {% endif %}
+        <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">Voir PDF</a>
+        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">Telecharger PDF</a>
+    </div>
+</div>
+
+<div class="summary-grid">
+    <div class="summary-card">
+        <span class="label">Total HT</span>
+        <strong>{{ total_ht }}</strong>
+        <span class="helper">{{ line_count }} ligne{{ line_count|pluralize:"s" }} de facturation</span>
+    </div>
+    <div class="summary-card">
+        <span class="label">TVA</span>
+        <strong>{{ total_tva }}</strong>
+        <span class="helper">Taux applique : {{ facture.tva }}%</span>
+    </div>
+    <div class="summary-card">
+        <span class="label">Total net</span>
+        <strong>{{ total_net }}</strong>
+        <span class="helper">Montant global de la facture</span>
+    </div>
+    <div class="summary-card">
+        <span class="label">Montant paye</span>
+        <strong>{{ total_paye }}</strong>
+        <span class="helper">{{ payment_count }} paiement{{ payment_count|pluralize:"s" }} enregistre{{ payment_count|pluralize:"s" }}</span>
+    </div>
+    <div class="summary-card">
+        <span class="label">Reste a payer</span>
+        <strong>{{ reste_a_payer }}</strong>
+        <span class="helper">Solde encore attendu</span>
+    </div>
+</div>
+
+<div class="page-grid">
+    <div>
+        <div class="panel">
+            <h3>Prestations facturees</h3>
+            <p class="panel-subtitle">Lecture detaillee des lignes de facture avec quantites, prix unitaires et montants calcules.</p>
+            <table class="facture-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Designation</th>
+                        <th style="width: 12%;">Qte</th>
+                        <th style="width: 24%;">Prix unitaire</th>
+                        <th style="width: 24%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in line_rows %}
+                    <tr>
+                        <td>
+                            <span class="origin-badge {{ ligne.source.class }}">{{ ligne.source.label }}</span>
+                            <div>{{ ligne.instance.designation }}</div>
+                            {% if ligne.source.name %}
+                                <span class="source-name">{{ ligne.source.name }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ ligne.instance.quantite }}</td>
+                        <td style="text-align:right;">
+                            <span class="amount-pill total">{{ ligne.unit_price_display }}</span>
+                        </td>
+                        <td style="text-align:right;">
+                            <span class="amount-pill total">{{ ligne.total_display }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel">
+            <h3>Paiements enregistres</h3>
+            <p class="panel-subtitle">Historique des reglements deja saisis sur cette facture.</p>
+            <table class="payment-table">
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">Date</th>
+                        <th style="width: 18%;">Mode</th>
+                        <th style="width: 20%;">Reference</th>
+                        <th style="width: 20%;">Montant</th>
+                        <th style="width: 20%;">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paiement in paiements %}
+                    <tr>
+                        <td>{{ paiement.date_display }}</td>
+                        <td>{{ paiement.instance.get_mode_display }}</td>
+                        <td>{{ paiement.instance.reference|default:"-" }}</td>
+                        <td style="text-align:right;">
+                            <span class="amount-pill paid">{{ paiement.amount_display }}</span>
+                        </td>
+                        <td>{{ paiement.instance.get_statut_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="5">Aucun paiement enregistre.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        {% if can_manage_factures_ui %}
+        <div class="panel">
+            <h3>Mettre a jour le statut</h3>
+            <p class="panel-subtitle">Faites evoluer la facture dans son workflow tout en gardant une note de transition si besoin.</p>
+            <form method="post" action="{% url 'change_facture_status' facture.id %}" class="inline-form" onsubmit="return confirmStatusChange(this);">
+                {% csrf_token %}
+                <div class="field">
+                    <label for="facture-statut">Nouveau statut</label>
+                    <select id="facture-statut" name="statut">
+                        {% for value, label in statut_choices %}
+                            <option value="{{ value }}" {% if facture.statut == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="facture-note">Note de transition</label>
+                    <textarea id="facture-note" name="note" rows="3" placeholder="Ajouter un contexte interne si necessaire"></textarea>
+                </div>
+                <button type="submit" class="btn btn-print">Mettre a jour</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if can_record_payments_ui %}
+        <div class="panel">
+            <h3>Enregistrer un paiement</h3>
+            <p class="panel-subtitle">Saisissez un reglement sans quitter la fiche facture.</p>
+            <form method="post" action="{% url 'add_paiement_facture' facture.id %}" class="inline-form" onsubmit="return confirm('Confirmer l\\'enregistrement de ce paiement ?');">
+                {% csrf_token %}
+                <div class="field">
+                    <label for="paiement-montant">Montant</label>
+                    <input id="paiement-montant" type="number" step="0.01" min="0" max="{{ facture.reste_a_payer }}" name="montant" placeholder="Montant du paiement">
+                </div>
+                <div class="field">
+                    <label for="paiement-mode">Mode de paiement</label>
+                    <select id="paiement-mode" name="mode">
+                        {% for value, label in mode_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="paiement-reference">Reference</label>
+                    <input id="paiement-reference" type="text" name="reference" placeholder="Reference, numero ou libelle">
+                </div>
+                <div class="field">
+                    <label for="paiement-note">Note</label>
+                    <textarea id="paiement-note" name="note" rows="3" placeholder="Commentaire interne sur ce reglement"></textarea>
+                </div>
+                <button type="submit" class="btn btn-paid">Enregistrer le paiement</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="panel">
+            <h3>Historique</h3>
+            <p class="panel-subtitle">Trace recente des actions effectuees sur cette facture.</p>
+            {% for event in historique %}
+                <div class="history-item">
+                    <strong>{{ event.get_action_display }}</strong>
+                    <div class="history-meta">{{ event.created_at|date:"d/m/Y H:i:s" }}</div>
+                    <div class="history-desc">{{ event.description|default:"Aucun commentaire" }}</div>
+                </div>
+            {% empty %}
+                <p class="panel-subtitle" style="margin:0;">Aucun historique disponible.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmStatusChange(form) {
+    const statut = form.querySelector('select[name="statut"]').value;
+    if (statut === 'annulee') {
+        return confirm("Confirmer l'annulation de cette facture ?");
+    }
+    if (statut === 'payee') {
+        return confirm("Confirmer le passage de cette facture au statut payee ?");
+    }
+    return confirm("Confirmer le changement de statut ?");
+}
+</script>
+{% endblock %}

@@ -1,0 +1,464 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Super admin | JOATHAM Manager{% endblock %}
+{% block content_title %}Super admin{% endblock %}
+{% block content_subtitle %}Pilotage global des entreprises, des abonnements et de l'etat SaaS de la plateforme.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">Rafraichir</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.4fr) minmax(180px, 0.7fr) auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .filter-form label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .super-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(150px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .super-kpi {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid #dde7f0;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .super-kpi .label {
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .super-kpi .value {
+        display: block;
+        margin-top: 8px;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #10233f;
+        letter-spacing: -0.03em;
+    }
+
+    .super-kpi.essai { border-color: #fde68a; background: #fffdf4; }
+    .super-kpi.actif { border-color: #bbf7d0; background: #f5fff8; }
+    .super-kpi.expire { border-color: #fecaca; background: #fff7f7; }
+    .super-kpi.suspendu { border-color: #cbd5e1; background: #f8fafc; }
+    .super-kpi.future { border-color: #dbeafe; background: #f8fbff; }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 22px;
+        background: #fff;
+    }
+
+    .super-table {
+        width: 100%;
+        min-width: 1120px;
+        border-collapse: collapse;
+    }
+
+    .super-table th,
+    .super-table td {
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .super-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .super-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .stacked {
+        display: grid;
+        gap: 6px;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-essai { background: #fef3c7; color: #92400e; }
+    .status-actif { background: #dcfce7; color: #166534; }
+    .status-expire { background: #fee2e2; color: #b91c1c; }
+    .status-suspendu { background: #e2e8f0; color: #334155; }
+    .status-none { background: #eef2ff; color: #4338ca; }
+
+    .row-actions {
+        display: grid;
+        gap: 10px;
+        min-width: 280px;
+    }
+
+    .row-actions form {
+        display: grid;
+        gap: 8px;
+    }
+
+    .row-actions select,
+    .row-actions input {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .action-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-small[disabled] {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .btn-small.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .btn-small.warning {
+        background: #fff7ed;
+        border-color: #fdba74;
+        color: #c2410c;
+    }
+
+    .btn-small.danger {
+        background: #fff1f2;
+        border-color: #fecdd3;
+        color: #be123c;
+    }
+
+    .payments-panel {
+        margin-bottom: 24px;
+        padding: 20px;
+        border-radius: 22px;
+        border: 1px solid #dde7f0;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .payments-panel h2 {
+        margin: 0 0 14px;
+        color: #10233f;
+        font-size: 1.15rem;
+    }
+
+    .payment-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 1180px) {
+        .toolbar,
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .super-grid {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+    }
+
+    @media (max-width: 760px) {
+        .super-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="super-grid">
+    <div class="super-kpi">
+        <span class="label">Entreprises</span>
+        <span class="value">{{ counts.total_entreprises }}</span>
+    </div>
+    <div class="super-kpi essai">
+        <span class="label">En essai</span>
+        <span class="value">{{ counts.essai }}</span>
+    </div>
+    <div class="super-kpi actif">
+        <span class="label">Actives</span>
+        <span class="value">{{ counts.actif }}</span>
+    </div>
+    <div class="super-kpi expire">
+        <span class="label">Expirees</span>
+        <span class="value">{{ counts.expire }}</span>
+    </div>
+    <div class="super-kpi suspendu">
+        <span class="label">Suspendues</span>
+        <span class="value">{{ counts.suspendu }}</span>
+    </div>
+    <div class="super-kpi future">
+        <span class="label">Revenu estime futur</span>
+        <span class="value">A venir</span>
+    </div>
+</div>
+
+<section class="payments-panel">
+    <h2>Paiements d'abonnement en attente</h2>
+    {% if pending_payments %}
+    <div class="table-shell">
+        <table class="super-table">
+            <thead>
+                <tr>
+                    <th>Entreprise</th>
+                    <th>Plan</th>
+                    <th>Duree</th>
+                    <th>Montant</th>
+                    <th>Reference</th>
+                    <th>Preuve</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for paiement in pending_payments %}
+                <tr>
+                    <td>{{ paiement.entreprise.nom }}</td>
+                    <td>{{ paiement.plan.nom }}</td>
+                    <td>{{ paiement.get_duree_display }}</td>
+                    <td>{{ paiement.montant }} {{ paiement.entreprise.devise }}</td>
+                    <td>{{ paiement.reference_paiement }}</td>
+                    <td>
+                        {% if paiement.preuve_paiement %}
+                        <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">Voir la preuve</a>
+                        {% else %}
+                        <span class="muted">Aucune preuve</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="payment-actions">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
+                                <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider</button>
+                            </form>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
+                                <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="muted">Aucun paiement en attente pour le moment.</p>
+    {% endif %}
+</section>
+
+<div class="toolbar">
+    <form method="get" class="filter-form">
+        <div>
+            <label for="id_q">Rechercher une entreprise</label>
+            <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom ou raison sociale">
+        </div>
+        <div>
+            <label for="id_statut">Filtrer par statut</label>
+            <select id="id_statut" name="statut">
+                <option value="">Tous les statuts</option>
+                {% for value, label in statut_choices %}
+                <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn-small primary">Filtrer</button>
+            <a href="{% url 'super_admin_dashboard' %}" class="btn-small" style="text-decoration:none;">Reinitialiser</a>
+        </div>
+    </form>
+</div>
+
+<div class="table-shell">
+    <table class="super-table">
+        <thead>
+            <tr>
+                <th>Entreprise</th>
+                <th>Pays</th>
+                <th>Devise</th>
+                <th>Plan</th>
+                <th>Statut abonnement</th>
+                <th>Date expiration</th>
+                <th>Utilisateurs</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entreprise in entreprises %}
+            {% with subscription=entreprise.abonnement_entreprise %}
+            <tr>
+                <td>
+                    <div class="stacked">
+                        <strong>{{ entreprise.nom }}</strong>
+                        {% if entreprise.raison_sociale %}
+                        <span class="muted">{{ entreprise.raison_sociale }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ entreprise.pays|default:"-" }}</td>
+                <td>{{ entreprise.devise|default:"-" }}</td>
+                <td>{% if subscription %}{{ subscription.plan.nom }}{% else %}-{% endif %}</td>
+                <td>
+                    {% if subscription %}
+                    <span class="status-badge status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
+                    {% else %}
+                    <span class="status-badge status-none">Aucun abonnement</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if subscription and subscription.date_fin %}
+                        {{ subscription.date_fin|date:"d/m/Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ entreprise.user_count }}</td>
+                <td>
+                    <div class="row-actions">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <select name="plan_id" class="plan-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
+                                    <option value="">Choisir un plan</option>
+                                    {% for plan in plans %}
+                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>Activer</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <select name="plan_id" class="plan-select plan-change-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
+                                    <option value="">Conserver le plan</option>
+                                    {% for plan in plans %}
+                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>Changer plan</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <input type="number" name="trial_days" value="7" min="1" step="1">
+                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger essai</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>Suspendre</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="8">Aucune entreprise n'est encore enregistree.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    document.querySelectorAll(".plan-change-select").forEach(function (select) {
+        const button = select.closest("form").querySelector(".change-plan-button");
+        if (!button) {
+            return;
+        }
+
+        const currentPlan = select.dataset.currentPlan || "";
+
+        const syncButton = function () {
+            const selectedPlan = select.value || "";
+            button.disabled = !selectedPlan || selectedPlan === currentPlan;
+        };
+
+        syncButton();
+        select.addEventListener("change", syncButton);
+    });
+</script>
+{% endblock %}

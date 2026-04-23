@@ -1,0 +1,10 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Clients | JOATHAM Manager{% endblock %}
+{% block content_title %}{% block clients_title %}Clients{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block clients_subtitle %}Gestion de la base clients de votre entreprise.{% endblock %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'client_list' %}" class="btn-link">Liste des clients</a>
+<a href="{% url 'add_client' %}" class="btn-link primary">Ajouter un client</a>
+{% endblock %}

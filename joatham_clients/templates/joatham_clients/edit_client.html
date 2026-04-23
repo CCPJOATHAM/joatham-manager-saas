@@ -1,0 +1,77 @@
+{% extends "joatham_clients/base.html" %}
+
+{% block clients_title %}Modifier un client{% endblock %}
+{% block clients_subtitle %}Mettez a jour les informations de contact du client selectionne.{% endblock %}
+
+{% block content %}
+<style>
+    .form-card {
+        max-width: 760px;
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 20px;
+        padding: 24px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field.full {
+        grid-column: 1 / -1;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+    }
+
+    .field input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+    }
+
+    .submit-btn {
+        margin-top: 18px;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 0;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+    }
+</style>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="field full">
+                <label for="id_nom">Nom</label>
+                <input id="id_nom" type="text" name="nom" value="{{ client.nom }}" required>
+            </div>
+            <div class="field">
+                <label for="id_telephone">Telephone</label>
+                <input id="id_telephone" type="text" name="telephone" value="{{ client.telephone }}">
+            </div>
+            <div class="field">
+                <label for="id_email">Email</label>
+                <input id="id_email" type="email" name="email" value="{{ client.email }}">
+            </div>
+        </div>
+        <button type="submit" class="submit-btn">Mettre a jour le client</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inscription | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f3f6fb;
+            --panel: #ffffff;
+            --panel-soft: rgba(255, 255, 255, 0.76);
+            --text: #10233f;
+            --muted: #64748b;
+            --line: #d9e2ec;
+            --brand: #0f766e;
+            --brand-strong: #115e59;
+            --accent: #c0841a;
+            --danger-bg: #fee2e2;
+            --danger-text: #991b1b;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(192, 132, 26, 0.16), transparent 24%),
+                linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            padding: 24px;
+        }
+
+        .shell {
+            width: 100%;
+            max-width: 1220px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr);
+            background: var(--panel-soft);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-panel {
+            padding: 48px;
+            background:
+                radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 24%),
+                linear-gradient(160deg, rgba(16, 35, 63, 0.97), rgba(15, 118, 110, 0.9));
+            color: white;
+        }
+
+        .brand-panel h1 {
+            margin: 22px 0 14px;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.04;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-panel p {
+            color: rgba(255,255,255,0.84);
+            line-height: 1.7;
+        }
+
+        .brand-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .steps {
+            margin-top: 30px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .steps div {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .form-panel {
+            padding: 44px 40px;
+            background: var(--panel);
+        }
+
+        .form-panel h2 {
+            margin: 0 0 10px;
+            font-size: 1.9rem;
+        }
+
+        .subtitle {
+            margin: 0 0 28px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-weight: 600;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #fbfdff;
+            font-size: 1rem;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: rgba(15, 118, 110, 0.7);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+        }
+
+        .error-box,
+        .field-error {
+            color: var(--danger-text);
+        }
+
+        .error-box {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--danger-bg);
+        }
+
+        .field-error {
+            font-size: 0.9rem;
+        }
+
+        .submit-btn {
+            margin-top: 22px;
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 28px rgba(15, 118, 110, 0.24);
+        }
+
+        .helper {
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .helper a {
+            color: var(--brand);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 980px) {
+            .shell {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-panel,
+            .form-panel {
+                padding: 30px 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {{ country_currency_map|json_script:"country-currency-map" }}
+    <main class="shell">
+        <section class="brand-panel">
+            <div class="brand-kicker">Parcours SaaS</div>
+            <h1>Créez votre entreprise et commencez votre essai JOATHAM Manager.</h1>
+            <p>
+                En quelques informations, vous obtenez votre espace propriétaire, votre entreprise,
+                une devise par défaut selon votre pays et un démarrage propre sur le socle SaaS.
+            </p>
+
+            <div class="steps">
+                <div>1. Créez votre entreprise et votre compte propriétaire</div>
+                <div>2. Le pays suggère automatiquement la devise par défaut</div>
+                <div>3. L'essai démarre et vous accédez directement à votre tableau de bord</div>
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <h2>Inscription entreprise</h2>
+            <p class="subtitle">Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloqués proprement.</p>
+
+            {% if form.non_field_errors %}
+            <div class="error-box">
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="{{ form.company_name.id_for_label }}">Nom de l'entreprise</label>
+                        {{ form.company_name }}
+                        {% for error in form.company_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.raison_sociale.id_for_label }}">Raison sociale</label>
+                        {{ form.raison_sociale }}
+                        {% for error in form.raison_sociale.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field full">
+                        <label for="{{ form.owner_full_name.id_for_label }}">Nom complet du propriétaire</label>
+                        {{ form.owner_full_name }}
+                        {% for error in form.owner_full_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.email.id_for_label }}">E-mail</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.telephone.id_for_label }}">Telephone</label>
+                        {{ form.telephone }}
+                        {% for error in form.telephone.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.pays.id_for_label }}">Pays</label>
+                        {{ form.pays }}
+                        {% for error in form.pays.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.devise.id_for_label }}">Devise</label>
+                        {{ form.devise }}
+                        {% for error in form.devise.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                        {{ form.password }}
+                        {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.password_confirm.id_for_label }}">Confirmation du mot de passe</label>
+                        {{ form.password_confirm }}
+                        {% for error in form.password_confirm.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Creer mon entreprise</button>
+            </form>
+
+            <p class="helper">
+                Vous avez deja un compte ? <a href="{% url 'login' %}">Se connecter</a>
+            </p>
+        </section>
+    </main>
+
+    <script>
+        const countryCurrencyMap = JSON.parse(document.getElementById("country-currency-map").textContent);
+        const countryField = document.getElementById("id_pays");
+        const currencyField = document.getElementById("id_devise");
+        let currencyTouched = false;
+
+        if (currencyField) {
+            currencyField.addEventListener("change", function () {
+                currencyTouched = true;
+            });
+        }
+
+        if (countryField && currencyField) {
+            countryField.addEventListener("change", function () {
+                const suggested = countryCurrencyMap[countryField.value];
+                if (suggested && (!currencyTouched || !currencyField.value)) {
+                    currencyField.value = suggested;
+                }
+            });
+
+            if (!currencyField.value && countryCurrencyMap[countryField.value]) {
+                currencyField.value = countryCurrencyMap[countryField.value];
+            }
+        }
+    </script>
+</body>
+</html>

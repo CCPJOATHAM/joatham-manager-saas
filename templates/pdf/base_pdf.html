@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block pdf_title %}Document{% endblock %}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 16mm 14mm 18mm 14mm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10.5px;
+            color: #1f2933;
+            margin: 0;
+            padding: 0;
+        }
+
+        .pdf-page {
+            width: 100%;
+        }
+
+        .pdf-header {
+            margin-bottom: 14px;
+        }
+
+        .pdf-header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pdf-header-table td {
+            border: none;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .pdf-company-logo {
+            width: 76px;
+            height: 76px;
+            border: 1px solid #d8e1ea;
+            border-radius: 10px;
+            padding: 6px;
+            background: #ffffff;
+        }
+
+        .pdf-company-block {
+            padding-left: 12px;
+        }
+
+        .pdf-company-name {
+            margin: 0 0 4px;
+            font-size: 18px;
+            color: #10233f;
+            font-weight: bold;
+        }
+
+        .pdf-company-secondary {
+            margin: 0 0 4px;
+            color: #475569;
+            font-size: 11px;
+        }
+
+        .pdf-company-line {
+            margin: 0 0 2px;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .pdf-meta-block {
+            text-align: right;
+        }
+
+        .pdf-meta-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.4pt;
+        }
+
+        .pdf-meta-line {
+            margin: 4px 0 0;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .separator {
+            height: 2px;
+            background: #10233f;
+            margin: 10px 0 14px;
+        }
+
+        .document-title {
+            margin: 0 0 12px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+            color: #10233f;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px 9px;
+            border: 1px solid #d8e1ea;
+        }
+
+        th {
+            background: #e9eef5;
+            color: #10233f;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 0.4pt;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .pdf-footer {
+            margin-top: 14px;
+            border-top: 1px solid #d8e1ea;
+            padding-top: 8px;
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        .pdf-footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pdf-footer-table td {
+            border: none;
+            padding: 0;
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        {% block pdf_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="pdf-page">
+        {% block pdf_content %}{% endblock %}
+    </div>
+</body>
+</html>

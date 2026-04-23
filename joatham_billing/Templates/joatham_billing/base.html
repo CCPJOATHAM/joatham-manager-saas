@@ -1,0 +1,52 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Facturation | JOATHAM Manager{% endblock %}
+{% block content_title %}Facturation{% endblock %}
+{% block content_subtitle %}Suivi des factures, paiements et documents PDF de l'entreprise.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'facture_list' %}" class="btn-link">Liste des factures</a>
+{% if can_manage_factures_ui and "/factures/add/" != request.path %}
+<a href="{% url 'add_facture' %}" class="btn-link primary">Nouvelle facture</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+        background: #f8fafc;
+        text-align: left;
+        color: #334155;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        border: 0;
+    }
+
+    .btn-print { background: #2563eb; }
+    .btn-download { background: #7c3aed; }
+    .btn-paid { background: #0f766e; }
+    .btn-add { background: #0f766e; }
+</style>
+{% endblock %}

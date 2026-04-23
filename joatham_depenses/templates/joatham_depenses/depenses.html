@@ -1,0 +1,447 @@
+{% extends "joatham_depenses/base.html" %}
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 26px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 720px;
+        line-height: 1.6;
+    }
+
+    .stat-badges {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(190px, 1fr));
+        gap: 12px;
+    }
+
+    .stat-badge {
+        display: grid;
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        min-width: 170px;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: #1d4ed8;
+    }
+
+    .stat-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stat-badge .label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.3;
+    }
+
+    .stat-badge strong {
+        color: #10233f;
+        font-size: 1.08rem;
+        letter-spacing: -0.02em;
+    }
+
+    .trend {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .trend.up {
+        color: #0f766e;
+    }
+
+    .trend.down {
+        color: #b91c1c;
+    }
+
+    .trend.flat {
+        color: #64748b;
+    }
+
+    .page-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .panel-subtitle {
+        margin: 0 0 18px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .expense-form,
+    .filters-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+        font-size: 0.95rem;
+    }
+
+    .expense-form input,
+    .filters-form input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+    }
+
+    .panel-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .panel-actions button,
+    .panel-actions a {
+        min-height: 42px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .panel-actions button {
+        background: linear-gradient(135deg, #0f766e, #115e59);
+        color: #fff;
+        cursor: pointer;
+        border-color: #0f766e;
+    }
+
+    .panel-actions a {
+        background: #fff;
+        color: #10233f;
+    }
+
+    .panel-actions a:last-child {
+        background: #10233f;
+        color: #fff;
+        border-color: #10233f;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+    }
+
+    .depenses-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .depenses-table thead {
+        background: #f8fafc;
+    }
+
+    .depenses-table th,
+    .depenses-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .depenses-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .depenses-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .amount {
+        text-align: right;
+        font-weight: 800;
+        color: #0f766e;
+        white-space: nowrap;
+        font-size: 0.98rem;
+    }
+
+    .date {
+        color: #64748b;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .description {
+        color: #10233f;
+        font-weight: 600;
+    }
+
+    .date-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .amount-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        color: #047857;
+        font-weight: 800;
+    }
+
+    .empty-state {
+        padding: 60px 24px;
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 480px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .empty-state .btn-link {
+        display: inline-flex;
+    }
+
+    .empty-state .helper {
+        margin-top: 10px;
+        color: #94a3b8;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 980px) {
+        .page-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-badges {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Dépenses</h2>
+        <p>Suivez les sorties financières de votre entreprise, filtrez rapidement les mouvements et exportez un document PDF professionnel.</p>
+    </div>
+    <div class="stat-badges">
+        <div class="stat-badge">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                    <path d="M8 9h8M8 13h5"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="label">Total cumule</span>
+                <strong>{{ global_total_display }}</strong>
+            </div>
+        </div>
+        <div class="stat-badge">
+            <div class="stat-icon" style="background:#eefcf6; color:#047857;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 6v12M7 10.5c0-1.38 2.24-2.5 5-2.5s5 1.12 5 2.5-2.24 2.5-5 2.5-5 1.12-5 2.5S9.24 18 12 18s5-1.12 5-2.5"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="label">Depenses du mois</span>
+                <strong>{{ month_total_display }}</strong>
+                <span class="trend {{ evolution_direction }}">Evolution : {{ evolution_display }}</span>
+            </div>
+        </div>
+        <div class="stat-badge">
+            <div class="stat-icon" style="background:#fff7ed; color:#c2410c;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 8v5l3 2"></path>
+                    <circle cx="12" cy="12" r="8"></circle>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="label">Depenses du jour</span>
+                <strong>{{ today_total_display }}</strong>
+            </div>
+        </div>
+        <div class="stat-badge">
+            <div class="stat-icon" style="background:#f5f3ff; color:#6d28d9;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M5 16l4-4 3 3 7-7"></path>
+                    <path d="M19 12V8h-4"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="label">Moyenne par depense</span>
+                <strong>{{ average_total_display }}</strong>
+                <span class="label">{{ global_depense_count }} depense{% if global_depense_count > 1 %}s{% endif %}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-grid" {% if not can_manage_expenses_ui %}style="grid-template-columns: 1fr;"{% endif %}>
+    {% if can_manage_expenses_ui %}
+    <section class="panel">
+        <h3>Ajouter une depense</h3>
+        <p class="panel-subtitle">Enregistrez rapidement une nouvelle sortie financiere pour garder votre suivi a jour.</p>
+        <form method="post" class="expense-form">
+            {% csrf_token %}
+            <div class="field">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+            </div>
+            <div class="field">
+                <label for="{{ form.montant.id_for_label }}">Montant</label>
+                {{ form.montant }}
+            </div>
+            <div class="panel-actions">
+                <button type="submit">Ajouter la depense</button>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    <section class="panel">
+        <h3>Filtres et export</h3>
+        <p class="panel-subtitle">Affinez la liste par periode ou recherche texte, puis exportez le resultat en PDF.</p>
+        <form method="get" class="filters-form">
+            <div class="field">
+                <label for="id_date_debut">Date debut</label>
+                <input id="id_date_debut" type="date" name="date_debut" value="{{ date_debut }}">
+            </div>
+            <div class="field">
+                <label for="id_date_fin">Date fin</label>
+                <input id="id_date_fin" type="date" name="date_fin" value="{{ date_fin }}">
+            </div>
+            <div class="field">
+                <label for="id_q">Recherche</label>
+                <input id="id_q" type="text" name="q" value="{{ search }}" placeholder="Description...">
+            </div>
+            <div class="panel-actions">
+                <button type="submit">Appliquer les filtres</button>
+                <a href="{% url 'depenses' %}">Reinitialiser</a>
+                <a href="{% url 'depenses_pdf' %}?date_debut={{ date_debut|urlencode }}&date_fin={{ date_fin|urlencode }}&q={{ search|urlencode }}">Exporter le PDF</a>
+            </div>
+        </form>
+    </section>
+</div>
+
+{% if depenses %}
+<div class="table-shell" style="margin-top: 20px;">
+    <table class="depenses-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for depense in depenses %}
+            <tr>
+                <td class="description">{{ depense.description }}</td>
+                <td class="amount"><span class="amount-pill">{{ depense.amount_display }}</span></td>
+                <td class="date"><span class="date-badge">{{ depense.date_display }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-shell" style="margin-top: 20px;">
+    <div class="empty-state">
+        <h3>Aucune depense enregistree pour le moment</h3>
+        <p>Ajoutez votre premiere depense pour commencer a suivre les sorties financieres de l'entreprise et generer vos rapports PDF.</p>
+        {% if can_manage_expenses_ui %}
+        <a href="{% url 'depenses' %}" class="btn-link primary">Ajouter une depense</a>
+        {% endif %}
+        <div class="helper">Vous pourrez ensuite filtrer, suivre le total mensuel et exporter un document PDF professionnel.</div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

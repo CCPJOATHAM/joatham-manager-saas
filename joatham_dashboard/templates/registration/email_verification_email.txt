@@ -1,0 +1,13 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+Merci pour votre inscription sur JOATHAM Manager.
+
+Pour activer votre espace entreprise, confirmez votre adresse email en ouvrant le lien ci-dessous :
+{{ verification_url }}
+
+Ce lien expire automatiquement après {{ expiration_seconds }} seconde{{ expiration_seconds|pluralize:"s" }}.
+
+Si vous n’êtes pas à l’origine de cette inscription, ignorez simplement cet email.
+
+JOATHAM Manager
+Logiciel de gestion d’entreprise

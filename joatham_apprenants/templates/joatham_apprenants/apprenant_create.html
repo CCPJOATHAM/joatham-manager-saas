@@ -1,0 +1,13 @@
+<h1>Ajouter un apprenant</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="nom" placeholder="Nom"><br><br>
+    <input type="text" name="prenom" placeholder="Prenom"><br><br>
+    <input type="text" name="telephone" placeholder="Telephone"><br><br>
+    <input type="email" name="email" placeholder="Email"><br><br>
+    <input type="text" name="adresse" placeholder="Adresse"><br><br>
+    <textarea name="observations" placeholder="Observations"></textarea><br><br>
+    <label><input type="checkbox" name="actif" checked> Actif</label><br><br>
+    <button type="submit">Enregistrer</button>
+</form>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Detail inscription - JOATHAM Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
+        .container { max-width: 980px; margin: 0 auto; }
+        .card { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); margin-bottom: 20px; }
+        .actions a { display: inline-block; padding: 10px 14px; background: #0f766e; color: #fff; border-radius: 6px; text-decoration: none; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        th { background: #f9fafb; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="actions" style="margin-bottom:20px;">
+        <a href="{% url 'apprenant_list' %}">Retour</a>
+        {% if can_record_apprenant_payments_ui %}
+        <a href="{% url 'paiement_inscription_create' inscription.id %}">Ajouter un paiement</a>
+        {% endif %}
+        <a href="{% url 'inscription_paiements_pdf' inscription.id %}">Export PDF paiements</a>
+        <a href="{% url 'inscription_paiements_excel' inscription.id %}">Export Excel paiements</a>
+        {% if can_manage_inscription_billing_ui and not inscription.facture_id %}
+            <form method="post" action="{% url 'inscription_generate_facture' inscription.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" style="padding:10px 14px; border:none; background:#1d4ed8; color:#fff; border-radius:6px; cursor:pointer;">
+                    Generer une facture
+                </button>
+            </form>
+        {% elif can_manage_inscription_billing_ui %}
+            <form method="post" action="{% url 'inscription_unlink_facture' inscription.id %}" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="facture_id" value="{{ inscription.facture.id }}">
+                <button type="submit" style="padding:10px 14px; border:none; background:#b91c1c; color:#fff; border-radius:6px; cursor:pointer;">
+                    Delier la facture
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h1>Inscription</h1>
+        <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
+        <p><strong>Formation:</strong> {{ inscription.formation }}</p>
+        <p><strong>Statut:</strong> {{ inscription.get_statut_display }}</p>
+        <p><strong>Montant prevu:</strong> {{ inscription.montant_prevu }}</p>
+        <p><strong>Montant paye:</strong> {{ inscription.montant_paye }}</p>
+        <p><strong>Solde:</strong> {{ inscription.solde }}</p>
+        <p>
+            <strong>Facture liee:</strong>
+            {% if inscription.facture %}
+                {{ inscription.facture.numero }} ({{ inscription.facture.get_statut_display }})
+                -
+                <a href="{% url 'facture_detail' inscription.facture.id %}">Voir la facture</a>
+                {% if facture_link_mode == "cree_depuis_inscription" %}
+                    - Creee depuis l'inscription
+                {% elif facture_link_mode == "liee_manuellement" %}
+                    - Liee manuellement
+                {% endif %}
+            {% else %}
+                Aucune facture liee
+            {% endif %}
+        </p>
+    </div>
+
+    {% if can_manage_inscription_billing_ui and not inscription.facture_id %}
+    <div class="card">
+        <h2>Lier une facture existante</h2>
+        <form method="post" action="{% url 'inscription_link_existing_facture' inscription.id %}">
+            {% csrf_token %}
+            <label for="facture_id"><strong>Facture</strong></label>
+            <div style="margin-top:8px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <select id="facture_id" name="facture_id" required style="padding:10px; border:1px solid #cbd5e1; border-radius:6px; min-width:320px;">
+                    <option value="">Choisir une facture existante</option>
+                    {% for facture in factures_candidates %}
+                        <option value="{{ facture.id }}">
+                            {{ facture.numero }} - {{ facture.client_display }} - {{ facture.get_statut_display }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" style="padding:10px 14px; border:none; background:#0f766e; color:#fff; border-radius:6px; cursor:pointer;">
+                    Lier la facture
+                </button>
+            </div>
+        </form>
+        {% if not factures_candidates %}
+            <p style="margin-top:12px;">Aucune facture disponible a lier pour cette entreprise.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Historique des paiements</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Mode</th>
+                    <th>Reference</th>
+                    <th>Utilisateur</th>
+                    <th>Observations</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for paiement in paiements %}
+                <tr>
+                    <td>{{ paiement.date_paiement }}</td>
+                    <td>{{ paiement.montant }}</td>
+                    <td>{{ paiement.get_mode_paiement_display }}</td>
+                    <td>{{ paiement.reference|default:"-" }}</td>
+                    <td>{{ paiement.utilisateur|default:"-" }}</td>
+                    <td>{{ paiement.observations|default:"-" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Aucun paiement enregistre.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Historique de liaison facturation</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Utilisateur</th>
+                    <th>Action</th>
+                    <th>Numero facture</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for entry in billing_history %}
+                <tr>
+                    <td>{{ entry.date_creation|date:"d/m/Y H:i" }}</td>
+                    <td>{{ entry.utilisateur|default:"-" }}</td>
+                    <td>{{ entry.action }}</td>
+                    <td>{{ entry.facture_numero|default:"-" }}</td>
+                    <td>{{ entry.description }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">Aucun evenement de facturation rattache a cette inscription.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

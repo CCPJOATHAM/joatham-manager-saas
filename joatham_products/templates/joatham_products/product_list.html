@@ -1,0 +1,300 @@
+{% extends "joatham_products/base.html" %}
+
+{% block products_subtitle %}Suivez vos produits, repérez rapidement les stocks faibles et identifiez les ruptures dans une interface claire et exploitable.{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.65rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 740px;
+        line-height: 1.6;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .stat-value {
+        display: block;
+        margin-top: 8px;
+        color: #10233f;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filters a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .filters a.active {
+        background: #0f766e;
+        color: #fff;
+        border-color: #0f766e;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+    }
+
+    .products-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .products-table thead {
+        background: #f8fafc;
+    }
+
+    .products-table th,
+    .products-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .products-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .products-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .product-name {
+        font-weight: 800;
+        color: #10233f;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .badge.en-stock {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .badge.stock-faible {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .badge.rupture {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 460px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 980px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+    }
+
+    @media (max-width: 720px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Produits</h2>
+        <p>Visualisez vos niveaux de stock et concentrez-vous rapidement sur les produits à surveiller, en particulier les stocks faibles et les ruptures.</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Produits</span>
+        <span class="stat-value">{{ total }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Produits actifs</span>
+        <span class="stat-value">{{ actifs }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Stocks faibles</span>
+        <span class="stat-value">{{ stock_faible }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Ruptures</span>
+        <span class="stat-value">{{ rupture }}</span>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="filters">
+        {% for item in filters %}
+        <a href="?stock={{ item.value }}" class="{% if item.value == selected_filter %}active{% endif %}">{{ item.label }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% if products %}
+<div class="table-shell">
+    <table class="products-table">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Référence</th>
+                <th>Prix unitaire</th>
+                <th>Stock</th>
+                <th>Seuil d'alerte</th>
+                <th>État</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in products %}
+            <tr>
+                <td>
+                    <div class="product-name">{{ row.instance.nom }}</div>
+                    <div class="muted">{% if row.instance.actif %}Produit actif{% else %}Produit inactif{% endif %}</div>
+                </td>
+                <td class="muted">{{ row.instance.reference|default:"-" }}</td>
+                <td>{{ row.instance.prix_unitaire }}</td>
+                <td>{{ row.instance.quantite_stock }}</td>
+                <td>{{ row.instance.seuil_alerte }}</td>
+                <td>
+                    <span class="badge {% if row.status == 'en_stock' %}en-stock{% elif row.status == 'stock_faible' %}stock-faible{% else %}rupture{% endif %}">
+                        {{ row.status_label }}
+                    </span>
+                </td>
+                <td>
+                    {% if can_manage_products_ui %}
+                    <a href="{% url 'product_update' row.instance.id %}" class="action-link">Modifier</a>
+                    {% else %}
+                    <span class="muted">Lecture seule</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-shell">
+    <div class="empty-state">
+        <h3>Aucun produit trouvé</h3>
+        <p>Commencez par créer un premier produit pour suivre son prix, son stock disponible et ses alertes de rupture.</p>
+        {% if can_manage_products_ui %}
+        <a href="{% url 'product_create' %}" class="btn-link primary">Ajouter un produit</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

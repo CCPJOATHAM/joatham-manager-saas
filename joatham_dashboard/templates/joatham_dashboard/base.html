@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
+    <style>
+        :root {
+            --sidebar-bg: #10233f;
+            --sidebar-accent: #0f766e;
+            --sidebar-soft: rgba(255, 255, 255, 0.08);
+            --page-bg: #f3f6fb;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --line: #dde7f0;
+            --text: #12263f;
+            --muted: #64748b;
+            --success: #0f766e;
+            --warning: #b45309;
+            --danger: #b91c1c;
+            --shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 248px minmax(0, 1fr);
+            width: 100%;
+            min-width: 0;
+            align-items: start;
+        }
+
+        .sidebar {
+            background:
+                radial-gradient(circle at top, rgba(15, 118, 110, 0.22), transparent 30%),
+                linear-gradient(180deg, #10233f 0%, #132b4b 100%);
+            color: white;
+            padding: 22px 16px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+            align-self: start;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 8px 6px 0;
+        }
+
+        .brand-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-subtitle {
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .company-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .company-card .label {
+            display: block;
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.62);
+            margin-bottom: 6px;
+        }
+
+        .company-card strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .company-card .muted {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav a {
+            color: rgba(255, 255, 255, 0.86);
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 14px;
+            transition: background-color 0.18s ease, transform 0.18s ease;
+            background: transparent;
+        }
+
+        .nav a:hover,
+        .nav a.is-active {
+            background: var(--sidebar-soft);
+            transform: translateX(2px);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 0.85rem;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 20px 0;
+            min-width: 0;
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 1.9rem;
+            letter-spacing: -0.03em;
+        }
+
+        .topbar .subtitle {
+            margin-top: 6px;
+            color: var(--muted);
+        }
+
+        .identity-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            min-width: 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .page-content {
+            padding: 18px 20px 20px;
+            min-width: 0;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .content-card {
+            background: var(--surface);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 18px;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .kpi-grid {
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        }
+
+        .kpi-card {
+            padding: 20px;
+            border-radius: 18px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+        }
+
+        .kpi-card .label {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .kpi-card .value {
+            display: block;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .section-title {
+            margin: 0 0 14px;
+            font-size: 1.1rem;
+        }
+
+        .list-card {
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .list-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .list-card li {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .list-card li:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .messages {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #c7d2fe;
+            background: #eef2ff;
+            color: #312e81;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: var(--danger);
+            border-color: #fecaca;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .content-card table {
+            display: table;
+            width: max-content !important;
+            min-width: 100%;
+            max-width: none;
+        }
+
+        .content-card th,
+        .content-card td {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1280px) {
+            .app-shell {
+                grid-template-columns: 224px minmax(0, 1fr);
+            }
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-link.primary {
+            background: var(--sidebar-accent);
+            color: white;
+            border-color: var(--sidebar-accent);
+        }
+
+        .btn-link.danger {
+            background: #fff1f2;
+            color: #be123c;
+            border-color: #fecdd3;
+        }
+
+        @media (max-width: 980px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+
+            .topbar {
+                padding-top: 18px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .identity-bar {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-title">JOATHAM Manager</div>
+                <div class="brand-subtitle">Un espace de gestion structure pour une utilisation SaaS claire selon le role.</div>
+            </div>
+
+            <div class="company-card">
+                <span class="label">Entreprise</span>
+                <strong>
+                    {% if entreprise_identity.primary_name %}
+                        {{ entreprise_identity.primary_name }}
+                    {% elif user_role_label == "Super admin" %}
+                        Plateforme JOATHAM Manager
+                    {% else %}
+                        Mon entreprise
+                    {% endif %}
+                </strong>
+                {% if entreprise_identity.secondary_name %}
+                <div class="muted">{{ entreprise_identity.secondary_name }}</div>
+                {% elif user_role_label == "Super admin" %}
+                <div class="muted">Pilotage global SaaS</div>
+                {% endif %}
+                <div class="muted">{{ user_role_label }}</div>
+                <div class="muted">Devise : {{ entreprise_identity.currency_code|default:"Multi" }}</div>
+            </div>
+
+            <nav class="nav">
+                {% for item in dashboard_navigation %}
+                <a href="{{ item.url }}" class="{% if item.is_active %}is-active{% endif %}">{{ item.label }}</a>
+                {% endfor %}
+            </nav>
+
+            <div class="sidebar-footer">Facture generee automatiquement par JOATHAM Manager.</div>
+        </aside>
+
+        <main class="main">
+            <div class="topbar">
+                <div>
+                    <h1>{% block content_title %}Tableau de bord{% endblock %}</h1>
+                    <div class="subtitle">{% block content_subtitle %}Vue d'ensemble de votre activite.{% endblock %}</div>
+                </div>
+                <div class="identity-bar">
+                    <span class="badge">{{ request.user.username }}</span>
+                    <span class="badge">{{ user_role_label }}</span>
+                    <div class="top-actions">
+                        {% block top_actions %}{% endblock %}
+                        <a href="{% url 'logout' %}" class="btn-link danger">Deconnexion</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    {% ifchanged message|stringformat:"s" %}
+                    <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+                    {% endifchanged %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="content-card">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </main>
+    </div>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

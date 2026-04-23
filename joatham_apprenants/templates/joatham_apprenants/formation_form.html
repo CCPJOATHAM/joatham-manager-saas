@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>{% if formation %}Modifier{% else %}Nouvelle{% endif %} formation - JOATHAM Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
+        .container { max-width: 760px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
+        .field { display: flex; flex-direction: column; margin-bottom: 16px; }
+        label { margin-bottom: 6px; font-weight: bold; }
+        input, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .actions { margin-top: 20px; display: flex; gap: 12px; }
+        button, a { padding: 10px 14px; border-radius: 6px; text-decoration: none; }
+        button { border: none; background: #0f766e; color: white; cursor: pointer; }
+        a { background: #e5e7eb; color: #111827; }
+        .error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>{% if formation %}Modifier{% else %}Creer{% endif %} une formation</h1>
+    <p>Entreprise: {{ entreprise.nom }}</p>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="field">
+            <label for="nom">Nom</label>
+            <input id="nom" name="nom" value="{{ formation.nom|default:'' }}" required>
+        </div>
+        <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4">{{ formation.description|default:'' }}</textarea>
+        </div>
+        <div class="field">
+            <label for="prix">Prix</label>
+            <input id="prix" name="prix" value="{{ formation.prix|default:'0.00' }}" required>
+        </div>
+        <div class="field">
+            <label for="duree">Duree</label>
+            <input id="duree" name="duree" value="{{ formation.duree|default:'' }}">
+        </div>
+        <div class="field">
+            <label>
+                <input type="checkbox" name="actif" {% if formation is None or formation.actif %}checked{% endif %}>
+                Formation active
+            </label>
+        </div>
+
+        <div class="actions">
+            <button type="submit">Enregistrer</button>
+            <a href="{% url 'formation_list' %}">Retour</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{% extends "joatham_comptabilite/compta_base.html" %}
+
+{% block content %}
+<section class="summary-grid">
+    <article class="metric">
+        <div class="label">Total produits</div>
+        <div class="value">{{ total_produits|floatformat:2 }} FC</div>
+    </article>
+    <article class="metric">
+        <div class="label">Total charges</div>
+        <div class="value">{{ total_charges|floatformat:2 }} FC</div>
+    </article>
+    <article class="metric">
+        <div class="label">Resultat net</div>
+        <div class="value {% if resultat_net > 0 %}status-positive{% elif resultat_net < 0 %}status-negative{% else %}status-neutral{% endif %}">{{ resultat_net|floatformat:2 }} FC</div>
+        <div class="meta">{{ resultat_label }}</div>
+    </article>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <h3 class="section-title">Produits</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Compte</th>
+                        <th class="number">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in produits %}
+                        <tr>
+                            <td>{{ row.numero }}</td>
+                            <td>{{ row.nom }}</td>
+                            <td class="number">{{ row.montant|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3" class="empty">Aucun produit sur cette periode.</td></tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="2">Total produits</th>
+                        <th class="number">{{ total_produits|floatformat:2 }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <h3 class="section-title">Charges</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Compte</th>
+                        <th class="number">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in charges %}
+                        <tr>
+                            <td>{{ row.numero }}</td>
+                            <td>{{ row.nom }}</td>
+                            <td class="number">{{ row.montant|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3" class="empty">Aucune charge sur cette periode.</td></tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="2">Total charges</th>
+                        <th class="number">{{ total_charges|floatformat:2 }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

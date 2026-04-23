@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>{{ report_title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            font-size: 12px;
+        }
+
+        h1, h2, h3 {
+            margin: 0 0 10px;
+        }
+
+        .meta {
+            margin-bottom: 16px;
+            color: #4b5563;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+        }
+
+        th {
+            background: #eff6ff;
+            text-align: left;
+        }
+
+        .number {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .section {
+            margin-bottom: 22px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ report_title }}</h1>
+    <div class="meta">
+        <div>Entreprise: {{ selected_entreprise.nom }}</div>
+        <div>Periode: {{ period_label }}</div>
+        <div>Genere le: {{ generated_at|date:"d/m/Y H:i" }}</div>
+    </div>
+
+    {% if report_slug == "balance" %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Compte</th>
+                    <th class="number">Debit</th>
+                    <th class="number">Credit</th>
+                    <th class="number">Solde debit</th>
+                    <th class="number">Solde credit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td class="number">{{ row.debit|floatformat:2 }}</td>
+                        <td class="number">{{ row.credit|floatformat:2 }}</td>
+                        <td class="number">{{ row.solde_debit|floatformat:2 }}</td>
+                        <td class="number">{{ row.solde_credit|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif report_slug == "grand_livre" %}
+        {% for account in accounts %}
+            <div class="section">
+                <h3>{{ account.numero }} - {{ account.nom }}</h3>
+                <div class="meta">
+                    Ouverture D {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Journal</th>
+                            <th>Piece</th>
+                            <th>Libelle</th>
+                            <th class="number">Debit</th>
+                            <th class="number">Credit</th>
+                            <th class="number">Solde debit</th>
+                            <th class="number">Solde credit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in account.lignes %}
+                            <tr>
+                                <td>{{ line.date_piece|date:"d/m/Y" }}</td>
+                                <td>{{ line.journal }}</td>
+                                <td>{{ line.numero_piece }}</td>
+                                <td>{{ line.libelle }}</td>
+                                <td class="number">{{ line.debit|floatformat:2 }}</td>
+                                <td class="number">{{ line.credit|floatformat:2 }}</td>
+                                <td class="number">{{ line.solde_debit|floatformat:2 }}</td>
+                                <td class="number">{{ line.solde_credit|floatformat:2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% elif report_slug == "compte_resultat" %}
+        <h2>Produits</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Compte</th>
+                    <th class="number">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in produits %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td class="number">{{ row.montant|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Charges</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Compte</th>
+                    <th class="number">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in charges %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td class="number">{{ row.montant|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div><strong>Total produits:</strong> {{ total_produits|floatformat:2 }} FC</div>
+        <div><strong>Total charges:</strong> {{ total_charges|floatformat:2 }} FC</div>
+        <div><strong>Resultat net:</strong> {{ resultat_net|floatformat:2 }} FC</div>
+    {% elif report_slug == "bilan" %}
+        <h2>Actif</h2>
+        {% for section in actif_sections %}
+            <h3>{{ section.label }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Compte</th>
+                        <th class="number">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in section.rows %}
+                        <tr>
+                            <td>{{ row.numero }}</td>
+                            <td>{{ row.nom }}</td>
+                            <td class="number">{{ row.montant|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+
+        <h2>Passif</h2>
+        {% for section in passif_sections %}
+            <h3>{{ section.label }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Compte</th>
+                        <th class="number">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in section.rows %}
+                        <tr>
+                            <td>{{ row.numero }}</td>
+                            <td>{{ row.nom }}</td>
+                            <td class="number">{{ row.montant|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+
+        <div><strong>Total actif:</strong> {{ actif|floatformat:2 }} FC</div>
+        <div><strong>Total passif:</strong> {{ passif|floatformat:2 }} FC</div>
+    {% endif %}
+</body>
+</html>

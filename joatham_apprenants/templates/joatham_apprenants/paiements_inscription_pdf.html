@@ -1,0 +1,65 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.document-title {
+    margin: 16px 0 12px;
+    font-size: 15px;
+    text-align: center;
+}
+.meta-box {
+    margin-bottom: 12px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="pdf-header">
+    <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
+    <p>{{ entreprise.nom }}</p>
+    <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
+    <p>Edition du {{ date_generation }}</p>
+</div>
+
+<div class="document-title">{{ report_title }}</div>
+<div class="meta-box">
+    <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
+    <p><strong>Formation:</strong> {{ inscription.formation }}</p>
+    <p><strong>Montant prevu:</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
+    <p><strong>Montant paye:</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
+    <p><strong>Solde:</strong> {{ inscription.solde|floatformat:2 }}</p>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th class="text-right">Montant</th>
+            <th>Mode</th>
+            <th>Reference</th>
+            <th>Utilisateur</th>
+            <th>Observations</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for paiement in paiements %}
+            <tr>
+                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                <td class="text-right">{{ paiement.montant|floatformat:2 }}</td>
+                <td>{{ paiement.get_mode_paiement_display }}</td>
+                <td>{{ paiement.reference|default:"-" }}</td>
+                <td>{{ paiement.utilisateur|default:"-" }}</td>
+                <td>{{ paiement.observations|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Aucun paiement enregistre.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pdf-footer">
+    Document genere le {{ date_footer }}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Depenses | JOATHAM Manager{% endblock %}
+{% block content_title %}{% block depenses_title %}Depenses{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block depenses_subtitle %}Suivi des sorties financieres de votre entreprise dans une interface claire et professionnelle.{% endblock %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'depenses' %}" class="btn-link">Liste des depenses</a>
+<a href="{% url 'depenses_pdf' %}{% if request.GET.q or request.GET.date_debut or request.GET.date_fin %}?q={{ request.GET.q|urlencode }}&date_debut={{ request.GET.date_debut|urlencode }}&date_fin={{ request.GET.date_fin|urlencode }}{% endif %}" class="btn-link primary">Exporter en PDF</a>
+{% endblock %}

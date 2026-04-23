@@ -1,0 +1,561 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Utilisateurs | JOATHAM Manager{% endblock %}
+{% block content_title %}Utilisateurs{% endblock %}
+{% block content_subtitle %}Pilotez les comptes de votre entreprise avec une vue claire des roles, des statuts et des actions disponibles.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'user_create' %}" class="btn-link primary">Ajouter un utilisateur</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 26px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.65rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 720px;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .hero-actions .btn-link {
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .stat-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: #2563eb;
+    }
+
+    .stat-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
+    .stat-value {
+        display: block;
+        margin-top: 3px;
+        color: #10233f;
+        font-size: 1.08rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .stat-meta {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .page-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .panel-subtitle {
+        margin: 0 0 18px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .info-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .info-row {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f8fbff;
+        border: 1px solid #d9e6fb;
+    }
+
+    .info-row strong {
+        display: block;
+        color: #10233f;
+        margin-bottom: 4px;
+    }
+
+    .info-row span {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.92rem;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+    }
+
+    .table-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7;
+        background: #ffffff;
+        flex-wrap: wrap;
+    }
+
+    .table-toolbar h3 {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .table-toolbar p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .table-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .users-table thead {
+        background: #f8fafc;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .users-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .users-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .user-name {
+        font-weight: 800;
+        color: #10233f;
+    }
+
+    .user-email {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .role-badge,
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .role-owner {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .role-manager {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .role-accountant {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        border-color: #bbf7d0;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn,
+    .action-form button,
+    .owner-note {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.84rem;
+    }
+
+    .action-btn.primary {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .action-btn.success,
+    .action-form .success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        color: #166534;
+    }
+
+    .action-btn.warning,
+    .action-form .warning {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #9a3412;
+    }
+
+    .action-btn.danger,
+    .action-form .danger {
+        background: #fff1f2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .action-form {
+        margin: 0;
+    }
+
+    .owner-note {
+        background: #f8fafc;
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+
+    .empty-state {
+        padding: 60px 24px;
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 480px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .empty-state .btn-link {
+        display: inline-flex;
+    }
+
+    .empty-state .helper {
+        margin-top: 10px;
+        color: #94a3b8;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 1180px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+
+        .page-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Gestion des utilisateurs</h2>
+        <p>Administrez les comptes gestionnaire et comptable de votre entreprise depuis une interface plus claire, avec une lecture immediate des roles, des statuts et des actions disponibles.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{% url 'user_list' %}" class="btn-link">Actualiser la liste</a>
+        <a href="{% url 'user_create' %}" class="btn-link primary">Ajouter un utilisateur</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="10" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="stat-label">Utilisateurs total</span>
+            <span class="stat-value">{{ total_users }}</span>
+            <span class="stat-meta">{{ proprietaire_count }} proprietaire principal</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eefcf6; color:#047857;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20 7 9 18l-5-5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="stat-label">Comptes actifs</span>
+            <span class="stat-value">{{ active_users }}</span>
+            <span class="stat-meta">{{ inactive_users }} inactif{{ inactive_users|pluralize:"s" }}</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef6ff; color:#1d4ed8;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2v20"></path>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="stat-label">Gestionnaires</span>
+            <span class="stat-value">{{ gestionnaire_count }}</span>
+            <span class="stat-meta">Comptes de pilotage operationnel</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fff7ed; color:#c2410c;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 3v18h18"></path>
+                <path d="M19 9 13 15 10 12 6 16"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="stat-label">Comptables</span>
+            <span class="stat-value">{{ comptable_count }}</span>
+            <span class="stat-meta">Comptes de suivi financier</span>
+        </div>
+    </div>
+</div>
+
+<div class="page-grid">
+    <div class="panel">
+        <h3>Bonnes pratiques</h3>
+        <p class="panel-subtitle">Le proprietaire garde la maitrise des comptes de l'entreprise. Les roles restent simples et explicites pour eviter les erreurs de configuration.</p>
+        <div class="info-list">
+            <div class="info-row">
+                <strong>Proprietaire</strong>
+                <span>Compte principal de l'entreprise. Il reste visible dans la liste mais ne propose pas d'action destructive depuis cet ecran.</span>
+            </div>
+            <div class="info-row">
+                <strong>Gestionnaire</strong>
+                <span>Role adapte au pilotage quotidien des clients, factures, depenses et modules operationnels autorises.</span>
+            </div>
+            <div class="info-row">
+                <strong>Comptable</strong>
+                <span>Role oriente suivi financier et comptable, avec un acces cible selon les permissions deja en place.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-shell">
+        <div class="table-toolbar">
+            <div>
+                <h3>Equipe de l'entreprise</h3>
+                <p>Retrouvez chaque compte avec son role, son statut et ses actions de gestion dans une vue de travail plus lisible.</p>
+            </div>
+            <div class="table-meta">
+                <span class="meta-pill">{{ total_users }} utilisateur{{ total_users|pluralize:"s" }}</span>
+                <span class="meta-pill">{{ active_users }} actif{{ active_users|pluralize:"s" }}</span>
+            </div>
+        </div>
+
+        {% if users %}
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Utilisateur</th>
+                    <th style="width: 17%;">Telephone</th>
+                    <th style="width: 16%;">Role</th>
+                    <th style="width: 14%;">Statut</th>
+                    <th style="width: 28%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for managed_user in users %}
+                <tr>
+                    <td>
+                        <div class="user-name">{{ managed_user.full_name }}</div>
+                        <div class="user-email">{{ managed_user.email_display }}</div>
+                    </td>
+                    <td>{{ managed_user.telephone_display }}</td>
+                    <td>
+                        {% if managed_user.instance.normalized_role == "proprietaire" %}
+                        <span class="role-badge role-owner">{{ managed_user.instance.get_role_display }}</span>
+                        {% elif managed_user.instance.normalized_role == "gestionnaire" %}
+                        <span class="role-badge role-manager">{{ managed_user.instance.get_role_display }}</span>
+                        {% else %}
+                        <span class="role-badge role-accountant">{{ managed_user.instance.get_role_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if managed_user.instance.is_active %}
+                        <span class="status-badge status-active">Actif</span>
+                        {% else %}
+                        <span class="status-badge status-inactive">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            {% if not managed_user.is_owner %}
+                            <a href="{% url 'user_update' managed_user.instance.id %}" class="action-btn primary">Modifier</a>
+                            <form method="post" action="{% url 'user_toggle_active' managed_user.instance.id %}" class="action-form">
+                                {% csrf_token %}
+                                <button type="submit" class="{% if managed_user.instance.is_active %}warning{% else %}success{% endif %}">
+                                    {% if managed_user.instance.is_active %}Desactiver{% else %}Activer{% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'user_delete' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('Confirmer la suppression de cet utilisateur ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="danger">Supprimer</button>
+                            </form>
+                            {% else %}
+                            <span class="owner-note">Compte proprietaire principal</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h3>Aucun utilisateur secondaire pour le moment</h3>
+            <p>Ajoutez un gestionnaire ou un comptable pour deleguer certaines operations de votre entreprise tout en gardant le controle proprietaire.</p>
+            <a href="{% url 'user_create' %}" class="btn-link primary">Ajouter un utilisateur</a>
+            <div class="helper">Le compte proprietaire principal reste votre point d'entree pour administrer l'equipe.</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

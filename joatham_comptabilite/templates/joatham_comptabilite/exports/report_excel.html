@@ -1,0 +1,178 @@
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <table border="1">
+        <tr>
+            <td colspan="8"><strong>{{ report_title }}</strong></td>
+        </tr>
+        <tr>
+            <td colspan="8">Entreprise: {{ selected_entreprise.nom }}</td>
+        </tr>
+        <tr>
+            <td colspan="8">Periode: {{ period_label }}</td>
+        </tr>
+        <tr>
+            <td colspan="8">Genere le: {{ generated_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+
+    {% if report_slug == "balance" %}
+        <table border="1">
+            <tr>
+                <th>Numero</th>
+                <th>Compte</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <th>Solde debit</th>
+                <th>Solde credit</th>
+            </tr>
+            {% for row in rows %}
+                <tr>
+                    <td>{{ row.numero }}</td>
+                    <td>{{ row.nom }}</td>
+                    <td>{{ row.debit|floatformat:2 }}</td>
+                    <td>{{ row.credit|floatformat:2 }}</td>
+                    <td>{{ row.solde_debit|floatformat:2 }}</td>
+                    <td>{{ row.solde_credit|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% elif report_slug == "grand_livre" %}
+        {% for account in accounts %}
+            <table border="1">
+                <tr>
+                    <td colspan="8"><strong>{{ account.numero }} - {{ account.nom }}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="8">Ouverture D {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Journal</th>
+                    <th>Piece</th>
+                    <th>Libelle</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Solde debit</th>
+                    <th>Solde credit</th>
+                </tr>
+                {% for line in account.lignes %}
+                    <tr>
+                        <td>{{ line.date_piece|date:"d/m/Y" }}</td>
+                        <td>{{ line.journal }}</td>
+                        <td>{{ line.numero_piece }}</td>
+                        <td>{{ line.libelle }}</td>
+                        <td>{{ line.debit|floatformat:2 }}</td>
+                        <td>{{ line.credit|floatformat:2 }}</td>
+                        <td>{{ line.solde_debit|floatformat:2 }}</td>
+                        <td>{{ line.solde_credit|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+        {% endfor %}
+    {% elif report_slug == "compte_resultat" %}
+        <table border="1">
+            <tr>
+                <th colspan="3">Produits</th>
+            </tr>
+            <tr>
+                <th>Numero</th>
+                <th>Compte</th>
+                <th>Montant</th>
+            </tr>
+            {% for row in produits %}
+                <tr>
+                    <td>{{ row.numero }}</td>
+                    <td>{{ row.nom }}</td>
+                    <td>{{ row.montant|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2"><strong>Total produits</strong></td>
+                <td><strong>{{ total_produits|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+
+        <table border="1">
+            <tr>
+                <th colspan="3">Charges</th>
+            </tr>
+            <tr>
+                <th>Numero</th>
+                <th>Compte</th>
+                <th>Montant</th>
+            </tr>
+            {% for row in charges %}
+                <tr>
+                    <td>{{ row.numero }}</td>
+                    <td>{{ row.nom }}</td>
+                    <td>{{ row.montant|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2"><strong>Total charges</strong></td>
+                <td><strong>{{ total_charges|floatformat:2 }}</strong></td>
+            </tr>
+            <tr>
+                <td colspan="2"><strong>Resultat net</strong></td>
+                <td><strong>{{ resultat_net|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+    {% elif report_slug == "bilan" %}
+        <table border="1">
+            <tr>
+                <th colspan="3">Actif</th>
+            </tr>
+            {% for section in actif_sections %}
+                <tr>
+                    <td colspan="3"><strong>{{ section.label }}</strong></td>
+                </tr>
+                {% for row in section.rows %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td>{{ row.montant|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2"><strong>Sous-total</strong></td>
+                    <td><strong>{{ section.subtotal|floatformat:2 }}</strong></td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2"><strong>Total actif</strong></td>
+                <td><strong>{{ actif|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+
+        <table border="1">
+            <tr>
+                <th colspan="3">Passif</th>
+            </tr>
+            {% for section in passif_sections %}
+                <tr>
+                    <td colspan="3"><strong>{{ section.label }}</strong></td>
+                </tr>
+                {% for row in section.rows %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td>{{ row.montant|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2"><strong>Sous-total</strong></td>
+                    <td><strong>{{ section.subtotal|floatformat:2 }}</strong></td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2"><strong>Total passif</strong></td>
+                <td><strong>{{ passif|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+    {% endif %}
+</body>
+</html>

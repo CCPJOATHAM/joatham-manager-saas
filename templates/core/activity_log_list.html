@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle des flux | JOATHAM Manager</title>
+    <style>
+        :root {
+            --bg: #f3f7fb;
+            --panel: #ffffff;
+            --line: #dbe4ef;
+            --text: #10233f;
+            --muted: #64748b;
+            --accent: #0f766e;
+            --accent-dark: #0b5f58;
+            --soft: #f8fbff;
+            --badge: #eef6ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f4f8fc 0%, #eef4fb 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 24px 20px 36px;
+        }
+
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 22px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            max-width: 780px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        }
+
+        form.filters {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        select, input, button, .ghost-link {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #d1d9e6;
+            background: white;
+            min-height: 44px;
+            font-size: 0.95rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .ghost-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text);
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            padding: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+            border: 1px solid var(--line);
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            display: block;
+            margin-top: 8px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--soft);
+            color: #0f3d5e;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            position: sticky;
+            top: 0;
+        }
+
+        tbody tr:hover {
+            background: #fbfdff;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--badge);
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .desc {
+            max-width: 320px;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .top-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .helper {
+            margin: 0 0 14px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        @media (max-width: 900px) {
+            form.filters {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div>
+                <h1>Controle des flux</h1>
+                <p>Suivez les operations creees dans l'entreprise, identifiez rapidement leur auteur, leur role, le module concerne et isolez les flux recents ou inhabituels sans quitter JOATHAM Manager.</p>
+                <div class="muted">{{ entreprise.nom }}</div>
+            </div>
+            <div class="hero-actions">
+                {% if request.user.normalized_role == "comptable" %}
+                    <a class="top-link" href="{% url 'comptable_dashboard' %}">Retour au dashboard comptable</a>
+                {% else %}
+                    <a class="top-link" href="{% url 'admin_dashboard' %}">Retour au dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Evenements visibles</span>
+                <span class="stat-value">{{ log_count }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Modules traces</span>
+                <span class="stat-value">{{ modules|length }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Utilisateurs traces</span>
+                <span class="stat-value">{{ users|length }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Filtres actifs</span>
+                <span class="stat-value">
+                    {% if selected_module or selected_user or selected_action or selected_role or selected_date_from or selected_date_to %}
+                        Oui
+                    {% else %}
+                        Non
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <p class="helper">Utilisez les filtres pour isoler un auteur, un role, un module ou une periode precise. Cette vue est particulierement utile pour controler les flux saisis par le proprietaire ou le gestionnaire.</p>
+            <form method="get" class="filters">
+                <div>
+                    <label for="id_module">Module</label>
+                    <select id="id_module" name="module">
+                        <option value="">Tous</option>
+                        {% for item in modules %}
+                            <option value="{{ item }}" {% if item == selected_module %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="id_utilisateur">Utilisateur</label>
+                    <select id="id_utilisateur" name="utilisateur">
+                        <option value="">Tous</option>
+                        {% for item in users %}
+                            <option value="{{ item.id }}" {% if item.id|stringformat:'s' == selected_user %}selected{% endif %}>{{ item.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="id_role">Role</label>
+                    <select id="id_role" name="role">
+                        <option value="">Tous</option>
+                        {% for item in roles %}
+                            <option value="{{ item.value }}" {% if item.value == selected_role %}selected{% endif %}>{{ item.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="id_action">Action</label>
+                    <select id="id_action" name="action">
+                        <option value="">Toutes</option>
+                        {% for item in actions %}
+                            <option value="{{ item }}" {% if item == selected_action %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="id_date_from">Date debut</label>
+                    <input id="id_date_from" name="date_from" type="date" value="{{ selected_date_from }}">
+                </div>
+                <div>
+                    <label for="id_date_to">Date fin</label>
+                    <input id="id_date_to" name="date_to" type="date" value="{{ selected_date_to }}">
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button type="submit">Filtrer</button>
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <a class="ghost-link" href="{% url 'activity_log_list' %}">Reinitialiser</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Utilisateur</th>
+                            <th>Role</th>
+                            <th>Module</th>
+                            <th>Action</th>
+                            <th>Objet</th>
+                            <th>ID</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>{{ log.date_creation|date:"d/m/Y H:i:s" }}</td>
+                                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">Systeme</span>{% endif %}</td>
+                                <td>
+                                    {% if log.utilisateur %}
+                                        <span class="badge">{{ log.utilisateur.get_role_display }}</span>
+                                    {% else %}
+                                        <span class="muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge">{{ log.module }}</span></td>
+                                <td>{{ log.action }}</td>
+                                <td>{{ log.objet_type|default:"-" }}</td>
+                                <td>{{ log.objet_id|default:"-" }}</td>
+                                <td class="desc">{{ log.description }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="empty">Aucun evenement d'audit pour ces filtres.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

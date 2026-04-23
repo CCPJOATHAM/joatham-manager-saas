@@ -1,0 +1,263 @@
+{% extends "joatham_clients/base.html" %}
+
+{% block clients_subtitle %}Consultez, recherchez et gérez les clients de votre entreprise dans une interface claire et professionnelle.{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 700px;
+        line-height: 1.6;
+    }
+
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #dde7f0;
+        color: #475569;
+        font-weight: 700;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 640px;
+    }
+
+    .search-form input {
+        flex: 1;
+        min-width: 220px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+    }
+
+    .search-form button,
+    .search-form a {
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .search-form button {
+        background: #10233f;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .search-form a {
+        background: #fff;
+        color: #10233f;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.05);
+    }
+
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .clients-table thead {
+        background: #f8fafc;
+    }
+
+    .clients-table th,
+    .clients-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .clients-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .clients-table tbody tr:hover {
+        background: #fbfdff;
+    }
+
+    .client-id {
+        font-weight: 700;
+        color: #0f766e;
+    }
+
+    .client-name {
+        font-weight: 700;
+        color: #10233f;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .action-link.edit {
+        background: #eef6ff;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+    }
+
+    .action-link.delete {
+        background: #fff1f2;
+        color: #b91c1c;
+        border-color: #fecdd3;
+    }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 480px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .empty-state .btn-link {
+        display: inline-flex;
+    }
+
+    @media (max-width: 840px) {
+        .clients-table th:nth-child(1),
+        .clients-table td:nth-child(1) {
+            display: none;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Clients</h2>
+        <p>Retrouvez tous vos clients dans une vue unique, lisible et adaptée à une utilisation quotidienne de JOATHAM Manager.</p>
+    </div>
+    <div class="count-badge">{{ client_count }} client{% if client_count > 1 %}s{% endif %}</div>
+</div>
+
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par nom, téléphone ou e-mail">
+        <button type="submit">Rechercher</button>
+        {% if search %}
+        <a href="{% url 'client_list' %}">Réinitialiser</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if clients %}
+<div class="table-shell">
+    <table class="clients-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Téléphone</th>
+                <th>E-mail</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><span class="client-id">CL-{{ client.id }}</span></td>
+                <td><span class="client-name">{{ client.nom }}</span></td>
+                <td class="muted">{{ client.telephone|default:"-" }}</td>
+                <td class="muted">{{ client.email|default:"-" }}</td>
+                <td>
+                    <div class="actions">
+                        <a href="{% url 'edit_client' client.id %}" class="action-link edit">Modifier</a>
+                        <a href="{% url 'delete_client' client.id %}" class="action-link delete" onclick="return confirm('Voulez-vous vraiment supprimer ce client ?');">Supprimer</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-shell">
+    <div class="empty-state">
+        <h3>Aucun client enregistré pour le moment</h3>
+        <p>
+            Commencez par ajouter votre premier client pour structurer votre relation commerciale
+            et faciliter la facturation.
+        </p>
+        <a href="{% url 'add_client' %}" class="btn-link primary">Ajouter un client</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

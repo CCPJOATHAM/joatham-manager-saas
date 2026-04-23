@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Nouvel apprenant - JOATHAM Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
+        .container { max-width: 760px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .field { display: flex; flex-direction: column; margin-bottom: 16px; }
+        .field-full { grid-column: 1 / -1; }
+        label { margin-bottom: 6px; font-weight: bold; }
+        input, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .actions { margin-top: 20px; display: flex; gap: 12px; }
+        button, a { padding: 10px 14px; border-radius: 6px; text-decoration: none; }
+        button { border: none; background: #0f766e; color: white; cursor: pointer; }
+        a { background: #e5e7eb; color: #111827; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Creer un apprenant</h1>
+    <p>Entreprise: {{ entreprise.nom }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid">
+            <div class="field">
+                <label for="nom">Nom</label>
+                <input id="nom" name="nom" required>
+            </div>
+            <div class="field">
+                <label for="prenom">Prenom</label>
+                <input id="prenom" name="prenom">
+            </div>
+            <div class="field">
+                <label for="telephone">Telephone</label>
+                <input id="telephone" name="telephone">
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email">
+            </div>
+            <div class="field field-full">
+                <label for="adresse">Adresse</label>
+                <input id="adresse" name="adresse">
+            </div>
+            <div class="field field-full">
+                <label for="observations">Observations</label>
+                <textarea id="observations" name="observations" rows="4"></textarea>
+            </div>
+            <div class="field field-full">
+                <label>
+                    <input type="checkbox" name="actif" checked>
+                    Apprenant actif
+                </label>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit">Enregistrer</button>
+            <a href="{% url 'apprenant_list' %}">Retour</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+

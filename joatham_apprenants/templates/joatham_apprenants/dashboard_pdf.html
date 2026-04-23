@@ -1,0 +1,72 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.document-title {
+    margin: 16px 0 12px;
+    font-size: 15px;
+    text-align: center;
+}
+.kpi-table {
+    margin-bottom: 14px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="pdf-header">
+    <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
+    <p>{{ entreprise.nom }}</p>
+    <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
+    <p>Edition du {{ date_generation }}</p>
+</div>
+
+<div class="document-title">{{ report_title }}</div>
+
+<table class="kpi-table">
+    <thead>
+        <tr>
+            <th>Indicateur</th>
+            <th class="text-right">Valeur</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Apprenants actifs</td><td class="text-right">{{ kpis.active_apprenants }}</td></tr>
+        <tr><td>Formations actives</td><td class="text-right">{{ kpis.active_formations }}</td></tr>
+        <tr><td>Total inscriptions</td><td class="text-right">{{ kpis.total_inscriptions }}</td></tr>
+        <tr><td>Inscriptions non soldees</td><td class="text-right">{{ kpis.overdue_inscriptions }}</td></tr>
+        <tr><td>Total du</td><td class="text-right">{{ kpis.total_du|floatformat:2 }}</td></tr>
+        <tr><td>Total paye</td><td class="text-right">{{ kpis.total_paye|floatformat:2 }}</td></tr>
+        <tr><td>Total restant</td><td class="text-right">{{ kpis.total_restant|floatformat:2 }}</td></tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Apprenant</th>
+            <th>Formation</th>
+            <th>Statut</th>
+            <th class="text-right">Solde</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inscription in inscriptions %}
+            <tr>
+                <td>{{ inscription.apprenant }}</td>
+                <td>{{ inscription.formation }}</td>
+                <td>{{ inscription.get_statut_display }}</td>
+                <td class="text-right">{{ inscription.solde|floatformat:2 }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">Aucune inscription a afficher.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pdf-footer">
+    Document genere le {{ date_footer }}
+</div>
+{% endblock %}

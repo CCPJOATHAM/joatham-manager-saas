@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email confirmé | JOATHAM Manager</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            color: #10233f;
+        }
+        .card {
+            width: 100%;
+            max-width: 620px;
+            background: #fff;
+            border-radius: 28px;
+            padding: 40px 34px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        }
+        h1 { margin: 0 0 12px; font-size: 2rem; letter-spacing: -0.03em; }
+        p { color: #64748b; line-height: 1.7; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 14px;
+            border: 1px solid #0f766e;
+            background: #0f766e;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <h1>Adresse email confirmée</h1>
+        <p>Votre compte JOATHAM Manager est maintenant confirmé. Vous pouvez vous connecter normalement et accéder à votre espace selon votre rôle.</p>
+        <a href="{{ login_url }}" class="btn">Se connecter</a>
+    </main>
+</body>
+</html>

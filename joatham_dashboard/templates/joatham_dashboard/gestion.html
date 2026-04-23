@@ -1,0 +1,332 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Dashboard Gestionnaire | JOATHAM Manager{% endblock %}
+{% block content_title %}Dashboard gestionnaire{% endblock %}
+{% block content_subtitle %}Une vue operationnelle claire pour piloter les ventes, les depenses, les clients et les apprenants au quotidien.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'client_list' %}" class="btn-link">Clients</a>
+<a href="{% url 'facture_list' %}" class="btn-link">Factures</a>
+<a href="{% url 'depenses' %}" class="btn-link">Depenses</a>
+<a href="{% url 'apprenant_list' %}" class="btn-link primary">Apprenants</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.65rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 760px;
+        line-height: 1.6;
+    }
+
+    .hero-pills {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .premium-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .premium-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .premium-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: #2563eb;
+    }
+
+    .premium-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .premium-label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
+    .premium-value {
+        display: block;
+        margin-top: 3px;
+        color: #10233f;
+        font-size: 1.08rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .premium-meta {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .quick-action-card {
+        display: block;
+        text-decoration: none;
+        padding: 18px;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #dde7f0;
+        color: #10233f;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+    }
+
+    .quick-action-card strong {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .quick-action-card span {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.92rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+    }
+
+    .section-card {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .section-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .section-subtitle {
+        margin: 0 0 16px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .list-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .list-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    .list-card li {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .list-card li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    @media (max-width: 1180px) {
+        .premium-kpis,
+        .quick-actions {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .premium-kpis,
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Pilotage quotidien</h2>
+        <p>Suivez l'activite commerciale et operationnelle de l'entreprise avec un tableau de bord plus utile, plus lisible et oriente action.</p>
+    </div>
+    <div class="hero-pills">
+        <span class="hero-pill">Clients : {{ nombre_clients }}</span>
+        <span class="hero-pill">Factures : {{ nombre_factures }}</span>
+        <span class="hero-pill">Apprenants : {{ nombre_apprenants }}</span>
+    </div>
+</div>
+
+<div class="premium-kpis">
+    <div class="premium-card">
+        <div class="premium-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2v20"></path>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Facturation du mois</span>
+            <span class="premium-value">{{ total_mois }}</span>
+            <span class="premium-meta">Production commerciale recente</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#eefcf6; color:#047857;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20 7 9 18l-5-5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Encaissements</span>
+            <span class="premium-value">{{ total_encaisse }}</span>
+            <span class="premium-meta">{{ payees }} facture{{ payees|pluralize:"s" }} soldee{{ payees|pluralize:"s" }}</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#fff7ed; color:#c2410c;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 8v5"></path>
+                <path d="M12 16h.01"></path>
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Reste a relancer</span>
+            <span class="premium-value">{{ reste_encaisser }}</span>
+            <span class="premium-meta">{{ impayees }} facture{{ impayees|pluralize:"s" }} en attente</span>
+        </div>
+    </div>
+    <div class="premium-card">
+        <div class="premium-icon" style="background:#eef6ff; color:#1d4ed8;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="10" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="premium-label">Portefeuille actif</span>
+            <span class="premium-value">{{ nombre_clients }}</span>
+            <span class="premium-meta">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="{% url 'client_list' %}" class="quick-action-card">
+        <strong>Clients</strong>
+        <span>Ouvrez le portefeuille client et poursuivez vos actions commerciales en cours.</span>
+    </a>
+    <a href="{% url 'facture_list' %}" class="quick-action-card">
+        <strong>Factures</strong>
+        <span>Retrouvez les factures a suivre, les PDFs et les paiements lies.</span>
+    </a>
+    <a href="{% url 'depenses' %}" class="quick-action-card">
+        <strong>Depenses</strong>
+        <span>Suivez les sorties financieres et les tendances recentes du module depenses.</span>
+    </a>
+    <a href="{% url 'apprenant_list' %}" class="quick-action-card">
+        <strong>Apprenants</strong>
+        <span>Accedez aux apprenants, inscriptions et paiements de formation.</span>
+    </a>
+</div>
+
+<div class="dashboard-grid">
+    <section class="section-card">
+        <h3>Synthese operationnelle</h3>
+        <p class="section-subtitle">Les indicateurs les plus utiles pour prioriser les actions commerciales et de suivi.</p>
+        <div class="list-card">
+            <ul>
+                <li><span>Chiffre d'affaires cumule</span><strong>{{ total_ca }}</strong></li>
+                <li><span>Benefice estime</span><strong>{{ benefice }}</strong></li>
+                <li><span>TVA cumulee</span><strong>{{ total_tva }}</strong></li>
+                <li><span>Depenses du mois</span><strong>{{ depense_mois }}</strong></li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="section-card">
+        <h3>Priorites du jour</h3>
+        <p class="section-subtitle">Une lecture simple pour savoir ou agir ensuite dans le produit.</p>
+        <div class="list-card">
+            <ul>
+                <li><span>Factures aujourd'hui</span><strong>{{ total_jour }}</strong></li>
+                <li><span>Depenses aujourd'hui</span><strong>{{ depense_jour }}</strong></li>
+                <li><span>Factures a relancer</span><strong>{{ impayees }}</strong></li>
+                <li><span>Clients suivis</span><strong>{{ nombre_clients }}</strong></li>
+            </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}

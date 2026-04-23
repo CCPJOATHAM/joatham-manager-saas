@@ -1,0 +1,64 @@
+{% extends "joatham_comptabilite/compta_base.html" %}
+
+{% block content %}
+<section class="panel">
+    <div class="summary-grid" style="margin-bottom:18px;">
+        <article class="metric">
+            <div class="label">Total debit</div>
+            <div class="value">{{ total_debit|floatformat:2 }} FC</div>
+        </article>
+        <article class="metric">
+            <div class="label">Total credit</div>
+            <div class="value">{{ total_credit|floatformat:2 }} FC</div>
+        </article>
+        <article class="metric">
+            <div class="label">Solde debiteur cumule</div>
+            <div class="value">{{ total_solde_debit|floatformat:2 }} FC</div>
+        </article>
+        <article class="metric">
+            <div class="label">Solde crediteur cumule</div>
+            <div class="value">{{ total_solde_credit|floatformat:2 }} FC</div>
+        </article>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Compte</th>
+                    <th class="number">Debit</th>
+                    <th class="number">Credit</th>
+                    <th class="number">Solde debit</th>
+                    <th class="number">Solde credit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>{{ row.numero }}</td>
+                        <td>{{ row.nom }}</td>
+                        <td class="number">{{ row.debit|floatformat:2 }}</td>
+                        <td class="number">{{ row.credit|floatformat:2 }}</td>
+                        <td class="number">{{ row.solde_debit|floatformat:2 }}</td>
+                        <td class="number">{{ row.solde_credit|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">Aucun mouvement comptable sur cette periode.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Totaux</th>
+                    <th class="number">{{ total_debit|floatformat:2 }}</th>
+                    <th class="number">{{ total_credit|floatformat:2 }}</th>
+                    <th class="number">{{ total_solde_debit|floatformat:2 }}</th>
+                    <th class="number">{{ total_solde_credit|floatformat:2 }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</section>
+{% endblock %}

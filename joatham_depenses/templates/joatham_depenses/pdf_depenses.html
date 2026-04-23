@@ -1,0 +1,229 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}Liste des depenses - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.expenses-table tbody tr:nth-child(even) {
+    background: #f8fbfd;
+}
+
+.report-shell {
+    border: 1px solid #d8e1ea;
+    border-radius: 16px;
+    padding: 12px 14px 14px;
+    background: #ffffff;
+}
+
+.header-title-wrapper {
+    margin-bottom: 10px;
+}
+
+.header-subtitle {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.doc-meta {
+    margin-bottom: 14px;
+    text-align: center;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.qr-box {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.qr-box img {
+    width: 84px;
+    height: 84px;
+    border: 1px solid #cbd5e1;
+    padding: 5px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.amount-cell {
+    font-weight: bold;
+    color: #0f766e;
+}
+
+.description-cell {
+    white-space: normal;
+    line-height: 1.5;
+}
+
+.summary-band {
+    margin-bottom: 16px;
+    border: 1px solid #d8e1ea;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 10px 12px;
+}
+
+.summary-band-table td {
+    border: none;
+    padding: 0;
+    font-size: 9.5px;
+    color: #475569;
+}
+
+.summary-value {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #10233f;
+}
+
+.total-panel {
+    margin-top: 18px;
+    margin-left: auto;
+    width: 260px;
+    border: 1px solid #0f766e;
+    border-radius: 14px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.total-panel-label {
+    margin: 0 0 6px;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+}
+
+.total-panel-value {
+    margin: 0;
+    color: #065f46;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.empty-row td {
+    text-align: center;
+    color: #64748b;
+    padding: 18px 10px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="report-shell">
+    <div class="pdf-header">
+        <table class="pdf-header-table">
+            <tr>
+                <td style="width: 64%;">
+                    <table class="pdf-header-table">
+                        <tr>
+                            {% if entreprise_identity.logo_data_uri %}
+                            <td style="width: 88px;">
+                                <img src="{{ entreprise_identity.logo_data_uri }}" alt="Logo entreprise" class="pdf-company-logo">
+                            </td>
+                            {% endif %}
+                            <td class="pdf-company-block">
+                                <p class="pdf-company-name">{{ entreprise_identity.primary_name }}</p>
+                                {% if entreprise_identity.secondary_name %}
+                                <p class="pdf-company-secondary">{{ entreprise_identity.secondary_name }}</p>
+                                {% endif %}
+                                {% if entreprise_identity.address %}
+                                <p class="pdf-company-line">{{ entreprise_identity.address }}</p>
+                                {% endif %}
+                                <p class="pdf-company-line">
+                                    {% if entreprise_identity.city %}{{ entreprise_identity.city }}{% endif %}
+                                    {% if entreprise_identity.city and entreprise_identity.country %}, {% endif %}
+                                    {% if entreprise_identity.country %}{{ entreprise_identity.country }}{% endif %}
+                                </p>
+                                {% if entreprise_identity.phone %}
+                                <p class="pdf-company-line">Telephone : {{ entreprise_identity.phone }}</p>
+                                {% endif %}
+                                {% if entreprise_identity.email %}
+                                <p class="pdf-company-line">Email : {{ entreprise_identity.email }}</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="pdf-meta-block">
+                    <div class="header-title-wrapper">
+                        <p class="pdf-meta-title">Liste des depenses</p>
+                        <p class="header-subtitle">Etat financier de suivi</p>
+                    </div>
+                    <p class="pdf-meta-line">Edition du {{ date_generation }}</p>
+                    <p class="pdf-meta-line">Devise : {{ currency_display }}</p>
+                    {% if qr_code_data_uri %}
+                    <div class="qr-box">
+                        <img src="{{ qr_code_data_uri }}" alt="QR code depenses">
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="separator"></div>
+
+    <h1 class="document-title">Liste des depenses</h1>
+    <div class="doc-meta">{{ period_label }}</div>
+
+    <div class="summary-band">
+        <table class="summary-band-table">
+            <tr>
+                <td style="width:33%;">
+                    Nombre de depenses
+                    <span class="summary-value">{{ depense_count }}</span>
+                </td>
+                <td style="width:33%;" class="text-center">
+                    Devise
+                    <span class="summary-value">{{ currency_code }}</span>
+                </td>
+                <td style="width:34%;" class="text-right">
+                    Edition
+                    <span class="summary-value">{{ date_generation }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="expenses-table">
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 18%;">Date</th>
+                <th style="width: 57%;">Description</th>
+                <th class="text-right" style="width: 25%;">Montant ({{ currency_code }})</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for depense in depenses %}
+            <tr>
+                <td class="text-center">{{ depense.date }}</td>
+                <td class="description-cell">{{ depense.description }}</td>
+                <td class="text-right amount-cell">{{ depense.amount }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row">
+                <td colspan="3">Aucune depense enregistree pour cette edition.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total-panel">
+        <p class="total-panel-label">Total des depenses</p>
+        <p class="total-panel-value">{{ total_display }}</p>
+    </div>
+
+    <div class="pdf-footer">
+        <table class="pdf-footer-table">
+            <tr>
+                <td>Document genere automatiquement par JOATHAM Manager</td>
+                <td class="text-center">{{ date_footer }}</td>
+                <td class="text-right">Page <pdf:pagenumber /> / <pdf:pagecount /></td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

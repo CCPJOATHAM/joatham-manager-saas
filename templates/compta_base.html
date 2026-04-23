@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comptabilité</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI';
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #1e293b;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background: #334155;
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #f1f5f9;
+        }
+
+        .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th {
+    background: #1e293b;
+    color: white;
+    padding: 12px;
+}
+
+.table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.table tr:hover {
+    background: #f1f5f9;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>📊 Comptabilité</h2>
+
+    <a href="/compta/">🏠 Dashboard</a>
+    <a href="/compta/resultat/">📈 Résultat</a>
+    <a href="/compta/bilan/">📊 Bilan</a>
+    <a href="/compta/grand-livre/">📒 Grand Livre</a>
+    <a href="/compta/balance/">📋 Balance</a>
+</div>
+
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
