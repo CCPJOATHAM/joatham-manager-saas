@@ -1,3 +1,5 @@
+from datetime import datetime, time, timedelta, timezone as dt_timezone
+
 from core.services.tenancy import scope_queryset_to_entreprise
 from joatham_users.models import User
 
@@ -27,9 +29,11 @@ def get_activity_logs_by_entreprise(
     if role:
         queryset = queryset.filter(utilisateur__role=role)
     if date_from:
-        queryset = queryset.filter(date_creation__date__gte=date_from)
+        date_from_start = datetime.combine(date_from, time.min, tzinfo=dt_timezone.utc)
+        queryset = queryset.filter(date_creation__gte=date_from_start)
     if date_to:
-        queryset = queryset.filter(date_creation__date__lte=date_to)
+        next_day_start = datetime.combine(date_to + timedelta(days=1), time.min, tzinfo=dt_timezone.utc)
+        queryset = queryset.filter(date_creation__lt=next_day_start)
     return queryset.order_by("-date_creation", "-id")
 
 

@@ -4,11 +4,8 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from core.services.subscription import get_current_subscription, is_subscription_expired, refresh_subscription_status
-from core.services.tenancy import get_user_entreprise_or_raise
-from joatham_users.models import AbonnementEntreprise
-
-
+from core.services.subscription import get_current_subscription, refresh_subscription_status
+from core.services.tenancy import get_subscription_access_state, get_user_entreprise_or_raise
 ACCESS_FREE = "free"
 ACCESS_TRIAL_OR_ACTIVE = "trial_or_active"
 ACCESS_ACTIVE_ONLY = "active_only"
@@ -62,60 +59,23 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
             "subscription": get_current_subscription(entreprise),
         }
 
-    subscription = refresh_subscription_status(entreprise, as_of=as_of)
-    if subscription is None:
-        return {
-            "allowed": False,
-            "reason": "missing_subscription",
-            "level": level,
-            "subscription": None,
-        }
-
-    if not subscription.actif:
-        return {
-            "allowed": False,
-            "reason": "inactive_subscription",
-            "level": level,
-            "subscription": subscription,
-        }
-
-    if is_subscription_expired(subscription, as_of=as_of):
-        return {
-            "allowed": False,
-            "reason": "expired_subscription",
-            "level": level,
-            "subscription": subscription,
-        }
-
-    if level == ACCESS_TRIAL_OR_ACTIVE and subscription.statut in {
-        AbonnementEntreprise.Statut.ESSAI,
-        AbonnementEntreprise.Statut.ACTIF,
-    }:
-        return {
-            "allowed": True,
-            "reason": None,
-            "level": level,
-            "subscription": subscription,
-        }
-
-    if level == ACCESS_ACTIVE_ONLY and subscription.statut == AbonnementEntreprise.Statut.ACTIF:
-        return {
-            "allowed": True,
-            "reason": None,
-            "level": level,
-            "subscription": subscription,
-        }
-
-    reason = "active_subscription_required" if level == ACCESS_ACTIVE_ONLY else "subscription_not_eligible"
+    refresh_subscription_status(entreprise, as_of=as_of)
+    state = get_subscription_access_state(
+        entreprise,
+        as_of=as_of,
+        allow_trial=(level == ACCESS_TRIAL_OR_ACTIVE),
+    )
     return {
-        "allowed": False,
-        "reason": reason,
+        "allowed": state["allowed"],
+        "reason": state["reason"],
         "level": level,
-        "subscription": subscription,
+        "subscription": state["subscription"],
     }
 
 
 def can_access_module(user, module_name, *, as_of=None):
+    if getattr(user, "is_super_admin", False):
+        return True
     entreprise = get_user_entreprise_or_raise(user)
     return get_module_access_state(entreprise, module_name, as_of=as_of)["allowed"]
 

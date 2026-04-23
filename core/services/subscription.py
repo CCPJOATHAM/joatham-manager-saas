@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement
+from core.selectors.subscriptions import get_subscription_with_plan_for_entreprise
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.models import Abonnement, AbonnementEntreprise
 
@@ -23,6 +24,13 @@ def get_current_subscription(entreprise):
     if entreprise is None:
         return None
     return getattr(entreprise, "abonnement_entreprise", None)
+
+
+def get_subscription_for_entreprise(entreprise):
+    subscription = get_subscription_with_plan_for_entreprise(entreprise)
+    if subscription is not None:
+        return subscription
+    return get_current_subscription(entreprise)
 
 
 def get_or_create_default_trial_plan():
@@ -47,15 +55,21 @@ def is_subscription_expired(subscription, *, as_of=None):
 
 
 def has_active_subscription_access(entreprise, *, as_of=None):
-    subscription = get_current_subscription(entreprise)
+    return is_subscription_active(entreprise, as_of=as_of, allow_trial=True)
+
+
+def is_subscription_active(entreprise, *, as_of=None, allow_trial=True):
+    subscription = get_subscription_for_entreprise(entreprise)
     if subscription is None or not subscription.actif:
         return False
+
     refresh_subscription_status(entreprise, as_of=as_of)
     subscription.refresh_from_db()
-    return subscription.statut in {
-        AbonnementEntreprise.Statut.ACTIF,
-        AbonnementEntreprise.Statut.ESSAI,
-    } and not is_subscription_expired(subscription, as_of=as_of)
+    allowed_statuses = {AbonnementEntreprise.Statut.ACTIF}
+    if allow_trial:
+        allowed_statuses.add(AbonnementEntreprise.Statut.ESSAI)
+
+    return subscription.statut in allowed_statuses and not is_subscription_expired(subscription, as_of=as_of)
 
 
 def activate_subscription_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut=None, duration_days=None, prolong_existing=False):

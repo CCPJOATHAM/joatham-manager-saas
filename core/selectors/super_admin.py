@@ -44,8 +44,10 @@ def get_super_admin_entreprise_queryset(*, search=None, statut=None):
 def get_super_admin_subscription_counts():
     subscriptions = AbonnementEntreprise.objects.all()
     payments = PaiementAbonnement.objects.all()
+    total_accounts = Entreprise.objects.count()
     return {
-        "total_accounts": Entreprise.objects.count(),
+        "total_accounts": total_accounts,
+        "total_entreprises": total_accounts,
         "essai": subscriptions.filter(statut=AbonnementEntreprise.Statut.ESSAI).count(),
         "actif": subscriptions.filter(statut=AbonnementEntreprise.Statut.ACTIF).count(),
         "expire": subscriptions.filter(statut=AbonnementEntreprise.Statut.EXPIRE).count(),

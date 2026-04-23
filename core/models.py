@@ -1,4 +1,6 @@
 from django.db import models
+from joatham_users.models import Abonnement as SaaSPlan
+from joatham_users.models import AbonnementEntreprise as SaaSSubscription
 
 
 class ActivityLog(models.Model):
@@ -79,3 +81,17 @@ class PaiementAbonnement(models.Model):
 
     def __str__(self):
         return f"{self.entreprise.nom} - {self.plan.nom} - {self.get_statut_display()}"
+
+
+class Plan(SaaSPlan):
+    class Meta:
+        proxy = True
+        verbose_name = "Plan SaaS"
+        verbose_name_plural = "Plans SaaS"
+
+
+class Abonnement(SaaSSubscription):
+    class Meta:
+        proxy = True
+        verbose_name = "Abonnement SaaS"
+        verbose_name_plural = "Abonnements SaaS"

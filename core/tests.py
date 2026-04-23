@@ -21,7 +21,12 @@ from .selectors.audit import (
     get_activity_roles_for_entreprise,
     get_activity_users_for_entreprise,
 )
-from .services.tenancy import get_object_for_entreprise, get_user_entreprise_or_raise, scope_queryset_to_entreprise
+from .services.tenancy import (
+    get_object_for_entreprise,
+    get_subscription_access_state,
+    get_user_entreprise_or_raise,
+    scope_queryset_to_entreprise,
+)
 from .services.subscription import (
     create_subscription_payment_request,
     refuse_subscription_payment,
@@ -73,6 +78,11 @@ class TenancyServiceTests(TestCase):
 
         with self.assertRaises(Http404):
             get_object_for_entreprise(self.client_a.__class__.objects.all(), self.entreprise_a, id=self.client_b.id)
+
+    def test_subscription_access_state_reports_missing_subscription(self):
+        state = get_subscription_access_state(self.entreprise_a, user=self.user_a)
+        self.assertFalse(state["allowed"])
+        self.assertEqual(state["reason"], "missing_subscription")
 
 
 class AuditLogTests(TestCase):
@@ -380,7 +390,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Basic")
         self.assertContains(response, "Pro")
         self.assertContains(response, "3")
-        self.assertContains(response, "Rechercher une entreprise")
+        self.assertContains(response, "Rechercher un compte client")
         self.assertContains(response, "Filtrer par statut")
 
     def test_super_admin_dashboard_filters_companies_by_name_and_status(self):

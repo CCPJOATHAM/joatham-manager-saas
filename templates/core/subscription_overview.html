@@ -1,20 +1,17 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Abonnement | JOATHAM Manager{% endblock %}
-{% block content_title %}Abonnement{% endblock %}
-{% block content_subtitle %}Suivez votre plan actuel et envoyez une demande de paiement pour activer ou prolonger votre abonnement.{% endblock %}
-
-{% block top_actions %}
-<a href="{% url 'subscription_payment_create' %}" class="btn-link primary">Payer un abonnement</a>
-{% endblock %}
+{% block page_title %}Mon abonnement | JOATHAM Manager{% endblock %}
+{% block content_title %}Mon abonnement{% endblock %}
+{% block content_subtitle %}Consultez le plan actif de votre organisation, son statut et sa période de validité.{% endblock %}
 
 {% block content %}
 <style>
     .subscription-grid {
         display: grid;
-        grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+        grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
         gap: 18px;
     }
+
     .sub-card {
         border: 1px solid #dde7f0;
         border-radius: 22px;
@@ -22,15 +19,18 @@
         padding: 22px;
         box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
+
     .sub-card h2 {
         margin: 0 0 16px;
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         color: #10233f;
     }
+
     .details {
         display: grid;
         gap: 12px;
     }
+
     .detail-row {
         display: flex;
         justify-content: space-between;
@@ -38,48 +38,69 @@
         border-bottom: 1px solid #edf2f7;
         padding-bottom: 10px;
     }
+
     .detail-row span:first-child {
         color: #64748b;
         font-weight: 700;
     }
+
     .status-pill {
         display: inline-flex;
         padding: 6px 10px;
         border-radius: 999px;
-        background: #ecfdf5;
-        color: #047857;
         font-weight: 800;
         font-size: 0.82rem;
     }
-    .payment-table {
-        width: 100%;
-        min-width: 760px;
-        border-collapse: collapse;
+
+    .status-actif {
+        background: #ecfdf5;
+        color: #047857;
     }
-    .table-shell {
-        overflow-x: auto;
-        border: 1px solid #dde7f0;
-        border-radius: 18px;
+
+    .status-essai {
+        background: #fffbeb;
+        color: #b45309;
     }
-    .payment-table th,
-    .payment-table td {
-        padding: 12px 14px;
-        border-bottom: 1px solid #edf2f7;
-        text-align: left;
+
+    .status-expire,
+    .status-suspendu {
+        background: #fff1f2;
+        color: #be123c;
     }
-    .payment-table th {
-        background: #f8fafc;
-        color: #475569;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-    .empty-state {
-        padding: 24px;
+
+    .empty-state,
+    .info-box {
+        padding: 20px;
         color: #64748b;
         background: #f8fafc;
         border-radius: 18px;
+        line-height: 1.7;
     }
+
+    .history-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .history-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .history-item strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #10233f;
+    }
+
+    .history-item span {
+        display: block;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
     @media (max-width: 980px) {
         .subscription-grid {
             grid-template-columns: 1fr;
@@ -89,51 +110,54 @@
 
 <div class="subscription-grid">
     <section class="sub-card">
-        <h2>Plan actuel</h2>
+        <h2>Etat actuel</h2>
+        {% if subscription %}
         <div class="details">
-            <div class="detail-row"><span>Entreprise</span><strong>{{ entreprise.nom }}</strong></div>
-            {% if subscription %}
+            <div class="detail-row"><span>Organisation</span><strong>{{ entreprise.nom }}</strong></div>
             <div class="detail-row"><span>Plan</span><strong>{{ subscription.plan.nom }}</strong></div>
-            <div class="detail-row"><span>Statut</span><span class="status-pill">{{ subscription.get_statut_display }}</span></div>
-            <div class="detail-row"><span>Date debut</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Date fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
-            {% else %}
-            <p class="empty-state">Aucun abonnement n'est encore configure pour cette entreprise.</p>
-            {% endif %}
-        </div>
-    </section>
-
-    <section class="sub-card">
-        <h2>Demandes de paiement recentes</h2>
-        {% if paiements %}
-        <div class="table-shell">
-            <table class="payment-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Plan</th>
-                        <th>Duree</th>
-                        <th>Montant</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for paiement in paiements %}
-                    <tr>
-                        <td>{{ paiement.date_creation|date:"d/m/Y H:i" }}</td>
-                        <td>{{ paiement.plan.nom }}</td>
-                        <td>{{ paiement.get_duree_display }}</td>
-                        <td>{{ paiement.montant }} {{ entreprise.devise }}</td>
-                        <td>{{ paiement.get_statut_display }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="detail-row">
+                <span>Statut</span>
+                <span class="status-pill status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
+            </div>
+            <div class="detail-row"><span>Date de debut</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
+            <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
+            <div class="detail-row"><span>Periode d'essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
+            <div class="detail-row"><span>Acces courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
         </div>
         {% else %}
         <div class="empty-state">
-            Aucune demande de paiement pour le moment. Utilisez le bouton "Payer un abonnement" pour envoyer une demande.
+            Aucun abonnement n'est encore configure pour votre organisation.
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="sub-card">
+        <h2>Informations utiles</h2>
+        {% if subscription %}
+        <div class="info-box">
+            Votre abonnement determine l'acces aux modules de la plateforme. En cas d'expiration ou de suspension, certains espaces peuvent devenir indisponibles jusqu'a reactivation.
+        </div>
+        {% else %}
+        <div class="info-box">
+            Votre organisation ne dispose pas encore d'un abonnement actif. Contactez l'administration de la plateforme pour activer votre acces.
+        </div>
+        {% endif %}
+
+        <h2 style="margin-top:22px;">Historique recent</h2>
+        {% if paiements %}
+        <div class="history-list">
+            {% for paiement in paiements %}
+            <article class="history-item">
+                <strong>{{ paiement.plan.nom }} - {{ paiement.get_statut_display }}</strong>
+                <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
+                <span>Duree : {{ paiement.get_duree_display }}</span>
+                <span>Montant : {{ paiement.montant }} {{ entreprise.devise }}</span>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            Aucun evenement d'abonnement recent n'est disponible pour le moment.
         </div>
         {% endif %}
     </section>

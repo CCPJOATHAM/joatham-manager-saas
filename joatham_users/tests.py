@@ -1,15 +1,20 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from core.models import ActivityLog
+from core.models import Abonnement as CoreSubscription, ActivityLog, Plan
+from core.selectors.subscriptions import get_subscription_with_plan_for_entreprise
+from core.services.tenancy import ensure_subscription_access_for_entreprise, get_subscription_access_state
 from core.services.subscription import (
     activate_subscription_for_entreprise,
     get_current_subscription,
+    get_subscription_for_entreprise,
     has_active_subscription_access,
+    is_subscription_active,
     is_subscription_expired,
     refresh_subscription_status,
     start_trial_for_entreprise,
@@ -115,6 +120,46 @@ class SubscriptionServiceTests(TestCase):
         self.assertTrue(has_active_subscription_access(self.entreprise))
         self.assertFalse(has_active_subscription_access(self.autre_entreprise))
 
+    def test_proxy_models_expose_existing_subscription_domain(self):
+        self.assertEqual(Plan.objects.get(id=self.plan.id).nom, self.plan.nom)
+
+    def test_get_subscription_for_entreprise_returns_subscription_with_plan(self):
+        subscription = activate_subscription_for_entreprise(
+            entreprise=self.entreprise,
+            plan=self.plan,
+            utilisateur=self.owner,
+        )
+
+        selected = get_subscription_for_entreprise(self.entreprise)
+        self.assertIsNotNone(selected)
+        self.assertIsInstance(selected, CoreSubscription)
+        self.assertEqual(selected.id, subscription.id)
+        self.assertEqual(selected.plan_id, self.plan.id)
+
+    def test_selector_returns_subscription_with_plan(self):
+        subscription = start_trial_for_entreprise(
+            entreprise=self.entreprise,
+            plan=self.plan,
+            utilisateur=self.owner,
+            trial_days=14,
+        )
+
+        selected = get_subscription_with_plan_for_entreprise(self.entreprise)
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.id, subscription.id)
+        self.assertEqual(selected.plan.nom, self.plan.nom)
+
+    def test_is_subscription_active_accepts_trial_by_default(self):
+        start_trial_for_entreprise(
+            entreprise=self.entreprise,
+            plan=self.plan,
+            utilisateur=self.owner,
+            trial_days=14,
+        )
+
+        self.assertTrue(is_subscription_active(self.entreprise))
+        self.assertFalse(is_subscription_active(self.entreprise, allow_trial=False))
+
     def test_suspend_subscription_for_entreprise(self):
         subscription = activate_subscription_for_entreprise(
             entreprise=self.entreprise,
@@ -133,6 +178,24 @@ class SubscriptionServiceTests(TestCase):
                 objet_id=subscription.id,
             ).exists()
         )
+
+    def test_tenancy_guard_blocks_expired_or_inactive_subscription(self):
+        AbonnementEntreprise.objects.create(
+            entreprise=self.entreprise,
+            plan=self.plan,
+            statut=AbonnementEntreprise.Statut.EXPIRE,
+            date_debut=timezone.localdate() - timedelta(days=30),
+            date_fin=timezone.localdate() - timedelta(days=1),
+            essai=False,
+            actif=False,
+        )
+
+        state = get_subscription_access_state(self.entreprise, user=self.owner)
+        self.assertFalse(state["allowed"])
+        self.assertIn(state["reason"], {"inactive_subscription", "expired_subscription"})
+
+        with self.assertRaises(PermissionDenied):
+            ensure_subscription_access_for_entreprise(self.entreprise, user=self.owner)
 
 
 class SubscriptionAccessTests(TestCase):
@@ -178,7 +241,7 @@ class SubscriptionAccessTests(TestCase):
         self.client.force_login(self.owner)
         allowed = self.client.get(reverse("subscription_overview"))
         self.assertEqual(allowed.status_code, 200)
-        self.assertContains(allowed, "Plan actuel")
+        self.assertContains(allowed, "Etat actuel")
 
     def test_subscription_overview_displays_current_subscription(self):
         subscription = activate_subscription_for_entreprise(
@@ -371,9 +434,9 @@ class UserManagementTests(TestCase):
         response = self.client.get(reverse("user_create"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Repere rapide")
+        self.assertContains(response, "Repère rapide")
         self.assertContains(response, "Nom complet")
-        self.assertContains(response, "Roles geres : Gestionnaire / Comptable")
+        self.assertContains(response, "Rôles gérés : Gestionnaire / Comptable")
 
     def test_owner_can_update_company_user(self):
         managed_user = User.objects.create_user(
