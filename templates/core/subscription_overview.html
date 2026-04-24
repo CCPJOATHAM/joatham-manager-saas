@@ -101,9 +101,68 @@
         line-height: 1.6;
     }
 
+    .actions-card {
+        margin-top: 18px;
+        border: 1px solid #dde7f0;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        padding: 22px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .actions-card h2 {
+        margin: 0 0 10px;
+        font-size: 1.15rem;
+        color: #10233f;
+    }
+
+    .actions-card p {
+        margin: 0;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .subscription-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 18px;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 18px;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        border: 1px solid #dde7f0;
+    }
+
+    .btn-action.primary {
+        background: linear-gradient(135deg, #0f766e, #0b5f58);
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .btn-action.secondary {
+        background: #f8fafc;
+        color: #10233f;
+    }
+
     @media (max-width: 980px) {
         .subscription-grid {
             grid-template-columns: 1fr;
+        }
+
+        .subscription-actions {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
         }
     }
 </style>
@@ -162,4 +221,40 @@
         {% endif %}
     </section>
 </div>
+
+<section class="actions-card">
+    <h2>Actions disponibles</h2>
+    <p>
+        {% if subscription %}
+            Selon l'état de votre abonnement, vous pouvez demander une évolution de plan ou une réactivation de votre accès.
+        {% else %}
+            Votre organisation n'a pas encore d'abonnement actif. Contactez l'équipe JOATHAM Manager pour être accompagné.
+        {% endif %}
+    </p>
+
+    <div class="subscription-actions">
+        {% if subscription %}
+            {% if subscription.statut == "essai" %}
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Passer au plan payant</a>
+            {% elif subscription.statut == "expire" or subscription.statut == "suspendu" %}
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver abonnement</a>
+            {% elif subscription.statut == "actif" %}
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Changer de plan</a>
+            {% else %}
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Gérer mon abonnement</a>
+            {% endif %}
+        {% else %}
+        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Activer un abonnement</a>
+        {% endif %}
+
+        <a
+            class="btn-action secondary"
+            href="https://api.whatsapp.com/send?text=Bonjour%20JOATHAM%20Manager%2C%20je%20souhaite%20%C3%AAtre%20accompagn%C3%A9%20pour%20mon%20abonnement."
+            target="_blank"
+            rel="noopener"
+        >
+            Contacter via WhatsApp
+        </a>
+    </div>
+</section>
 {% endblock %}
