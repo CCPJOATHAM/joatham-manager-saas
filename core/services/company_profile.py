@@ -1,6 +1,12 @@
 from base64 import b64encode
+import logging
+from io import BytesIO
 
 from core.services.currency import get_currency_code, get_currency_label
+
+logger = logging.getLogger(__name__)
+MAX_LOGO_DIMENSION = 240
+MAX_LOGO_BYTES = 2 * 1024 * 1024
 
 
 def build_entreprise_identity(entreprise):
@@ -50,11 +56,40 @@ def build_logo_data_uri(entreprise):
 
     try:
         file_obj.seek(0)
-        encoded = b64encode(file_obj.read()).decode("ascii")
-    except Exception:
-        return ""
+        raw_content = file_obj.read()
+        if not raw_content:
+            logger.warning("Logo entreprise ignore: fichier vide.", extra={"entreprise_id": getattr(entreprise, "id", None)})
+            return ""
+        if len(raw_content) > MAX_LOGO_BYTES:
+            logger.warning(
+                "Logo entreprise ignore: fichier trop lourd pour le PDF.",
+                extra={"entreprise_id": getattr(entreprise, "id", None), "logo_bytes": len(raw_content)},
+            )
+            return ""
 
-    content_type = "image/png"
-    if getattr(logo, "name", "").lower().endswith((".jpg", ".jpeg")):
-        content_type = "image/jpeg"
-    return f"data:{content_type};base64,{encoded}"
+        from PIL import Image, UnidentifiedImageError
+
+        source_buffer = BytesIO(raw_content)
+        with Image.open(source_buffer) as image:
+            image.load()
+            if image.mode not in ("RGB", "RGBA"):
+                image = image.convert("RGBA")
+
+            image.thumbnail((MAX_LOGO_DIMENSION, MAX_LOGO_DIMENSION))
+            output_buffer = BytesIO()
+            image.save(output_buffer, format="PNG", optimize=True)
+            encoded = b64encode(output_buffer.getvalue()).decode("ascii")
+    except (FileNotFoundError, OSError, ValueError, UnidentifiedImageError):
+        logger.warning(
+            "Logo entreprise ignore: fichier introuvable ou invalide pour le PDF.",
+            extra={"entreprise_id": getattr(entreprise, "id", None), "logo_name": getattr(logo, "name", "")},
+        )
+        return ""
+    except Exception:
+        logger.warning(
+            "Logo entreprise ignore: erreur inattendue lors de la preparation du logo PDF.",
+            exc_info=True,
+            extra={"entreprise_id": getattr(entreprise, "id", None), "logo_name": getattr(logo, "name", "")},
+        )
+        return ""
+    return f"data:image/png;base64,{encoded}"
