@@ -11,6 +11,7 @@ from core.selectors.subscriptions import get_subscription_with_plan_for_entrepri
 from core.services.tenancy import ensure_subscription_access_for_entreprise, get_subscription_access_state
 from core.services.subscription import (
     activate_subscription_for_entreprise,
+    build_subscription_payment_estimate,
     get_current_subscription,
     get_subscription_for_entreprise,
     has_active_subscription_access,
@@ -241,7 +242,7 @@ class SubscriptionAccessTests(TestCase):
         self.client.force_login(self.owner)
         allowed = self.client.get(reverse("subscription_overview"))
         self.assertEqual(allowed.status_code, 200)
-        self.assertContains(allowed, "Etat actuel")
+        self.assertContains(allowed, "État actuel")
 
     def test_subscription_overview_displays_current_subscription(self):
         subscription = activate_subscription_for_entreprise(
@@ -255,6 +256,20 @@ class SubscriptionAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["subscription"], get_current_subscription(self.entreprise))
         self.assertContains(response, subscription.plan.nom)
+        self.assertContains(response, "USD")
+        self.assertContains(response, "Contacter via WhatsApp")
+        self.assertContains(response, "J'ai effectué le paiement")
+
+    def test_subscription_payment_estimate_returns_local_currency_snapshot(self):
+        estimate = build_subscription_payment_estimate(
+            entreprise=self.entreprise,
+            plan=self.plan,
+            duree="mensuel",
+        )
+
+        self.assertEqual(estimate["amount_usd"], Decimal("49.00"))
+        self.assertEqual(estimate["currency_code"], self.entreprise.devise)
+        self.assertGreater(estimate["estimated_amount"], Decimal("0.00"))
 
 
 class ProductPolicyTests(TestCase):

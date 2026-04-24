@@ -72,13 +72,17 @@ class PaiementAbonnementForm(forms.ModelForm):
 
     class Meta:
         model = PaiementAbonnement
-        fields = ["plan", "duree", "reference_paiement", "preuve_paiement"]
+        fields = ["plan", "duree", "telephone_paiement", "reference_paiement", "preuve_paiement"]
         labels = {
-            "duree": "Durée",
+            "duree": "Période",
+            "telephone_paiement": "Numéro de paiement",
             "reference_paiement": "Référence de paiement",
             "preuve_paiement": "Preuve de paiement",
         }
         widgets = {
+            "telephone_paiement": forms.TextInput(
+                attrs={"placeholder": "Ex. +243... pour le compte utilisé"}
+            ),
             "reference_paiement": forms.TextInput(
                 attrs={"placeholder": "Ex. transaction Mobile Money, virement, reçu"}
             ),
@@ -86,5 +90,6 @@ class PaiementAbonnementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["plan"].queryset = Abonnement.objects.filter(actif=True).order_by("prix", "nom")
+        self.fields["plan"].queryset = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
+        self.fields["telephone_paiement"].required = False
         self.fields["preuve_paiement"].required = False

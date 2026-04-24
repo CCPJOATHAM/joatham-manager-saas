@@ -2,7 +2,7 @@
 
 {% block page_title %}Mon abonnement | JOATHAM Manager{% endblock %}
 {% block content_title %}Mon abonnement{% endblock %}
-{% block content_subtitle %}Consultez le plan actif de votre organisation, son statut et sa période de validité.{% endblock %}
+{% block content_subtitle %}Consultez votre statut, le prix de référence en USD et les prochaines actions disponibles pour votre organisation.{% endblock %}
 
 {% block content %}
 <style>
@@ -12,7 +12,8 @@
         gap: 18px;
     }
 
-    .sub-card {
+    .sub-card,
+    .actions-card {
         border: 1px solid #dde7f0;
         border-radius: 22px;
         background: #fff;
@@ -20,7 +21,13 @@
         box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
 
-    .sub-card h2 {
+    .actions-card {
+        margin-top: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+    }
+
+    .sub-card h2,
+    .actions-card h2 {
         margin: 0 0 16px;
         font-size: 1.15rem;
         color: #10233f;
@@ -77,11 +84,13 @@
         line-height: 1.7;
     }
 
+    .pricing-grid,
     .history-list {
         display: grid;
         gap: 12px;
     }
 
+    .pricing-card,
     .history-item {
         border: 1px solid #e2e8f0;
         border-radius: 16px;
@@ -89,31 +98,25 @@
         background: #fff;
     }
 
+    .pricing-card strong,
     .history-item strong {
         display: block;
         margin-bottom: 6px;
         color: #10233f;
     }
 
+    .pricing-card span,
     .history-item span {
         display: block;
         color: #64748b;
         line-height: 1.6;
     }
 
-    .actions-card {
-        margin-top: 18px;
-        border: 1px solid #dde7f0;
-        border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        padding: 22px;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .actions-card h2 {
-        margin: 0 0 10px;
-        font-size: 1.15rem;
-        color: #10233f;
+    .pricing-card .usd-value {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #0f766e;
+        margin-bottom: 8px;
     }
 
     .actions-card p {
@@ -169,54 +172,65 @@
 
 <div class="subscription-grid">
     <section class="sub-card">
-        <h2>Etat actuel</h2>
+        <h2>État actuel</h2>
         {% if subscription %}
         <div class="details">
             <div class="detail-row"><span>Organisation</span><strong>{{ entreprise.nom }}</strong></div>
-            <div class="detail-row"><span>Plan</span><strong>{{ subscription.plan.nom }}</strong></div>
+            <div class="detail-row"><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></div>
             <div class="detail-row">
                 <span>Statut</span>
                 <span class="status-pill status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
             </div>
-            <div class="detail-row"><span>Date de debut</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
+            <div class="detail-row"><span>Date de début</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
             <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Periode d'essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
-            <div class="detail-row"><span>Acces courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
+            <div class="detail-row"><span>Période d'essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
+            <div class="detail-row"><span>Accès courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
         </div>
         {% else %}
         <div class="empty-state">
-            Aucun abonnement n'est encore configure pour votre organisation.
+            Aucun abonnement n'est encore configuré pour votre organisation.
         </div>
         {% endif %}
     </section>
 
     <section class="sub-card">
-        <h2>Informations utiles</h2>
-        {% if subscription %}
-        <div class="info-box">
-            Votre abonnement determine l'acces aux modules de la plateforme. En cas d'expiration ou de suspension, certains espaces peuvent devenir indisponibles jusqu'a reactivation.
+        <h2>JOATHAM Pro</h2>
+        {% if featured_plan and pricing_options %}
+        <div class="pricing-grid">
+            {% for option in pricing_options %}
+            <article class="pricing-card">
+                <strong>{{ option.label }}</strong>
+                <div class="usd-value">{{ option.amount_usd }} USD</div>
+                <span>Montant estimatif dans votre devise : {{ option.estimated_amount }} {{ option.currency_code }}</span>
+                <span>Taux utilisé pour l'estimation : {{ option.exchange_rate }}</span>
+            </article>
+            {% endfor %}
+        </div>
+        <div class="info-box" style="margin-top:16px;">
+            La plateforme conserve toujours le montant de référence en USD. Le montant affiché dans votre devise est fourni à titre estimatif.
         </div>
         {% else %}
         <div class="info-box">
-            Votre organisation ne dispose pas encore d'un abonnement actif. Contactez l'administration de la plateforme pour activer votre acces.
+            Aucun plan payant n'est disponible pour le moment. Contactez l'équipe JOATHAM Manager pour être accompagné.
         </div>
         {% endif %}
 
-        <h2 style="margin-top:22px;">Historique recent</h2>
+        <h2 style="margin-top:22px;">Historique récent</h2>
         {% if paiements %}
         <div class="history-list">
             {% for paiement in paiements %}
             <article class="history-item">
                 <strong>{{ paiement.plan.nom }} - {{ paiement.get_statut_display }}</strong>
                 <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
-                <span>Duree : {{ paiement.get_duree_display }}</span>
-                <span>Montant : {{ paiement.montant }} {{ entreprise.devise }}</span>
+                <span>Période : {{ paiement.get_duree_display }}</span>
+                <span>Montant de référence : {{ paiement.montant_usd|default:paiement.montant }} USD</span>
+                <span>Montant estimatif local : {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:entreprise.devise }}</span>
             </article>
             {% endfor %}
         </div>
         {% else %}
         <div class="empty-state">
-            Aucun evenement d'abonnement recent n'est disponible pour le moment.
+            Aucun événement d'abonnement récent n'est disponible pour le moment.
         </div>
         {% endif %}
     </section>
@@ -226,9 +240,9 @@
     <h2>Actions disponibles</h2>
     <p>
         {% if subscription %}
-            Selon l'état de votre abonnement, vous pouvez demander une évolution de plan ou une réactivation de votre accès.
+            Selon l'état de votre abonnement, vous pouvez passer au plan payant, demander une réactivation ou préparer un changement de plan.
         {% else %}
-            Votre organisation n'a pas encore d'abonnement actif. Contactez l'équipe JOATHAM Manager pour être accompagné.
+            Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué.
         {% endif %}
     </p>
 
@@ -237,7 +251,7 @@
             {% if subscription.statut == "essai" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Passer au plan payant</a>
             {% elif subscription.statut == "expire" or subscription.statut == "suspendu" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver abonnement</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver l'abonnement</a>
             {% elif subscription.statut == "actif" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Changer de plan</a>
             {% else %}
@@ -247,14 +261,8 @@
         <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Activer un abonnement</a>
         {% endif %}
 
-        <a
-            class="btn-action secondary"
-            href="https://api.whatsapp.com/send?text=Bonjour%20JOATHAM%20Manager%2C%20je%20souhaite%20%C3%AAtre%20accompagn%C3%A9%20pour%20mon%20abonnement."
-            target="_blank"
-            rel="noopener"
-        >
-            Contacter via WhatsApp
-        </a>
+        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">J'ai effectué le paiement</a>
+        <a class="btn-action secondary" href="{{ whatsapp_link }}" target="_blank" rel="noopener">Contacter via WhatsApp</a>
     </div>
 </section>
 {% endblock %}

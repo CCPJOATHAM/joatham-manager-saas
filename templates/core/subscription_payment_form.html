@@ -1,11 +1,11 @@
 {% extends "joatham_dashboard/base.html" %}
 
 {% block page_title %}Paiement abonnement | JOATHAM Manager{% endblock %}
-{% block content_title %}Payer un abonnement{% endblock %}
-{% block content_subtitle %}Choisissez un plan, envoyez votre reference de paiement, puis attendez la validation du super admin.{% endblock %}
+{% block content_title %}Paiement de l'abonnement{% endblock %}
+{% block content_subtitle %}Choisissez votre période, vérifiez le montant en USD et envoyez votre demande après paiement pour validation manuelle.{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">Retour abonnement</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">Retour à mon abonnement</a>
 {% endblock %}
 
 {% block content %}
@@ -17,6 +17,7 @@
         gap: 18px;
         align-items: start;
     }
+
     .payment-card {
         border: 1px solid #dde7f0;
         border-radius: 22px;
@@ -24,16 +25,19 @@
         padding: 24px;
         box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
+
     .form-grid {
         display: grid;
         gap: 16px;
     }
+
     .form-grid label {
         display: block;
         margin-bottom: 7px;
         color: #475569;
         font-weight: 800;
     }
+
     .form-grid select,
     .form-grid input {
         width: 100%;
@@ -43,41 +47,97 @@
         border: 1px solid #cbd5e1;
         background: #fff;
     }
+
+    .amount-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
     .amount-preview {
         padding: 18px;
         border-radius: 18px;
-        background: #f0fdfa;
-        border: 1px solid #99f6e4;
-        color: #115e59;
-        font-weight: 900;
-        font-size: 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #dde7f0;
     }
+
+    .amount-preview .label {
+        display: block;
+        margin-bottom: 8px;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .amount-preview .value {
+        display: block;
+        color: #10233f;
+        font-weight: 900;
+        font-size: 1.4rem;
+    }
+
+    .amount-preview .meta {
+        display: block;
+        margin-top: 6px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
     .instructions {
         display: grid;
-        gap: 12px;
+        gap: 14px;
         color: #475569;
         line-height: 1.7;
     }
-    .instructions strong {
+
+    .instructions strong,
+    .instructions h2 {
         color: #10233f;
     }
-    .submit-btn {
-        border: 0;
-        border-radius: 14px;
+
+    .cta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .submit-btn,
+    .secondary-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         min-height: 46px;
         padding: 0 18px;
+        border-radius: 14px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .submit-btn {
+        border: 0;
         background: #0f766e;
         color: #fff;
-        font-weight: 800;
         cursor: pointer;
     }
+
+    .secondary-link {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #10233f;
+    }
+
     .errorlist {
         margin: 8px 0 0;
         padding-left: 18px;
         color: #b91c1c;
     }
+
     @media (max-width: 980px) {
         .payment-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .amount-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -97,9 +157,24 @@
                 {{ form.duree }}
                 {{ form.duree.errors }}
             </div>
+
+            <div class="amount-grid">
+                <div class="amount-preview">
+                    <span class="label">Montant de référence</span>
+                    <span class="value"><span id="amount-usd-preview">-</span> USD</span>
+                    <span class="meta">Prix plateforme conservé en USD.</span>
+                </div>
+                <div class="amount-preview">
+                    <span class="label">Montant estimatif dans votre devise</span>
+                    <span class="value"><span id="amount-local-preview">-</span> <span id="currency-preview">{{ entreprise.devise }}</span></span>
+                    <span class="meta">Taux utilisé : <span id="rate-preview">-</span></span>
+                </div>
+            </div>
+
             <div>
-                <label>Montant a payer</label>
-                <div class="amount-preview"><span id="amount-preview">-</span> {{ entreprise.devise }}</div>
+                <label for="{{ form.telephone_paiement.id_for_label }}">{{ form.telephone_paiement.label }}</label>
+                {{ form.telephone_paiement }}
+                {{ form.telephone_paiement.errors }}
             </div>
             <div>
                 <label for="{{ form.reference_paiement.id_for_label }}">{{ form.reference_paiement.label }}</label>
@@ -111,16 +186,20 @@
                 {{ form.preuve_paiement }}
                 {{ form.preuve_paiement.errors }}
             </div>
-            <button type="submit" class="submit-btn">Envoyer la demande de paiement</button>
+            <div class="cta-row">
+                <button type="submit" class="submit-btn">Envoyer la demande</button>
+                <a class="secondary-link" href="{{ whatsapp_link }}" target="_blank" rel="noopener">Contacter via WhatsApp</a>
+            </div>
         </form>
     </section>
 
     <aside class="payment-card instructions">
-        <h2>Instructions de paiement</h2>
-        <p><strong>1.</strong> Choisissez votre plan et la duree souhaitee.</p>
-        <p><strong>2.</strong> Effectuez le paiement via le canal indique par JOATHAM Manager : Mobile Money, virement ou validation commerciale.</p>
-        <p><strong>3.</strong> Saisissez la reference de transaction et ajoutez une preuve si disponible.</p>
-        <p><strong>4.</strong> Votre abonnement sera active uniquement apres validation par le super admin.</p>
+        <h2>Demande de paiement</h2>
+        <p><strong>1.</strong> Choisissez le plan payant et la période souhaitée.</p>
+        <p><strong>2.</strong> Vérifiez le montant de référence en USD et son estimation dans la devise de votre entreprise.</p>
+        <p><strong>3.</strong> Effectuez votre paiement hors plateforme, puis ajoutez votre référence et votre preuve si disponible.</p>
+        <p><strong>4.</strong> Le statut restera <strong>Demande de paiement en attente</strong> jusqu'à validation par le super admin.</p>
+        <p>Le montant affiché dans votre devise est fourni à titre estimatif. L'activation de l'abonnement intervient uniquement après validation manuelle.</p>
     </aside>
 </div>
 
@@ -128,14 +207,21 @@
     const pricingMatrix = JSON.parse(document.getElementById("pricing-matrix").textContent);
     const planField = document.getElementById("id_plan");
     const durationField = document.getElementById("id_duree");
-    const amountPreview = document.getElementById("amount-preview");
+    const amountUsdPreview = document.getElementById("amount-usd-preview");
+    const amountLocalPreview = document.getElementById("amount-local-preview");
+    const currencyPreview = document.getElementById("currency-preview");
+    const ratePreview = document.getElementById("rate-preview");
 
     function syncAmountPreview() {
         const key = `${planField.value}:${durationField.value}`;
-        amountPreview.textContent = pricingMatrix[key] || "-";
+        const data = pricingMatrix[key];
+        amountUsdPreview.textContent = data ? data.amount_usd : "-";
+        amountLocalPreview.textContent = data ? data.estimated_amount : "-";
+        currencyPreview.textContent = data ? data.currency_code : "{{ entreprise.devise }}";
+        ratePreview.textContent = data ? data.exchange_rate : "-";
     }
 
-    if (planField && durationField && amountPreview) {
+    if (planField && durationField) {
         planField.addEventListener("change", syncAmountPreview);
         durationField.addEventListener("change", syncAmountPreview);
         syncAmountPreview();

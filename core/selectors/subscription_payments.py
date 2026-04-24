@@ -17,6 +17,15 @@ def get_pending_subscription_payments():
     )
 
 
+def get_latest_subscription_payment_by_entreprise(entreprise):
+    return (
+        PaiementAbonnement.objects.filter(entreprise=entreprise)
+        .select_related("plan", "valide_par")
+        .order_by("-date_creation", "-id")
+        .first()
+    )
+
+
 def get_subscription_payment_for_super_admin(paiement_id):
     try:
         return PaiementAbonnement.objects.select_related("entreprise", "plan").get(id=paiement_id)

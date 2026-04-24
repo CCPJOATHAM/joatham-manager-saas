@@ -21,6 +21,9 @@ def get_super_admin_entreprise_queryset(*, search=None, statut=None):
             owner_email=Coalesce(Subquery(owner_users.values("email")[:1]), Value("")),
             owner_username=Coalesce(Subquery(owner_users.values("username")[:1]), Value("")),
             last_payment_amount=Subquery(latest_payment.values("montant")[:1]),
+            last_payment_amount_usd=Subquery(latest_payment.values("montant_usd")[:1]),
+            last_payment_currency=Subquery(latest_payment.values("devise_entreprise")[:1]),
+            last_payment_local_amount=Subquery(latest_payment.values("montant_devise_locale_estime")[:1]),
             last_payment_status=Subquery(latest_payment.values("statut")[:1]),
             last_payment_created_at=Subquery(latest_payment.values("date_creation")[:1]),
             payment_request_count=Count("paiements_abonnement"),
@@ -54,6 +57,6 @@ def get_super_admin_subscription_counts():
         "suspendu": subscriptions.filter(statut=AbonnementEntreprise.Statut.SUSPENDU).count(),
         "pending_payments": payments.filter(statut=PaiementAbonnement.Statut.EN_ATTENTE).count(),
         "validated_revenue": payments.filter(statut=PaiementAbonnement.Statut.VALIDE).aggregate(
-            total=Coalesce(Sum("montant"), Value(Decimal("0.00")), output_field=DecimalField(max_digits=12, decimal_places=2))
+            total=Coalesce(Sum("montant_usd"), Value(Decimal("0.00")), output_field=DecimalField(max_digits=12, decimal_places=2))
         )["total"],
     }

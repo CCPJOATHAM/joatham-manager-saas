@@ -1,11 +1,15 @@
 from django.utils.dateparse import parse_date
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from urllib.parse import quote
 
 from core.audit import record_audit_event
 from core.forms import EntrepriseSettingsForm, PaiementAbonnementForm
 from core.services.subscription import (
-    calculate_subscription_payment_amount,
+    DEFAULT_WHATSAPP_MESSAGE,
+    DEFAULT_WHATSAPP_NUMBER,
+    build_subscription_payment_estimate,
+    build_subscription_pricing_matrix,
     create_subscription_payment_request,
     get_current_subscription,
     get_subscription_payment_duration_options,
@@ -88,10 +92,29 @@ def activity_log_list(request):
 def subscription_overview(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     subscription = refresh_subscription_status(entreprise)
+    plans = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
+    pricing_options = []
+    featured_plan = plans.first()
+    if featured_plan is not None:
+        for duree, details in get_subscription_payment_duration_options().items():
+            estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=featured_plan, duree=duree)
+            pricing_options.append(
+                {
+                    "code": duree,
+                    "label": details["label"],
+                    "amount_usd": estimate["amount_usd"],
+                    "currency_code": estimate["currency_code"],
+                    "estimated_amount": estimate["estimated_amount"],
+                    "exchange_rate": estimate["exchange_rate"],
+                }
+            )
     context = {
         "entreprise": entreprise,
         "subscription": subscription or get_current_subscription(entreprise),
         "paiements": get_subscription_payments_by_entreprise(entreprise)[:8],
+        "featured_plan": featured_plan,
+        "pricing_options": pricing_options,
+        "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",
     }
     return render(request, "core/subscription_overview.html", context)
 
@@ -106,6 +129,7 @@ def subscription_payment_create(request):
             entreprise=entreprise,
             plan=form.cleaned_data["plan"],
             duree=form.cleaned_data["duree"],
+            telephone_paiement=form.cleaned_data.get("telephone_paiement", ""),
             reference_paiement=form.cleaned_data["reference_paiement"],
             preuve_paiement=form.cleaned_data.get("preuve_paiement"),
             utilisateur=request.user,
@@ -113,19 +137,15 @@ def subscription_payment_create(request):
         messages.success(request, "Votre demande de paiement a ete envoyee. Elle sera activee apres validation.")
         return redirect("subscription_overview")
 
-    plans = Abonnement.objects.filter(actif=True).order_by("prix", "nom")
+    plans = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
     duration_options = get_subscription_payment_duration_options()
-    pricing_matrix = {
-        f"{plan.id}:{duree}": str(calculate_subscription_payment_amount(plan=plan, duree=duree))
-        for plan in plans
-        for duree in duration_options
-    }
     context = {
         "entreprise": entreprise,
         "form": form,
         "plans": plans,
         "duration_options": duration_options,
-        "pricing_matrix": pricing_matrix,
+        "pricing_matrix": build_subscription_pricing_matrix(entreprise=entreprise, plans=plans),
+        "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",
     }
     return render(request, "core/subscription_payment_form.html", context)
 
@@ -174,13 +194,21 @@ def super_admin_dashboard(request):
         try:
             if action == "validate_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
-                validate_subscription_payment(paiement=paiement, super_admin=request.user)
-                messages.success(request, f"Paiement valide pour {paiement.entreprise.nom}.")
+                validate_subscription_payment(
+                    paiement=paiement,
+                    super_admin=request.user,
+                    notes_validation=request.POST.get("notes_validation") or "",
+                )
+                messages.success(request, f"Le paiement a ete valide et l'abonnement a ete active pour {paiement.entreprise.nom}.")
                 return redirect("super_admin_dashboard")
             if action == "refuse_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
-                refuse_subscription_payment(paiement=paiement, super_admin=request.user)
-                messages.success(request, f"Paiement refuse pour {paiement.entreprise.nom}.")
+                refuse_subscription_payment(
+                    paiement=paiement,
+                    super_admin=request.user,
+                    notes_validation=request.POST.get("notes_validation") or "",
+                )
+                messages.success(request, f"Le paiement a ete refuse pour {paiement.entreprise.nom}.")
                 return redirect("super_admin_dashboard")
 
             entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))

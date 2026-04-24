@@ -9,10 +9,13 @@ from django.utils import timezone
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement
 from core.selectors.subscriptions import get_subscription_with_plan_for_entreprise
+from core.services.currency import estimate_local_amount_from_usd
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.models import Abonnement, AbonnementEntreprise
 
 
+DEFAULT_WHATSAPP_NUMBER = "243970258117"
+DEFAULT_WHATSAPP_MESSAGE = "Je veux payer mon abonnement JOATHAM Pro"
 SUBSCRIPTION_PAYMENT_DURATIONS = {
     PaiementAbonnement.Duree.MENSUEL: {"label": "Mensuel", "days": 30, "multiplier": Decimal("1")},
     PaiementAbonnement.Duree.TRIMESTRIEL: {"label": "Trimestriel", "days": 90, "multiplier": Decimal("3")},
@@ -109,11 +112,15 @@ def get_subscription_payment_duration_options():
     return SUBSCRIPTION_PAYMENT_DURATIONS
 
 
-def calculate_subscription_payment_amount(*, plan, duree):
+def get_subscription_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
         raise ValueError("Duree d'abonnement invalide.")
     return Decimal(str(plan.prix)) * duration["multiplier"]
+
+
+def calculate_subscription_payment_amount(*, plan, duree):
+    return get_subscription_price_usd(plan=plan, duree=duree)
 
 
 def get_subscription_payment_duration_days(duree):
@@ -123,14 +130,60 @@ def get_subscription_payment_duration_days(duree):
     return duration["days"]
 
 
+def build_subscription_payment_estimate(*, entreprise, plan, duree):
+    amount_usd = get_subscription_price_usd(plan=plan, duree=duree).quantize(Decimal("0.01"))
+    estimation = estimate_local_amount_from_usd(amount_usd, getattr(entreprise, "devise", "USD"))
+    return {
+        "plan_id": plan.id,
+        "plan_name": plan.nom,
+        "period": duree,
+        "amount_usd": amount_usd,
+        "currency_code": estimation["currency_code"],
+        "estimated_amount": estimation["estimated_amount"],
+        "exchange_rate": estimation["exchange_rate"],
+        "exchange_source": estimation["source"],
+    }
+
+
+def build_subscription_pricing_matrix(*, entreprise, plans):
+    pricing_matrix = {}
+    for plan in plans:
+        for duree, details in get_subscription_payment_duration_options().items():
+            estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
+            pricing_matrix[f"{plan.id}:{duree}"] = {
+                "amount_usd": str(estimate["amount_usd"]),
+                "currency_code": estimate["currency_code"],
+                "estimated_amount": str(estimate["estimated_amount"]),
+                "exchange_rate": str(estimate["exchange_rate"]),
+                "duration_label": details["label"],
+            }
+    return pricing_matrix
+
+
 @transaction.atomic
-def create_subscription_payment_request(*, entreprise, plan, duree, reference_paiement, preuve_paiement=None, utilisateur=None):
-    montant = calculate_subscription_payment_amount(plan=plan, duree=duree)
+def create_subscription_payment_request(
+    *,
+    entreprise,
+    plan,
+    duree,
+    reference_paiement,
+    preuve_paiement=None,
+    telephone_paiement="",
+    utilisateur=None,
+):
+    estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
+    montant = estimate["amount_usd"]
     paiement = PaiementAbonnement.objects.create(
         entreprise=entreprise,
         plan=plan,
         duree=duree,
         montant=montant,
+        montant_usd=estimate["amount_usd"],
+        devise_entreprise=estimate["currency_code"],
+        montant_devise_locale_estime=estimate["estimated_amount"],
+        taux_change_reference=estimate["exchange_rate"],
+        source_taux=estimate["exchange_source"],
+        telephone_paiement=(telephone_paiement or "").strip(),
         reference_paiement=(reference_paiement or "").strip(),
         preuve_paiement=preuve_paiement,
     )
@@ -142,13 +195,19 @@ def create_subscription_payment_request(*, entreprise, plan, duree, reference_pa
         objet_type="PaiementAbonnement",
         objet_id=paiement.id,
         description=f"Demande de paiement abonnement creee pour le plan {plan.nom}.",
-        metadata={"plan_id": plan.id, "duree": duree, "montant": str(montant)},
+        metadata={
+            "plan_id": plan.id,
+            "duree": duree,
+            "montant_usd": str(estimate["amount_usd"]),
+            "devise_entreprise": estimate["currency_code"],
+            "montant_devise_locale_estime": str(estimate["estimated_amount"]),
+        },
     )
     return paiement
 
 
 @transaction.atomic
-def validate_subscription_payment(*, paiement, super_admin):
+def validate_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
         raise ValueError("Seuls les paiements en attente peuvent etre valides.")
     duration_days = get_subscription_payment_duration_days(paiement.duree)
@@ -162,7 +221,8 @@ def validate_subscription_payment(*, paiement, super_admin):
     paiement.statut = PaiementAbonnement.Statut.VALIDE
     paiement.date_validation = timezone.now()
     paiement.valide_par = super_admin
-    paiement.save(update_fields=["statut", "date_validation", "valide_par"])
+    paiement.notes_validation = (notes_validation or "").strip()
+    paiement.save(update_fields=["statut", "date_validation", "valide_par", "notes_validation"])
     record_audit_event(
         entreprise=paiement.entreprise,
         utilisateur=super_admin,
@@ -171,19 +231,24 @@ def validate_subscription_payment(*, paiement, super_admin):
         objet_type="PaiementAbonnement",
         objet_id=paiement.id,
         description=f"Paiement abonnement valide pour le plan {paiement.plan.nom}.",
-        metadata={"plan_id": paiement.plan_id, "montant": str(paiement.montant), "subscription_id": subscription.id},
+        metadata={
+            "plan_id": paiement.plan_id,
+            "montant_usd": str(paiement.montant_usd or paiement.montant),
+            "subscription_id": subscription.id,
+        },
     )
     return subscription
 
 
 @transaction.atomic
-def refuse_subscription_payment(*, paiement, super_admin):
+def refuse_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
         raise ValueError("Seuls les paiements en attente peuvent etre refuses.")
     paiement.statut = PaiementAbonnement.Statut.REFUSE
     paiement.date_validation = timezone.now()
     paiement.valide_par = super_admin
-    paiement.save(update_fields=["statut", "date_validation", "valide_par"])
+    paiement.notes_validation = (notes_validation or "").strip()
+    paiement.save(update_fields=["statut", "date_validation", "valide_par", "notes_validation"])
     record_audit_event(
         entreprise=paiement.entreprise,
         utilisateur=super_admin,
@@ -192,7 +257,7 @@ def refuse_subscription_payment(*, paiement, super_admin):
         objet_type="PaiementAbonnement",
         objet_id=paiement.id,
         description=f"Paiement abonnement refuse pour le plan {paiement.plan.nom}.",
-        metadata={"plan_id": paiement.plan_id, "montant": str(paiement.montant)},
+        metadata={"plan_id": paiement.plan_id, "montant_usd": str(paiement.montant_usd or paiement.montant)},
     )
     return paiement
 

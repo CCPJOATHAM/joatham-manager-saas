@@ -273,11 +273,12 @@
         <table class="super-table">
             <thead>
                 <tr>
-                    <th>Entreprise</th>
+                    <th>Compte client</th>
                     <th>Plan</th>
-                    <th>Duree</th>
-                    <th>Montant</th>
-                    <th>Reference</th>
+                    <th>Période</th>
+                    <th>Montant USD</th>
+                    <th>Montant estimatif local</th>
+                    <th>Référence</th>
                     <th>Preuve</th>
                     <th>Actions</th>
                 </tr>
@@ -288,7 +289,8 @@
                     <td>{{ paiement.entreprise.nom }}</td>
                     <td>{{ paiement.plan.nom }}</td>
                     <td>{{ paiement.get_duree_display }}</td>
-                    <td>{{ paiement.montant }} {{ paiement.entreprise.devise }}</td>
+                    <td>{{ paiement.montant_usd|default:paiement.montant }} USD</td>
+                    <td>{{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:paiement.entreprise.devise }}</td>
                     <td>{{ paiement.reference_paiement }}</td>
                     <td>
                         {% if paiement.preuve_paiement %}
@@ -302,12 +304,14 @@
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider</button>
+                                <input type="text" name="notes_validation" placeholder="Note interne (optionnel)">
+                                <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider le paiement</button>
                             </form>
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser</button>
+                                <input type="text" name="notes_validation" placeholder="Motif du refus (optionnel)">
+                                <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser le paiement</button>
                             </form>
                         </div>
                     </td>

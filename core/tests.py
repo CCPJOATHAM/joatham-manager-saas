@@ -28,7 +28,9 @@ from .services.tenancy import (
     scope_queryset_to_entreprise,
 )
 from .services.subscription import (
+    build_subscription_payment_estimate,
     create_subscription_payment_request,
+    get_subscription_price_usd,
     refuse_subscription_payment,
     validate_subscription_payment,
 )
@@ -483,6 +485,7 @@ class SubscriptionPaymentTests(TestCase):
             {
                 "plan": self.plan_basic.id,
                 "duree": PaiementAbonnement.Duree.TRIMESTRIEL,
+                "telephone_paiement": "+243970258117",
                 "reference_paiement": "MOMO-123",
             },
         )
@@ -491,7 +494,37 @@ class SubscriptionPaymentTests(TestCase):
         paiement = PaiementAbonnement.objects.get(entreprise=self.entreprise)
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
         self.assertEqual(paiement.montant, Decimal("30"))
+        self.assertEqual(paiement.montant_usd, Decimal("30"))
+        self.assertEqual(paiement.devise_entreprise, self.entreprise.devise)
+        self.assertTrue(paiement.taux_change_reference)
+        self.assertEqual(paiement.telephone_paiement, "+243970258117")
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    def test_subscription_price_rules_match_v1_periods(self):
+        self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("10"))
+        self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.TRIMESTRIEL), Decimal("30"))
+        self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("120"))
+
+    def test_subscription_payment_estimate_uses_usd_reference_and_local_snapshot(self):
+        estimate = build_subscription_payment_estimate(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+        )
+
+        self.assertEqual(estimate["amount_usd"], Decimal("10.00"))
+        self.assertEqual(estimate["currency_code"], self.entreprise.devise)
+        self.assertGreater(estimate["estimated_amount"], Decimal("0.00"))
+
+    def test_payment_form_displays_whatsapp_and_price_previews(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("subscription_payment_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Montant de référence")
+        self.assertContains(response, "Montant estimatif dans votre devise")
+        self.assertContains(response, "Contacter via WhatsApp")
+        self.assertContains(response, "243970258117")
 
     def test_super_admin_validation_activates_subscription(self):
         paiement = create_subscription_payment_request(
@@ -512,6 +545,7 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(subscription.plan, self.plan_pro)
         self.assertEqual(self.entreprise.abonnement, self.plan_pro)
         self.assertEqual(self.entreprise.date_expiration, subscription.date_fin)
+        self.assertEqual(paiement.montant_usd, Decimal("30"))
 
     def test_super_admin_refusal_does_not_activate_subscription(self):
         paiement = create_subscription_payment_request(
@@ -549,19 +583,22 @@ class SubscriptionPaymentTests(TestCase):
         dashboard = self.client.get(reverse("super_admin_dashboard"))
         self.assertContains(dashboard, "Paiements d'abonnement en attente")
         self.assertContains(dashboard, "MOMO-VALID")
+        self.assertContains(dashboard, "Valider le paiement")
 
         validate_response = self.client.post(
             reverse("super_admin_dashboard"),
-            {"action": "validate_payment", "paiement_id": paiement_validate.id},
+            {"action": "validate_payment", "paiement_id": paiement_validate.id, "notes_validation": "Paiement confirme"},
         )
         self.assertRedirects(validate_response, reverse("super_admin_dashboard"))
         paiement_validate.refresh_from_db()
         self.assertEqual(paiement_validate.statut, PaiementAbonnement.Statut.VALIDE)
+        self.assertEqual(paiement_validate.notes_validation, "Paiement confirme")
 
         refuse_response = self.client.post(
             reverse("super_admin_dashboard"),
-            {"action": "refuse_payment", "paiement_id": paiement_refuse.id},
+            {"action": "refuse_payment", "paiement_id": paiement_refuse.id, "notes_validation": "Reference invalide"},
         )
         self.assertRedirects(refuse_response, reverse("super_admin_dashboard"))
         paiement_refuse.refresh_from_db()
         self.assertEqual(paiement_refuse.statut, PaiementAbonnement.Statut.REFUSE)
+        self.assertEqual(paiement_refuse.notes_validation, "Reference invalide")
