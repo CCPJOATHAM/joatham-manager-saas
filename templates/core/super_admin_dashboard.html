@@ -221,6 +221,26 @@
         flex-wrap: wrap;
     }
 
+    .platform-map {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .platform-map-item {
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid #dde7f0;
+        background: #fff;
+    }
+
+    .platform-map-item strong {
+        display: block;
+        color: #10233f;
+        margin-bottom: 6px;
+    }
+
     @media (max-width: 1180px) {
         .toolbar,
         .filter-form {
@@ -236,10 +256,14 @@
         .super-grid {
             grid-template-columns: 1fr;
         }
+
+        .platform-map {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="super-grid">
+<div id="dashboard-global" class="super-grid">
     <div class="super-kpi">
         <span class="label">Comptes clients</span>
         <span class="value">{{ counts.total_accounts }}</span>
@@ -266,7 +290,22 @@
     </div>
 </div>
 
-<section class="payments-panel">
+<div class="platform-map">
+    <div id="utilisateurs" class="platform-map-item">
+        <strong>Utilisateurs</strong>
+        <span class="muted">Vue globale via les comptes clients et contacts proprietaires.</span>
+    </div>
+    <div id="audit-logs" class="platform-map-item">
+        <strong>Audit / logs</strong>
+        <span class="muted">Actions plateforme tracees lors des validations, suspensions et changements d'abonnement.</span>
+    </div>
+    <div id="parametres-plateforme" class="platform-map-item">
+        <strong>Parametres plateforme</strong>
+        <span class="muted">Plans, statuts et actions SaaS disponibles depuis ce pilotage global.</span>
+    </div>
+</div>
+
+<section id="abonnements" class="payments-panel">
     <h2>Paiements d'abonnement en attente</h2>
     {% if pending_payments %}
     <div class="table-shell">
@@ -325,7 +364,7 @@
     {% endif %}
 </section>
 
-<div class="toolbar">
+<div id="abonnements-entreprises" class="toolbar">
     <form method="get" class="filter-form">
         <div>
             <label for="id_q">Rechercher un compte client</label>

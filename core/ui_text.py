@@ -1,23 +1,26 @@
+from django.utils.translation import gettext_lazy as _
+
+
 FLASH_MESSAGES = {
-    "company_updated": "Les coordonnées de l'entreprise ont été mises à jour.",
-    "already_logged_in": "Vous êtes déjà connecté. Déconnectez-vous pour accéder à cette page.",
-    "signup_success": "Votre entreprise a été créée avec succès. Votre période d'essai a démarré.",
-    "logged_out": "Vous avez été déconnecté. Vous pouvez maintenant vous connecter ou créer votre entreprise.",
-    "invoice_created": "La facture a été créée avec succès.",
-    "invoice_updated": "La facture a été modifiée avec succès.",
-    "invoice_status_updated": "Le statut de la facture a été mis à jour.",
-    "invoice_payment_created": "Le paiement a été enregistré.",
-    "invoice_payment_quick": "Le paiement complet a été enregistré.",
-    "user_created": "L'utilisateur a été créé avec succès.",
-    "user_updated": "L'utilisateur a été mis à jour avec succès.",
-    "user_deleted": "L'utilisateur a été supprimé avec succès.",
+    "company_updated": _("Les coordonnees de l'entreprise ont ete mises a jour."),
+    "already_logged_in": _("Vous etes deja connecte. Deconnectez-vous pour acceder a cette page."),
+    "signup_success": _("Votre entreprise a ete creee avec succes. Votre periode d'essai a demarre."),
+    "logged_out": _("Vous avez ete deconnecte. Vous pouvez maintenant vous connecter ou creer votre entreprise."),
+    "invoice_created": _("La facture a ete creee avec succes."),
+    "invoice_updated": _("La facture a ete modifiee avec succes."),
+    "invoice_status_updated": _("Le statut de la facture a ete mis a jour."),
+    "invoice_payment_created": _("Le paiement a ete enregistre."),
+    "invoice_payment_quick": _("Le paiement complet a ete enregistre."),
+    "user_created": _("L'utilisateur a ete cree avec succes."),
+    "user_updated": _("L'utilisateur a ete mis a jour avec succes."),
+    "user_deleted": _("L'utilisateur a ete supprime avec succes."),
 }
 
 
 TERMS = {
-    "client": "Client",
-    "expense": "Dépense",
-    "invoice": "Facture",
-    "user": "Utilisateur",
-    "learner": "Apprenant",
+    "client": _("Client"),
+    "expense": _("Depense"),
+    "invoice": _("Facture"),
+    "user": _("Utilisateur"),
+    "learner": _("Apprenant"),
 }

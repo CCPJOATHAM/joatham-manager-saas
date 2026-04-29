@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class Apprenant(models.Model):
@@ -48,9 +49,9 @@ class Formation(models.Model):
 
 class InscriptionFormation(models.Model):
     class Statut(models.TextChoices):
-        EN_COURS = "en_cours", "En cours"
-        TERMINEE = "terminee", "Terminee"
-        ANNULEE = "annulee", "Annulee"
+        EN_COURS = "en_cours", _("En cours")
+        TERMINEE = "terminee", _("Terminee")
+        ANNULEE = "annulee", _("Annulee")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -99,11 +100,11 @@ class InscriptionFormation(models.Model):
 
 class PaiementInscription(models.Model):
     class ModePaiement(models.TextChoices):
-        ESPECES = "especes", "Especes"
-        VIREMENT = "virement", "Virement"
+        ESPECES = "especes", _("Especes")
+        VIREMENT = "virement", _("Virement")
         MOBILE_MONEY = "mobile_money", "Mobile Money"
-        CHEQUE = "cheque", "Cheque"
-        AUTRE = "autre", "Autre"
+        CHEQUE = "cheque", _("Cheque")
+        AUTRE = "autre", _("Autre")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",

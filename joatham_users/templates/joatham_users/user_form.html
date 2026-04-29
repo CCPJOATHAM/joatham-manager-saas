@@ -1,11 +1,12 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
 {% block page_title %}{{ page_title }} | JOATHAM Manager{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}Création et mise à jour des comptes gestionnaire et comptable de l'entreprise, avec un formulaire plus lisible et rassurant pour le propriétaire.{% endblock %}
+{% block content_subtitle %}{% trans "Creation et mise a jour des comptes gestionnaire et comptable de l'entreprise, avec un formulaire plus lisible et rassurant pour le proprietaire." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'user_list' %}" class="btn-link">Retour a la liste</a>
+<a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour a la liste" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -211,32 +212,32 @@
 <div class="hero">
     <div>
         <h2>{{ page_title }}</h2>
-        <p>{% if form_mode == "create" %}Ajoutez un nouveau compte à votre entreprise en définissant simplement son rôle, ses coordonnées et son accès initial.{% else %}Mettez à jour les informations du compte sélectionné sans toucher aux règles de sécurité et d'isolation déjà en place.{% endif %}</p>
+        <p>{% if form_mode == "create" %}{% trans "Ajoutez un nouveau compte a votre entreprise en definissant simplement son role, ses coordonnees et son acces initial." %}{% else %}{% trans "Mettez a jour les informations du compte selectionne sans toucher aux regles de securite et d'isolation deja en place." %}{% endif %}</p>
     </div>
     <div class="hero-badges">
-        <span class="hero-badge">Rôles gérés : Gestionnaire / Comptable</span>
+        <span class="hero-badge">{% trans "Roles geres : Gestionnaire / Comptable" %}</span>
         {% if target_user %}
-        <span class="hero-badge">Utilisateur concerné : {{ target_user.username }}</span>
+        <span class="hero-badge">{% trans "Utilisateur concerne" %} : {{ target_user.username }}</span>
         {% endif %}
     </div>
 </div>
 
 <div class="page-grid">
     <div class="panel">
-        <h3>Repère rapide</h3>
-        <p class="panel-subtitle">Le formulaire reste volontairement simple pour vous permettre de créer et de mettre à jour les comptes de votre équipe en quelques secondes.</p>
+        <h3>{% trans "Repere rapide" %}</h3>
+        <p class="panel-subtitle">{% trans "Le formulaire reste volontairement simple pour vous permettre de creer et de mettre a jour les comptes de votre equipe en quelques secondes." %}</p>
         <div class="guidance-list">
             <div class="guidance-item">
-                <strong>Nom</strong>
-                <span>Utilisez le nom complet de la personne pour retrouver rapidement le bon compte dans la liste.</span>
+                <strong>{% trans "Nom" %}</strong>
+                <span>{% trans "Utilisez le nom complet de la personne pour retrouver rapidement le bon compte dans la liste." %}</span>
             </div>
             <div class="guidance-item">
-                <strong>Role</strong>
-                <span>Choisissez un rôle explicite selon l'usage prévu. Les permissions existantes restent appliquées automatiquement.</span>
+                <strong>{% trans "Role" %}</strong>
+                <span>{% trans "Choisissez un role explicite selon l'usage prevu. Les permissions existantes restent appliquees automatiquement." %}</span>
             </div>
             <div class="guidance-item">
-                <strong>Mot de passe</strong>
-                <span>{% if form_mode == "create" %}Un mot de passe est requis à la création pour rendre le compte immédiatement utilisable.{% else %}Laissez le champ vide si vous souhaitez conserver le mot de passe actuel de l'utilisateur.{% endif %}</span>
+                <strong>{% trans "Mot de passe" %}</strong>
+                <span>{% if form_mode == "create" %}{% trans "Un mot de passe est requis a la creation pour rendre le compte immediatement utilisable." %}{% else %}{% trans "Laissez le champ vide si vous souhaitez conserver le mot de passe actuel de l'utilisateur." %}{% endif %}</span>
             </div>
         </div>
     </div>
@@ -250,31 +251,31 @@
 
             <div class="form-grid">
                 <div class="field full">
-                    <label for="{{ form.full_name.id_for_label }}">Nom complet</label>
+                    <label for="{{ form.full_name.id_for_label }}">{% trans "Nom complet" %}</label>
                     {{ form.full_name }}
                     {{ form.full_name.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.email.id_for_label }}">E-mail</label>
+                    <label for="{{ form.email.id_for_label }}">{% trans "E-mail" %}</label>
                     {{ form.email }}
                     {{ form.email.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.telephone.id_for_label }}">Telephone</label>
+                    <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
                     {{ form.telephone }}
                     {{ form.telephone.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.role.id_for_label }}">Role</label>
+                    <label for="{{ form.role.id_for_label }}">{% trans "Role" %}</label>
                     {{ form.role }}
                     {{ form.role.errors }}
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                    <label for="{{ form.password.id_for_label }}">{% trans "Mot de passe" %}</label>
                     {{ form.password }}
                     {{ form.password.errors }}
                     {% if form.password.help_text %}
@@ -286,9 +287,9 @@
             <div class="form-footer">
                 <div class="footer-note">
                     {% if form_mode == "create" %}
-                    Le nouveau compte sera automatiquement rattache a votre entreprise actuelle.
+                    {% trans "Le nouveau compte sera automatiquement rattache a votre entreprise actuelle." %}
                     {% else %}
-                    Les modifications restent limitees a l'utilisateur de votre entreprise selectionne.
+                    {% trans "Les modifications restent limitees a l'utilisateur de votre entreprise selectionne." %}
                     {% endif %}
                 </div>
                 <button type="submit" class="submit-btn">{{ submit_label }}</button>

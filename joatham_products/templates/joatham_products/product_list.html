@@ -1,6 +1,7 @@
 {% extends "joatham_products/base.html" %}
+{% load i18n %}
 
-{% block products_subtitle %}Suivez vos produits, repérez rapidement les stocks faibles et identifiez les ruptures dans une interface claire et exploitable.{% endblock %}
+{% block products_subtitle %}{% trans "Suivez vos produits, reperez rapidement les stocks faibles et identifiez les ruptures dans une interface claire et exploitable." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -212,26 +213,26 @@
 
 <div class="hero">
     <div>
-        <h2>Produits</h2>
-        <p>Visualisez vos niveaux de stock et concentrez-vous rapidement sur les produits à surveiller, en particulier les stocks faibles et les ruptures.</p>
+        <h2>{% trans "Produits" %}</h2>
+        <p>{% trans "Visualisez vos niveaux de stock et concentrez-vous rapidement sur les produits a surveiller, en particulier les stocks faibles et les ruptures." %}</p>
     </div>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
-        <span class="stat-label">Produits</span>
+        <span class="stat-label">{% trans "Produits" %}</span>
         <span class="stat-value">{{ total }}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Produits actifs</span>
+        <span class="stat-label">{% trans "Produits actifs" %}</span>
         <span class="stat-value">{{ actifs }}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Stocks faibles</span>
+        <span class="stat-label">{% trans "Stocks faibles" %}</span>
         <span class="stat-value">{{ stock_faible }}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Ruptures</span>
+        <span class="stat-label">{% trans "Ruptures" %}</span>
         <span class="stat-value">{{ rupture }}</span>
     </div>
 </div>
@@ -249,13 +250,13 @@
     <table class="products-table">
         <thead>
             <tr>
-                <th>Produit</th>
-                <th>Référence</th>
-                <th>Prix unitaire</th>
-                <th>Stock</th>
-                <th>Seuil d'alerte</th>
-                <th>État</th>
-                <th>Actions</th>
+                <th>{% trans "Produit" %}</th>
+                <th>{% trans "Reference" %}</th>
+                <th>{% trans "Prix unitaire" %}</th>
+                <th>{% trans "Stock" %}</th>
+                <th>{% trans "Seuil d'alerte" %}</th>
+                <th>{% trans "Etat" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -263,7 +264,7 @@
             <tr>
                 <td>
                     <div class="product-name">{{ row.instance.nom }}</div>
-                    <div class="muted">{% if row.instance.actif %}Produit actif{% else %}Produit inactif{% endif %}</div>
+                    <div class="muted">{% if row.instance.actif %}{% trans "Produit actif" %}{% else %}{% trans "Produit inactif" %}{% endif %}</div>
                 </td>
                 <td class="muted">{{ row.instance.reference|default:"-" }}</td>
                 <td>{{ row.instance.prix_unitaire }}</td>
@@ -276,9 +277,9 @@
                 </td>
                 <td>
                     {% if can_manage_products_ui %}
-                    <a href="{% url 'product_update' row.instance.id %}" class="action-link">Modifier</a>
+                    <a href="{% url 'product_update' row.instance.id %}" class="action-link">{% trans "Modifier" %}</a>
                     {% else %}
-                    <span class="muted">Lecture seule</span>
+                    <span class="muted">{% trans "Lecture seule" %}</span>
                     {% endif %}
                 </td>
             </tr>
@@ -289,10 +290,10 @@
 {% else %}
 <div class="table-shell">
     <div class="empty-state">
-        <h3>Aucun produit trouvé</h3>
-        <p>Commencez par créer un premier produit pour suivre son prix, son stock disponible et ses alertes de rupture.</p>
+        <h3>{% trans "Aucun produit trouve" %}</h3>
+        <p>{% trans "Commencez par creer un premier produit pour suivre son prix, son stock disponible et ses alertes de rupture." %}</p>
         {% if can_manage_products_ui %}
-        <a href="{% url 'product_create' %}" class="btn-link primary">Ajouter un produit</a>
+        <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>
         {% endif %}
     </div>
 </div>

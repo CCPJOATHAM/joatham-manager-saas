@@ -16,7 +16,7 @@ from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise
 
 
 def refresh_all_subscription_statuses(*, utilisateur=None):
-    for entreprise in Entreprise.objects.select_related("abonnement_entreprise").all():
+    for entreprise in Entreprise.objects.filter(is_active=True).select_related("abonnement_entreprise"):
         refresh_subscription_status(entreprise, utilisateur=utilisateur)
 
 
@@ -26,6 +26,39 @@ def get_plan_for_super_admin(plan_id):
 
 def get_entreprise_for_super_admin(entreprise_id):
     return get_object_or_404(Entreprise.objects.all(), id=entreprise_id)
+
+
+def deactivate_company_for_super_admin(*, entreprise, confirmation_name, utilisateur=None):
+    if not getattr(entreprise, "is_active", True):
+        raise ValueError("Cette entreprise est deja desactivee.")
+
+    expected_name = (entreprise.nom or "").strip()
+    if (confirmation_name or "").strip() != expected_name:
+        raise ValueError("Le nom saisi ne correspond pas exactement au nom de l'entreprise.")
+
+    entreprise.is_active = False
+    entreprise.save(update_fields=["is_active"])
+    entreprise.user_set.update(is_active=False)
+
+    subscription = get_current_subscription(entreprise)
+    if subscription is not None:
+        subscription.actif = False
+        subscription.statut = AbonnementEntreprise.Statut.SUSPENDU
+        subscription.save(update_fields=["actif", "statut"])
+        sync_legacy_entreprise_subscription_fields(entreprise, subscription)
+
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="entreprise_desactivee",
+        module="super_admin",
+        objet_type="Entreprise",
+        objet_id=entreprise.id,
+        description=f"Entreprise desactivee par super admin : {entreprise.nom}.",
+        metadata={"entreprise_nom": entreprise.nom},
+        fail_silently=False,
+    )
+    return entreprise
 
 
 def activate_company_subscription(*, entreprise, plan, utilisateur=None):

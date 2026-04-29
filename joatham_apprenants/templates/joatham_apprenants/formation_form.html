@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <title>{% if formation %}Modifier{% else %}Nouvelle{% endif %} formation - JOATHAM Manager</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
-        .container { max-width: 760px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
-        .field { display: flex; flex-direction: column; margin-bottom: 16px; }
-        label { margin-bottom: 6px; font-weight: bold; }
-        input, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
-        .actions { margin-top: 20px; display: flex; gap: 12px; }
-        button, a { padding: 10px 14px; border-radius: 6px; text-decoration: none; }
-        button { border: none; background: #0f766e; color: white; cursor: pointer; }
-        a { background: #e5e7eb; color: #111827; }
-        .error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 16px; }
-    </style>
-</head>
-<body>
-<div class="container">
+{% extends "joatham_apprenants/base.html" %}
+{% load i18n %}
+
+{% block apprenants_title %}{% if formation %}{% trans "Modifier une formation" %}{% else %}{% trans "Creer une formation" %}{% endif %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Configurer le catalogue de formation." %}{% endblock %}
+{% block apprenants_content %}
     <h1>{% if formation %}Modifier{% else %}Creer{% endif %} une formation</h1>
     <p>Entreprise: {{ entreprise.nom }}</p>
 
@@ -55,6 +41,4 @@
             <a href="{% url 'formation_list' %}">Retour</a>
         </div>
     </form>
-</div>
-</body>
-</html>
+{% endblock %}

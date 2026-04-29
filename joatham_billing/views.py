@@ -13,9 +13,10 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.utils.translation import gettext_lazy as _
 
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
-from core.services.currency import format_amount_for_entreprise, get_currency_wording
+from core.services.currency import format_amount_for_entreprise, get_currency_code, get_currency_wording
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
@@ -125,7 +126,7 @@ def _build_facture_qr_data_uri(facture, legal_information):
 def _build_facture_context(facture, mode):
     lignes = []
     total_ht = Decimal("0")
-    currency_wording = get_currency_wording(getattr(facture.entreprise, "devise", None))
+    currency_wording = get_currency_wording(get_currency_code(facture.entreprise))
 
     for index, ligne in enumerate(facture.lignes.all(), start=1):
         total_ligne = Decimal(ligne.quantite) * Decimal(ligne.prix_unitaire)
@@ -151,11 +152,11 @@ def _build_facture_context(facture, mode):
     line_count = len(lignes)
     compact_layout = mode != "print" and line_count <= 8
 
-    copies = [{"label": "EXEMPLAIRE CLIENT", "slug": "client", "compact_layout": compact_layout, "force_page_break": False}]
+    copies = [{"label": _("EXEMPLAIRE CLIENT"), "slug": "client", "compact_layout": compact_layout, "force_page_break": False}]
     if mode != "print":
         copies.append(
             {
-                "label": "EXEMPLAIRE ARCHIVES",
+                "label": _("EXEMPLAIRE ARCHIVES"),
                 "slug": "archives",
                 "compact_layout": compact_layout,
                 "force_page_break": not compact_layout,
@@ -240,7 +241,7 @@ def facture_pdf(request, id):
         return response
     except PdfRenderError:
         logger.exception("Erreur generation PDF", extra={"facture_id": facture.id, "entreprise_id": facture.entreprise_id})
-        return HttpResponse("Erreur lors de la génération du PDF.", status=500)
+        return HttpResponse(_("Erreur lors de la generation du PDF."), status=500)
 
 
 @login_required
@@ -303,7 +304,7 @@ def facture_list(request):
             "page_obj": page_obj,
             "clients": clients,
             "statut_choices": Facture.Statut.choices,
-            "currency_code": getattr(entreprise, "devise", "CDF"),
+            "currency_code": get_currency_code(entreprise),
             "facture_count": facture_kpis["facture_count"],
             "total_emis_display": format_amount_for_entreprise(facture_kpis["total_emis"], entreprise),
             "total_encaisse_display": format_amount_for_entreprise(facture_kpis["total_encaisse"], entreprise),
@@ -361,7 +362,7 @@ def add_facture(request):
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue creation facture", extra={"entreprise_id": entreprise.id})
-            messages.error(request, "Une erreur inattendue est survenue lors de la création de la facture.")
+            messages.error(request, _("Une erreur inattendue est survenue lors de la creation de la facture."))
 
     return render(
         request,
@@ -371,7 +372,7 @@ def add_facture(request):
             "services": services,
             "products": products,
             "default_tva": entreprise.taux_tva_defaut,
-            "currency_code": getattr(entreprise, "devise", "CDF") or "CDF",
+            "currency_code": get_currency_code(entreprise),
             **_get_billing_ui_permissions(request.user),
         },
     )
@@ -428,7 +429,7 @@ def edit_facture(request, id):
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue modification facture", extra={"facture_id": facture.id, "entreprise_id": facture.entreprise_id})
-            messages.error(request, "Une erreur inattendue est survenue lors de la modification de la facture.")
+            messages.error(request, _("Une erreur inattendue est survenue lors de la modification de la facture."))
 
     return render(
         request,
@@ -439,7 +440,7 @@ def edit_facture(request, id):
             "services": services,
             "products": products,
             "default_tva": entreprise.taux_tva_defaut,
-            "currency_code": getattr(entreprise, "devise", "CDF") or "CDF",
+            "currency_code": get_currency_code(entreprise),
             **_get_billing_ui_permissions(request.user),
         },
     )
@@ -459,19 +460,19 @@ def facture_detail(request, id):
     for ligne in facture.lignes.all():
         if ligne.produit_id:
             line_source = {
-                "label": "Produit",
+                "label": _("Produit"),
                 "class": "source-product",
                 "name": getattr(ligne.produit, "nom", ""),
             }
         elif ligne.service_id:
             line_source = {
-                "label": "Service",
+                "label": _("Service"),
                 "class": "source-service",
                 "name": getattr(ligne.service, "nom", ""),
             }
         else:
             line_source = {
-                "label": "Saisie libre",
+                "label": _("Saisie libre"),
                 "class": "source-free",
                 "name": "",
             }
@@ -501,7 +502,7 @@ def facture_detail(request, id):
         "historique": facture.historique.all()[:20],
         "statut_choices": Facture.Statut.choices,
         "mode_choices": PaiementFacture.ModePaiement.choices,
-        "currency_code": getattr(entreprise, "devise", "CDF"),
+        "currency_code": get_currency_code(entreprise),
         "total_ht": format_amount_for_entreprise(facture.total_ht, entreprise),
         "total_tva": format_amount_for_entreprise(facture.total_tva, entreprise),
         "total_net": format_amount_for_entreprise(facture.total_net, entreprise),
@@ -554,5 +555,5 @@ def add_paiement_facture(request, id):
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue paiement facture", extra={"facture_id": facture.id, "entreprise_id": facture.entreprise_id})
-            messages.error(request, "Une erreur inattendue est survenue lors de l'enregistrement du paiement.")
+            messages.error(request, _("Une erreur inattendue est survenue lors de l'enregistrement du paiement."))
     return redirect("facture_detail", id=facture.id)

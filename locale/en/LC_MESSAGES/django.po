@@ -1,0 +1,422 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: JOATHAM Manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: JOATHAM Manager\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Dashboard Proprietaire"
+msgstr "Owner Dashboard"
+
+msgid "Dashboard proprietaire"
+msgstr "Owner dashboard"
+
+msgid "Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle."
+msgstr "Your product home page for managing the company, teams, finances, and SaaS access from one control point."
+
+msgid "Ajouter un utilisateur"
+msgstr "Add user"
+
+msgid "Abonnement"
+msgstr "Subscription"
+
+msgid "Controle des flux"
+msgstr "Flow control"
+
+msgid "Bienvenue dans votre cockpit JOATHAM Manager"
+msgstr "Welcome to your JOATHAM Manager cockpit"
+
+msgid "Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour."
+msgstr "See key company indicators, quick access to useful modules, and overall product status at a glance so you can act faster every day."
+
+msgid "Factures"
+msgstr "Invoices"
+
+msgid "Chiffre d'affaires"
+msgstr "Revenue"
+
+msgid "Facturation emise a date"
+msgstr "Billing issued to date"
+
+msgid "Encaissements"
+msgstr "Collections"
+
+msgid "facture(s) soldee(s)"
+msgstr "paid invoice(s)"
+
+msgid "Reste a encaisser"
+msgstr "Outstanding amount"
+
+msgid "facture(s) a suivre"
+msgstr "invoice(s) to follow up"
+
+msgid "Portefeuille client"
+msgstr "Customer portfolio"
+
+msgid "apprenant(s) actif(s)"
+msgstr "active learner(s)"
+
+msgid "Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise."
+msgstr "Update the identity, currency, default VAT, and structuring settings of the company."
+
+msgid "Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire."
+msgstr "Manage manager and accountant accounts without leaving your owner workspace."
+
+msgid "Accedez rapidement au portefeuille client et a la relation commerciale."
+msgstr "Quickly access the customer portfolio and commercial relationship."
+
+msgid "Consultez les sorties financieres et les rapports PDF correspondants."
+msgstr "Review cash outflows and related PDF reports."
+
+msgid "Suivez la facturation, les PDF et les paiements dans un espace premium."
+msgstr "Track billing, PDFs, and payments in a premium workspace."
+
+msgid "Pilotez les apprenants, formations, inscriptions et paiements de formation."
+msgstr "Manage learners, training sessions, registrations, and training payments."
+
+msgid "Audit"
+msgstr "Audit"
+
+msgid "Relisez les actions sensibles et gardez une trace claire des operations produit."
+msgstr "Review sensitive actions and keep a clear record of product operations."
+
+msgid "Consultez le plan en cours, le statut SaaS et la periode d'acces active."
+msgstr "View the current plan, SaaS status, and active access period."
+
+msgid "Vue de pilotage"
+msgstr "Management view"
+
+msgid "Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien."
+msgstr "A quick read of commercial, financial, and product indicators to stay on track every day."
+
+msgid "Depenses cumulees"
+msgstr "Total expenses"
+
+msgid "Benefice estime"
+msgstr "Estimated profit"
+
+msgid "TVA cumulee"
+msgstr "Total VAT"
+
+msgid "Facturation aujourd'hui"
+msgstr "Billing today"
+
+msgid "Facturation ce mois"
+msgstr "Billing this month"
+
+msgid "Depenses ce mois"
+msgstr "Expenses this month"
+
+msgid "Activite recente"
+msgstr "Recent activity"
+
+msgid "Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe."
+msgstr "Latest important actions recorded in the company to keep an immediate view of what is happening."
+
+msgid "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone."
+msgstr "No recent activity is available yet. Future business-module actions will automatically feed this area."
+
+msgid "Resume abonnement"
+msgstr "Subscription summary"
+
+msgid "Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise."
+msgstr "Product status and SaaS access level currently linked to your company."
+
+msgid "Plan actuel"
+msgstr "Current plan"
+
+msgid "Statut"
+msgstr "Status"
+
+msgid "Date de debut"
+msgstr "Start date"
+
+msgid "Date de fin"
+msgstr "End date"
+
+msgid "Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit."
+msgstr "No subscription is attached yet. Open the subscription area to review or regularize product access."
+
+msgid "Alertes stock"
+msgstr "Stock alerts"
+
+msgid "Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque."
+msgstr "Quickly spot out-of-stock or nearly out-of-stock products before a customer need is blocked."
+
+msgid "Produits en rupture"
+msgstr "Out-of-stock products"
+
+msgid "Quantite en stock inferieure ou egale a 0."
+msgstr "Stock quantity less than or equal to 0."
+
+msgid "Produits en stock faible"
+msgstr "Low-stock products"
+
+msgid "Stock positif mais inferieur ou egal au seuil d'alerte."
+msgstr "Positive stock but less than or equal to alert threshold."
+
+msgid "Stock actuel"
+msgstr "Current stock"
+
+msgid "Seuil"
+msgstr "Threshold"
+
+msgid "Rupture"
+msgstr "Out of stock"
+
+msgid "Stock faible"
+msgstr "Low stock"
+
+msgid "Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance."
+msgstr "No stock alert for now. Your products remain above watch thresholds."
+
+msgid "Ouvrir le module Produits"
+msgstr "Open Products module"
+
+msgid "Demarrage rapide"
+msgstr "Quick start"
+
+msgid "Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus."
+msgstr "A few useful entry points to move the company forward without searching menus."
+
+msgid "Ajouter un gestionnaire ou comptable"
+msgstr "Add a manager or accountant"
+
+msgid "Creer"
+msgstr "Create"
+
+msgid "Completer l'identite entreprise"
+msgstr "Complete company identity"
+
+msgid "Ouvrir"
+msgstr "Open"
+
+msgid "Creer une facture"
+msgstr "Create an invoice"
+
+msgid "Facturer"
+msgstr "Invoice"
+
+msgid "Analyser le journal d'activites"
+msgstr "Review the activity log"
+
+msgid "Consulter"
+msgstr "View"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Organisation"
+msgstr "Organization"
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Mon abonnement"
+msgstr "My subscription"
+
+msgid "Pilotage SaaS"
+msgstr "SaaS management"
+
+msgid "Entreprises"
+msgstr "Companies"
+
+msgid "Audit / logs"
+msgstr "Audit / logs"
+
+msgid "Super admin"
+msgstr "Super admin"
+
+msgid "Proprietaire"
+msgstr "Owner"
+
+msgid "Gestionnaire"
+msgstr "Manager"
+
+msgid "Comptable"
+msgstr "Accountant"
+
+msgid "Un espace de gestion structure pour une utilisation SaaS claire selon le role."
+msgstr "A structured management workspace for clear SaaS use by role."
+
+msgid "Multi"
+msgstr "Multi"
+
+msgid "Français"
+msgstr "French"
+
+msgid "English"
+msgstr "English"
+
+msgid "Português"
+msgstr "Portuguese"
+
+msgid "Español"
+msgstr "Spanish"
+
+msgid "Langue"
+msgstr "Language"
+
+msgid "Changer"
+msgstr "Change"
+
+msgid "Connexion"
+msgstr "Sign in"
+
+msgid "Inscription"
+msgstr "Sign up"
+
+msgid "Tableau de bord"
+msgstr "Dashboard"
+
+msgid "Vue d'ensemble de votre activite."
+msgstr "Overview of your activity."
+
+msgid "Deconnexion"
+msgstr "Sign out"
+
+msgid "Entreprise"
+msgstr "Company"
+
+msgid "Plateforme JOATHAM Manager"
+msgstr "JOATHAM Manager Platform"
+
+msgid "Mon entreprise"
+msgstr "My company"
+
+msgid "Pilotage global SaaS"
+msgstr "Global SaaS management"
+
+msgid "Devise"
+msgstr "Currency"
+
+msgid "Facture generee automatiquement par JOATHAM Manager."
+msgstr "Invoice generated automatically by JOATHAM Manager."
+
+msgid "Facturation"
+msgstr "Billing"
+
+msgid "Liste des factures"
+msgstr "Invoice list"
+
+msgid "Nouvelle facture"
+msgstr "New invoice"
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Liste des clients"
+msgstr "Client list"
+
+msgid "Ajouter un client"
+msgstr "Add client"
+
+msgid "Depenses"
+msgstr "Expenses"
+
+msgid "Liste des depenses"
+msgstr "Expense list"
+
+msgid "Exporter en PDF"
+msgstr "Export as PDF"
+
+msgid "Produits"
+msgstr "Products"
+
+msgid "Liste des produits"
+msgstr "Product list"
+
+msgid "Ajouter un produit"
+msgstr "Add product"
+
+msgid "Comptabilite"
+msgstr "Accounting"
+
+msgid "Apprenants"
+msgstr "Learners"
+
+msgid "Utilisateurs"
+msgstr "Users"
+
+msgid "Abonnements"
+msgstr "Subscriptions"
+
+msgid "Parametres plateforme"
+msgstr "Platform settings"
+
+msgid "Taux de change"
+msgstr "Exchange rates"
+
+msgid "Abonnement requis"
+msgstr "Subscription required"
+
+msgid "Mot de passe"
+msgstr "Password"
+
+msgid "Email ou nom d'utilisateur"
+msgstr "Email or username"
+
+msgid "Afficher"
+msgstr "Show"
+
+msgid "Masquer"
+msgstr "Hide"
+
+msgid "Se connecter"
+msgstr "Sign in"
+
+msgid "Mot de passe oublie ?"
+msgstr "Forgot password?"
+
+msgid "Inscription entreprise"
+msgstr "Company sign up"
+
+msgid "Nom de l'entreprise"
+msgstr "Company name"
+
+msgid "Raison sociale"
+msgstr "Legal name"
+
+msgid "Nom complet du proprietaire"
+msgstr "Owner full name"
+
+msgid "Telephone"
+msgstr "Phone"
+
+msgid "Pays"
+msgstr "Country"
+
+msgid "Confirmation du mot de passe"
+msgstr "Password confirmation"
+
+msgid "Creer mon entreprise"
+msgstr "Create my company"
+
+msgid "Vous avez deja un compte ?"
+msgstr "Already have an account?"
+
+msgid "Le produit a ete cree avec succes."
+msgstr "The product was created successfully."
+
+msgid "Le produit a ete mis a jour avec succes."
+msgstr "The product was updated successfully."
+
+msgid "La facture a ete creee avec succes."
+msgstr "The invoice was created successfully."
+
+msgid "La facture a ete modifiee avec succes."
+msgstr "The invoice was updated successfully."
+
+msgid "Le paiement a ete enregistre."
+msgstr "The payment was recorded."
+
+#, python-format
+msgid "Le module %(module)s est momentanement en maintenance."
+msgstr "The %(module)s module is temporarily under maintenance."

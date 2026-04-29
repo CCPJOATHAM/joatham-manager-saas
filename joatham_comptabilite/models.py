@@ -3,12 +3,13 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 
 class ExerciceComptable(models.Model):
     class Statut(models.TextChoices):
-        OUVERT = "ouvert", "Ouvert"
-        FERME = "ferme", "Ferme"
+        OUVERT = "ouvert", _("Ouvert")
+        FERME = "ferme", _("Ferme")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -32,8 +33,8 @@ class ExerciceComptable(models.Model):
 
 class CompteComptable(models.Model):
     class Sens(models.TextChoices):
-        DEBIT = "debit", "Debit"
-        CREDIT = "credit", "Credit"
+        DEBIT = "debit", _("Debit")
+        CREDIT = "credit", _("Credit")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -59,10 +60,10 @@ class CompteComptable(models.Model):
 
 class JournalComptable(models.Model):
     class TypeJournal(models.TextChoices):
-        VENTES = "ventes", "Ventes"
-        ACHATS = "achats", "Achats"
-        TRESORERIE = "tresorerie", "Tresorerie"
-        OD = "od", "Operations diverses"
+        VENTES = "ventes", _("Ventes")
+        ACHATS = "achats", _("Achats")
+        TRESORERIE = "tresorerie", _("Tresorerie")
+        OD = "od", _("Operations diverses")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -86,9 +87,9 @@ class JournalComptable(models.Model):
 
 class EcritureComptable(models.Model):
     class Statut(models.TextChoices):
-        BROUILLON = "brouillon", "Brouillon"
-        VALIDE = "valide", "Valide"
-        ANNULEE = "annulee", "Annulee"
+        BROUILLON = "brouillon", _("Brouillon")
+        VALIDE = "valide", _("Valide")
+        ANNULEE = "annulee", _("Annulee")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -151,7 +152,7 @@ class EcritureComptable(models.Model):
 
     def clean(self):
         if self.pk and not self.est_equilibree():
-            raise ValidationError("Une ecriture validee doit etre equilibree.")
+            raise ValidationError(_("Une ecriture validee doit etre equilibree."))
 
 
 class LigneEcritureComptable(models.Model):
@@ -177,8 +178,8 @@ class LigneEcritureComptable(models.Model):
 
     def clean(self):
         if self.debit < 0 or self.credit < 0:
-            raise ValidationError("Debit et credit doivent etre positifs.")
+            raise ValidationError(_("Debit et credit doivent etre positifs."))
         if self.debit > 0 and self.credit > 0:
-            raise ValidationError("Une ligne ne peut pas porter debit et credit en meme temps.")
+            raise ValidationError(_("Une ligne ne peut pas porter debit et credit en meme temps."))
         if self.debit == 0 and self.credit == 0:
-            raise ValidationError("Une ligne doit porter un montant.")
+            raise ValidationError(_("Une ligne doit porter un montant."))

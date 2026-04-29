@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext_lazy as _
 
 from core.selectors.audit import get_inscription_billing_history
 from core.services.product_policy import module_access_required
@@ -63,6 +64,7 @@ def apprenants_dashboard(request):
     context = {
         "entreprise": entreprise,
         **dashboard_data,
+        **_get_apprenants_ui_permissions(request.user),
     }
     return render(request, "joatham_apprenants/dashboard.html", context)
 
@@ -89,7 +91,7 @@ def apprenant_list(request):
 @module_access_required("apprenants")
 def apprenant_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    context = {"entreprise": entreprise}
+    context = {"entreprise": entreprise, **_get_apprenants_ui_permissions(request.user)}
 
     if request.method == "POST":
         actif = request.POST.get("actif") == "on"
@@ -123,13 +125,13 @@ def formation_list(request):
 @permission_required("apprenants.manage")
 def formation_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    context = {"entreprise": entreprise, "formation": None}
+    context = {"entreprise": entreprise, "formation": None, **_get_apprenants_ui_permissions(request.user)}
 
     if request.method == "POST":
         try:
             prix = Decimal(request.POST.get("prix", "0") or "0")
         except InvalidOperation:
-            context["error"] = "Le prix saisi est invalide."
+            context["error"] = _("Le prix saisi est invalide.")
             return render(request, "joatham_apprenants/formation_form.html", context, status=400)
 
         create_formation(
@@ -150,13 +152,13 @@ def formation_create(request):
 def formation_update(request, formation_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     formation = get_formation_by_entreprise(entreprise, formation_id)
-    context = {"entreprise": entreprise, "formation": formation}
+    context = {"entreprise": entreprise, "formation": formation, **_get_apprenants_ui_permissions(request.user)}
 
     if request.method == "POST":
         try:
             prix = Decimal(request.POST.get("prix", "0") or "0")
         except InvalidOperation:
-            context["error"] = "Le prix saisi est invalide."
+            context["error"] = _("Le prix saisi est invalide.")
             return render(request, "joatham_apprenants/formation_form.html", context, status=400)
 
         update_formation(
@@ -196,6 +198,7 @@ def inscription_create(request):
         "formations": formations,
         "statuts": InscriptionFormation.Statut.choices,
         "entreprise": entreprise,
+        **_get_apprenants_ui_permissions(request.user),
     }
 
     if request.method == "POST":
@@ -205,7 +208,7 @@ def inscription_create(request):
             montant_prevu = Decimal(montant_prevu_raw) if montant_prevu_raw else None
             montant_paye = Decimal(montant_paye_raw) if montant_paye_raw else Decimal("0.00")
         except InvalidOperation:
-            context["error"] = "Les montants saisis sont invalides."
+            context["error"] = _("Les montants saisis sont invalides.")
             return render(request, "joatham_apprenants/inscription_form.html", context, status=400)
 
         inscrire_apprenant_a_formation(
@@ -272,13 +275,14 @@ def paiement_inscription_create(request, inscription_id):
         "inscription": inscription,
         "paiements": paiements,
         "modes_paiement": PaiementInscription.ModePaiement.choices,
+        **_get_apprenants_ui_permissions(request.user),
     }
 
     if request.method == "POST":
         try:
             montant = Decimal(request.POST.get("montant", "0") or "0")
         except InvalidOperation:
-            context["error"] = "Le montant saisi est invalide."
+            context["error"] = _("Le montant saisi est invalide.")
             return render(request, "joatham_apprenants/paiement_form.html", context, status=400)
 
         create_paiement_inscription(
@@ -307,7 +311,7 @@ def inscription_generate_facture(request, inscription_id):
                 inscription_id=inscription.id,
                 utilisateur=request.user,
             )
-            messages.success(request, f"La facture {facture.numero} a été créée et liée à l'inscription.")
+            messages.success(request, _("La facture %(numero)s a ete creee et liee a l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -327,7 +331,7 @@ def inscription_link_existing_facture(request, inscription_id):
                 facture_id=request.POST.get("facture_id"),
                 utilisateur=request.user,
             )
-            messages.success(request, f"La facture {facture.numero} a été liée à l'inscription.")
+            messages.success(request, _("La facture %(numero)s a ete liee a l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -347,7 +351,7 @@ def inscription_unlink_facture(request, inscription_id):
                 facture_id=request.POST.get("facture_id") or inscription.facture_id,
                 utilisateur=request.user,
             )
-            messages.success(request, f"La facture {facture.numero} a été déliée de l'inscription.")
+            messages.success(request, _("La facture %(numero)s a ete deliee de l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -360,7 +364,7 @@ def apprenants_pdf(request):
     apprenants = get_apprenants_by_entreprise(entreprise)
     context = {
         "apprenants": apprenants,
-        **build_report_metadata(entreprise=entreprise, title="Liste des apprenants"),
+        **build_report_metadata(entreprise=entreprise, title=_("Liste des apprenants")),
     }
     return render_pdf_response(
         request,
@@ -382,14 +386,14 @@ def apprenants_excel(request):
             apprenant.telephone,
             apprenant.email,
             apprenant.date_inscription.strftime("%d/%m/%Y"),
-            "Oui" if apprenant.actif else "Non",
+            _("Oui") if apprenant.actif else _("Non"),
         ]
         for apprenant in apprenants
     ]
     return build_xlsx_response(
         filename="apprenants.xlsx",
         sheet_name="Apprenants",
-        headers=["Nom", "Prenom", "Telephone", "Email", "Date inscription", "Actif"],
+        headers=[_("Nom"), _("Prenom"), _("Telephone"), _("Email"), _("Date inscription"), _("Actif")],
         rows=rows,
     )
 
@@ -400,7 +404,7 @@ def formations_pdf(request):
     formations = get_formations_by_entreprise(entreprise)
     context = {
         "formations": formations,
-        **build_report_metadata(entreprise=entreprise, title="Liste des formations"),
+        **build_report_metadata(entreprise=entreprise, title=_("Liste des formations")),
     }
     return render_pdf_response(
         request,
@@ -416,13 +420,13 @@ def formations_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formations = get_formations_by_entreprise(entreprise)
     rows = [
-        [formation.nom, formation.description, formation.prix, formation.duree, "Oui" if formation.actif else "Non"]
+        [formation.nom, formation.description, formation.prix, formation.duree, _("Oui") if formation.actif else _("Non")]
         for formation in formations
     ]
     return build_xlsx_response(
         filename="formations.xlsx",
         sheet_name="Formations",
-        headers=["Nom", "Description", "Prix", "Duree", "Actif"],
+        headers=[_("Nom"), _("Description"), _("Prix"), _("Duree"), _("Actif")],
         rows=rows,
     )
 
@@ -442,7 +446,7 @@ def inscriptions_pdf(request):
     inscriptions = _get_inscriptions_export_queryset(request, entreprise)
     context = {
         "inscriptions": inscriptions,
-        **build_report_metadata(entreprise=entreprise, title="Liste des inscriptions"),
+        **build_report_metadata(entreprise=entreprise, title=_("Liste des inscriptions")),
     }
     return render_pdf_response(
         request,
@@ -472,7 +476,7 @@ def inscriptions_excel(request):
     return build_xlsx_response(
         filename="inscriptions.xlsx",
         sheet_name="Inscriptions",
-        headers=["Apprenant", "Formation", "Date inscription", "Statut", "Montant prevu", "Montant paye", "Solde"],
+        headers=[_("Apprenant"), _("Formation"), _("Date inscription"), _("Statut"), _("Montant prevu"), _("Montant paye"), _("Solde")],
         rows=rows,
     )
 
@@ -485,7 +489,7 @@ def inscription_paiements_pdf(request, inscription_id):
     context = {
         "inscription": inscription,
         "paiements": paiements,
-        **build_report_metadata(entreprise=entreprise, title="Historique des paiements"),
+        **build_report_metadata(entreprise=entreprise, title=_("Historique des paiements")),
     }
     return render_pdf_response(
         request,
@@ -515,7 +519,7 @@ def inscription_paiements_excel(request, inscription_id):
     return build_xlsx_response(
         filename=f"inscription-{inscription.id}-paiements.xlsx",
         sheet_name="Paiements",
-        headers=["Date paiement", "Montant", "Mode", "Reference", "Utilisateur", "Observations"],
+        headers=[_("Date paiement"), _("Montant"), _("Mode"), _("Reference"), _("Utilisateur"), _("Observations")],
         rows=rows,
     )
 
@@ -532,7 +536,7 @@ def apprenants_dashboard_pdf(request):
     )
     context = {
         **dashboard_data,
-        **build_report_metadata(entreprise=entreprise, title="Synthese dashboard apprenants"),
+        **build_report_metadata(entreprise=entreprise, title=_("Synthese dashboard apprenants")),
     }
     return render_pdf_response(
         request,
@@ -566,6 +570,6 @@ def apprenants_dashboard_excel(request):
     return build_xlsx_response(
         filename="dashboard-apprenants.xlsx",
         sheet_name="Dashboard",
-        headers=["Indicateur", "Valeur"],
+        headers=[_("Indicateur"), _("Valeur")],
         rows=rows,
     )

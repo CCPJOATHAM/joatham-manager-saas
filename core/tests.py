@@ -3,8 +3,9 @@ from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
+from unittest.mock import Mock, patch
 
 from joatham_billing.models import PaiementFacture
 from joatham_billing.services.facturation import register_payment
@@ -12,7 +13,7 @@ from joatham_billing.tests.factories import create_client, create_entreprise, cr
 from joatham_clients.services.clients_service import create_client_for_entreprise
 from joatham_users.models import Abonnement, AbonnementEntreprise, User
 
-from .models import ActivityLog, PaiementAbonnement
+from .models import ActivityLog, ExchangeRate, PaiementAbonnement, PlatformSettings
 from .selectors.audit import (
     get_activity_actions_for_entreprise,
     get_activity_logs_by_entreprise,
@@ -34,7 +35,41 @@ from .services.subscription import (
     refuse_subscription_payment,
     validate_subscription_payment,
 )
+from .services.product_policy import get_module_access_state as get_product_module_access_state
+from .services.currency import get_currency_code
+from .services.exchange_rates import convert_amount, get_plan_price_for_company
+from .services.language import LANGUAGE_SESSION_KEY, get_request_language, persist_language_preference
 from joatham_users.permissions import user_has_permission
+
+
+class LanguagePreferenceTests(TestCase):
+    def _request(self, user, session=None, cookies=None):
+        request = Mock()
+        request.user = user
+        request.session = session or {}
+        request.COOKIES = cookies or {}
+        return request
+
+    def test_user_language_wins_over_stale_session_for_authenticated_user(self):
+        entreprise = create_entreprise("Entreprise Langue")
+        user = create_user("lang-user", "proprietaire", entreprise)
+        user.preferred_language = "en"
+        user.save(update_fields=["preferred_language"])
+        request = self._request(user, session={LANGUAGE_SESSION_KEY: "fr"})
+
+        self.assertEqual(get_request_language(request), "en")
+
+    def test_persist_language_preference_accepts_en_and_pt(self):
+        entreprise = create_entreprise("Entreprise Langues")
+
+        for language_code in ("en", "pt"):
+            user = create_user(f"lang-{language_code}", "proprietaire", entreprise)
+            request = self._request(user)
+
+            self.assertEqual(persist_language_preference(request, language_code), language_code)
+            user.refresh_from_db()
+            self.assertEqual(user.preferred_language, language_code)
+            self.assertEqual(request.session[LANGUAGE_SESSION_KEY], language_code)
 
 
 class TenancyServiceTests(TestCase):
@@ -85,6 +120,113 @@ class TenancyServiceTests(TestCase):
         state = get_subscription_access_state(self.entreprise_a, user=self.user_a)
         self.assertFalse(state["allowed"])
         self.assertEqual(state["reason"], "missing_subscription")
+
+    def test_empty_plan_modules_keep_existing_access_policy(self):
+        plan = Abonnement.objects.create(nom="Ouvert", code="open", prix=10, duree_jours=30, modules_inclus=[])
+        AbonnementEntreprise.objects.create(
+            entreprise=self.entreprise_a,
+            plan=plan,
+            statut=AbonnementEntreprise.Statut.ACTIF,
+            date_debut=date.today(),
+            date_fin=date.today(),
+            actif=True,
+        )
+
+        state = get_product_module_access_state(self.entreprise_a, "billing")
+
+        self.assertTrue(state["allowed"])
+
+    def test_plan_modules_can_restrict_module_access(self):
+        plan = Abonnement.objects.create(
+            nom="Clients only",
+            code="clients-only",
+            prix=10,
+            duree_jours=30,
+            modules_inclus=["clients"],
+        )
+        AbonnementEntreprise.objects.create(
+            entreprise=self.entreprise_a,
+            plan=plan,
+            statut=AbonnementEntreprise.Statut.ACTIF,
+            date_debut=date.today(),
+            date_fin=date.today(),
+            actif=True,
+        )
+
+        state = get_product_module_access_state(self.entreprise_a, "billing")
+
+        self.assertFalse(state["allowed"])
+        self.assertEqual(state["reason"], "module_not_in_plan")
+
+
+class ExchangeRateServiceTests(TestCase):
+    def setUp(self):
+        self.entreprise = create_entreprise("Entreprise Devise")
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+
+    def test_same_currency_conversion_uses_rate_one(self):
+        result = convert_amount(Decimal("10.00"), "USD", "USD")
+
+        self.assertEqual(result.amount, Decimal("10.00"))
+        self.assertEqual(result.rate, Decimal("1"))
+
+    def test_conversion_uses_cached_rate(self):
+        from django.utils import timezone
+
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2750.00"),
+            source_provider="manuel",
+            date_taux=timezone.now(),
+        )
+
+        result = convert_amount(Decimal("10.00"), "USD", "CDF")
+
+        self.assertEqual(result.amount, Decimal("27500.00"))
+        self.assertEqual(result.rate, Decimal("2750.00"))
+
+    def test_plan_price_is_unavailable_without_api_or_cached_rate(self):
+        plan = Abonnement.objects.create(nom="Pro", code="pro-cdf", prix=10, duree_jours=30, actif=True)
+
+        price = get_plan_price_for_company(plan, self.entreprise)
+
+        self.assertTrue(price["unavailable"])
+        self.assertEqual(price["official_amount"], Decimal("10.00"))
+        self.assertEqual(price["official_currency"], "USD")
+        self.assertEqual(price["company_currency"], "CDF")
+        self.assertIsNone(price["estimated_amount"])
+        self.assertIsNone(price["rate"])
+
+    def test_exchange_rate_provider_uses_dynamic_source_currency(self):
+        pairs = [
+            ("USD", "CDF", "2750"),
+            ("USD", "EUR", "0.92"),
+            ("EUR", "CDF", "3000"),
+            ("USD", "XAF", "605"),
+            ("USD", "AOA", "920"),
+            ("CDF", "USD", "0.00036"),
+        ]
+
+        for source_currency, target_currency, rate in pairs:
+            with self.subTest(source_currency=source_currency, target_currency=target_currency):
+                ExchangeRate.objects.all().delete()
+                response = Mock()
+                response.status_code = 200
+                response.json.return_value = {"result": "success", "rates": {target_currency: rate}}
+                response.text = ""
+
+                with patch("core.services.exchange_rates.requests.get", return_value=response) as mocked_get:
+                    result = convert_amount(Decimal("1.00"), source_currency, target_currency)
+
+                mocked_get.assert_called_once_with(
+                    f"https://open.er-api.com/v6/latest/{source_currency}",
+                    timeout=5,
+                )
+                self.assertEqual(result.rate, Decimal(rate))
+                self.assertEqual(result.source_currency, source_currency)
+                self.assertEqual(result.target_currency, target_currency)
 
 
 class AuditLogTests(TestCase):
@@ -394,6 +536,467 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "3")
         self.assertContains(response, "Rechercher un compte client")
         self.assertContains(response, "Filtrer par statut")
+        self.assertNotContains(response, reverse("super_admin_company_deactivate", args=[self.entreprise_a.id]))
+        self.assertNotContains(response, "/super-admin/entreprises/%3Cid%3E/desactiver/")
+        self.assertNotContains(response, "/super-admin/entreprises/<id>/desactiver/")
+
+    def test_super_admin_navigation_uses_platform_entries_only(self):
+        self.client.force_login(self.super_admin)
+        response = self.client.get(reverse("super_admin_dashboard"))
+
+        labels = [item["label"] for item in response.context["dashboard_navigation"]]
+        self.assertEqual(
+            labels,
+            [
+                "Pilotage SaaS",
+                "Entreprises",
+                "Utilisateurs",
+                "Abonnements",
+                "Audit / logs",
+                "Parametres plateforme",
+            ],
+        )
+        self.assertNotIn("Factures", labels)
+        self.assertNotIn("Services", labels)
+        self.assertNotIn("Clients", labels)
+        self.assertNotIn("Depenses", labels)
+        self.assertNotIn("Comptabilite", labels)
+        self.assertNotIn("Apprenants", labels)
+
+        pilotage_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Pilotage SaaS")
+        company_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Entreprises")
+        subscription_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Abonnements")
+        users_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Utilisateurs")
+        audit_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Audit / logs")
+        settings_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Parametres plateforme")
+
+        self.assertEqual(pilotage_item["url"], "/super-admin/")
+        self.assertEqual(company_item["url"], reverse("super_admin_company_list"))
+        self.assertEqual(subscription_item["url"], reverse("super_admin_subscription_list"))
+        self.assertEqual(users_item["url"], reverse("super_admin_user_list"))
+        self.assertEqual(audit_item["url"], reverse("super_admin_audit_list"))
+        self.assertEqual(settings_item["url"], reverse("super_admin_settings"))
+        self.assertFalse(pilotage_item["is_disabled"])
+        self.assertFalse(company_item["is_disabled"])
+        self.assertFalse(subscription_item["is_disabled"])
+        self.assertFalse(users_item["is_disabled"])
+        self.assertFalse(audit_item["is_disabled"])
+        self.assertFalse(settings_item["is_disabled"])
+
+    def test_super_admin_company_list_shows_company_management_actions(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.get(reverse("super_admin_company_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gestion entreprises")
+        self.assertContains(response, "Entreprise Alpha")
+        self.assertContains(response, "Entreprise Beta")
+        self.assertContains(response, "Active")
+        self.assertContains(response, "Desactiver")
+        self.assertContains(response, reverse("super_admin_company_deactivate", args=[self.entreprise_a.id]))
+        self.assertNotContains(response, "/super-admin/entreprises/%3Cid%3E/desactiver/")
+        self.assertNotContains(response, "/super-admin/entreprises/<id>/desactiver/")
+
+    def test_super_admin_subscription_list_shows_subscription_management_actions(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.get(reverse("super_admin_subscription_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Abonnements")
+        self.assertContains(response, "Entreprise Alpha")
+        self.assertContains(response, "Entreprise Beta")
+        self.assertContains(response, "Date debut")
+        self.assertContains(response, "Jours restants")
+        self.assertContains(response, "Activer")
+        self.assertContains(response, "Changer plan")
+        self.assertContains(response, "Prolonger essai")
+        self.assertContains(response, "Suspendre")
+
+    def test_super_admin_can_manage_subscription_from_subscription_page(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_subscription_list"),
+            {
+                "action": "change_plan",
+                "entreprise_id": self.entreprise_b.id,
+                "plan_id": self.plan_basic.id,
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_subscription_list"))
+        subscription_b = AbonnementEntreprise.objects.get(entreprise=self.entreprise_b)
+        self.assertEqual(subscription_b.plan, self.plan_basic)
+
+    def test_super_admin_user_list_shows_users_and_safe_actions(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.get(reverse("super_admin_user_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Utilisateurs")
+        self.assertContains(response, self.super_admin.email)
+        self.assertContains(response, self.owner.username)
+        self.assertContains(response, "Compte courant")
+        self.assertContains(response, "Desactiver")
+
+    def test_super_admin_cannot_deactivate_self_from_user_list(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_user_list"),
+            {
+                "action": "deactivate_user",
+                "user_id": self.super_admin.id,
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_user_list"))
+        self.super_admin.refresh_from_db()
+        self.assertTrue(self.super_admin.is_active)
+
+    def test_super_admin_can_deactivate_and_reactivate_tenant_user(self):
+        self.client.force_login(self.super_admin)
+
+        deactivate_response = self.client.post(
+            reverse("super_admin_user_list"),
+            {
+                "action": "deactivate_user",
+                "user_id": self.owner.id,
+            },
+        )
+        self.assertRedirects(deactivate_response, reverse("super_admin_user_list"))
+        self.owner.refresh_from_db()
+        self.assertFalse(self.owner.is_active)
+        self.assertTrue(ActivityLog.objects.filter(entreprise=self.entreprise_a, action="utilisateur_desactive").exists())
+
+        reactivate_response = self.client.post(
+            reverse("super_admin_user_list"),
+            {
+                "action": "reactivate_user",
+                "user_id": self.owner.id,
+            },
+        )
+        self.assertRedirects(reactivate_response, reverse("super_admin_user_list"))
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assertTrue(ActivityLog.objects.filter(entreprise=self.entreprise_a, action="utilisateur_reactive").exists())
+
+    def test_super_admin_audit_list_shows_logs_and_filters(self):
+        ActivityLog.objects.create(
+            entreprise=self.entreprise_a,
+            utilisateur=self.owner,
+            action="test_audit_super_admin",
+            module="tests",
+            objet_type="User",
+            objet_id=self.owner.id,
+            description="Evenement audit visible super admin.",
+        )
+        self.client.force_login(self.super_admin)
+
+        response = self.client.get(reverse("super_admin_audit_list"), {"module": "tests", "q": "visible"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Audit / logs")
+        self.assertContains(response, "Evenement audit visible super admin.")
+        self.assertContains(response, "Entreprise Alpha")
+        self.assertContains(response, self.owner.username)
+        self.assertContains(response, "test_audit_super_admin")
+        self.assertContains(response, "Page")
+
+    def test_super_admin_settings_page_updates_platform_settings(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_settings"),
+            {
+                "nom_plateforme": "JOATHAM Manager Pro",
+                "email_systeme": "admin@joatham.com",
+                "devise_defaut": "USD",
+                "mode_maintenance": "on",
+                "message_maintenance": "Maintenance planifiee ce soir.",
+                "maintenance_allowed_ips": "127.0.0.1",
+                "maintenance_modules": ["factures", "clients"],
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_settings"))
+        settings = PlatformSettings.get_solo()
+        self.assertEqual(settings.nom_plateforme, "JOATHAM Manager Pro")
+        self.assertEqual(settings.email_systeme, "admin@joatham.com")
+        self.assertEqual(settings.devise_defaut, "USD")
+        self.assertTrue(settings.mode_maintenance)
+        self.assertEqual(settings.message_maintenance, "Maintenance planifiee ce soir.")
+        self.assertEqual(settings.maintenance_allowed_ips, "127.0.0.1")
+        self.assertEqual(settings.maintenance_modules, ["factures", "clients"])
+
+    def test_super_admin_can_register_manual_subscription_payment(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_subscription_manual_payment", args=[self.entreprise_a.id]),
+            {
+                "plan": self.plan_pro.id,
+                "montant": "50.00",
+                "devise": "USD",
+                "methode_paiement": PaiementAbonnement.Methode.CASH,
+                "reference_paiement": "RECU-001",
+                "periode_jours": 90,
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_subscription_list"))
+        paiement = PaiementAbonnement.objects.get(reference_paiement="RECU-001")
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.VALIDE)
+        self.assertEqual(paiement.methode_paiement, PaiementAbonnement.Methode.CASH)
+        self.assertEqual(paiement.periode_fin, date.today() + timedelta(days=90))
+
+        subscription = self.entreprise_a.abonnement_entreprise
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.plan, self.plan_pro)
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ACTIF)
+        self.assertFalse(subscription.essai)
+        self.assertEqual(subscription.date_fin, date.today() + timedelta(days=90))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise_a,
+                action="paiement_abonnement_enregistre",
+                objet_id=paiement.id,
+            ).exists()
+        )
+
+    def test_manual_subscription_payment_is_restricted_to_super_admin(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("super_admin_subscription_manual_payment", args=[self.entreprise_a.id]))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_company_can_request_paid_plan_without_auto_activation(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("subscription_plan_list"),
+            {"plan_id": self.plan_pro.id},
+        )
+
+        self.assertRedirects(response, reverse("subscription_plan_list"))
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise_a,
+            plan=self.plan_pro,
+            source_taux="demande_plan",
+        )
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertEqual(paiement.reference_paiement, "Demande plan Pro")
+
+        subscription = self.entreprise_a.abonnement_entreprise
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.plan, self.plan_basic)
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertTrue(ActivityLog.objects.filter(action="abonnement_plan_demande", objet_id=paiement.id).exists())
+
+    def test_subscription_plan_list_displays_available_conversion(self):
+        from django.utils import timezone
+
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2304.02457800"),
+            source_provider="exchangerate_api",
+            date_taux=timezone.now(),
+        )
+        self.entreprise_a.devise = "CDF"
+        self.entreprise_a.save(update_fields=["devise"])
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Equivalent estime")
+        self.assertContains(response, "Taux utilise")
+        self.assertNotContains(response, "Conversion temporairement indisponible")
+
+    def test_super_admin_subscription_list_can_validate_plan_request(self):
+        paiement = PaiementAbonnement.objects.create(
+            entreprise=self.entreprise_a,
+            plan=self.plan_pro,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            montant=Decimal("30.00"),
+            montant_usd=Decimal("30.00"),
+            devise_entreprise="USD",
+            statut=PaiementAbonnement.Statut.EN_ATTENTE,
+            reference_paiement="Demande plan Pro",
+            source_taux="demande_plan",
+        )
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_subscription_list"),
+            {
+                "action": "validate_plan_request",
+                "entreprise_id": self.entreprise_a.id,
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_subscription_list"))
+        paiement.refresh_from_db()
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.APPROUVEE)
+        subscription = self.entreprise_a.abonnement_entreprise
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.plan, self.plan_pro)
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertTrue(ActivityLog.objects.filter(action="abonnement_plan_demande_validee", objet_id=paiement.id).exists())
+
+    def test_super_admin_subscription_list_shows_plan_request_actions(self):
+        PaiementAbonnement.objects.create(
+            entreprise=self.entreprise_a,
+            plan=self.plan_pro,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            montant=Decimal("30.00"),
+            montant_usd=Decimal("30.00"),
+            devise_entreprise="USD",
+            statut=PaiementAbonnement.Statut.EN_ATTENTE,
+            reference_paiement="Demande plan Pro",
+            source_taux="demande_plan",
+        )
+        self.client.force_login(self.super_admin)
+
+        response = self.client.get(reverse("super_admin_subscription_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Plan demande : Pro")
+        self.assertContains(response, 'value="validate_plan_request"')
+        self.assertContains(response, 'value="refuse_plan_request"')
+        self.assertNotContains(response, 'value="validate_payment"')
+
+    def test_super_admin_subscription_list_can_refuse_plan_request_without_changing_plan(self):
+        paiement = PaiementAbonnement.objects.create(
+            entreprise=self.entreprise_a,
+            plan=self.plan_pro,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            montant=Decimal("30.00"),
+            montant_usd=Decimal("30.00"),
+            devise_entreprise="USD",
+            statut=PaiementAbonnement.Statut.EN_ATTENTE,
+            reference_paiement="Demande plan Pro",
+            source_taux="demande_plan",
+        )
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_subscription_list"),
+            {
+                "action": "refuse_plan_request",
+                "entreprise_id": self.entreprise_a.id,
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_subscription_list"))
+        paiement.refresh_from_db()
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.REFUSE)
+        subscription = self.entreprise_a.abonnement_entreprise
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.plan, self.plan_basic)
+        self.assertTrue(ActivityLog.objects.filter(action="abonnement_plan_demande_refusee", objet_id=paiement.id).exists())
+
+    def test_super_admin_can_toggle_maintenance_without_required_currency(self):
+        settings = PlatformSettings.get_solo()
+        settings.nom_plateforme = "JOATHAM Stable"
+        settings.email_systeme = "stable@joatham.com"
+        settings.devise_defaut = "CDF"
+        settings.mode_maintenance = False
+        settings.message_maintenance = "Message stable"
+        settings.maintenance_allowed_ips = "10.0.0.1"
+        settings.save()
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_settings"),
+            {
+                "mode_maintenance": "on",
+            },
+        )
+
+        self.assertRedirects(response, reverse("super_admin_settings"))
+        settings.refresh_from_db()
+        self.assertEqual(settings.nom_plateforme, "JOATHAM Stable")
+        self.assertEqual(settings.email_systeme, "stable@joatham.com")
+        self.assertEqual(settings.devise_defaut, "CDF")
+        self.assertEqual(settings.message_maintenance, "Message stable")
+        self.assertEqual(settings.maintenance_allowed_ips, "10.0.0.1")
+        self.assertTrue(settings.mode_maintenance)
+
+    def test_platform_default_currency_is_only_used_when_company_currency_is_empty(self):
+        settings = PlatformSettings.get_solo()
+        settings.devise_defaut = "USD"
+        settings.save(update_fields=["devise_defaut"])
+
+        self.entreprise_a.devise = "AOA"
+        self.entreprise_a.save(update_fields=["devise"])
+        self.assertEqual(get_currency_code(self.entreprise_a), "AOA")
+
+        self.entreprise_a.devise = ""
+        self.entreprise_a.save(update_fields=["devise"])
+        self.assertEqual(get_currency_code(self.entreprise_a), "USD")
+
+    def test_maintenance_mode_blocks_tenant_users_but_not_super_admin(self):
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = True
+        settings.message_maintenance = "Maintenance personnalisable"
+        settings.save(update_fields=["mode_maintenance", "message_maintenance"])
+
+        self.client.force_login(self.owner)
+        blocked = self.client.get(reverse("admin_dashboard"))
+        self.assertEqual(blocked.status_code, 503)
+        self.assertContains(blocked, "Maintenance personnalisable", status_code=503)
+
+        manager = create_user("manager-maintenance", "gestionnaire", self.entreprise_a)
+        self.client.force_login(manager)
+        manager_blocked = self.client.get(reverse("gestion_dashboard"))
+        self.assertEqual(manager_blocked.status_code, 503)
+
+        self.client.force_login(self.super_admin)
+        allowed = self.client.get(reverse("super_admin_settings"))
+        self.assertEqual(allowed.status_code, 200)
+
+    def test_maintenance_mode_allows_configured_ip(self):
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = True
+        settings.maintenance_allowed_ips = "203.0.113.8, 198.51.100.9"
+        settings.save(update_fields=["mode_maintenance", "maintenance_allowed_ips"])
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("admin_dashboard"), REMOTE_ADDR="203.0.113.8")
+
+        self.assertNotEqual(response.status_code, 503)
+
+    def test_module_maintenance_blocks_only_targeted_module(self):
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = False
+        settings.maintenance_modules = ["factures"]
+        settings.save(update_fields=["mode_maintenance", "maintenance_modules"])
+
+        self.client.force_login(self.owner)
+        blocked = self.client.get(reverse("facture_list"))
+        self.assertEqual(blocked.status_code, 503)
+        self.assertContains(blocked, "Le module Factures est momentanement en maintenance.", status_code=503)
+
+        allowed = self.client.get(reverse("admin_dashboard"))
+        self.assertNotEqual(allowed.status_code, 503)
+
+    def test_module_maintenance_allows_configured_ip(self):
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = False
+        settings.maintenance_modules = ["factures"]
+        settings.maintenance_allowed_ips = "203.0.113.8"
+        settings.save(update_fields=["mode_maintenance", "maintenance_modules", "maintenance_allowed_ips"])
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("facture_list"), REMOTE_ADDR="203.0.113.8")
+
+        self.assertNotEqual(response.status_code, 503)
 
     def test_super_admin_dashboard_filters_companies_by_name_and_status(self):
         self.client.force_login(self.super_admin)
@@ -462,6 +1065,59 @@ class SuperAdminDashboardTests(TestCase):
         self.assertEqual(subscription_b.statut, AbonnementEntreprise.Statut.ESSAI)
         self.assertEqual(subscription_b.plan, self.plan_basic)
         self.assertGreater(subscription_b.date_fin, previous_end)
+
+    def test_super_admin_company_deactivation_requires_exact_name_confirmation(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_company_deactivate", args=[self.entreprise_a.id]),
+            {"confirmation_name": "Entreprise alpha"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.entreprise_a.refresh_from_db()
+        self.assertTrue(self.entreprise_a.is_active)
+        self.assertContains(response, "ne correspond pas exactement")
+
+    def test_super_admin_can_deactivate_company_without_deleting_data(self):
+        self.client.force_login(self.super_admin)
+
+        response = self.client.post(
+            reverse("super_admin_company_deactivate", args=[self.entreprise_a.id]),
+            {"confirmation_name": self.entreprise_a.nom},
+        )
+
+        self.assertRedirects(response, reverse("super_admin_company_list"))
+        self.entreprise_a.refresh_from_db()
+        self.assertFalse(self.entreprise_a.is_active)
+        self.assertTrue(User.objects.filter(entreprise=self.entreprise_a).exists())
+        self.assertFalse(User.objects.filter(entreprise=self.entreprise_a, is_active=True).exists())
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise_a,
+                action="entreprise_desactivee",
+                module="super_admin",
+                objet_type="Entreprise",
+                objet_id=self.entreprise_a.id,
+            ).exists()
+        )
+
+        dashboard = self.client.get(reverse("super_admin_dashboard"))
+        self.assertNotContains(dashboard, "Entreprise Alpha")
+        self.assertContains(dashboard, "Entreprise Beta")
+
+        company_list = self.client.get(reverse("super_admin_company_list"), {"status": "inactive"})
+        self.assertContains(company_list, "Entreprise Alpha")
+        self.assertContains(company_list, "Desactivee")
+
+    def test_inactive_company_user_cannot_access_platform(self):
+        self.entreprise_a.is_active = False
+        self.entreprise_a.save(update_fields=["is_active"])
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertEqual(response.status_code, 403)
 
 
 class SubscriptionPaymentTests(TestCase):

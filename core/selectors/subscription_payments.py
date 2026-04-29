@@ -12,6 +12,7 @@ def get_subscription_payments_by_entreprise(entreprise):
 def get_pending_subscription_payments():
     return (
         PaiementAbonnement.objects.filter(statut=PaiementAbonnement.Statut.EN_ATTENTE)
+        .exclude(source_taux="demande_plan")
         .select_related("entreprise", "plan", "valide_par")
         .order_by("-date_creation", "-id")
     )

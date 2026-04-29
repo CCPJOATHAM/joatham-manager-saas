@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from joatham_clients.models import Client
 
@@ -21,10 +22,10 @@ class FactureSequence(models.Model):
 
 class Facture(models.Model):
     class Statut(models.TextChoices):
-        BROUILLON = "brouillon", "Brouillon"
-        EMISE = "emise", "Emise"
-        PAYEE = "payee", "Payee"
-        ANNULEE = "annulee", "Annulee"
+        BROUILLON = "brouillon", _("Brouillon")
+        EMISE = "emise", _("Emise")
+        PAYEE = "payee", _("Payee")
+        ANNULEE = "annulee", _("Annulee")
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
     client_nom = models.CharField(max_length=100, blank=True, null=True)
@@ -73,7 +74,7 @@ class Facture(models.Model):
 
     @property
     def client_display(self):
-        return self.client.nom if self.client else (self.client_nom or "Client non renseigne")
+        return self.client.nom if self.client else (self.client_nom or _("Client non renseigne"))
 
     @property
     def total_ht(self):
@@ -132,7 +133,7 @@ class Facture(models.Model):
 
     def changer_statut(self, nouveau_statut, user=None, note=""):
         if not self.peut_passer_a(nouveau_statut):
-            raise ValueError(f"Transition invalide : {self.statut} -> {nouveau_statut}")
+            raise ValueError(_("Transition invalide : %(old)s -> %(new)s") % {"old": self.statut, "new": nouveau_statut})
 
         ancien_statut = self.statut
         self.statut = nouveau_statut
@@ -149,7 +150,7 @@ class Facture(models.Model):
             return
         if self.reste_a_payer == Decimal("0") and self.total_paye > Decimal("0"):
             if self.statut != self.Statut.PAYEE:
-                self.changer_statut(self.Statut.PAYEE, user=user, note="Paiement complet enregistre.")
+                self.changer_statut(self.Statut.PAYEE, user=user, note=_("Paiement complet enregistre."))
         else:
             paye = False
             if self.paye != paye:
@@ -237,16 +238,16 @@ class Service(models.Model):
 
 class PaiementFacture(models.Model):
     class ModePaiement(models.TextChoices):
-        ESPECES = "especes", "Especes"
-        VIREMENT = "virement", "Virement"
+        ESPECES = "especes", _("Especes")
+        VIREMENT = "virement", _("Virement")
         MOBILE_MONEY = "mobile_money", "Mobile Money"
-        CHEQUE = "cheque", "Cheque"
-        AUTRE = "autre", "Autre"
+        CHEQUE = "cheque", _("Cheque")
+        AUTRE = "autre", _("Autre")
 
     class StatutPaiement(models.TextChoices):
-        EN_ATTENTE = "en_attente", "En attente"
-        VALIDE = "valide", "Valide"
-        ANNULE = "annule", "Annule"
+        EN_ATTENTE = "en_attente", _("En attente")
+        VALIDE = "valide", _("Valide")
+        ANNULE = "annule", _("Annule")
 
     facture = models.ForeignKey("Facture", on_delete=models.CASCADE, related_name="paiements")
     entreprise = models.ForeignKey("joatham_users.Entreprise", on_delete=models.CASCADE, related_name="paiements_factures")
@@ -268,20 +269,22 @@ class PaiementFacture(models.Model):
         self.entreprise = self.facture.entreprise
         is_create = self.pk is None
         super().save(*args, **kwargs)
+        action_label = _("Paiement ajoute") if is_create else _("Paiement modifie")
         self.facture.log_action(
             action=FactureHistorique.Action.PAIEMENT,
-            description=("Paiement ajoute" if is_create else "Paiement modifie") + f" : {self.montant} via {self.mode}.",
+            description=_("%(action)s : %(amount)s via %(mode)s.")
+            % {"action": action_label, "amount": self.montant, "mode": self.mode},
         )
         self.facture.actualiser_statut_depuis_paiements()
 
 
 class FactureHistorique(models.Model):
     class Action(models.TextChoices):
-        CREATION = "creation", "Creation"
-        MODIFICATION = "modification", "Modification"
-        STATUT = "statut", "Changement de statut"
-        PAIEMENT = "paiement", "Paiement"
-        PDF = "pdf", "Generation PDF"
+        CREATION = "creation", _("Creation")
+        MODIFICATION = "modification", _("Modification")
+        STATUT = "statut", _("Changement de statut")
+        PAIEMENT = "paiement", _("Paiement")
+        PDF = "pdf", _("Generation PDF")
 
     facture = models.ForeignKey("Facture", on_delete=models.CASCADE, related_name="historique")
     entreprise = models.ForeignKey("joatham_users.Entreprise", on_delete=models.CASCADE, related_name="historique_factures")

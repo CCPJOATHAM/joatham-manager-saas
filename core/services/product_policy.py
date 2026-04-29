@@ -40,6 +40,18 @@ MODULE_LABELS = {
     "subscription": "abonnement",
 }
 
+PLAN_MODULE_ALIASES = {
+    "dashboard": "dashboard",
+    "clients": "clients",
+    "services": "services",
+    "expenses": "depenses",
+    "billing": "factures",
+    "accounting": "comptabilite",
+    "apprenants": "apprenants",
+    "users": "utilisateurs",
+    "subscription": "abonnements",
+}
+
 
 def get_module_access_level(module_name):
     return MODULE_ACCESS_POLICY.get(module_name, ACCESS_FREE)
@@ -65,6 +77,25 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
         as_of=as_of,
         allow_trial=(level == ACCESS_TRIAL_OR_ACTIVE),
     )
+    if state["allowed"]:
+        plan = getattr(state["subscription"], "plan", None)
+        plan_module = PLAN_MODULE_ALIASES.get(module_name, module_name)
+        included_modules = getattr(plan, "modules_inclus", None) or []
+        if included_modules and plan_module not in included_modules:
+            return {
+                "allowed": False,
+                "reason": "module_not_in_plan",
+                "level": level,
+                "subscription": state["subscription"],
+            }
+        if module_name == "accounting" and plan is not None and not getattr(plan, "acces_comptabilite", True):
+            return {
+                "allowed": False,
+                "reason": "module_not_in_plan",
+                "level": level,
+                "subscription": state["subscription"],
+            }
+
     return {
         "allowed": state["allowed"],
         "reason": state["reason"],
@@ -88,6 +119,8 @@ def get_module_access_denied_message(module_name, reason):
         return f"Le module {module_label} necessite un abonnement ou un essai actif."
     if reason in {"inactive_subscription", "expired_subscription"}:
         return f"L'acces au module {module_label} est indisponible car l'abonnement de votre entreprise n'est plus actif."
+    if reason == "module_not_in_plan":
+        return f"Le module {module_label} n'est pas inclus dans le plan actuel de votre entreprise."
     return f"Vous ne pouvez pas acceder au module {module_label} avec l'etat actuel de votre abonnement."
 
 

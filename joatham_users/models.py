@@ -1,14 +1,23 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+
+LANGUAGE_CHOICES = (
+    ("fr", _("Français")),
+    ("en", _("English")),
+    ("pt", _("Português")),
+    ("es", _("Español")),
+)
 
 
 class Entreprise(models.Model):
     class ReferentielComptable(models.TextChoices):
         SYSCOHADA = "syscohada", "SYSCOHADA"
         PCG = "pcg", "PCG"
-        IFRS_SIMPLIFIE = "ifrs_simplifie", "IFRS simplifie"
-        AUTRE = "autre", "Autre"
+        IFRS_SIMPLIFIE = "ifrs_simplifie", _("IFRS simplifie")
+        AUTRE = "autre", _("Autre")
 
     nom = models.CharField(max_length=100)
     raison_sociale = models.CharField(max_length=150, blank=True, default="")
@@ -37,6 +46,7 @@ class Entreprise(models.Model):
         blank=True,
     )
     date_expiration = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nom
@@ -44,16 +54,22 @@ class Entreprise(models.Model):
 
 class User(AbstractUser):
     class Role(models.TextChoices):
-        SUPER_ADMIN = "super_admin", "Super admin"
-        PROPRIETAIRE = "proprietaire", "Proprietaire"
-        GESTIONNAIRE = "gestionnaire", "Gestionnaire"
-        COMPTABLE = "comptable", "Comptable"
+        SUPER_ADMIN = "super_admin", _("Super admin")
+        PROPRIETAIRE = "proprietaire", _("Proprietaire")
+        GESTIONNAIRE = "gestionnaire", _("Gestionnaire")
+        COMPTABLE = "comptable", _("Comptable")
 
     ROLE_ALIASES = {
         "admin": Role.PROPRIETAIRE,
     }
 
     role = models.CharField(max_length=20, choices=Role.choices)
+    preferred_language = models.CharField(
+        _("langue preferee"),
+        max_length=5,
+        choices=LANGUAGE_CHOICES,
+        default="fr",
+    )
     telephone = models.CharField(max_length=50, blank=True, default="")
     email_verified = models.BooleanField(default=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)
@@ -89,11 +105,20 @@ class User(AbstractUser):
 
 class Abonnement(models.Model):
     nom = models.CharField(max_length=50)
-    code = models.CharField(max_length=50, blank=True, default="")
+    code = models.CharField(max_length=50, blank=True, default="", db_index=True)
     prix = models.FloatField()
+    prix_annuel = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    devise = models.CharField(max_length=10, default="USD")
     duree_jours = models.IntegerField()
     actif = models.BooleanField(default=True)
     description = models.TextField(blank=True, default="")
+    modules_inclus = models.JSONField(default=list, blank=True)
+    max_utilisateurs = models.PositiveIntegerField(null=True, blank=True)
+    max_factures_mois = models.PositiveIntegerField(null=True, blank=True)
+    max_clients = models.PositiveIntegerField(null=True, blank=True)
+    max_apprenants = models.PositiveIntegerField(null=True, blank=True)
+    acces_comptabilite = models.BooleanField(default=True)
+    acces_exports = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nom
@@ -101,10 +126,16 @@ class Abonnement(models.Model):
 
 class AbonnementEntreprise(models.Model):
     class Statut(models.TextChoices):
-        ESSAI = "essai", "Essai"
-        ACTIF = "actif", "Actif"
-        EXPIRE = "expire", "Expire"
-        SUSPENDU = "suspendu", "Suspendu"
+        ESSAI = "essai", _("Essai")
+        ACTIF = "actif", _("Actif")
+        EXPIRE = "expire", _("Expire")
+        SUSPENDU = "suspendu", _("Suspendu")
+        ANNULE = "annule", _("Annule")
+
+    class Renouvellement(models.TextChoices):
+        MANUEL = "manuel", _("Manuel")
+        MENSUEL = "mensuel", _("Mensuel")
+        ANNUEL = "annuel", _("Annuel")
 
     entreprise = models.OneToOneField(
         Entreprise,
@@ -119,9 +150,15 @@ class AbonnementEntreprise(models.Model):
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.ACTIF)
     date_debut = models.DateField()
     date_fin = models.DateField()
+    renouvellement = models.CharField(
+        max_length=20,
+        choices=Renouvellement.choices,
+        default=Renouvellement.MANUEL,
+    )
     essai = models.BooleanField(default=False)
     actif = models.BooleanField(default=True)
     date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         ordering = ["-date_creation", "-id"]

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext_lazy as _
 
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
@@ -38,9 +39,9 @@ def product_list(request):
             "instance": produit,
             "status": produit.stock_status,
             "status_label": {
-                "en_stock": "En stock",
-                "stock_faible": "Stock faible",
-                "rupture": "Rupture",
+                "en_stock": _("En stock"),
+                "stock_faible": _("Stock faible"),
+                "rupture": _("Rupture"),
             }[produit.stock_status],
         }
         for produit in products
@@ -53,9 +54,9 @@ def product_list(request):
             "products": product_rows,
             "selected_filter": selected_filter,
             "filters": [
-                {"value": STOCK_FILTER_ALL, "label": "Tous"},
-                {"value": STOCK_FILTER_LOW, "label": "Stock faible"},
-                {"value": STOCK_FILTER_RUPTURE, "label": "Rupture"},
+                {"value": STOCK_FILTER_ALL, "label": _("Tous")},
+                {"value": STOCK_FILTER_LOW, "label": _("Stock faible")},
+                {"value": STOCK_FILTER_RUPTURE, "label": _("Rupture")},
             ],
             **counts,
             **_build_product_ui_permissions(request.user),
@@ -75,7 +76,7 @@ def product_create(request):
             utilisateur=request.user,
             **form.cleaned_data,
         )
-        messages.success(request, "Le produit a été créé avec succès.")
+        messages.success(request, _("Le produit a ete cree avec succes."))
         return redirect("product_list")
 
     return render(
@@ -83,8 +84,8 @@ def product_create(request):
         "joatham_products/product_form.html",
         {
             "form": form,
-            "page_title": "Créer un produit",
-            "submit_label": "Créer le produit",
+            "page_title": _("Creer un produit"),
+            "submit_label": _("Creer le produit"),
         },
     )
 
@@ -104,7 +105,7 @@ def product_update(request, product_id):
             utilisateur=request.user,
             **form.cleaned_data,
         )
-        messages.success(request, "Le produit a été mis à jour avec succès.")
+        messages.success(request, _("Le produit a ete mis a jour avec succes."))
         return redirect("product_list")
 
     return render(
@@ -112,8 +113,8 @@ def product_update(request, product_id):
         "joatham_products/product_form.html",
         {
             "form": form,
-            "page_title": "Modifier un produit",
-            "submit_label": "Enregistrer les modifications",
+            "page_title": _("Modifier un produit"),
+            "submit_label": _("Enregistrer les modifications"),
             "product": produit,
         },
     )

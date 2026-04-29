@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <title>Apprenants - JOATHAM Manager</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .actions a { display: inline-block; margin-left: 10px; padding: 10px 14px; border-radius: 6px; background: #0f766e; color: #fff; text-decoration: none; }
-        .sub-actions a { display: inline-block; margin-right: 10px; margin-bottom: 10px; padding: 8px 12px; border-radius: 6px; background: #1d4ed8; color: #fff; text-decoration: none; font-size: 14px; }
-        .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-        th { background: #f9fafb; }
-        .empty { color: #6b7280; }
-    </style>
-</head>
-<body>
-<div class="container">
+{% extends "joatham_apprenants/base.html" %}
+{% load i18n %}
+
+{% block apprenants_title %}{% trans "Apprenants" %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Liste des apprenants et inscriptions recentes." %}{% endblock %}
+{% block apprenants_content %}
     <div class="header">
         <div>
             <h1>Apprenants</h1>
@@ -109,6 +95,4 @@
             </tbody>
         </table>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Utilisateurs | JOATHAM Manager{% endblock %}
+{% block content_title %}Utilisateurs{% endblock %}
+{% block content_subtitle %}Gestion plateforme des comptes utilisateurs, sans suppression definitive.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .user-toolbar {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(150px, 0.4fr) minmax(200px, 0.55fr) minmax(150px, 0.35fr) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .user-toolbar label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .user-toolbar input,
+    .user-toolbar select {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .user-table {
+        width: 100%;
+        min-width: 1120px;
+        border-collapse: collapse;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .user-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .stacked {
+        display: grid;
+        gap: 6px;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-inactive { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .status-role { background: #eef2ff; color: #4338ca; }
+    .status-warning { background: #fef3c7; color: #92400e; }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-small.danger {
+        background: #fff1f2;
+        border-color: #fecdd3;
+        color: #be123c;
+    }
+
+    .btn-small.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    @media (max-width: 1100px) {
+        .user-toolbar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<form method="get" class="user-toolbar">
+    <div>
+        <label for="id_q">Recherche</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Email, username ou nom">
+    </div>
+    <div>
+        <label for="id_role">Role</label>
+        <select id="id_role" name="role">
+            <option value="">Tous</option>
+            {% for value, label in role_choices %}
+            <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="id_entreprise">Entreprise</label>
+        <select id="id_entreprise" name="entreprise">
+            <option value="">Toutes</option>
+            {% for entreprise in entreprises %}
+            <option value="{{ entreprise.id }}" {% if selected_entreprise == entreprise.id|stringformat:"s" %}selected{% endif %}>{{ entreprise.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="id_status">Statut</label>
+        <select id="id_status" name="status">
+            <option value="" {% if selected_status == "" %}selected{% endif %}>Tous</option>
+            <option value="active" {% if selected_status == "active" %}selected{% endif %}>Actifs</option>
+            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Inactifs</option>
+        </select>
+    </div>
+    <div class="actions">
+        <button type="submit" class="btn-small primary">Filtrer</button>
+        <a href="{% url 'super_admin_user_list' %}" class="btn-small">Reinitialiser</a>
+    </div>
+</form>
+
+<div class="table-shell">
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Entreprise liee</th>
+                <th>Statut</th>
+                <th>Email verifie</th>
+                <th>Date creation</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for listed_user in users %}
+            <tr id="user-{{ listed_user.id }}">
+                <td>{{ listed_user.id }}</td>
+                <td>{{ listed_user.email|default:"-" }}</td>
+                <td>
+                    <div class="stacked">
+                        <strong>{{ listed_user.username }}</strong>
+                        {% if listed_user.get_full_name %}
+                        <span class="muted">{{ listed_user.get_full_name }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td><span class="status-badge status-role">{{ listed_user.get_role_display }}</span></td>
+                <td>{% if listed_user.entreprise %}{{ listed_user.entreprise.nom }}{% else %}<span class="muted">Plateforme</span>{% endif %}</td>
+                <td>
+                    {% if listed_user.is_active %}
+                    <span class="status-badge status-active">Actif</span>
+                    {% else %}
+                    <span class="status-badge status-inactive">Inactif</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if listed_user.email_verified %}
+                    <span class="status-badge status-active">Oui</span>
+                    {% else %}
+                    <span class="status-badge status-warning">Non</span>
+                    {% endif %}
+                </td>
+                <td>{% if listed_user.date_joined %}{{ listed_user.date_joined|date:"d/m/Y H:i" }}{% else %}<span class="muted">Non disponible</span>{% endif %}</td>
+                <td>
+                    <div class="actions">
+                        <a href="#user-{{ listed_user.id }}" class="btn-small">Voir</a>
+                        {% if listed_user.id == request.user.id %}
+                        <span class="muted">Compte courant</span>
+                        {% elif listed_user.is_active %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ listed_user.id }}">
+                            <button type="submit" name="action" value="deactivate_user" class="btn-small danger">Desactiver</button>
+                        </form>
+                        {% else %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ listed_user.id }}">
+                            <button type="submit" name="action" value="reactivate_user" class="btn-small primary">Reactiver</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">Aucun utilisateur ne correspond aux filtres.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

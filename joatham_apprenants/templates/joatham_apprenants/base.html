@@ -1,0 +1,173 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% block apprenants_page_title %}{% trans "Apprenants" %} | JOATHAM Manager{% endblock %}{% endblock %}
+{% block content_title %}{% block apprenants_title %}{% trans "Apprenants" %}{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block apprenants_subtitle %}{% trans "Gestion des apprenants, formations, inscriptions et paiements." %}{% endblock %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'apprenants_dashboard' %}" class="btn-link">{% trans "Dashboard" %}</a>
+<a href="{% url 'apprenant_list' %}" class="btn-link">{% trans "Apprenants" %}</a>
+<a href="{% url 'formation_list' %}" class="btn-link">{% trans "Formations" %}</a>
+{% if can_manage_apprenants_ui %}
+<a href="{% url 'inscription_create' %}" class="btn-link primary">{% trans "Nouvelle inscription" %}</a>
+{% endif %}
+{% if can_add_apprenants_ui %}
+<a href="{% url 'apprenant_create' %}" class="btn-link primary">{% trans "Nouvel apprenant" %}</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .apprenants-toolbar,
+    .actions,
+    .sub-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .apprenants-toolbar a,
+    .actions a,
+    .sub-actions a,
+    .actions button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 8px;
+        background: #0f766e;
+        color: #fff;
+        border: 0;
+        text-decoration: none;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+    }
+
+    .actions a.secondary,
+    .apprenants-toolbar a.secondary {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .card,
+    .panel {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .cards .card h3 {
+        margin-top: 0;
+        font-size: 14px;
+        color: #475569;
+    }
+
+    .cards .card p {
+        margin-bottom: 0;
+        font-size: 26px;
+        font-weight: 800;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .field,
+    .field-full {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+    }
+
+    .field-full {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font: inherit;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+    }
+
+    th {
+        background: #f9fafb;
+    }
+
+    .filters {
+        display: flex;
+        gap: 12px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .empty {
+        color: #6b7280;
+    }
+
+    .error {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+    }
+
+    .summary {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    @media(max-width: 900px) {
+        .cards {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media(max-width: 560px) {
+        .cards,
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+{% block apprenants_content %}{% endblock %}
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from joatham_users.models import Abonnement as SaaSPlan
 from joatham_users.models import AbonnementEntreprise as SaaSSubscription
 
@@ -38,14 +39,24 @@ class ActivityLog(models.Model):
 
 class PaiementAbonnement(models.Model):
     class Duree(models.TextChoices):
-        MENSUEL = "mensuel", "Mensuel"
-        TRIMESTRIEL = "trimestriel", "Trimestriel"
-        ANNUEL = "annuel", "Annuel"
+        MENSUEL = "mensuel", _("Mensuel")
+        TRIMESTRIEL = "trimestriel", _("Trimestriel")
+        SEMESTRIEL = "semestriel", _("Semestriel")
+        ANNUEL = "annuel", _("Annuel")
 
     class Statut(models.TextChoices):
-        EN_ATTENTE = "en_attente", "En attente"
-        VALIDE = "valide", "Valide"
-        REFUSE = "refuse", "Refuse"
+        EN_ATTENTE = "en_attente", _("En attente")
+        APPROUVEE = "approuvee", _("Approuvee")
+        VALIDE = "valide", _("Valide")
+        REFUSE = "refuse", _("Refuse")
+        ANNULE = "annule", _("Annule")
+
+    class Methode(models.TextChoices):
+        MANUEL = "manuel", _("Manuel")
+        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        CARTE = "carte", _("Carte")
+        VIREMENT = "virement", _("Virement")
+        CASH = "cash", "Cash"
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -64,7 +75,13 @@ class PaiementAbonnement(models.Model):
     montant_devise_locale_estime = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     taux_change_reference = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     source_taux = models.CharField(max_length=30, default="manuel")
+    date_taux = models.DateTimeField(null=True, blank=True)
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE)
+    methode_paiement = models.CharField(max_length=30, choices=Methode.choices, default=Methode.MANUEL)
+    provider_reference = models.CharField(max_length=120, blank=True, default="")
+    periode_debut = models.DateField(null=True, blank=True)
+    periode_fin = models.DateField(null=True, blank=True)
+    date_paiement = models.DateTimeField(null=True, blank=True)
     telephone_paiement = models.CharField(max_length=30, blank=True, default="")
     reference_paiement = models.CharField(max_length=120)
     preuve_paiement = models.FileField(upload_to="abonnements/preuves/", blank=True, null=True)
@@ -90,15 +107,84 @@ class PaiementAbonnement(models.Model):
         return f"{self.entreprise.nom} - {self.plan.nom} - {self.get_statut_display()}"
 
 
+class PlatformSettings(models.Model):
+    nom_plateforme = models.CharField(max_length=120, default="JOATHAM Manager")
+    email_systeme = models.EmailField(default="admin@joatham.com")
+    devise_defaut = models.CharField(max_length=10, default="CDF")
+    devise_plateforme = models.CharField(max_length=10, default="USD")
+    exchange_rate_provider = models.CharField(max_length=50, default="exchangerate_api")
+    exchange_rate_api_key = models.CharField(max_length=255, blank=True, default="")
+    exchange_rate_cache_hours = models.PositiveIntegerField(default=12)
+    allow_manual_exchange_rate_fallback = models.BooleanField(default=True)
+    duree_essai_jours = models.PositiveIntegerField(default=14)
+    mode_maintenance = models.BooleanField(default=False)
+    message_maintenance = models.TextField(
+        blank=True,
+        default="Nous effectuons une operation de maintenance afin d'ameliorer votre experience.",
+    )
+    maintenance_allowed_ips = models.TextField(blank=True, default="")
+    maintenance_modules = models.JSONField(default=list, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Parametres plateforme")
+        verbose_name_plural = _("Parametres plateforme")
+
+    def __str__(self):
+        return self.nom_plateforme
+
+    @classmethod
+    def get_solo(cls):
+        settings, _ = cls.objects.get_or_create(
+            pk=1,
+            defaults={
+                "nom_plateforme": "JOATHAM Manager",
+                "email_systeme": "admin@joatham.com",
+                "devise_defaut": "CDF",
+                "devise_plateforme": "USD",
+                "exchange_rate_provider": "exchangerate_api",
+                "exchange_rate_api_key": "",
+                "exchange_rate_cache_hours": 12,
+                "allow_manual_exchange_rate_fallback": True,
+                "duree_essai_jours": 14,
+                "mode_maintenance": False,
+                "message_maintenance": "Nous effectuons une operation de maintenance afin d'ameliorer votre experience.",
+                "maintenance_allowed_ips": "",
+                "maintenance_modules": [],
+            },
+        )
+        return settings
+
+
+class ExchangeRate(models.Model):
+    devise_source = models.CharField(max_length=10, db_index=True)
+    devise_cible = models.CharField(max_length=10, db_index=True)
+    taux = models.DecimalField(max_digits=20, decimal_places=8)
+    source_provider = models.CharField(max_length=50, default="manuel")
+    date_taux = models.DateTimeField()
+    fetched_at = models.DateTimeField(auto_now_add=True)
+    actif = models.BooleanField(default=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ["-date_taux", "-fetched_at", "-id"]
+        indexes = [
+            models.Index(fields=["devise_source", "devise_cible", "actif", "date_taux"], name="core_exchan_devise__cb06c8_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.devise_source}->{self.devise_cible}: {self.taux}"
+
+
 class Plan(SaaSPlan):
     class Meta:
         proxy = True
-        verbose_name = "Plan SaaS"
-        verbose_name_plural = "Plans SaaS"
+        verbose_name = _("Plan SaaS")
+        verbose_name_plural = _("Plans SaaS")
 
 
 class Abonnement(SaaSSubscription):
     class Meta:
         proxy = True
-        verbose_name = "Abonnement SaaS"
-        verbose_name_plural = "Abonnements SaaS"
+        verbose_name = _("Abonnement SaaS")
+        verbose_name_plural = _("Abonnements SaaS")

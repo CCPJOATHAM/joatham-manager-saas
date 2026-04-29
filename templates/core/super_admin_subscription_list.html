@@ -1,0 +1,389 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Abonnements | JOATHAM Manager{% endblock %}
+{% block content_title %}Abonnements{% endblock %}
+{% block content_subtitle %}Gestion des plans, statuts, echeances et essais des entreprises clientes.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.35fr) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .toolbar label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .toolbar input,
+    .toolbar select {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .subscription-table {
+        width: 100%;
+        min-width: 1180px;
+        border-collapse: collapse;
+    }
+
+    .subscription-table th,
+    .subscription-table td {
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .subscription-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .subscription-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .stacked {
+        display: grid;
+        gap: 6px;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-essai { background: #fef3c7; color: #92400e; }
+    .status-actif { background: #dcfce7; color: #166534; }
+    .status-expire { background: #fee2e2; color: #b91c1c; }
+    .status-suspendu { background: #e2e8f0; color: #334155; }
+    .status-annule { background: #f3f4f6; color: #374151; }
+    .status-none { background: #eef2ff; color: #4338ca; }
+
+    .actions {
+        display: grid;
+        gap: 10px;
+        min-width: 280px;
+    }
+
+    .actions form {
+        display: grid;
+        gap: 8px;
+    }
+
+    .action-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+
+    .actions select,
+    .actions input {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-small[disabled] {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .btn-small.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .btn-small.warning {
+        background: #fff7ed;
+        border-color: #fdba74;
+        color: #c2410c;
+    }
+
+    .btn-small.danger {
+        background: #fff1f2;
+        border-color: #fecdd3;
+        color: #be123c;
+    }
+
+    .request-box {
+        display: grid;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid #fde68a;
+        background: #fffbeb;
+    }
+
+    .request-box strong {
+        color: #92400e;
+    }
+
+    .request-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+        .toolbar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<form method="get" class="toolbar">
+    <div>
+        <label for="id_q">Rechercher une entreprise</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email proprietaire">
+    </div>
+    <div>
+        <label for="id_statut">Statut abonnement</label>
+        <select id="id_statut" name="statut">
+            <option value="">Tous les statuts</option>
+            {% for value, label in statut_choices %}
+            <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="submit" class="btn-small primary">Filtrer</button>
+        <a href="{% url 'super_admin_subscription_list' %}" class="btn-small">Reinitialiser</a>
+    </div>
+</form>
+
+<div class="table-shell">
+    <table class="subscription-table">
+        <thead>
+            <tr>
+                <th>Entreprise</th>
+                <th>Plan</th>
+                <th>Statut</th>
+                <th>Date debut</th>
+                <th>Date fin</th>
+                <th>Jours restants</th>
+                <th>Montant plan</th>
+                <th>Dernier paiement</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entreprise in entreprises %}
+            {% with subscription=entreprise.abonnement_entreprise %}
+            <tr>
+                <td>
+                    <div class="stacked">
+                        <strong>{{ entreprise.nom }}</strong>
+                        {% if entreprise.owner_email %}
+                        <span class="muted">{{ entreprise.owner_email }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{% if subscription %}{{ subscription.plan.nom }}{% else %}<span class="muted">Aucun plan</span>{% endif %}</td>
+                <td>
+                    {% if subscription %}
+                    <span class="status-badge status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
+                    {% else %}
+                    <span class="status-badge status-none">Aucun abonnement</span>
+                    {% endif %}
+                </td>
+                <td>{% if subscription and subscription.date_debut %}{{ subscription.date_debut|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                <td>{% if subscription and subscription.date_fin %}{{ subscription.date_fin|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                <td>
+                    {{ entreprise.subscription_days_remaining_display }}
+                </td>
+                <td>
+                    {% if subscription %}
+                    <div class="stacked">
+                        <strong>{{ subscription.plan.prix }} {{ subscription.plan.devise|default:"USD" }}</strong>
+                        {% if subscription.plan.prix_annuel %}
+                        <span class="muted">Annuel : {{ subscription.plan.prix_annuel }} {{ subscription.plan.devise|default:"USD" }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entreprise.last_payment_created_at %}
+                    <div class="stacked">
+                        <strong>{{ entreprise.last_payment_amount_usd|default:entreprise.last_payment_amount }} USD</strong>
+                        <span class="muted">{{ entreprise.last_payment_status }} - {{ entreprise.last_payment_created_at|date:"d/m/Y" }}</span>
+                        {% if entreprise.last_payment_local_amount %}
+                        <span class="muted">{{ entreprise.last_payment_local_amount }} {{ entreprise.last_payment_currency }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="muted">Aucun paiement</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <select name="plan_id">
+                                    <option value="">Choisir un plan</option>
+                                    {% for plan in plans %}
+                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>Activer</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <select name="plan_id" class="plan-change-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
+                                    <option value="">Conserver le plan</option>
+                                    {% for plan in plans %}
+                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>Changer plan</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <div class="action-row">
+                                <input type="number" name="trial_days" value="7" min="1" step="1">
+                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger essai</button>
+                            </div>
+                        </form>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                            <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>Suspendre</button>
+                        </form>
+
+                        <a href="{% url 'super_admin_subscription_manual_payment' entreprise.id %}" class="btn-small primary">Enregistrer paiement</a>
+
+                        {% if entreprise.last_payment_status == "en_attente" %}
+                        <div class="request-box">
+                            <strong>Demande en attente</strong>
+                            <span class="muted">
+                                {% if entreprise.last_payment_source == "demande_plan" %}
+                                Plan demande : {{ entreprise.last_payment_plan_name|default:"-" }}
+                                {% else %}
+                                Paiement en attente : {{ entreprise.last_payment_reference|default:"-" }}
+                                {% endif %}
+                            </span>
+                            <div class="request-actions">
+                                {% if entreprise.last_payment_source == "demande_plan" %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <button type="submit" name="action" value="validate_plan_request" class="btn-small primary">Valider</button>
+                                </form>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <button type="submit" name="action" value="refuse_plan_request" class="btn-small danger">Refuser</button>
+                                </form>
+                                {% elif entreprise.last_payment_source != "demande_plan" %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paiement_id" value="{{ entreprise.last_payment_id }}">
+                                    <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider</button>
+                                </form>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paiement_id" value="{{ entreprise.last_payment_id }}">
+                                    <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="9">Aucun abonnement ne correspond aux filtres.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.querySelectorAll(".plan-change-select").forEach(function (select) {
+        const button = select.closest("form").querySelector(".change-plan-button");
+        if (!button) {
+            return;
+        }
+
+        const currentPlan = select.dataset.currentPlan || "";
+
+        const syncButton = function () {
+            const selectedPlan = select.value || "";
+            button.disabled = !selectedPlan || selectedPlan === currentPlan;
+        };
+
+        syncButton();
+        select.addEventListener("change", syncButton);
+    });
+</script>
+{% endblock %}

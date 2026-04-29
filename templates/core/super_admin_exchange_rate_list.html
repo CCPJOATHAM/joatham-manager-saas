@@ -1,0 +1,172 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Taux de change | JOATHAM Manager{% endblock %}
+{% block content_title %}Taux de change{% endblock %}
+{% block content_subtitle %}Suivi des taux utilises uniquement pour les abonnements SaaS plateforme.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_settings' %}" class="btn-link">Parametres plateforme</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(160px, 220px)) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .toolbar label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-weight: 800;
+    }
+
+    .toolbar input {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-small.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    table {
+        width: 100%;
+        min-width: 920px;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+</style>
+
+<form method="get" class="toolbar">
+    <div>
+        <label for="id_source">Devise source</label>
+        <input id="id_source" type="text" name="source" value="{{ selected_source }}" placeholder="USD">
+    </div>
+    <div>
+        <label for="id_target">Devise cible</label>
+        <input id="id_target" type="text" name="target" value="{{ selected_target }}" placeholder="CDF">
+    </div>
+    <button type="submit" class="btn-small primary">Filtrer</button>
+</form>
+
+<form method="post" class="toolbar">
+    {% csrf_token %}
+    <div>
+        <label for="refresh_source">Source</label>
+        <input id="refresh_source" type="text" name="source" value="{{ selected_source|default:'USD' }}">
+    </div>
+    <div>
+        <label for="refresh_target">Cible</label>
+        <input id="refresh_target" type="text" name="target" value="{{ selected_target|default:'CDF' }}">
+    </div>
+    <button type="submit" class="btn-small primary">Rafraichir taux</button>
+</form>
+
+<form method="post" class="toolbar">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="manual_rate">
+    <div>
+        <label for="{{ manual_form.devise_source.id_for_label }}">{{ manual_form.devise_source.label }}</label>
+        {{ manual_form.devise_source }}
+        {{ manual_form.devise_source.errors }}
+    </div>
+    <div>
+        <label for="{{ manual_form.devise_cible.id_for_label }}">{{ manual_form.devise_cible.label }}</label>
+        {{ manual_form.devise_cible }}
+        {{ manual_form.devise_cible.errors }}
+    </div>
+    <div>
+        <label for="{{ manual_form.taux.id_for_label }}">{{ manual_form.taux.label }}</label>
+        {{ manual_form.taux }}
+        {{ manual_form.taux.errors }}
+    </div>
+    <div>
+        <label for="{{ manual_form.date_taux.id_for_label }}">{{ manual_form.date_taux.label }}</label>
+        {{ manual_form.date_taux }}
+        {{ manual_form.date_taux.errors }}
+    </div>
+    <label class="btn-small" for="{{ manual_form.actif.id_for_label }}">
+        {{ manual_form.actif }} Actif
+    </label>
+    <button type="submit" class="btn-small primary">Enregistrer taux manuel</button>
+</form>
+
+<div class="table-shell">
+    <table>
+        <thead>
+            <tr>
+                <th>Devise source</th>
+                <th>Devise cible</th>
+                <th>Taux</th>
+                <th>Provider</th>
+                <th>Date taux</th>
+                <th>Recupere le</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rate in rates %}
+            <tr>
+                <td>{{ rate.devise_source }}</td>
+                <td>{{ rate.devise_cible }}</td>
+                <td>{{ rate.taux }}</td>
+                <td>{{ rate.source_provider }}</td>
+                <td>{{ rate.date_taux|date:"d/m/Y H:i" }}</td>
+                <td>{{ rate.fetched_at|date:"d/m/Y H:i" }}</td>
+                <td>{% if rate.actif %}Actif{% else %}Inactif{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Aucun taux de change disponible.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

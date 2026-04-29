@@ -1,0 +1,111 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Desactiver entreprise | JOATHAM Manager{% endblock %}
+{% block content_title %}Desactiver une entreprise{% endblock %}
+{% block content_subtitle %}Desactivation logique securisee : les donnees sont conservees et les acces sont bloques.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_company_list' %}" class="btn-link">Retour aux entreprises</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .danger-panel {
+        max-width: 760px;
+        padding: 22px;
+        border-radius: 18px;
+        border: 1px solid #fecaca;
+        background: #fff7f7;
+        box-shadow: 0 16px 34px rgba(127, 29, 29, 0.08);
+    }
+
+    .danger-panel h2 {
+        margin: 0 0 10px;
+        color: #991b1b;
+        font-size: 1.2rem;
+    }
+
+    .warning-copy {
+        color: #7f1d1d;
+        line-height: 1.6;
+    }
+
+    .impact-list {
+        display: grid;
+        gap: 8px;
+        margin: 18px 0;
+        padding: 0;
+        list-style: none;
+        color: #334155;
+    }
+
+    .impact-list li {
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #fee2e2;
+    }
+
+    .confirm-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .confirm-form label {
+        font-weight: 800;
+        color: #10233f;
+    }
+
+    .confirm-form input {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .confirm-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+</style>
+
+<section class="danger-panel">
+    <h2>Desactivation de {{ entreprise.nom }}</h2>
+    <p class="warning-copy">
+        Cette action ne supprime pas physiquement les donnees. Elle masque l'entreprise des listes actives,
+        suspend son abonnement, desactive ses utilisateurs et bloque leur acces a la plateforme.
+    </p>
+
+    <ul class="impact-list">
+        <li>Utilisateurs lies : {{ critical_counts.users }}</li>
+        <li>Clients conserves : {{ critical_counts.clients }}</li>
+        <li>Factures conservees : {{ critical_counts.factures }}</li>
+        <li>Services conserves : {{ critical_counts.services }}</li>
+        <li>Depenses conservees : {{ critical_counts.depenses }}</li>
+        <li>Produits conserves : {{ critical_counts.produits }}</li>
+        <li>Apprenants conserves : {{ critical_counts.apprenants }}</li>
+        <li>Ecritures comptables conservees : {{ critical_counts.ecritures }}</li>
+        <li>Paiements d'abonnement conserves : {{ critical_counts.payments }}</li>
+        <li>Evenements d'audit conserves : {{ critical_counts.logs }}</li>
+    </ul>
+
+    {% if not entreprise.is_active %}
+    <p class="warning-copy">Cette entreprise est deja desactivee.</p>
+    {% else %}
+    <form method="post" class="confirm-form">
+        {% csrf_token %}
+        <label for="id_confirmation_name">Saisissez exactement le nom de l'entreprise pour confirmer</label>
+        <input id="id_confirmation_name" type="text" name="confirmation_name" autocomplete="off" placeholder="{{ entreprise.nom }}">
+        <div class="confirm-actions">
+            <button type="submit" class="btn-link danger">Desactiver l'entreprise</button>
+            <a href="{% url 'super_admin_company_list' %}" class="btn-link">Annuler</a>
+        </div>
+    </form>
+    {% endif %}
+</section>
+{% endblock %}

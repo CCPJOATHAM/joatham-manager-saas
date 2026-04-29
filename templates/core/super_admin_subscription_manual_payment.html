@@ -1,0 +1,208 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Paiement manuel | JOATHAM Manager{% endblock %}
+{% block content_title %}Enregistrer paiement{% endblock %}
+{% block content_subtitle %}Activation ou prolongation manuelle de l'abonnement d'une entreprise.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">Retour aux abonnements</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .payment-shell {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.85fr) minmax(320px, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+    .panel {
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+        padding: 22px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .panel h2 {
+        margin: 0 0 16px;
+        color: #10233f;
+        font-size: 1.12rem;
+    }
+
+    .details,
+    .payment-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .detail-row span:first-child,
+    .field label {
+        color: #64748b;
+        font-weight: 800;
+    }
+
+    .field {
+        display: grid;
+        gap: 7px;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .help {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .submit-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .btn-save {
+        min-height: 44px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 12px;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        color: #10233f;
+        background: #f8fafc;
+        text-decoration: none;
+        font-weight: 800;
+    }
+
+    .errorlist {
+        margin: 0;
+        padding-left: 18px;
+        color: #be123c;
+    }
+
+    @media (max-width: 900px) {
+        .payment-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="payment-shell">
+    <section class="panel">
+        <h2>Entreprise</h2>
+        <div class="details">
+            <div class="detail-row"><span>Nom</span><strong>{{ entreprise.nom }}</strong></div>
+            <div class="detail-row"><span>Email</span><strong>{{ entreprise.email|default:"-" }}</strong></div>
+            <div class="detail-row"><span>Devise entreprise</span><strong>{{ entreprise.devise|default:"-" }}</strong></div>
+            {% if subscription %}
+            <div class="detail-row"><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></div>
+            <div class="detail-row"><span>Statut</span><strong>{{ subscription.get_statut_display }}</strong></div>
+            <div class="detail-row"><span>Date fin actuelle</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
+            {% else %}
+            <div class="detail-row"><span>Abonnement</span><strong>Aucun abonnement actif</strong></div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Paiement reçu</h2>
+        <form method="post" class="payment-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="field">
+                <label for="{{ form.plan.id_for_label }}">{{ form.plan.label }}</label>
+                {{ form.plan }}
+                {{ form.plan.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.montant.id_for_label }}">{{ form.montant.label }}</label>
+                {{ form.montant }}
+                {{ form.montant.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.devise.id_for_label }}">{{ form.devise.label }}</label>
+                {{ form.devise }}
+                {{ form.devise.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.montant_usd.id_for_label }}">{{ form.montant_usd.label }}</label>
+                {{ form.montant_usd }}
+                <span class="help">Optionnel. A renseigner si la conversion automatique est indisponible.</span>
+                {{ form.montant_usd.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.taux_change_reference.id_for_label }}">{{ form.taux_change_reference.label }}</label>
+                {{ form.taux_change_reference }}
+                <span class="help">Optionnel. Exemple : 2750 si 1 USD = 2750 CDF.</span>
+                {{ form.taux_change_reference.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.methode_paiement.id_for_label }}">{{ form.methode_paiement.label }}</label>
+                {{ form.methode_paiement }}
+                {{ form.methode_paiement.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.reference_paiement.id_for_label }}">{{ form.reference_paiement.label }}</label>
+                {{ form.reference_paiement }}
+                <span class="help">Exemple : reference Mobile Money, numero de recu, note interne.</span>
+                {{ form.reference_paiement.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.periode_jours.id_for_label }}">{{ form.periode_jours.label }}</label>
+                {{ form.periode_jours }}
+                {{ form.periode_jours.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.date_paiement.id_for_label }}">{{ form.date_paiement.label }}</label>
+                {{ form.date_paiement }}
+                <span class="help">Laissez vide pour utiliser la date du jour.</span>
+                {{ form.date_paiement.errors }}
+            </div>
+
+            <div class="submit-row">
+                <button type="submit" class="btn-save">Enregistrer paiement</button>
+                <a href="{% url 'super_admin_subscription_list' %}" class="btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

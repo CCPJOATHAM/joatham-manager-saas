@@ -1,359 +1,247 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ report_title }} | Comptabilite</title>
-    <style>
-        :root {
-            --bg: #f5f7fb;
-            --panel: #ffffff;
-            --line: #d8dfeb;
-            --ink: #1f2937;
-            --muted: #6b7280;
-            --brand: #0f3d5e;
-            --brand-soft: #e6f1f8;
-            --success: #0f766e;
-            --danger: #b42318;
-            --warning: #a16207;
-        }
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-        * {
-            box-sizing: border-box;
-        }
+{% block page_title %}{{ report_title|default:"Comptabilite" }} | JOATHAM Manager{% endblock %}
+{% block content_title %}{{ report_title|default:"Comptabilite" }}{% endblock %}
+{% block content_subtitle %}{{ period_label|default:"Rapports financiers de l'entreprise." }}{% endblock %}
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Tahoma, sans-serif;
-            color: var(--ink);
-            background: linear-gradient(180deg, #eef4fb 0%, var(--bg) 260px);
-        }
+{% block top_actions %}
+<a href="{% url 'compta_dashboard' %}" class="btn-link {% if report_slug == 'dashboard' %}primary{% endif %}">{% trans "Dashboard" %}</a>
+<a href="{% url 'balance' %}" class="btn-link {% if report_slug == 'balance' %}primary{% endif %}">{% trans "Balance" %}</a>
+<a href="{% url 'grand_livre' %}" class="btn-link {% if report_slug == 'grand_livre' %}primary{% endif %}">{% trans "Grand livre" %}</a>
+<a href="{% url 'compte_resultat' %}" class="btn-link {% if report_slug == 'compte_resultat' %}primary{% endif %}">{% trans "Resultat" %}</a>
+<a href="{% url 'bilan' %}" class="btn-link {% if report_slug == 'bilan' %}primary{% endif %}">{% trans "Bilan" %}</a>
+{% endblock %}
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
+{% block content %}
+<style>
+    .compta-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        color: #64748b;
+    }
 
-        .layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+        gap: 14px;
+        align-items: end;
+    }
 
-        .sidebar {
-            background: linear-gradient(180deg, #0f3d5e 0%, #0c2f48 100%);
-            color: #f8fafc;
-            padding: 28px 20px;
-        }
+    .field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 700;
+    }
 
-        .brand {
-            margin-bottom: 28px;
-        }
+    .field input,
+    .field select {
+        width: 100%;
+        border: 1px solid #dde7f0;
+        border-radius: 12px;
+        padding: 11px 12px;
+        background: #fff;
+        color: #12263f;
+    }
 
-        .brand h1 {
-            margin: 0 0 8px;
-            font-size: 22px;
-        }
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+    }
 
-        .brand p {
-            margin: 0;
-            color: #c8d7e5;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+    }
 
-        .nav {
-            display: grid;
-            gap: 10px;
-        }
+    .btn-primary {
+        background: #0f766e;
+        color: #fff;
+    }
 
-        .nav a {
-            padding: 12px 14px;
-            border-radius: 12px;
-            color: #dbeafe;
-            background: rgba(255, 255, 255, 0.04);
-            transition: 0.2s ease;
-        }
+    .btn-secondary {
+        background: #e6f1f8;
+        color: #0f3d5e;
+        border-color: #c3dceb;
+    }
 
-        .nav a.active,
-        .nav a:hover {
-            background: rgba(255, 255, 255, 0.14);
-            color: #ffffff;
-        }
+    .panel {
+        background: #ffffff;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
 
-        .content {
-            padding: 28px;
-        }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
 
-        .hero {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
+    .metric {
+        padding: 18px;
+        border-radius: 16px;
+        border: 1px solid #dde7f0;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    }
 
-        .hero h2 {
-            margin: 0 0 6px;
-            font-size: 28px;
-        }
+    .metric .label {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
 
-        .hero p {
-            margin: 0;
-            color: var(--muted);
-        }
+    .metric .value {
+        font-size: 26px;
+        font-weight: 800;
+    }
 
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 12px 32px rgba(15, 61, 94, 0.08);
-            margin-bottom: 20px;
-        }
+    .metric .meta,
+    .muted {
+        color: #64748b;
+    }
 
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #dde7f0;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f8fbfe;
+        color: #0f3d5e;
+        text-align: left;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    td.number,
+    th.number {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .empty {
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .section-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .section-title {
+        margin: 0 0 14px;
+        font-size: 18px;
+    }
+
+    .subtle-badge {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #f3f7fb;
+        color: #0f3d5e;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .status-positive {
+        color: #0f766e;
+    }
+
+    .status-negative {
+        color: #b42318;
+    }
+
+    .status-neutral {
+        color: #a16207;
+    }
+
+    @media (max-width: 980px) {
         .filters {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
-            gap: 14px;
-            align-items: end;
-        }
-
-        .field label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .field input,
-        .field select {
-            width: 100%;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 11px 12px;
-            background: #fff;
-            color: var(--ink);
+            grid-template-columns: 1fr;
         }
 
         .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: flex-end;
+            justify-content: stretch;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 11px 16px;
-            border-radius: 12px;
-            border: 1px solid transparent;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--brand);
-            color: #fff;
-        }
-
-        .btn-secondary {
-            background: var(--brand-soft);
-            color: var(--brand);
-            border-color: #c3dceb;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
-        .metric {
-            padding: 18px;
-            border-radius: 16px;
-            border: 1px solid var(--line);
-            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-        }
-
-        .metric .label {
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .metric .value {
-            font-size: 26px;
-            font-weight: 700;
-        }
-
-        .metric .meta {
-            margin-top: 6px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
+        .actions .btn {
             width: 100%;
-            border-collapse: collapse;
         }
+    }
+</style>
 
-        th,
-        td {
-            padding: 12px 14px;
-            border-bottom: 1px solid var(--line);
-            vertical-align: top;
-        }
+<div class="compta-meta">
+    <span>{{ selected_entreprise.nom }}</span>
+    <span>{% trans "Genere le" %} {{ generated_at|date:"d/m/Y H:i" }}</span>
+</div>
 
-        th {
-            background: #f8fbfe;
-            color: var(--brand);
-            text-align: left;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
+<section class="panel">
+    <form method="get" class="filters">
+        <div class="field">
+            <label for="id_entreprise">{% trans "Entreprise" %}</label>
+            <select id="id_entreprise" name="entreprise">
+                {% for entreprise in entreprises %}
+                    <option value="{{ entreprise.id }}" {% if entreprise.id == selected_entreprise.id %}selected{% endif %}>{{ entreprise.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <input id="id_date_debut" type="date" name="date_debut" value="{{ filters.date_debut|date:'Y-m-d' }}">
+        </div>
+        <div class="field">
+            <label for="id_date_fin">{% trans "Date fin" %}</label>
+            <input id="id_date_fin" type="date" name="date_fin" value="{{ filters.date_fin|date:'Y-m-d' }}">
+        </div>
+        <div class="field">
+            <label>&nbsp;</label>
+            <div class="muted">{% trans "Utilisez ces filtres pour recalculer les etats." %}</div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-primary" type="submit">{% trans "Appliquer" %}</button>
+            {% if report_slug != "dashboard" %}
+                <a class="btn btn-secondary" href="{% url 'compta_report_export' report_slug 'pdf' %}{{ filter_query }}">{% trans "Export PDF" %}</a>
+                <a class="btn btn-secondary" href="{% url 'compta_report_export' report_slug 'excel' %}{{ filter_query }}">{% trans "Export Excel" %}</a>
+            {% endif %}
+        </div>
+    </form>
+</section>
 
-        td.number,
-        th.number {
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .muted {
-            color: var(--muted);
-        }
-
-        .empty {
-            padding: 24px;
-            text-align: center;
-            color: var(--muted);
-        }
-
-        .section-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-        }
-
-        .section-title {
-            margin: 0 0 14px;
-            font-size: 18px;
-        }
-
-        .subtle-badge {
-            display: inline-flex;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: #f3f7fb;
-            color: var(--brand);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-positive {
-            color: var(--success);
-        }
-
-        .status-negative {
-            color: var(--danger);
-        }
-
-        .status-neutral {
-            color: var(--warning);
-        }
-
-        @media (max-width: 980px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                padding-bottom: 18px;
-            }
-
-            .filters {
-                grid-template-columns: 1fr;
-            }
-
-            .actions {
-                justify-content: stretch;
-            }
-
-            .actions .btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="layout">
-        <aside class="sidebar">
-            <div class="brand">
-                <h1>Comptabilite</h1>
-                <p>Rapports financiers centralises pour suivre les mouvements et les soldes de l'entreprise.</p>
-            </div>
-            <nav class="nav">
-                <a href="{% url 'compta_dashboard' %}" class="{% if report_slug == 'dashboard' %}active{% endif %}">Tableau de bord</a>
-                <a href="{% url 'balance' %}" class="{% if report_slug == 'balance' %}active{% endif %}">Balance comptable</a>
-                <a href="{% url 'grand_livre' %}" class="{% if report_slug == 'grand_livre' %}active{% endif %}">Grand livre</a>
-                <a href="{% url 'compte_resultat' %}" class="{% if report_slug == 'compte_resultat' %}active{% endif %}">Compte de resultat</a>
-                <a href="{% url 'bilan' %}" class="{% if report_slug == 'bilan' %}active{% endif %}">Bilan simplifie</a>
-            </nav>
-        </aside>
-
-        <main class="content">
-            <section class="hero">
-                <div>
-                    <span class="subtle-badge">{{ selected_entreprise.nom }}</span>
-                    <h2>{{ report_title }}</h2>
-                    <p>{{ period_label }}</p>
-                </div>
-                <div class="muted">Genere le {{ generated_at|date:"d/m/Y H:i" }}</div>
-            </section>
-
-            <section class="panel">
-                <form method="get" class="filters">
-                    <div class="field">
-                        <label for="id_entreprise">Entreprise</label>
-                        <select id="id_entreprise" name="entreprise">
-                            {% for entreprise in entreprises %}
-                                <option value="{{ entreprise.id }}" {% if entreprise.id == selected_entreprise.id %}selected{% endif %}>{{ entreprise.nom }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="id_date_debut">Date debut</label>
-                        <input id="id_date_debut" type="date" name="date_debut" value="{{ filters.date_debut|date:'Y-m-d' }}">
-                    </div>
-                    <div class="field">
-                        <label for="id_date_fin">Date fin</label>
-                        <input id="id_date_fin" type="date" name="date_fin" value="{{ filters.date_fin|date:'Y-m-d' }}">
-                    </div>
-                    <div class="field">
-                        <label>&nbsp;</label>
-                        <div class="muted">Utilisez ces filtres pour recalculer les etats.</div>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-primary" type="submit">Appliquer</button>
-                        {% if report_slug != 'dashboard' %}
-                            <a class="btn btn-secondary" href="{% url 'compta_report_export' report_slug 'pdf' %}{{ filter_query }}">Export PDF</a>
-                            <a class="btn btn-secondary" href="{% url 'compta_report_export' report_slug 'excel' %}{{ filter_query }}">Export Excel</a>
-                        {% endif %}
-                    </div>
-                </form>
-            </section>
-
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-</body>
-</html>
+{% block compta_content %}{% endblock %}
+{% endblock %}

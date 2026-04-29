@@ -1,15 +1,16 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Dashboard Proprietaire | JOATHAM Manager{% endblock %}
-{% block content_title %}Dashboard proprietaire{% endblock %}
-{% block content_subtitle %}Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle.{% endblock %}
+{% block page_title %}{% trans "Dashboard Proprietaire" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Dashboard proprietaire" %}{% endblock %}
+{% block content_subtitle %}{% trans "Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'company_settings' %}" class="btn-link">Entreprise</a>
-<a href="{% url 'user_list' %}" class="btn-link">Utilisateurs</a>
-<a href="{% url 'user_create' %}" class="btn-link primary">Ajouter un utilisateur</a>
-<a href="{% url 'subscription_overview' %}" class="btn-link">Abonnement</a>
-<a href="{% url 'activity_log_list' %}" class="btn-link">Controle des flux</a>
+<a href="{% url 'company_settings' %}" class="btn-link">{% trans "Entreprise" %}</a>
+<a href="{% url 'user_list' %}" class="btn-link">{% trans "Utilisateurs" %}</a>
+<a href="{% url 'user_create' %}" class="btn-link primary">{% trans "Ajouter un utilisateur" %}</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Abonnement" %}</a>
+<a href="{% url 'activity_log_list' %}" class="btn-link">{% trans "Controle des flux" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -352,15 +353,15 @@
 
 <div class="hero">
     <div>
-        <h2>Bienvenue dans votre cockpit JOATHAM Manager</h2>
-        <p>Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour.</p>
+        <h2>{% trans "Bienvenue dans votre cockpit JOATHAM Manager" %}</h2>
+        <p>{% trans "Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour." %}</p>
     </div>
     <div class="hero-summary">
-        <span class="hero-pill">Devise : {{ entreprise_identity.currency_code }}</span>
-        <span class="hero-pill">Clients : {{ nombre_clients }}</span>
-        <span class="hero-pill">Factures : {{ nombre_factures }}</span>
+        <span class="hero-pill">{% trans "Devise" %} : {{ entreprise_identity.currency_code }}</span>
+        <span class="hero-pill">{% trans "Clients" %} : {{ nombre_clients }}</span>
+        <span class="hero-pill">{% trans "Factures" %} : {{ nombre_factures }}</span>
         {% if subscription %}
-        <span class="hero-pill">Abonnement : {{ subscription.get_statut_display }}</span>
+        <span class="hero-pill">{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
         {% endif %}
     </div>
 </div>
@@ -374,9 +375,9 @@
             </svg>
         </div>
         <div>
-            <span class="premium-label">Chiffre d'affaires</span>
+            <span class="premium-label">{% trans "Chiffre d'affaires" %}</span>
             <span class="premium-value">{{ total_ca }}</span>
-            <span class="premium-meta">Facturation emise a date</span>
+            <span class="premium-meta">{% trans "Facturation emise a date" %}</span>
         </div>
     </div>
     <div class="premium-card">
@@ -386,9 +387,9 @@
             </svg>
         </div>
         <div>
-            <span class="premium-label">Encaissements</span>
+            <span class="premium-label">{% trans "Encaissements" %}</span>
             <span class="premium-value">{{ total_encaisse }}</span>
-            <span class="premium-meta">{{ payees }} facture{{ payees|pluralize:"s" }} soldee{{ payees|pluralize:"s" }}</span>
+            <span class="premium-meta">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
         </div>
     </div>
     <div class="premium-card">
@@ -400,9 +401,9 @@
             </svg>
         </div>
         <div>
-            <span class="premium-label">Reste a encaisser</span>
+            <span class="premium-label">{% trans "Reste a encaisser" %}</span>
             <span class="premium-value">{{ reste_encaisser }}</span>
-            <span class="premium-meta">{{ impayees }} facture{{ impayees|pluralize:"s" }} a suivre</span>
+            <span class="premium-meta">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
         </div>
     </div>
     <div class="premium-card">
@@ -415,69 +416,69 @@
             </svg>
         </div>
         <div>
-            <span class="premium-label">Portefeuille client</span>
+            <span class="premium-label">{% trans "Portefeuille client" %}</span>
             <span class="premium-value">{{ nombre_clients }}</span>
-            <span class="premium-meta">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</span>
+            <span class="premium-meta">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
         </div>
     </div>
 </div>
 
 <div class="quick-actions">
     <a href="{% url 'company_settings' %}" class="quick-action-card">
-        <strong>Entreprise</strong>
-        <span>Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise.</span>
+        <strong>{% trans "Entreprise" %}</strong>
+        <span>{% trans "Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise." %}</span>
     </a>
     <a href="{% url 'user_list' %}" class="quick-action-card">
-        <strong>Utilisateurs</strong>
-        <span>Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire.</span>
+        <strong>{% trans "Utilisateurs" %}</strong>
+        <span>{% trans "Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire." %}</span>
     </a>
     <a href="{% url 'client_list' %}" class="quick-action-card">
-        <strong>Clients</strong>
-        <span>Accedez rapidement au portefeuille client et a la relation commerciale.</span>
+        <strong>{% trans "Clients" %}</strong>
+        <span>{% trans "Accedez rapidement au portefeuille client et a la relation commerciale." %}</span>
     </a>
     <a href="{% url 'depenses' %}" class="quick-action-card">
-        <strong>Depenses</strong>
-        <span>Consultez les sorties financieres et les rapports PDF correspondants.</span>
+        <strong>{% trans "Depenses" %}</strong>
+        <span>{% trans "Consultez les sorties financieres et les rapports PDF correspondants." %}</span>
     </a>
     <a href="{% url 'facture_list' %}" class="quick-action-card">
-        <strong>Factures</strong>
-        <span>Suivez la facturation, les PDF et les paiements dans un espace premium.</span>
+        <strong>{% trans "Factures" %}</strong>
+        <span>{% trans "Suivez la facturation, les PDF et les paiements dans un espace premium." %}</span>
     </a>
     <a href="{% url 'apprenant_list' %}" class="quick-action-card">
-        <strong>Apprenants</strong>
-        <span>Pilotez les apprenants, formations, inscriptions et paiements de formation.</span>
+        <strong>{% trans "Apprenants" %}</strong>
+        <span>{% trans "Pilotez les apprenants, formations, inscriptions et paiements de formation." %}</span>
     </a>
     <a href="{% url 'activity_log_list' %}" class="quick-action-card">
-        <strong>Audit</strong>
-        <span>Relisez les actions sensibles et gardez une trace claire des operations produit.</span>
+        <strong>{% trans "Audit" %}</strong>
+        <span>{% trans "Relisez les actions sensibles et gardez une trace claire des operations produit." %}</span>
     </a>
     <a href="{% url 'subscription_overview' %}" class="quick-action-card">
-        <strong>Abonnement</strong>
-        <span>Consultez le plan en cours, le statut SaaS et la periode d'acces active.</span>
+        <strong>{% trans "Abonnement" %}</strong>
+        <span>{% trans "Consultez le plan en cours, le statut SaaS et la periode d'acces active." %}</span>
     </a>
 </div>
 
 <div class="dashboard-grid">
     <div>
         <section class="section-card">
-            <h3>Vue de pilotage</h3>
-            <p class="section-subtitle">Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien.</p>
+            <h3>{% trans "Vue de pilotage" %}</h3>
+            <p class="section-subtitle">{% trans "Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien." %}</p>
 
             <div class="list-card">
                 <ul>
-                    <li><span>Depenses cumulees</span><strong>{{ total_depenses }}</strong></li>
-                    <li><span>Benefice estime</span><strong>{{ benefice }}</strong></li>
-                    <li><span>TVA cumulee</span><strong>{{ total_tva }}</strong></li>
-                    <li><span>Facturation aujourd'hui</span><strong>{{ total_jour }}</strong></li>
-                    <li><span>Facturation ce mois</span><strong>{{ total_mois }}</strong></li>
-                    <li><span>Depenses ce mois</span><strong>{{ depense_mois }}</strong></li>
+                    <li><span>{% trans "Depenses cumulees" %}</span><strong>{{ total_depenses }}</strong></li>
+                    <li><span>{% trans "Benefice estime" %}</span><strong>{{ benefice }}</strong></li>
+                    <li><span>{% trans "TVA cumulee" %}</span><strong>{{ total_tva }}</strong></li>
+                    <li><span>{% trans "Facturation aujourd'hui" %}</span><strong>{{ total_jour }}</strong></li>
+                    <li><span>{% trans "Facturation ce mois" %}</span><strong>{{ total_mois }}</strong></li>
+                    <li><span>{% trans "Depenses ce mois" %}</span><strong>{{ depense_mois }}</strong></li>
                 </ul>
             </div>
         </section>
 
         <section class="section-card" style="margin-top:20px;">
-            <h3>Activite recente</h3>
-            <p class="section-subtitle">Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe.</p>
+            <h3>{% trans "Activite recente" %}</h3>
+            <p class="section-subtitle">{% trans "Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe." %}</p>
 
             {% if recent_activity %}
             <div class="activity-list">
@@ -493,45 +494,45 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div class="empty-hint">Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone.</div>
+            <div class="empty-hint">{% trans "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone." %}</div>
             {% endif %}
         </section>
     </div>
 
     <div>
         <section class="section-card">
-            <h3>Resume abonnement</h3>
-            <p class="section-subtitle">Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise.</p>
+            <h3>{% trans "Resume abonnement" %}</h3>
+            <p class="section-subtitle">{% trans "Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise." %}</p>
 
             {% if subscription %}
             <div class="list-card">
                 <ul>
-                    <li><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></li>
-                    <li><span>Statut</span><strong>{{ subscription.get_statut_display }}</strong></li>
-                    <li><span>Date de debut</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></li>
-                    <li><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></li>
+                    <li><span>{% trans "Plan actuel" %}</span><strong>{{ subscription.plan.nom }}</strong></li>
+                    <li><span>{% trans "Statut" %}</span><strong>{{ subscription.get_statut_display }}</strong></li>
+                    <li><span>{% trans "Date de debut" %}</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></li>
+                    <li><span>{% trans "Date de fin" %}</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></li>
                 </ul>
             </div>
             {% else %}
-            <div class="empty-hint">Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit.</div>
+            <div class="empty-hint">{% trans "Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit." %}</div>
             {% endif %}
         </section>
 
         <section class="section-card" style="margin-top:20px;">
-            <h3>Alertes stock</h3>
-            <p class="section-subtitle">Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque.</p>
+            <h3>{% trans "Alertes stock" %}</h3>
+            <p class="section-subtitle">{% trans "Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque." %}</p>
 
             <div class="stock-alert-shell">
                 <div class="stock-alert-summary">
                     <div class="stock-alert-card rupture">
-                        <span>Produits en rupture</span>
+                        <span>{% trans "Produits en rupture" %}</span>
                         <strong>{{ rupture_products_count }}</strong>
-                        <small>Quantite en stock inferieure ou egale a 0.</small>
+                        <small>{% trans "Quantite en stock inferieure ou egale a 0." %}</small>
                     </div>
                     <div class="stock-alert-card low">
-                        <span>Produits en stock faible</span>
+                        <span>{% trans "Produits en stock faible" %}</span>
                         <strong>{{ low_stock_products_count }}</strong>
-                        <small>Stock positif mais inferieur ou egal au seuil d'alerte.</small>
+                        <small>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</small>
                     </div>
                 </div>
 
@@ -542,41 +543,41 @@
                         <li class="stock-alert-item">
                             <div>
                                 <strong>{{ product.nom }}</strong>
-                                <span>Stock actuel : {{ product.quantite_stock }} | Seuil : {{ product.seuil_alerte }}</span>
+                                <span>{% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</span>
                             </div>
-                            <span class="stock-alert-badge rupture">Rupture</span>
+                            <span class="stock-alert-badge rupture">{% trans "Rupture" %}</span>
                         </li>
                         {% endfor %}
                         {% for product in low_stock_products %}
                         <li class="stock-alert-item">
                             <div>
                                 <strong>{{ product.nom }}</strong>
-                                <span>Stock actuel : {{ product.quantite_stock }} | Seuil : {{ product.seuil_alerte }}</span>
+                                <span>{% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</span>
                             </div>
-                            <span class="stock-alert-badge low">Stock faible</span>
+                            <span class="stock-alert-badge low">{% trans "Stock faible" %}</span>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 {% else %}
-                <div class="empty-hint">Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance.</div>
+                <div class="empty-hint">{% trans "Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
                 {% endif %}
 
                 <div>
-                    <a href="{% url 'product_list' %}" class="btn-link">Ouvrir le module Produits</a>
+                    <a href="{% url 'product_list' %}" class="btn-link">{% trans "Ouvrir le module Produits" %}</a>
                 </div>
             </div>
         </section>
 
         <section class="section-card" style="margin-top:20px;">
-            <h3>Demarrage rapide</h3>
-            <p class="section-subtitle">Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus.</p>
+            <h3>{% trans "Demarrage rapide" %}</h3>
+            <p class="section-subtitle">{% trans "Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus." %}</p>
             <div class="list-card">
                 <ul>
-                    <li><span>Ajouter un gestionnaire ou comptable</span><strong><a href="{% url 'user_create' %}" style="text-decoration:none; color:#0f766e;">Creer</a></strong></li>
-                    <li><span>Completer l'identite entreprise</span><strong><a href="{% url 'company_settings' %}" style="text-decoration:none; color:#0f766e;">Ouvrir</a></strong></li>
-                    <li><span>Creer une facture</span><strong><a href="{% url 'add_facture' %}" style="text-decoration:none; color:#0f766e;">Facturer</a></strong></li>
-                    <li><span>Analyser le journal d'activites</span><strong><a href="{% url 'activity_log_list' %}" style="text-decoration:none; color:#0f766e;">Consulter</a></strong></li>
+                    <li><span>{% trans "Ajouter un gestionnaire ou comptable" %}</span><strong><a href="{% url 'user_create' %}" style="text-decoration:none; color:#0f766e;">{% trans "Creer" %}</a></strong></li>
+                    <li><span>{% trans "Completer l'identite entreprise" %}</span><strong><a href="{% url 'company_settings' %}" style="text-decoration:none; color:#0f766e;">{% trans "Ouvrir" %}</a></strong></li>
+                    <li><span>{% trans "Creer une facture" %}</span><strong><a href="{% url 'add_facture' %}" style="text-decoration:none; color:#0f766e;">{% trans "Facturer" %}</a></strong></li>
+                    <li><span>{% trans "Analyser le journal d'activites" %}</span><strong><a href="{% url 'activity_log_list' %}" style="text-decoration:none; color:#0f766e;">{% trans "Consulter" %}</a></strong></li>
                 </ul>
             </div>
         </section>

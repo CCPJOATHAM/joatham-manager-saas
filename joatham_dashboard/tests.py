@@ -174,6 +174,25 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Origine recente des flux")
         self.assertContains(response, self.gestionnaire.username)
 
+    def test_accounting_navigation_shows_subscription_required_badge_during_trial(self):
+        trial_entreprise = create_entreprise("Entreprise Trial Navigation")
+        trial_owner = create_user("owner-trial-nav", "proprietaire", trial_entreprise)
+        AbonnementEntreprise.objects.create(
+            entreprise=trial_entreprise,
+            plan=self.plan,
+            statut=AbonnementEntreprise.Statut.ESSAI,
+            date_debut=datetime.now().date(),
+            date_fin=datetime.now().date() + timedelta(days=14),
+            essai=True,
+            actif=True,
+        )
+
+        self.client.force_login(trial_owner)
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertContains(response, "Comptabilite")
+        self.assertContains(response, "Abonnement requis")
+
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class OnboardingSignupTests(TestCase):

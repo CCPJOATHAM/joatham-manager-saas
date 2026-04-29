@@ -1,33 +1,34 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 
 User = get_user_model()
 
 
 ROLE_CHOICES = [
-    (User.Role.GESTIONNAIRE, "Gestionnaire"),
-    (User.Role.COMPTABLE, "Comptable"),
+    (User.Role.GESTIONNAIRE, _("Gestionnaire")),
+    (User.Role.COMPTABLE, _("Comptable")),
 ]
 
 
 class UserManagementForm(forms.Form):
-    full_name = forms.CharField(max_length=150, label="Nom")
-    email = forms.EmailField(label="E-mail")
-    telephone = forms.CharField(max_length=50, required=False, label="Téléphone")
-    role = forms.ChoiceField(choices=ROLE_CHOICES, label="Rôle")
+    full_name = forms.CharField(max_length=150, label=_("Nom"))
+    email = forms.EmailField(label=_("E-mail"))
+    telephone = forms.CharField(max_length=50, required=False, label=_("Telephone"))
+    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Role"))
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput,
-        label="Mot de passe",
-        help_text="Laissez ce champ vide lors d'une modification pour conserver le mot de passe actuel.",
+        label=_("Mot de passe"),
+        help_text=_("Laissez ce champ vide lors d'une modification pour conserver le mot de passe actuel."),
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["full_name"].widget.attrs.update(
             {
-                "placeholder": "Nom complet de l'utilisateur",
+                "placeholder": _("Nom complet de l'utilisateur"),
                 "autocomplete": "name",
             }
         )
@@ -43,10 +44,10 @@ class UserManagementForm(forms.Form):
                 "autocomplete": "tel",
             }
         )
-        self.fields["role"].widget.attrs.update({"aria-label": "Rôle"})
+        self.fields["role"].widget.attrs.update({"aria-label": _("Role")})
         self.fields["password"].widget.attrs.update(
             {
-                "placeholder": "Mot de passe sécurisé",
+                "placeholder": _("Mot de passe securise"),
                 "autocomplete": "new-password",
             }
         )

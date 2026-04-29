@@ -51,6 +51,23 @@
         font-weight: 700;
     }
 
+    .module-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .module-pill {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #3730a3;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
     .status-pill {
         display: inline-flex;
         padding: 6px 10px;
@@ -70,7 +87,8 @@
     }
 
     .status-expire,
-    .status-suspendu {
+    .status-suspendu,
+    .status-annule {
         background: #fff1f2;
         color: #be123c;
     }
@@ -185,6 +203,25 @@
             <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
             <div class="detail-row"><span>Période d'essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
             <div class="detail-row"><span>Accès courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
+            <div class="detail-row"><span>Renouvellement</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
+        </div>
+        <h2 style="margin-top:22px;">Modules et limites</h2>
+        {% if subscription.plan.modules_inclus %}
+        <div class="module-list">
+            {% for module in subscription.plan.modules_inclus %}
+            <span class="module-pill">{{ module }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="info-box">Tous les modules autorisés par votre abonnement restent disponibles.</div>
+        {% endif %}
+        <div class="details" style="margin-top:14px;">
+            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Comptabilité</span><strong>{% if subscription.plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
+            <div class="detail-row"><span>Exports</span><strong>{% if subscription.plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
         </div>
         {% else %}
         <div class="empty-state">
@@ -224,7 +261,7 @@
                 <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
                 <span>Période : {{ paiement.get_duree_display }}</span>
                 <span>Montant de référence : {{ paiement.montant_usd|default:paiement.montant }} USD</span>
-                <span>Montant estimatif local : {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:entreprise.devise }}</span>
+                <span>Montant estimatif local : {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:currency_code }}</span>
             </article>
             {% endfor %}
         </div>
@@ -247,6 +284,7 @@
     </p>
 
     <div class="subscription-actions">
+        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Choisir un plan</a>
         {% if subscription %}
             {% if subscription.statut == "essai" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Passer au plan payant</a>

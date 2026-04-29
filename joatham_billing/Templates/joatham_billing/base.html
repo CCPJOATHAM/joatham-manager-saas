@@ -1,13 +1,14 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Facturation | JOATHAM Manager{% endblock %}
-{% block content_title %}Facturation{% endblock %}
-{% block content_subtitle %}Suivi des factures, paiements et documents PDF de l'entreprise.{% endblock %}
+{% block page_title %}{% trans "Facturation" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Facturation" %}{% endblock %}
+{% block content_subtitle %}{% trans "Suivi des factures, paiements et documents PDF de l'entreprise." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'facture_list' %}" class="btn-link">Liste des factures</a>
+<a href="{% url 'facture_list' %}" class="btn-link">{% trans "Liste des factures" %}</a>
 {% if can_manage_factures_ui and "/factures/add/" != request.path %}
-<a href="{% url 'add_facture' %}" class="btn-link primary">Nouvelle facture</a>
+<a href="{% url 'add_facture' %}" class="btn-link primary">{% trans "Nouvelle facture" %}</a>
 {% endif %}
 {% endblock %}
 

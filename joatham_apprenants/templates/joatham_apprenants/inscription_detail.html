@@ -1,20 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <title>Detail inscription - JOATHAM Manager</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
-        .container { max-width: 980px; margin: 0 auto; }
-        .card { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); margin-bottom: 20px; }
-        .actions a { display: inline-block; padding: 10px 14px; background: #0f766e; color: #fff; border-radius: 6px; text-decoration: none; margin-right: 10px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-        th { background: #f9fafb; }
-    </style>
-</head>
-<body>
-<div class="container">
+{% extends "joatham_apprenants/base.html" %}
+{% load i18n %}
+
+{% block apprenants_title %}{% trans "Detail inscription" %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Paiements et liaison facturation de l'inscription." %}{% endblock %}
+{% block apprenants_content %}
     <div class="actions" style="margin-bottom:20px;">
         <a href="{% url 'apprenant_list' %}">Retour</a>
         {% if can_record_apprenant_payments_ui %}
@@ -152,6 +141,4 @@
             </tbody>
         </table>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}

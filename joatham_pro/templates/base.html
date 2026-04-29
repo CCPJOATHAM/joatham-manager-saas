@@ -1,11 +1,14 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <title>JOATHAM</title>
 </head>
 <body>
 
-<h2>Bienvenue {{ request.user.username }}</h2>
+{% include "includes/language_selector.html" with language_selector_id="simple-language-select" %}
+
+<h2>{% trans "Bienvenue" %} {{ request.user.username }}</h2>
 
 {% block content %}{% endblock %}
 

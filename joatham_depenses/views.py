@@ -6,7 +6,7 @@ import qrcode
 from django.shortcuts import redirect, render
 
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
-from core.services.currency import format_amount_for_entreprise, format_decimal_number, get_currency_display
+from core.services.currency import format_amount_for_entreprise, format_decimal_number, get_currency_code, get_currency_display
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_billing.pdf import render_pdf_response
@@ -89,7 +89,7 @@ def depenses_list(request):
             "global_total_display": format_amount_for_entreprise(kpis["total"], entreprise),
             "evolution_display": kpis["evolution_display"],
             "evolution_direction": kpis["evolution_direction"],
-            "currency_code": getattr(entreprise, "devise", "CDF"),
+            "currency_code": get_currency_code(entreprise),
             "date_debut": date_debut or "",
             "date_fin": date_fin or "",
             "search": recherche or "",
@@ -140,8 +140,8 @@ def depenses_pdf(request):
             "total": total,
             "total_display": format_amount_for_entreprise(total, entreprise),
             "entreprise": entreprise,
-            "currency_code": getattr(entreprise, "devise", "CDF"),
-            "currency_display": get_currency_display(getattr(entreprise, "devise", "CDF")),
+            "currency_code": get_currency_code(entreprise),
+            "currency_display": get_currency_display(entreprise),
             "entreprise_identity": entreprise_identity,
             "date_generation": date_generation,
             "date_footer": datetime.now().strftime("%d/%m/%Y a %H:%M:%S"),

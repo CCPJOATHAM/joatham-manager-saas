@@ -1,0 +1,242 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Entreprises | JOATHAM Manager{% endblock %}
+{% block content_title %}Gestion entreprises{% endblock %}
+{% block content_subtitle %}Administration des entreprises clientes, avec desactivation logique et conservation des donnees.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .company-toolbar {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.35fr) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .company-toolbar label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .company-toolbar input,
+    .company-toolbar select {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .company-table {
+        width: 100%;
+        min-width: 1040px;
+        border-collapse: collapse;
+    }
+
+    .company-table th,
+    .company-table td {
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .company-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .company-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .stacked {
+        display: grid;
+        gap: 6px;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+    }
+
+    .status-subscription {
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .btn-small.danger {
+        background: #fff1f2;
+        border-color: #fecdd3;
+        color: #be123c;
+    }
+
+    @media (max-width: 900px) {
+        .company-toolbar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<form method="get" class="company-toolbar">
+    <div>
+        <label for="id_q">Rechercher une entreprise</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email">
+    </div>
+    <div>
+        <label for="id_status">Statut</label>
+        <select id="id_status" name="status">
+            <option value="" {% if selected_status == "" %}selected{% endif %}>Toutes</option>
+            <option value="active" {% if selected_status == "active" %}selected{% endif %}>Actives</option>
+            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Desactivees</option>
+        </select>
+    </div>
+    <div class="actions">
+        <button type="submit" class="btn-small">Filtrer</button>
+        <a href="{% url 'super_admin_company_list' %}" class="btn-small">Reinitialiser</a>
+    </div>
+</form>
+
+<div class="table-shell">
+    <table class="company-table">
+        <thead>
+            <tr>
+                <th>Nom entreprise</th>
+                <th>Contact principal</th>
+                <th>Email</th>
+                <th>Statut</th>
+                <th>Abonnement actuel</th>
+                <th>Date creation</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entreprise in entreprises %}
+            {% with subscription=entreprise.abonnement_entreprise %}
+            <tr id="entreprise-{{ entreprise.id }}">
+                <td>
+                    <div class="stacked">
+                        <strong>{{ entreprise.nom }}</strong>
+                        {% if entreprise.raison_sociale %}
+                        <span class="muted">{{ entreprise.raison_sociale }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="stacked">
+                        <strong>{{ entreprise.owner_username|default:"-" }}</strong>
+                        {% if entreprise.telephone %}
+                        <span class="muted">{{ entreprise.telephone }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</td>
+                <td>
+                    {% if entreprise.is_active %}
+                    <span class="status-badge status-active">Active</span>
+                    {% else %}
+                    <span class="status-badge status-inactive">Desactivee</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if subscription %}
+                    <div class="stacked">
+                        <span class="status-badge status-subscription">{{ subscription.get_statut_display }}</span>
+                        <span>{{ subscription.plan.nom }}</span>
+                        {% if subscription.date_fin %}
+                        <span class="muted">Echeance : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="muted">Aucun abonnement</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entreprise.date_creation %}
+                    {{ entreprise.date_creation|date:"d/m/Y" }}
+                    {% else %}
+                    <span class="muted">Non disponible</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="#entreprise-{{ entreprise.id }}" class="btn-small">Voir</a>
+                        {% if entreprise.is_active %}
+                        {% url 'super_admin_company_deactivate' entreprise.pk as deactivate_url %}
+                        <a href="{{ deactivate_url }}" class="btn-small danger">Desactiver</a>
+                        {% else %}
+                        <span class="muted">Desactivee</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="7">Aucune entreprise ne correspond aux filtres.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

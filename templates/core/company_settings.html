@@ -1,8 +1,9 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <meta charset="utf-8">
-    <title>Organisation | JOATHAM Manager</title>
+    <title>{% trans "Organisation" %} | JOATHAM Manager</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 24px; }
         .container { max-width: 960px; margin: 0 auto; }
@@ -22,14 +23,18 @@
 </head>
 <body>
 {{ country_currency_map|json_script:"company-country-currency-map" }}
+
 <div class="container">
     <div class="topbar">
         <div>
-            <h1 style="margin:0;">Profil de l'organisation</h1>
-            <p style="margin:8px 0 0; color:#64748b;">Espace interne de votre entreprise pour les coordonnees, la facturation et les references legales.</p>
+            <h1 style="margin:0;">{% trans "Profil de l'organisation" %}</h1>
+            <p style="margin:8px 0 0; color:#64748b;">
+                {% trans "Espace interne de votre entreprise pour les coordonnées, la facturation et les références légales." %}
+            </p>
         </div>
-        <a href="{% url 'admin_dashboard' %}">Retour au dashboard</a>
+        <a href="{% url 'admin_dashboard' %}">{% trans "Retour au dashboard" %}</a>
     </div>
+
     {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -37,58 +42,42 @@
         {% endfor %}
     </div>
     {% endif %}
+
     <div class="card">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="grid">
-                <div class="field"><label for="{{ form.nom.id_for_label }}">Nom de l'organisation</label>{{ form.nom }}</div>
-                <div class="field"><label for="{{ form.raison_sociale.id_for_label }}">Raison sociale</label>{{ form.raison_sociale }}</div>
-                <div class="field field-full"><label for="{{ form.adresse.id_for_label }}">Adresse</label>{{ form.adresse }}</div>
-                <div class="field"><label for="{{ form.ville.id_for_label }}">Ville</label>{{ form.ville }}</div>
-                <div class="field"><label for="{{ form.pays.id_for_label }}">Pays</label>{{ form.pays }}</div>
-                <div class="field"><label for="{{ form.devise.id_for_label }}">Devise</label>{{ form.devise }}</div>
-                <div class="field"><label for="{{ form.taux_tva_defaut.id_for_label }}">TVA par defaut (%)</label>{{ form.taux_tva_defaut }}</div>
-                <div class="field"><label for="{{ form.referentiel_comptable.id_for_label }}">Referentiel comptable</label>{{ form.referentiel_comptable }}</div>
-                <div class="field"><label for="{{ form.telephone.id_for_label }}">Telephone</label>{{ form.telephone }}</div>
-                <div class="field"><label for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}</div>
-                <div class="field"><label for="{{ form.banque.id_for_label }}">Banque</label>{{ form.banque }}</div>
-                <div class="field"><label for="{{ form.compte_bancaire.id_for_label }}">Compte bancaire</label>{{ form.compte_bancaire }}</div>
-                <div class="field"><label for="{{ form.rccm.id_for_label }}">RCCM</label>{{ form.rccm }}</div>
-                <div class="field"><label for="{{ form.id_nat.id_for_label }}">ID NAT</label>{{ form.id_nat }}</div>
-                <div class="field"><label for="{{ form.numero_impot.id_for_label }}">Numero d'impot</label>{{ form.numero_impot }}</div>
+                <div class="field"><label for="{{ form.nom.id_for_label }}">{% trans "Nom de l'organisation" %}</label>{{ form.nom }}</div>
+                <div class="field"><label for="{{ form.raison_sociale.id_for_label }}">{% trans "Raison sociale" %}</label>{{ form.raison_sociale }}</div>
+                <div class="field field-full"><label for="{{ form.adresse.id_for_label }}">{% trans "Adresse" %}</label>{{ form.adresse }}</div>
+                <div class="field"><label for="{{ form.ville.id_for_label }}">{% trans "Ville" %}</label>{{ form.ville }}</div>
+                <div class="field"><label for="{{ form.pays.id_for_label }}">{% trans "Pays" %}</label>{{ form.pays }}</div>
+                <div class="field"><label for="{{ form.devise.id_for_label }}">{% trans "Devise" %}</label>{{ form.devise }}</div>
+                <div class="field"><label for="{{ form.taux_tva_defaut.id_for_label }}">{% trans "TVA par défaut (%)" %}</label>{{ form.taux_tva_defaut }}</div>
+                <div class="field"><label for="{{ form.referentiel_comptable.id_for_label }}">{% trans "Référentiel comptable" %}</label>{{ form.referentiel_comptable }}</div>
+                <div class="field"><label for="{{ form.telephone.id_for_label }}">{% trans "Téléphone" %}</label>{{ form.telephone }}</div>
+                <div class="field"><label for="{{ form.email.id_for_label }}">{% trans "Email" %}</label>{{ form.email }}</div>
+                <div class="field"><label for="{{ form.banque.id_for_label }}">{% trans "Banque" %}</label>{{ form.banque }}</div>
+                <div class="field"><label for="{{ form.compte_bancaire.id_for_label }}">{% trans "Compte bancaire" %}</label>{{ form.compte_bancaire }}</div>
+                <div class="field"><label for="{{ form.rccm.id_for_label }}">{% trans "RCCM" %}</label>{{ form.rccm }}</div>
+                <div class="field"><label for="{{ form.id_nat.id_for_label }}">{% trans "ID NAT" %}</label>{{ form.id_nat }}</div>
+                <div class="field"><label for="{{ form.numero_impot.id_for_label }}">{% trans "Numéro d'impôt" %}</label>{{ form.numero_impot }}</div>
                 <div class="field">
-                    <label for="{{ form.logo.id_for_label }}">Logo</label>
+                    <label for="{{ form.logo.id_for_label }}">{% trans "Logo" %}</label>
                     {{ form.logo }}
                     {% if entreprise.logo %}
-                    <div class="logo-preview"><img src="{{ entreprise.logo.url }}" alt="Logo entreprise"></div>
+                    <div class="logo-preview">
+                        <img src="{{ entreprise.logo.url }}" alt="{% trans 'Logo entreprise' %}">
+                    </div>
                     {% endif %}
                 </div>
             </div>
-            <p style="margin:16px 0 0; color:#64748b; font-size:13px;">Ces informations servent a vos documents et reglages internes. Le super admin plateforme ne les utilise pas comme console metier.</p>
-            <button type="submit">Enregistrer le profil</button>
+
+            <p style="margin:16px 0 0; color:#64748b; font-size:13px;">
+                {% trans "Ces informations servent à vos documents et réglages internes. Le super admin plateforme ne les utilise pas comme console métier." %}
+            </p>
+
+            <button type="submit">{% trans "Enregistrer le profil" %}</button>
         </form>
     </div>
 </div>
-<script>
-    const companyCountryCurrencyMap = JSON.parse(document.getElementById("company-country-currency-map").textContent);
-    const companyCountryField = document.getElementById("id_pays");
-    const companyCurrencyField = document.getElementById("id_devise");
-    let companyCurrencyTouched = false;
-
-    if (companyCurrencyField) {
-        companyCurrencyField.addEventListener("change", function () {
-            companyCurrencyTouched = true;
-        });
-    }
-
-    if (companyCountryField && companyCurrencyField) {
-        companyCountryField.addEventListener("change", function () {
-            const suggested = companyCountryCurrencyMap[companyCountryField.value];
-            if (suggested && (!companyCurrencyTouched || !companyCurrencyField.value)) {
-                companyCurrencyField.value = suggested;
-            }
-        });
-    }
-</script>
-</body>
-</html>

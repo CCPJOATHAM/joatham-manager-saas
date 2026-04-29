@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Connexion | {{ app_name }}</title>
+    <title>{% trans "Connexion" %} | {{ app_name }}</title>
     <style>
         :root {
             --bg: #f3f6fb;
@@ -222,6 +223,55 @@
             text-align: center;
         }
 
+        .auth-language {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 2;
+        }
+
+        .language-switcher {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid var(--line);
+        }
+
+        .language-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .language-select,
+        .language-submit {
+            min-height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            font: inherit;
+        }
+
+        .language-select {
+            padding: 0 28px 0 10px;
+        }
+
+        .language-submit {
+            padding: 0 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         @media (max-width: 900px) {
             .login-shell {
                 grid-template-columns: 1fr;
@@ -235,25 +285,30 @@
     </style>
 </head>
 <body>
+    <div class="auth-language">
+        {% include "includes/language_selector.html" with language_selector_id="login-language-select" %}
+    </div>
     <main class="login-shell">
         <section class="brand-panel">
             <div class="brand-kicker">JOATHAM Manager</div>
-            <h1>Pilotez votre entreprise dans une interface SaaS claire et professionnelle.</h1>
+            <h1>{% trans "Pilotez votre entreprise dans une interface SaaS claire et professionnelle." %}</h1>
             <p>
-                Facturation, dépenses, comptabilité, apprenants, audit et abonnement dans un environnement
-                unique, structuré pour une gestion multi-entreprises propre et fiable.
+                {% blocktrans trimmed %}
+                Facturation, depenses, comptabilite, apprenants, audit et abonnement dans un environnement
+                unique, structure pour une gestion multi-entreprises propre et fiable.
+                {% endblocktrans %}
             </p>
             <ul class="feature-list">
-                <li>Navigation adaptée au rôle après connexion</li>
-                <li>Documents professionnels et paramètres d'entreprise centralisés</li>
-                <li>Base SaaS progressive, maintenable et sécurisée</li>
+                <li>{% trans "Navigation adaptee au role apres connexion" %}</li>
+                <li>{% trans "Documents professionnels et parametres d'entreprise centralises" %}</li>
+                <li>{% trans "Base SaaS progressive, maintenable et securisee" %}</li>
             </ul>
         </section>
 
         <section class="login-card">
             <div>
-                <h2>Connexion</h2>
-                <p class="subtitle">Accédez à votre espace JOATHAM Manager pour gérer votre activité selon votre rôle, ou créer votre entreprise si vous démarrez.</p>
+                <h2>{% trans "Connexion" %}</h2>
+                <p class="subtitle">{% trans "Accedez a votre espace JOATHAM Manager pour gerer votre activite selon votre role, ou creer votre entreprise si vous demarrez." %}</p>
             </div>
 
             {% if error %}
@@ -264,29 +319,29 @@
                 {% csrf_token %}
 
                 <div class="field">
-                    <label for="id_username">Email ou nom d'utilisateur</label>
+                    <label for="id_username">{% trans "Email ou nom d'utilisateur" %}</label>
                     <div class="input-wrap">
                         <input id="id_username" type="text" name="username" autocomplete="username" required>
                     </div>
                 </div>
 
                 <div class="field">
-                    <label for="id_password">Mot de passe</label>
+                    <label for="id_password">{% trans "Mot de passe" %}</label>
                     <div class="input-wrap">
                         <input id="id_password" type="password" name="password" autocomplete="current-password" required>
-                        <button type="button" class="toggle-password" id="togglePassword">Afficher</button>
+                        <button type="button" class="toggle-password" id="togglePassword">{% trans "Afficher" %}</button>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Se connecter</button>
+                <button type="submit" class="submit-btn">{% trans "Se connecter" %}</button>
             </form>
 
             <div class="helper-links">
-                <span>Nouveau sur JOATHAM Manager ? <a href="{% url 'signup' %}">Créer mon entreprise et commencer mon essai gratuit</a></span>
-                <span><a href="{% url 'password_reset' %}">Mot de passe oublie ?</a></span>
+                <span>{% trans "Nouveau sur JOATHAM Manager ?" %} <a href="{% url 'signup' %}">{% trans "Creer mon entreprise et commencer mon essai gratuit" %}</a></span>
+                <span><a href="{% url 'password_reset' %}">{% trans "Mot de passe oublie ?" %}</a></span>
             </div>
 
-            <p class="footnote">Connexion sécurisée à l’espace entreprise JOATHAM Manager.</p>
+            <p class="footnote">{% trans "Connexion securisee a l'espace entreprise JOATHAM Manager." %}</p>
         </section>
     </main>
 
@@ -298,7 +353,7 @@
             togglePasswordButton.addEventListener("click", function () {
                 const isHidden = passwordInput.type === "password";
                 passwordInput.type = isHidden ? "text" : "password";
-                togglePasswordButton.textContent = isHidden ? "Masquer" : "Afficher";
+                togglePasswordButton.textContent = isHidden ? "{% trans 'Masquer' %}" : "{% trans 'Afficher' %}";
             });
         }
     </script>

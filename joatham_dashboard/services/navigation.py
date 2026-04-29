@@ -1,6 +1,8 @@
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
-from core.services.product_policy import can_access_module
+from core.services.product_policy import can_access_module, get_module_access_state
+from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import (
     get_default_dashboard_name,
     get_user_role,
@@ -10,15 +12,64 @@ from joatham_users.permissions import (
 
 NAV_ITEMS = [
     {
-        "label": "Pilotage SaaS",
+        "label": _("Pilotage SaaS"),
         "url_name": "super_admin_dashboard",
+        "url": "/super-admin/",
         "permission": "superadmin.view",
         "module": None,
         "roles": ["super_admin"],
-        "prefixes": ["/super-admin/"],
+        "exact_paths": ["/super-admin/"],
     },
     {
-        "label": "Dashboard",
+        "label": _("Entreprises"),
+        "url_name": "super_admin_company_list",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/entreprises/"],
+    },
+    {
+        "label": _("Utilisateurs"),
+        "url_name": "super_admin_user_list",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/utilisateurs/"],
+    },
+    {
+        "label": _("Abonnements"),
+        "url_name": "super_admin_subscription_list",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/abonnements/"],
+    },
+    {
+        "label": _("Audit / logs"),
+        "url_name": "super_admin_audit_list",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/audit/"],
+    },
+    {
+        "label": _("Parametres plateforme"),
+        "url_name": "super_admin_settings",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/parametres/"],
+    },
+    {
+        "label": _("Taux de change"),
+        "url_name": "super_admin_exchange_rate_list",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/taux-change/"],
+    },
+    {
+        "label": _("Dashboard"),
         "url_name": None,
         "permission": None,
         "module": "dashboard",
@@ -31,70 +82,70 @@ NAV_ITEMS = [
         ],
     },
     {
-        "label": "Organisation",
+        "label": _("Organisation"),
         "url_name": "company_settings",
         "permission": "company.manage",
         "module": None,
         "prefixes": ["/entreprise/"],
     },
     {
-        "label": "Clients",
+        "label": _("Clients"),
         "url_name": "client_list",
         "permission": "clients.view",
         "module": "clients",
         "prefixes": ["/clients/"],
     },
     {
-        "label": "Services",
+        "label": _("Services"),
         "url_name": "service_list",
         "permission": "services.view",
         "module": "services",
         "prefixes": ["/services/"],
     },
     {
-        "label": "Depenses",
+        "label": _("Depenses"),
         "url_name": "depenses",
         "permission": "expenses.view",
         "module": "expenses",
         "prefixes": ["/depenses/"],
     },
     {
-        "label": "Produits",
+        "label": _("Produits"),
         "url_name": "product_list",
         "permission": "products.view",
         "module": "products",
         "prefixes": ["/produits/"],
     },
     {
-        "label": "Factures",
+        "label": _("Factures"),
         "url_name": "facture_list",
         "permission": "billing.view",
         "module": "billing",
         "prefixes": ["/factures/"],
     },
     {
-        "label": "Comptabilite",
+        "label": _("Comptabilite"),
         "url_name": "compta_dashboard",
         "permission": "accounting.view",
         "module": "accounting",
         "prefixes": ["/compta/"],
     },
     {
-        "label": "Apprenants",
+        "label": _("Apprenants"),
         "url_name": "apprenant_list",
         "permission": "apprenants.view",
         "module": "apprenants",
         "prefixes": ["/apprenants/"],
     },
     {
-        "label": "Utilisateurs",
+        "label": _("Utilisateurs"),
         "url_name": "user_list",
         "permission": "users.manage",
         "module": "users",
         "prefixes": ["/utilisateurs/"],
     },
     {
-        "label": "Audit",
+        "label": _("Audit"),
         "url_name": "activity_log_list",
         "permission": "audit.view",
         "module": "audit",
@@ -102,7 +153,7 @@ NAV_ITEMS = [
         "prefixes": ["/audit/"],
     },
     {
-        "label": "Mon abonnement",
+        "label": _("Mon abonnement"),
         "url_name": "subscription_overview",
         "permission": "subscription.view",
         "module": "subscription",
@@ -112,29 +163,51 @@ NAV_ITEMS = [
 
 
 ROLE_LABELS = {
-    "super_admin": "Super admin",
-    "proprietaire": "Proprietaire",
-    "gestionnaire": "Gestionnaire",
-    "comptable": "Comptable",
+    "super_admin": _("Super admin"),
+    "proprietaire": _("Proprietaire"),
+    "gestionnaire": _("Gestionnaire"),
+    "comptable": _("Comptable"),
 }
 
 
-def _is_item_visible(user, item):
+def _get_module_state(user, module_name):
+    entreprise = get_user_entreprise_or_raise(user)
+    return get_module_access_state(entreprise, module_name)
+
+
+def _get_item_state(user, item):
     roles = item.get("roles")
     if roles and get_user_role(user) not in roles:
-        return False
+        return {"visible": False}
 
     permission = item.get("permission")
     if permission and not user_has_permission(user, permission):
-        return False
+        return {"visible": False}
 
     module_name = item.get("module")
     if module_name:
         try:
-            return can_access_module(user, module_name)
+            if can_access_module(user, module_name):
+                return {"visible": True}
+            if module_name == "accounting":
+                return {
+                    "visible": True,
+                    "badge": _("Abonnement requis"),
+                }
+            return {"visible": False}
         except Exception:
-            return False
-    return True
+            if module_name == "accounting":
+                try:
+                    state = _get_module_state(user, module_name)
+                except Exception:
+                    return {"visible": False}
+                if not state.get("allowed"):
+                    return {
+                        "visible": True,
+                        "badge": _("Abonnement requis"),
+                    }
+            return {"visible": False}
+    return {"visible": True}
 
 
 def build_navigation_for_request(request):
@@ -146,16 +219,29 @@ def build_navigation_for_request(request):
     items = []
 
     for item in NAV_ITEMS:
-        if not _is_item_visible(user, item):
+        item_state = _get_item_state(user, item)
+        if not item_state.get("visible"):
             continue
 
-        url_name = item["url_name"] or get_default_dashboard_name(user)
-        url = reverse(url_name)
+        is_disabled = bool(item.get("disabled"))
+        url = ""
+        if not is_disabled:
+            if item.get("url"):
+                url = item["url"]
+            else:
+                url_name = item["url_name"] or get_default_dashboard_name(user)
+                url = reverse(url_name)
+            if item.get("url_fragment"):
+                url = f"{url}#{item['url_fragment']}"
+        exact_paths = item.get("exact_paths", [])
+        prefixes = item.get("prefixes", [])
         items.append(
             {
                 "label": item["label"],
                 "url": url,
-                "is_active": any(current_path.startswith(prefix) for prefix in item["prefixes"]),
+                "is_active": not is_disabled and (current_path in exact_paths or any(current_path.startswith(prefix) for prefix in prefixes)),
+                "badge": item_state.get("badge") or item.get("badge"),
+                "is_disabled": is_disabled,
             }
         )
 

@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inscription | {{ app_name }}</title>
+    <title>{% trans "Inscription" %} | {{ app_name }}</title>
     <style>
         :root {
             --bg: #f3f6fb;
@@ -186,6 +187,55 @@
             font-weight: 600;
         }
 
+        .auth-language {
+            max-width: 1220px;
+            margin: 0 auto 12px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .language-switcher {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid var(--line);
+        }
+
+        .language-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .language-select,
+        .language-submit {
+            min-height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            font: inherit;
+        }
+
+        .language-select {
+            padding: 0 28px 0 10px;
+        }
+
+        .language-submit {
+            padding: 0 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         @media (max-width: 980px) {
             .shell {
                 grid-template-columns: 1fr;
@@ -204,25 +254,30 @@
 </head>
 <body>
     {{ country_currency_map|json_script:"country-currency-map" }}
+    <div class="auth-language">
+        {% include "includes/language_selector.html" with language_selector_id="signup-language-select" %}
+    </div>
     <main class="shell">
         <section class="brand-panel">
-            <div class="brand-kicker">Parcours SaaS</div>
-            <h1>Créez votre entreprise et commencez votre essai JOATHAM Manager.</h1>
+            <div class="brand-kicker">{% trans "Parcours SaaS" %}</div>
+            <h1>{% trans "Creez votre entreprise et commencez votre essai JOATHAM Manager." %}</h1>
             <p>
-                En quelques informations, vous obtenez votre espace propriétaire, votre entreprise,
-                une devise par défaut selon votre pays et un démarrage propre sur le socle SaaS.
+                {% blocktrans trimmed %}
+                En quelques informations, vous obtenez votre espace proprietaire, votre entreprise,
+                une devise par defaut selon votre pays et un demarrage propre sur le socle SaaS.
+                {% endblocktrans %}
             </p>
 
             <div class="steps">
-                <div>1. Créez votre entreprise et votre compte propriétaire</div>
-                <div>2. Le pays suggère automatiquement la devise par défaut</div>
-                <div>3. L'essai démarre et vous accédez directement à votre tableau de bord</div>
+                <div>{% trans "1. Creez votre entreprise et votre compte proprietaire" %}</div>
+                <div>{% trans "2. Le pays suggere automatiquement la devise par defaut" %}</div>
+                <div>{% trans "3. L'essai demarre et vous accedez directement a votre tableau de bord" %}</div>
             </div>
         </section>
 
         <section class="form-panel">
-            <h2>Inscription entreprise</h2>
-            <p class="subtitle">Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloqués proprement.</p>
+            <h2>{% trans "Inscription entreprise" %}</h2>
+            <p class="subtitle">{% trans "Si vous avez deja un compte, connectez-vous directement. Les doublons d'e-mail sont bloques proprement." %}</p>
 
             {% if form.non_field_errors %}
             <div class="error-box">
@@ -236,65 +291,65 @@
                 {% csrf_token %}
                 <div class="form-grid">
                     <div class="field">
-                        <label for="{{ form.company_name.id_for_label }}">Nom de l'entreprise</label>
+                        <label for="{{ form.company_name.id_for_label }}">{% trans "Nom de l'entreprise" %}</label>
                         {{ form.company_name }}
                         {% for error in form.company_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.raison_sociale.id_for_label }}">Raison sociale</label>
+                        <label for="{{ form.raison_sociale.id_for_label }}">{% trans "Raison sociale" %}</label>
                         {{ form.raison_sociale }}
                         {% for error in form.raison_sociale.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field full">
-                        <label for="{{ form.owner_full_name.id_for_label }}">Nom complet du propriétaire</label>
+                        <label for="{{ form.owner_full_name.id_for_label }}">{% trans "Nom complet du proprietaire" %}</label>
                         {{ form.owner_full_name }}
                         {% for error in form.owner_full_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.email.id_for_label }}">E-mail</label>
+                        <label for="{{ form.email.id_for_label }}">{% trans "E-mail" %}</label>
                         {{ form.email }}
                         {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.telephone.id_for_label }}">Telephone</label>
+                        <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
                         {{ form.telephone }}
                         {% for error in form.telephone.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.pays.id_for_label }}">Pays</label>
+                        <label for="{{ form.pays.id_for_label }}">{% trans "Pays" %}</label>
                         {{ form.pays }}
                         {% for error in form.pays.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.devise.id_for_label }}">Devise</label>
+                        <label for="{{ form.devise.id_for_label }}">{% trans "Devise" %}</label>
                         {{ form.devise }}
                         {% for error in form.devise.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                        <label for="{{ form.password.id_for_label }}">{% trans "Mot de passe" %}</label>
                         {{ form.password }}
                         {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.password_confirm.id_for_label }}">Confirmation du mot de passe</label>
+                        <label for="{{ form.password_confirm.id_for_label }}">{% trans "Confirmation du mot de passe" %}</label>
                         {{ form.password_confirm }}
                         {% for error in form.password_confirm.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Creer mon entreprise</button>
+                <button type="submit" class="submit-btn">{% trans "Creer mon entreprise" %}</button>
             </form>
 
             <p class="helper">
-                Vous avez deja un compte ? <a href="{% url 'login' %}">Se connecter</a>
+                {% trans "Vous avez deja un compte ?" %} <a href="{% url 'login' %}">{% trans "Se connecter" %}</a>
             </p>
         </section>
     </main>

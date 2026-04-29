@@ -1,0 +1,422 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: JOATHAM Manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: JOATHAM Manager\n"
+"Language-Team: Portuguese\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Dashboard Proprietaire"
+msgstr "Painel do proprietario"
+
+msgid "Dashboard proprietaire"
+msgstr "Painel do proprietario"
+
+msgid "Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle."
+msgstr "Sua pagina inicial do produto para gerir a empresa, as equipes, as financas e os acessos SaaS a partir de um unico ponto de controle."
+
+msgid "Ajouter un utilisateur"
+msgstr "Adicionar usuario"
+
+msgid "Abonnement"
+msgstr "Assinatura"
+
+msgid "Controle des flux"
+msgstr "Controle de fluxos"
+
+msgid "Bienvenue dans votre cockpit JOATHAM Manager"
+msgstr "Bem-vindo ao seu cockpit JOATHAM Manager"
+
+msgid "Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour."
+msgstr "Veja de relance os indicadores chave da empresa, os acessos rapidos aos modulos uteis e o estado geral do produto para agir mais rapido todos os dias."
+
+msgid "Factures"
+msgstr "Faturas"
+
+msgid "Chiffre d'affaires"
+msgstr "Faturamento"
+
+msgid "Facturation emise a date"
+msgstr "Faturamento emitido ate a data"
+
+msgid "Encaissements"
+msgstr "Recebimentos"
+
+msgid "facture(s) soldee(s)"
+msgstr "fatura(s) quitada(s)"
+
+msgid "Reste a encaisser"
+msgstr "Valor a receber"
+
+msgid "facture(s) a suivre"
+msgstr "fatura(s) a acompanhar"
+
+msgid "Portefeuille client"
+msgstr "Carteira de clientes"
+
+msgid "apprenant(s) actif(s)"
+msgstr "aluno(s) ativo(s)"
+
+msgid "Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise."
+msgstr "Atualize a identidade, a moeda, o IVA padrao e os parametros estruturais da empresa."
+
+msgid "Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire."
+msgstr "Gerencie contas de gestor e contador sem sair do seu espaco de proprietario."
+
+msgid "Accedez rapidement au portefeuille client et a la relation commerciale."
+msgstr "Acesse rapidamente a carteira de clientes e o relacionamento comercial."
+
+msgid "Consultez les sorties financieres et les rapports PDF correspondants."
+msgstr "Consulte as saidas financeiras e os relatorios PDF correspondentes."
+
+msgid "Suivez la facturation, les PDF et les paiements dans un espace premium."
+msgstr "Acompanhe o faturamento, os PDFs e os pagamentos em um espaco premium."
+
+msgid "Pilotez les apprenants, formations, inscriptions et paiements de formation."
+msgstr "Gerencie alunos, formacoes, inscricoes e pagamentos de formacao."
+
+msgid "Audit"
+msgstr "Auditoria"
+
+msgid "Relisez les actions sensibles et gardez une trace claire des operations produit."
+msgstr "Revise as acoes sensiveis e mantenha um registro claro das operacoes do produto."
+
+msgid "Consultez le plan en cours, le statut SaaS et la periode d'acces active."
+msgstr "Consulte o plano atual, o status SaaS e o periodo de acesso ativo."
+
+msgid "Vue de pilotage"
+msgstr "Visao de gestao"
+
+msgid "Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien."
+msgstr "Uma leitura rapida dos indicadores comerciais, financeiros e de produto para manter o rumo diariamente."
+
+msgid "Depenses cumulees"
+msgstr "Despesas acumuladas"
+
+msgid "Benefice estime"
+msgstr "Lucro estimado"
+
+msgid "TVA cumulee"
+msgstr "IVA acumulado"
+
+msgid "Facturation aujourd'hui"
+msgstr "Faturamento de hoje"
+
+msgid "Facturation ce mois"
+msgstr "Faturamento deste mes"
+
+msgid "Depenses ce mois"
+msgstr "Despesas deste mes"
+
+msgid "Activite recente"
+msgstr "Atividade recente"
+
+msgid "Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe."
+msgstr "Ultimas acoes importantes registradas na empresa para manter uma visao imediata do que acontece."
+
+msgid "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone."
+msgstr "Ainda nao ha atividade recente disponivel. As proximas acoes nos modulos de negocio alimentarao automaticamente esta area."
+
+msgid "Resume abonnement"
+msgstr "Resumo da assinatura"
+
+msgid "Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise."
+msgstr "Estado do produto e nivel de acesso SaaS atualmente associado a sua empresa."
+
+msgid "Plan actuel"
+msgstr "Plano atual"
+
+msgid "Statut"
+msgstr "Status"
+
+msgid "Date de debut"
+msgstr "Data de inicio"
+
+msgid "Date de fin"
+msgstr "Data de fim"
+
+msgid "Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit."
+msgstr "Ainda nao ha assinatura vinculada. Abra a area de assinatura para consultar ou regularizar o acesso ao produto."
+
+msgid "Alertes stock"
+msgstr "Alertas de estoque"
+
+msgid "Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque."
+msgstr "Identifique rapidamente produtos sem estoque ou proximos da ruptura para agir antes que uma necessidade do cliente seja bloqueada."
+
+msgid "Produits en rupture"
+msgstr "Produtos sem estoque"
+
+msgid "Quantite en stock inferieure ou egale a 0."
+msgstr "Quantidade em estoque inferior ou igual a 0."
+
+msgid "Produits en stock faible"
+msgstr "Produtos com estoque baixo"
+
+msgid "Stock positif mais inferieur ou egal au seuil d'alerte."
+msgstr "Estoque positivo, mas inferior ou igual ao limite de alerta."
+
+msgid "Stock actuel"
+msgstr "Estoque atual"
+
+msgid "Seuil"
+msgstr "Limite"
+
+msgid "Rupture"
+msgstr "Sem estoque"
+
+msgid "Stock faible"
+msgstr "Estoque baixo"
+
+msgid "Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance."
+msgstr "Nenhum alerta de estoque no momento. Seus produtos continuam acima dos limites de vigilancia."
+
+msgid "Ouvrir le module Produits"
+msgstr "Abrir o modulo Produtos"
+
+msgid "Demarrage rapide"
+msgstr "Inicio rapido"
+
+msgid "Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus."
+msgstr "Alguns pontos de entrada uteis para fazer a empresa avancar sem procurar nos menus."
+
+msgid "Ajouter un gestionnaire ou comptable"
+msgstr "Adicionar um gestor ou contador"
+
+msgid "Creer"
+msgstr "Criar"
+
+msgid "Completer l'identite entreprise"
+msgstr "Completar a identidade da empresa"
+
+msgid "Ouvrir"
+msgstr "Abrir"
+
+msgid "Creer une facture"
+msgstr "Criar uma fatura"
+
+msgid "Facturer"
+msgstr "Faturar"
+
+msgid "Analyser le journal d'activites"
+msgstr "Analisar o registro de atividades"
+
+msgid "Consulter"
+msgstr "Consultar"
+
+msgid "Dashboard"
+msgstr "Painel"
+
+msgid "Organisation"
+msgstr "Organizacao"
+
+msgid "Services"
+msgstr "Servicos"
+
+msgid "Mon abonnement"
+msgstr "Minha assinatura"
+
+msgid "Pilotage SaaS"
+msgstr "Gestao SaaS"
+
+msgid "Entreprises"
+msgstr "Empresas"
+
+msgid "Audit / logs"
+msgstr "Auditoria / logs"
+
+msgid "Super admin"
+msgstr "Super admin"
+
+msgid "Proprietaire"
+msgstr "Proprietario"
+
+msgid "Gestionnaire"
+msgstr "Gestor"
+
+msgid "Comptable"
+msgstr "Contador"
+
+msgid "Un espace de gestion structure pour une utilisation SaaS claire selon le role."
+msgstr "Um espaco de gestao estruturado para uso SaaS claro de acordo com o papel."
+
+msgid "Multi"
+msgstr "Multi"
+
+msgid "Français"
+msgstr "Francês"
+
+msgid "English"
+msgstr "Inglês"
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Español"
+msgstr "Espanhol"
+
+msgid "Langue"
+msgstr "Idioma"
+
+msgid "Changer"
+msgstr "Alterar"
+
+msgid "Connexion"
+msgstr "Entrar"
+
+msgid "Inscription"
+msgstr "Cadastro"
+
+msgid "Tableau de bord"
+msgstr "Painel"
+
+msgid "Vue d'ensemble de votre activite."
+msgstr "Visão geral da sua atividade."
+
+msgid "Deconnexion"
+msgstr "Sair"
+
+msgid "Entreprise"
+msgstr "Empresa"
+
+msgid "Plateforme JOATHAM Manager"
+msgstr "Plataforma JOATHAM Manager"
+
+msgid "Mon entreprise"
+msgstr "Minha empresa"
+
+msgid "Pilotage global SaaS"
+msgstr "Gestão global SaaS"
+
+msgid "Devise"
+msgstr "Moeda"
+
+msgid "Facture generee automatiquement par JOATHAM Manager."
+msgstr "Fatura gerada automaticamente pelo JOATHAM Manager."
+
+msgid "Facturation"
+msgstr "Faturamento"
+
+msgid "Liste des factures"
+msgstr "Lista de faturas"
+
+msgid "Nouvelle facture"
+msgstr "Nova fatura"
+
+msgid "Clients"
+msgstr "Clientes"
+
+msgid "Liste des clients"
+msgstr "Lista de clientes"
+
+msgid "Ajouter un client"
+msgstr "Adicionar cliente"
+
+msgid "Depenses"
+msgstr "Despesas"
+
+msgid "Liste des depenses"
+msgstr "Lista de despesas"
+
+msgid "Exporter en PDF"
+msgstr "Exportar em PDF"
+
+msgid "Produits"
+msgstr "Produtos"
+
+msgid "Liste des produits"
+msgstr "Lista de produtos"
+
+msgid "Ajouter un produit"
+msgstr "Adicionar produto"
+
+msgid "Comptabilite"
+msgstr "Contabilidade"
+
+msgid "Apprenants"
+msgstr "Alunos"
+
+msgid "Utilisateurs"
+msgstr "Usuários"
+
+msgid "Abonnements"
+msgstr "Assinaturas"
+
+msgid "Parametres plateforme"
+msgstr "Configurações da plataforma"
+
+msgid "Taux de change"
+msgstr "Taxas de câmbio"
+
+msgid "Abonnement requis"
+msgstr "Assinatura necessária"
+
+msgid "Mot de passe"
+msgstr "Senha"
+
+msgid "Email ou nom d'utilisateur"
+msgstr "E-mail ou nome de usuário"
+
+msgid "Afficher"
+msgstr "Mostrar"
+
+msgid "Masquer"
+msgstr "Ocultar"
+
+msgid "Se connecter"
+msgstr "Entrar"
+
+msgid "Mot de passe oublie ?"
+msgstr "Esqueceu a senha?"
+
+msgid "Inscription entreprise"
+msgstr "Cadastro da empresa"
+
+msgid "Nom de l'entreprise"
+msgstr "Nome da empresa"
+
+msgid "Raison sociale"
+msgstr "Razão social"
+
+msgid "Nom complet du proprietaire"
+msgstr "Nome completo do proprietário"
+
+msgid "Telephone"
+msgstr "Telefone"
+
+msgid "Pays"
+msgstr "País"
+
+msgid "Confirmation du mot de passe"
+msgstr "Confirmação da senha"
+
+msgid "Creer mon entreprise"
+msgstr "Criar minha empresa"
+
+msgid "Vous avez deja un compte ?"
+msgstr "Já tem uma conta?"
+
+msgid "Le produit a ete cree avec succes."
+msgstr "O produto foi criado com sucesso."
+
+msgid "Le produit a ete mis a jour avec succes."
+msgstr "O produto foi atualizado com sucesso."
+
+msgid "La facture a ete creee avec succes."
+msgstr "A fatura foi criada com sucesso."
+
+msgid "La facture a ete modifiee avec succes."
+msgstr "A fatura foi atualizada com sucesso."
+
+msgid "Le paiement a ete enregistre."
+msgstr "O pagamento foi registrado."
+
+#, python-format
+msgid "Le module %(module)s est momentanement en maintenance."
+msgstr "O módulo %(module)s está temporariamente em manutenção."

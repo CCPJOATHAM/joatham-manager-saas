@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext_lazy as _
 
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
@@ -69,7 +70,7 @@ def user_create(request):
 
     if request.method == "POST" and form.is_valid():
         if not form.cleaned_data["password"]:
-            form.add_error("password", "Le mot de passe est obligatoire pour créer un utilisateur.")
+            form.add_error("password", _("Le mot de passe est obligatoire pour creer un utilisateur."))
         else:
             try:
                 create_company_user(
@@ -92,8 +93,8 @@ def user_create(request):
         "joatham_users/user_form.html",
         {
             "form": form,
-            "page_title": "Créer un utilisateur",
-            "submit_label": "Créer l'utilisateur",
+            "page_title": _("Creer un utilisateur"),
+            "submit_label": _("Creer l'utilisateur"),
             "form_mode": "create",
         },
     )
@@ -137,8 +138,8 @@ def user_update(request, user_id):
         "joatham_users/user_form.html",
         {
             "form": form,
-            "page_title": "Modifier un utilisateur",
-            "submit_label": "Enregistrer les modifications",
+            "page_title": _("Modifier un utilisateur"),
+            "submit_label": _("Enregistrer les modifications"),
             "target_user": target_user,
             "form_mode": "update",
         },
@@ -156,8 +157,8 @@ def user_toggle_active(request, user_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            status_label = "activé" if target_user.is_active else "désactivé"
-            messages.success(request, f"Utilisateur {status_label} avec succès.")
+            status_label = _("active") if target_user.is_active else _("desactive")
+            messages.success(request, _("Utilisateur %(status)s avec succes.") % {"status": status_label})
     return redirect("user_list")
 
 

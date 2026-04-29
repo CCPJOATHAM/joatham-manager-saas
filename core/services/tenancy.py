@@ -16,6 +16,8 @@ def get_user_entreprise_or_raise(user):
     entreprise = get_user_entreprise(user)
     if entreprise is None:
         raise PermissionDenied("Aucune entreprise n'est associee a cet utilisateur.")
+    if not getattr(entreprise, "is_active", True):
+        raise PermissionDenied("Cette entreprise est desactivee.")
     return entreprise
 
 
@@ -48,6 +50,13 @@ def get_subscription_access_state(entreprise, *, user=None, as_of=None, allow_tr
         return {
             "allowed": False,
             "reason": "missing_entreprise",
+            "subscription": None,
+        }
+
+    if not getattr(entreprise, "is_active", True):
+        return {
+            "allowed": False,
+            "reason": "inactive_entreprise",
             "subscription": None,
         }
 

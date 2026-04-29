@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance | {{ platform_name|default:"JOATHAM Manager" }}</title>
+    <style>
+        :root {
+            --ink: #10233f;
+            --muted: #64748b;
+            --accent: #0f766e;
+            --line: rgba(148, 163, 184, 0.28);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(15, 118, 110, 0.14), transparent 28%),
+                radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.12), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #eef6f4 48%, #f8fafc 100%);
+        }
+
+        .maintenance-card {
+            width: min(680px, 100%);
+            padding: clamp(28px, 6vw, 52px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.86);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.14);
+            backdrop-filter: blur(18px);
+            text-align: center;
+        }
+
+        .brand {
+            margin-bottom: 22px;
+            color: var(--accent);
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+        }
+
+        .icon {
+            width: 74px;
+            height: 74px;
+            margin: 0 auto 22px;
+            display: grid;
+            place-items: center;
+            border-radius: 22px;
+            color: #fff;
+            background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
+            box-shadow: 0 18px 40px rgba(15, 118, 110, 0.28);
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 7vw, 3.4rem);
+            line-height: 1.04;
+        }
+
+        .message {
+            margin: 18px auto 0;
+            max-width: 540px;
+            color: var(--muted);
+            font-size: clamp(1rem, 2.4vw, 1.12rem);
+            line-height: 1.75;
+        }
+
+        .footer-note {
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid var(--line);
+            color: #334155;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+    <main class="maintenance-card" role="main">
+        <div class="brand">{{ platform_name|default:"JOATHAM Manager" }}</div>
+        <div class="icon" aria-hidden="true">!</div>
+        <h1>Maintenance en cours</h1>
+        <p class="message">{{ message|default:"Nous effectuons une operation de maintenance afin d'ameliorer votre experience." }}</p>
+        <div class="footer-note">Nous revenons bientot.</div>
+    </main>
+</body>
+</html>

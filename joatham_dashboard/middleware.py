@@ -6,6 +6,7 @@ ALLOWED_UNVERIFIED_URL_NAMES = {
     "home",
     "login",
     "logout",
+    "set_language",
     "signup",
     "password_reset",
     "password_reset_done",

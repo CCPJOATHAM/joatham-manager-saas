@@ -166,7 +166,7 @@
                 </div>
                 <div class="amount-preview">
                     <span class="label">Montant estimatif dans votre devise</span>
-                    <span class="value"><span id="amount-local-preview">-</span> <span id="currency-preview">{{ entreprise.devise }}</span></span>
+                    <span class="value"><span id="amount-local-preview">-</span> <span id="currency-preview">{{ currency_code }}</span></span>
                     <span class="meta">Taux utilisé : <span id="rate-preview">-</span></span>
                 </div>
             </div>
@@ -217,7 +217,7 @@
         const data = pricingMatrix[key];
         amountUsdPreview.textContent = data ? data.amount_usd : "-";
         amountLocalPreview.textContent = data ? data.estimated_amount : "-";
-        currencyPreview.textContent = data ? data.currency_code : "{{ entreprise.devise }}";
+        currencyPreview.textContent = data ? data.currency_code : "{{ currency_code }}";
         ratePreview.textContent = data ? data.exchange_rate : "-";
     }
 

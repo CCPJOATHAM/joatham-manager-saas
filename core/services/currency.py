@@ -3,26 +3,29 @@ from decimal import Decimal, ROUND_HALF_UP
 
 DEFAULT_EXCHANGE_SOURCE = "manuel"
 USD_CURRENCY = "USD"
+HARDCODED_FALLBACK_CURRENCY = "CDF"
 DEFAULT_CURRENCY_LABELS = {
     "USD": "Dollar americain",
     "CDF": "Franc congolais",
     "EUR": "Euro",
     "XAF": "Franc CFA",
 }
-MANUAL_EXCHANGE_RATES = {
-    "CDF": Decimal("2850.00"),
-    "EUR": Decimal("0.92"),
-    "XAF": Decimal("605.00"),
-}
-
-
 def _normalize_currency_code(currency_code):
-    return (currency_code or USD_CURRENCY).strip().upper()
+    return (currency_code or get_platform_default_currency()).strip().upper()
+
+
+def get_platform_default_currency():
+    try:
+        from core.models import PlatformSettings
+
+        return (PlatformSettings.get_solo().devise_defaut or HARDCODED_FALLBACK_CURRENCY).strip().upper()
+    except Exception:
+        return HARDCODED_FALLBACK_CURRENCY
 
 
 def get_currency_code(entreprise=None):
     if entreprise is None:
-        return USD_CURRENCY
+        return get_platform_default_currency()
     return _normalize_currency_code(getattr(entreprise, "devise", ""))
 
 
@@ -54,16 +57,18 @@ def get_manual_exchange_rate(currency_code):
     normalized_currency = _normalize_currency_code(currency_code)
     if normalized_currency == USD_CURRENCY:
         return Decimal("1.0000")
-    return MANUAL_EXCHANGE_RATES.get(normalized_currency, Decimal("1.0000"))
+    return None
 
 
 def estimate_local_amount_from_usd(amount_usd, currency_code):
     normalized_currency = _normalize_currency_code(currency_code)
     exchange_rate = get_manual_exchange_rate(normalized_currency)
-    estimated_amount = (Decimal(amount_usd) * exchange_rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    estimated_amount = None
+    if exchange_rate is not None:
+        estimated_amount = (Decimal(amount_usd) * exchange_rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return {
         "currency_code": normalized_currency,
         "exchange_rate": exchange_rate,
         "estimated_amount": estimated_amount,
-        "source": DEFAULT_EXCHANGE_SOURCE,
+        "source": DEFAULT_EXCHANGE_SOURCE if exchange_rate is not None else "unavailable",
     }

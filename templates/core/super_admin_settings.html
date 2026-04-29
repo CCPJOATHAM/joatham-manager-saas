@@ -1,0 +1,229 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Parametres plateforme | JOATHAM Manager{% endblock %}
+{% block content_title %}Parametres plateforme{% endblock %}
+{% block content_subtitle %}Configuration centrale de JOATHAM Manager et du mode maintenance.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .settings-panel {
+        max-width: 760px;
+        padding: 22px;
+        border-radius: 18px;
+        border: 1px solid #dde7f0;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .settings-form {
+        display: grid;
+        gap: 16px;
+    }
+
+    .field {
+        display: grid;
+        gap: 7px;
+    }
+
+    .field label {
+        color: #10233f;
+        font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .field textarea {
+        resize: vertical;
+    }
+
+    .checkbox-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        background: #fffbeb;
+    }
+
+    .checkbox-field input {
+        width: auto;
+        min-height: auto;
+    }
+
+    .section-title {
+        margin: 8px 0 0;
+        color: #10233f;
+        font-size: 1.05rem;
+        font-weight: 900;
+    }
+
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+
+    .module-check {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #10233f;
+        font-weight: 700;
+    }
+
+    .module-check input {
+        width: auto;
+        min-height: auto;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .btn-save {
+        justify-self: start;
+        min-height: 42px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 10px;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .errorlist {
+        margin: 0;
+        padding-left: 18px;
+        color: #be123c;
+    }
+</style>
+
+<section class="settings-panel">
+    <form method="post" class="settings-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="field">
+            <label for="{{ form.nom_plateforme.id_for_label }}">{{ form.nom_plateforme.label }}</label>
+            {{ form.nom_plateforme }}
+            {{ form.nom_plateforme.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.email_systeme.id_for_label }}">{{ form.email_systeme.label }}</label>
+            {{ form.email_systeme }}
+            <span class="muted">Cet email est un parametre applicatif et ne modifie pas la configuration SMTP existante.</span>
+            {{ form.email_systeme.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.devise_defaut.id_for_label }}">{{ form.devise_defaut.label }}</label>
+            {{ form.devise_defaut }}
+            {{ form.devise_defaut.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.devise_plateforme.id_for_label }}">{{ form.devise_plateforme.label }}</label>
+            {{ form.devise_plateforme }}
+            <span class="muted">Devise officielle des abonnements plateforme. Par defaut : USD.</span>
+            {{ form.devise_plateforme.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.exchange_rate_provider.id_for_label }}">{{ form.exchange_rate_provider.label }}</label>
+            {{ form.exchange_rate_provider }}
+            <span class="muted">Provider actuel : exchangerate_api. Les variables d'environnement restent prioritaires.</span>
+            {{ form.exchange_rate_provider.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.exchange_rate_api_key.id_for_label }}">{{ form.exchange_rate_api_key.label }}</label>
+            {{ form.exchange_rate_api_key }}
+            <span class="muted">Optionnel ici. Preferer EXCHANGE_RATE_API_KEY cote serveur.</span>
+            {{ form.exchange_rate_api_key.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.exchange_rate_cache_hours.id_for_label }}">{{ form.exchange_rate_cache_hours.label }}</label>
+            {{ form.exchange_rate_cache_hours }}
+            {{ form.exchange_rate_cache_hours.errors }}
+        </div>
+
+        <label class="checkbox-field" for="{{ form.allow_manual_exchange_rate_fallback.id_for_label }}">
+            {{ form.allow_manual_exchange_rate_fallback }}
+            <span>
+                <strong>{{ form.allow_manual_exchange_rate_fallback.label }}</strong>
+                <span class="muted">Permet au super_admin de saisir un montant USD ou un taux si l'API est indisponible.</span>
+            </span>
+        </label>
+        {{ form.allow_manual_exchange_rate_fallback.errors }}
+
+        <div class="field">
+            <label for="{{ form.duree_essai_jours.id_for_label }}">{{ form.duree_essai_jours.label }}</label>
+            {{ form.duree_essai_jours }}
+            <span class="muted">Nombre de jours appliques aux nouveaux essais crees lors du signup.</span>
+            {{ form.duree_essai_jours.errors }}
+        </div>
+
+        <label class="checkbox-field" for="{{ form.mode_maintenance.id_for_label }}">
+            {{ form.mode_maintenance }}
+            <span>
+                <strong>{{ form.mode_maintenance.label }}</strong>
+                <span class="muted">Les utilisateurs non super_admin seront bloques tant que ce mode est actif.</span>
+            </span>
+        </label>
+        {{ form.mode_maintenance.errors }}
+
+        <div class="field">
+            <label for="{{ form.message_maintenance.id_for_label }}">{{ form.message_maintenance.label }}</label>
+            {{ form.message_maintenance }}
+            <span class="muted">Message affiche aux utilisateurs lorsque le mode maintenance est actif.</span>
+            {{ form.message_maintenance.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.maintenance_allowed_ips.id_for_label }}">{{ form.maintenance_allowed_ips.label }}</label>
+            {{ form.maintenance_allowed_ips }}
+            <span class="muted">Une IP par ligne ou separee par virgule.</span>
+            {{ form.maintenance_allowed_ips.errors }}
+        </div>
+
+        <h2 class="section-title">Maintenance par module</h2>
+        <div class="field">
+            <span class="muted">Cochez uniquement les modules a rendre temporairement indisponibles. Le super_admin et les IPs autorisees gardent l'acces.</span>
+            <div class="module-grid">
+                {% for checkbox in form.maintenance_modules %}
+                    <label class="module-check" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.tag }}
+                        <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ form.maintenance_modules.errors }}
+        </div>
+
+        <button type="submit" class="btn-save">Enregistrer</button>
+    </form>
+</section>
+{% endblock %}

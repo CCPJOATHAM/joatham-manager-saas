@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 
 from core.audit import record_audit_event
 from core.services.product_policy import get_module_label, module_access_required
@@ -94,7 +95,7 @@ class SecurePasswordResetCompleteView(PasswordResetCompleteView):
 
 def login_view(request):
     if request.user.is_authenticated:
-        messages.info(request, "Vous êtes déjà connecté. Déconnectez-vous pour accéder à la page de connexion ou créer une nouvelle entreprise.")
+        messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour acceder a la page de connexion ou creer une nouvelle entreprise."))
         return redirect(get_default_dashboard_name(request.user))
 
     error = None
@@ -110,21 +111,25 @@ def login_view(request):
                 user = authenticate(request, username=existing_user.username, password=password)
 
         if user is not None:
+            entreprise = getattr(user, "entreprise", None)
+            if entreprise is not None and not getattr(entreprise, "is_active", True):
+                error = _("Votre entreprise est desactivee. Contactez l'administrateur JOATHAM.")
+                return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
             if not getattr(user, "email_verified", True):
                 request.session["pending_verification_user_id"] = user.id
-                messages.info(request, "Veuillez confirmer votre adresse email avant d'utiliser JOATHAM Manager.")
+                messages.info(request, _("Veuillez confirmer votre adresse email avant d'utiliser JOATHAM Manager."))
                 return redirect("email_verification_sent")
             login(request, user)
             return redirect(get_default_dashboard_name(user))
 
-        error = "Nom d'utilisateur ou mot de passe incorrect"
+        error = _("Nom d'utilisateur ou mot de passe incorrect")
 
     return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
 
 
 def signup_view(request):
     if request.user.is_authenticated:
-        messages.info(request, "Vous êtes déjà connecté. Déconnectez-vous pour créer une autre entreprise ou tester le parcours d'inscription.")
+        messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour creer une autre entreprise ou tester le parcours d'inscription."))
         return redirect(get_default_dashboard_name(request.user))
 
     form = SignupForm(request.POST or None)
@@ -146,7 +151,7 @@ def signup_view(request):
         else:
             request.session["pending_verification_user_id"] = user.id
             send_email_verification(request, user)
-            messages.success(request, "Un email de confirmation a été envoyé à votre adresse.")
+            messages.success(request, _("Un email de confirmation a ete envoye a votre adresse."))
             return redirect("email_verification_sent")
 
     return render(
@@ -251,7 +256,7 @@ def email_verification_resend_view(request):
 
     if request.method == "POST" and user is not None and not getattr(user, "email_verified", True):
         send_email_verification(request, user)
-        messages.success(request, "Un nouvel email de confirmation a été envoyé.")
+        messages.success(request, _("Un nouvel email de confirmation a ete envoye."))
 
     return redirect("email_verification_sent")
 
