@@ -1,0 +1,148 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Demandes SaaS" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Demandes SaaS" %}{% endblock %}
+{% block content_subtitle %}{% trans "Suggestions des proprietaires et questions publiques avant inscription." %}{% endblock %}
+
+{% block content %}
+<style>
+    .admin-section {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .admin-section h2 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .request-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid #dde7f0;
+        border-radius: 16px;
+    }
+
+    .request-table th,
+    .request-table td {
+        padding: 12px;
+        border-bottom: 1px solid #edf2f7;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .request-table th {
+        background: #f8fbff;
+        color: #475569;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+    }
+
+    .request-table form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .request-table select {
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 8px;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.86rem;
+    }
+</style>
+
+<section class="admin-section">
+    <h2>{% trans "Suggestions proprietaires" %}</h2>
+    <table class="request-table">
+        <thead>
+            <tr>
+                <th>{% trans "Sujet" %}</th>
+                <th>{% trans "Entreprise" %}</th>
+                <th>{% trans "Utilisateur" %}</th>
+                <th>{% trans "Message" %}</th>
+                <th>{% trans "Statut" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for suggestion in suggestions %}
+            <tr>
+                <td>
+                    <strong>{{ suggestion.sujet }}</strong>
+                    <div class="muted">{{ suggestion.date_creation|date:"d/m/Y H:i" }}</div>
+                </td>
+                <td>{{ suggestion.entreprise.nom }}</td>
+                <td>{{ suggestion.utilisateur.email|default:suggestion.utilisateur.username }}</td>
+                <td>{{ suggestion.message }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="suggestion">
+                        <input type="hidden" name="item_id" value="{{ suggestion.id }}">
+                        <select name="status">
+                            {% for value, label in suggestion_statuses %}
+                            <option value="{{ value }}" {% if suggestion.statut == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-link">{% trans "OK" %}</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="muted">{% trans "Aucune suggestion." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="admin-section">
+    <h2>{% trans "Questions publiques" %}</h2>
+    <table class="request-table">
+        <thead>
+            <tr>
+                <th>{% trans "Sujet" %}</th>
+                <th>{% trans "Contact" %}</th>
+                <th>{% trans "Message" %}</th>
+                <th>{% trans "Statut" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in public_questions %}
+            <tr>
+                <td>
+                    <strong>{{ question.sujet }}</strong>
+                    <div class="muted">{{ question.date_creation|date:"d/m/Y H:i" }}</div>
+                </td>
+                <td>
+                    {{ question.nom }}<br>
+                    <span class="muted">{{ question.email }}{% if question.telephone %} - {{ question.telephone }}{% endif %}</span>
+                </td>
+                <td>{{ question.message }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="question">
+                        <input type="hidden" name="item_id" value="{{ question.id }}">
+                        <select name="status">
+                            {% for value, label in question_statuses %}
+                            <option value="{{ value }}" {% if question.statut == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-link">{% trans "OK" %}</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="muted">{% trans "Aucune question publique." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

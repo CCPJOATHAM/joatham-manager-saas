@@ -554,6 +554,8 @@ class SuperAdminDashboardTests(TestCase):
                 "Abonnements",
                 "Audit / logs",
                 "Parametres plateforme",
+                "Taux de change",
+                "Demandes SaaS",
             ],
         )
         self.assertNotIn("Factures", labels)
@@ -569,6 +571,8 @@ class SuperAdminDashboardTests(TestCase):
         users_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Utilisateurs")
         audit_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Audit / logs")
         settings_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Parametres plateforme")
+        rates_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Taux de change")
+        messages_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Demandes SaaS")
 
         self.assertEqual(pilotage_item["url"], "/super-admin/")
         self.assertEqual(company_item["url"], reverse("super_admin_company_list"))
@@ -576,12 +580,16 @@ class SuperAdminDashboardTests(TestCase):
         self.assertEqual(users_item["url"], reverse("super_admin_user_list"))
         self.assertEqual(audit_item["url"], reverse("super_admin_audit_list"))
         self.assertEqual(settings_item["url"], reverse("super_admin_settings"))
+        self.assertEqual(rates_item["url"], reverse("super_admin_exchange_rate_list"))
+        self.assertEqual(messages_item["url"], reverse("super_admin_messages"))
         self.assertFalse(pilotage_item["is_disabled"])
         self.assertFalse(company_item["is_disabled"])
         self.assertFalse(subscription_item["is_disabled"])
         self.assertFalse(users_item["is_disabled"])
         self.assertFalse(audit_item["is_disabled"])
         self.assertFalse(settings_item["is_disabled"])
+        self.assertFalse(rates_item["is_disabled"])
+        self.assertFalse(messages_item["is_disabled"])
 
     def test_super_admin_company_list_shows_company_management_actions(self):
         self.client.force_login(self.super_admin)

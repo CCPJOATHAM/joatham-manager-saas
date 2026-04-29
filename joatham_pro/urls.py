@@ -6,11 +6,13 @@ from django.views.generic import RedirectView
 
 from core.language_views import set_language_preference
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
+from joatham_messages.views import public_question_create, super_admin_messages
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='login', permanent=False), name='root_redirect'),
     path('i18n/setlang/', set_language_preference, name='set_language'),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('question-avant-inscription/', public_question_create, name='public_question_create'),
     path('admin/', admin.site.urls),
     path('super-admin/', super_admin_dashboard, name='super_admin_dashboard'),
     path('super-admin/entreprises/', super_admin_company_list, name='super_admin_company_list'),
@@ -20,6 +22,7 @@ urlpatterns = [
     path('super-admin/audit/', super_admin_audit_list, name='super_admin_audit_list'),
     path('super-admin/parametres/', super_admin_settings, name='super_admin_settings'),
     path('super-admin/taux-change/', super_admin_exchange_rate_list, name='super_admin_exchange_rate_list'),
+    path('super-admin/messages/', super_admin_messages, name='super_admin_messages'),
     path('super-admin/entreprises/<int:entreprise_id>/desactiver/', super_admin_company_deactivate, name='super_admin_company_deactivate'),
 
     path('', include('joatham_dashboard.urls')),  # accueil
@@ -27,6 +30,7 @@ urlpatterns = [
     path('abonnement/', include('core.subscription_urls')),
     path('entreprise/', include('core.company_urls')),
     path('utilisateurs/', include('joatham_users.urls')),
+    path('messages/', include('joatham_messages.urls')),
 
     path('clients/', include('joatham_clients.urls')),
     path('services/', include('joatham_billing.service_urls')),

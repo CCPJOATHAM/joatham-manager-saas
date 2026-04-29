@@ -38,6 +38,8 @@ PERMISSIONS = {
     "company.manage": {ROLE_PROPRIETAIRE},
     "audit.view": {ROLE_PROPRIETAIRE, ROLE_COMPTABLE},
     "users.manage": {ROLE_PROPRIETAIRE},
+    "messages.view": {ROLE_PROPRIETAIRE, ROLE_GESTIONNAIRE, ROLE_COMPTABLE},
+    "suggestions.create": {ROLE_PROPRIETAIRE},
 }
 
 

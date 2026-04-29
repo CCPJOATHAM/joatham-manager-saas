@@ -1,0 +1,87 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Suggestions" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Suggestions au super admin" %}{% endblock %}
+{% block content_subtitle %}{% trans "Transmettez une demande ou une idee d'amelioration a l'equipe plateforme." %}{% endblock %}
+
+{% block content %}
+<style>
+    .split-layout {
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .form-stack,
+    .history {
+        display: grid;
+        gap: 14px;
+    }
+
+    .form-stack input,
+    .form-stack textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font: inherit;
+    }
+
+    .history-row {
+        padding: 16px;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+    }
+
+    .history-row h2 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .meta {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 0.86rem;
+    }
+
+    @media (max-width: 900px) {
+        .split-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="split-layout">
+    <form method="post" class="form-stack">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div>
+            <label for="{{ form.sujet.id_for_label }}">{{ form.sujet.label }}</label>
+            {{ form.sujet }}
+            {{ form.sujet.errors }}
+        </div>
+        <div>
+            <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+            {{ form.message }}
+            {{ form.message.errors }}
+        </div>
+        <button type="submit" class="btn-link primary">{% trans "Envoyer la suggestion" %}</button>
+    </form>
+
+    <section class="history">
+        <h2>{% trans "Historique" %}</h2>
+        {% for suggestion in suggestions %}
+        <article class="history-row">
+            <h2>{{ suggestion.sujet }}</h2>
+            <div class="meta">{{ suggestion.get_statut_display }} - {{ suggestion.date_creation|date:"d/m/Y H:i" }}</div>
+            <p>{{ suggestion.message }}</p>
+        </article>
+        {% empty %}
+        <p class="meta">{% trans "Aucune suggestion envoyee pour le moment." %}</p>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}

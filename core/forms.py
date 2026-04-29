@@ -19,6 +19,7 @@ MAINTENANCE_MODULE_CHOICES = [
     ("apprenants", _("Apprenants")),
     ("abonnements", _("Abonnements")),
     ("utilisateurs", _("Utilisateurs")),
+    ("messages", _("Messagerie")),
 ]
 
 MANUAL_PAYMENT_PERIOD_CHOICES = [

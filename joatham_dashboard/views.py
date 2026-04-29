@@ -1,4 +1,5 @@
-from django.conf import settings
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView, PasswordResetCompleteView
@@ -26,6 +27,7 @@ from joatham_users.permissions import get_default_dashboard_name, permission_req
 from .services.dashboard_service import build_dashboard_context
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class SecurePasswordResetRequestView(PasswordResetView):
@@ -103,15 +105,48 @@ def login_view(request):
     if request.method == "POST":
         username = (request.POST.get("username") or "").strip()
         password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)
+        logger.info(
+            "login.post.start username=%s has_session=%s",
+            username,
+            hasattr(request, "session"),
+        )
+
+        try:
+            user = authenticate(request, username=username, password=password)
+        except Exception:
+            logger.exception("login.authenticate.failed username=%s", username)
+            raise
 
         if user is None and "@" in username:
-            existing_user = User.objects.filter(email__iexact=username).first()
+            try:
+                existing_user = User.objects.filter(email__iexact=username).first()
+            except Exception:
+                logger.exception("login.email_lookup.failed email=%s", username)
+                raise
             if existing_user is not None:
-                user = authenticate(request, username=existing_user.username, password=password)
+                try:
+                    user = authenticate(request, username=existing_user.username, password=password)
+                except Exception:
+                    logger.exception("login.email_authenticate.failed user_id=%s", existing_user.id)
+                    raise
 
         if user is not None:
-            entreprise = getattr(user, "entreprise", None)
+            logger.info(
+                "login.authenticated user_id=%s role=%s entreprise_id=%s email_verified=%s",
+                user.id,
+                getattr(user, "role", ""),
+                getattr(user, "entreprise_id", None),
+                getattr(user, "email_verified", None),
+            )
+            try:
+                entreprise = getattr(user, "entreprise", None)
+            except Exception:
+                logger.exception(
+                    "login.entreprise_lookup.failed user_id=%s entreprise_id=%s",
+                    user.id,
+                    getattr(user, "entreprise_id", None),
+                )
+                raise
             if entreprise is not None and not getattr(entreprise, "is_active", True):
                 error = _("Votre entreprise est desactivee. Contactez l'administrateur JOATHAM.")
                 return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
@@ -119,8 +154,14 @@ def login_view(request):
                 request.session["pending_verification_user_id"] = user.id
                 messages.info(request, _("Veuillez confirmer votre adresse email avant d'utiliser JOATHAM Manager."))
                 return redirect("email_verification_sent")
-            login(request, user)
-            return redirect(get_default_dashboard_name(user))
+            try:
+                login(request, user)
+            except Exception:
+                logger.exception("login.session_login.failed user_id=%s", user.id)
+                raise
+            dashboard_name = get_default_dashboard_name(user)
+            logger.info("login.redirect user_id=%s dashboard=%s", user.id, dashboard_name)
+            return redirect(dashboard_name)
 
         error = _("Nom d'utilisateur ou mot de passe incorrect")
 

@@ -1,0 +1,95 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Messagerie" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Messagerie" %}{% endblock %}
+{% block content_subtitle %}{% trans "Echanges internes securises entre les utilisateurs de votre entreprise." %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'message_conversation_create' %}" class="btn-link primary">{% trans "Nouvelle conversation" %}</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .message-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .message-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        padding: 18px;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .message-row:hover {
+        border-color: #94a3b8;
+    }
+
+    .message-row h2 {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .message-meta {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .message-badge {
+        align-self: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.82rem;
+    }
+
+    .empty-state {
+        padding: 32px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 18px;
+        color: #64748b;
+        text-align: center;
+    }
+</style>
+
+{% if conversations %}
+<div class="message-list">
+    {% for conversation in conversations %}
+    <a class="message-row" href="{% url 'message_conversation_detail' conversation.id %}">
+        <div>
+            <h2>{{ conversation.sujet }}</h2>
+            <div class="message-meta">
+                {% trans "Participants" %} :
+                {% for participant in conversation.participants.all %}
+                    {{ participant.get_full_name|default:participant.username }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            <div class="message-meta">{% trans "Derniere activite" %} : {{ conversation.date_modification|date:"d/m/Y H:i" }}</div>
+        </div>
+        {% if conversation.unread_count %}
+        <span class="message-badge">{{ conversation.unread_count }}</span>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    {% trans "Aucune conversation pour le moment." %}
+</div>
+{% endif %}
+{% endblock %}

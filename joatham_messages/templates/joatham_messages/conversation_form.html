@@ -1,0 +1,84 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Nouvelle conversation" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Nouvelle conversation" %}{% endblock %}
+{% block content_subtitle %}{% trans "Demarrez un echange avec les utilisateurs de votre entreprise." %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'message_conversation_list' %}" class="btn-link">{% trans "Retour" %}</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .form-grid {
+        display: grid;
+        gap: 18px;
+        max-width: 760px;
+    }
+
+    .field {
+        display: grid;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+    }
+
+    .field input,
+    .field textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font: inherit;
+    }
+
+    .participants {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+        border: 1px solid #dde7f0;
+        border-radius: 14px;
+        background: #f8fbff;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<form method="post" enctype="multipart/form-data" class="form-grid">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="field">
+        <label for="{{ form.sujet.id_for_label }}">{{ form.sujet.label }}</label>
+        {{ form.sujet }}
+        {{ form.sujet.errors }}
+    </div>
+    <div class="field">
+        <label>{{ form.participants.label }}</label>
+        <div class="participants">
+            {{ form.participants }}
+        </div>
+        {{ form.participants.errors }}
+    </div>
+    <div class="field">
+        <label for="{{ form.contenu.id_for_label }}">{{ form.contenu.label }}</label>
+        {{ form.contenu }}
+        {{ form.contenu.errors }}
+    </div>
+    <div class="field">
+        <label for="id_attachments">{% trans "Pieces jointes" %}</label>
+        <input id="id_attachments" type="file" name="attachments" multiple>
+    </div>
+    <div class="actions">
+        <button type="submit" class="btn-link primary">{% trans "Creer" %}</button>
+        <a href="{% url 'message_conversation_list' %}" class="btn-link">{% trans "Annuler" %}</a>
+    </div>
+</form>
+{% endblock %}

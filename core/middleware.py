@@ -17,6 +17,7 @@ MODULE_LABELS = {
     "apprenants": _("Apprenants"),
     "abonnements": _("Abonnements"),
     "utilisateurs": _("Utilisateurs"),
+    "messages": _("Messagerie"),
 }
 
 MODULE_PREFIXES = [
@@ -29,6 +30,7 @@ MODULE_PREFIXES = [
     ("apprenants", ("/apprenants/",)),
     ("abonnements", ("/abonnement/",)),
     ("utilisateurs", ("/utilisateurs/",)),
+    ("messages", ("/messages/",)),
 ]
 
 MAINTENANCE_EXEMPT_PREFIXES = (

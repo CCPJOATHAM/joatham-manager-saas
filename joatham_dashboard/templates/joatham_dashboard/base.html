@@ -469,6 +469,9 @@
                 {% if item.is_disabled %}
                 <span class="nav-disabled" aria-disabled="true">
                     <span>{% trans item.label %}</span>
+                    {% if item.badge_count %}
+                    <span class="nav-badge">{{ item.badge_count }}</span>
+                    {% endif %}
                     {% if item.badge %}
                     <span class="nav-badge">{% trans item.badge %}</span>
                     {% endif %}
@@ -476,6 +479,9 @@
                 {% else %}
                 <a href="{{ item.url }}" class="{% if item.is_active %}is-active{% endif %}">
                     <span>{% trans item.label %}</span>
+                    {% if item.badge_count %}
+                    <span class="nav-badge">{{ item.badge_count }}</span>
+                    {% endif %}
                     {% if item.badge %}
                     <span class="nav-badge">{% trans item.badge %}</span>
                     {% endif %}

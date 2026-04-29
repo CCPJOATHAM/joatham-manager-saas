@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "joatham_dashboard",
     "joatham_clients",
     "joatham_billing",
+    "joatham_messages.apps.JoathamMessagesConfig",
     "joatham_depenses",
     "joatham_comptabilite",
     "joatham_products.apps.JoathamProductsConfig",
@@ -213,6 +214,21 @@ LOGGING = {
         },
     },
     "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "joatham_dashboard": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "core": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
         "joatham_billing": {
             "handlers": ["console"],
             "level": LOG_LEVEL,

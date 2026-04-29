@@ -1,0 +1,38 @@
+from django.contrib import admin
+
+from .models import Conversation, Message, MessageAttachment, PublicQuestion, SuggestionSuperAdmin
+
+
+class MessageAttachmentInline(admin.TabularInline):
+    model = MessageAttachment
+    extra = 0
+
+
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ("sujet", "entreprise", "cree_par", "date_modification")
+    list_filter = ("entreprise",)
+    search_fields = ("sujet", "entreprise__nom", "cree_par__email", "cree_par__username")
+    filter_horizontal = ("participants",)
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("conversation", "expediteur", "date_creation")
+    list_filter = ("conversation__entreprise",)
+    search_fields = ("contenu", "expediteur__email", "expediteur__username", "conversation__sujet")
+    inlines = [MessageAttachmentInline]
+
+
+@admin.register(SuggestionSuperAdmin)
+class SuggestionSuperAdminAdmin(admin.ModelAdmin):
+    list_display = ("sujet", "entreprise", "utilisateur", "statut", "date_creation")
+    list_filter = ("statut", "entreprise")
+    search_fields = ("sujet", "message", "entreprise__nom", "utilisateur__email")
+
+
+@admin.register(PublicQuestion)
+class PublicQuestionAdmin(admin.ModelAdmin):
+    list_display = ("sujet", "nom", "email", "statut", "date_creation")
+    list_filter = ("statut",)
+    search_fields = ("sujet", "message", "nom", "email", "telephone")

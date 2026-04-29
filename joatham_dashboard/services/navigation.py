@@ -69,6 +69,15 @@ NAV_ITEMS = [
         "prefixes": ["/super-admin/taux-change/"],
     },
     {
+        "label": _("Demandes SaaS"),
+        "url_name": "super_admin_messages",
+        "permission": "superadmin.view",
+        "module": None,
+        "roles": ["super_admin"],
+        "prefixes": ["/super-admin/messages/"],
+        "badge_counter": "super_admin_messages",
+    },
+    {
         "label": _("Dashboard"),
         "url_name": None,
         "permission": None,
@@ -80,6 +89,16 @@ NAV_ITEMS = [
             "/gestion-dashboard/",
             "/comptable-dashboard/",
         ],
+    },
+    {
+        "label": _("Messagerie"),
+        "url_name": "message_conversation_list",
+        "permission": "messages.view",
+        "module": None,
+        "roles": ["proprietaire", "gestionnaire", "comptable"],
+        "exact_paths": ["/messages/"],
+        "prefixes": ["/messages/nouvelle/", "/messages/conversation/", "/messages/piece-jointe/"],
+        "badge_counter": "unread_messages",
     },
     {
         "label": _("Organisation"),
@@ -159,6 +178,14 @@ NAV_ITEMS = [
         "module": "subscription",
         "prefixes": ["/abonnement/"],
     },
+    {
+        "label": _("Suggestions"),
+        "url_name": "message_suggestion_create",
+        "permission": "suggestions.create",
+        "module": None,
+        "roles": ["proprietaire"],
+        "prefixes": ["/messages/suggestions/"],
+    },
 ]
 
 
@@ -235,17 +262,36 @@ def build_navigation_for_request(request):
                 url = f"{url}#{item['url_fragment']}"
         exact_paths = item.get("exact_paths", [])
         prefixes = item.get("prefixes", [])
+        badge_count = _get_badge_count(user, item.get("badge_counter"))
         items.append(
             {
                 "label": item["label"],
                 "url": url,
                 "is_active": not is_disabled and (current_path in exact_paths or any(current_path.startswith(prefix) for prefix in prefixes)),
                 "badge": item_state.get("badge") or item.get("badge"),
+                "badge_count": badge_count,
                 "is_disabled": is_disabled,
             }
         )
 
     return items
+
+
+def _get_badge_count(user, counter_name):
+    if not counter_name:
+        return 0
+    try:
+        if counter_name == "unread_messages":
+            from joatham_messages.selectors.messages import get_unread_message_count
+
+            return get_unread_message_count(user)
+        if counter_name == "super_admin_messages":
+            from joatham_messages.selectors.messages import get_pending_super_admin_message_count
+
+            return get_pending_super_admin_message_count()
+    except Exception:
+        return 0
+    return 0
 
 
 def get_role_label(user):

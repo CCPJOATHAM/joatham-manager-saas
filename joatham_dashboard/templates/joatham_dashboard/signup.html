@@ -350,6 +350,8 @@
 
             <p class="helper">
                 {% trans "Vous avez deja un compte ?" %} <a href="{% url 'login' %}">{% trans "Se connecter" %}</a>
+                <br>
+                <a href="{% url 'public_question_create' %}">{% trans "Poser une question avant inscription" %}</a>
             </p>
         </section>
     </main>
