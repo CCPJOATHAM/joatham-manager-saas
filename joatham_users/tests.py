@@ -569,9 +569,9 @@ class UserManagementTests(TestCase):
         response = self.client.get(reverse("user_create"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Repère rapide")
+        self.assertContains(response, "Repere rapide")
         self.assertContains(response, "Nom complet")
-        self.assertContains(response, "Rôles gérés : Gestionnaire / Comptable")
+        self.assertContains(response, "Roles geres : Gestionnaire / Comptable")
 
     def test_owner_can_update_company_user(self):
         managed_user = User.objects.create_user(
