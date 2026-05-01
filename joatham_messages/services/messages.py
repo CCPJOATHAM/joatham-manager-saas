@@ -380,6 +380,14 @@ def update_public_question_status(*, question, status, changed_by=None):
     return question
 
 
+def update_public_question_lead_status(*, question, lead_status):
+    if lead_status not in PublicQuestion.LeadStatus.values:
+        raise ValidationError("Statut de lead invalide.")
+    question.lead_status = lead_status
+    question.save(update_fields=["lead_status", "date_modification"])
+    return question
+
+
 @transaction.atomic
 def answer_public_question(*, question, responder, response):
     _ensure_super_admin_user(responder)

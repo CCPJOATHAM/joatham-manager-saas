@@ -97,7 +97,10 @@ def _apply_common_filters(queryset, *, filters, search_query):
 def get_super_admin_suggestions(filters=None):
     filters = filters or {}
     selected_type = filters.get("type") or ""
+    selected_lead_status = filters.get("lead_status") or ""
     if selected_type == REQUEST_TYPE_QUESTION:
+        return SuggestionSuperAdmin.objects.none()
+    if selected_lead_status:
         return SuggestionSuperAdmin.objects.none()
     search = (filters.get("q") or "").strip()
     search_query = None
@@ -125,6 +128,7 @@ def get_suggestion_for_super_admin(suggestion_id):
 def get_super_admin_public_questions(filters=None):
     filters = filters or {}
     selected_type = filters.get("type") or ""
+    selected_lead_status = filters.get("lead_status") or ""
     if selected_type == REQUEST_TYPE_SUGGESTION:
         return PublicQuestion.objects.none()
     search = (filters.get("q") or "").strip()
@@ -141,8 +145,11 @@ def get_super_admin_public_questions(filters=None):
             | Q(repondu_par__username__icontains=search)
             | Q(repondu_par__email__icontains=search)
         )
+    queryset = PublicQuestion.objects.select_related("repondu_par").order_by("-date_creation", "-id")
+    if selected_lead_status:
+        queryset = queryset.filter(lead_status=selected_lead_status)
     return _apply_common_filters(
-        PublicQuestion.objects.select_related("repondu_par").order_by("-date_creation", "-id"),
+        queryset,
         filters=filters,
         search_query=search_query,
     )
@@ -186,6 +193,10 @@ def _public_question_to_request_item(question):
         "message": question.message,
         "statut": question.statut,
         "statut_label": question.get_statut_display(),
+        "lead_status": question.lead_status,
+        "lead_status_label": question.get_lead_status_display(),
+        "is_lead": question.is_lead,
+        "source": question.source,
         "date_creation": question.date_creation,
         "date_traitement": question.date_traitement,
         "has_reply": bool(question.reponse),
@@ -212,6 +223,21 @@ def get_super_admin_request_summary():
         + PublicQuestion.objects.filter(statut=PublicQuestion.Statut.NOUVEAU).count(),
         "en_cours": SuggestionSuperAdmin.objects.filter(statut=SuggestionSuperAdmin.Statut.EN_COURS).count()
         + PublicQuestion.objects.filter(statut=PublicQuestion.Statut.EN_COURS).count(),
+    }
+
+
+def get_lead_stats():
+    leads = PublicQuestion.objects.filter(is_lead=True)
+    counts = dict(
+        leads.values("lead_status")
+        .annotate(total=Count("id"))
+        .values_list("lead_status", "total")
+    )
+    return {
+        "total": leads.count(),
+        "nouveau_count": counts.get(PublicQuestion.LeadStatus.NOUVEAU, 0),
+        "en_cours_count": counts.get(PublicQuestion.LeadStatus.EN_COURS, 0),
+        "converti_count": counts.get(PublicQuestion.LeadStatus.CONVERTI, 0),
     }
 
 

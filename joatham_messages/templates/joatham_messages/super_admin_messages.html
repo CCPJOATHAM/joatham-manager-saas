@@ -39,6 +39,72 @@
         line-height: 1;
     }
 
+    .lead-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .lead-card {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid #dbe5ef;
+        border-radius: 12px;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        box-shadow: 0 12px 26px rgba(16, 35, 63, 0.06);
+    }
+
+    .lead-card:hover,
+    .lead-card.active {
+        border-color: #0f766e;
+        box-shadow: 0 16px 32px rgba(15, 118, 110, 0.12);
+    }
+
+    .lead-card span {
+        color: #64748b;
+        font-size: 0.82rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .lead-card strong {
+        font-size: 1.65rem;
+        line-height: 1;
+    }
+
+    .lead-filters {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .lead-filter {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #fff;
+        color: #10233f;
+        font-size: 0.86rem;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .lead-filter.active {
+        border-color: #0f766e;
+        background: #f0fdfa;
+        color: #115e59;
+    }
+
     .filter-panel {
         margin-bottom: 20px;
         padding: 16px;
@@ -116,7 +182,7 @@
 
     .request-table {
         width: 100%;
-        min-width: 1180px;
+        min-width: 1320px;
         border-collapse: collapse;
     }
 
@@ -243,6 +309,58 @@
         color: #115e59;
     }
 
+    .lead-cell {
+        display: grid;
+        gap: 8px;
+        min-width: 170px;
+    }
+
+    .lead-badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 900;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .lead-nouveau {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .lead-en_cours {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .lead-converti {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .lead-status-form {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .lead-status-form select {
+        width: 100%;
+        min-height: 36px;
+        padding: 7px 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #fff;
+        color: #10233f;
+        font: inherit;
+        font-size: 0.86rem;
+    }
+
     .btn-small {
         display: inline-flex;
         align-items: center;
@@ -296,6 +414,7 @@
     }
 
     @media (max-width: 1200px) {
+        .lead-strip,
         .summary-strip,
         .message-filters {
             grid-template-columns: 1fr 1fr;
@@ -307,6 +426,7 @@
     }
 
     @media (max-width: 760px) {
+        .lead-strip,
         .summary-strip,
         .message-filters {
             grid-template-columns: 1fr;
@@ -321,6 +441,32 @@
         }
     }
 </style>
+
+<div class="lead-strip" aria-label="{% trans 'Statistiques CRM des questions publiques' %}">
+    <a href="{% url 'super_admin_messages' %}" class="lead-card {% if not selected_lead_status %}active{% endif %}">
+        <span>{% trans "Total" %}</span>
+        <strong>{{ lead_stats.total }}</strong>
+    </a>
+    <a href="?status=nouveau" class="lead-card {% if selected_lead_status == 'nouveau' %}active{% endif %}">
+        <span>{% trans "Nouveau" %}</span>
+        <strong>{{ lead_stats.nouveau_count }}</strong>
+    </a>
+    <a href="?status=en_cours" class="lead-card {% if selected_lead_status == 'en_cours' %}active{% endif %}">
+        <span>{% trans "En cours" %}</span>
+        <strong>{{ lead_stats.en_cours_count }}</strong>
+    </a>
+    <a href="?status=converti" class="lead-card {% if selected_lead_status == 'converti' %}active{% endif %}">
+        <span>{% trans "Converti" %}</span>
+        <strong>{{ lead_stats.converti_count }}</strong>
+    </a>
+</div>
+
+<nav class="lead-filters" aria-label="{% trans 'Filtres CRM' %}">
+    <a href="{% url 'super_admin_messages' %}" class="lead-filter {% if not selected_lead_status %}active{% endif %}">{% trans "Tous les leads" %}</a>
+    <a href="?status=nouveau" class="lead-filter {% if selected_lead_status == 'nouveau' %}active{% endif %}">{% trans "Nouveau" %}</a>
+    <a href="?status=en_cours" class="lead-filter {% if selected_lead_status == 'en_cours' %}active{% endif %}">{% trans "En cours" %}</a>
+    <a href="?status=converti" class="lead-filter {% if selected_lead_status == 'converti' %}active{% endif %}">{% trans "Converti" %}</a>
+</nav>
 
 <div class="summary-strip">
     <div class="summary-item">
@@ -383,6 +529,7 @@
         <thead>
             <tr>
                 <th>{% trans "Type" %}</th>
+                <th>{% trans "Lead" %}</th>
                 <th>{% trans "Auteur" %}</th>
                 <th>{% trans "Entreprise" %}</th>
                 <th>{% trans "Contact" %}</th>
@@ -397,6 +544,24 @@
             {% for item in requests %}
             <tr>
                 <td><span class="type-badge type-{{ item.type }}">{{ item.type_label }}</span></td>
+                <td>
+                    {% if item.type == "question" %}
+                    <div class="lead-cell">
+                        <span class="lead-badge lead-{{ item.lead_status }}">{{ item.lead_status_label }}</span>
+                        <form method="post" action="{% url 'super_admin_update_lead_status' item.id %}" class="lead-status-form">
+                            {% csrf_token %}
+                            <select name="lead_status" aria-label="{% trans 'Statut CRM du lead' %}">
+                                {% for value, label in lead_status_choices %}
+                                <option value="{{ value }}" {% if item.lead_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-small">{% trans "OK" %}</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="muted">-</span>
+                    {% endif %}
+                </td>
                 <td class="identity-cell">
                     <strong>{{ item.auteur|default:"-" }}</strong>
                     {% if item.type == "question" %}
@@ -452,7 +617,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="9" class="empty-row muted">{% trans "Aucune demande ne correspond aux filtres." %}</td>
+                <td colspan="10" class="empty-row muted">{% trans "Aucune demande ne correspond aux filtres." %}</td>
             </tr>
             {% endfor %}
         </tbody>

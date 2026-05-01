@@ -7,7 +7,7 @@ from django.views.generic import RedirectView
 from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
-from joatham_messages.views import public_question_create, public_question_success, public_question_thanks, super_admin_messages, super_admin_public_question_reply
+from joatham_messages.views import public_question_create, public_question_success, public_question_thanks, super_admin_messages, super_admin_public_question_reply, update_lead_status
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='login', permanent=False), name='root_redirect'),
@@ -28,6 +28,7 @@ urlpatterns = [
     path('super-admin/parametres/', super_admin_settings, name='super_admin_settings'),
     path('super-admin/taux-change/', super_admin_exchange_rate_list, name='super_admin_exchange_rate_list'),
     path('super-admin/messages/', super_admin_messages, name='super_admin_messages'),
+    path('super-admin/messages/<int:id>/update-status/', update_lead_status, name='super_admin_update_lead_status'),
     path('super-admin/questions-publiques/<int:question_id>/repondre/', super_admin_public_question_reply, name='super_admin_public_question_reply'),
     path('super-admin/entreprises/<int:entreprise_id>/desactiver/', super_admin_company_deactivate, name='super_admin_company_deactivate'),
 

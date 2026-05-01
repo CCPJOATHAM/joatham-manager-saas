@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.http import FileResponse, Http404
@@ -17,11 +18,12 @@ from .forms import (
     SuperAdminRequestFilterForm,
     SuperAdminStatusUpdateForm,
 )
-from .models import SuggestionSuperAdmin
+from .models import PublicQuestion, SuggestionSuperAdmin
 from .selectors.messages import (
     get_attachment_for_user,
     get_conversation_for_user,
     get_conversations_for_user,
+    get_lead_stats,
     get_public_question_for_super_admin,
     get_suggestions_for_entreprise,
     get_suggestion_for_super_admin,
@@ -37,6 +39,7 @@ from .services.messages import (
     mark_conversation_read,
     PublicQuestionReplyEmailError,
     send_message,
+    update_public_question_lead_status,
     update_public_question_status,
     update_suggestion_status,
 )
@@ -258,6 +261,12 @@ def super_admin_messages(request):
     filters = filter_form.cleaned_data if filter_form.is_valid() else {}
     if request.GET and not filter_form.is_valid():
         messages.error(request, "Certains filtres sont invalides.")
+    selected_lead_status = (request.GET.get("status") or "").strip()
+    valid_lead_statuses = {value for value, _label in PublicQuestion.LeadStatus.choices}
+    if selected_lead_status not in valid_lead_statuses:
+        selected_lead_status = ""
+    if selected_lead_status:
+        filters = {**filters, "lead_status": selected_lead_status}
     request_items = get_super_admin_request_items(filters)
     paginator = Paginator(request_items, 25)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -272,8 +281,26 @@ def super_admin_messages(request):
             "requests": page_obj.object_list,
             "page_obj": page_obj,
             "status_choices": SuggestionSuperAdmin.Statut.choices,
+            "lead_status_choices": PublicQuestion.LeadStatus.choices,
             "summary": get_super_admin_request_summary(),
+            "lead_stats": get_lead_stats(),
+            "selected_lead_status": selected_lead_status,
             "selected_filters": filters,
             "querystring_without_page": query_params.urlencode(),
         },
     )
+
+
+@login_required
+@permission_required("superadmin.view")
+@require_POST
+def update_lead_status(request, id):
+    question = get_public_question_for_super_admin(id)
+    lead_status = (request.POST.get("lead_status") or request.POST.get("status") or "").strip()
+    try:
+        update_public_question_lead_status(question=question, lead_status=lead_status)
+    except ValidationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, "Statut CRM du lead mis a jour.")
+    return redirect(request.META.get("HTTP_REFERER") or "super_admin_messages")

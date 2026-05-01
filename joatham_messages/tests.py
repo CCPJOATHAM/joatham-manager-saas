@@ -293,6 +293,110 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertContains(response, "Reporting avance")
         self.assertNotContains(response, "Question visible autre")
 
+    def test_super_admin_lead_stats_are_correct(self):
+        PublicQuestion.objects.create(
+            nom="Prospect nouveau",
+            email="nouveau@example.com",
+            sujet="Lead nouveau",
+            message="Message lead nouveau.",
+            lead_status=PublicQuestion.LeadStatus.NOUVEAU,
+        )
+        PublicQuestion.objects.create(
+            nom="Prospect en cours",
+            email="encours@example.com",
+            sujet="Lead en cours",
+            message="Message lead en cours.",
+            lead_status=PublicQuestion.LeadStatus.EN_COURS,
+        )
+        PublicQuestion.objects.create(
+            nom="Prospect converti",
+            email="converti@example.com",
+            sujet="Lead converti",
+            message="Message lead converti.",
+            lead_status=PublicQuestion.LeadStatus.CONVERTI,
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.get(reverse("super_admin_messages"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["lead_stats"]["total"], 3)
+        self.assertEqual(response.context["lead_stats"]["nouveau_count"], 1)
+        self.assertEqual(response.context["lead_stats"]["en_cours_count"], 1)
+        self.assertEqual(response.context["lead_stats"]["converti_count"], 1)
+
+    def test_super_admin_filters_public_questions_by_lead_status(self):
+        PublicQuestion.objects.create(
+            nom="Prospect nouveau",
+            email="nouveau@example.com",
+            sujet="Lead encore nouveau",
+            message="Message lead nouveau.",
+            lead_status=PublicQuestion.LeadStatus.NOUVEAU,
+        )
+        PublicQuestion.objects.create(
+            nom="Prospect converti",
+            email="converti@example.com",
+            sujet="Lead deja converti",
+            message="Message lead converti.",
+            lead_status=PublicQuestion.LeadStatus.CONVERTI,
+        )
+        SuggestionSuperAdmin.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            sujet="Suggestion hors CRM",
+            message="Message suggestion hors CRM.",
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.get(reverse("super_admin_messages"), {"status": PublicQuestion.LeadStatus.CONVERTI})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["selected_lead_status"], PublicQuestion.LeadStatus.CONVERTI)
+        self.assertContains(response, "Lead deja converti")
+        self.assertNotContains(response, "Lead encore nouveau")
+        self.assertNotContains(response, "Suggestion hors CRM")
+
+    def test_super_admin_can_update_public_question_lead_status(self):
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            sujet="Lead a convertir",
+            message="Message lead a convertir.",
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(
+            reverse("super_admin_update_lead_status", args=[question.id]),
+            {"lead_status": PublicQuestion.LeadStatus.CONVERTI},
+            HTTP_REFERER=reverse("super_admin_messages") + "?status=nouveau",
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("super_admin_messages") + "?status=nouveau",
+            fetch_redirect_response=False,
+        )
+        question.refresh_from_db()
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.CONVERTI)
+
+    def test_non_authorized_user_cannot_update_public_question_lead_status(self):
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            sujet="Lead protege",
+            message="Message lead protege.",
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("super_admin_update_lead_status", args=[question.id]),
+            {"lead_status": PublicQuestion.LeadStatus.CONVERTI},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        question.refresh_from_db()
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.NOUVEAU)
+
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEFAULT_FROM_EMAIL="support@joatham.local")
     def test_super_admin_can_reply_to_public_question(self):
         mail.outbox = []
