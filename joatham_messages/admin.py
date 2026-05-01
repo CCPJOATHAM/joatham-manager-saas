@@ -33,6 +33,6 @@ class SuggestionSuperAdminAdmin(admin.ModelAdmin):
 
 @admin.register(PublicQuestion)
 class PublicQuestionAdmin(admin.ModelAdmin):
-    list_display = ("sujet", "nom", "email", "entreprise", "statut", "date_creation", "date_traitement")
+    list_display = ("sujet", "nom", "email", "entreprise", "statut", "repondu_par", "date_creation", "date_reponse", "date_traitement")
     list_filter = ("statut",)
-    search_fields = ("sujet", "message", "nom", "email", "telephone", "entreprise")
+    search_fields = ("sujet", "message", "reponse", "nom", "email", "telephone", "entreprise", "repondu_par__email", "repondu_par__username")

@@ -178,9 +178,9 @@ class SuperAdminRequestFilterForm(forms.Form):
     q = forms.CharField(required=False, max_length=120)
     type = forms.ChoiceField(required=False, choices=TYPE_CHOICES)
     statut = forms.ChoiceField(
-    required=False,
-    choices=[("", _("Tous les statuts"))] + list(SuggestionSuperAdmin.Statut.choices),
-)
+        required=False,
+        choices=[("", _("Tous les statuts"))] + list(SuggestionSuperAdmin.Statut.choices),
+    )
     date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
     date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
 
@@ -200,3 +200,25 @@ class SuperAdminStatusUpdateForm(forms.Form):
     item_type = forms.ChoiceField(choices=(("suggestion", _("Suggestion")), ("question", _("Question publique"))))
     item_id = forms.IntegerField(min_value=1)
     status = forms.ChoiceField(choices=SuggestionSuperAdmin.Statut.choices)
+
+
+class PublicQuestionReplyForm(forms.Form):
+    reponse = forms.CharField(
+        label=_("Reponse"),
+        max_length=MAX_MESSAGE_LENGTH,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 9,
+                "maxlength": MAX_MESSAGE_LENGTH,
+                "placeholder": _("Redigez une reponse claire pour le visiteur"),
+            }
+        ),
+    )
+
+    def clean_reponse(self):
+        return _clean_trimmed_required(
+            self.cleaned_data.get("reponse"),
+            field_label=_("Reponse"),
+            min_length=MIN_MESSAGE_LENGTH,
+            max_length=MAX_MESSAGE_LENGTH,
+        )

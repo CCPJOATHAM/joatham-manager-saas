@@ -1,0 +1,152 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Repondre a une question publique" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Repondre a une question publique" %}{% endblock %}
+{% block content_subtitle %}{% trans "Envoyez une reponse email au visiteur et marquez la demande comme traitee." %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'super_admin_messages' %}" class="btn-link">{% trans "Retour" %}</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .reply-layout {
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .question-panel,
+    .reply-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .detail-row {
+        display: grid;
+        gap: 4px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .detail-row:last-child {
+        border-bottom: 0;
+    }
+
+    .detail-row span {
+        color: #64748b;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .detail-row strong,
+    .detail-row div {
+        color: #10233f;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        min-height: 240px;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font: inherit;
+        line-height: 1.5;
+    }
+
+    .previous-reply {
+        padding: 14px;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+        background: #f0fdf4;
+    }
+
+    .previous-reply h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+    }
+
+    .muted {
+        color: #64748b;
+        font-size: 0.86rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 980px) {
+        .reply-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="reply-layout">
+    <section class="question-panel">
+        <div class="detail-row">
+            <span>{% trans "Nom" %}</span>
+            <strong>{{ question.nom }}</strong>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Email" %}</span>
+            <strong>{{ question.email }}</strong>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Telephone" %}</span>
+            <strong>{{ question.telephone|default:"-" }}</strong>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Entreprise" %}</span>
+            <strong>{{ question.entreprise|default:"-" }}</strong>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Sujet" %}</span>
+            <strong>{{ question.sujet }}</strong>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Message" %}</span>
+            <div>{{ question.message }}</div>
+        </div>
+        <div class="detail-row">
+            <span>{% trans "Statut" %}</span>
+            <strong>{{ question.get_statut_display }}</strong>
+        </div>
+    </section>
+
+    <section class="reply-form">
+        {% if question.reponse %}
+        <div class="previous-reply">
+            <h2>{% trans "Reponse deja envoyee" %}</h2>
+            <div class="muted">
+                {{ question.date_reponse|date:"d/m/Y H:i" }}
+                {% if question.repondu_par %}
+                - {{ question.repondu_par.get_full_name|default:question.repondu_par.username }}
+                {% endif %}
+            </div>
+            <p>{{ question.reponse }}</p>
+        </div>
+        {% endif %}
+
+        <form method="post" class="reply-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                <label for="{{ form.reponse.id_for_label }}">{{ form.reponse.label }}</label>
+                {{ form.reponse }}
+                {{ form.reponse.errors }}
+            </div>
+            <div class="actions">
+                <button type="submit" class="btn-link primary">{% trans "Envoyer la reponse" %}</button>
+                <a href="{% url 'super_admin_messages' %}" class="btn-link">{% trans "Annuler" %}</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -137,16 +137,19 @@ def get_super_admin_public_questions(filters=None):
             | Q(email__icontains=search)
             | Q(telephone__icontains=search)
             | Q(entreprise__icontains=search)
+            | Q(reponse__icontains=search)
+            | Q(repondu_par__username__icontains=search)
+            | Q(repondu_par__email__icontains=search)
         )
     return _apply_common_filters(
-        PublicQuestion.objects.order_by("-date_creation", "-id"),
+        PublicQuestion.objects.select_related("repondu_par").order_by("-date_creation", "-id"),
         filters=filters,
         search_query=search_query,
     )
 
 
 def get_public_question_for_super_admin(question_id):
-    return get_object_or_404(PublicQuestion.objects.all(), id=question_id)
+    return get_object_or_404(PublicQuestion.objects.select_related("repondu_par"), id=question_id)
 
 
 def _suggestion_to_request_item(suggestion):
@@ -168,6 +171,9 @@ def _suggestion_to_request_item(suggestion):
 
 
 def _public_question_to_request_item(question):
+    repondu_par = ""
+    if question.repondu_par:
+        repondu_par = question.repondu_par.get_full_name() or question.repondu_par.username
     return {
         "type": REQUEST_TYPE_QUESTION,
         "type_label": "Question publique",
@@ -182,6 +188,9 @@ def _public_question_to_request_item(question):
         "statut_label": question.get_statut_display(),
         "date_creation": question.date_creation,
         "date_traitement": question.date_traitement,
+        "has_reply": bool(question.reponse),
+        "date_reponse": question.date_reponse,
+        "repondu_par": repondu_par,
     }
 
 

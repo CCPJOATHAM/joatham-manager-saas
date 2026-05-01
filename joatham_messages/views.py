@@ -11,6 +11,7 @@ from joatham_users.permissions import permission_required
 from .forms import (
     ConversationCreateForm,
     MessageReplyForm,
+    PublicQuestionReplyForm,
     PublicQuestionForm,
     SuggestionSuperAdminForm,
     SuperAdminRequestFilterForm,
@@ -32,7 +33,9 @@ from .services.messages import (
     create_conversation,
     create_public_question,
     create_suggestion_for_super_admin,
+    answer_public_question,
     mark_conversation_read,
+    PublicQuestionReplyEmailError,
     send_message,
     update_public_question_status,
     update_suggestion_status,
@@ -184,6 +187,37 @@ def public_question_create(request):
 
 def public_question_thanks(request):
     return render(request, "joatham_messages/public_question_thanks.html")
+
+
+@permission_required("superadmin.view")
+def super_admin_public_question_reply(request, question_id):
+    question = get_public_question_for_super_admin(question_id)
+    form = PublicQuestionReplyForm(request.POST or None, initial={"reponse": question.reponse})
+
+    if request.method == "POST" and form.is_valid():
+        try:
+            answer_public_question(
+                question=question,
+                responder=request.user,
+                response=form.cleaned_data["reponse"],
+            )
+        except PublicQuestionReplyEmailError as exc:
+            messages.error(request, str(exc))
+            question = get_public_question_for_super_admin(question_id)
+        except (PermissionDenied, ValidationError) as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, "Reponse envoyee au visiteur.")
+            return redirect("super_admin_messages")
+
+    return render(
+        request,
+        "joatham_messages/public_question_reply_form.html",
+        {
+            "question": question,
+            "form": form,
+        },
+    )
 
 
 @permission_required("superadmin.view")

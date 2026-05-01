@@ -38,9 +38,20 @@ DANGEROUS_ATTACHMENT_EXTENSIONS = {
 }
 
 
+class PublicQuestionReplyEmailError(Exception):
+    pass
+
+
 def _ensure_company_user(user, entreprise):
     if not user or not getattr(user, "is_authenticated", False) or getattr(user, "entreprise_id", None) != entreprise.id:
         raise PermissionDenied("Utilisateur hors entreprise.")
+
+
+def _ensure_super_admin_user(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        raise PermissionDenied("Utilisateur non authentifie.")
+    if getattr(user, "normalized_role", getattr(user, "role", "")) != User.Role.SUPER_ADMIN:
+        raise PermissionDenied("Seul le super admin peut repondre a une question publique.")
 
 
 def _clean_required_text(value, *, field_label, max_length=MAX_MESSAGE_LENGTH, min_length=1):
@@ -111,6 +122,32 @@ def _notify_super_admins_new_request(*, subject, body):
         )
     except Exception:
         logger.exception("Echec de notification e-mail pour une nouvelle demande SaaS.")
+
+
+def _send_public_question_reply_email(*, question):
+    try:
+        send_mail(
+            f"Reponse a votre question - JOATHAM Manager",
+            (
+                f"Bonjour {question.nom},\n\n"
+                f"Merci pour votre question sur JOATHAM Manager.\n\n"
+                f"Votre question :\n{question.message}\n\n"
+                f"Reponse de l'equipe JOATHAM :\n{question.reponse}\n\n"
+                f"Cordialement,\n"
+                f"L'equipe JOATHAM Manager"
+            ),
+            settings.DEFAULT_FROM_EMAIL,
+            [question.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        logger.exception(
+            "Echec d'envoi de la reponse a une question publique question_id=%s",
+            getattr(question, "id", None),
+        )
+        raise PublicQuestionReplyEmailError(
+            "La reponse n'a pas pu etre envoyee par email. Verifiez la configuration email puis reessayez."
+        ) from exc
 
 
 def _get_participants(entreprise, participant_ids, creator):
@@ -327,5 +364,47 @@ def update_public_question_status(*, question, status, changed_by=None):
         objet_id=question.id,
         description=f"Statut de question publique modifie : {old_status} -> {status}.",
         metadata={"ancien_statut": old_status, "nouveau_statut": status},
+    )
+    return question
+
+
+@transaction.atomic
+def answer_public_question(*, question, responder, response):
+    _ensure_super_admin_user(responder)
+    response = _clean_required_text(response, field_label="La reponse", min_length=10)
+    now = timezone.now()
+    old_status = question.statut
+
+    question.reponse = response
+    question.statut = PublicQuestion.Statut.TRAITE
+    question.date_reponse = now
+    question.date_traitement = now
+    question.repondu_par = responder
+    question.save(
+        update_fields=[
+            "reponse",
+            "statut",
+            "date_reponse",
+            "date_traitement",
+            "repondu_par",
+            "date_modification",
+        ]
+    )
+
+    _send_public_question_reply_email(question=question)
+
+    _record_message_event(
+        entreprise=None,
+        utilisateur=responder,
+        action="question_publique_repondue",
+        objet_type="PublicQuestion",
+        objet_id=question.id,
+        description=f"Reponse envoyee a la question publique : {question.sujet}.",
+        metadata={
+            "ancien_statut": old_status,
+            "nouveau_statut": question.statut,
+            "email": question.email,
+            "date_reponse": question.date_reponse.isoformat(),
+        },
     )
     return question

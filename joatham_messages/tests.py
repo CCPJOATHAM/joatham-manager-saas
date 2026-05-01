@@ -1,5 +1,7 @@
 import tempfile
+from unittest.mock import patch
 
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -281,3 +283,111 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Reporting avance")
         self.assertNotContains(response, "Question visible autre")
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEFAULT_FROM_EMAIL="support@joatham.local")
+    def test_super_admin_can_reply_to_public_question(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            telephone="+243000",
+            entreprise="Prospect SARL",
+            sujet="Question avant inscription",
+            message="Je veux comprendre le fonctionnement de JOATHAM Manager.",
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(
+            reverse("super_admin_public_question_reply", args=[question.id]),
+            {"reponse": "Merci pour votre question. JOATHAM Manager permet de gerer votre activite SaaS simplement."},
+        )
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        self.assertEqual(question.statut, PublicQuestion.Statut.TRAITE)
+        self.assertEqual(question.repondu_par, self.super_admin)
+        self.assertIsNotNone(question.date_reponse)
+        self.assertIsNotNone(question.date_traitement)
+        self.assertIn("JOATHAM Manager permet", question.reponse)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["prospect@example.com"])
+        self.assertIn("JOATHAM Manager permet", mail.outbox[0].body)
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise__isnull=True,
+                utilisateur=self.super_admin,
+                action="question_publique_repondue",
+                objet_id=question.id,
+            ).exists()
+        )
+
+    def test_non_authorized_user_cannot_reply_to_public_question(self):
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            sujet="Question protegee",
+            message="Message question publique protegee.",
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("super_admin_public_question_reply", args=[question.id]),
+            {"reponse": "Reponse interdite pour utilisateur non super admin."},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        question.refresh_from_db()
+        self.assertEqual(question.statut, PublicQuestion.Statut.NOUVEAU)
+        self.assertEqual(question.reponse, "")
+        self.assertIsNone(question.date_reponse)
+        self.assertIsNone(question.date_traitement)
+        self.assertIsNone(question.repondu_par)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEFAULT_FROM_EMAIL="support@joatham.local")
+    def test_audit_failure_does_not_block_public_question_reply(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            sujet="Question audit",
+            message="Message question publique avec audit.",
+        )
+
+        self.client.force_login(self.super_admin)
+        with patch("core.audit.ActivityLog.objects.create", side_effect=Exception("audit down")):
+            response = self.client.post(
+                reverse("super_admin_public_question_reply", args=[question.id]),
+                {"reponse": "Reponse envoyee meme si le journal audit echoue."},
+            )
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        self.assertEqual(question.statut, PublicQuestion.Statut.TRAITE)
+        self.assertEqual(question.repondu_par, self.super_admin)
+        self.assertEqual(len(mail.outbox), 1)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEFAULT_FROM_EMAIL="support@joatham.local")
+    def test_email_failure_keeps_question_unanswered_and_shows_message(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect",
+            email="prospect@example.com",
+            sujet="Question email",
+            message="Message question publique avec echec email.",
+        )
+
+        self.client.force_login(self.super_admin)
+        with patch("joatham_messages.services.messages.send_mail", side_effect=Exception("smtp down")):
+            response = self.client.post(
+                reverse("super_admin_public_question_reply", args=[question.id]),
+                {"reponse": "Reponse qui ne doit pas etre marquee comme envoyee si email echoue."},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "La reponse n&#x27;a pas pu etre envoyee par email")
+        question.refresh_from_db()
+        self.assertEqual(question.statut, PublicQuestion.Statut.NOUVEAU)
+        self.assertEqual(question.reponse, "")
+        self.assertIsNone(question.date_reponse)
+        self.assertIsNone(question.date_traitement)
+        self.assertIsNone(question.repondu_par)

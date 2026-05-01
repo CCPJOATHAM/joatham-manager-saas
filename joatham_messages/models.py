@@ -155,6 +155,15 @@ class PublicQuestion(models.Model):
     sujet = models.CharField(max_length=180)
     message = models.TextField()
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.NOUVEAU)
+    reponse = models.TextField(blank=True)
+    date_reponse = models.DateTimeField(null=True, blank=True)
+    repondu_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="questions_publiques_repondues",
+    )
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
     date_traitement = models.DateTimeField(null=True, blank=True)
