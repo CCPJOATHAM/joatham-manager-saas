@@ -9,9 +9,14 @@
         :root {
             --text: #10233f;
             --muted: #64748b;
-            --line: #dbe5ee;
+            --line: #dbe5ef;
+            --soft-line: #e7edf4;
             --accent: #0f766e;
-            --bg: #f5f7fb;
+            --accent-dark: #115e59;
+            --accent-soft: #f0fdfa;
+            --surface: #ffffff;
+            --bg: #f4f7fb;
+            --warning: #92400e;
         }
 
         * {
@@ -23,44 +28,175 @@
             min-height: 100vh;
             font-family: Inter, Segoe UI, Arial, sans-serif;
             color: var(--text);
-            background: var(--bg);
-            display: grid;
-            place-items: center;
-            padding: 24px;
+            background:
+                linear-gradient(180deg, #f8fafc 0%, var(--bg) 58%, #eef4f8 100%);
         }
 
-        .question-shell {
-            width: min(760px, 100%);
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+        a {
+            color: inherit;
         }
 
-        .topline {
+        .page-shell {
+            width: min(1180px, 100%);
+            margin: 0 auto;
+            padding: 28px 22px 40px;
+        }
+
+        .topbar {
             display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
             align-items: center;
-            margin-bottom: 22px;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 38px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            display: inline-flex;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.18);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+            gap: 34px;
+            align-items: start;
+        }
+
+        .hero-copy {
+            padding-top: 32px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            padding: 0 10px;
+            border: 1px solid #99f6e4;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent-dark);
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         h1 {
-            margin: 0;
-            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            margin: 18px 0 0;
+            max-width: 680px;
+            color: var(--text);
+            font-size: clamp(2rem, 4vw, 3.6rem);
+            line-height: 1.05;
+            letter-spacing: 0;
         }
 
-        p {
+        .subtitle {
+            margin: 18px 0 0;
+            max-width: 620px;
             color: var(--muted);
-            line-height: 1.6;
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .trust-block {
+            display: grid;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .trust-item {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.78);
+        }
+
+        .trust-icon {
+            display: inline-flex;
+            width: 38px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-weight: 900;
+        }
+
+        .trust-item strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--text);
+            font-size: 0.96rem;
+        }
+
+        .trust-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .question-card {
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: var(--surface);
+            box-shadow: 0 24px 70px rgba(16, 35, 63, 0.11);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px 26px 18px;
+            border-bottom: 1px solid var(--soft-line);
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: var(--text);
+            font-size: 1.25rem;
+            line-height: 1.35;
+        }
+
+        .card-header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            line-height: 1.55;
         }
 
         form {
             display: grid;
-            gap: 14px;
-            margin-top: 20px;
+            gap: 18px;
+            padding: 24px 26px 26px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
         .field {
@@ -68,17 +204,50 @@
             gap: 7px;
         }
 
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
         label {
-            font-weight: 700;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 900;
         }
 
         input,
         textarea {
             width: 100%;
             border: 1px solid #cbd5e1;
-            border-radius: 14px;
-            padding: 12px 14px;
+            border-radius: 12px;
+            padding: 12px 13px;
+            background: #fff;
+            color: var(--text);
             font: inherit;
+            line-height: 1.45;
+            outline: none;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+        }
+
+        .form-note {
+            margin: 0;
+            padding: 12px 14px;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            background: #fffbeb;
+            color: var(--warning);
+            font-size: 0.9rem;
+            line-height: 1.45;
         }
 
         .actions {
@@ -89,8 +258,8 @@
         }
 
         .btn {
-            min-height: 44px;
-            padding: 0 16px;
+            min-height: 46px;
+            padding: 0 18px;
             border-radius: 12px;
             border: 1px solid var(--line);
             display: inline-flex;
@@ -99,14 +268,27 @@
             text-decoration: none;
             color: var(--text);
             background: #fff;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
+            transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+        }
+
+        .btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
         }
 
         .btn.primary {
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
+            box-shadow: 0 14px 26px rgba(15, 118, 110, 0.22);
+        }
+
+        .btn.primary:hover {
+            background: var(--accent-dark);
+            border-color: var(--accent-dark);
         }
 
         .errors,
@@ -115,57 +297,159 @@
             padding-left: 18px;
             color: #b91c1c;
             font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .errorlist {
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
+            .page-shell {
+                padding: 22px 16px 32px;
+            }
+
+            .topbar {
+                margin-bottom: 24px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .hero-copy {
+                padding-top: 0;
+            }
+
+            .trust-block {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .trust-block,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-card {
+                border-radius: 18px;
+            }
+
+            .card-header,
+            form {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <main class="question-shell">
-        <div class="topline">
-            <strong>JOATHAM Manager</strong>
+    <main class="page-shell">
+        <header class="topbar">
+            <a href="{% url 'login' %}" class="brand" aria-label="JOATHAM Manager">
+                <span class="brand-mark">JM</span>
+                <span>JOATHAM Manager</span>
+            </a>
             {% include "includes/language_selector.html" with language_selector_id="public-question-language-select" %}
-        </div>
-        <h1>{% trans "Poser une question avant inscription" %}</h1>
-        <p>{% trans "Laissez votre demande. L'equipe JOATHAM pourra vous repondre et mieux comprendre votre besoin avant votre inscription." %}</p>
+        </header>
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {{ form.site_web }}
-            <div class="field">
-                <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
-                {{ form.nom }}
-                {{ form.nom.errors }}
+        <section class="hero" aria-labelledby="public-question-title">
+            <div class="hero-copy">
+                <span class="eyebrow">{% trans "Avant inscription" %}</span>
+                <h1 id="public-question-title">{% trans "Une question avant de créer votre compte ?" %}</h1>
+                <p class="subtitle">
+                    {% trans "Expliquez-nous votre besoin en quelques lignes. L'equipe JOATHAM Manager vous repondra avec une information claire avant votre inscription." %}
+                </p>
+
+                <div class="trust-block" aria-label="{% trans 'Engagements JOATHAM Manager' %}">
+                    <div class="trust-item">
+                        <span class="trust-icon">1</span>
+                        <div>
+                            <strong>{% trans "Reponse rapide" %}</strong>
+                            <span>{% trans "Votre demande est consultee par l'equipe et traitee avec attention." %}</span>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon">2</span>
+                        <div>
+                            <strong>{% trans "Confidentialite" %}</strong>
+                            <span>{% trans "Vos informations servent uniquement a comprendre votre besoin." %}</span>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon">3</span>
+                        <div>
+                            <strong>{% trans "Accompagnement" %}</strong>
+                            <span>{% trans "Nous vous orientons vers la meilleure facon de demarrer." %}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="field">
-                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
-                {{ form.email }}
-                {{ form.email.errors }}
-            </div>
-            <div class="field">
-                <label for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
-                {{ form.telephone }}
-                {{ form.telephone.errors }}
-            </div>
-            <div class="field">
-                <label for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
-                {{ form.entreprise }}
-                {{ form.entreprise.errors }}
-            </div>
-            <div class="field">
-                <label for="{{ form.sujet.id_for_label }}">{{ form.sujet.label }}</label>
-                {{ form.sujet }}
-                {{ form.sujet.errors }}
-            </div>
-            <div class="field">
-                <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
-                {{ form.message }}
-                {{ form.message.errors }}
-            </div>
-            <div class="actions">
-                <button type="submit" class="btn primary">{% trans "Envoyer" %}</button>
-                <a href="{% url 'login' %}" class="btn">{% trans "Retour connexion" %}</a>
-            </div>
-        </form>
+
+            <section class="question-card" aria-label="{% trans 'Formulaire de question avant inscription' %}">
+                <div class="card-header">
+                    <h2>{% trans "Envoyez votre question" %}</h2>
+                    <p>{% trans "Tous les champs utiles nous aident a vous repondre plus precisement." %}</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    {{ form.site_web }}
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+                            {{ form.nom }}
+                            {{ form.nom.errors }}
+                        </div>
+                        <div class="field">
+                            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                        </div>
+                        <div class="field">
+                            <label for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+                            {{ form.telephone }}
+                            {{ form.telephone.errors }}
+                        </div>
+                        <div class="field">
+                            <label for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
+                            {{ form.entreprise }}
+                            {{ form.entreprise.errors }}
+                        </div>
+                        <div class="field full">
+                            <label for="{{ form.sujet.id_for_label }}">{{ form.sujet.label }}</label>
+                            {{ form.sujet }}
+                            {{ form.sujet.errors }}
+                        </div>
+                        <div class="field full">
+                            <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+                            {{ form.message }}
+                            {{ form.message.errors }}
+                        </div>
+                    </div>
+
+                    <p class="form-note">{% trans "Nous ne partageons pas votre demande avec des tiers. Elle sert a vous repondre et a mieux adapter JOATHAM Manager aux besoins des entreprises." %}</p>
+
+                    <div class="actions">
+                        <button type="submit" class="btn primary">{% trans "Envoyer ma question" %}</button>
+                        <a href="{% url 'login' %}" class="btn">{% trans "Retour connexion" %}</a>
+                    </div>
+                </form>
+            </section>
+        </section>
     </main>
 </body>
 </html>
