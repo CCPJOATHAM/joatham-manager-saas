@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 from joatham_users.models import User
@@ -10,6 +10,9 @@ OPEN_STATUSES = (
     SuggestionSuperAdmin.Statut.NOUVEAU,
     SuggestionSuperAdmin.Statut.EN_COURS,
 )
+
+REQUEST_TYPE_SUGGESTION = "suggestion"
+REQUEST_TYPE_QUESTION = "question"
 
 
 def get_company_users_for_messaging(entreprise, *, exclude_user=None):
@@ -75,12 +78,132 @@ def get_suggestions_for_entreprise(entreprise):
     return SuggestionSuperAdmin.objects.filter(entreprise=entreprise).select_related("utilisateur").order_by("-date_creation", "-id")
 
 
-def get_super_admin_suggestions():
-    return SuggestionSuperAdmin.objects.select_related("entreprise", "utilisateur").order_by("-date_creation", "-id")
+def _apply_common_filters(queryset, *, filters, search_query):
+    selected_status = filters.get("statut") if filters else ""
+    date_from = filters.get("date_from") if filters else None
+    date_to = filters.get("date_to") if filters else None
+
+    if selected_status:
+        queryset = queryset.filter(statut=selected_status)
+    if date_from:
+        queryset = queryset.filter(date_creation__date__gte=date_from)
+    if date_to:
+        queryset = queryset.filter(date_creation__date__lte=date_to)
+    if search_query is not None:
+        queryset = queryset.filter(search_query)
+    return queryset
 
 
-def get_super_admin_public_questions():
-    return PublicQuestion.objects.order_by("-date_creation", "-id")
+def get_super_admin_suggestions(filters=None):
+    filters = filters or {}
+    selected_type = filters.get("type") or ""
+    if selected_type == REQUEST_TYPE_QUESTION:
+        return SuggestionSuperAdmin.objects.none()
+    search = (filters.get("q") or "").strip()
+    search_query = None
+    if search:
+        search_query = (
+            Q(sujet__icontains=search)
+            | Q(message__icontains=search)
+            | Q(entreprise__nom__icontains=search)
+            | Q(utilisateur__username__icontains=search)
+            | Q(utilisateur__email__icontains=search)
+            | Q(utilisateur__first_name__icontains=search)
+            | Q(utilisateur__last_name__icontains=search)
+        )
+    return _apply_common_filters(
+        SuggestionSuperAdmin.objects.select_related("entreprise", "utilisateur").order_by("-date_creation", "-id"),
+        filters=filters,
+        search_query=search_query,
+    )
+
+
+def get_suggestion_for_super_admin(suggestion_id):
+    return get_object_or_404(SuggestionSuperAdmin.objects.select_related("entreprise", "utilisateur"), id=suggestion_id)
+
+
+def get_super_admin_public_questions(filters=None):
+    filters = filters or {}
+    selected_type = filters.get("type") or ""
+    if selected_type == REQUEST_TYPE_SUGGESTION:
+        return PublicQuestion.objects.none()
+    search = (filters.get("q") or "").strip()
+    search_query = None
+    if search:
+        search_query = (
+            Q(sujet__icontains=search)
+            | Q(message__icontains=search)
+            | Q(nom__icontains=search)
+            | Q(email__icontains=search)
+            | Q(telephone__icontains=search)
+            | Q(entreprise__icontains=search)
+        )
+    return _apply_common_filters(
+        PublicQuestion.objects.order_by("-date_creation", "-id"),
+        filters=filters,
+        search_query=search_query,
+    )
+
+
+def get_public_question_for_super_admin(question_id):
+    return get_object_or_404(PublicQuestion.objects.all(), id=question_id)
+
+
+def _suggestion_to_request_item(suggestion):
+    return {
+        "type": REQUEST_TYPE_SUGGESTION,
+        "type_label": "Suggestion",
+        "id": suggestion.id,
+        "auteur": suggestion.utilisateur.get_full_name() or suggestion.utilisateur.username,
+        "entreprise": suggestion.entreprise.nom,
+        "email": suggestion.utilisateur.email,
+        "telephone": getattr(suggestion.utilisateur, "telephone", ""),
+        "sujet": suggestion.sujet,
+        "message": suggestion.message,
+        "statut": suggestion.statut,
+        "statut_label": suggestion.get_statut_display(),
+        "date_creation": suggestion.date_creation,
+        "date_traitement": suggestion.date_traitement,
+    }
+
+
+def _public_question_to_request_item(question):
+    return {
+        "type": REQUEST_TYPE_QUESTION,
+        "type_label": "Question publique",
+        "id": question.id,
+        "auteur": question.nom,
+        "entreprise": question.entreprise,
+        "email": question.email,
+        "telephone": question.telephone,
+        "sujet": question.sujet,
+        "message": question.message,
+        "statut": question.statut,
+        "statut_label": question.get_statut_display(),
+        "date_creation": question.date_creation,
+        "date_traitement": question.date_traitement,
+    }
+
+
+def get_super_admin_request_items(filters=None):
+    suggestions = [_suggestion_to_request_item(suggestion) for suggestion in get_super_admin_suggestions(filters)]
+    questions = [_public_question_to_request_item(question) for question in get_super_admin_public_questions(filters)]
+    return sorted(
+        suggestions + questions,
+        key=lambda item: (item["date_creation"], item["id"]),
+        reverse=True,
+    )
+
+
+def get_super_admin_request_summary():
+    return {
+        "suggestions": SuggestionSuperAdmin.objects.count(),
+        "questions": PublicQuestion.objects.count(),
+        "nouveau": SuggestionSuperAdmin.objects.filter(statut=SuggestionSuperAdmin.Statut.NOUVEAU).count()
+        + PublicQuestion.objects.filter(statut=PublicQuestion.Statut.NOUVEAU).count(),
+        "en_cours": SuggestionSuperAdmin.objects.filter(statut=SuggestionSuperAdmin.Statut.EN_COURS).count()
+        + PublicQuestion.objects.filter(statut=PublicQuestion.Statut.EN_COURS).count(),
+    }
 
 
 def get_pending_super_admin_message_count():

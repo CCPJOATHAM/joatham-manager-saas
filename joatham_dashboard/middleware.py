@@ -13,6 +13,7 @@ ALLOWED_UNVERIFIED_URL_NAMES = {
     "password_reset_confirm",
     "password_reset_complete",
     "public_question_create",
+    "public_question_thanks",
     "email_verification_sent",
     "email_verification_confirm",
     "email_verification_resend",

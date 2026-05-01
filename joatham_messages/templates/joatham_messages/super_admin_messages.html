@@ -3,146 +3,303 @@
 
 {% block page_title %}{% trans "Demandes SaaS" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Demandes SaaS" %}{% endblock %}
-{% block content_subtitle %}{% trans "Suggestions des proprietaires et questions publiques avant inscription." %}{% endblock %}
+{% block content_subtitle %}{% trans "Messages de marche, suggestions clients et questions avant inscription." %}{% endblock %}
 
 {% block content %}
 <style>
-    .admin-section {
+    .summary-strip {
         display: grid;
-        gap: 16px;
-        margin-bottom: 28px;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
     }
 
-    .admin-section h2 {
-        margin: 0;
-        font-size: 1.2rem;
+    .summary-item {
+        padding: 14px;
+        border: 1px solid #dde7f0;
+        border-radius: 14px;
+        background: #f8fafc;
+    }
+
+    .summary-item span {
+        display: block;
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .summary-item strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 1.25rem;
+    }
+
+    .message-filters {
+        display: grid;
+        grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr)) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .message-filters label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .message-filters input,
+    .message-filters select,
+    .status-form select {
+        width: 100%;
+        min-height: 40px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        font: inherit;
+    }
+
+    .filter-actions,
+    .status-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .table-shell {
+        overflow-x: auto;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
     }
 
     .request-table {
         width: 100%;
+        min-width: 1180px;
         border-collapse: collapse;
-        overflow: hidden;
-        border: 1px solid #dde7f0;
-        border-radius: 16px;
     }
 
     .request-table th,
     .request-table td {
-        padding: 12px;
-        border-bottom: 1px solid #edf2f7;
+        padding: 13px 14px;
+        border-bottom: 1px solid #e2e8f0;
         text-align: left;
         vertical-align: top;
+        white-space: normal;
     }
 
     .request-table th {
-        background: #f8fbff;
+        background: #f8fafc;
         color: #475569;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
+        letter-spacing: 0.06em;
     }
 
-    .request-table form {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    .request-table select {
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        padding: 8px;
+    .request-table tr:last-child td {
+        border-bottom: 0;
     }
 
     .muted {
         color: #64748b;
         font-size: 0.86rem;
     }
+
+    .message-preview {
+        max-width: 340px;
+        white-space: pre-wrap;
+        line-height: 1.45;
+    }
+
+    .type-badge,
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .type-badge {
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .status-badge {
+        background: #ecfdf5;
+        color: #166534;
+        margin-top: 6px;
+    }
+
+    .btn-small {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-small.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 1200px) {
+        .summary-strip,
+        .message-filters {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .summary-strip,
+        .message-filters {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<section class="admin-section">
-    <h2>{% trans "Suggestions proprietaires" %}</h2>
-    <table class="request-table">
-        <thead>
-            <tr>
-                <th>{% trans "Sujet" %}</th>
-                <th>{% trans "Entreprise" %}</th>
-                <th>{% trans "Utilisateur" %}</th>
-                <th>{% trans "Message" %}</th>
-                <th>{% trans "Statut" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for suggestion in suggestions %}
-            <tr>
-                <td>
-                    <strong>{{ suggestion.sujet }}</strong>
-                    <div class="muted">{{ suggestion.date_creation|date:"d/m/Y H:i" }}</div>
-                </td>
-                <td>{{ suggestion.entreprise.nom }}</td>
-                <td>{{ suggestion.utilisateur.email|default:suggestion.utilisateur.username }}</td>
-                <td>{{ suggestion.message }}</td>
-                <td>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_type" value="suggestion">
-                        <input type="hidden" name="item_id" value="{{ suggestion.id }}">
-                        <select name="status">
-                            {% for value, label in suggestion_statuses %}
-                            <option value="{{ value }}" {% if suggestion.statut == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn-link">{% trans "OK" %}</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="muted">{% trans "Aucune suggestion." %}</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
+<div class="summary-strip">
+    <div class="summary-item">
+        <span>{% trans "Suggestions" %}</span>
+        <strong>{{ summary.suggestions }}</strong>
+    </div>
+    <div class="summary-item">
+        <span>{% trans "Questions publiques" %}</span>
+        <strong>{{ summary.questions }}</strong>
+    </div>
+    <div class="summary-item">
+        <span>{% trans "Nouveaux" %}</span>
+        <strong>{{ summary.nouveau }}</strong>
+    </div>
+    <div class="summary-item">
+        <span>{% trans "En cours" %}</span>
+        <strong>{{ summary.en_cours }}</strong>
+    </div>
+</div>
 
-<section class="admin-section">
-    <h2>{% trans "Questions publiques" %}</h2>
+<form method="get" class="message-filters">
+    <div>
+        <label for="id_q">{% trans "Recherche" %}</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_filters.q }}" placeholder="{% trans 'Nom, e-mail, entreprise ou sujet' %}">
+    </div>
+    <div>
+        <label for="id_type">{% trans "Type" %}</label>
+        <select id="id_type" name="type">
+            {% for value, label in filter_form.fields.type.choices %}
+            <option value="{{ value }}" {% if selected_filters.type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="id_statut">{% trans "Statut" %}</label>
+        <select id="id_statut" name="statut">
+            {% for value, label in filter_form.fields.statut.choices %}
+            <option value="{{ value }}" {% if selected_filters.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="id_date_from">{% trans "Date debut" %}</label>
+        <input id="id_date_from" name="date_from" type="date" value="{{ selected_filters.date_from|date:'Y-m-d' }}">
+    </div>
+    <div>
+        <label for="id_date_to">{% trans "Date fin" %}</label>
+        <input id="id_date_to" name="date_to" type="date" value="{{ selected_filters.date_to|date:'Y-m-d' }}">
+    </div>
+    <div class="filter-actions">
+        <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
+        <a href="{% url 'super_admin_messages' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+    </div>
+</form>
+
+<div class="table-shell">
     <table class="request-table">
         <thead>
             <tr>
-                <th>{% trans "Sujet" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Auteur" %}</th>
+                <th>{% trans "Entreprise" %}</th>
                 <th>{% trans "Contact" %}</th>
+                <th>{% trans "Sujet" %}</th>
                 <th>{% trans "Message" %}</th>
                 <th>{% trans "Statut" %}</th>
+                <th>{% trans "Date envoi" %}</th>
+                <th>{% trans "Action" %}</th>
             </tr>
         </thead>
         <tbody>
-            {% for question in public_questions %}
+            {% for item in requests %}
             <tr>
+                <td><span class="type-badge">{{ item.type_label }}</span></td>
+                <td>{{ item.auteur|default:"-" }}</td>
+                <td>{{ item.entreprise|default:"-" }}</td>
                 <td>
-                    <strong>{{ question.sujet }}</strong>
-                    <div class="muted">{{ question.date_creation|date:"d/m/Y H:i" }}</div>
+                    {% if item.email %}<div>{{ item.email }}</div>{% endif %}
+                    {% if item.telephone %}<div class="muted">{{ item.telephone }}</div>{% endif %}
+                    {% if not item.email and not item.telephone %}<span class="muted">-</span>{% endif %}
                 </td>
+                <td><strong>{{ item.sujet }}</strong></td>
+                <td><div class="message-preview">{{ item.message }}</div></td>
                 <td>
-                    {{ question.nom }}<br>
-                    <span class="muted">{{ question.email }}{% if question.telephone %} - {{ question.telephone }}{% endif %}</span>
+                    <span class="status-badge">{{ item.statut_label }}</span>
+                    {% if item.date_traitement %}
+                    <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"d/m/Y H:i" }}</div>
+                    {% endif %}
                 </td>
-                <td>{{ question.message }}</td>
+                <td>{{ item.date_creation|date:"d/m/Y H:i" }}</td>
                 <td>
-                    <form method="post">
+                    <form method="post" class="status-form">
                         {% csrf_token %}
-                        <input type="hidden" name="item_type" value="question">
-                        <input type="hidden" name="item_id" value="{{ question.id }}">
-                        <select name="status">
-                            {% for value, label in question_statuses %}
-                            <option value="{{ value }}" {% if question.statut == value %}selected{% endif %}>{{ label }}</option>
+                        <input type="hidden" name="item_type" value="{{ item.type }}">
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                        <select name="status" aria-label="{% trans 'Nouveau statut' %}">
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if item.statut == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn-link">{% trans "OK" %}</button>
+                        <button type="submit" class="btn-small">{% trans "Mettre a jour" %}</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4" class="muted">{% trans "Aucune question publique." %}</td></tr>
+            <tr>
+                <td colspan="9" class="muted">{% trans "Aucune demande ne correspond aux filtres." %}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-</section>
+</div>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+    <a class="btn-small" href="?{% if querystring_without_page %}{{ querystring_without_page }}&{% endif %}page={{ page_obj.previous_page_number }}">{% trans "Precedent" %}</a>
+    {% endif %}
+    <span class="muted">{% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a class="btn-small" href="?{% if querystring_without_page %}{{ querystring_without_page }}&{% endif %}page={{ page_obj.next_page_number }}">{% trans "Suivant" %}</a>
+    {% endif %}
+</div>
 {% endblock %}

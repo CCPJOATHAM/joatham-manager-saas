@@ -1,21 +1,31 @@
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.paginator import Paginator
 from django.http import FileResponse, Http404
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required
 
-from .forms import ConversationCreateForm, MessageReplyForm, PublicQuestionForm, SuggestionSuperAdminForm
-from .models import PublicQuestion, SuggestionSuperAdmin
+from .forms import (
+    ConversationCreateForm,
+    MessageReplyForm,
+    PublicQuestionForm,
+    SuggestionSuperAdminForm,
+    SuperAdminRequestFilterForm,
+    SuperAdminStatusUpdateForm,
+)
+from .models import SuggestionSuperAdmin
 from .selectors.messages import (
     get_attachment_for_user,
     get_conversation_for_user,
     get_conversations_for_user,
+    get_public_question_for_super_admin,
     get_suggestions_for_entreprise,
-    get_super_admin_public_questions,
-    get_super_admin_suggestions,
+    get_suggestion_for_super_admin,
+    get_super_admin_request_items,
+    get_super_admin_request_summary,
     with_unread_counts,
 )
 from .services.messages import (
@@ -130,7 +140,7 @@ def suggestion_create(request):
                 subject=form.cleaned_data["sujet"],
                 message=form.cleaned_data["message"],
             )
-        except PermissionDenied as exc:
+        except (PermissionDenied, ValidationError) as exc:
             messages.error(request, str(exc))
         else:
             messages.success(request, "Suggestion transmise au super admin.")
@@ -148,42 +158,57 @@ def suggestion_create(request):
 
 def public_question_create(request):
     form = PublicQuestionForm(request.POST or None)
-    submitted = False
     if request.method == "POST" and form.is_valid():
-        create_public_question(
-            nom=form.cleaned_data["nom"],
-            email=form.cleaned_data["email"],
-            telephone=form.cleaned_data.get("telephone", ""),
-            subject=form.cleaned_data["sujet"],
-            message=form.cleaned_data["message"],
-        )
-        submitted = True
-        form = PublicQuestionForm()
+        try:
+            create_public_question(
+                nom=form.cleaned_data["nom"],
+                email=form.cleaned_data["email"],
+                telephone=form.cleaned_data.get("telephone", ""),
+                entreprise=form.cleaned_data.get("entreprise", ""),
+                subject=form.cleaned_data["sujet"],
+                message=form.cleaned_data["message"],
+            )
+        except ValidationError as exc:
+            messages.error(request, str(exc))
+        else:
+            return redirect("public_question_thanks")
 
     return render(
         request,
         "joatham_messages/public_question_form.html",
         {
             "form": form,
-            "submitted": submitted,
         },
     )
+
+
+def public_question_thanks(request):
+    return render(request, "joatham_messages/public_question_thanks.html")
 
 
 @permission_required("superadmin.view")
 def super_admin_messages(request):
     if request.method == "POST":
-        item_type = (request.POST.get("item_type") or "").strip()
-        item_id = request.POST.get("item_id")
-        status = (request.POST.get("status") or "").strip()
+        form = SuperAdminStatusUpdateForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "Action de statut invalide.")
+            return redirect("super_admin_messages")
         try:
-            if item_type == "suggestion":
-                suggestion = get_object_or_404(SuggestionSuperAdmin, id=item_id)
-                update_suggestion_status(suggestion=suggestion, status=status)
+            if form.cleaned_data["item_type"] == "suggestion":
+                suggestion = get_suggestion_for_super_admin(form.cleaned_data["item_id"])
+                update_suggestion_status(
+                    suggestion=suggestion,
+                    status=form.cleaned_data["status"],
+                    changed_by=request.user,
+                )
                 messages.success(request, "Statut de suggestion mis a jour.")
-            elif item_type == "question":
-                question = get_object_or_404(PublicQuestion, id=item_id)
-                update_public_question_status(question=question, status=status)
+            elif form.cleaned_data["item_type"] == "question":
+                question = get_public_question_for_super_admin(form.cleaned_data["item_id"])
+                update_public_question_status(
+                    question=question,
+                    status=form.cleaned_data["status"],
+                    changed_by=request.user,
+                )
                 messages.success(request, "Statut de question mis a jour.")
             else:
                 messages.error(request, "Action inconnue.")
@@ -191,13 +216,26 @@ def super_admin_messages(request):
             messages.error(request, str(exc))
         return redirect("super_admin_messages")
 
+    filter_form = SuperAdminRequestFilterForm(request.GET or None)
+    filters = filter_form.cleaned_data if filter_form.is_valid() else {}
+    if request.GET and not filter_form.is_valid():
+        messages.error(request, "Certains filtres sont invalides.")
+    request_items = get_super_admin_request_items(filters)
+    paginator = Paginator(request_items, 25)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+
     return render(
         request,
         "joatham_messages/super_admin_messages.html",
         {
-            "suggestions": get_super_admin_suggestions(),
-            "public_questions": get_super_admin_public_questions(),
-            "suggestion_statuses": SuggestionSuperAdmin.Statut.choices,
-            "question_statuses": PublicQuestion.Statut.choices,
+            "filter_form": filter_form,
+            "requests": page_obj.object_list,
+            "page_obj": page_obj,
+            "status_choices": SuggestionSuperAdmin.Statut.choices,
+            "summary": get_super_admin_request_summary(),
+            "selected_filters": filters,
+            "querystring_without_page": query_params.urlencode(),
         },
     )

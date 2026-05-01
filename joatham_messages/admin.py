@@ -26,13 +26,13 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(SuggestionSuperAdmin)
 class SuggestionSuperAdminAdmin(admin.ModelAdmin):
-    list_display = ("sujet", "entreprise", "utilisateur", "statut", "date_creation")
+    list_display = ("sujet", "entreprise", "utilisateur", "statut", "date_creation", "date_traitement")
     list_filter = ("statut", "entreprise")
     search_fields = ("sujet", "message", "entreprise__nom", "utilisateur__email")
 
 
 @admin.register(PublicQuestion)
 class PublicQuestionAdmin(admin.ModelAdmin):
-    list_display = ("sujet", "nom", "email", "statut", "date_creation")
+    list_display = ("sujet", "nom", "email", "entreprise", "statut", "date_creation", "date_traitement")
     list_filter = ("statut",)
-    search_fields = ("sujet", "message", "nom", "email", "telephone")
+    search_fields = ("sujet", "message", "nom", "email", "telephone", "entreprise")

@@ -8,6 +8,8 @@ class ActivityLog(models.Model):
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="activity_logs",
     )
     utilisateur = models.ForeignKey(

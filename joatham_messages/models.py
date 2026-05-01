@@ -108,8 +108,9 @@ class SuggestionSuperAdmin(models.Model):
     class Statut(models.TextChoices):
         NOUVEAU = "nouveau", _("Nouveau")
         EN_COURS = "en_cours", _("En cours")
-        RESOLU = "resolu", _("Resolu")
-        IGNORE = "ignore", _("Ignore")
+        TRAITE = "traite", _("Traite")
+        REJETE = "rejete", _("Rejete")
+        ARCHIVE = "archive", _("Archive")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -126,6 +127,7 @@ class SuggestionSuperAdmin(models.Model):
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.NOUVEAU)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
+    date_traitement = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-date_creation", "-id"]
@@ -142,17 +144,20 @@ class PublicQuestion(models.Model):
     class Statut(models.TextChoices):
         NOUVEAU = "nouveau", _("Nouveau")
         EN_COURS = "en_cours", _("En cours")
-        RESOLU = "resolu", _("Resolu")
-        IGNORE = "ignore", _("Ignore")
+        TRAITE = "traite", _("Traite")
+        REJETE = "rejete", _("Rejete")
+        ARCHIVE = "archive", _("Archive")
 
     nom = models.CharField(max_length=150)
     email = models.EmailField()
     telephone = models.CharField(max_length=50, blank=True, default="")
+    entreprise = models.CharField(max_length=150, blank=True, default="")
     sujet = models.CharField(max_length=180)
     message = models.TextField()
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.NOUVEAU)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
+    date_traitement = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-date_creation", "-id"]

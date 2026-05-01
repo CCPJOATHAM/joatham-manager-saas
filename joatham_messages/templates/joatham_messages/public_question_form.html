@@ -109,12 +109,12 @@
             border-color: var(--accent);
         }
 
-        .success {
-            padding: 14px;
-            border-radius: 14px;
-            background: #ecfdf5;
-            color: #166534;
-            font-weight: 700;
+        .errors,
+        .errorlist {
+            margin: 0;
+            padding-left: 18px;
+            color: #b91c1c;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -125,15 +125,12 @@
             {% include "includes/language_selector.html" with language_selector_id="public-question-language-select" %}
         </div>
         <h1>{% trans "Poser une question avant inscription" %}</h1>
-        <p>{% trans "Laissez votre demande. Le super admin pourra la traiter depuis l'espace plateforme." %}</p>
-
-        {% if submitted %}
-        <div class="success">{% trans "Votre question a ete envoyee." %}</div>
-        {% endif %}
+        <p>{% trans "Laissez votre demande. L'equipe JOATHAM pourra vous repondre et mieux comprendre votre besoin avant votre inscription." %}</p>
 
         <form method="post">
             {% csrf_token %}
             {{ form.non_field_errors }}
+            {{ form.site_web }}
             <div class="field">
                 <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
                 {{ form.nom }}
@@ -148,6 +145,11 @@
                 <label for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
                 {{ form.telephone }}
                 {{ form.telephone.errors }}
+            </div>
+            <div class="field">
+                <label for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
+                {{ form.entreprise }}
+                {{ form.entreprise.errors }}
             </div>
             <div class="field">
                 <label for="{{ form.sujet.id_for_label }}">{{ form.sujet.label }}</label>
