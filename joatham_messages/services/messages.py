@@ -302,6 +302,9 @@ def create_public_question(*, nom, email, telephone, entreprise="", subject, mes
         entreprise=(entreprise or "").strip(),
         sujet=_clean_required_text(subject, field_label="Le sujet", max_length=180),
         message=_clean_required_text(message, field_label="Le message", min_length=10),
+        lead_status=PublicQuestion.LeadStatus.NOUVEAU,
+        is_lead=True,
+        source="question_publique",
     )
     _record_message_event(
         entreprise=None,

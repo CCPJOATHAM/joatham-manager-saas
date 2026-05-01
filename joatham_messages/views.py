@@ -174,7 +174,7 @@ def public_question_create(request):
         except ValidationError as exc:
             messages.error(request, str(exc))
         else:
-            return redirect("public_question_thanks")
+            return redirect("public_question_success")
 
     return render(
         request,
@@ -187,6 +187,10 @@ def public_question_create(request):
 
 def public_question_thanks(request):
     return render(request, "joatham_messages/public_question_thanks.html")
+
+
+def public_question_success(request):
+    return render(request, "joatham_messages/public_question_success.html")
 
 
 @permission_required("superadmin.view")

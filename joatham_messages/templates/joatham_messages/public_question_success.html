@@ -1,0 +1,194 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Question envoyee" %} | JOATHAM Manager</title>
+    <style>
+        :root {
+            --text: #10233f;
+            --muted: #64748b;
+            --line: #dbe5ef;
+            --accent: #0f766e;
+            --accent-dark: #115e59;
+            --accent-soft: #f0fdfa;
+            --bg: #f4f7fb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 58%, #eef4f8 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .success-shell {
+            width: min(720px, 100%);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(16, 35, 63, 0.11);
+            overflow: hidden;
+        }
+
+        .success-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding: 22px 26px;
+            border-bottom: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 900;
+        }
+
+        .brand-mark {
+            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.92rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+        }
+
+        .success-body {
+            padding: 38px 34px 34px;
+            text-align: center;
+        }
+
+        .success-icon {
+            display: inline-flex;
+            width: 62px;
+            height: 62px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: var(--accent-soft);
+            color: var(--accent-dark);
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--text);
+            font-size: clamp(1.8rem, 4vw, 2.7rem);
+            line-height: 1.1;
+            letter-spacing: 0;
+        }
+
+        p {
+            margin: 16px auto 0;
+            max-width: 560px;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .btn {
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text);
+            background: #fff;
+            font-weight: 900;
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 14px 26px rgba(15, 118, 110, 0.22);
+        }
+
+        .next-steps {
+            margin-top: 28px;
+            padding: 16px;
+            border: 1px solid #ccfbf1;
+            border-radius: 14px;
+            background: var(--accent-soft);
+            color: var(--accent-dark);
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .success-header {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .success-body {
+                padding: 30px 20px 24px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="success-shell">
+        <header class="success-header">
+            <div class="brand">
+                <span class="brand-mark">JM</span>
+                <span>JOATHAM Manager</span>
+            </div>
+            {% include "includes/language_selector.html" with language_selector_id="public-question-success-language-select" %}
+        </header>
+
+        <section class="success-body">
+            <div class="success-icon" aria-hidden="true">OK</div>
+            <h1>{% trans "Votre question a bien ete envoyee" %}</h1>
+            <p>{% trans "Merci pour votre interet. Votre demande est maintenant enregistree et sera analysee par l'equipe JOATHAM Manager." %}</p>
+            <div class="next-steps">
+                {% trans "Vous pouvez deja creer votre compte si vous souhaitez decouvrir la plateforme pendant que notre equipe prepare sa reponse." %}
+            </div>
+            <div class="actions">
+                <a href="/signup/" class="btn primary">{% trans "Creer un compte" %}</a>
+                <a href="{% url 'public_question_create' %}" class="btn">{% trans "Envoyer une autre question" %}</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

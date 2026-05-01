@@ -148,6 +148,11 @@ class PublicQuestion(models.Model):
         REJETE = "rejete", _("Rejete")
         ARCHIVE = "archive", _("Archive")
 
+    class LeadStatus(models.TextChoices):
+        NOUVEAU = "nouveau", _("Nouveau")
+        EN_COURS = "en_cours", _("En cours")
+        CONVERTI = "converti", _("Converti")
+
     nom = models.CharField(max_length=150)
     email = models.EmailField()
     telephone = models.CharField(max_length=50, blank=True, default="")
@@ -155,6 +160,9 @@ class PublicQuestion(models.Model):
     sujet = models.CharField(max_length=180)
     message = models.TextField()
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.NOUVEAU)
+    lead_status = models.CharField(max_length=20, choices=LeadStatus.choices, default=LeadStatus.NOUVEAU)
+    is_lead = models.BooleanField(default=True)
+    source = models.CharField(max_length=50, default="question_publique")
     reponse = models.TextField(blank=True)
     date_reponse = models.DateTimeField(null=True, blank=True)
     repondu_par = models.ForeignKey(

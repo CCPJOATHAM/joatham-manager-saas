@@ -116,7 +116,7 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(SuggestionSuperAdmin.objects.exists())
 
-    def test_public_question_form_does_not_require_account_and_redirects_to_confirmation(self):
+    def test_public_question_form_does_not_require_account_and_redirects_to_success(self):
         response = self.client.post(
             reverse("public_question_create"),
             {
@@ -129,11 +129,14 @@ class SuggestionAndPublicQuestionTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("public_question_thanks"))
+        self.assertRedirects(response, reverse("public_question_success"))
         question = PublicQuestion.objects.get()
         self.assertEqual(question.email, "prospect@example.com")
         self.assertEqual(question.entreprise, "Prospect SARL")
         self.assertEqual(question.statut, PublicQuestion.Statut.NOUVEAU)
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.NOUVEAU)
+        self.assertTrue(question.is_lead)
+        self.assertEqual(question.source, "question_publique")
         self.assertTrue(
             ActivityLog.objects.filter(
                 entreprise__isnull=True,
@@ -141,6 +144,12 @@ class SuggestionAndPublicQuestionTests(TestCase):
                 objet_id=question.id,
             ).exists()
         )
+
+    def test_public_question_success_page_shows_signup_action(self):
+        response = self.client.get(reverse("public_question_success"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "/signup/")
 
     def test_public_question_rejects_missing_required_fields(self):
         response = self.client.post(
