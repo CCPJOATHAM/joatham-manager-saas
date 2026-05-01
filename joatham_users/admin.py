@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import Abonnement, AbonnementEntreprise, Entreprise, User
+from .models import Abonnement, AbonnementEntreprise, Entreprise, EntrepriseInvitation, User
 
 
 @admin.register(Entreprise)
@@ -29,3 +29,12 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = DjangoUserAdmin.fieldsets + (
         ("Organisation", {"fields": ("role", "preferred_language", "entreprise")}),
     )
+
+
+@admin.register(EntrepriseInvitation)
+class EntrepriseInvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "full_name", "source", "is_used", "created_at", "expires_at", "reminder_count", "max_reminders", "last_reminder_sent_at")
+    list_filter = ("is_used", "source", "created_at", "expires_at")
+    search_fields = ("email", "full_name", "source")
+    readonly_fields = ("created_at", "last_reminder_sent_at", "reminder_count")
+    exclude = ("token",)

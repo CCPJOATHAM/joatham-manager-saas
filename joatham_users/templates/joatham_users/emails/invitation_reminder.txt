@@ -1,0 +1,18 @@
+Bonjour {% if invitation.full_name %}{{ invitation.full_name }}{% else %}{{ invitation.email }}{% endif %},
+
+Votre acces JOATHAM Manager est pret.
+
+Vous pouvez activer votre compte avec ce lien :
+{{ activation_url }}
+
+Ce lien expire le {{ invitation.expires_at|date:"d/m/Y H:i" }}.
+
+JOATHAM Manager vous aide notamment avec :
+- la facturation professionnelle ;
+- le suivi clients ;
+- la comptabilite de votre activite.
+
+Cordialement,
+L'equipe JOATHAM Manager
+{{ support_email }}
+{{ app_url }}

@@ -1,8 +1,12 @@
+from io import StringIO
 from datetime import timedelta
 from decimal import Decimal
+from unittest.mock import patch
 
+from django.core import mail
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase
+from django.core.management import call_command
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -24,7 +28,8 @@ from core.services.subscription import (
 from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_TRIAL_OR_ACTIVE, can_access_module, get_module_access_level
 from joatham_billing.tests.factories import create_entreprise, create_user
 
-from .models import Abonnement, AbonnementEntreprise, User
+from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User
+from .services.invitations import REMINDER_ERROR, REMINDER_SENT, REMINDER_SKIPPED, send_invitation_reminder
 
 
 class SubscriptionServiceTests(TestCase):
@@ -197,6 +202,121 @@ class SubscriptionServiceTests(TestCase):
 
         with self.assertRaises(PermissionDenied):
             ensure_subscription_access_for_entreprise(self.entreprise, user=self.owner)
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="support@joatham.local",
+    JOATHAM_APP_URL="https://app.joatham.test",
+)
+class EntrepriseInvitationReminderTests(TestCase):
+    def setUp(self):
+        mail.outbox = []
+
+    def make_invitation(self, **overrides):
+        now = timezone.now()
+        defaults = {
+            "email": "lead@example.com",
+            "full_name": "Lead Prospect",
+            "created_at": now - timedelta(days=2),
+            "expires_at": now + timedelta(days=5),
+            "source": "question_publique",
+        }
+        defaults.update(overrides)
+        return EntrepriseInvitation.objects.create(**defaults)
+
+    def test_reminder_is_sent_when_conditions_are_ok(self):
+        invitation = self.make_invitation()
+
+        result = send_invitation_reminder(invitation)
+
+        self.assertEqual(result.status, REMINDER_SENT)
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.reminder_count, 1)
+        self.assertIsNotNone(invitation.last_reminder_sent_at)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["lead@example.com"])
+        self.assertIn("Activer mon compte", mail.outbox[0].alternatives[0][0])
+        self.assertIn("https://app.joatham.test/signup/?invitation=", mail.outbox[0].body)
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise__isnull=True,
+                action="invitation_relance_envoyee",
+                objet_id=invitation.id,
+            ).exists()
+        )
+
+    def test_no_reminder_is_sent_if_invitation_is_used(self):
+        invitation = self.make_invitation(is_used=True)
+
+        result = send_invitation_reminder(invitation)
+
+        invitation.refresh_from_db()
+        self.assertEqual(result.status, REMINDER_SKIPPED)
+        self.assertEqual(result.reason, "used")
+        self.assertEqual(invitation.reminder_count, 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_reminder_is_sent_if_invitation_is_expired(self):
+        invitation = self.make_invitation(expires_at=timezone.now() - timedelta(minutes=1))
+
+        result = send_invitation_reminder(invitation)
+
+        invitation.refresh_from_db()
+        self.assertEqual(result.status, REMINDER_SKIPPED)
+        self.assertEqual(result.reason, "expired")
+        self.assertEqual(invitation.reminder_count, 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_reminder_is_sent_if_max_reminders_is_reached(self):
+        invitation = self.make_invitation(reminder_count=2, max_reminders=2)
+
+        result = send_invitation_reminder(invitation)
+
+        invitation.refresh_from_db()
+        self.assertEqual(result.status, REMINDER_SKIPPED)
+        self.assertEqual(result.reason, "max_reminders_reached")
+        self.assertEqual(invitation.reminder_count, 2)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_reminder_is_sent_if_last_reminder_is_less_than_24h(self):
+        invitation = self.make_invitation(
+            reminder_count=1,
+            last_reminder_sent_at=timezone.now() - timedelta(hours=2),
+        )
+
+        result = send_invitation_reminder(invitation)
+
+        invitation.refresh_from_db()
+        self.assertEqual(result.status, REMINDER_SKIPPED)
+        self.assertEqual(result.reason, "too_recent")
+        self.assertEqual(invitation.reminder_count, 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_email_error_is_handled_without_incrementing_counter(self):
+        invitation = self.make_invitation()
+
+        with self.assertLogs("joatham_users.services.invitations", level="ERROR") as logs:
+            with patch("joatham_users.services.invitations.EmailMultiAlternatives.send", side_effect=Exception("smtp down")):
+                result = send_invitation_reminder(invitation)
+
+        invitation.refresh_from_db()
+        self.assertEqual(result.status, REMINDER_ERROR)
+        self.assertEqual(result.reason, "email_error")
+        self.assertEqual(invitation.reminder_count, 0)
+        self.assertIsNone(invitation.last_reminder_sent_at)
+        self.assertNotIn(invitation.token, "\n".join(logs.output))
+
+    def test_management_command_sends_eligible_reminders(self):
+        invitation = self.make_invitation(email="command@example.com")
+        output = StringIO()
+
+        call_command("send_invitation_reminders", stdout=output)
+
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.reminder_count, 1)
+        self.assertIn("total verifiees=1", output.getvalue())
+        self.assertIn("envoyees=1", output.getvalue())
 
 
 class SubscriptionAccessTests(TestCase):

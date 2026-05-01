@@ -1,3 +1,6 @@
+import secrets
+from datetime import timedelta
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -10,6 +13,14 @@ LANGUAGE_CHOICES = (
     ("pt", _("Português")),
     ("es", _("Español")),
 )
+
+
+def generate_invitation_token():
+    return secrets.token_urlsafe(32)
+
+
+def default_invitation_expiry():
+    return timezone.now() + timedelta(days=7)
 
 
 class Entreprise(models.Model):
@@ -101,6 +112,33 @@ class User(AbstractUser):
         self.email_verified = True
         self.email_verified_at = timezone.now()
         self.save(update_fields=["email_verified", "email_verified_at"])
+
+
+class EntrepriseInvitation(models.Model):
+    email = models.EmailField(db_index=True)
+    full_name = models.CharField(max_length=150, blank=True, default="")
+    token = models.CharField(max_length=128, unique=True, default=generate_invitation_token)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField(default=default_invitation_expiry)
+    source = models.CharField(max_length=80, blank=True, default="question_publique", db_index=True)
+    last_reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    reminder_count = models.PositiveSmallIntegerField(default=0)
+    max_reminders = models.PositiveSmallIntegerField(default=2)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["is_used", "expires_at", "created_at"]),
+            models.Index(fields=["reminder_count", "last_reminder_sent_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.email} ({self.source or 'invitation'})"
+
+    @property
+    def is_expired(self):
+        return self.expires_at <= timezone.now()
 
 
 class Abonnement(models.Model):
