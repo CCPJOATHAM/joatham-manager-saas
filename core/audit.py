@@ -35,8 +35,8 @@ def record_audit_event(
             extra={
                 "entreprise_id": getattr(entreprise, "id", None),
                 "utilisateur_id": getattr(utilisateur, "id", None),
-                "action": action,
-                "module": module,
+                "audit_action": action,
+                "audit_module": module,
             },
         )
         if not fail_silently:

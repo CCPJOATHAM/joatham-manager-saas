@@ -1,5 +1,6 @@
 import importlib.util
 import os
+import warnings
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -17,6 +18,15 @@ PASSWORD_MIN_LENGTH = int(os.getenv("DJANGO_PASSWORD_MIN_LENGTH", "10"))
 
 def _env_bool(name, default=False):
     return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
+
+
+def _env_float(name, default=0.0):
+    raw_value = os.getenv(name, str(default))
+    try:
+        return float(raw_value)
+    except (TypeError, ValueError):
+        warnings.warn(f"{name} doit etre un nombre. Valeur par defaut utilisee.", RuntimeWarning)
+        return default
 
 
 def _build_allowed_hosts():
@@ -185,6 +195,7 @@ EMAIL_VERIFICATION_TIMEOUT = int(
 JOATHAM_PDF_ENGINE = os.getenv("JOATHAM_PDF_ENGINE", "xhtml2pdf")
 JOATHAM_BILLING_PAGE_SIZE = int(os.getenv("JOATHAM_BILLING_PAGE_SIZE", "20"))
 JOATHAM_FACTURE_NUMBER_FORMAT = os.getenv("JOATHAM_FACTURE_NUMBER_FORMAT", "standard")
+HEALTH_CHECK_TOKEN = os.getenv("HEALTH_CHECK_TOKEN", "").strip()
 
 if REST_FRAMEWORK_AVAILABLE:
     REST_FRAMEWORK = {
@@ -198,7 +209,36 @@ if REST_FRAMEWORK_AVAILABLE:
         "PAGE_SIZE": JOATHAM_BILLING_PAGE_SIZE,
     }
 
-LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "production" if not DEBUG else "development")
+SENTRY_TRACES_SAMPLE_RATE = _env_float("SENTRY_TRACES_SAMPLE_RATE", 0.0)
+
+if SENTRY_DSN:
+    if importlib.util.find_spec("sentry_sdk") is None:
+        warnings.warn(
+            "SENTRY_DSN est defini mais sentry-sdk n'est pas installe. "
+            "Le monitoring Sentry reste desactive.",
+            RuntimeWarning,
+        )
+    else:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            environment=SENTRY_ENVIRONMENT,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+            send_default_pii=False,
+        )
+
+
+LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO").upper()
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_DJANGO_LOG_LEVEL", "INFO").upper()
+DJANGO_SECURITY_LOG_LEVEL = os.getenv("DJANGO_SECURITY_LOG_LEVEL", "WARNING").upper()
+DJANGO_REQUEST_LOG_LEVEL = os.getenv("DJANGO_REQUEST_LOG_LEVEL", "ERROR").upper()
+ROOT_LOG_LEVEL = os.getenv("DJANGO_ROOT_LOG_LEVEL", "WARNING").upper()
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -213,10 +253,39 @@ LOGGING = {
             "formatter": "standard",
         },
     },
+    "root": {
+        "handlers": ["console"],
+        "level": ROOT_LOG_LEVEL,
+    },
     "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": DJANGO_LOG_LEVEL,
+            "propagate": False,
+        },
         "django.request": {
             "handlers": ["console"],
-            "level": "ERROR",
+            "level": DJANGO_REQUEST_LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.security": {
+            "handlers": ["console"],
+            "level": DJANGO_SECURITY_LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "core.audit": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "core.health": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
             "propagate": False,
         },
         "joatham_dashboard": {
@@ -229,7 +298,37 @@ LOGGING = {
             "level": LOG_LEVEL,
             "propagate": False,
         },
+        "joatham_messages": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
         "joatham_billing": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "joatham_clients": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "joatham_users": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "joatham_products": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "joatham_comptabilite": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "joatham_apprenants": {
             "handlers": ["console"],
             "level": LOG_LEVEL,
             "propagate": False,

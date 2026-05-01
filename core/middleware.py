@@ -37,6 +37,7 @@ MAINTENANCE_EXEMPT_PREFIXES = (
     "/i18n/",
     "/login/",
     "/logout/",
+    "/health/",
     "/super-admin/",
     "/static/",
     "/media/",

@@ -4,12 +4,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 
+from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
 from joatham_messages.views import public_question_create, public_question_thanks, super_admin_messages
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='login', permanent=False), name='root_redirect'),
+    path('health/', health_check, name='health_check'),
+    path('health/db/', database_health_check, name='database_health_check'),
     path('i18n/setlang/', set_language_preference, name='set_language'),
     path('i18n/', include('django.conf.urls.i18n')),
     path('question-avant-inscription/', public_question_create, name='public_question_create'),
