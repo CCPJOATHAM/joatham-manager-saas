@@ -312,6 +312,11 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ["prospect@example.com"])
         self.assertIn("JOATHAM Manager permet", mail.outbox[0].body)
+        self.assertEqual(len(mail.outbox[0].alternatives), 1)
+        html_body, html_mimetype = mail.outbox[0].alternatives[0]
+        self.assertEqual(html_mimetype, "text/html")
+        self.assertIn("Creer un compte", html_body)
+        self.assertIn("https://app.joatham.com/signup/", html_body)
         self.assertTrue(
             ActivityLog.objects.filter(
                 entreprise__isnull=True,
@@ -377,7 +382,7 @@ class SuggestionAndPublicQuestionTests(TestCase):
         )
 
         self.client.force_login(self.super_admin)
-        with patch("joatham_messages.services.messages.send_mail", side_effect=Exception("smtp down")):
+        with patch("joatham_messages.services.messages.EmailMultiAlternatives.send", side_effect=Exception("smtp down")):
             response = self.client.post(
                 reverse("super_admin_public_question_reply", args=[question.id]),
                 {"reponse": "Reponse qui ne doit pas etre marquee comme envoyee si email echoue."},

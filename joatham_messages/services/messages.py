@@ -3,8 +3,9 @@ import os
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from core.audit import record_audit_event
@@ -125,21 +126,29 @@ def _notify_super_admins_new_request(*, subject, body):
 
 
 def _send_public_question_reply_email(*, question):
+    context = {
+        "question": question,
+        "signup_url": "https://app.joatham.com/signup/",
+        "app_url": "https://app.joatham.com",
+        "support_email": "admin@joatham.com",
+    }
     try:
-        send_mail(
-            f"Reponse a votre question - JOATHAM Manager",
-            (
-                f"Bonjour {question.nom},\n\n"
-                f"Merci pour votre question sur JOATHAM Manager.\n\n"
-                f"Votre question :\n{question.message}\n\n"
-                f"Reponse de l'equipe JOATHAM :\n{question.reponse}\n\n"
-                f"Cordialement,\n"
-                f"L'equipe JOATHAM Manager"
-            ),
+        text_body = render_to_string(
+            "joatham_messages/emails/public_question_reply.txt",
+            context,
+        ).strip()
+        html_body = render_to_string(
+            "joatham_messages/emails/public_question_reply.html",
+            context,
+        )
+        email = EmailMultiAlternatives(
+            "Reponse a votre question - JOATHAM Manager",
+            text_body,
             settings.DEFAULT_FROM_EMAIL,
             [question.email],
-            fail_silently=False,
         )
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=False)
     except Exception as exc:
         logger.exception(
             "Echec d'envoi de la reponse a une question publique question_id=%s",

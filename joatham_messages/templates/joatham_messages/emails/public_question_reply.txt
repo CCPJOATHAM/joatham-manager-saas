@@ -1,0 +1,18 @@
+Bonjour {{ question.nom }},
+
+Merci pour votre interet pour JOATHAM Manager. Notre equipe a traite votre question avant inscription.
+
+Votre question
+Sujet : {{ question.sujet }}
+{{ question.message }}
+
+Reponse de l'equipe JOATHAM Manager
+{{ question.reponse }}
+
+Creer un compte :
+{{ signup_url }}
+
+Cordialement,
+L'equipe JOATHAM Manager
+{{ support_email }}
+{{ app_url }}

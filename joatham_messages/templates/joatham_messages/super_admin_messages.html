@@ -11,57 +11,80 @@
         display: grid;
         grid-template-columns: repeat(4, minmax(150px, 1fr));
         gap: 12px;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
     }
 
     .summary-item {
-        padding: 14px;
-        border: 1px solid #dde7f0;
-        border-radius: 14px;
-        background: #f8fafc;
+        padding: 16px;
+        border: 1px solid #dbe5ef;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 12px 26px rgba(16, 35, 63, 0.06);
     }
 
     .summary-item span {
         display: block;
         color: #64748b;
-        font-size: 0.84rem;
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
     .summary-item strong {
         display: block;
-        margin-top: 6px;
-        font-size: 1.25rem;
+        margin-top: 8px;
+        color: #10233f;
+        font-size: 1.55rem;
+        line-height: 1;
+    }
+
+    .filter-panel {
+        margin-bottom: 20px;
+        padding: 16px;
+        border: 1px solid #dbe5ef;
+        border-radius: 14px;
+        background: #f8fafc;
     }
 
     .message-filters {
         display: grid;
-        grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr)) auto;
+        grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(150px, 1fr)) auto;
         gap: 12px;
         align-items: end;
-        margin-bottom: 18px;
     }
 
     .message-filters label {
         display: block;
         margin-bottom: 6px;
         color: #475569;
-        font-size: 0.86rem;
-        font-weight: 700;
+        font-size: 0.82rem;
+        font-weight: 800;
     }
 
     .message-filters input,
     .message-filters select,
     .status-form select {
         width: 100%;
-        min-height: 40px;
-        padding: 9px 10px;
+        min-height: 42px;
+        padding: 9px 11px;
         border-radius: 10px;
         border: 1px solid #cbd5e1;
         background: #fff;
+        color: #10233f;
         font: inherit;
+        outline: none;
+    }
+
+    .message-filters input:focus,
+    .message-filters select:focus,
+    .status-form select:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
     }
 
     .filter-actions,
+    .row-actions,
     .status-form {
         display: flex;
         gap: 8px;
@@ -69,11 +92,26 @@
         flex-wrap: wrap;
     }
 
+    .row-actions {
+        align-items: stretch;
+        min-width: 250px;
+    }
+
+    .status-form {
+        width: 100%;
+    }
+
+    .status-form select {
+        min-width: 140px;
+        flex: 1 1 140px;
+    }
+
     .table-shell {
         overflow-x: auto;
-        border: 1px solid #dde7f0;
-        border-radius: 18px;
+        border: 1px solid #dbe5ef;
+        border-radius: 16px;
         background: #fff;
+        box-shadow: 0 16px 36px rgba(16, 35, 63, 0.07);
     }
 
     .request-table {
@@ -84,7 +122,7 @@
 
     .request-table th,
     .request-table td {
-        padding: 13px 14px;
+        padding: 15px 14px;
         border-bottom: 1px solid #e2e8f0;
         text-align: left;
         vertical-align: top;
@@ -94,22 +132,38 @@
     .request-table th {
         background: #f8fafc;
         color: #475569;
-        font-size: 0.8rem;
+        font-size: 0.76rem;
+        font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 0.06em;
+    }
+
+    .request-table tbody tr:hover {
+        background: #fbfdff;
     }
 
     .request-table tr:last-child td {
         border-bottom: 0;
     }
 
+    .identity-cell strong,
+    .subject-cell strong {
+        display: block;
+        color: #10233f;
+        line-height: 1.35;
+    }
+
     .muted {
         color: #64748b;
         font-size: 0.86rem;
+        line-height: 1.45;
     }
 
     .message-preview {
-        max-width: 340px;
+        max-width: 360px;
+        max-height: 92px;
+        overflow: hidden;
+        color: #334155;
         white-space: pre-wrap;
         line-height: 1.45;
     }
@@ -119,10 +173,12 @@
     .reply-badge {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         padding: 6px 10px;
         border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 800;
+        font-size: 0.76rem;
+        font-weight: 900;
+        line-height: 1;
         white-space: nowrap;
     }
 
@@ -131,21 +187,60 @@
         color: #075985;
     }
 
+    .type-badge.type-question {
+        background: #f0fdfa;
+        color: #0f766e;
+    }
+
+    .type-badge.type-suggestion {
+        background: #eef2ff;
+        color: #3730a3;
+    }
+
+    .status-stack {
+        display: grid;
+        gap: 7px;
+        justify-items: start;
+    }
+
     .status-badge {
-        background: #ecfdf5;
+        background: #eef2ff;
+        color: #3730a3;
+    }
+
+    .status-nouveau {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-en_cours {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-traite {
+        background: #dcfce7;
         color: #166534;
-        margin-top: 6px;
+    }
+
+    .status-rejete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-archive {
+        background: #e2e8f0;
+        color: #334155;
     }
 
     .reply-badge {
-        background: #fef3c7;
-        color: #92400e;
-        margin-top: 6px;
+        background: #fff7ed;
+        color: #9a3412;
     }
 
     .reply-badge.sent {
-        background: #dcfce7;
-        color: #166534;
+        background: #ccfbf1;
+        color: #115e59;
     }
 
     .btn-small {
@@ -158,15 +253,37 @@
         border: 1px solid #cbd5e1;
         background: #fff;
         color: #10233f;
-        font-weight: 700;
+        font-weight: 800;
         text-decoration: none;
         cursor: pointer;
+        transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+    }
+
+    .btn-small:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
     }
 
     .btn-small.primary {
         background: #0f766e;
         border-color: #0f766e;
         color: #fff;
+    }
+
+    .btn-small.primary:hover {
+        background: #115e59;
+        border-color: #115e59;
+    }
+
+    .reply-action {
+        width: 100%;
+        box-shadow: 0 10px 22px rgba(15, 118, 110, 0.18);
+    }
+
+    .empty-row {
+        padding: 28px;
+        text-align: center;
     }
 
     .pagination {
@@ -183,12 +300,24 @@
         .message-filters {
             grid-template-columns: 1fr 1fr;
         }
+
+        .filter-actions {
+            grid-column: 1 / -1;
+        }
     }
 
     @media (max-width: 760px) {
         .summary-strip,
         .message-filters {
             grid-template-columns: 1fr;
+        }
+
+        .filter-panel {
+            padding: 14px;
+        }
+
+        .pagination {
+            justify-content: flex-start;
         }
     }
 </style>
@@ -212,40 +341,42 @@
     </div>
 </div>
 
-<form method="get" class="message-filters">
-    <div>
-        <label for="id_q">{% trans "Recherche" %}</label>
-        <input id="id_q" type="text" name="q" value="{{ selected_filters.q }}" placeholder="{% trans 'Nom, e-mail, entreprise ou sujet' %}">
-    </div>
-    <div>
-        <label for="id_type">{% trans "Type" %}</label>
-        <select id="id_type" name="type">
-            {% for value, label in filter_form.fields.type.choices %}
-            <option value="{{ value }}" {% if selected_filters.type == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div>
-        <label for="id_statut">{% trans "Statut" %}</label>
-        <select id="id_statut" name="statut">
-            {% for value, label in filter_form.fields.statut.choices %}
-            <option value="{{ value }}" {% if selected_filters.statut == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div>
-        <label for="id_date_from">{% trans "Date debut" %}</label>
-        <input id="id_date_from" name="date_from" type="date" value="{{ selected_filters.date_from|date:'Y-m-d' }}">
-    </div>
-    <div>
-        <label for="id_date_to">{% trans "Date fin" %}</label>
-        <input id="id_date_to" name="date_to" type="date" value="{{ selected_filters.date_to|date:'Y-m-d' }}">
-    </div>
-    <div class="filter-actions">
-        <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
-        <a href="{% url 'super_admin_messages' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
-    </div>
-</form>
+<div class="filter-panel">
+    <form method="get" class="message-filters">
+        <div>
+            <label for="id_q">{% trans "Recherche" %}</label>
+            <input id="id_q" type="text" name="q" value="{{ selected_filters.q }}" placeholder="{% trans 'Nom, e-mail, entreprise ou sujet' %}">
+        </div>
+        <div>
+            <label for="id_type">{% trans "Type" %}</label>
+            <select id="id_type" name="type">
+                {% for value, label in filter_form.fields.type.choices %}
+                <option value="{{ value }}" {% if selected_filters.type == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="id_statut">{% trans "Statut" %}</label>
+            <select id="id_statut" name="statut">
+                {% for value, label in filter_form.fields.statut.choices %}
+                <option value="{{ value }}" {% if selected_filters.statut == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="id_date_from">{% trans "Date debut" %}</label>
+            <input id="id_date_from" name="date_from" type="date" value="{{ selected_filters.date_from|date:'Y-m-d' }}">
+        </div>
+        <div>
+            <label for="id_date_to">{% trans "Date fin" %}</label>
+            <input id="id_date_to" name="date_to" type="date" value="{{ selected_filters.date_to|date:'Y-m-d' }}">
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
+            <a href="{% url 'super_admin_messages' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+        </div>
+    </form>
+</div>
 
 <div class="table-shell">
     <table class="request-table">
@@ -265,54 +396,63 @@
         <tbody>
             {% for item in requests %}
             <tr>
-                <td><span class="type-badge">{{ item.type_label }}</span></td>
-                <td>{{ item.auteur|default:"-" }}</td>
+                <td><span class="type-badge type-{{ item.type }}">{{ item.type_label }}</span></td>
+                <td class="identity-cell">
+                    <strong>{{ item.auteur|default:"-" }}</strong>
+                    {% if item.type == "question" %}
+                    <span class="muted">{% trans "Avant inscription" %}</span>
+                    {% endif %}
+                </td>
                 <td>{{ item.entreprise|default:"-" }}</td>
                 <td>
                     {% if item.email %}<div>{{ item.email }}</div>{% endif %}
                     {% if item.telephone %}<div class="muted">{{ item.telephone }}</div>{% endif %}
                     {% if not item.email and not item.telephone %}<span class="muted">-</span>{% endif %}
                 </td>
-                <td><strong>{{ item.sujet }}</strong></td>
+                <td class="subject-cell"><strong>{{ item.sujet }}</strong></td>
                 <td><div class="message-preview">{{ item.message }}</div></td>
                 <td>
-                    <span class="status-badge">{{ item.statut_label }}</span>
-                    {% if item.date_traitement %}
-                    <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"d/m/Y H:i" }}</div>
-                    {% endif %}
-                    {% if item.type == "question" %}
-                        {% if item.has_reply %}
-                        <span class="reply-badge sent">{% trans "Repondu" %}</span>
-                        <div class="muted">
-                            {{ item.date_reponse|date:"d/m/Y H:i" }}
-                            {% if item.repondu_par %}- {{ item.repondu_par }}{% endif %}
-                        </div>
-                        {% else %}
-                        <span class="reply-badge">{% trans "Non repondu" %}</span>
+                    <div class="status-stack">
+                        <span class="status-badge status-{{ item.statut }}">{{ item.statut_label }}</span>
+                        {% if item.date_traitement %}
+                        <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"d/m/Y H:i" }}</div>
                         {% endif %}
-                    {% endif %}
+                        {% if item.type == "question" %}
+                            {% if item.has_reply %}
+                            <span class="reply-badge sent">{% trans "Repondu" %}</span>
+                            <div class="muted">
+                                {{ item.date_reponse|date:"d/m/Y H:i" }}
+                                {% if item.repondu_par %}- {{ item.repondu_par }}{% endif %}
+                            </div>
+                            {% else %}
+                            <span class="reply-badge">{% trans "Non repondu" %}</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </td>
                 <td>{{ item.date_creation|date:"d/m/Y H:i" }}</td>
                 <td>
-                    <form method="post" class="status-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_type" value="{{ item.type }}">
-                        <input type="hidden" name="item_id" value="{{ item.id }}">
-                        <select name="status" aria-label="{% trans 'Nouveau statut' %}">
-                            {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if item.statut == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn-small">{% trans "Mettre a jour" %}</button>
-                    </form>
-                    {% if item.type == "question" %}
-                    <a href="{% url 'super_admin_public_question_reply' item.id %}" class="btn-small primary">{% trans "Repondre" %}</a>
-                    {% endif %}
+                    <div class="row-actions">
+                        <form method="post" class="status-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="item_type" value="{{ item.type }}">
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <select name="status" aria-label="{% trans 'Nouveau statut' %}">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if item.statut == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-small">{% trans "Mettre a jour" %}</button>
+                        </form>
+                        {% if item.type == "question" %}
+                        <a href="{% url 'super_admin_public_question_reply' item.id %}" class="btn-small primary reply-action">{% trans "Repondre" %}</a>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="9" class="muted">{% trans "Aucune demande ne correspond aux filtres." %}</td>
+                <td colspan="9" class="empty-row muted">{% trans "Aucune demande ne correspond aux filtres." %}</td>
             </tr>
             {% endfor %}
         </tbody>

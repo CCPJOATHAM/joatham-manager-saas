@@ -13,72 +13,210 @@
 <style>
     .reply-layout {
         display: grid;
-        grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
-        gap: 22px;
+        grid-template-columns: minmax(300px, 430px) minmax(0, 1fr);
+        gap: 24px;
         align-items: start;
     }
 
-    .question-panel,
-    .reply-form {
+    .info-column,
+    .reply-column {
         display: grid;
-        gap: 14px;
+        gap: 16px;
+    }
+
+    .info-panel,
+    .message-panel,
+    .reply-editor,
+    .previous-reply,
+    .warning-box {
+        border: 1px solid #dbe5ef;
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .info-panel,
+    .message-panel,
+    .reply-editor {
+        padding: 18px;
+    }
+
+    .panel-title {
+        margin: 0 0 14px;
+        color: #10233f;
+        font-size: 1rem;
+        font-weight: 900;
+    }
+
+    .contact-grid {
+        display: grid;
+        gap: 12px;
     }
 
     .detail-row {
         display: grid;
         gap: 4px;
-        padding-bottom: 10px;
+        padding-bottom: 12px;
         border-bottom: 1px solid #e2e8f0;
     }
 
     .detail-row:last-child {
+        padding-bottom: 0;
         border-bottom: 0;
     }
 
     .detail-row span {
         color: #64748b;
-        font-size: 0.84rem;
-        font-weight: 700;
+        font-size: 0.8rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
     .detail-row strong,
-    .detail-row div {
+    .detail-row div,
+    .message-body,
+    .previous-body {
         color: #10233f;
-        line-height: 1.5;
+        line-height: 1.55;
         white-space: pre-wrap;
+        overflow-wrap: anywhere;
     }
 
-    .reply-form textarea {
-        width: 100%;
-        min-height: 240px;
-        border: 1px solid #cbd5e1;
-        border-radius: 14px;
-        padding: 12px 14px;
-        font: inherit;
-        line-height: 1.5;
+    .message-panel {
+        background: #f8fafc;
+    }
+
+    .message-subject {
+        margin: 0 0 12px;
+        color: #10233f;
+        font-size: 1.08rem;
+        line-height: 1.35;
+    }
+
+    .status-line {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #3730a3;
+        font-size: 0.78rem;
+        font-weight: 900;
     }
 
     .previous-reply {
-        padding: 14px;
-        border: 1px solid #bbf7d0;
-        border-radius: 14px;
-        background: #f0fdf4;
+        padding: 18px;
+        border-color: #99f6e4;
+        background: #f0fdfa;
     }
 
     .previous-reply h2 {
         margin: 0 0 8px;
+        color: #115e59;
         font-size: 1rem;
+        font-weight: 900;
+    }
+
+    .previous-body {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #99f6e4;
+    }
+
+    .warning-box {
+        padding: 14px 16px;
+        border-color: #fcd34d;
+        background: #fffbeb;
+        color: #92400e;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .reply-editor {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 16px 36px rgba(16, 35, 63, 0.07);
+    }
+
+    .response-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #10233f;
+        font-weight: 900;
+    }
+
+    .response-field textarea {
+        width: 100%;
+        min-height: 320px;
+        resize: vertical;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 14px 15px;
+        background: #fff;
+        color: #10233f;
+        font: inherit;
+        line-height: 1.55;
+        outline: none;
+    }
+
+    .response-field textarea:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    .field-errors,
+    .non-field-errors {
+        margin: 8px 0 0;
+        color: #991b1b;
+        font-weight: 700;
     }
 
     .muted {
         color: #64748b;
         font-size: 0.86rem;
+        line-height: 1.45;
     }
 
     .actions {
         display: flex;
         gap: 10px;
+        align-items: center;
+        margin-top: 16px;
         flex-wrap: wrap;
+    }
+
+    .reply-submit,
+    .reply-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 10px;
+        font-weight: 900;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .reply-submit {
+        border: 1px solid #0f766e;
+        background: #0f766e;
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(15, 118, 110, 0.2);
+    }
+
+    .reply-secondary {
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #10233f;
     }
 
     @media (max-width: 980px) {
@@ -86,41 +224,64 @@
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 640px) {
+        .info-panel,
+        .message-panel,
+        .reply-editor,
+        .previous-reply {
+            padding: 15px;
+        }
+
+        .reply-submit,
+        .reply-secondary {
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="reply-layout">
-    <section class="question-panel">
-        <div class="detail-row">
-            <span>{% trans "Nom" %}</span>
-            <strong>{{ question.nom }}</strong>
+    <section class="info-column">
+        <div class="info-panel">
+            <h2 class="panel-title">{% trans "Informations contact" %}</h2>
+            <div class="contact-grid">
+                <div class="detail-row">
+                    <span>{% trans "Nom" %}</span>
+                    <strong>{{ question.nom }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>{% trans "Email" %}</span>
+                    <strong><a href="mailto:{{ question.email }}">{{ question.email }}</a></strong>
+                </div>
+                <div class="detail-row">
+                    <span>{% trans "Telephone" %}</span>
+                    <strong>{{ question.telephone|default:"-" }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>{% trans "Entreprise" %}</span>
+                    <strong>{{ question.entreprise|default:"-" }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>{% trans "Date d'envoi" %}</span>
+                    <strong>{{ question.date_creation|date:"d/m/Y H:i" }}</strong>
+                </div>
+            </div>
         </div>
-        <div class="detail-row">
-            <span>{% trans "Email" %}</span>
-            <strong>{{ question.email }}</strong>
-        </div>
-        <div class="detail-row">
-            <span>{% trans "Telephone" %}</span>
-            <strong>{{ question.telephone|default:"-" }}</strong>
-        </div>
-        <div class="detail-row">
-            <span>{% trans "Entreprise" %}</span>
-            <strong>{{ question.entreprise|default:"-" }}</strong>
-        </div>
-        <div class="detail-row">
-            <span>{% trans "Sujet" %}</span>
-            <strong>{{ question.sujet }}</strong>
-        </div>
-        <div class="detail-row">
-            <span>{% trans "Message" %}</span>
-            <div>{{ question.message }}</div>
-        </div>
-        <div class="detail-row">
-            <span>{% trans "Statut" %}</span>
-            <strong>{{ question.get_statut_display }}</strong>
+
+        <div class="message-panel">
+            <h2 class="panel-title">{% trans "Question originale" %}</h2>
+            <h3 class="message-subject">{{ question.sujet }}</h3>
+            <div class="message-body">{{ question.message }}</div>
+            <div class="status-line">
+                <span class="status-badge">{{ question.get_statut_display }}</span>
+                {% if question.date_traitement %}
+                <span class="muted">{% trans "Traite le" %} {{ question.date_traitement|date:"d/m/Y H:i" }}</span>
+                {% endif %}
+            </div>
         </div>
     </section>
 
-    <section class="reply-form">
+    <section class="reply-column">
         {% if question.reponse %}
         <div class="previous-reply">
             <h2>{% trans "Reponse deja envoyee" %}</h2>
@@ -130,21 +291,28 @@
                 - {{ question.repondu_par.get_full_name|default:question.repondu_par.username }}
                 {% endif %}
             </div>
-            <p>{{ question.reponse }}</p>
+            <div class="previous-body">{{ question.reponse }}</div>
+        </div>
+        <div class="warning-box">
+            {% trans "Cette question a deja recu une reponse. Un nouvel envoi remplacera la reponse enregistree et renverra un email au visiteur." %}
         </div>
         {% endif %}
 
-        <form method="post" class="reply-form">
+        <form method="post" class="reply-editor">
             {% csrf_token %}
-            {{ form.non_field_errors }}
-            <div>
+            {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="response-field">
                 <label for="{{ form.reponse.id_for_label }}">{{ form.reponse.label }}</label>
                 {{ form.reponse }}
-                {{ form.reponse.errors }}
+                {% if form.reponse.errors %}
+                <div class="field-errors">{{ form.reponse.errors }}</div>
+                {% endif %}
             </div>
             <div class="actions">
-                <button type="submit" class="btn-link primary">{% trans "Envoyer la reponse" %}</button>
-                <a href="{% url 'super_admin_messages' %}" class="btn-link">{% trans "Annuler" %}</a>
+                <button type="submit" class="reply-submit">{% trans "Envoyer la reponse" %}</button>
+                <a href="{% url 'super_admin_messages' %}" class="reply-secondary">{% trans "Retour" %}</a>
             </div>
         </form>
     </section>
