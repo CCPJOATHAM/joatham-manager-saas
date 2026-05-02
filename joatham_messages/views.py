@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required
+from joatham_users.services.invitations import InvitationEmailError
 
 from .forms import (
     ConversationCreateForm,
@@ -33,6 +34,7 @@ from .selectors.messages import (
 )
 from .services.messages import (
     create_conversation,
+    create_invitation_from_public_question,
     create_public_question,
     create_suggestion_for_super_admin,
     answer_public_question,
@@ -304,3 +306,22 @@ def update_lead_status(request, id):
     else:
         messages.success(request, "Statut CRM du lead mis a jour.")
     return redirect(request.META.get("HTTP_REFERER") or "super_admin_messages")
+
+
+@login_required
+@permission_required("superadmin.view")
+@require_POST
+def send_public_question_invitation(request, question_id):
+    question = get_public_question_for_super_admin(question_id)
+    try:
+        result = create_invitation_from_public_question(question=question, created_by=request.user)
+    except InvitationEmailError as exc:
+        messages.error(request, str(exc))
+    except ValidationError as exc:
+        messages.error(request, str(exc))
+    else:
+        if result.created:
+            messages.success(request, "Invitation envoyee au lead.")
+        else:
+            messages.info(request, "Une invitation existe deja pour ce lead.")
+    return redirect("super_admin_messages")

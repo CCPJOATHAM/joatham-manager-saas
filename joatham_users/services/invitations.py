@@ -21,6 +21,10 @@ REMINDER_SKIPPED = "skipped"
 REMINDER_ERROR = "error"
 
 
+class InvitationEmailError(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class InvitationReminderResult:
     status: str
@@ -37,6 +41,37 @@ def _get_app_url():
 
 def build_invitation_activation_url(invitation):
     return f"{_get_app_url()}/signup/?invitation={quote(invitation.token)}"
+
+
+def _get_invitation_email_context(invitation):
+    return {
+        "invitation": invitation,
+        "activation_url": build_invitation_activation_url(invitation),
+        "app_url": _get_app_url(),
+        "support_email": "admin@joatham.com",
+    }
+
+
+def send_invitation_email(invitation):
+    context = _get_invitation_email_context(invitation)
+    try:
+        text_body = render_to_string("joatham_users/emails/invitation.txt", context).strip()
+        html_body = render_to_string("joatham_users/emails/invitation.html", context)
+        email = EmailMultiAlternatives(
+            "Votre acces JOATHAM Manager est pret",
+            text_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [invitation.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=False)
+    except Exception as exc:
+        logger.exception(
+            "Echec d'envoi d'invitation entreprise invitation_id=%s email=%s",
+            invitation.id,
+            invitation.email,
+        )
+        raise InvitationEmailError("L'invitation n'a pas pu etre envoyee par email.") from exc
 
 
 def _get_skip_reason(invitation, *, now):
@@ -59,12 +94,7 @@ def send_invitation_reminder(invitation):
     if skip_reason:
         return InvitationReminderResult(status=REMINDER_SKIPPED, reason=skip_reason)
 
-    context = {
-        "invitation": invitation,
-        "activation_url": build_invitation_activation_url(invitation),
-        "app_url": _get_app_url(),
-        "support_email": "admin@joatham.com",
-    }
+    context = _get_invitation_email_context(invitation)
     subject = "Votre acces JOATHAM Manager est pret"
 
     try:

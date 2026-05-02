@@ -1,5 +1,6 @@
 import logging
 import os
+from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -10,7 +11,8 @@ from django.utils import timezone
 
 from core.audit import record_audit_event
 from core.models import PlatformSettings
-from joatham_users.models import User
+from joatham_users.models import EntrepriseInvitation, User
+from joatham_users.services.invitations import InvitationEmailError, send_invitation_email
 
 from ..models import Conversation, Message, MessageAttachment, PublicQuestion, SuggestionSuperAdmin
 
@@ -41,6 +43,12 @@ DANGEROUS_ATTACHMENT_EXTENSIONS = {
 
 class PublicQuestionReplyEmailError(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class PublicQuestionInvitationResult:
+    invitation: EntrepriseInvitation
+    created: bool
 
 
 def _ensure_company_user(user, entreprise):
@@ -386,6 +394,45 @@ def update_public_question_lead_status(*, question, lead_status):
     question.lead_status = lead_status
     question.save(update_fields=["lead_status", "date_modification"])
     return question
+
+
+@transaction.atomic
+def create_invitation_from_public_question(*, question, created_by):
+    _ensure_super_admin_user(created_by)
+    question = PublicQuestion.objects.select_for_update().select_related("invitation").get(id=question.id)
+    if question.lead_status == PublicQuestion.LeadStatus.CONVERTI:
+        raise ValidationError("Ce lead est deja converti.")
+    if question.invitation_id:
+        if question.lead_status != PublicQuestion.LeadStatus.EN_COURS:
+            question.lead_status = PublicQuestion.LeadStatus.EN_COURS
+            question.save(update_fields=["lead_status", "date_modification"])
+        return PublicQuestionInvitationResult(invitation=question.invitation, created=False)
+
+    invitation = EntrepriseInvitation.objects.create(
+        email=question.email,
+        full_name=question.nom,
+        source="question_publique",
+    )
+    send_invitation_email(invitation)
+
+    question.invitation = invitation
+    question.lead_status = PublicQuestion.LeadStatus.EN_COURS
+    question.save(update_fields=["invitation", "lead_status", "date_modification"])
+    _record_message_event(
+        entreprise=None,
+        utilisateur=created_by,
+        action="question_publique_invitation_envoyee",
+        objet_type="PublicQuestion",
+        objet_id=question.id,
+        description=f"Invitation envoyee depuis la question publique : {question.sujet}.",
+        metadata={
+            "email": question.email,
+            "source": invitation.source,
+            "invitation_id": invitation.id,
+            "lead_status": question.lead_status,
+        },
+    )
+    return PublicQuestionInvitationResult(invitation=invitation, created=True)
 
 
 @transaction.atomic

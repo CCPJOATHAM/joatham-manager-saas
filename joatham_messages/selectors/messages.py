@@ -145,7 +145,7 @@ def get_super_admin_public_questions(filters=None):
             | Q(repondu_par__username__icontains=search)
             | Q(repondu_par__email__icontains=search)
         )
-    queryset = PublicQuestion.objects.select_related("repondu_par").order_by("-date_creation", "-id")
+    queryset = PublicQuestion.objects.select_related("repondu_par", "invitation").order_by("-date_creation", "-id")
     if selected_lead_status:
         queryset = queryset.filter(lead_status=selected_lead_status)
     return _apply_common_filters(
@@ -156,7 +156,7 @@ def get_super_admin_public_questions(filters=None):
 
 
 def get_public_question_for_super_admin(question_id):
-    return get_object_or_404(PublicQuestion.objects.select_related("repondu_par"), id=question_id)
+    return get_object_or_404(PublicQuestion.objects.select_related("repondu_par", "invitation"), id=question_id)
 
 
 def _suggestion_to_request_item(suggestion):
@@ -181,6 +181,14 @@ def _public_question_to_request_item(question):
     repondu_par = ""
     if question.repondu_par:
         repondu_par = question.repondu_par.get_full_name() or question.repondu_par.username
+    invitation_status = "non_invitee"
+    invitation_status_label = "Non invitee"
+    if question.lead_status == PublicQuestion.LeadStatus.CONVERTI:
+        invitation_status = "converti"
+        invitation_status_label = "Converti"
+    elif question.invitation_id:
+        invitation_status = "envoyee"
+        invitation_status_label = "Invitation envoyee"
     return {
         "type": REQUEST_TYPE_QUESTION,
         "type_label": "Question publique",
@@ -197,6 +205,10 @@ def _public_question_to_request_item(question):
         "lead_status_label": question.get_lead_status_display(),
         "is_lead": question.is_lead,
         "source": question.source,
+        "invitation_id": question.invitation_id,
+        "has_invitation": bool(question.invitation_id),
+        "invitation_status": invitation_status,
+        "invitation_status_label": invitation_status_label,
         "date_creation": question.date_creation,
         "date_traitement": question.date_traitement,
         "has_reply": bool(question.reponse),

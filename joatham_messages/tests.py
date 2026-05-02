@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from core.models import ActivityLog
 from joatham_billing.tests.factories import create_entreprise, create_user
-from joatham_users.models import User
+from joatham_users.models import Entreprise, EntrepriseInvitation, User
 
 from .models import MessageAttachment, PublicQuestion, SuggestionSuperAdmin
 from .services.messages import create_conversation
@@ -396,6 +396,163 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(response.status_code, 403)
         question.refresh_from_db()
         self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.NOUVEAU)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_super_admin_can_create_invitation_from_public_question(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect Invite",
+            email="invite@example.com",
+            sujet="Invitation souhaitee",
+            message="Je veux recevoir une invitation securisee.",
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        invitation = question.invitation
+        self.assertIsNotNone(invitation)
+        self.assertEqual(invitation.email, "invite@example.com")
+        self.assertEqual(invitation.full_name, "Prospect Invite")
+        self.assertEqual(invitation.source, "question_publique")
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.EN_COURS)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["invite@example.com"])
+        self.assertIn("https://app.joatham.test/signup/?invitation=", mail.outbox[0].body)
+        self.assertIn("Activer mon compte", mail.outbox[0].alternatives[0][0])
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise__isnull=True,
+                utilisateur=self.super_admin,
+                action="question_publique_invitation_envoyee",
+                objet_id=question.id,
+            ).exists()
+        )
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_public_question_invitation_is_not_duplicated(self):
+        mail.outbox = []
+        invitation = EntrepriseInvitation.objects.create(
+            email="existing@example.com",
+            full_name="Prospect Existing",
+            source="question_publique",
+        )
+        question = PublicQuestion.objects.create(
+            nom="Prospect Existing",
+            email="existing@example.com",
+            sujet="Invitation existante",
+            message="Message invitation existante.",
+            invitation=invitation,
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        self.assertEqual(question.invitation, invitation)
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.EN_COURS)
+        self.assertEqual(EntrepriseInvitation.objects.count(), 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_public_question_invitation_does_not_create_company_or_user(self):
+        question = PublicQuestion.objects.create(
+            nom="Prospect Sans Creation",
+            email="no-create@example.com",
+            sujet="Invitation sans creation",
+            message="Je veux seulement recevoir une invitation.",
+        )
+        company_count = Entreprise.objects.count()
+        user_count = User.objects.count()
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        self.assertEqual(Entreprise.objects.count(), company_count)
+        self.assertEqual(User.objects.count(), user_count)
+
+    def test_non_authorized_user_cannot_send_public_question_invitation(self):
+        question = PublicQuestion.objects.create(
+            nom="Prospect Protege",
+            email="protected@example.com",
+            sujet="Invitation protegee",
+            message="Message invitation protegee.",
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertEqual(response.status_code, 403)
+        question.refresh_from_db()
+        self.assertIsNone(question.invitation)
+        self.assertFalse(EntrepriseInvitation.objects.exists())
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_converted_public_question_cannot_send_invitation(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect Converti",
+            email="converted@example.com",
+            sujet="Lead converti",
+            message="Message lead deja converti.",
+            lead_status=PublicQuestion.LeadStatus.CONVERTI,
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        self.assertIsNone(question.invitation)
+        self.assertFalse(EntrepriseInvitation.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_public_question_invitation_email_error_is_handled(self):
+        mail.outbox = []
+        question = PublicQuestion.objects.create(
+            nom="Prospect Email Down",
+            email="email-down@example.com",
+            sujet="Invitation erreur email",
+            message="Message invitation avec erreur email.",
+        )
+
+        self.client.force_login(self.super_admin)
+        with self.assertLogs("joatham_users.services.invitations", level="ERROR") as logs:
+            with patch("joatham_users.services.invitations.EmailMultiAlternatives.send", side_effect=Exception("smtp down")):
+                response = self.client.post(reverse("super_admin_send_public_question_invitation", args=[question.id]))
+
+        self.assertRedirects(response, reverse("super_admin_messages"))
+        question.refresh_from_db()
+        self.assertIsNone(question.invitation)
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.NOUVEAU)
+        self.assertFalse(EntrepriseInvitation.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotIn("invitation=", "\n".join(logs.output))
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend", DEFAULT_FROM_EMAIL="support@joatham.local")
     def test_super_admin_can_reply_to_public_question(self):

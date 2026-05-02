@@ -163,6 +163,13 @@ class PublicQuestion(models.Model):
     lead_status = models.CharField(max_length=20, choices=LeadStatus.choices, default=LeadStatus.NOUVEAU)
     is_lead = models.BooleanField(default=True)
     source = models.CharField(max_length=50, default="question_publique")
+    invitation = models.ForeignKey(
+        "joatham_users.EntrepriseInvitation",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="public_questions",
+    )
     reponse = models.TextField(blank=True)
     date_reponse = models.DateTimeField(null=True, blank=True)
     repondu_par = models.ForeignKey(
