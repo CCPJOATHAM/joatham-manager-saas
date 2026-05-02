@@ -4,6 +4,7 @@ from django.urls import resolve, reverse
 
 ALLOWED_UNVERIFIED_URL_NAMES = {
     "home",
+    "public_home",
     "login",
     "logout",
     "set_language",

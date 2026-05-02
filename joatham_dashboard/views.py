@@ -30,6 +30,10 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+def public_home(request):
+    return render(request, "joatham_dashboard/public_home.html", {"app_name": "JOATHAM Manager"})
+
+
 class SecurePasswordResetRequestView(PasswordResetView):
     form_class = SecurePasswordResetForm
     template_name = "joatham_dashboard/password_reset_form.html"

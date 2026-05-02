@@ -21,6 +21,36 @@ from .selectors.dashboard import get_dashboard_kpis_by_entreprise
 from .services.dashboard_service import build_dashboard_context
 
 
+class PublicHomeTests(TestCase):
+    def test_public_home_returns_200_without_login(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_public_home_contains_branding(self):
+        response = self.client.get(reverse("public_home"))
+
+        self.assertContains(response, "JOATHAM Manager")
+
+    def test_public_home_contains_signup_link(self):
+        response = self.client.get("/")
+
+        self.assertContains(response, reverse("signup"))
+
+    def test_public_home_contains_login_link(self):
+        response = self.client.get("/")
+
+        self.assertContains(response, reverse("login"))
+
+    def test_public_home_contains_question_link_and_login_still_works(self):
+        response = self.client.get("/")
+
+        self.assertContains(response, reverse("public_question_create"))
+        login_response = self.client.get(reverse("login"))
+        self.assertEqual(login_response.status_code, 200)
+        self.assertContains(login_response, "JOATHAM Manager")
+
+
 class DashboardAccessTests(TestCase):
     def setUp(self):
         self.entreprise = create_entreprise("Entreprise Dashboard")
