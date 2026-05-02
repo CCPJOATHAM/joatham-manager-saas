@@ -399,14 +399,15 @@ def update_public_question_lead_status(*, question, lead_status):
 @transaction.atomic
 def create_invitation_from_public_question(*, question, created_by):
     _ensure_super_admin_user(created_by)
-    question = PublicQuestion.objects.select_for_update().select_related("invitation").get(id=question.id)
+    question = PublicQuestion.objects.select_for_update().get(id=question.id)
     if question.lead_status == PublicQuestion.LeadStatus.CONVERTI:
         raise ValidationError("Ce lead est deja converti.")
     if question.invitation_id:
         if question.lead_status != PublicQuestion.LeadStatus.EN_COURS:
             question.lead_status = PublicQuestion.LeadStatus.EN_COURS
             question.save(update_fields=["lead_status", "date_modification"])
-        return PublicQuestionInvitationResult(invitation=question.invitation, created=False)
+        invitation = EntrepriseInvitation.objects.get(id=question.invitation_id)
+        return PublicQuestionInvitationResult(invitation=invitation, created=False)
 
     invitation = EntrepriseInvitation.objects.create(
         email=question.email,

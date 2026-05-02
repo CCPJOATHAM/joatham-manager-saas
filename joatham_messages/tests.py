@@ -11,7 +11,7 @@ from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Entreprise, EntrepriseInvitation, User
 
 from .models import MessageAttachment, PublicQuestion, SuggestionSuperAdmin
-from .services.messages import create_conversation
+from .services.messages import create_conversation, create_invitation_from_public_question
 
 
 class MessageTenancyTests(TestCase):
@@ -396,6 +396,42 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(response.status_code, 403)
         question.refresh_from_db()
         self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.NOUVEAU)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="support@joatham.local",
+        JOATHAM_APP_URL="https://app.joatham.test",
+    )
+    def test_public_question_invitation_lock_query_does_not_select_related_nullable_invitation(self):
+        class LockedQuestionQuery:
+            def __init__(self, locked_question):
+                self.locked_question = locked_question
+
+            def select_related(self, *args, **kwargs):
+                raise AssertionError("select_related must not be chained after select_for_update for invitation.")
+
+            def get(self, **kwargs):
+                if kwargs != {"id": self.locked_question.id}:
+                    raise AssertionError(f"Unexpected lock query filters: {kwargs}")
+                return self.locked_question
+
+        question = PublicQuestion.objects.create(
+            nom="Prospect PostgreSQL",
+            email="postgres@example.com",
+            sujet="Compatibilite verrou",
+            message="Message pour verifier la compatibilite PostgreSQL.",
+        )
+
+        with patch(
+            "joatham_messages.services.messages.PublicQuestion.objects.select_for_update",
+            return_value=LockedQuestionQuery(question),
+        ):
+            result = create_invitation_from_public_question(question=question, created_by=self.super_admin)
+
+        question.refresh_from_db()
+        self.assertTrue(result.created)
+        self.assertIsNotNone(question.invitation)
+        self.assertEqual(question.lead_status, PublicQuestion.LeadStatus.EN_COURS)
 
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
