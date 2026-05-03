@@ -46,11 +46,12 @@ def get_currency_display(entreprise=None):
 def format_decimal_number(value, decimal_places=2):
     quantize_pattern = "0." + ("0" * max(int(decimal_places), 0))
     quantized_value = Decimal(value or 0).quantize(Decimal(quantize_pattern), rounding=ROUND_HALF_UP)
-    return f"{quantized_value:,.{max(int(decimal_places), 0)}f}".replace(",", " ")
+    formatted = f"{quantized_value:,.{max(int(decimal_places), 0)}f}"
+    return formatted.replace(",", " ").replace(".", ",")
 
 
 def format_amount_for_entreprise(amount, entreprise=None):
-    return format_decimal_number(amount, decimal_places=2)
+    return f"{format_decimal_number(amount, decimal_places=2)} {get_currency_code(entreprise)}"
 
 
 def get_manual_exchange_rate(currency_code):

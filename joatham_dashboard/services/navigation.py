@@ -143,7 +143,8 @@ NAV_ITEMS = [
         "prefixes": ["/factures/"],
     },
     {
-        "label": _("Comptabilite"),
+        "label": "Comptabilite",
+        "translate_label": False,
         "url_name": "compta_dashboard",
         "permission": "accounting.view",
         "module": "accounting",
@@ -271,6 +272,7 @@ def build_navigation_for_request(request):
                 "badge": item_state.get("badge") or item.get("badge"),
                 "badge_count": badge_count,
                 "is_disabled": is_disabled,
+                "translate_label": item.get("translate_label", True),
             }
         )
 

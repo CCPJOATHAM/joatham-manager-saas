@@ -34,7 +34,7 @@ class SignupForm(forms.Form):
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
         if User.objects.filter(email__iexact=email).exists() or User.objects.filter(username__iexact=email).exists():
-            raise forms.ValidationError(_("Un compte existe deja avec cet e-mail. Veuillez vous connecter."))
+            raise forms.ValidationError(_("Un compte existe déjà avec cet e-mail. Veuillez vous connecter."))
         return email
 
     def clean(self):
