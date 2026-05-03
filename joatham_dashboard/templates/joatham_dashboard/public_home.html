@@ -934,6 +934,16 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
+        .navbar,
+        .site-header.navbar {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: rgba(12, 10, 28, 0.82);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+        }
+
         .header-inner,
         .product-view,
         .status-panel,
@@ -947,13 +957,17 @@
         }
 
         .hero-layout {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
             gap: 30px;
         }
 
         .product-view {
             width: 100%;
             max-width: 100%;
+        }
+
+        .hero .product-view {
+            justify-self: stretch;
         }
 
         .product-grid {
@@ -965,7 +979,7 @@
         }
 
         .status-strip {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(130px, 1fr));
         }
 
         .screen-layout {
@@ -981,8 +995,55 @@
         .status-panel strong,
         .insight-list strong,
         .insight-list span span {
-            overflow-wrap: anywhere;
+            overflow-wrap: normal;
             word-break: normal;
+            hyphens: none;
+        }
+
+        .status-panel {
+            min-width: 130px;
+            padding: 24px;
+        }
+
+        .status-panel strong {
+            font-size: 0.92rem;
+            line-height: 1.35;
+        }
+
+        .status-panel span {
+            font-size: 0.72rem;
+        }
+
+        .product-content {
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 1180px) {
+            .status-strip {
+                grid-template-columns: repeat(2, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 980px) {
+            .hero-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .status-strip {
+                grid-template-columns: repeat(3, minmax(130px, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .status-strip {
+                grid-template-columns: repeat(2, minmax(140px, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .status-strip {
+                grid-template-columns: 1fr;
+            }
         }
 
         .button:not(.primary) {
