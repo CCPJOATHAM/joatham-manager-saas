@@ -17,21 +17,21 @@
     <meta name="theme-color" content="#07131f">
     <style>
         :root {
-            --ink: #08111f;
-            --ink-2: #122033;
-            --muted: #667085;
-            --soft: #eef4f6;
-            --surface: #ffffff;
-            --line: #dce8ee;
-            --brand: #0f766e;
-            --brand-soft: #ccfbf1;
-            --blue: #2563eb;
-            --violet: #6d5dfc;
-            --gold: #d9982f;
-            --rose: #d94f72;
-            --max: 1180px;
-            --radius: 8px;
-            --shadow: 0 24px 70px rgba(8, 17, 31, 0.14);
+            --ink: #ffffff;
+            --ink-2: #e9d5ff;
+            --muted: #c4b5fd;
+            --soft: rgba(255, 255, 255, 0.08);
+            --surface: rgba(255, 255, 255, 0.05);
+            --line: rgba(255, 255, 255, 0.08);
+            --brand: #7c3aed;
+            --brand-soft: rgba(124, 58, 237, 0.16);
+            --blue: #9333ea;
+            --violet: #a78bfa;
+            --gold: #f0abfc;
+            --rose: #fb7185;
+            --max: 1200px;
+            --radius: 20px;
+            --shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
         }
 
         * {
@@ -45,9 +45,12 @@
         body {
             margin: 0;
             min-height: 100vh;
-            color: var(--ink);
+            color: #fff;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background: #f6f9fb;
+            background:
+                radial-gradient(circle at 20% 20%, #6d28d9 0%, transparent 40%),
+                radial-gradient(circle at 80% 30%, #9333ea 0%, transparent 40%),
+                #0b0f1a;
             letter-spacing: 0;
         }
 
@@ -78,9 +81,9 @@
             overflow: hidden;
             color: #ffffff;
             background:
-                linear-gradient(138deg, rgba(15, 118, 110, 0.36), transparent 34%),
-                linear-gradient(223deg, rgba(37, 99, 235, 0.26), transparent 36%),
-                linear-gradient(180deg, #07131f 0%, #0e1c2c 58%, #f6f9fb 58%, #f6f9fb 100%);
+                radial-gradient(circle at 16% 18%, rgba(124, 58, 237, 0.42), transparent 34%),
+                radial-gradient(circle at 82% 22%, rgba(147, 51, 234, 0.38), transparent 36%),
+                linear-gradient(180deg, rgba(11, 15, 26, 0.78), rgba(11, 15, 26, 0.24));
             isolation: isolate;
         }
 
@@ -102,6 +105,61 @@
         .page-section {
             width: min(var(--max), calc(100% - 40px));
             margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+        }
+
+        .card {
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+        }
+
+        .section-glow {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .section-glow::before {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #7c3aed, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+            content: "";
+        }
+
+        .btn-primary {
+            border-color: transparent;
+            border-radius: 999px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: white;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 20, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .site-header {
@@ -847,6 +905,180 @@
             color: var(--brand);
         }
 
+        .site-header {
+            padding: 18px 0;
+            background: rgba(10, 10, 20, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-inner,
+        .product-view,
+        .status-panel,
+        .workflow-panel,
+        .insight-panel,
+        .contact-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+        }
+
+        .feature-card,
+        .method-card,
+        .contact-list li,
+        .status-panel,
+        .workflow-panel,
+        .insight-panel {
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover,
+        .method-card:hover,
+        .contact-list li:hover,
+        .status-panel:hover,
+        .workflow-panel:hover,
+        .insight-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+        }
+
+        .hero,
+        .modules,
+        .method,
+        .contact {
+            padding: 100px 20px;
+        }
+
+        .modules,
+        .method,
+        .contact,
+        .site-footer {
+            position: relative;
+            background: transparent;
+            color: #fff;
+            isolation: isolate;
+        }
+
+        .hero::before,
+        .modules::before,
+        .method::before,
+        .contact::before {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #7c3aed, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+            content: "";
+        }
+
+        .hero::before {
+            right: 8%;
+            top: 10%;
+        }
+
+        .modules::before {
+            left: -120px;
+            top: 20%;
+        }
+
+        .method::before {
+            right: -120px;
+            top: 12%;
+        }
+
+        .contact::before {
+            left: 12%;
+            top: 10%;
+        }
+
+        .product-view.section-glow::before {
+            right: -80px;
+            bottom: -120px;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-heading h2,
+        .contact-panel h2,
+        .insight-panel h2,
+        .feature-card h3,
+        .method-card h3,
+        .contact-list strong,
+        .contact-list a {
+            color: #fff;
+        }
+
+        .hero-lead,
+        .section-heading p,
+        .contact-panel p,
+        .feature-card p,
+        .method-card p,
+        .workflow-row span,
+        .insight-list span span,
+        .trust-item span,
+        .contact-list span,
+        .site-footer {
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .button.primary,
+        .btn-primary {
+            border-color: transparent;
+            border-radius: 999px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: white;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .button {
+            border-radius: 999px;
+        }
+
+        .button.subtle,
+        .contact-actions .button.subtle {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .module-grid,
+        .method-grid,
+        .status-strip,
+        .screen-layout {
+            gap: 30px;
+        }
+
+        .section-kicker,
+        .eyebrow,
+        .tag {
+            border: 1px solid rgba(167, 139, 250, 0.24);
+            background: rgba(124, 58, 237, 0.16);
+            color: #ddd6fe;
+        }
+
+        .brand-mark,
+        .method-number,
+        .feature-card .module-icon,
+        .module-icon,
+        .check {
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.35);
+        }
+
         @media (max-width: 1120px) {
             .hero-layout {
                 grid-template-columns: 1fr;
@@ -895,8 +1127,9 @@
 
             .hero-shell {
                 background:
-                    linear-gradient(138deg, rgba(15, 118, 110, 0.30), transparent 34%),
-                    linear-gradient(180deg, #07131f 0%, #0e1c2c 64%, #f6f9fb 64%, #f6f9fb 100%);
+                    radial-gradient(circle at 20% 20%, #6d28d9 0%, transparent 40%),
+                    radial-gradient(circle at 80% 30%, #9333ea 0%, transparent 40%),
+                    #0b0f1a;
             }
 
             .site-header {
@@ -1004,9 +1237,9 @@
     <a class="skip-link" href="#contenu">{% trans "Aller au contenu" %}</a>
 
     <div class="hero-shell">
-        <header class="site-header">
-            <div class="page-section">
-                <div class="header-inner">
+        <header class="site-header navbar">
+            <div class="page-section container">
+                <div class="header-inner glass">
                     <a href="{% url 'public_home' %}" class="brand" aria-label="{% trans 'Accueil JOATHAM Manager' %}">
                         <span class="brand-mark">JM</span>
                         <span class="brand-text">
@@ -1023,15 +1256,15 @@
 
                     <nav class="header-actions" aria-label="{% trans 'Accès rapides' %}">
                         <a class="button subtle" href="{% url 'login' %}">{% trans "Se connecter" %}</a>
-                        <a class="button primary" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
+                        <a class="button primary btn-primary" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
                     </nav>
                 </div>
             </div>
         </header>
 
         <div id="contenu">
-            <section class="hero" aria-labelledby="titre-accueil">
-                <div class="page-section hero-layout">
+            <section class="hero section-glow" aria-labelledby="titre-accueil">
+                <div class="page-section container hero-layout">
                     <div class="hero-copy">
                         <span class="eyebrow">{% trans "Plateforme SaaS de gestion en RDC" %}</span>
                         <h1 id="titre-accueil">JOATHAM Manager</h1>
@@ -1039,7 +1272,7 @@
                             {% trans "Un espace web moderne pour organiser vos clients, factures, dépenses, comptabilité et apprenants avec une expérience claire, rapide et professionnelle." %}
                         </p>
                         <div class="hero-actions">
-                            <a class="button primary" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
+                            <a class="button primary btn-primary" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
                             <a class="button" href="{% url 'public_question_create' %}">{% trans "Poser une question" %}</a>
                             <a class="button subtle" href="{% url 'login' %}">{% trans "Se connecter" %}</a>
                         </div>
@@ -1066,7 +1299,7 @@
                         </div>
                     </div>
 
-                    <section class="product-view" aria-label="{% trans 'Aperçu de l’interface JOATHAM Manager' %}">
+                    <section class="product-view glass section-glow" aria-label="{% trans 'Aperçu de l’interface JOATHAM Manager' %}">
                         <div class="product-bar">
                             <div class="window-dots" aria-hidden="true">
                                 <span></span>
@@ -1090,22 +1323,22 @@
 
                             <div class="product-content">
                                 <div class="status-strip">
-                                    <div class="status-panel">
+                                    <div class="status-panel glass card">
                                         <span>{% trans "Organisation" %}</span>
                                         <strong>{% trans "Flux de travail centralisés" %}</strong>
                                     </div>
-                                    <div class="status-panel">
+                                    <div class="status-panel glass card">
                                         <span>{% trans "Suivi" %}</span>
                                         <strong>{% trans "Actions visibles par module" %}</strong>
                                     </div>
-                                    <div class="status-panel">
+                                    <div class="status-panel glass card">
                                         <span>{% trans "Pilotage" %}</span>
                                         <strong>{% trans "Décisions mieux préparées" %}</strong>
                                     </div>
                                 </div>
 
                                 <div class="screen-layout">
-                                    <section class="workflow-panel" aria-labelledby="titre-flux">
+                                    <section class="workflow-panel glass card" aria-labelledby="titre-flux">
                                         <div class="panel-header">
                                             <strong id="titre-flux">{% trans "Travail en cours" %}</strong>
                                             <span class="tag">{% trans "Vue claire" %}</span>
@@ -1126,7 +1359,7 @@
                                         </div>
                                     </section>
 
-                                    <aside class="insight-panel">
+                                    <aside class="insight-panel glass card">
                                         <h2>{% trans "Un tableau de bord plus net" %}</h2>
                                         <ul class="insight-list">
                                             <li>
@@ -1162,7 +1395,7 @@
     </div>
 
     <main>
-        <section id="modules" class="modules page-section" aria-labelledby="titre-modules">
+        <section id="modules" class="modules page-section container section-glow" aria-labelledby="titre-modules">
             <div class="section-heading">
                 <span class="section-kicker">{% trans "Modules essentiels" %}</span>
                 <h2 id="titre-modules">{% trans "Tout ce qu’une petite entreprise doit garder sous contrôle." %}</h2>
@@ -1170,27 +1403,27 @@
             </div>
 
             <div class="module-grid">
-                <article class="feature-card">
+                <article class="feature-card glass card">
                     <span class="module-icon">F</span>
                     <h3>{% trans "Facturation" %}</h3>
                     <p>{% trans "Préparez vos factures, suivez leur état et gardez une lecture claire des documents commerciaux." %}</p>
                 </article>
-                <article class="feature-card">
+                <article class="feature-card glass card">
                     <span class="module-icon">C</span>
                     <h3>{% trans "Clients" %}</h3>
                     <p>{% trans "Centralisez les informations utiles pour mieux suivre les relations et les demandes." %}</p>
                 </article>
-                <article class="feature-card">
+                <article class="feature-card glass card">
                     <span class="module-icon">D</span>
                     <h3>{% trans "Dépenses" %}</h3>
                     <p>{% trans "Classez les charges, gardez une trace propre et préparez vos décisions avec plus de sérénité." %}</p>
                 </article>
-                <article class="feature-card">
+                <article class="feature-card glass card">
                     <span class="module-icon">A</span>
                     <h3>{% trans "Apprenants" %}</h3>
                     <p>{% trans "Suivez les inscriptions, profils et activités liées aux services de formation." %}</p>
                 </article>
-                <article class="feature-card">
+                <article class="feature-card glass card">
                     <span class="module-icon">O</span>
                     <h3>{% trans "Comptabilité" %}</h3>
                     <p>{% trans "Organisez les données de gestion nécessaires au suivi financier interne." %}</p>
@@ -1198,8 +1431,8 @@
             </div>
         </section>
 
-        <section id="methode" class="method" aria-labelledby="titre-methode">
-            <div class="page-section">
+        <section id="methode" class="method section-glow" aria-labelledby="titre-methode">
+            <div class="page-section container">
                 <div class="section-heading">
                     <span class="section-kicker">{% trans "Méthode de travail" %}</span>
                     <h2 id="titre-methode">{% trans "Une organisation plus professionnelle, sans lourdeur." %}</h2>
@@ -1207,17 +1440,17 @@
                 </div>
 
                 <div class="method-grid">
-                    <article class="method-card">
+                    <article class="method-card glass card">
                         <span class="method-number">01</span>
                         <h3>{% trans "Créer un compte" %}</h3>
                         <p>{% trans "Démarrez l’inscription de votre entreprise et préparez votre espace JOATHAM Manager." %}</p>
                     </article>
-                    <article class="method-card">
+                    <article class="method-card glass card">
                         <span class="method-number">02</span>
                         <h3>{% trans "Structurer les modules" %}</h3>
                         <p>{% trans "Organisez clients, factures, dépenses, comptabilité et apprenants selon vos besoins." %}</p>
                     </article>
-                    <article class="method-card">
+                    <article class="method-card glass card">
                         <span class="method-number">03</span>
                         <h3>{% trans "Piloter au quotidien" %}</h3>
                         <p>{% trans "Retrouvez les actions importantes dans un tableau de bord pensé pour les décisions rapides." %}</p>
@@ -1226,29 +1459,29 @@
             </div>
         </section>
 
-        <section id="contact" class="contact page-section" aria-labelledby="titre-contact">
-            <div class="contact-panel">
+        <section id="contact" class="contact page-section container section-glow" aria-labelledby="titre-contact">
+            <div class="contact-panel glass">
                 <div>
                     <span class="section-kicker">{% trans "Contact" %}</span>
                     <h2 id="titre-contact">{% trans "Une question avant de créer votre espace ?" %}</h2>
                     <p>{% trans "L’équipe JOATHAM peut vous répondre avant l’inscription et vous orienter vers le bon parcours pour votre entreprise." %}</p>
                     <div class="contact-actions">
-                        <a class="button primary" href="{% url 'public_question_create' %}">{% trans "Poser une question" %}</a>
+                        <a class="button primary btn-primary" href="{% url 'public_question_create' %}">{% trans "Poser une question" %}</a>
                         <a class="button" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
                         <a class="button subtle" href="{% url 'login' %}">{% trans "Se connecter" %}</a>
                     </div>
                 </div>
 
                 <ul class="contact-list" aria-label="{% trans 'Coordonnées JOATHAM' %}">
-                    <li>
+                    <li class="glass card">
                         <span>{% trans "Email" %}</span>
                         <a href="mailto:admin@joatham.com">admin@joatham.com</a>
                     </li>
-                    <li>
+                    <li class="glass card">
                         <span>{% trans "WhatsApp" %}</span>
                         <a href="https://wa.me/243819050191">+243 819 050 191</a>
                     </li>
-                    <li>
+                    <li class="glass card">
                         <span>{% trans "Localisation" %}</span>
                         <strong>{% trans "Matadi, RDC" %}</strong>
                     </li>
