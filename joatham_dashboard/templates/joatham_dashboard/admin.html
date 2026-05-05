@@ -29,14 +29,20 @@
     --primary-hover: #1D4ED8;
     --line: rgba(148, 163, 184, 0.18);
     --line-strong: rgba(148, 163, 184, 0.28);
-    --shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
-    --shadow-md: 0 22px 54px rgba(0, 0, 0, 0.36);
+    --shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 14px 34px rgba(0, 0, 0, 0.28);
     --radius: 14px;
     --dashboard-card: rgba(17, 24, 39, 0.94);
     --dashboard-card-soft: rgba(15, 23, 42, 0.78);
     --dashboard-heading: #F8FAFC;
     --dashboard-text: #E2E8F0;
     --dashboard-muted: #94A3B8;
+}
+
+body,
+.page-content {
+    background: #0B1220 !important;
+    color: #E2E8F0;
 }
 
 .hero {
@@ -236,6 +242,10 @@
     grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
     gap: 22px;
     align-items: start;
+}
+
+.dashboard-grid .section-card + .section-card {
+    margin-top: 20px;
 }
 
 .section-card {
@@ -498,7 +508,7 @@
         </div>
     </div>
     <div class="premium-card">
-        <div class="premium-icon" style="background:#eefcf6; color:#047857;">
+        <div class="premium-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M20 7 9 18l-5-5"></path>
             </svg>
@@ -510,7 +520,7 @@
         </div>
     </div>
     <div class="premium-card">
-        <div class="premium-icon" style="background:#fff7ed; color:#c2410c;">
+        <div class="premium-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M12 8v5"></path>
                 <path d="M12 16h.01"></path>
@@ -524,7 +534,7 @@
         </div>
     </div>
     <div class="premium-card">
-        <div class="premium-icon" style="background:#eef6ff; color:#1d4ed8;">
+        <div class="premium-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="10" cy="7" r="4"></circle>
@@ -593,7 +603,7 @@
             </div>
         </section>
 
-        <section class="section-card" style="margin-top:20px;">
+        <section class="section-card">
             <h3>{% trans "Activite recente" %}</h3>
             <p class="section-subtitle">{% trans "Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe." %}</p>
 
@@ -635,7 +645,7 @@
             {% endif %}
         </section>
 
-        <section class="section-card" style="margin-top:20px;">
+        <section class="section-card">
             <h3>{% trans "Alertes stock" %}</h3>
             <p class="section-subtitle">{% trans "Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque." %}</p>
 
@@ -686,15 +696,15 @@
             </div>
         </section>
 
-        <section class="section-card" style="margin-top:20px;">
+        <section class="section-card">
             <h3>{% trans "Demarrage rapide" %}</h3>
             <p class="section-subtitle">{% trans "Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus." %}</p>
             <div class="list-card">
                 <ul>
-                    <li><span>{% trans "Ajouter un gestionnaire ou comptable" %}</span><strong><a href="{% url 'user_create' %}" style="text-decoration:none; color:#0f766e;">{% trans "Creer" %}</a></strong></li>
-                    <li><span>{% trans "Completer l'identite entreprise" %}</span><strong><a href="{% url 'company_settings' %}" style="text-decoration:none; color:#0f766e;">{% trans "Ouvrir" %}</a></strong></li>
-                    <li><span>{% trans "Creer une facture" %}</span><strong><a href="{% url 'add_facture' %}" style="text-decoration:none; color:#0f766e;">{% trans "Facturer" %}</a></strong></li>
-                    <li><span>{% trans "Analyser le journal d'activites" %}</span><strong><a href="{% url 'activity_log_list' %}" style="text-decoration:none; color:#0f766e;">{% trans "Consulter" %}</a></strong></li>
+                    <li><span>{% trans "Ajouter un gestionnaire ou comptable" %}</span><strong><a href="{% url 'user_create' %}">{% trans "Creer" %}</a></strong></li>
+                    <li><span>{% trans "Completer l'identite entreprise" %}</span><strong><a href="{% url 'company_settings' %}">{% trans "Ouvrir" %}</a></strong></li>
+                    <li><span>{% trans "Creer une facture" %}</span><strong><a href="{% url 'add_facture' %}">{% trans "Facturer" %}</a></strong></li>
+                    <li><span>{% trans "Analyser le journal d'activites" %}</span><strong><a href="{% url 'activity_log_list' %}">{% trans "Consulter" %}</a></strong></li>
                 </ul>
             </div>
         </section>
