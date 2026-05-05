@@ -7,27 +7,28 @@
     <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-light: #3b82f6;
-            --primary-soft: rgba(37, 99, 235, 0.14);
-            --bg: #08111f;
-            --sidebar-bg: rgba(8, 17, 31, 0.86);
+            --page-bg: #0A0F1C;
+            --surface: #111827;
+            --surface-soft: #151E2E;
+            --sidebar-bg: #0B1220;
+            --text: #E5E7EB;
+            --muted: #CBD5E1;
+            --primary: #2563EB;
+            --primary-light: #3B82F6;
+            --primary-soft: rgba(37, 99, 235, 0.16);
+            --bg: var(--page-bg);
             --sidebar-accent: var(--primary);
-            --sidebar-soft: rgba(255, 255, 255, 0.08);
-            --page-bg: var(--bg);
-            --surface: rgba(255, 255, 255, 0.07);
-            --surface-strong: rgba(15, 23, 42, 0.88);
-            --surface-soft: rgba(255, 255, 255, 0.045);
-            --line: rgba(255, 255, 255, 0.11);
-            --text: #ffffff;
-            --muted: rgba(255, 255, 255, 0.72);
-            --muted-strong: #dbeafe;
+            --sidebar-soft: rgba(229, 231, 235, 0.06);
+            --surface-strong: #111827;
+            --line: rgba(203, 213, 225, 0.15);
+            --text-strong: #F8FAFC;
+            --muted-strong: #E2E8F0;
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #fb7185;
-            --accent-blue: #93c5fd;
-            --glow: 0 22px 62px rgba(37, 99, 235, 0.18);
-            --shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+            --accent-blue: var(--primary-light);
+            --glow: 0 18px 44px rgba(0, 0, 0, 0.24);
+            --shadow: 0 22px 62px rgba(0, 0, 0, 0.32);
             --radius: 22px;
         }
 
@@ -46,9 +47,7 @@
             margin: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background:
-                radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.42), transparent 31%),
-                radial-gradient(circle at 86% 18%, rgba(59, 130, 246, 0.28), transparent 32%),
-                radial-gradient(circle at 48% 88%, rgba(15, 23, 42, 0.62), transparent 44%),
+                linear-gradient(180deg, rgba(17, 24, 39, 0.34), rgba(10, 15, 28, 0.94) 42%, rgba(8, 12, 22, 0.98)),
                 var(--page-bg);
             color: var(--text);
             width: 100%;
@@ -64,8 +63,8 @@
             z-index: -2;
             pointer-events: none;
             background:
-                linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 36%),
-                radial-gradient(circle at 70% 58%, rgba(37, 99, 235, 0.10), transparent 36%);
+                linear-gradient(135deg, rgba(248, 250, 252, 0.025), transparent 38%),
+                radial-gradient(circle at 76% 24%, rgba(203, 213, 225, 0.055), transparent 34%);
             content: "";
         }
 
@@ -83,9 +82,9 @@
 
         .sidebar {
             background:
-                radial-gradient(circle at 18% 8%, rgba(147, 197, 253, 0.16), transparent 30%),
-                linear-gradient(180deg, rgba(8, 17, 31, 0.94), rgba(15, 23, 42, 0.86));
-            color: white;
+                linear-gradient(180deg, rgba(17, 24, 39, 0.35), rgba(11, 18, 32, 0.96)),
+                var(--sidebar-bg);
+            color: var(--text);
             padding: 24px 18px;
             position: sticky;
             top: 0;
@@ -97,27 +96,24 @@
             align-self: start;
             overflow-y: auto;
             overflow-x: hidden;
-            border-right: 1px solid rgba(255, 255, 255, 0.09);
-            box-shadow: 24px 0 70px rgba(0, 0, 0, 0.22);
+            border-right: 1px solid var(--line);
+            box-shadow: 20px 0 54px rgba(0, 0, 0, 0.26);
             backdrop-filter: blur(18px);
         }
 
         .brand {
             padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.09);
+            border: 1px solid var(--line);
             border-radius: var(--radius);
-            background: rgba(255, 255, 255, 0.055);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            background: var(--surface);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
         }
 
         .brand-title {
             font-size: 1.42rem;
             font-weight: 800;
             letter-spacing: 0;
-            background: linear-gradient(135deg, #ffffff, var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-strong);
         }
 
         .brand-subtitle {
@@ -128,8 +124,8 @@
         }
 
         .company-card {
-            background: rgba(255, 255, 255, 0.075);
-            border: 1px solid rgba(255, 255, 255, 0.11);
+            background: var(--surface);
+            border: 1px solid var(--line);
             border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--glow);
@@ -141,7 +137,7 @@
             font-size: 0.74rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: rgba(255, 255, 255, 0.68);
+            color: var(--muted);
             margin-bottom: 6px;
         }
 
@@ -149,6 +145,7 @@
             display: block;
             font-size: 1rem;
             margin-bottom: 6px;
+            color: var(--text-strong);
         }
 
         .company-card .muted {
@@ -167,20 +164,20 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            color: rgba(255, 255, 255, 0.86);
+            color: var(--text);
             text-decoration: none;
             padding: 11px 13px;
             border: 1px solid transparent;
             border-radius: 16px;
             transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-            background: rgba(255, 255, 255, 0.025);
+            background: transparent;
             min-width: 0;
         }
 
         .nav .nav-disabled {
-            color: rgba(255, 255, 255, 0.72);
+            color: rgba(203, 213, 225, 0.72);
             cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.045);
+            background: rgba(21, 30, 46, 0.72);
         }
 
         .nav .nav-badge {
@@ -198,15 +195,15 @@
 
         .nav a:hover,
         .nav a.is-active {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.26), rgba(59, 130, 246, 0.12));
-            border-color: rgba(147, 197, 253, 0.24);
-            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.13);
+            background: rgba(37, 99, 235, 0.18);
+            border-color: rgba(59, 130, 246, 0.34);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
             transform: translateX(2px);
         }
 
         .sidebar-footer {
             margin-top: auto;
-            color: rgba(255, 255, 255, 0.66);
+            color: var(--muted);
             font-size: 0.85rem;
             padding: 14px 4px 0;
         }
@@ -232,9 +229,8 @@
             top: 0;
             z-index: 30;
             background:
-                linear-gradient(180deg, rgba(8, 17, 31, 0.96), rgba(15, 23, 42, 0.78)),
-                radial-gradient(circle at 82% 0%, rgba(37, 99, 235, 0.16), transparent 32%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+                linear-gradient(180deg, rgba(11, 18, 32, 0.98), rgba(17, 24, 39, 0.92));
+            border-bottom: 1px solid var(--line);
             backdrop-filter: blur(18px);
             box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
         }
@@ -243,7 +239,7 @@
             margin: 0;
             font-size: clamp(1.55rem, 2vw, 2.1rem);
             letter-spacing: 0;
-            color: #ffffff;
+            color: var(--text-strong);
         }
 
         .topbar .subtitle {
@@ -270,7 +266,7 @@
             border: 1px solid var(--line);
             font-size: 0.9rem;
             color: var(--muted-strong);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
             backdrop-filter: blur(12px);
         }
 
@@ -298,9 +294,9 @@
             border-radius: 999px;
             border: 1px solid var(--line);
             background: var(--surface);
-            color: #ffffff;
+            color: var(--text);
             font: inherit;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
         }
 
         .language-select {
@@ -309,8 +305,8 @@
 
         .language-select option,
         .content-card option {
-            background: #111827;
-            color: #ffffff;
+            background: var(--surface);
+            color: var(--text);
         }
 
         .language-submit {
@@ -345,7 +341,7 @@
         .content-card h2,
         .content-card h3,
         .content-card h4 {
-            color: #ffffff;
+            color: var(--text-strong);
             letter-spacing: 0;
         }
 
@@ -357,7 +353,7 @@
         }
 
         .content-card a {
-            color: #bfdbfe;
+            color: var(--primary-light);
         }
 
         .content-card input:not([type="checkbox"]):not([type="radio"]),
@@ -365,12 +361,12 @@
         .content-card textarea {
             min-height: 42px;
             max-width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--line);
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.075);
-            color: #ffffff;
+            background: var(--surface-soft);
+            color: var(--text);
             font: inherit;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
         }
 
         .content-card input:not([type="checkbox"]):not([type="radio"]),
@@ -386,13 +382,13 @@
         .content-card select:focus,
         .content-card textarea:focus {
             border-color: rgba(147, 197, 253, 0.54);
-            outline: 3px solid rgba(37, 99, 235, 0.18);
+            outline: 3px solid rgba(37, 99, 235, 0.16);
             outline-offset: 0;
         }
 
         .content-card input::placeholder,
         .content-card textarea::placeholder {
-            color: rgba(255, 255, 255, 0.62);
+            color: rgba(203, 213, 225, 0.72);
         }
 
         .grid {
@@ -409,7 +405,7 @@
             border-radius: 20px;
             background: var(--surface-soft);
             border: 1px solid var(--line);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
         }
 
         .kpi-card .label {
@@ -423,7 +419,7 @@
             font-size: 1.5rem;
             font-weight: 800;
             letter-spacing: 0;
-            color: #ffffff;
+            color: var(--text-strong);
         }
 
         .section-title {
@@ -436,7 +432,7 @@
             border: 1px solid var(--line);
             border-radius: 20px;
             padding: 18px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
         }
 
         .list-card ul {
@@ -471,9 +467,9 @@
             padding: 12px 14px;
             border-radius: 16px;
             border: 1px solid rgba(147, 197, 253, 0.24);
-            background: rgba(37, 99, 235, 0.12);
+            background: rgba(37, 99, 235, 0.14);
             color: #eff6ff;
-            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
         }
 
         .message.error {
@@ -502,7 +498,7 @@
             -webkit-overflow-scrolling: touch;
             border: 1px solid var(--line);
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.035);
+            background: var(--surface-soft);
         }
 
         .content-card table {
@@ -517,19 +513,19 @@
         .content-card th,
         .content-card td {
             white-space: nowrap;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--line);
             padding: 12px 14px;
             text-align: left;
         }
 
         .content-card th {
-            background: rgba(37, 99, 235, 0.13);
-            color: #ffffff;
+            background: rgba(37, 99, 235, 0.14);
+            color: var(--text-strong);
             font-weight: 800;
         }
 
         .content-card td {
-            color: rgba(255, 255, 255, 0.78);
+            color: var(--text);
         }
 
         @media (max-width: 1280px) {
@@ -547,24 +543,24 @@
             border-radius: 999px;
             border: 1px solid var(--line);
             background: var(--surface);
-            color: #ffffff;
+            color: var(--text);
             text-decoration: none;
             font-weight: 750;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04);
             transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
         }
 
         .btn-link:hover {
             transform: translateY(-1px);
             border-color: rgba(147, 197, 253, 0.36);
-            box-shadow: 0 14px 30px rgba(37, 99, 235, 0.14);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
         }
 
         .btn-link.primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
             border-color: transparent;
-            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.34);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
         }
 
         .btn-link.danger {
@@ -585,7 +581,7 @@
             font: inherit;
             font-weight: 750;
             cursor: pointer;
-            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.30);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
         }
 
         .content-card button:disabled,
@@ -606,7 +602,7 @@
                 height: auto;
                 max-height: none;
                 border-right: 0;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+                border-bottom: 1px solid var(--line);
             }
 
             .topbar {
