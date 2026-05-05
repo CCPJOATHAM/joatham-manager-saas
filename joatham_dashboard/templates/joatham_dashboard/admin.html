@@ -19,22 +19,26 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 26px;
+        gap: 22px;
+        margin-bottom: 28px;
         flex-wrap: wrap;
     }
 
     .hero h2 {
         margin: 0;
-        font-size: 1.75rem;
-        letter-spacing: -0.03em;
+        font-size: 2rem;
+        color: #ffffff;
+        letter-spacing: -0.04em;
     }
 
-    .hero p {
-        margin: 8px 0 0;
-        color: #64748b;
-        max-width: 760px;
-        line-height: 1.6;
+    .hero p,
+    .section-subtitle,
+    .premium-meta,
+    .quick-action-card span,
+    .activity-meta,
+    .activity-desc,
+    .empty-hint {
+        color: #cbd5e1;
     }
 
     .hero-summary {
@@ -46,21 +50,34 @@
     .hero-pill {
         display: inline-flex;
         align-items: center;
-        min-height: 36px;
+        min-height: 38px;
         padding: 0 14px;
         border-radius: 999px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
+        background: rgba(37, 99, 235, 0.14);
+        border: 1px solid rgba(59, 130, 246, 0.28);
+        color: #dbeafe;
         font-size: 0.84rem;
-        font-weight: 700;
+        font-weight: 800;
     }
 
-    .premium-kpis {
+    .premium-kpis,
+    .quick-actions {
         display: grid;
         grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .premium-card,
+    .quick-action-card,
+    .section-card,
+    .list-card,
+    .activity-item,
+    .empty-hint {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(16px);
     }
 
     .premium-card {
@@ -70,20 +87,17 @@
         align-items: center;
         padding: 18px;
         border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        border: 1px solid #dde7f0;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
 
     .premium-icon {
         width: 48px;
         height: 48px;
-        border-radius: 15px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #eef6ff;
-        color: #2563eb;
+        background: rgba(37, 99, 235, 0.18) !important;
+        color: #60a5fa !important;
     }
 
     .premium-icon svg {
@@ -92,32 +106,18 @@
     }
 
     .premium-label {
-        color: #64748b;
+        color: #bfdbfe;
         font-size: 0.84rem;
         line-height: 1.35;
     }
 
     .premium-value {
         display: block;
-        margin-top: 3px;
-        color: #10233f;
-        font-size: 1.08rem;
-        font-weight: 800;
+        margin-top: 4px;
+        color: #ffffff;
+        font-size: 1.18rem;
+        font-weight: 900;
         letter-spacing: -0.02em;
-    }
-
-    .premium-meta {
-        display: block;
-        margin-top: 3px;
-        color: #64748b;
-        font-size: 0.8rem;
-    }
-
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
     }
 
     .quick-action-card {
@@ -125,62 +125,48 @@
         text-decoration: none;
         padding: 18px;
         border-radius: 20px;
-        background: linear-gradient(145deg, #ffffff, #f8fafc);
-        border: 1px solid #dde7f0;
-        color: #10233f;
-        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+        color: #ffffff;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .quick-action-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow: 0 22px 55px rgba(37, 99, 235, 0.18);
     }
 
     .quick-action-card strong {
         display: block;
         font-size: 1rem;
         margin-bottom: 8px;
-    }
-
-    .quick-action-card span {
-        color: #64748b;
-        line-height: 1.6;
-        font-size: 0.92rem;
+        color: #ffffff;
     }
 
     .dashboard-grid {
         display: grid;
-        grid-template-columns: 1.3fr 1fr;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
         gap: 20px;
         align-items: start;
     }
 
     .section-card {
-        background: #fff;
-        border: 1px solid #dde7f0;
         border-radius: 24px;
         padding: 22px;
-        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
     }
 
     .section-card h3 {
         margin: 0 0 8px;
-        font-size: 1.08rem;
-    }
-
-    .section-subtitle {
-        margin: 0 0 16px;
-        color: #64748b;
-        line-height: 1.6;
+        font-size: 1.12rem;
+        color: #ffffff;
     }
 
     .list-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
         border-radius: 18px;
         padding: 16px;
     }
 
-    .list-card + .list-card {
-        margin-top: 14px;
-    }
-
-    .list-card ul {
+    .list-card ul,
+    .stock-alert-list {
         list-style: none;
         padding: 0;
         margin: 0;
@@ -193,12 +179,17 @@
         justify-content: space-between;
         gap: 14px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.14);
+        color: #cbd5e1;
     }
 
     .list-card li:last-child {
         border-bottom: 0;
         padding-bottom: 0;
+    }
+
+    .list-card strong {
+        color: #ffffff;
     }
 
     .activity-list {
@@ -209,26 +200,11 @@
     .activity-item {
         padding: 14px 16px;
         border-radius: 16px;
-        background: #f8fbff;
-        border: 1px solid #d9e6fb;
     }
 
     .activity-item strong {
         display: block;
-        color: #10233f;
-    }
-
-    .activity-meta {
-        margin-top: 4px;
-        color: #64748b;
-        font-size: 0.84rem;
-    }
-
-    .activity-desc {
-        margin-top: 6px;
-        color: #334155;
-        line-height: 1.6;
-        font-size: 0.92rem;
+        color: #ffffff;
     }
 
     .stock-alert-shell {
@@ -245,41 +221,33 @@
     .stock-alert-card {
         padding: 16px 18px;
         border-radius: 18px;
-        border: 1px solid transparent;
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        background: rgba(15, 23, 42, 0.72);
     }
 
     .stock-alert-card strong {
         display: block;
         font-size: 1.7rem;
-        letter-spacing: -0.03em;
+        color: #ffffff;
         margin-top: 6px;
     }
 
-    .stock-alert-card small {
-        display: block;
-        margin-top: 4px;
-        color: #475569;
-        line-height: 1.5;
+    .stock-alert-card small,
+    .stock-alert-card span,
+    .stock-alert-item span {
+        color: #cbd5e1;
     }
 
     .stock-alert-card.rupture {
-        background: linear-gradient(180deg, #fff4f3 0%, #fff8f7 100%);
-        border-color: #fecaca;
-        color: #9f1239;
+        border-color: rgba(248, 113, 113, 0.35);
+        background: rgba(127, 29, 29, 0.22);
+        color: #fecaca;
     }
 
     .stock-alert-card.low {
-        background: linear-gradient(180deg, #fff8ed 0%, #fffbf5 100%);
-        border-color: #fed7aa;
-        color: #b45309;
-    }
-
-    .stock-alert-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 10px;
+        border-color: rgba(251, 191, 36, 0.35);
+        background: rgba(120, 53, 15, 0.22);
+        color: #fde68a;
     }
 
     .stock-alert-item {
@@ -288,19 +256,12 @@
         gap: 14px;
         padding: 12px 14px;
         border-radius: 16px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: rgba(15, 23, 42, 0.68);
+        border: 1px solid rgba(59, 130, 246, 0.14);
     }
 
     .stock-alert-item strong {
-        display: block;
-        color: #10233f;
-        margin-bottom: 3px;
-    }
-
-    .stock-alert-item span {
-        color: #64748b;
-        font-size: 0.88rem;
+        color: #ffffff;
     }
 
     .stock-alert-badge {
@@ -310,26 +271,27 @@
         padding: 6px 10px;
         border-radius: 999px;
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 900;
     }
 
     .stock-alert-badge.rupture {
-        background: #fee2e2;
-        color: #b91c1c;
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
     }
 
     .stock-alert-badge.low {
-        background: #ffedd5;
-        color: #c2410c;
+        background: rgba(251, 191, 36, 0.18);
+        color: #fde68a;
     }
 
     .empty-hint {
         padding: 18px;
         border-radius: 16px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #64748b;
         line-height: 1.7;
+    }
+
+    .list-card a {
+        color: #60a5fa !important;
     }
 
     @media (max-width: 1180px) {
@@ -345,7 +307,8 @@
 
     @media (max-width: 760px) {
         .premium-kpis,
-        .quick-actions {
+        .quick-actions,
+        .stock-alert-summary {
             grid-template-columns: 1fr;
         }
     }
