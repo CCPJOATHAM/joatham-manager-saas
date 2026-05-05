@@ -7,30 +7,21 @@
     <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
     <style>
         :root {
-            --page-bg: #0A0F1C;
-            --surface: #111827;
-            --surface-soft: #151E2E;
-            --sidebar-bg: #0B1220;
-            --text: #E5E7EB;
-            --muted: #CBD5E1;
-            --primary: #2563EB;
-            --primary-light: #3B82F6;
-            --primary-soft: rgba(37, 99, 235, 0.16);
-            --bg: var(--page-bg);
-            --sidebar-accent: var(--primary);
-            --sidebar-soft: rgba(229, 231, 235, 0.06);
-            --surface-strong: #111827;
-            --line: rgba(203, 213, 225, 0.15);
-            --text-strong: #F8FAFC;
-            --muted-strong: #E2E8F0;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #fb7185;
-            --accent-blue: var(--primary-light);
-            --glow: 0 18px 44px rgba(0, 0, 0, 0.24);
-            --shadow: 0 22px 62px rgba(0, 0, 0, 0.32);
-            --radius: 22px;
-        }
+    --admin-bg: #EEF6FF;
+    --admin-card: #FFFFFF;
+    --admin-card-soft: #F8FBFF;
+    --admin-border: #D8E6F7;
+    --admin-text: #0F172A;
+    --admin-soft: #475569;
+    --admin-muted: #64748B;
+    --admin-primary: #2563EB;
+    --admin-primary-light: #3B82F6;
+    --admin-primary-soft: rgba(37, 99, 235, 0.10);
+    --admin-success: #0F766E;
+    --admin-warning: #B45309;
+    --admin-danger: #B91C1C;
+    --admin-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+}
 
         * {
             box-sizing: border-box;
@@ -81,25 +72,10 @@
         }
 
         .sidebar {
-            background:
-                linear-gradient(180deg, rgba(17, 24, 39, 0.35), rgba(11, 18, 32, 0.96)),
-                var(--sidebar-bg);
-            color: var(--text);
-            padding: 24px 18px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            min-width: 0;
-            align-self: start;
-            overflow-y: auto;
-            overflow-x: hidden;
-            border-right: 1px solid var(--line);
-            box-shadow: 20px 0 54px rgba(0, 0, 0, 0.26);
-            backdrop-filter: blur(18px);
-        }
+    background: linear-gradient(180deg, #FFFFFF 0%, #EAF2FF 100%);
+    color: var(--admin-text);
+    border-right: 1px solid var(--line);
+}
 
         .brand {
             padding: 16px;
@@ -113,12 +89,12 @@
             font-size: 1.42rem;
             font-weight: 800;
             letter-spacing: 0;
-            color: var(--text-strong);
+            color: var(--admin-text);
         }
 
         .brand-subtitle {
             margin-top: 6px;
-            color: var(--muted);
+            color: var(--admin-text);
             font-size: 0.92rem;
             line-height: 1.5;
         }
@@ -175,7 +151,7 @@
         }
 
         .nav .nav-disabled {
-            color: rgba(203, 213, 225, 0.72);
+            color: var(--text);
             cursor: not-allowed;
             background: rgba(21, 30, 46, 0.72);
         }
@@ -229,7 +205,7 @@
             top: 0;
             z-index: 30;
             background:
-                linear-gradient(180deg, rgba(11, 18, 32, 0.98), rgba(17, 24, 39, 0.92));
+                linear-gradient(180deg, rgba(11, 18, 32, 0.98),var(--admin-card));
             border-bottom: 1px solid var(--line);
             backdrop-filter: blur(18px);
             box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
