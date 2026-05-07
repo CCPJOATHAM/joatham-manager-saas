@@ -51,3 +51,56 @@ class UserManagementForm(forms.Form):
                 "autocomplete": "new-password",
             }
         )
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    full_name = forms.CharField(
+        max_length=150,
+        required=False,
+        label=_("Nom complet"),
+    )
+
+    class Meta:
+        model = User
+        fields = ["full_name", "telephone", "preferred_language", "profile_photo"]
+        labels = {
+            "telephone": _("Telephone"),
+            "preferred_language": _("Langue preferee"),
+            "profile_photo": _("Photo de profil"),
+        }
+        widgets = {
+            "telephone": forms.TextInput(attrs={"placeholder": "+243...", "autocomplete": "tel"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        full_name = ""
+        if self.instance and self.instance.pk:
+            full_name = f"{self.instance.first_name} {self.instance.last_name}".strip()
+        self.fields["full_name"].initial = full_name
+        self.fields["full_name"].widget.attrs.update(
+            {
+                "placeholder": _("Votre nom complet"),
+                "autocomplete": "name",
+            }
+        )
+        self.fields["preferred_language"].widget.attrs.update({"aria-label": _("Langue preferee")})
+        self.fields["profile_photo"].widget.attrs.update({"accept": "image/*"})
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        full_name = (self.cleaned_data.get("full_name") or "").strip()
+        parts = full_name.split()
+        if not parts:
+            user.first_name = ""
+            user.last_name = ""
+        elif len(parts) == 1:
+            user.first_name = parts[0]
+            user.last_name = ""
+        else:
+            user.first_name = parts[0]
+            user.last_name = " ".join(parts[1:])
+
+        if commit:
+            user.save()
+        return user

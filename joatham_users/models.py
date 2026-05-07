@@ -81,6 +81,7 @@ class User(AbstractUser):
         choices=LANGUAGE_CHOICES,
         default="fr",
     )
+    profile_photo = models.ImageField(upload_to="profiles/", blank=True, null=True)
     telephone = models.CharField(max_length=50, blank=True, default="")
     email_verified = models.BooleanField(default=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)

@@ -1,9 +1,11 @@
+import tempfile
 from io import StringIO
 from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.test import TestCase, override_settings
@@ -658,3 +660,97 @@ class UserManagementTests(TestCase):
         self.entreprise.refresh_from_db()
         self.assertEqual(self.entreprise.taux_tva_defaut, Decimal("18.50"))
         self.assertEqual(self.entreprise.referentiel_comptable, "pcg")
+
+
+class ProfileTests(TestCase):
+    def setUp(self):
+        self.media_root = tempfile.TemporaryDirectory()
+        self.override = override_settings(MEDIA_ROOT=self.media_root.name)
+        self.override.enable()
+        self.addCleanup(self.override.disable)
+        self.addCleanup(self.media_root.cleanup)
+
+        self.entreprise = create_entreprise("Entreprise Profil")
+        self.autre_entreprise = create_entreprise("Entreprise Autre")
+        self.user = create_user("profil-user", User.Role.GESTIONNAIRE, self.entreprise)
+        self.user.first_name = "Jean"
+        self.user.last_name = "Profil"
+        self.user.email = "jean.profil@example.com"
+        self.user.telephone = "+243810000000"
+        self.user.preferred_language = "fr"
+        self.user.save()
+        self.other_user = create_user("autre-profil", User.Role.COMPTABLE, self.autre_entreprise)
+
+    def test_profile_requires_authenticated_user(self):
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+    def test_user_sees_profile_information(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mon profil")
+        self.assertContains(response, "profil-user")
+        self.assertContains(response, "Jean Profil")
+        self.assertContains(response, "jean.profil@example.com")
+        self.assertContains(response, "+243810000000")
+        self.assertContains(response, "Gestionnaire")
+        self.assertContains(response, "Entreprise Profil")
+        self.assertContains(response, "Fran")
+
+    def test_user_can_update_allowed_profile_fields(self):
+        avatar = SimpleUploadedFile(
+            "avatar.gif",
+            b"GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00\xff\xff\xff,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;",
+            content_type="image/gif",
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("profile"),
+            {
+                "full_name": "Jeanne Profil",
+                "telephone": "+243820000000",
+                "preferred_language": "en",
+                "profile_photo": avatar,
+            },
+        )
+
+        self.assertRedirects(response, reverse("profile"))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Jeanne")
+        self.assertEqual(self.user.last_name, "Profil")
+        self.assertEqual(self.user.telephone, "+243820000000")
+        self.assertEqual(self.user.preferred_language, "en")
+        self.assertTrue(self.user.profile_photo.name.startswith("profiles/avatar"))
+
+    def test_user_cannot_update_sensitive_profile_fields(self):
+        original_email = self.user.email
+        original_role = self.user.role
+        original_entreprise = self.user.entreprise
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("profile"),
+            {
+                "id": self.other_user.id,
+                "full_name": "Jean Modifie",
+                "telephone": "+243830000000",
+                "preferred_language": "pt",
+                "email": "attacker@example.com",
+                "role": User.Role.PROPRIETAIRE,
+                "entreprise": self.autre_entreprise.id,
+            },
+        )
+
+        self.assertRedirects(response, reverse("profile"))
+        self.user.refresh_from_db()
+        self.other_user.refresh_from_db()
+        self.assertEqual(self.user.email, original_email)
+        self.assertEqual(self.user.role, original_role)
+        self.assertEqual(self.user.entreprise, original_entreprise)
+        self.assertEqual(self.user.telephone, "+243830000000")
+        self.assertEqual(self.user.preferred_language, "pt")
+        self.assertNotEqual(self.other_user.telephone, "+243830000000")

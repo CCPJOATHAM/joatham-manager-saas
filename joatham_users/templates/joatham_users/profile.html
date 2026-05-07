@@ -1,0 +1,336 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Mon profil" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Mon profil" %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez vos informations personnelles et mettez a jour les elements modifiables de votre compte." %}{% endblock %}
+
+{% block extra_styles %}
+<style>
+.profile-page {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.profile-card,
+.profile-form-card {
+    border: 1px solid #DDE7F0;
+    border-radius: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.profile-card {
+    overflow: hidden;
+}
+
+.profile-cover {
+    height: 96px;
+    background: linear-gradient(135deg, #2563EB, #93C5FD);
+}
+
+.profile-identity {
+    padding: 0 24px 24px;
+}
+
+.profile-photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 112px;
+    height: 112px;
+    margin-top: -56px;
+    border: 5px solid #FFFFFF;
+    border-radius: 999px;
+    background: #EAF2FF;
+    color: #2563EB;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.profile-photo svg {
+    width: 44px;
+    height: 44px;
+}
+
+.profile-name {
+    margin: 16px 0 4px;
+    color: #0F172A;
+    font-size: 1.45rem;
+    font-weight: 900;
+}
+
+.profile-username {
+    margin: 0;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.profile-details {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.profile-detail {
+    padding: 14px;
+    border: 1px solid #DDE7F0;
+    border-radius: 16px;
+    background: #F8FAFC;
+}
+
+.profile-detail span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748B;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.profile-detail strong {
+    display: block;
+    color: #0F172A;
+    font-weight: 850;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.profile-form-card {
+    padding: 26px;
+}
+
+.profile-form-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.profile-form-header h2 {
+    margin: 0;
+    color: #0F172A;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.profile-form-header p {
+    margin: 7px 0 0;
+    max-width: 620px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.locked-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid #BFDBFE;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    font-size: 0.8rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.profile-form {
+    display: grid;
+    gap: 18px;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-field.full {
+    grid-column: 1 / -1;
+}
+
+.profile-field label {
+    color: #0F172A;
+    font-weight: 800;
+}
+
+.profile-field input,
+.profile-field select {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border: 1px solid #D7E2EF;
+    border-radius: 14px;
+    background: #FFFFFF;
+    color: #0F172A;
+    font: inherit;
+}
+
+.profile-field input[type="file"] {
+    padding: 10px;
+}
+
+.profile-field input:focus,
+.profile-field select:focus {
+    border-color: #2563EB;
+    outline: 3px solid rgba(37, 99, 235, 0.10);
+}
+
+.profile-field small,
+.profile-lock-note {
+    color: #64748B;
+    line-height: 1.55;
+}
+
+.profile-lock-note {
+    padding: 14px 16px;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    background: #F8FAFC;
+}
+
+.errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #B91C1C;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.profile-submit {
+    min-height: 48px;
+    padding: 0 22px;
+    border: 1px solid #2563EB;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
+    color: #FFFFFF;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+@media (max-width: 980px) {
+    .profile-page,
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-form-header {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% with full_name=profile_user.get_full_name %}
+<div class="profile-page">
+    <aside class="profile-card">
+        <div class="profile-cover"></div>
+        <div class="profile-identity">
+            <div class="profile-photo">
+                {% if profile_user.profile_photo %}
+                <img src="{{ profile_user.profile_photo.url }}" alt="{% trans 'Photo de profil' %}">
+                {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                {% endif %}
+            </div>
+            <h2 class="profile-name">{% if full_name %}{{ full_name }}{% else %}{{ profile_user.username }}{% endif %}</h2>
+            <p class="profile-username">@{{ profile_user.username }}</p>
+
+            <div class="profile-details">
+                <div class="profile-detail">
+                    <span>{% trans "Email" %}</span>
+                    <strong>{{ profile_user.email|default:profile_user.username }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span>{% trans "Telephone" %}</span>
+                    <strong>{{ profile_user.telephone|default:"-" }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span>{% trans "Role" %}</span>
+                    <strong>{{ profile_user.get_role_display }}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span>{% trans "Entreprise" %}</span>
+                    <strong>{% if profile_user.entreprise %}{{ profile_user.entreprise.nom }}{% else %}{% trans "Plateforme JOATHAM Manager" %}{% endif %}</strong>
+                </div>
+                <div class="profile-detail">
+                    <span>{% trans "Langue preferee" %}</span>
+                    <strong>{{ profile_user.get_preferred_language_display }}</strong>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <section class="profile-form-card">
+        <div class="profile-form-header">
+            <div>
+                <h2>{% trans "Modifier mes informations" %}</h2>
+                <p>{% trans "Cette premiere version limite volontairement les changements aux informations personnelles autorisees." %}</p>
+            </div>
+            <span class="locked-badge">{% trans "Compte securise" %}</span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="profile-form">
+            {% csrf_token %}
+            <div class="profile-form-grid">
+                <div class="profile-field full">
+                    <label for="{{ form.full_name.id_for_label }}">{% trans "Nom complet" %}</label>
+                    {{ form.full_name }}
+                    {{ form.full_name.errors }}
+                </div>
+                <div class="profile-field">
+                    <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
+                    {{ form.telephone }}
+                    {{ form.telephone.errors }}
+                </div>
+                <div class="profile-field">
+                    <label for="{{ form.preferred_language.id_for_label }}">{% trans "Langue preferee" %}</label>
+                    {{ form.preferred_language }}
+                    {{ form.preferred_language.errors }}
+                </div>
+                <div class="profile-field full">
+                    <label for="{{ form.profile_photo.id_for_label }}">{% trans "Photo de profil" %}</label>
+                    {{ form.profile_photo }}
+                    {{ form.profile_photo.errors }}
+                    <small>{% trans "Formats image standards recommandes. Votre photo reste rattachee uniquement a votre compte." %}</small>
+                </div>
+            </div>
+
+            <div class="profile-lock-note">
+                {% trans "Email, role et entreprise sont affiches pour controle, mais restent non modifiables par l'utilisateur dans cette version." %}
+            </div>
+
+            <div class="profile-actions">
+                <button type="submit" class="profile-submit">{% trans "Enregistrer mon profil" %}</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endwith %}
+{% endblock %}

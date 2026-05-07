@@ -264,6 +264,20 @@ body {
     font-size: 0.9rem;
 }
 
+.profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.profile-link svg {
+    width: 17px;
+    height: 17px;
+}
+
 .language-label {
     position: absolute;
     width: 1px;
@@ -609,6 +623,13 @@ body {
                 <div class="identity-bar">
                     <div class="topbar-meta">
                         {% include "includes/language_selector.html" %}
+                        <a href="{% url 'profile' %}" class="badge profile-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>{% trans "Mon profil" %}</span>
+                        </a>
                         <span class="badge">{{ request.user.email|default:request.user.username }}</span>
                         <span class="badge">{{ user_role_label }}</span>
                     </div>

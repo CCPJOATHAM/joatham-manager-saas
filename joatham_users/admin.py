@@ -27,7 +27,7 @@ class UserAdmin(DjangoUserAdmin):
     list_display = ("username", "email", "role", "preferred_language", "entreprise", "is_active", "is_staff")
     list_filter = ("role", "preferred_language", "entreprise", "is_active", "is_staff")
     fieldsets = DjangoUserAdmin.fieldsets + (
-        ("Organisation", {"fields": ("role", "preferred_language", "entreprise")}),
+        ("Organisation", {"fields": ("role", "preferred_language", "entreprise", "profile_photo")}),
     )
 
 

@@ -1,13 +1,15 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 
+from core.services.language import persist_language_preference
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
 from joatham_users.permissions import permission_required
 
-from .forms import UserManagementForm
+from .forms import ProfileUpdateForm, UserManagementForm
 from .selectors.users import get_users_by_entreprise
 from .services.user_management import (
     create_company_user,
@@ -43,6 +45,30 @@ def _build_user_rows(users):
             }
         )
     return rows
+
+
+@login_required(login_url="login")
+def profile_view(request):
+    form = ProfileUpdateForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=request.user,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        persist_language_preference(request, user.preferred_language)
+        messages.success(request, _("Votre profil a ete mis a jour."))
+        return redirect("profile")
+
+    return render(
+        request,
+        "joatham_users/profile.html",
+        {
+            "form": form,
+            "profile_user": request.user,
+        },
+    )
 
 
 @permission_required("users.manage")
