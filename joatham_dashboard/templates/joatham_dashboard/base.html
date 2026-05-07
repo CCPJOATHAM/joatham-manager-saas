@@ -479,7 +479,7 @@ body {
                 </div>
                 <div class="identity-bar">
                     {% include "includes/language_selector.html" %}
-                    <span class="badge">{{ request.user.username }}</span>
+                    <span class="badge">{{ request.user.email|default:request.user.username }}</span>
                     <span class="badge">{{ user_role_label }}</span>
                     <div class="top-actions">
                         {% block top_actions %}{% endblock %}

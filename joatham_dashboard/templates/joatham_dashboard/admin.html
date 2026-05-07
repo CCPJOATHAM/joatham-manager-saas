@@ -2,719 +2,1054 @@
 {% load i18n %}
 
 {% block page_title %}{% trans "Dashboard Proprietaire" %} | JOATHAM Manager{% endblock %}
-{% block content_title %}{% trans "Dashboard proprietaire" %}{% endblock %}
-{% block content_subtitle %}{% trans "Votre page d'accueil produit pour piloter l'entreprise, les equipes, les finances et les acces SaaS depuis un seul point de controle." %}{% endblock %}
+{% block content_title %}{% trans "Bonjour" %}, {{ user_role_label }}{% endblock %}
+{% block content_subtitle %}{% trans "Voici un apercu complet de votre entreprise. Pilotez vos equipes, finances et activites en toute simplicite." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'company_settings' %}" class="btn-link">{% trans "Entreprise" %}</a>
 <a href="{% url 'user_list' %}" class="btn-link">{% trans "Utilisateurs" %}</a>
-<a href="{% url 'user_create' %}" class="btn-link primary">{% trans "Ajouter un utilisateur" %}</a>
+<a href="{% url 'user_create' %}" class="btn-link primary"><span aria-hidden="true" class="btn-link-icon">+</span>{% trans "Ajouter un utilisateur" %}</a>
 <a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Abonnement" %}</a>
 <a href="{% url 'activity_log_list' %}" class="btn-link">{% trans "Controle des flux" %}</a>
 {% endblock %}
 
 {% block extra_styles %}
 <style>
-:root {
-    --page-bg: #151617;
-    --surface: #202124;
-    --surface-soft: #282A2E;
-    --sidebar-bg: #131415;
-    --text: #E8EAED;
-    --text-strong: #FFFFFF;
-    --muted: #B8BEC7;
-    --muted-light: #8B949E;
-    --primary: #3B82F6;
-    --primary-light: #6EA8FE;
-    --primary-hover: #2563EB;
-    --line: rgba(255, 255, 255, 0.10);
-    --line-strong: rgba(255, 255, 255, 0.16);
-    --shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-    --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.28);
-    --radius: 12px;
-    --dashboard-card: rgba(32, 33, 36, 0.98);
-    --dashboard-card-soft: rgba(40, 42, 46, 0.94);
-    --dashboard-heading: #FFFFFF;
-    --dashboard-text: #E8EAED;
-    --dashboard-muted: #B8BEC7;
-}
-
-body,
-.page-content {
-    background: var(--page-bg) !important;
+.main {
+    --dashboard-bg: #F4F7FB;
+    --dashboard-bg-soft: #F8FAFC;
+    --dashboard-card: #FFFFFF;
+    --dashboard-card-soft: #F8FAFC;
+    --dashboard-line: #DDE7F0;
+    --dashboard-line-soft: #E8EEF6;
+    --dashboard-heading: #0F172A;
+    --dashboard-text: #1E293B;
+    --dashboard-muted: #475569;
+    --dashboard-muted-soft: #64748B;
+    --dashboard-accent: #2563EB;
+    --dashboard-accent-soft: #EAF2FF;
+    --dashboard-success: #16A34A;
+    --dashboard-warning: #F59E0B;
+    --dashboard-danger: #EF4444;
+    --dashboard-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    --dashboard-shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.06);
+    min-width: 0;
+    background:
+        linear-gradient(180deg, #EEF5FF 0, var(--dashboard-bg) 330px, var(--dashboard-bg-soft) 100%);
     color: var(--dashboard-text);
 }
 
-.content-card {
+.main .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 880px);
+    align-items: start;
+    gap: 28px;
+    padding: 30px 36px 18px;
+    border-bottom: 0;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(248, 250, 252, 0.90));
+    box-shadow: none;
+    backdrop-filter: blur(16px);
+}
+
+.main .topbar h1 {
+    margin: 0 0 12px;
+    color: var(--dashboard-heading);
+    font-size: clamp(1.7rem, 2.8vw, 2.35rem);
+    font-weight: 850;
+    letter-spacing: 0;
+    line-height: 1.08;
+}
+
+.main .topbar .subtitle {
+    max-width: 620px;
+    color: #334155;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.main .identity-bar {
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    max-width: 880px;
+}
+
+.main .language-switcher,
+.main .top-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.main .language-select,
+.main .language-submit,
+.main .btn-link,
+.main .badge {
+    min-height: 48px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--dashboard-heading);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.main .language-select {
+    padding: 0 42px 0 18px;
+    font-weight: 650;
+}
+
+.main .language-submit,
+.main .btn-link {
+    padding: 0 20px;
+    font-weight: 800;
+    text-align: center;
+    white-space: normal;
+}
+
+.main .btn-link:hover,
+.main .language-submit:hover {
+    border-color: #BFCCDA;
+    transform: translateY(-1px);
+}
+
+.main .btn-link.primary {
+    gap: 10px;
+    border-color: var(--dashboard-accent);
+    background: linear-gradient(180deg, #2F6DF3, #1D4ED8);
+    color: #FFFFFF;
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.28);
+}
+
+.main .btn-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.main .btn-link.danger {
+    border-color: #FBD1D1;
+    background: #FFF5F5;
+    color: #DC2626;
+    box-shadow: 0 10px 24px rgba(220, 38, 38, 0.06);
+}
+
+.main .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 18px;
+    font-size: 0.92rem;
+    font-weight: 650;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.main .page-content {
+    padding: 0 36px 28px;
+    background: transparent !important;
+    color: var(--dashboard-text);
+}
+
+.main .content-card {
     overflow: visible;
     padding: 0;
     border: 0;
+    border-radius: 0;
     background: transparent;
     box-shadow: none;
 }
 
-.hero {
-    position: relative;
-    overflow: hidden;
+.main .content-card h1,
+.main .content-card h2,
+.main .content-card h3,
+.main .content-card h4,
+.main .content-card strong {
+    color: var(--dashboard-heading);
+}
+
+.main .content-card p,
+.main .content-card li,
+.main .content-card small,
+.main .content-card label {
+    color: var(--dashboard-muted);
+}
+
+.dashboard-shell {
+    display: grid;
+    gap: 20px;
+}
+
+.hero-panel,
+.metric-card,
+.section-card {
+    border: 1px solid var(--dashboard-line);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--dashboard-shadow);
+}
+
+.hero-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    gap: 28px;
+    align-items: start;
+    min-height: 220px;
+    padding: 32px;
+    border-radius: 22px;
+}
+
+.hero-main {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
     gap: 24px;
-    margin-bottom: 24px;
-    padding: 24px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--dashboard-card);
-    box-shadow: var(--shadow);
 }
 
-.hero::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary), rgba(59, 130, 246, 0));
+.hero-icon,
+.quick-icon,
+.timeline-icon,
+.alert-icon,
+.metric-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
 }
 
-.hero h2 {
-    margin: 0 0 10px;
+.hero-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 18px;
+    background: var(--dashboard-accent-soft);
+    color: var(--dashboard-accent);
+}
+
+.hero-icon svg,
+.metric-icon svg,
+.quick-icon svg,
+.timeline-icon svg,
+.alert-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.hero-panel h2 {
+    margin: 0 0 16px;
     color: var(--dashboard-heading);
-    font-size: clamp(24px, 3vw, 32px);
-    line-height: 1.15;
+    font-size: clamp(2rem, 3vw, 2.55rem);
+    font-weight: 900;
     letter-spacing: 0;
+    line-height: 1.12;
 }
 
-.hero p {
-    max-width: 760px;
+.hero-panel h2 span {
+    color: var(--dashboard-accent);
+}
+
+.hero-panel p {
+    max-width: 680px;
     margin: 0;
-    color: var(--dashboard-muted);
-    line-height: 1.65;
+    color: #334155;
+    font-size: 1rem;
+    line-height: 1.8;
 }
 
 .hero-summary {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px;
-    min-width: min(360px, 100%);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    justify-self: end;
+    width: 100%;
 }
 
 .hero-pill {
     display: inline-flex;
     align-items: center;
-    min-height: 34px;
-    padding: 7px 11px;
-    border: 1px solid rgba(110, 168, 254, 0.28);
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 13px;
+    background: #FFFFFF;
+    color: #1E3A5F;
+    font-size: 0.86rem;
+    font-weight: 850;
+    text-align: center;
+    box-shadow: var(--dashboard-shadow-soft);
+}
+
+.hero-pill.subscription-pill {
+    grid-column: 1 / -1;
+    gap: 10px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
     border-radius: 999px;
-    background: rgba(59, 130, 246, 0.08);
-    color: #D8E7FF;
-    font-size: 12px;
-    font-weight: 750;
+    background: #22C55E;
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.10);
 }
 
-.premium-kpis {
+.metric-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
-    margin-bottom: 26px;
 }
 
-.premium-card {
-    position: relative;
-    overflow: hidden;
+.metric-card {
     display: flex;
     align-items: flex-start;
-    gap: 14px;
-    min-height: 138px;
-    padding: 18px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--dashboard-card);
-    box-shadow: var(--shadow);
-    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    gap: 16px;
+    min-height: 168px;
+    padding: 24px;
+    border-radius: 20px;
 }
 
-.premium-card::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary), rgba(59, 130, 246, 0));
+.metric-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    background: #EAF2FF;
+    color: var(--dashboard-accent);
 }
 
-.premium-card:hover {
-    border-color: rgba(110, 168, 254, 0.36);
-    background: rgba(38, 40, 44, 0.98);
-    box-shadow: var(--shadow);
+.metric-icon.warning {
+    background: #FFF7ED;
+    color: var(--dashboard-warning);
 }
 
-.premium-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    border: 1px solid rgba(110, 168, 254, 0.22);
-    border-radius: 10px;
-    background: rgba(59, 130, 246, 0.10) !important;
-    color: var(--primary-light) !important;
-}
-
-.premium-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.premium-label {
+.metric-label {
     display: block;
     margin-bottom: 10px;
-    color: var(--dashboard-muted);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0;
+    color: #1E3A5F;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
 }
 
-.premium-value {
+.metric-value {
     display: block;
     color: var(--dashboard-heading);
-    font-size: clamp(24px, 3vw, 31px);
-    font-weight: 850;
+    font-size: clamp(1.85rem, 3vw, 2.35rem);
+    font-weight: 900;
     line-height: 1.05;
 }
 
-.premium-meta {
+.metric-meta,
+.metric-trend {
     display: block;
-    margin-top: 12px;
+    margin-top: 11px;
     color: var(--dashboard-muted);
-    font-size: 13px;
-    font-weight: 650;
+    font-size: 0.88rem;
     line-height: 1.45;
 }
 
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin-bottom: 26px;
-}
-
-.quick-action-card {
-    position: relative;
-    min-height: 128px;
-    padding: 18px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--dashboard-card);
-    color: var(--dashboard-text);
-    text-decoration: none;
-    box-shadow: var(--shadow);
-    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
-}
-
-.quick-action-card::before {
-    content: "";
-    display: block;
-    width: 34px;
-    height: 2px;
-    margin-bottom: 14px;
-    border-radius: 999px;
-    background: var(--primary-light);
-}
-
-.quick-action-card:hover {
-    border-color: rgba(110, 168, 254, 0.34);
-    background: rgba(38, 40, 44, 0.98);
-    box-shadow: var(--shadow);
-}
-
-.quick-action-card strong {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--dashboard-heading);
-    font-size: 15px;
+.metric-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 9px;
+    color: var(--dashboard-success);
     font-weight: 800;
 }
 
-.quick-action-card span {
-    display: block;
-    color: var(--dashboard-muted);
-    font-size: 13px;
-    line-height: 1.55;
+.metric-trend.warning {
+    color: #DC2626;
 }
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
-    align-items: start;
-}
-
-.dashboard-grid .section-card + .section-card {
-    margin-top: 20px;
+    align-items: stretch;
 }
 
 .section-card {
+    min-width: 0;
     padding: 22px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--dashboard-card);
-    box-shadow: var(--shadow);
+    border-radius: 20px;
 }
 
-.section-card h3 {
-    margin: 0 0 9px;
-    color: var(--dashboard-heading);
-    font-size: 18px;
-    font-weight: 850;
-    letter-spacing: 0;
-}
-
-.section-subtitle {
-    margin: 0 0 18px;
-    color: var(--dashboard-muted);
-    line-height: 1.6;
-}
-
-.list-card {
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--dashboard-card-soft);
-}
-
-.list-card ul,
-.stock-alert-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.list-card li,
-.stock-alert-item {
+.section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--line);
+    gap: 14px;
+    margin-bottom: 18px;
 }
 
-.list-card li:last-child,
-.stock-alert-item:last-child {
-    border-bottom: none;
-}
-
-.list-card span,
-.stock-alert-item span {
-    color: var(--dashboard-muted);
-    font-size: 13px;
-}
-
-.list-card strong,
-.stock-alert-item strong {
+.section-title {
+    margin: 0;
     color: var(--dashboard-heading);
-    font-weight: 800;
+    font-size: 1.18rem;
+    font-weight: 900;
+    letter-spacing: 0;
 }
 
-.list-card a {
-    color: var(--primary-light) !important;
+.section-link {
+    color: var(--dashboard-accent) !important;
+    font-size: 0.88rem;
+    font-weight: 850;
     text-decoration: none !important;
 }
 
-.activity-list {
-    display: grid;
-    gap: 12px;
-}
-
-.activity-item {
-    position: relative;
-    padding: 15px 15px 15px 34px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--dashboard-card-soft);
-}
-
-.activity-item::before {
-    content: "";
-    position: absolute;
-    top: 19px;
-    left: 15px;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--primary-light);
-    box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.12);
-}
-
-.activity-item strong {
+.section-kicker {
     display: block;
-    color: var(--dashboard-heading);
-    font-weight: 800;
-    line-height: 1.35;
+    margin-top: 4px;
+    color: var(--dashboard-muted-soft);
+    font-size: 0.78rem;
+    font-weight: 750;
 }
 
-.activity-meta,
-.activity-desc {
-    margin-top: 6px;
-    color: var(--dashboard-muted);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.empty-hint {
-    padding: 18px;
-    border: 1px dashed var(--line-strong);
-    border-radius: var(--radius);
-    background: rgba(40, 42, 46, 0.72);
-    color: var(--dashboard-muted);
-    text-align: center;
-    line-height: 1.6;
-}
-
-.stock-alert-shell {
-    display: grid;
-    gap: 16px;
-}
-
-.stock-alert-summary {
+.quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 
-.stock-alert-card {
-    padding: 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--dashboard-card-soft);
-}
-
-.stock-alert-card.rupture {
-    border-color: rgba(239, 68, 68, 0.34);
-}
-
-.stock-alert-card.low {
-    border-color: rgba(245, 158, 11, 0.34);
-}
-
-.stock-alert-card span {
+.quick-action-card {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 74px;
+    padding: 14px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 13px;
+    background: #FFFFFF;
     color: var(--dashboard-text);
-    font-size: 13px;
-    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.stock-alert-card strong {
+.quick-action-card:hover {
+    border-color: #BBD0EA;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
+}
+
+.quick-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--dashboard-accent-soft);
+    color: var(--dashboard-accent);
+}
+
+.quick-action-card strong {
     display: block;
-    margin: 7px 0;
     color: var(--dashboard-heading);
-    font-size: 30px;
-    line-height: 1;
+    font-size: 0.9rem;
+    font-weight: 900;
 }
 
-.stock-alert-card small {
+.quick-action-card strong + span {
+    display: block;
+    margin-top: 4px;
     color: var(--dashboard-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.timeline {
+    display: grid;
+    gap: 16px;
+    position: relative;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 15px;
+    width: 1px;
+    background: #DDE7F0;
+}
+
+.timeline-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.timeline-icon {
+    position: relative;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #EAF2FF;
+    color: var(--dashboard-accent);
+}
+
+.timeline-icon.color-2 {
+    background: #ECFDF3;
+    color: #16A34A;
+}
+
+.timeline-icon.color-3 {
+    background: #FFF7ED;
+    color: #F59E0B;
+}
+
+.timeline-icon.color-4 {
+    background: #EFF6FF;
+    color: #0EA5E9;
+}
+
+.timeline-copy strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1.4;
+}
+
+.timeline-copy span {
+    display: block;
+    margin-top: 3px;
+    color: var(--dashboard-muted);
+    font-size: 0.84rem;
     line-height: 1.5;
 }
 
-.stock-alert-item {
-    align-items: flex-start;
+.timeline-meta {
+    color: #1E3A5F;
+    font-size: 0.8rem;
+    font-weight: 750;
+    white-space: nowrap;
 }
 
-.stock-alert-item div {
+.empty-hint {
+    padding: 18px;
+    border: 1px dashed #C9D7E6;
+    border-radius: 16px;
+    background: #F8FAFC;
+    color: var(--dashboard-muted);
+    line-height: 1.6;
+    text-align: center;
+}
+
+.alerts-list {
+    display: grid;
+    gap: 14px;
+}
+
+.alert-item {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 72px;
+    padding: 14px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 14px;
+    background: #FFFFFF;
+}
+
+.alert-item.danger {
+    border-color: #F8D4D4;
+    background: #FFF6F6;
+}
+
+.alert-item.warning {
+    border-color: #F7E2BC;
+    background: #FFF9F0;
+}
+
+.alert-item.info {
+    border-color: #D4E2FF;
+    background: #F7FAFF;
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+}
+
+.alert-item.danger .alert-icon {
+    background: #FFE4E6;
+    color: var(--dashboard-danger);
+}
+
+.alert-item.warning .alert-icon {
+    background: #FFF1D6;
+    color: var(--dashboard-warning);
+}
+
+.alert-item.info .alert-icon {
+    background: #EAF2FF;
+    color: var(--dashboard-accent);
+}
+
+.alert-copy strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 900;
+}
+
+.alert-copy span {
+    display: block;
+    margin-top: 4px;
+    color: var(--dashboard-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.alert-count {
+    color: var(--dashboard-heading);
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.alert-products {
     display: grid;
     gap: 5px;
+    margin-top: 9px;
 }
 
-.stock-alert-badge {
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    padding: 6px 9px;
-    border-radius: 999px;
-    font-size: 12px;
+.alert-products small {
+    color: var(--dashboard-muted);
+    font-size: 0.78rem;
+}
+
+.finance-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.finance-strip div {
+    padding: 13px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 14px;
+    background: #FFFFFF;
+}
+
+.finance-strip span,
+.finance-strip strong {
+    display: block;
+}
+
+.finance-strip span {
+    color: var(--dashboard-muted);
+    font-size: 0.75rem;
     font-weight: 800;
+    text-transform: uppercase;
 }
 
-.stock-alert-badge.rupture {
-    background: rgba(239, 68, 68, 0.12);
-    color: #FCA5A5;
+.finance-strip strong {
+    margin-top: 7px;
+    color: var(--dashboard-heading);
+    font-size: 1rem;
+    font-weight: 900;
 }
 
-.stock-alert-badge.low {
-    background: rgba(245, 158, 11, 0.12);
-    color: #FCD34D;
+@media (max-width: 1220px) {
+    .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid .section-card:first-child {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 980px) {
-    .hero,
-    .dashboard-grid {
+    .main .topbar {
         grid-template-columns: 1fr;
+        padding: 24px;
     }
 
-    .hero {
-        flex-direction: column;
+    .main .identity-bar,
+    .main .language-switcher,
+    .main .top-actions {
+        justify-content: flex-start;
+    }
+
+    .main .page-content {
+        padding: 0 24px 24px;
+    }
+
+    .hero-panel {
+        grid-template-columns: 1fr;
     }
 
     .hero-summary {
-        justify-content: flex-start;
+        justify-self: stretch;
     }
 }
 
-@media (max-width: 640px) {
-    .premium-kpis,
-    .quick-actions,
-    .stock-alert-summary {
+@media (max-width: 720px) {
+    .main .topbar,
+    .main .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .main .identity-bar,
+    .main .language-switcher,
+    .main .top-actions,
+    .main .language-select,
+    .main .language-submit,
+    .main .btn-link,
+    .main .badge {
+        width: 100%;
+    }
+
+    .main .language-switcher,
+    .main .top-actions {
+        display: grid;
         grid-template-columns: 1fr;
     }
 
-    .hero,
+    .hero-panel,
+    .metric-card,
     .section-card {
-        padding: 18px;
+        border-radius: 18px;
     }
 
-    .list-card li,
-    .stock-alert-item {
-        align-items: flex-start;
+    .hero-panel {
+        padding: 22px;
+    }
+
+    .hero-main {
         flex-direction: column;
-        gap: 8px;
+    }
+
+    .hero-icon {
+        width: 68px;
+        height: 68px;
+    }
+
+    .hero-summary,
+    .metric-grid,
+    .dashboard-grid,
+    .quick-actions-grid,
+    .finance-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .timeline-item {
+        grid-template-columns: 32px minmax(0, 1fr);
+    }
+
+    .timeline-meta {
+        grid-column: 2;
+        white-space: normal;
+    }
+
+    .alert-item {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .alert-count {
+        grid-column: 2;
     }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="hero">
-    <div>
-        <h2>{% trans "Bienvenue dans votre cockpit JOATHAM Manager" %}</h2>
-        <p>{% trans "Retrouvez en un coup d'oeil les indicateurs clefs de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour." %}</p>
-    </div>
-    <div class="hero-summary">
-        <span class="hero-pill">{% trans "Devise" %} : {{ entreprise_identity.currency_code }}</span>
-        <span class="hero-pill">{% trans "Clients" %} : {{ nombre_clients }}</span>
-        <span class="hero-pill">{% trans "Factures" %} : {{ nombre_factures }}</span>
-        {% if subscription %}
-        <span class="hero-pill">{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
-        {% endif %}
-    </div>
-</div>
-
-<div class="premium-kpis">
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2v20"></path>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">{% trans "Chiffre d'affaires" %}</span>
-            <span class="premium-value">{{ total_ca }}</span>
-            <span class="premium-meta">{% trans "Facturation emise a date" %}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 7 9 18l-5-5"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">{% trans "Encaissements" %}</span>
-            <span class="premium-value">{{ total_encaisse }}</span>
-            <span class="premium-meta">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 8v5"></path>
-                <path d="M12 16h.01"></path>
-                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">{% trans "Reste a encaisser" %}</span>
-            <span class="premium-value">{{ reste_encaisser }}</span>
-            <span class="premium-meta">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="10" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">{% trans "Portefeuille client" %}</span>
-            <span class="premium-value">{{ nombre_clients }}</span>
-            <span class="premium-meta">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
-        </div>
-    </div>
-</div>
-
-<div class="quick-actions">
-    <a href="{% url 'company_settings' %}" class="quick-action-card">
-        <strong>{% trans "Entreprise" %}</strong>
-        <span>{% trans "Mettez a jour l'identite, la devise, la TVA par defaut et les parametres structurants de l'entreprise." %}</span>
-    </a>
-    <a href="{% url 'user_list' %}" class="quick-action-card">
-        <strong>{% trans "Utilisateurs" %}</strong>
-        <span>{% trans "Gerez les comptes gestionnaire et comptable sans quitter votre espace proprietaire." %}</span>
-    </a>
-    <a href="{% url 'client_list' %}" class="quick-action-card">
-        <strong>{% trans "Clients" %}</strong>
-        <span>{% trans "Accedez rapidement au portefeuille client et a la relation commerciale." %}</span>
-    </a>
-    <a href="{% url 'depenses' %}" class="quick-action-card">
-        <strong>{% trans "Depenses" %}</strong>
-        <span>{% trans "Consultez les sorties financieres et les rapports PDF correspondants." %}</span>
-    </a>
-    <a href="{% url 'facture_list' %}" class="quick-action-card">
-        <strong>{% trans "Factures" %}</strong>
-        <span>{% trans "Suivez la facturation, les PDF et les paiements dans un espace premium." %}</span>
-    </a>
-    <a href="{% url 'apprenant_list' %}" class="quick-action-card">
-        <strong>{% trans "Apprenants" %}</strong>
-        <span>{% trans "Pilotez les apprenants, formations, inscriptions et paiements de formation." %}</span>
-    </a>
-    <a href="{% url 'activity_log_list' %}" class="quick-action-card">
-        <strong>{% trans "Audit" %}</strong>
-        <span>{% trans "Relisez les actions sensibles et gardez une trace claire des operations produit." %}</span>
-    </a>
-    <a href="{% url 'subscription_overview' %}" class="quick-action-card">
-        <strong>{% trans "Abonnement" %}</strong>
-        <span>{% trans "Consultez le plan en cours, le statut SaaS et la periode d'acces active." %}</span>
-    </a>
-</div>
-
-<div class="dashboard-grid">
-    <div>
-        <section class="section-card">
-            <h3>{% trans "Vue de pilotage" %}</h3>
-            <p class="section-subtitle">{% trans "Une lecture rapide des indicateurs commerciaux, financiers et produit pour garder le cap au quotidien." %}</p>
-
-            <div class="list-card">
-                <ul>
-                    <li><span>{% trans "Depenses cumulees" %}</span><strong>{{ total_depenses }}</strong></li>
-                    <li><span>{% trans "Benefice estime" %}</span><strong>{{ benefice }}</strong></li>
-                    <li><span>{% trans "TVA cumulee" %}</span><strong>{{ total_tva }}</strong></li>
-                    <li><span>{% trans "Facturation aujourd'hui" %}</span><strong>{{ total_jour }}</strong></li>
-                    <li><span>{% trans "Facturation ce mois" %}</span><strong>{{ total_mois }}</strong></li>
-                    <li><span>{% trans "Depenses ce mois" %}</span><strong>{{ depense_mois }}</strong></li>
-                </ul>
+<div class="dashboard-shell">
+    <section class="hero-panel">
+        <div class="hero-main">
+            <div class="hero-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17l6-6 4 4 7-9"></path>
+                    <path d="M14 6h6v6"></path>
+                </svg>
             </div>
-        </section>
+            <div>
+                <h2 aria-label="{% trans 'Bienvenue dans votre cockpit JOATHAM Manager' %}">
+                    {% trans "Bienvenue dans votre cockpit" %}<br>
+                    <span>JOATHAM</span> Manager
+                </h2>
+                <p>{% trans "Retrouvez en un coup d'oeil les indicateurs cles de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour." %}</p>
+            </div>
+        </div>
+        <div class="hero-summary" aria-label="{% trans 'Resume du dashboard' %}">
+            <span class="hero-pill">{% trans "Devise" %} : {{ entreprise_identity.currency_code }}</span>
+            <span class="hero-pill">{% trans "Clients" %} : {{ nombre_clients }}</span>
+            <span class="hero-pill">{% trans "Factures" %} : {{ nombre_factures }}</span>
+            {% if subscription %}
+            <span class="hero-pill subscription-pill"><span class="status-dot" aria-hidden="true"></span>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
+            {% endif %}
+        </div>
+    </section>
 
-        <section class="section-card">
-            <h3>{% trans "Activite recente" %}</h3>
-            <p class="section-subtitle">{% trans "Dernieres actions importantes relevees dans l'entreprise pour garder une vision immediate de ce qui se passe." %}</p>
+    <section class="metric-grid" aria-label="{% trans 'Indicateurs principaux' %}">
+        <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20"></path>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path>
+                </svg>
+            </div>
+            <div>
+                <span class="metric-label">{% trans "Chiffre d'affaires" %}</span>
+                <span class="metric-value">{{ total_ca }}</span>
+                <span class="metric-meta">{% trans "Facturation emise a date" %}</span>
+                <span class="metric-trend">{% trans "Suivi a jour" %}</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"></path>
+                    <circle cx="12" cy="12" r="9"></circle>
+                </svg>
+            </div>
+            <div>
+                <span class="metric-label">{% trans "Encaissements" %}</span>
+                <span class="metric-value">{{ total_encaisse }}</span>
+                <span class="metric-meta">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
+                <span class="metric-trend">{% trans "Paiements suivis" %}</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon warning" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+                </svg>
+            </div>
+            <div>
+                <span class="metric-label">{% trans "Reste a encaisser" %}</span>
+                <span class="metric-value">{{ reste_encaisser }}</span>
+                <span class="metric-meta">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
+                <span class="metric-trend warning">{% trans "Relances a prioriser" %}</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="10" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div>
+                <span class="metric-label">{% trans "Portefeuille client" %}</span>
+                <span class="metric-value">{{ nombre_clients }}</span>
+                <span class="metric-meta">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
+                <span class="metric-trend">{% trans "Base active" %}</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid">
+        <article class="section-card">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">{% trans "Actions rapides" %}</h3>
+                    <span class="section-kicker">{% trans "Acces directs aux operations courantes" %}</span>
+                </div>
+            </div>
+            <div class="quick-actions-grid">
+                <a href="{% url 'add_facture' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <path d="M14 2v6h6"></path>
+                            <path d="M12 18v-6"></path>
+                            <path d="M9 15h6"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Nouvelle facture" %}</strong><span>{% trans "Creer une facture" %}</span></span>
+                </a>
+
+                <a href="{% url 'add_client' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M19 8v6"></path>
+                            <path d="M22 11h-6"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Ajouter un client" %}</strong><span>{% trans "Enregistrer un client" %}</span></span>
+                </a>
+
+                <a href="{% url 'depenses' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1v22"></path>
+                            <path d="M17 5H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Nouvelle depense" %}</strong><span>{% trans "Ajouter une depense" %}</span></span>
+                </a>
+
+                <a href="{% url 'compte_resultat' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M7 14l4-4 3 3 5-6"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Rapport financier" %}</strong><span>{% trans "Voir les rapports" %}</span></span>
+                </a>
+
+                <a href="{% url 'user_list' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Gerer l'equipe" %}</strong><span>{% trans "Utilisateurs et roles" %}</span></span>
+                </a>
+
+                <a href="{% url 'company_settings' %}" class="quick-action-card">
+                    <span class="quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.38 1.05V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1.05-.38H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .38-1.05V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15.4 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.23.38.36.8.36 1.24"></path>
+                        </svg>
+                    </span>
+                    <span><strong>{% trans "Parametres" %}</strong><span>{% trans "Configuration" %}</span></span>
+                </a>
+            </div>
+
+            <div class="finance-strip" aria-label="{% trans 'Vue financiere complementaire' %}">
+                <div><span>{% trans "Depenses" %}</span><strong>{{ total_depenses }}</strong></div>
+                <div><span>{% trans "Benefice" %}</span><strong>{{ benefice }}</strong></div>
+                <div><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong></div>
+            </div>
+        </article>
+
+        <article class="section-card">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">{% trans "Activite recente" %}</h3>
+                    <span class="section-kicker">{% trans "Dernieres operations relevees" %}</span>
+                </div>
+                <a href="{% url 'activity_log_list' %}" class="section-link">{% trans "Voir tout" %}</a>
+            </div>
 
             {% if recent_activity %}
-            <div class="activity-list">
+            <div class="timeline">
                 {% for log in recent_activity %}
-                <div class="activity-item">
-                    <strong>{{ log.module|title }} - {{ log.action }}</strong>
-                    <div class="activity-meta">
-                        {{ log.date_creation|date:"d/m/Y H:i" }}
-                        {% if log.utilisateur %} | {{ log.utilisateur.username }}{% endif %}
+                <div class="timeline-item">
+                    <span class="timeline-icon color-{{ forloop.counter }}" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 8v4l3 3"></path>
+                            <circle cx="12" cy="12" r="9"></circle>
+                        </svg>
+                    </span>
+                    <div class="timeline-copy">
+                        <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                        <span>{{ log.description }}</span>
+                        {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
                     </div>
-                    <div class="activity-desc">{{ log.description }}</div>
+                    <time class="timeline-meta">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
             <div class="empty-hint">{% trans "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone." %}</div>
             {% endif %}
-        </section>
-    </div>
+        </article>
 
-    <div>
-        <section class="section-card">
-            <h3>{% trans "Resume abonnement" %}</h3>
-            <p class="section-subtitle">{% trans "Etat du produit et niveau d'acces SaaS actuellement associe a votre entreprise." %}</p>
-
-            {% if subscription %}
-            <div class="list-card">
-                <ul>
-                    <li><span>{% trans "Plan actuel" %}</span><strong>{{ subscription.plan.nom }}</strong></li>
-                    <li><span>{% trans "Statut" %}</span><strong>{{ subscription.get_statut_display }}</strong></li>
-                    <li><span>{% trans "Date de debut" %}</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></li>
-                    <li><span>{% trans "Date de fin" %}</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></li>
-                </ul>
+        <article class="section-card">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">{% trans "Alertes & notifications" %}</h3>
+                    <span class="section-kicker">{% trans "Alertes stock" %}</span>
+                </div>
+                <a href="{% url 'product_list' %}" class="section-link">{% trans "Voir tout" %}</a>
             </div>
-            {% else %}
-            <div class="empty-hint">{% trans "Aucun abonnement n'est encore rattache. Ouvrez l'espace abonnement pour consulter ou regulariser l'acces produit." %}</div>
-            {% endif %}
-        </section>
 
-        <section class="section-card">
-            <h3>{% trans "Alertes stock" %}</h3>
-            <p class="section-subtitle">{% trans "Reperez rapidement les produits en rupture ou proches de la rupture pour agir avant qu'un besoin client ne soit bloque." %}</p>
-
-            <div class="stock-alert-shell">
-                <div class="stock-alert-summary">
-                    <div class="stock-alert-card rupture">
-                        <span>{% trans "Produits en rupture" %}</span>
-                        <strong>{{ rupture_products_count }}</strong>
-                        <small>{% trans "Quantite en stock inferieure ou egale a 0." %}</small>
+            <div class="alerts-list">
+                {% if rupture_products_count %}
+                <div class="alert-item danger">
+                    <span class="alert-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+                        </svg>
+                    </span>
+                    <div class="alert-copy">
+                        <strong>{% trans "Produits en rupture" %}</strong>
+                        <span>{% trans "Quantite en stock inferieure ou egale a 0." %}</span>
+                        <div class="alert-products">
+                            {% for product in rupture_products %}
+                            <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }}</small>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="stock-alert-card low">
-                        <span>{% trans "Produits en stock faible" %}</span>
-                        <strong>{{ low_stock_products_count }}</strong>
-                        <small>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</small>
-                    </div>
+                    <span class="alert-count">{{ rupture_products_count }}</span>
                 </div>
-
-                {% if rupture_products or low_stock_products %}
-                <div class="list-card">
-                    <ul class="stock-alert-list">
-                        {% for product in rupture_products %}
-                        <li class="stock-alert-item">
-                            <div>
-                                <strong>{{ product.nom }}</strong>
-                                <span>{% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</span>
-                            </div>
-                            <span class="stock-alert-badge rupture">{% trans "Rupture" %}</span>
-                        </li>
-                        {% endfor %}
-                        {% for product in low_stock_products %}
-                        <li class="stock-alert-item">
-                            <div>
-                                <strong>{{ product.nom }}</strong>
-                                <span>{% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</span>
-                            </div>
-                            <span class="stock-alert-badge low">{% trans "Stock faible" %}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% else %}
-                <div class="empty-hint">{% trans "Aucune alerte stock pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
                 {% endif %}
 
-                <div>
-                    <a href="{% url 'product_list' %}" class="btn-link">{% trans "Ouvrir le module Produits" %}</a>
+                {% if low_stock_products_count %}
+                <div class="alert-item warning">
+                    <span class="alert-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    </span>
+                    <div class="alert-copy">
+                        <strong>{% trans "Produits en stock faible" %}</strong>
+                        <span>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</span>
+                        <div class="alert-products">
+                            {% for product in low_stock_products %}
+                            <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="alert-count">{{ low_stock_products_count }}</span>
                 </div>
-            </div>
-        </section>
+                {% endif %}
 
-        <section class="section-card">
-            <h3>{% trans "Demarrage rapide" %}</h3>
-            <p class="section-subtitle">{% trans "Quelques points d'entree utiles pour faire avancer l'entreprise sans chercher dans les menus." %}</p>
-            <div class="list-card">
-                <ul>
-                    <li><span>{% trans "Ajouter un gestionnaire ou comptable" %}</span><strong><a href="{% url 'user_create' %}">{% trans "Creer" %}</a></strong></li>
-                    <li><span>{% trans "Completer l'identite entreprise" %}</span><strong><a href="{% url 'company_settings' %}">{% trans "Ouvrir" %}</a></strong></li>
-                    <li><span>{% trans "Creer une facture" %}</span><strong><a href="{% url 'add_facture' %}">{% trans "Facturer" %}</a></strong></li>
-                    <li><span>{% trans "Analyser le journal d'activites" %}</span><strong><a href="{% url 'activity_log_list' %}">{% trans "Consulter" %}</a></strong></li>
-                </ul>
+                {% if subscription %}
+                <div class="alert-item info">
+                    <span class="alert-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6L9 17l-5-5"></path>
+                            <circle cx="12" cy="12" r="9"></circle>
+                        </svg>
+                    </span>
+                    <div class="alert-copy">
+                        <strong>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</strong>
+                        <span>{% trans "Plan actuel" %} : {{ subscription.plan.nom }} | {% trans "Fin" %} : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                    </div>
+                    <span class="alert-count">OK</span>
+                </div>
+                {% endif %}
+
+                {% if not rupture_products_count and not low_stock_products_count and not subscription %}
+                <div class="empty-hint">{% trans "Aucune alerte pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
+                {% endif %}
             </div>
-        </section>
-    </div>
+        </article>
+    </section>
 </div>
 {% endblock %}
