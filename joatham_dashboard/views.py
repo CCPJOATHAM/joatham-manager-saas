@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView, PasswordResetCompleteView
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, get_user_model
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -23,6 +23,7 @@ from joatham_dashboard.services.password_reset import (
 from joatham_dashboard.services.email_verification import send_email_verification, verify_email_token
 from joatham_dashboard.services.onboarding import register_entreprise_owner
 from joatham_users.permissions import get_default_dashboard_name, permission_required, user_has_permission
+from joatham_users.services.session_security import login_with_single_active_session, logout_and_release_session
 
 from .services.dashboard_service import build_dashboard_context
 
@@ -159,12 +160,15 @@ def login_view(request):
                 messages.info(request, _("Veuillez confirmer votre adresse email avant d'utiliser JOATHAM Manager."))
                 return redirect("email_verification_sent")
             try:
-                login(request, user)
+                login_result = login_with_single_active_session(request, user)
             except Exception:
                 logger.exception("login.session_login.failed user_id=%s", user.id)
                 raise
-            dashboard_name = get_default_dashboard_name(user)
-            logger.info("login.redirect user_id=%s dashboard=%s", user.id, dashboard_name)
+            if not login_result.allowed:
+                error = login_result.message
+                return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
+            dashboard_name = get_default_dashboard_name(login_result.user)
+            logger.info("login.redirect user_id=%s dashboard=%s", login_result.user.id, dashboard_name)
             return redirect(dashboard_name)
 
         error = _("Nom d'utilisateur ou mot de passe incorrect")
@@ -307,7 +311,7 @@ def email_verification_resend_view(request):
 
 
 def logout_view(request):
-    logout(request)
+    logout_and_release_session(request)
     messages.success(request, FLASH_MESSAGES["logged_out"])
     return redirect("login")
 

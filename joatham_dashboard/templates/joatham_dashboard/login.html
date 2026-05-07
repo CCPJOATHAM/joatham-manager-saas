@@ -140,6 +140,29 @@
             font-size: 0.95rem;
         }
 
+        .notice-box {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #EEF6FF;
+            color: #164E63;
+            border: 1px solid #BFDBFE;
+            font-size: 0.95rem;
+        }
+
+        .notice-box.success {
+            background: #ECFDF5;
+            color: #166534;
+            border-color: #BBF7D0;
+        }
+
+        .notice-box.error,
+        .notice-box.warning {
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            border-color: #FECACA;
+        }
+
         .field {
             margin-bottom: 18px;
         }
@@ -313,6 +336,12 @@
 
             {% if error %}
             <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="notice-box {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+                {% endfor %}
             {% endif %}
 
             <form method="post" novalidate>

@@ -1,6 +1,7 @@
 import secrets
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -113,6 +114,23 @@ class User(AbstractUser):
         self.email_verified = True
         self.email_verified_at = timezone.now()
         self.save(update_fields=["email_verified", "email_verified_at"])
+
+
+class UserActiveSession(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="active_session",
+    )
+    session_key = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    last_seen_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-last_seen_at", "-id"]
+
+    def __str__(self):
+        return f"{self.user_id}:{self.session_key}"
 
 
 class EntrepriseInvitation(models.Model):

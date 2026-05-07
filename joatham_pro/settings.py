@@ -84,6 +84,7 @@ MIDDLEWARE = [
     "core.middleware.PlatformMaintenanceMiddleware",
     "joatham_dashboard.middleware.EmailVerificationRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "joatham_dashboard.middleware.ActiveSessionSecurityMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -159,11 +160,15 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 SECURE_SSL_REDIRECT = _env_bool("DJANGO_SECURE_SSL_REDIRECT", False)
 SESSION_COOKIE_SECURE = _env_bool("DJANGO_SESSION_COOKIE_SECURE", False)
+SESSION_COOKIE_AGE = int(os.getenv("DJANGO_SESSION_COOKIE_AGE", "1800"))
+SESSION_SAVE_EVERY_REQUEST = _env_bool("DJANGO_SESSION_SAVE_EVERY_REQUEST", True)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = _env_bool("DJANGO_SESSION_EXPIRE_AT_BROWSER_CLOSE", True)
 CSRF_COOKIE_SECURE = _env_bool("DJANGO_CSRF_COOKIE_SECURE", False)
 SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "0"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
 SECURE_HSTS_PRELOAD = _env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if _env_bool("DJANGO_USE_X_FORWARDED_PROTO", False) else None
+LOGIN_URL = "login"
 
 # Email configuration:
 # - DEBUG=True: console backend by default

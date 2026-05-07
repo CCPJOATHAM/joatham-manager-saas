@@ -4,9 +4,11 @@ from unittest.mock import patch
 
 from django.core import mail
 from django.core.cache import cache
-from django.test import TestCase
+from django.contrib.sessions.models import Session
+from django.test import Client, TestCase
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from core.models import ActivityLog
 from core.services.subscription import activate_subscription_for_entreprise
@@ -14,7 +16,8 @@ from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
 from joatham_depenses.models import Depense
 from joatham_products.models import Produit
-from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise, User
+from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise, User, UserActiveSession
+from joatham_users.services.session_security import SESSION_CONFLICT_MESSAGE, SESSION_EXPIRED_MESSAGE
 from .services.email_verification import email_verification_token_generator
 
 from .selectors.dashboard import get_dashboard_kpis_by_entreprise
@@ -119,6 +122,73 @@ class DashboardAccessTests(TestCase):
         self.assertRedirects(response, reverse("login"))
         login_page = self.client.get(reverse("login"))
         self.assertEqual(login_page.status_code, 200)
+
+    def test_login_blocks_second_active_session_for_same_user(self):
+        first_response = self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        self.assertRedirects(first_response, reverse("admin_dashboard"))
+
+        second_client = Client()
+        second_response = second_client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+
+        self.assertEqual(second_response.status_code, 200)
+        self.assertContains(second_response, str(SESSION_CONFLICT_MESSAGE))
+
+    def test_logout_releases_active_session_for_new_login(self):
+        self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        self.assertTrue(UserActiveSession.objects.filter(user=self.proprietaire).exists())
+
+        logout_response = self.client.get(reverse("logout"))
+        self.assertRedirects(logout_response, reverse("login"))
+        self.assertFalse(UserActiveSession.objects.filter(user=self.proprietaire).exists())
+
+        second_client = Client()
+        second_response = second_client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        self.assertRedirects(second_response, reverse("admin_dashboard"))
+
+    def test_expired_active_session_is_released_on_login(self):
+        expired_key = "expired-session-key"
+        Session.objects.create(
+            session_key=expired_key,
+            session_data="",
+            expire_date=timezone.now() - timedelta(minutes=1),
+        )
+        UserActiveSession.objects.create(user=self.proprietaire, session_key=expired_key)
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+
+        self.assertRedirects(response, reverse("admin_dashboard"))
+        active_session = UserActiveSession.objects.get(user=self.proprietaire)
+        self.assertEqual(active_session.session_key, self.client.session.session_key)
+
+    def test_inactive_session_redirects_to_login_with_message(self):
+        self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        session_key = self.client.session.session_key
+        Session.objects.filter(session_key=session_key).update(expire_date=timezone.now() - timedelta(minutes=1))
+
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertRedirects(response, reverse("login"), fetch_redirect_response=False)
+        self.assertFalse(UserActiveSession.objects.filter(user=self.proprietaire, session_key=session_key).exists())
+        login_page = self.client.get(reverse("login"))
+        self.assertContains(login_page, str(SESSION_EXPIRED_MESSAGE))
 
     def test_gestionnaire_cannot_access_owner_dashboard(self):
         self.client.force_login(self.gestionnaire)
@@ -319,7 +389,7 @@ class OnboardingSignupTests(TestCase):
         blocked = self.client.get(reverse("admin_dashboard"))
         self.assertRedirects(
             blocked,
-            f"/accounts/login/?next={reverse('admin_dashboard')}",
+            f"{reverse('login')}?next={reverse('admin_dashboard')}",
             fetch_redirect_response=False,
         )
 
