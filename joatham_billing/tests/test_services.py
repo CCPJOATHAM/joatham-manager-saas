@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import ActivityLog
-from core.services.subscription import start_trial_for_entreprise
+from core.services.quotas import PlanQuotaExceeded
+from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement
 
@@ -144,6 +145,38 @@ class BillingStockWorkflowTests(TestCase):
                         "designation": "",
                         "quantite": 5,
                         "prix": "",
+                    }
+                ],
+            )
+
+    def test_free_plan_blocks_invoice_creation_after_monthly_limit(self):
+        free_plan = get_or_create_default_free_plan()
+        start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
+
+        for index in range(100):
+            create_facture(
+                entreprise=self.entreprise,
+                user=self.owner,
+                tva=0,
+                lignes=[
+                    {
+                        "designation": f"Ligne {index}",
+                        "quantite": 1,
+                        "prix": "10",
+                    }
+                ],
+            )
+
+        with self.assertRaises(PlanQuotaExceeded):
+            create_facture(
+                entreprise=self.entreprise,
+                user=self.owner,
+                tva=0,
+                lignes=[
+                    {
+                        "designation": "Ligne extra",
+                        "quantite": 1,
+                        "prix": "10",
                     }
                 ],
             )

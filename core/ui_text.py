@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 FLASH_MESSAGES = {
     "company_updated": _("Les coordonnees de l'entreprise ont ete mises a jour."),
     "already_logged_in": _("Vous etes deja connecte. Deconnectez-vous pour acceder a cette page."),
-    "signup_success": _("Votre entreprise a ete creee avec succes. Votre periode d'essai a demarre."),
+    "signup_success": _("Votre entreprise a ete creee avec succes. Le plan gratuit a ete active."),
     "logged_out": _("Vous avez ete deconnecte. Vous pouvez maintenant vous connecter ou creer votre entreprise."),
     "invoice_created": _("La facture a ete creee avec succes."),
     "invoice_updated": _("La facture a ete modifiee avec succes."),

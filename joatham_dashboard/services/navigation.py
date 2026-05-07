@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from core.services.product_policy import can_access_module, get_module_access_state
+from core.services.product_policy import PREMIUM_DENIED_REASONS, get_module_access_state
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import (
     get_default_dashboard_name,
@@ -94,7 +94,7 @@ NAV_ITEMS = [
         "label": _("Messagerie"),
         "url_name": "message_conversation_list",
         "permission": "messages.view",
-        "module": None,
+        "module": "messages",
         "roles": ["proprietaire", "gestionnaire", "comptable"],
         "exact_paths": ["/messages/"],
         "prefixes": ["/messages/nouvelle/", "/messages/conversation/", "/messages/piece-jointe/"],
@@ -215,12 +215,13 @@ def _get_item_state(user, item):
     module_name = item.get("module")
     if module_name:
         try:
-            if can_access_module(user, module_name):
+            state = _get_module_state(user, module_name)
+            if state.get("allowed"):
                 return {"visible": True}
-            if module_name == "accounting":
+            if state.get("reason") in PREMIUM_DENIED_REASONS:
                 return {
                     "visible": True,
-                    "badge": _("Abonnement requis"),
+                    "badge": _("Premium"),
                 }
             return {"visible": False}
         except Exception:

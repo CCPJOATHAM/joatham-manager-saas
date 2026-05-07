@@ -6,6 +6,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
+from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required
 from joatham_users.services.invitations import InvitationEmailError
@@ -48,6 +49,7 @@ from .services.messages import (
 
 
 @permission_required("messages.view")
+@module_access_required("messages")
 def conversation_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     conversations = with_unread_counts(get_conversations_for_user(request.user), request.user)
@@ -62,6 +64,7 @@ def conversation_list(request):
 
 
 @permission_required("messages.view")
+@module_access_required("messages")
 def conversation_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     form = ConversationCreateForm(request.POST or None, entreprise=entreprise, current_user=request.user)
@@ -85,6 +88,7 @@ def conversation_create(request):
 
 
 @permission_required("messages.view")
+@module_access_required("messages")
 def conversation_detail(request, conversation_id):
     conversation = get_conversation_for_user(request.user, conversation_id)
     mark_conversation_read(conversation=conversation, user=request.user)
@@ -102,6 +106,7 @@ def conversation_detail(request, conversation_id):
 
 @require_POST
 @permission_required("messages.view")
+@module_access_required("messages")
 def send_conversation_message(request, conversation_id):
     conversation = get_conversation_for_user(request.user, conversation_id)
     form = MessageReplyForm(request.POST)
@@ -123,6 +128,7 @@ def send_conversation_message(request, conversation_id):
 
 
 @permission_required("messages.view")
+@module_access_required("messages")
 def download_attachment(request, attachment_id):
     attachment = get_attachment_for_user(request.user, attachment_id)
     try:

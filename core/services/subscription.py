@@ -23,6 +23,20 @@ from joatham_users.models import Abonnement, AbonnementEntreprise
 
 DEFAULT_WHATSAPP_NUMBER = "243970258117"
 DEFAULT_WHATSAPP_MESSAGE = "Je veux payer mon abonnement JOATHAM Pro"
+FREE_PLAN_CODE = "free"
+FREE_PLAN_DURATION_DAYS = 365 * 100
+FREE_PLAN_INVOICE_LIMIT = 100
+FREE_PLAN_USER_LIMIT = 1
+FREE_PLAN_MODULES = [
+    "dashboard",
+    "clients",
+    "services",
+    "depenses",
+    "produits",
+    "factures",
+    "apprenants",
+    "abonnements",
+]
 SUBSCRIPTION_PAYMENT_DURATIONS = {
     PaiementAbonnement.Duree.MENSUEL: {"label": "Mensuel", "days": 30, "multiplier": Decimal("1")},
     PaiementAbonnement.Duree.TRIMESTRIEL: {"label": "Trimestriel", "days": 90, "multiplier": Decimal("3")},
@@ -44,19 +58,56 @@ def get_subscription_for_entreprise(entreprise):
     return get_current_subscription(entreprise)
 
 
-def get_or_create_default_trial_plan():
-    trial_days = get_default_trial_days()
-    plan = Abonnement.objects.filter(actif=True).order_by("prix", "id").first()
+def is_free_plan(plan):
+    return (getattr(plan, "code", "") or "").strip().lower() == FREE_PLAN_CODE
+
+
+def is_entreprise_on_free_plan(entreprise):
+    subscription = get_subscription_for_entreprise(entreprise)
+    return bool(subscription and is_free_plan(getattr(subscription, "plan", None)))
+
+
+def get_or_create_default_free_plan():
+    defaults = {
+        "nom": "Gratuit",
+        "prix": 0,
+        "prix_annuel": Decimal("0.00"),
+        "devise": get_platform_currency(),
+        "duree_jours": FREE_PLAN_DURATION_DAYS,
+        "actif": True,
+        "description": "Plan gratuit permanent pour demarrer avec JOATHAM Manager.",
+        "modules_inclus": FREE_PLAN_MODULES,
+        "max_utilisateurs": FREE_PLAN_USER_LIMIT,
+        "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
+        "max_clients": 100,
+        "max_apprenants": 0,
+        "acces_comptabilite": False,
+        "acces_exports": False,
+    }
+
+    plan = Abonnement.objects.filter(code=FREE_PLAN_CODE).order_by("id").first()
     if plan:
+        changed_fields = []
+        for field, value in defaults.items():
+            if getattr(plan, field) != value:
+                setattr(plan, field, value)
+                changed_fields.append(field)
+        if changed_fields:
+            plan.save(update_fields=changed_fields)
         return plan
-    return Abonnement.objects.create(
-        nom="Essai JOATHAM",
-        code="trial-default",
-        prix=0,
-        duree_jours=trial_days,
-        actif=True,
-        description="Plan d'essai automatique pour l'onboarding SaaS.",
-    )
+
+    plan = Abonnement.objects.filter(nom__iexact="Gratuit").order_by("id").first()
+    if plan:
+        for field, value in {**defaults, "code": FREE_PLAN_CODE}.items():
+            setattr(plan, field, value)
+        plan.save(update_fields=["code", *defaults.keys()])
+        return plan
+
+    return Abonnement.objects.create(code=FREE_PLAN_CODE, **defaults)
+
+
+def get_or_create_default_trial_plan():
+    return get_or_create_default_free_plan()
 
 
 def get_default_trial_days():
@@ -647,6 +698,36 @@ def start_trial_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut
         objet_type="AbonnementEntreprise",
         objet_id=subscription.id,
         description=f"Essai demarre sur le plan {plan.nom}.",
+        metadata={"plan_id": plan.id, "plan_nom": plan.nom, "statut": subscription.statut},
+    )
+    return subscription
+
+
+def start_free_plan_for_entreprise(*, entreprise, plan=None, utilisateur=None, date_debut=None):
+    date_debut = date_debut or timezone.localdate()
+    plan = plan or get_or_create_default_free_plan()
+    date_fin = date_debut + timedelta(days=plan.duree_jours or FREE_PLAN_DURATION_DAYS)
+    subscription, _ = AbonnementEntreprise.objects.update_or_create(
+        entreprise=entreprise,
+        defaults={
+            "plan": plan,
+            "statut": AbonnementEntreprise.Statut.ACTIF,
+            "date_debut": date_debut,
+            "date_fin": date_fin,
+            "renouvellement": AbonnementEntreprise.Renouvellement.MANUEL,
+            "essai": False,
+            "actif": True,
+        },
+    )
+    _sync_legacy_entreprise_subscription_fields(entreprise, subscription)
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="plan_gratuit_active",
+        module="subscription",
+        objet_type="AbonnementEntreprise",
+        objet_id=subscription.id,
+        description=f"Plan gratuit active sur {plan.nom}.",
         metadata={"plan_id": plan.id, "plan_nom": plan.nom, "statut": subscription.statut},
     )
     return subscription

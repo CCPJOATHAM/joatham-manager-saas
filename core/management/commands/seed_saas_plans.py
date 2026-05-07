@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+from core.services.subscription import get_or_create_default_free_plan
 from joatham_users.models import Abonnement
 
 
@@ -12,7 +13,7 @@ DEFAULT_PLANS = [
         "devise": "USD",
         "duree_jours": 30,
         "description": "L'essentiel pour demarrer avec la gestion commerciale JOATHAM Manager.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services"],
+        "modules_inclus": ["dashboard", "clients", "factures", "services", "produits"],
         "max_utilisateurs": 3,
         "max_factures_mois": 100,
         "max_clients": 200,
@@ -28,7 +29,7 @@ DEFAULT_PLANS = [
         "devise": "USD",
         "duree_jours": 30,
         "description": "Le plan complet pour piloter ventes, depenses, comptabilite et equipe.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "comptabilite", "utilisateurs"],
+        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "produits", "comptabilite", "utilisateurs", "messages", "audit"],
         "max_utilisateurs": 10,
         "max_factures_mois": 500,
         "max_clients": 1000,
@@ -44,7 +45,7 @@ DEFAULT_PLANS = [
         "devise": "USD",
         "duree_jours": 30,
         "description": "Pour les organisations qui veulent tous les modules et des capacites etendues.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "comptabilite", "apprenants", "utilisateurs"],
+        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "produits", "comptabilite", "apprenants", "utilisateurs", "messages", "audit"],
         "max_utilisateurs": None,
         "max_factures_mois": None,
         "max_clients": None,
@@ -56,11 +57,13 @@ DEFAULT_PLANS = [
 
 
 class Command(BaseCommand):
-    help = "Cree ou met a jour les plans SaaS payants par defaut sans toucher au plan d'essai."
+    help = "Cree ou met a jour les plans SaaS par defaut, dont le plan gratuit freemium."
 
     def handle(self, *args, **options):
         created = 0
         updated = 0
+        free_plan = get_or_create_default_free_plan()
+        self.stdout.write(f"{free_plan.nom} pret.")
         for payload in DEFAULT_PLANS:
             plan = Abonnement.objects.filter(code=payload["code"]).order_by("id").first()
             if plan is None:

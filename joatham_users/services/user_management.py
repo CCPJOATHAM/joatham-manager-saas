@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from core.audit import record_audit_event
+from core.services.quotas import assert_user_quota_available
 
 
 User = get_user_model()
@@ -43,6 +44,7 @@ def _ensure_email_available(email, *, exclude_user_id=None):
 @transaction.atomic
 def create_company_user(*, entreprise, owner_user, full_name, email, telephone, role, password):
     _ensure_manageable_role(role)
+    assert_user_quota_available(entreprise)
     normalized_email = _ensure_email_available(email)
     first_name, last_name = _split_full_name(full_name)
     user = User.objects.create_user(

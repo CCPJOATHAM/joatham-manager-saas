@@ -309,7 +309,7 @@ class OnboardingSignupTests(TestCase):
         response = self.client.get(reverse("signup"))
         self.assertRedirects(response, reverse("admin_dashboard"), fetch_redirect_response=False)
 
-    def test_signup_creates_owner_entreprise_and_trial(self):
+    def test_signup_creates_owner_entreprise_and_free_plan(self):
         response = self.client.post(
             reverse("signup"),
             {
@@ -336,7 +336,9 @@ class OnboardingSignupTests(TestCase):
         self.assertEqual(entreprise.nom, "Entreprise Monde")
         self.assertEqual(entreprise.pays, "Angola")
         self.assertEqual(entreprise.devise, "AOA")
-        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ACTIF)
+        self.assertFalse(subscription.essai)
+        self.assertEqual(subscription.plan.code, "free")
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("email-verification/confirm/", mail.outbox[0].body)
 

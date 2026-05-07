@@ -4,25 +4,30 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from core.services.subscription import get_current_subscription, refresh_subscription_status
+from core.services.subscription import get_current_subscription, is_free_plan, refresh_subscription_status
 from core.services.tenancy import get_subscription_access_state, get_user_entreprise_or_raise
-ACCESS_FREE = "free"
-ACCESS_TRIAL_OR_ACTIVE = "trial_or_active"
-ACCESS_ACTIVE_ONLY = "active_only"
+
+ACCESS_FREEMIUM = "freemium"
+ACCESS_PREMIUM = "premium"
+ACCESS_LOCKED = "locked"
+ACCESS_FREE = ACCESS_FREEMIUM
+ACCESS_TRIAL_OR_ACTIVE = ACCESS_FREEMIUM
+ACCESS_ACTIVE_ONLY = ACCESS_PREMIUM
 
 
 MODULE_ACCESS_POLICY = {
-    "dashboard": ACCESS_TRIAL_OR_ACTIVE,
-    "clients": ACCESS_TRIAL_OR_ACTIVE,
-    "services": ACCESS_TRIAL_OR_ACTIVE,
-    "expenses": ACCESS_TRIAL_OR_ACTIVE,
-    "products": ACCESS_TRIAL_OR_ACTIVE,
-    "billing": ACCESS_TRIAL_OR_ACTIVE,
-    "accounting": ACCESS_ACTIVE_ONLY,
-    "apprenants": ACCESS_TRIAL_OR_ACTIVE,
-    "users": ACCESS_TRIAL_OR_ACTIVE,
-    "audit": ACCESS_FREE,
-    "subscription": ACCESS_FREE,
+    "dashboard": ACCESS_FREEMIUM,
+    "clients": ACCESS_FREEMIUM,
+    "services": ACCESS_FREEMIUM,
+    "expenses": ACCESS_FREEMIUM,
+    "products": ACCESS_FREEMIUM,
+    "billing": ACCESS_FREEMIUM,
+    "apprenants": ACCESS_FREEMIUM,
+    "subscription": ACCESS_FREEMIUM,
+    "accounting": ACCESS_PREMIUM,
+    "audit": ACCESS_PREMIUM,
+    "messages": ACCESS_PREMIUM,
+    "users": ACCESS_PREMIUM,
 }
 
 
@@ -37,6 +42,7 @@ MODULE_LABELS = {
     "apprenants": "apprenants",
     "users": "utilisateurs",
     "audit": "journal d'activites",
+    "messages": "messagerie",
     "subscription": "abonnement",
 }
 
@@ -45,16 +51,21 @@ PLAN_MODULE_ALIASES = {
     "clients": "clients",
     "services": "services",
     "expenses": "depenses",
+    "products": "produits",
     "billing": "factures",
     "accounting": "comptabilite",
     "apprenants": "apprenants",
     "users": "utilisateurs",
+    "audit": "audit",
+    "messages": "messages",
     "subscription": "abonnements",
 }
 
+PREMIUM_DENIED_REASONS = {"premium_required", "feature_not_declared", "module_not_in_plan"}
+
 
 def get_module_access_level(module_name):
-    return MODULE_ACCESS_POLICY.get(module_name, ACCESS_FREE)
+    return MODULE_ACCESS_POLICY.get(module_name, ACCESS_LOCKED)
 
 
 def get_module_label(module_name):
@@ -63,22 +74,32 @@ def get_module_label(module_name):
 
 def get_module_access_state(entreprise, module_name, *, as_of=None):
     level = get_module_access_level(module_name)
-    if level == ACCESS_FREE:
+    if level == ACCESS_LOCKED:
         return {
-            "allowed": True,
-            "reason": None,
+            "allowed": False,
+            "reason": "feature_not_declared",
             "level": level,
             "subscription": get_current_subscription(entreprise),
+            "locked": True,
         }
 
     refresh_subscription_status(entreprise, as_of=as_of)
     state = get_subscription_access_state(
         entreprise,
         as_of=as_of,
-        allow_trial=(level == ACCESS_TRIAL_OR_ACTIVE),
+        allow_trial=(level == ACCESS_FREEMIUM),
     )
     if state["allowed"]:
         plan = getattr(state["subscription"], "plan", None)
+        if level == ACCESS_PREMIUM and is_free_plan(plan):
+            return {
+                "allowed": False,
+                "reason": "premium_required",
+                "level": level,
+                "subscription": state["subscription"],
+                "locked": True,
+            }
+
         plan_module = PLAN_MODULE_ALIASES.get(module_name, module_name)
         included_modules = getattr(plan, "modules_inclus", None) or []
         if included_modules and plan_module not in included_modules:
@@ -87,6 +108,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "reason": "module_not_in_plan",
                 "level": level,
                 "subscription": state["subscription"],
+                "locked": True,
             }
         if module_name == "accounting" and plan is not None and not getattr(plan, "acces_comptabilite", True):
             return {
@@ -94,6 +116,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "reason": "module_not_in_plan",
                 "level": level,
                 "subscription": state["subscription"],
+                "locked": True,
             }
 
     return {
@@ -101,6 +124,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
         "reason": state["reason"],
         "level": level,
         "subscription": state["subscription"],
+        "locked": state["reason"] in PREMIUM_DENIED_REASONS,
     }
 
 
@@ -113,10 +137,12 @@ def can_access_module(user, module_name, *, as_of=None):
 
 def get_module_access_denied_message(module_name, reason):
     module_label = get_module_label(module_name)
+    if reason in PREMIUM_DENIED_REASONS:
+        return "Cette fonctionnalite est reservee aux plans premium."
     if reason == "active_subscription_required":
         return f"Le module {module_label} est reserve aux entreprises avec un abonnement actif."
     if reason == "missing_subscription":
-        return f"Le module {module_label} necessite un abonnement ou un essai actif."
+        return f"Le module {module_label} necessite un plan actif."
     if reason in {"inactive_subscription", "expired_subscription"}:
         return f"L'acces au module {module_label} est indisponible car l'abonnement de votre entreprise n'est plus actif."
     if reason == "module_not_in_plan":

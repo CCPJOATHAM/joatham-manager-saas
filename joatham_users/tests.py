@@ -14,16 +14,19 @@ from django.utils import timezone
 
 from core.models import Abonnement as CoreSubscription, ActivityLog, Plan
 from core.selectors.subscriptions import get_subscription_with_plan_for_entreprise
+from core.services.quotas import PlanQuotaExceeded
 from core.services.tenancy import ensure_subscription_access_for_entreprise, get_subscription_access_state
 from core.services.subscription import (
     activate_subscription_for_entreprise,
     build_subscription_payment_estimate,
     get_current_subscription,
+    get_or_create_default_free_plan,
     get_subscription_for_entreprise,
     has_active_subscription_access,
     is_subscription_active,
     is_subscription_expired,
     refresh_subscription_status,
+    start_free_plan_for_entreprise,
     start_trial_for_entreprise,
     suspend_subscription_for_entreprise,
 )
@@ -80,6 +83,26 @@ class SubscriptionServiceTests(TestCase):
             plan=self.plan,
             utilisateur=self.owner,
             trial_days=14,
+        )
+
+    def test_start_free_plan_for_entreprise(self):
+        free_plan = get_or_create_default_free_plan()
+        subscription = start_free_plan_for_entreprise(
+            entreprise=self.entreprise,
+            plan=free_plan,
+            utilisateur=self.owner,
+        )
+
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ACTIF)
+        self.assertFalse(subscription.essai)
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                utilisateur=self.owner,
+                action="plan_gratuit_active",
+                objet_id=subscription.id,
+            ).exists()
         )
 
         self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
@@ -398,9 +421,11 @@ class ProductPolicyTests(TestCase):
     def setUp(self):
         self.entreprise_trial = create_entreprise("Entreprise Trial")
         self.entreprise_active = create_entreprise("Entreprise Active")
+        self.entreprise_free = create_entreprise("Entreprise Free")
         self.entreprise_none = create_entreprise("Entreprise None")
         self.owner_trial = create_user("owner-trial", "proprietaire", self.entreprise_trial)
         self.owner_active = create_user("owner-active", "proprietaire", self.entreprise_active)
+        self.owner_free = create_user("owner-free", "proprietaire", self.entreprise_free)
         self.owner_none = create_user("owner-none", "proprietaire", self.entreprise_none)
         self.gestionnaire_trial = create_user("gestion-trial", "gestionnaire", self.entreprise_trial)
         self.gestionnaire_active = create_user("gestion-active", "gestionnaire", self.entreprise_active)
@@ -422,6 +447,10 @@ class ProductPolicyTests(TestCase):
             entreprise=self.entreprise_active,
             plan=self.plan,
             utilisateur=self.owner_active,
+        )
+        start_free_plan_for_entreprise(
+            entreprise=self.entreprise_free,
+            utilisateur=self.owner_free,
         )
 
     def test_product_policy_levels_match_v1_strategy(self):
@@ -480,6 +509,12 @@ class ProductPolicyTests(TestCase):
         response = self.client.get(reverse("apprenant_list"))
         self.assertEqual(response.status_code, 200)
 
+    def test_free_plan_locks_premium_modules(self):
+        self.assertFalse(can_access_module(self.owner_free, "accounting"))
+        self.assertFalse(can_access_module(self.owner_free, "audit"))
+        self.assertFalse(can_access_module(self.owner_free, "messages"))
+        self.assertFalse(can_access_module(self.owner_free, "users"))
+
     def test_expired_or_suspended_subscription_blocks_targeted_views(self):
         suspend_subscription_for_entreprise(entreprise=self.entreprise_active, utilisateur=self.owner_active)
         self.client.force_login(self.gestionnaire_active)
@@ -496,10 +531,12 @@ class UserManagementTests(TestCase):
     def setUp(self):
         self.entreprise = create_entreprise("Entreprise Utilisateurs")
         self.autre_entreprise = create_entreprise("Entreprise Externe")
+        self.entreprise_free = create_entreprise("Entreprise Freemium")
         self.owner = create_user("owner-users", "proprietaire", self.entreprise)
         self.gestionnaire = create_user("gestion-users", "gestionnaire", self.entreprise)
         self.comptable = create_user("compta-users", "comptable", self.entreprise)
         self.external_user = create_user("external-users", "gestionnaire", self.autre_entreprise)
+        self.owner_free = create_user("owner-free-users", "proprietaire", self.entreprise_free)
         self.plan = Abonnement.objects.create(
             nom="Users",
             code="users",
@@ -518,6 +555,10 @@ class UserManagementTests(TestCase):
             plan=self.plan,
             utilisateur=self.external_user,
             trial_days=14,
+        )
+        start_free_plan_for_entreprise(
+            entreprise=self.entreprise_free,
+            utilisateur=self.owner_free,
         )
 
     def test_owner_can_access_user_list(self):
@@ -565,6 +606,23 @@ class UserManagementTests(TestCase):
         self.assertEqual(created_user.entreprise, self.entreprise)
         self.assertEqual(created_user.role, User.Role.GESTIONNAIRE)
         self.assertEqual(created_user.telephone, "+243900000099")
+
+    def test_free_plan_blocks_company_user_creation(self):
+        self.client.force_login(self.owner_free)
+        response = self.client.post(
+            reverse("user_create"),
+            {
+                "full_name": "Marie Gestion",
+                "email": "blocked.freemium@example.com",
+                "telephone": "+243900000188",
+                "role": User.Role.GESTIONNAIRE,
+                "password": "Motdepasse123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "reservee aux plans premium")
+        self.assertFalse(User.objects.filter(email="blocked.freemium@example.com").exists())
 
     def test_user_form_renders_premium_layout(self):
         self.client.force_login(self.owner)

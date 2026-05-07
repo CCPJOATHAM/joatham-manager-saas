@@ -6,6 +6,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 from core.audit import record_audit_event
+from core.services.quotas import assert_invoice_quota_available
 from joatham_clients.models import Client
 from joatham_comptabilite.services.comptabilisation import (
     comptabiliser_facture_emise,
@@ -264,6 +265,7 @@ def assert_facture_editable(facture):
 def create_facture(*, entreprise, user, client_id=None, client_nom="", tva=0, remise=0, rabais=0, ristourne=0, lignes=None):
     if not user_has_permission(user, "billing.manage"):
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent creer une facture.")
+    assert_invoice_quota_available(entreprise)
 
     lignes = lignes or []
     client = None

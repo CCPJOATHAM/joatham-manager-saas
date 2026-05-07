@@ -29,6 +29,7 @@ from core.services.subscription import (
 )
 from core.services.currency import get_currency_code
 from core.services.exchange_rates import ExchangeRateUnavailable, get_exchange_rate, get_plan_price_for_company
+from core.services.product_policy import module_access_required
 from core.services.super_admin import (
     activate_company_subscription,
     deactivate_company_for_super_admin,
@@ -125,6 +126,7 @@ def _record_super_admin_user_action(*, target_user, admin_user, action):
 
 
 @permission_required("audit.view")
+@module_access_required("audit")
 def activity_log_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     selected_module = request.GET.get("module", "").strip()
