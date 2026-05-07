@@ -101,8 +101,9 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
             }
 
         plan_module = PLAN_MODULE_ALIASES.get(module_name, module_name)
-        included_modules = getattr(plan, "modules_inclus", None) or []
-        if included_modules and plan_module not in included_modules:
+        included_modules = set(getattr(plan, "modules_inclus", None) or [])
+        accepted_plan_modules = {module_name, plan_module}
+        if included_modules and included_modules.isdisjoint(accepted_plan_modules):
             return {
                 "allowed": False,
                 "reason": "module_not_in_plan",
