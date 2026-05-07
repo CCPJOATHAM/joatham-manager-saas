@@ -3,10 +3,12 @@ from base64 import b64encode
 from io import BytesIO
 
 import qrcode
+from django.contrib import messages
 from django.shortcuts import redirect, render
 
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
 from core.services.currency import format_amount_for_entreprise, format_decimal_number, get_currency_code, get_currency_display
+from core.services.quotas import PlanQuotaExceeded
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_billing.pdf import render_pdf_response
@@ -50,8 +52,12 @@ def depenses_list(request):
     if request.method == "POST":
         require_permission(request.user, "expenses.manage")
         if form.is_valid():
-            create_depense_for_entreprise(form, entreprise, utilisateur=request.user)
-            return redirect("depenses")
+            try:
+                create_depense_for_entreprise(form, entreprise, utilisateur=request.user)
+            except PlanQuotaExceeded as exc:
+                messages.error(request, str(exc))
+            else:
+                return redirect("depenses")
 
     date_debut = request.GET.get("date_debut")
     date_fin = request.GET.get("date_fin")

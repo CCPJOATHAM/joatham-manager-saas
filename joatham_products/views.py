@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 
+from core.services.quotas import PlanQuotaExceeded
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
@@ -71,13 +72,17 @@ def product_create(request):
     form = ProduitForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
-        create_product_for_entreprise(
-            entreprise=entreprise,
-            utilisateur=request.user,
-            **form.cleaned_data,
-        )
-        messages.success(request, _("Le produit a ete cree avec succes."))
-        return redirect("product_list")
+        try:
+            create_product_for_entreprise(
+                entreprise=entreprise,
+                utilisateur=request.user,
+                **form.cleaned_data,
+            )
+        except PlanQuotaExceeded as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, _("Le produit a ete cree avec succes."))
+            return redirect("product_list")
 
     return render(
         request,

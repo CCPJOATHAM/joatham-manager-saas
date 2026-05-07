@@ -3,12 +3,14 @@ from decimal import Decimal
 from django.test import TestCase
 from django.urls import reverse
 
-from core.services.subscription import start_trial_for_entreprise
+from core.services.quotas import FREE_PLAN_EXPENSE_MONTHLY_LIMIT, PlanQuotaExceeded
+from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
 from joatham_billing.tests.factories import create_entreprise, create_user
 from core.services.currency import format_amount_for_entreprise, format_decimal_number
 from joatham_depenses.models import Depense
 from joatham_depenses.selectors.depenses import get_depenses_by_entreprise
-from joatham_depenses.services.depenses_service import get_depenses_kpis, get_depenses_total, list_depenses_for_entreprise
+from joatham_depenses.forms import DepenseForm
+from joatham_depenses.services.depenses_service import create_depense_for_entreprise, get_depenses_kpis, get_depenses_total, list_depenses_for_entreprise
 from joatham_users.models import Abonnement
 
 
@@ -86,3 +88,22 @@ class DepensesServiceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Ajouter une depense")
         self.assertContains(response, "Filtres et export")
+
+    def test_free_plan_blocks_expense_creation_after_monthly_limit(self):
+        entreprise = create_entreprise("Entreprise Depenses Free")
+        owner = create_user("owner-dep-free", "proprietaire", entreprise)
+        free_plan = get_or_create_default_free_plan()
+        start_free_plan_for_entreprise(entreprise=entreprise, plan=free_plan, utilisateur=owner)
+
+        for index in range(FREE_PLAN_EXPENSE_MONTHLY_LIMIT):
+            Depense.objects.create(
+                description=f"Depense {index}",
+                montant=Decimal("10.00"),
+                entreprise=entreprise,
+            )
+
+        form = DepenseForm(data={"description": "Depense bloquee", "montant": "15.00"})
+        self.assertTrue(form.is_valid())
+
+        with self.assertRaises(PlanQuotaExceeded):
+            create_depense_for_entreprise(form, entreprise, utilisateur=owner)

@@ -1,4 +1,5 @@
 from core.audit import record_audit_event
+from core.services.quotas import assert_product_quota_available
 
 from ..models import Produit
 from ..selectors.products import get_product_by_entreprise, get_products_by_entreprise
@@ -20,6 +21,7 @@ def create_product_for_entreprise(
     actif,
     utilisateur=None,
 ):
+    assert_product_quota_available(entreprise)
     produit = Produit.objects.create(
         entreprise=entreprise,
         nom=(nom or "").strip(),

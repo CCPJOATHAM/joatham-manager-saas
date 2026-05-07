@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import ActivityLog
-from core.services.subscription import start_trial_for_entreprise
+from core.services.quotas import FREE_PLAN_PRODUCT_LIMIT, PlanQuotaExceeded
+from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
 
@@ -149,6 +150,33 @@ class ProductServicesTests(TestCase):
                 objet_id=produit.id,
             ).exists()
         )
+
+    def test_free_plan_blocks_product_creation_after_limit(self):
+        free_plan = get_or_create_default_free_plan()
+        start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
+
+        for index in range(FREE_PLAN_PRODUCT_LIMIT):
+            Produit.objects.create(
+                entreprise=self.entreprise,
+                nom=f"Produit {index}",
+                reference=f"PRD-{index}",
+                prix_unitaire=Decimal("10.00"),
+                quantite_stock=1,
+                seuil_alerte=1,
+            )
+
+        with self.assertRaises(PlanQuotaExceeded):
+            create_product_for_entreprise(
+                entreprise=self.entreprise,
+                nom="Produit bloqué",
+                description="",
+                reference="PRD-BLOCK",
+                prix_unitaire=Decimal("20.00"),
+                quantite_stock=1,
+                seuil_alerte=1,
+                actif=True,
+                utilisateur=self.owner,
+            )
 
 
 class ProductViewsTests(TestCase):

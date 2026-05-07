@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from core.audit import record_audit_event
+from core.services.quotas import assert_expense_quota_available
 
 from ..selectors.depenses import get_depenses_by_entreprise
 
@@ -18,6 +19,7 @@ def list_depenses_for_entreprise(entreprise, *, date_debut=None, date_fin=None, 
 
 
 def create_depense_for_entreprise(form, entreprise, utilisateur=None):
+    assert_expense_quota_available(entreprise)
     depense = form.save(commit=False)
     depense.entreprise = entreprise
     depense.save()

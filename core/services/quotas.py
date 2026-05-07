@@ -9,6 +9,8 @@ from joatham_users.models import Entreprise
 
 
 PREMIUM_REQUIRED_MESSAGE = "Cette fonctionnalite est reservee aux plans premium."
+FREE_PLAN_PRODUCT_LIMIT = 50
+FREE_PLAN_EXPENSE_MONTHLY_LIMIT = 50
 
 
 class PlanQuotaExceeded(ValueError):
@@ -40,6 +42,23 @@ def get_monthly_invoice_count(entreprise, *, as_of=None):
     ).count()
 
 
+def get_product_count(entreprise):
+    from joatham_products.models import Produit
+
+    return Produit.objects.filter(entreprise=entreprise).count()
+
+
+def get_monthly_expense_count(entreprise, *, as_of=None):
+    from joatham_depenses.models import Depense
+
+    month_start, month_end = _month_bounds(as_of=as_of)
+    return Depense.objects.filter(
+        entreprise=entreprise,
+        date__date__gte=month_start,
+        date__date__lt=month_end,
+    ).count()
+
+
 def assert_invoice_quota_available(entreprise, *, as_of=None):
     if not is_entreprise_on_free_plan(entreprise):
         return
@@ -62,4 +81,28 @@ def assert_user_quota_available(entreprise):
     if user_count >= FREE_PLAN_USER_LIMIT:
         raise PlanQuotaExceeded(
             f"{PREMIUM_REQUIRED_MESSAGE} Le plan gratuit est limite a un seul utilisateur proprietaire."
+        )
+
+
+def assert_product_quota_available(entreprise):
+    if not is_entreprise_on_free_plan(entreprise):
+        return
+
+    _lock_entreprise_for_quota(entreprise)
+    product_count = get_product_count(entreprise)
+    if product_count >= FREE_PLAN_PRODUCT_LIMIT:
+        raise PlanQuotaExceeded(
+            f"{PREMIUM_REQUIRED_MESSAGE} Le plan gratuit permet jusqu'a {FREE_PLAN_PRODUCT_LIMIT} produits."
+        )
+
+
+def assert_expense_quota_available(entreprise, *, as_of=None):
+    if not is_entreprise_on_free_plan(entreprise):
+        return
+
+    _lock_entreprise_for_quota(entreprise)
+    expense_count = get_monthly_expense_count(entreprise, as_of=as_of)
+    if expense_count >= FREE_PLAN_EXPENSE_MONTHLY_LIMIT:
+        raise PlanQuotaExceeded(
+            f"{PREMIUM_REQUIRED_MESSAGE} Le plan gratuit permet jusqu'a {FREE_PLAN_EXPENSE_MONTHLY_LIMIT} depenses par mois."
         )
