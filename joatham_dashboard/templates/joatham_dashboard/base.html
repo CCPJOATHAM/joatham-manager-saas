@@ -52,8 +52,8 @@ body {
 }
 
 .sidebar {
-    background: linear-gradient(180deg, #EAF3FF 0%, #DCEBFF 100%);
-    border-right: 1px solid #D8E6F8;
+    background: linear-gradient(180deg, #DCEBFF 0%, #BFDBFE 45%, #EAF3FF 100%);
+    border-right: 1px solid #BBD7FF;
     color: var(--text);
     padding: 22px;
     display: flex;
@@ -78,6 +78,13 @@ body {
 .company-card {
     border-radius: 14px;
     padding: 16px;
+}
+
+.sidebar .brand,
+.sidebar .company-card {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid #BBD7FF;
+    box-shadow: 0 14px 34px rgba(37, 99, 235, 0.10);
 }
 
 .brand-title {
@@ -122,7 +129,8 @@ body {
     min-width: 0;
     padding: 11px 12px;
     border-radius: 12px;
-    color: #1E293B;
+    background: rgba(255, 255, 255, 0.42);
+    color: #0F172A;
     text-decoration: none;
     border: 1px solid transparent;
     transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
@@ -131,11 +139,11 @@ body {
 .nav a:hover {
     background: #DBEAFE;
     color: #0F172A;
-    border-color: #C7DAF5;
+    border-color: #93C5FD;
 }
 
 .nav a.is-active {
-    background: #2563EB;
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
     color: #FFFFFF;
     border-color: #2563EB;
     box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
