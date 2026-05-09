@@ -9,7 +9,7 @@ from core.services.subscription import get_or_create_default_free_plan, start_fr
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
 
-from .models import Produit
+from .models import Produit, StockMovement
 from .selectors.products import (
     STOCK_FILTER_LOW,
     STOCK_FILTER_RUPTURE,
@@ -95,6 +95,7 @@ class ProductServicesTests(TestCase):
 
         self.assertEqual(produit.entreprise, self.entreprise)
         self.assertEqual(produit.description, "Scanner reseau haute definition")
+        self.assertEqual(produit.quantite_stock, 5)
         self.assertTrue(
             ActivityLog.objects.filter(
                 entreprise=self.entreprise,
@@ -103,8 +104,37 @@ class ProductServicesTests(TestCase):
                 objet_id=produit.id,
             ).exists()
         )
+        mouvement = StockMovement.objects.get(
+            entreprise=self.entreprise,
+            produit=produit,
+            movement_type=StockMovement.MovementType.MANUAL_ENTRY,
+        )
+        self.assertEqual(mouvement.stock_before, 0)
+        self.assertEqual(mouvement.stock_after, 5)
+        self.assertEqual(mouvement.reason, "Stock initial produit")
 
-    def test_update_product_logs_modification_and_stock_change(self):
+    def test_create_product_without_initial_stock_does_not_create_stock_movement(self):
+        produit = create_product_for_entreprise(
+            entreprise=self.entreprise,
+            nom="Cable HDMI",
+            description="Cable HDMI 2m",
+            reference="HDMI-1",
+            prix_unitaire=Decimal("8.00"),
+            quantite_stock=0,
+            seuil_alerte=2,
+            actif=True,
+            utilisateur=self.owner,
+        )
+
+        self.assertEqual(produit.quantite_stock, 0)
+        self.assertFalse(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=produit,
+            ).exists()
+        )
+
+    def test_update_product_keeps_existing_stock(self):
         produit = create_product_for_entreprise(
             entreprise=self.entreprise,
             nom="Clavier",
@@ -133,7 +163,7 @@ class ProductServicesTests(TestCase):
         produit.refresh_from_db()
         self.assertEqual(produit.nom, "Clavier sans fil")
         self.assertEqual(produit.description, "Clavier sans fil rechargeable")
-        self.assertEqual(produit.quantite_stock, 2)
+        self.assertEqual(produit.quantite_stock, 8)
         self.assertTrue(
             ActivityLog.objects.filter(
                 entreprise=self.entreprise,
@@ -142,7 +172,7 @@ class ProductServicesTests(TestCase):
                 objet_id=produit.id,
             ).exists()
         )
-        self.assertTrue(
+        self.assertFalse(
             ActivityLog.objects.filter(
                 entreprise=self.entreprise,
                 utilisateur=self.owner,
@@ -213,9 +243,17 @@ class ProductViewsTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(Produit.objects.filter(entreprise=self.entreprise, nom="Projecteur").exists())
+        produit = Produit.objects.get(entreprise=self.entreprise, nom="Projecteur")
+        self.assertEqual(produit.quantite_stock, 4)
+        self.assertTrue(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=produit,
+                movement_type=StockMovement.MovementType.MANUAL_ENTRY,
+            ).exists()
+        )
 
-    def test_gestionnaire_can_update_product(self):
+    def test_gestionnaire_can_update_product_without_changing_stock(self):
         self.client.force_login(self.gestionnaire)
         response = self.client.post(
             reverse("product_update", args=[self.produit.id]),
@@ -231,7 +269,8 @@ class ProductViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.produit.refresh_from_db()
         self.assertEqual(self.produit.nom, "Tablette Pro")
-        self.assertEqual(self.produit.stock_status, "rupture")
+        self.assertEqual(self.produit.quantite_stock, 1)
+        self.assertEqual(self.produit.stock_status, "stock_faible")
 
     def test_comptable_has_read_only_access(self):
         self.client.force_login(self.comptable)
@@ -267,5 +306,12 @@ class ProductViewsTests(TestCase):
         self.client.force_login(self.gestionnaire)
         response = self.client.get(reverse("product_update", args=[external_product.id]))
         self.assertEqual(response.status_code, 404)
+
+    def test_product_update_form_does_not_expose_editable_stock_field(self):
+        self.client.force_login(self.gestionnaire)
+        response = self.client.get(reverse("product_update", args=[self.produit.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'name="quantite_stock"', html=False)
+        self.assertContains(response, "Stock actuel")
 
 

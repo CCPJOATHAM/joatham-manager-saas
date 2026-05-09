@@ -92,6 +92,23 @@
 
 <div class="form-card">
     <p class="help">{% trans "Cette fiche vous permet de suivre le prix, la description commerciale et le stock de chaque produit sans entrer encore dans une logique complexe d'inventaire." %}</p>
+    {% if not is_create_mode and product %}
+    <div class="help" style="padding: 16px 18px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
+        <strong>{% trans "Stock actuel :" %}</strong> {{ product.quantite_stock }}
+        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+            {% if can_view_stock_ui %}
+            <a href="{% url 'stock_movement_list' %}?produit={{ product.id }}" class="btn-link">{% trans "Voir les mouvements" %}</a>
+            {% endif %}
+            {% if can_move_stock_ui %}
+            <a href="{% url 'stock_entry_create' %}" class="btn-link">{% trans "Entree stock" %}</a>
+            <a href="{% url 'stock_exit_create' %}" class="btn-link">{% trans "Sortie stock" %}</a>
+            {% endif %}
+            {% if can_adjust_stock_ui %}
+            <a href="{% url 'stock_adjustment_create' %}" class="btn-link">{% trans "Ajustement stock" %}</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
     <form method="post">
         {% csrf_token %}
         <div class="form-grid">
@@ -115,11 +132,14 @@
                 {{ form.prix_unitaire }}
                 {{ form.prix_unitaire.errors }}
             </div>
+            {% if is_create_mode %}
             <div class="field">
-                <label for="{{ form.quantite_stock.id_for_label }}">{% trans "Quantite en stock" %}</label>
+                <label for="{{ form.quantite_stock.id_for_label }}">{% trans "Stock initial" %}</label>
                 {{ form.quantite_stock }}
                 {{ form.quantite_stock.errors }}
+                <small class="help" style="margin: 0;">{% trans "Ce stock initial sera enregistre comme mouvement de stock." %}</small>
             </div>
+            {% endif %}
             <div class="field">
                 <label for="{{ form.seuil_alerte.id_for_label }}">{% trans "Seuil d'alerte" %}</label>
                 {{ form.seuil_alerte }}

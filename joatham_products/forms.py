@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import Produit, StockMovement
 
 
-class ProduitForm(forms.ModelForm):
+class BaseProduitForm(forms.ModelForm):
     class Meta:
         model = Produit
         fields = [
@@ -12,7 +12,6 @@ class ProduitForm(forms.ModelForm):
             "description",
             "reference",
             "prix_unitaire",
-            "quantite_stock",
             "seuil_alerte",
             "actif",
         ]
@@ -21,7 +20,6 @@ class ProduitForm(forms.ModelForm):
             "description": _("Description"),
             "reference": _("Reference"),
             "prix_unitaire": _("Prix unitaire"),
-            "quantite_stock": _("Quantite en stock"),
             "seuil_alerte": _("Seuil d'alerte"),
             "actif": _("Produit actif"),
         }
@@ -34,8 +32,23 @@ class ProduitForm(forms.ModelForm):
         )
         self.fields["reference"].widget.attrs.update({"placeholder": _("Code ou reference")})
         self.fields["prix_unitaire"].widget.attrs.update({"placeholder": "0.00", "step": "0.01", "min": "0"})
-        self.fields["quantite_stock"].widget.attrs.update({"placeholder": "0", "min": "0"})
         self.fields["seuil_alerte"].widget.attrs.update({"placeholder": "0", "min": "0"})
+
+
+class ProduitCreateForm(BaseProduitForm):
+    quantite_stock = forms.IntegerField(min_value=0, label=_("Stock initial"))
+
+    class Meta(BaseProduitForm.Meta):
+        fields = BaseProduitForm.Meta.fields[:]
+        fields.insert(4, "quantite_stock")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["quantite_stock"].widget.attrs.update({"placeholder": "0", "min": "0"})
+
+
+class ProduitUpdateForm(BaseProduitForm):
+    pass
 
 
 class StockMovementForm(forms.Form):

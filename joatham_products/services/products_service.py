@@ -1,14 +1,18 @@
+from django.db import transaction
+
 from core.audit import record_audit_event
 from core.services.quotas import assert_product_quota_available
 
 from ..models import Produit
 from ..selectors.products import get_product_by_entreprise, get_products_by_entreprise
+from .stock import apply_manual_entry
 
 
 def list_products_for_entreprise(entreprise, *, stock_filter=None):
     return get_products_by_entreprise(entreprise, stock_filter=stock_filter)
 
 
+@transaction.atomic
 def create_product_for_entreprise(
     *,
     entreprise,
@@ -22,16 +26,28 @@ def create_product_for_entreprise(
     utilisateur=None,
 ):
     assert_product_quota_available(entreprise)
+    initial_stock = int(quantite_stock or 0)
     produit = Produit.objects.create(
         entreprise=entreprise,
         nom=(nom or "").strip(),
         description=(description or "").strip(),
         reference=(reference or "").strip(),
         prix_unitaire=prix_unitaire,
-        quantite_stock=quantite_stock,
+        quantite_stock=0,
         seuil_alerte=seuil_alerte,
         actif=actif,
     )
+    if initial_stock > 0:
+        apply_manual_entry(
+            entreprise=entreprise,
+            produit=produit,
+            quantity=initial_stock,
+            utilisateur=utilisateur,
+            reference=f"INIT-{produit.id}",
+            reason="Stock initial produit",
+            comment="Stock initial enregistre a la creation du produit.",
+        )
+        produit.refresh_from_db(fields=["quantite_stock"])
     record_audit_event(
         entreprise=entreprise,
         utilisateur=utilisateur,
@@ -65,13 +81,11 @@ def update_product_for_entreprise(
     utilisateur=None,
 ):
     produit = get_product_by_entreprise(entreprise, product_id)
-    old_stock = produit.quantite_stock
 
     produit.nom = (nom or "").strip()
     produit.description = (description or "").strip()
     produit.reference = (reference or "").strip()
     produit.prix_unitaire = prix_unitaire
-    produit.quantite_stock = quantite_stock
     produit.seuil_alerte = seuil_alerte
     produit.actif = actif
     produit.save()
@@ -93,21 +107,5 @@ def update_product_for_entreprise(
             "actif": produit.actif,
         },
     )
-
-    if old_stock != produit.quantite_stock:
-        record_audit_event(
-            entreprise=entreprise,
-            utilisateur=utilisateur,
-            action="stock_modifie",
-            module="products",
-            objet_type="Produit",
-            objet_id=produit.id,
-            description=f"Stock modifie pour {produit.nom}.",
-            metadata={
-                "ancien_stock": old_stock,
-                "nouveau_stock": produit.quantite_stock,
-                "reference": produit.reference,
-            },
-        )
 
     return produit

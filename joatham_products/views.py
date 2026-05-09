@@ -9,7 +9,7 @@ from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
 
-from .forms import ProduitForm, StockMovementForm
+from .forms import ProduitCreateForm, ProduitUpdateForm, StockMovementForm
 from .models import StockMovement
 from .selectors.products import (
     STOCK_FILTER_ALL,
@@ -173,7 +173,7 @@ def product_list(request):
 @module_access_required("products")
 def product_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    form = ProduitForm(request.POST or None)
+    form = ProduitCreateForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         try:
@@ -195,6 +195,7 @@ def product_create(request):
             "form": form,
             "page_title": _("Creer un produit"),
             "submit_label": _("Creer le produit"),
+            "is_create_mode": True,
             **_build_product_ui_permissions(request.user),
         },
     )
@@ -206,13 +207,14 @@ def product_update(request, product_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     produit = get_product_by_entreprise(entreprise, product_id)
     require_permission(request.user, "products.manage")
-    form = ProduitForm(request.POST or None, instance=produit)
+    form = ProduitUpdateForm(request.POST or None, instance=produit)
 
     if request.method == "POST" and form.is_valid():
         update_product_for_entreprise(
             entreprise=entreprise,
             product_id=produit.id,
             utilisateur=request.user,
+            quantite_stock=produit.quantite_stock,
             **form.cleaned_data,
         )
         messages.success(request, _("Le produit a ete mis a jour avec succes."))
@@ -226,6 +228,7 @@ def product_update(request, product_id):
             "page_title": _("Modifier un produit"),
             "submit_label": _("Enregistrer les modifications"),
             "product": produit,
+            "is_create_mode": False,
             **_build_product_ui_permissions(request.user),
         },
     )
