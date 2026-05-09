@@ -1,0 +1,176 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Mouvements caisse{% endblock %}
+{% block content_title %}Mouvements caisse{% endblock %}
+{% block content_subtitle %}Filtrez les mouvements de caisse par caisse, session, type, periode, montant et recherche texte.{% endblock %}
+
+{% block content %}
+<style>
+  .page-shell { display:grid; gap:22px; }
+  .panel {
+    border: 1px solid #dde7f0;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .panel-header, .panel-body { padding: 18px 20px; }
+  .panel-header { border-bottom: 1px solid #eef2f7; }
+  .panel-header h3 { margin: 0; color: #10233f; }
+  .panel-header p { margin: 6px 0 0; color: #64748b; }
+  .filters-grid {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .field { display:grid; gap:6px; }
+  .field label { color:#475569; font-weight:700; font-size:.88rem; }
+  .field input, .field select {
+    min-height:42px; border:1px solid #d7dee7; border-radius:12px; padding:0 12px; background:#fff;
+  }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .btn, .ghost {
+    display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 16px;
+    border-radius:12px; text-decoration:none; font-weight:700; border:1px solid #dbe5ef;
+  }
+  .btn { background:linear-gradient(135deg,#2563eb,#3b82f6); border-color:rgba(37,99,235,.72); color:#fff; }
+  .ghost { background:#fff; color:#10233f; }
+  .table-wrap { overflow-x:auto; }
+  .table { width:100%; border-collapse:collapse; }
+  .table th, .table td { padding:14px 18px; border-bottom:1px solid #eef2f7; text-align:left; white-space:nowrap; }
+  .table th { background:#f8fafc; color:#475569; font-size:.82rem; text-transform:uppercase; letter-spacing:.03em; }
+  .badge {
+    display:inline-flex; align-items:center; justify-content:center; min-height:30px; padding:0 10px;
+    border-radius:999px; font-size:.78rem; font-weight:800; border:1px solid #e2e8f0;
+  }
+  .badge.entry { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
+  .badge.payment { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+  .badge.adjustment { background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe; }
+  .badge.expense, .badge.exit { background:#fff7ed; color:#c2410c; border-color:#fed7aa; }
+  .badge.confirmed { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
+  .badge.draft { background:#f8fafc; color:#475569; border-color:#e2e8f0; }
+  .badge.cancelled { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+  .amount-positive { color:#047857; font-weight:700; }
+  .amount-negative { color:#b45309; font-weight:700; }
+  .empty-state { padding:24px 18px; color:#64748b; }
+  @media (max-width: 1080px) { .filters-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); } }
+  @media (max-width: 760px) { .filters-grid { grid-template-columns:1fr; } .panel-header, .panel-body { padding:16px; } .table th, .table td { padding:12px 14px; } }
+</style>
+
+<section class="page-shell">
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Filtres mouvements</h3>
+      <p>Isolez les mouvements utiles selon la caisse, la session, le type, la periode et le montant.</p>
+    </div>
+    <div class="panel-body">
+      <form method="get">
+        <div class="filters-grid">
+          <div class="field">
+            <label for="id_caisse">Caisse</label>
+            <select name="caisse" id="id_caisse">
+              <option value="">Toutes les caisses</option>
+              {% for caisse in caisses %}
+              <option value="{{ caisse.id }}" {% if filters.caisse|stringformat:"s" == caisse.id|stringformat:"s" %}selected{% endif %}>{{ caisse.nom }} ({{ caisse.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="id_session">Session</label>
+            <select name="session" id="id_session">
+              <option value="">Toutes les sessions</option>
+              {% for session in sessions %}
+              <option value="{{ session.id }}" {% if filters.session|stringformat:"s" == session.id|stringformat:"s" %}selected{% endif %}>{{ session.caisse.nom }} - {{ session.date_ouverture|date:"d/m/Y H:i" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="id_type_mouvement">Type</label>
+            <select name="type_mouvement" id="id_type_mouvement">
+              <option value="">Tous les types</option>
+              {% for value, label in movement_type_choices %}
+              <option value="{{ value }}" {% if filters.type_mouvement == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="id_q">Recherche</label>
+            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="Libelle ou reference">
+          </div>
+          <div class="field">
+            <label for="id_date_debut">Date debut</label>
+            <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
+          </div>
+          <div class="field">
+            <label for="id_date_fin">Date fin</label>
+            <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
+          </div>
+          <div class="field">
+            <label for="id_montant_min">Montant min</label>
+            <input type="number" step="0.01" name="montant_min" id="id_montant_min" value="{{ filters.montant_min }}">
+          </div>
+          <div class="field">
+            <label for="id_montant_max">Montant max</label>
+            <input type="number" step="0.01" name="montant_max" id="id_montant_max" value="{{ filters.montant_max }}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">Filtrer</button>
+          <a href="{% url 'caisse_movement_list' %}" class="ghost">Reinitialiser</a>
+          <a href="{% url 'caisse_movement_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">Export Excel</a>
+          <a href="{% url 'caisse_session_list' %}" class="ghost">Voir les sessions</a>
+          <a href="{% url 'caisse_reports' %}" class="ghost">Voir les rapports</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Mouvements filtres</h3>
+      <p>Historique detaille des operations de caisse correspondant aux criteres actifs.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Caisse</th>
+            <th>Session</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Libelle</th>
+            <th>Reference</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for movement in movements %}
+          <tr>
+            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.caisse.nom }}</td>
+            <td>{{ movement.session.date_ouverture|date:"d/m/Y H:i" }}</td>
+            <td>
+              <span class="badge {% if movement.type_mouvement == 'entree' %}entry{% elif movement.type_mouvement == 'paiement_facture' %}payment{% elif movement.type_mouvement == 'ajustement' %}adjustment{% elif movement.type_mouvement == 'depense' %}expense{% else %}exit{% endif %}">
+                {{ movement.get_type_mouvement_display }}
+              </span>
+            </td>
+            <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
+            <td>{{ movement.libelle }}</td>
+            <td>{{ movement.reference|default:"-" }}</td>
+            <td>
+              <span class="badge {% if movement.statut == 'confirme' %}confirmed{% elif movement.statut == 'annule' %}cancelled{% else %}draft{% endif %}">
+                {{ movement.get_statut_display }}
+              </span>
+            </td>
+            <td><a href="{% url 'caisse_session_detail' movement.session.id %}" class="ghost">Voir session</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="empty-state">Aucun mouvement ne correspond aux filtres selectionnes.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

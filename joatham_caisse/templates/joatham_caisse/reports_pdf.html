@@ -1,0 +1,193 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}Rapport caisse - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.report-shell {
+    border: 1px solid #d8e1ea;
+    border-radius: 16px;
+    padding: 12px 14px 14px;
+    background: #ffffff;
+}
+
+.doc-meta {
+    margin-bottom: 14px;
+    text-align: center;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.summary-band {
+    margin-bottom: 16px;
+    border: 1px solid #d8e1ea;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 10px 12px;
+}
+
+.summary-grid {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.summary-grid td {
+    border: none;
+    padding: 6px 8px;
+    font-size: 9.5px;
+    color: #475569;
+}
+
+.summary-value {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #10233f;
+}
+
+.section-title {
+    margin: 18px 0 10px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #10233f;
+    text-transform: uppercase;
+}
+
+.empty-row td {
+    text-align: center;
+    color: #64748b;
+    padding: 18px 10px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="report-shell">
+    <div class="pdf-header">
+        <table class="pdf-header-table">
+            <tr>
+                <td style="width: 60%;">
+                    <p class="pdf-company-name">{{ entreprise.nom }}</p>
+                </td>
+                <td class="pdf-meta-block">
+                    <p class="pdf-meta-title">Rapport caisse</p>
+                    <p class="pdf-meta-line">Edition du {{ date_generation }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="separator"></div>
+
+    <h1 class="document-title">Rapport caisse</h1>
+    <div class="doc-meta">
+        {{ period_label }}
+        {% if selected_caisse %}<br>Caisse : {{ selected_caisse.nom }} ({{ selected_caisse.code }}){% endif %}
+    </div>
+
+    <div class="summary-band">
+        <table class="summary-grid">
+            <tr>
+                <td style="width:25%;">Total entrees<span class="summary-value">{{ report.total_entrees }}</span></td>
+                <td style="width:25%;">Total sorties<span class="summary-value">{{ report.total_sorties }}</span></td>
+                <td style="width:25%;">Depenses caisse<span class="summary-value">{{ report.total_depenses_caisse }}</span></td>
+                <td style="width:25%;">Paiements facture<span class="summary-value">{{ report.total_paiements_factures }}</span></td>
+            </tr>
+            <tr>
+                <td>Solde net<span class="summary-value">{{ report.solde_net }}</span></td>
+                <td>Nombre de mouvements<span class="summary-value">{{ report.nombre_mouvements }}</span></td>
+                <td>Sessions O/F/V<span class="summary-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></td>
+                <td>Ecarts +/-<span class="summary-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <p class="section-title">Synthese par caisse</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Caisse</th>
+                <th class="text-center">Mouvements</th>
+                <th class="text-right">Entrees</th>
+                <th class="text-right">Sorties</th>
+                <th class="text-right">Depenses</th>
+                <th class="text-right">Paiements</th>
+                <th class="text-right">Net</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report.summary_by_caisse %}
+            <tr>
+                <td>{{ row.nom }} ({{ row.code }})</td>
+                <td class="text-center">{{ row.mouvement_count }}</td>
+                <td class="text-right">{{ row.total_entrees }}</td>
+                <td class="text-right">{{ row.total_sorties }}</td>
+                <td class="text-right">{{ row.total_depenses }}</td>
+                <td class="text-right">{{ row.total_paiements }}</td>
+                <td class="text-right">{{ row.solde_net }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="7">Aucune synthese disponible pour cette periode.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="section-title">Synthese par type de mouvement</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th class="text-center">Nombre</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report.summary_by_type %}
+            <tr>
+                <td>{{ row.label }}</td>
+                <td class="text-center">{{ row.count }}</td>
+                <td class="text-right">{{ row.total }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="3">Aucun mouvement sur la periode selectionnee.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="section-title">Derniers mouvements filtres</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Caisse</th>
+                <th>Type</th>
+                <th>Libelle</th>
+                <th>Reference</th>
+                <th class="text-right">Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movement in recent_movements %}
+            <tr>
+                <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+                <td>{{ movement.caisse.nom }}</td>
+                <td>{{ movement.get_type_mouvement_display }}</td>
+                <td>{{ movement.libelle }}</td>
+                <td>{{ movement.reference|default:"-" }}</td>
+                <td class="text-right">{{ movement.montant }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="6">Aucun mouvement filtre a afficher.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pdf-footer">
+        <table class="pdf-footer-table">
+            <tr>
+                <td>JOATHAM Manager</td>
+                <td class="text-right">{{ date_footer }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

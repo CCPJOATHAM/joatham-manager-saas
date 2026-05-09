@@ -1,0 +1,164 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Rapports caisse{% endblock %}
+{% block content_title %}Rapports caisse{% endblock %}
+{% block content_subtitle %}Synthese operationnelle des entrees, sorties, depenses, paiements facture et ecarts de caisse sur la periode choisie.{% endblock %}
+
+{% block content %}
+<style>
+  .report-shell { display:grid; gap:22px; }
+  .panel, .kpi {
+    border:1px solid #dde7f0; border-radius:20px; background:#fff;
+    box-shadow:0 18px 40px rgba(15,23,42,.06);
+  }
+  .panel-header, .panel-body { padding:18px 20px; }
+  .panel-header { border-bottom:1px solid #eef2f7; }
+  .panel-header h3 { margin:0; color:#10233f; }
+  .panel-header p { margin:6px 0 0; color:#64748b; }
+  .filters-grid { display:grid; grid-template-columns:repeat(3, minmax(180px,1fr)); gap:14px; }
+  .field { display:grid; gap:6px; }
+  .field label { color:#475569; font-weight:700; font-size:.88rem; }
+  .field input, .field select {
+    min-height:42px; border:1px solid #d7dee7; border-radius:12px; padding:0 12px; background:#fff;
+  }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .btn, .ghost {
+    display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 16px;
+    border-radius:12px; text-decoration:none; font-weight:700; border:1px solid #dbe5ef;
+  }
+  .btn { background:linear-gradient(135deg,#2563eb,#3b82f6); border-color:rgba(37,99,235,.72); color:#fff; }
+  .ghost { background:#fff; color:#10233f; }
+  .kpis { display:grid; grid-template-columns:repeat(4, minmax(160px,1fr)); gap:14px; }
+  .kpi { padding:16px 18px; }
+  .kpi-label { color:#64748b; display:block; font-size:.84rem; margin-bottom:6px; }
+  .kpi-value { color:#10233f; display:block; font-size:1.18rem; font-weight:800; }
+  .kpi-value.positive { color:#047857; }
+  .kpi-value.negative { color:#b45309; }
+  .double-panels { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:22px; }
+  .table-wrap { overflow-x:auto; }
+  .table { width:100%; border-collapse:collapse; }
+  .table th, .table td { padding:14px 18px; border-bottom:1px solid #eef2f7; text-align:left; white-space:nowrap; }
+  .table th { background:#f8fafc; color:#475569; font-size:.82rem; text-transform:uppercase; letter-spacing:.03em; }
+  .empty-state { padding:24px 18px; color:#64748b; }
+  @media (max-width: 1080px) { .filters-grid, .kpis, .double-panels { grid-template-columns:repeat(2, minmax(160px,1fr)); } }
+  @media (max-width: 760px) { .filters-grid, .kpis, .double-panels { grid-template-columns:1fr; } .panel-header, .panel-body { padding:16px; } .table th, .table td { padding:12px 14px; } }
+</style>
+
+<section class="report-shell">
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Filtres du rapport</h3>
+      <p>Limitez la synthese a une caisse ou a une periode pour obtenir une lecture operationnelle claire.</p>
+    </div>
+    <div class="panel-body">
+      <form method="get">
+        <div class="filters-grid">
+          <div class="field">
+            <label for="id_caisse">Caisse</label>
+            <select name="caisse" id="id_caisse">
+              <option value="">Toutes les caisses</option>
+              {% for caisse in caisses %}
+              <option value="{{ caisse.id }}" {% if filters.caisse|stringformat:"s" == caisse.id|stringformat:"s" %}selected{% endif %}>{{ caisse.nom }} ({{ caisse.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="id_date_debut">Date debut</label>
+            <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
+          </div>
+          <div class="field">
+            <label for="id_date_fin">Date fin</label>
+            <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">Mettre a jour</button>
+          <a href="{% url 'caisse_reports' %}" class="ghost">Reinitialiser</a>
+          <a href="{% url 'caisse_reports_export_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">Export PDF</a>
+          <a href="{% url 'caisse_movement_list' %}" class="ghost">Voir les mouvements</a>
+          <a href="{% url 'caisse_session_list' %}" class="ghost">Voir les sessions</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><span class="kpi-label">Total entrees</span><span class="kpi-value positive">{{ report.total_entrees }}</span></div>
+    <div class="kpi"><span class="kpi-label">Total sorties</span><span class="kpi-value negative">{{ report.total_sorties }}</span></div>
+    <div class="kpi"><span class="kpi-label">Depenses caisse</span><span class="kpi-value negative">{{ report.total_depenses_caisse }}</span></div>
+    <div class="kpi"><span class="kpi-label">Paiements facture caisse</span><span class="kpi-value positive">{{ report.total_paiements_factures }}</span></div>
+    <div class="kpi"><span class="kpi-label">Solde net</span><span class="kpi-value {% if report.solde_net >= 0 %}positive{% else %}negative{% endif %}">{{ report.solde_net }}</span></div>
+    <div class="kpi"><span class="kpi-label">Nombre de mouvements</span><span class="kpi-value">{{ report.nombre_mouvements }}</span></div>
+    <div class="kpi"><span class="kpi-label">Sessions ouvertes / fermees / validees</span><span class="kpi-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></div>
+    <div class="kpi"><span class="kpi-label">Ecarts positifs / negatifs</span><span class="kpi-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></div>
+  </div>
+
+  <div class="double-panels">
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Synthese par caisse</h3>
+        <p>Vue consolidee des flux par caisse sur la periode active.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Caisse</th>
+              <th>Mouvements</th>
+              <th>Entrees</th>
+              <th>Sorties</th>
+              <th>Depenses</th>
+              <th>Paiements</th>
+              <th>Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in report.summary_by_caisse %}
+            <tr>
+              <td>{{ row.nom }} ({{ row.code }})</td>
+              <td>{{ row.mouvement_count }}</td>
+              <td>{{ row.total_entrees }}</td>
+              <td>{{ row.total_sorties }}</td>
+              <td>{{ row.total_depenses }}</td>
+              <td>{{ row.total_paiements }}</td>
+              <td>{{ row.solde_net }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="empty-state">Aucune donnee a afficher pour cette periode.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Synthese par type de mouvement</h3>
+        <p>Repartition des flux confirmes par categorie de mouvement.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Nombre</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in report.summary_by_type %}
+            <tr>
+              <td>{{ row.label }}</td>
+              <td>{{ row.count }}</td>
+              <td>{{ row.total }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="empty-state">Aucun mouvement sur la periode selectionnee.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -255,9 +255,10 @@
       {% if can_create_caisse %}
       <a href="{% url 'caisse_create' %}" class="cash-btn">Nouvelle caisse</a>
       {% endif %}
+      <a href="{% url 'caisse_session_list' %}" class="ghost-btn">Toutes les sessions</a>
+      <a href="{% url 'caisse_movement_list' %}" class="ghost-btn">Tous les mouvements</a>
+      <a href="{% url 'caisse_reports' %}" class="ghost-btn">Rapports caisse</a>
       <a href="#sessions-ouvertes" class="ghost-btn">Voir les sessions ouvertes</a>
-      <a href="#mouvements-recents" class="ghost-btn">Derniers mouvements</a>
-      <a href="#ecarts-recents" class="ghost-btn">Ecarts recents</a>
     </div>
   </div>
 
@@ -301,9 +302,9 @@
       {% if can_create_caisse %}
       <a href="{% url 'caisse_create' %}" class="cash-btn">Creer une caisse</a>
       {% endif %}
-      <a href="#caisses-liste" class="ghost-btn">Voir les caisses</a>
-      <a href="#sessions-ouvertes" class="ghost-btn">Voir les sessions ouvertes</a>
-      <a href="#mouvements-recents" class="ghost-btn">Voir les operations</a>
+      <a href="{% url 'caisse_session_list' %}" class="ghost-btn">Sessions</a>
+      <a href="{% url 'caisse_movement_list' %}" class="ghost-btn">Mouvements</a>
+      <a href="{% url 'caisse_reports' %}" class="ghost-btn">Rapports</a>
     </div>
   </div>
 

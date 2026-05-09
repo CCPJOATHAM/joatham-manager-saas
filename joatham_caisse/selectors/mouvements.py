@@ -17,7 +17,18 @@ def get_total_mouvements_for_session(session):
     return MouvementCaisse.objects.filter(session=session).aggregate(total=Sum("montant")).get("total")
 
 
-def get_mouvements_for_entreprise(entreprise, *, caisse=None, session=None, date_debut=None, date_fin=None):
+def get_mouvements_for_entreprise(
+    entreprise,
+    *,
+    caisse=None,
+    session=None,
+    type_mouvement=None,
+    date_debut=None,
+    date_fin=None,
+    montant_min=None,
+    montant_max=None,
+    q=None,
+):
     queryset = scope_queryset_to_entreprise(MouvementCaisse.objects.all(), entreprise).select_related(
         "caisse",
         "session",
@@ -27,10 +38,18 @@ def get_mouvements_for_entreprise(entreprise, *, caisse=None, session=None, date
         queryset = queryset.filter(caisse=caisse)
     if session is not None:
         queryset = queryset.filter(session=session)
+    if type_mouvement:
+        queryset = queryset.filter(type_mouvement=type_mouvement)
     if date_debut:
         queryset = queryset.filter(date_mouvement__date__gte=date_debut)
     if date_fin:
         queryset = queryset.filter(date_mouvement__date__lte=date_fin)
+    if montant_min is not None:
+        queryset = queryset.filter(montant__gte=montant_min)
+    if montant_max is not None:
+        queryset = queryset.filter(montant__lte=montant_max)
+    if q:
+        queryset = queryset.filter(Q(libelle__icontains=q) | Q(reference__icontains=q))
     return queryset.order_by("-date_mouvement", "-id")
 
 

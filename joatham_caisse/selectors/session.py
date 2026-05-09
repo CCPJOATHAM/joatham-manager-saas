@@ -3,7 +3,16 @@ from core.services.tenancy import get_object_for_entreprise, scope_queryset_to_e
 from ..models import SessionCaisse
 
 
-def get_sessions_by_entreprise(entreprise, *, caisse=None, statut=None, date_debut=None, date_fin=None):
+def get_sessions_by_entreprise(
+    entreprise,
+    *,
+    caisse=None,
+    statut=None,
+    date_debut=None,
+    date_fin=None,
+    utilisateur_ouverture=None,
+    avec_ecart=False,
+):
     queryset = scope_queryset_to_entreprise(SessionCaisse.objects.all(), entreprise).select_related(
         "caisse",
         "utilisateur_ouverture",
@@ -17,6 +26,10 @@ def get_sessions_by_entreprise(entreprise, *, caisse=None, statut=None, date_deb
         queryset = queryset.filter(date_ouverture__date__gte=date_debut)
     if date_fin:
         queryset = queryset.filter(date_ouverture__date__lte=date_fin)
+    if utilisateur_ouverture is not None:
+        queryset = queryset.filter(utilisateur_ouverture=utilisateur_ouverture)
+    if avec_ecart:
+        queryset = queryset.exclude(ecart=0)
     return queryset.order_by("-date_ouverture", "-id")
 
 
