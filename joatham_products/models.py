@@ -114,3 +114,106 @@ class StockMovement(models.Model):
 
     def __str__(self):
         return f"{self.produit} - {self.movement_type} - {self.quantity}"
+
+
+class InventorySession(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Brouillon"
+        IN_PROGRESS = "in_progress", "En cours"
+        CLOSED = "closed", "Cloture"
+        VALIDATED = "validated", "Valide"
+        CANCELLED = "cancelled", "Annule"
+
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="inventory_sessions",
+    )
+    name = models.CharField(max_length=150)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    started_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    validated_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="inventory_sessions_created",
+    )
+    validated_by = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="inventory_sessions_validated",
+    )
+    comment = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["entreprise", "status"], name="inv_sess_ent_status_idx"),
+            models.Index(fields=["entreprise", "started_at"], name="inv_sess_ent_start_idx"),
+            models.Index(fields=["entreprise", "validated_at"], name="inv_sess_ent_valid_idx"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.name = (self.name or "").strip()
+        self.comment = (self.comment or "").strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class InventoryLine(models.Model):
+    session = models.ForeignKey(
+        InventorySession,
+        on_delete=models.CASCADE,
+        related_name="lines",
+    )
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="inventory_lines",
+    )
+    produit = models.ForeignKey(
+        Produit,
+        on_delete=models.CASCADE,
+        related_name="inventory_lines",
+    )
+    theoretical_quantity = models.PositiveIntegerField(default=0)
+    counted_quantity = models.PositiveIntegerField(null=True, blank=True)
+    difference = models.IntegerField(default=0)
+    comment = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["produit__nom", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["session", "produit"], name="uniq_inventory_line_session_product"),
+            models.CheckConstraint(condition=Q(theoretical_quantity__gte=0), name="inv_line_theoretical_gte_zero"),
+            models.CheckConstraint(
+                condition=Q(counted_quantity__isnull=True) | Q(counted_quantity__gte=0),
+                name="inv_line_counted_gte_zero_or_null",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["entreprise", "session"], name="inv_line_ent_session_idx"),
+            models.Index(fields=["entreprise", "produit"], name="inv_line_ent_product_idx"),
+            models.Index(fields=["session", "produit"], name="inv_line_session_prod_idx"),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.counted_quantity is None:
+            self.difference = 0
+        else:
+            self.difference = int(self.counted_quantity) - int(self.theoretical_quantity or 0)
+        self.comment = (self.comment or "").strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.session} - {self.produit}"

@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 
 from .models import Produit, StockMovement
@@ -80,3 +81,36 @@ class StockMovementForm(forms.Form):
         if movement_type not in allowed_values:
             raise forms.ValidationError(_("Le type de mouvement selectionne est invalide."))
         return movement_type
+
+
+class InventorySessionForm(forms.Form):
+    name = forms.CharField(max_length=150, label=_("Nom de l'inventaire"))
+    comment = forms.CharField(
+        required=False,
+        label=_("Commentaire"),
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs.update({"placeholder": _("Exemple : Inventaire mensuel magasin principal")})
+        self.fields["comment"].widget.attrs.update({"placeholder": _("Notes ou consignes pour cette session d'inventaire")})
+
+
+class InventoryCountForm(forms.Form):
+    line_id = forms.IntegerField(widget=forms.HiddenInput)
+    counted_quantity = forms.IntegerField(min_value=0, label=_("Quantite comptee"))
+    comment = forms.CharField(
+        required=False,
+        label=_("Commentaire"),
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+
+    def clean_line_id(self):
+        line_id = self.cleaned_data["line_id"]
+        if line_id <= 0:
+            raise forms.ValidationError(_("La ligne d'inventaire est invalide."))
+        return line_id
+
+
+InventoryCountFormSet = formset_factory(InventoryCountForm, extra=0)

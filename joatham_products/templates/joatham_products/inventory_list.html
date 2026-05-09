@@ -1,0 +1,116 @@
+{% extends "joatham_products/base.html" %}
+{% load i18n %}
+
+{% block products_title %}{% trans "Inventaires physiques" %}{% endblock %}
+{% block products_subtitle %}{% trans "Preparez vos comptages, suivez les ecarts et validez les ajustements de stock dans un cadre simple et fiable." %}{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar, .actions, .filters-inline { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .toolbar { justify-content:space-between; margin-bottom:18px; }
+    .action-link { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:0 14px; border-radius:12px; border:1px solid #dbe5ef; background:#fff; color:#10233f; text-decoration:none; font-weight:700; }
+    .action-link.primary { background:#0f766e; border-color:#0f766e; color:#fff; }
+    .filters-card,.table-shell,.kpi-card { border:1px solid #dde7f0; border-radius:22px; background:#fff; box-shadow:0 16px 34px rgba(15,23,42,.05); }
+    .filters-card { padding:18px; margin-bottom:18px; }
+    .filter-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .field { display:flex; flex-direction:column; gap:8px; }
+    .field input,.field select { width:100%; padding:12px 13px; border-radius:12px; border:1px solid #d7dee7; }
+    .table-shell { overflow:hidden; }
+    .table-scroll { overflow-x:auto; }
+    .inventory-table { width:100%; border-collapse:collapse; min-width:920px; }
+    .inventory-table thead { background:#f8fafc; }
+    .inventory-table th,.inventory-table td { padding:14px 16px; border-bottom:1px solid #eef2f7; text-align:left; vertical-align:middle; }
+    .inventory-table th { color:#475569; font-size:.88rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .badge { display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding:0 10px; border-radius:999px; font-size:.78rem; font-weight:800; border:1px solid transparent; white-space:nowrap; }
+    .badge.draft { background:#f1f5f9; border-color:#cbd5e1; color:#475569; }
+    .badge.in-progress { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+    .badge.closed { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
+    .badge.validated { background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+    .badge.cancelled { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
+    .muted { color:#64748b; }
+    .empty-state { padding:48px 24px; text-align:center; }
+    @media (max-width: 820px) { .filter-grid { grid-template-columns:1fr; } }
+</style>
+
+<div class="toolbar">
+    <div class="actions">
+        {% if can_inventory_stock_ui %}
+        <a href="{% url 'inventory_create' %}" class="action-link primary">{% trans "Nouvel inventaire" %}</a>
+        {% endif %}
+    </div>
+    <div class="filters-inline">
+        <a href="{% url 'product_list' %}" class="action-link">{% trans "Retour aux produits" %}</a>
+    </div>
+</div>
+
+<div class="filters-card">
+    <form method="get">
+        <div class="filter-grid">
+            <div class="field">
+                <label for="status">{% trans "Statut" %}</label>
+                <select id="status" name="status">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="date_debut">{% trans "Date debut" %}</label>
+                <input type="date" id="date_debut" name="date_debut" value="{{ selected_date_debut }}">
+            </div>
+            <div class="field">
+                <label for="date_fin">{% trans "Date fin" %}</label>
+                <input type="date" id="date_fin" name="date_fin" value="{{ selected_date_fin }}">
+            </div>
+        </div>
+        <div class="actions" style="margin-top:16px;">
+            <button type="submit" class="action-link primary">{% trans "Filtrer" %}</button>
+            <a href="{% url 'inventory_list' %}" class="action-link">{% trans "Reinitialiser" %}</a>
+        </div>
+    </form>
+</div>
+
+{% if sessions %}
+<div class="table-shell">
+    <div class="table-scroll">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Nom" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Date debut" %}</th>
+                    <th>{% trans "Date cloture" %}</th>
+                    <th>{% trans "Date validation" %}</th>
+                    <th>{% trans "Createur" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in sessions %}
+                <tr>
+                    <td>{{ row.instance.name }}</td>
+                    <td>
+                        <span class="badge {% if row.instance.status == 'draft' %}draft{% elif row.instance.status == 'in_progress' %}in-progress{% elif row.instance.status == 'closed' %}closed{% elif row.instance.status == 'validated' %}validated{% else %}cancelled{% endif %}">
+                            {{ row.status_label }}
+                        </span>
+                    </td>
+                    <td>{% if row.instance.started_at %}{{ row.instance.started_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.closed_at %}{{ row.instance.closed_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.validated_at %}{{ row.instance.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.created_by %}{{ row.instance.created_by.username }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td><a href="{% url 'inventory_detail' row.instance.id %}" class="action-link">{% trans "Voir" %}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="table-shell">
+    <div class="empty-state">
+        <h3>{% trans "Aucun inventaire trouve" %}</h3>
+        <p class="muted">{% trans "Commencez une session d'inventaire pour figer le stock theorique et saisir vos comptages." %}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

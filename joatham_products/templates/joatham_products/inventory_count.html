@@ -1,0 +1,72 @@
+{% extends "joatham_products/base.html" %}
+{% load i18n %}
+
+{% block products_title %}{% trans "Comptage inventaire" %} - {{ session.name }}{% endblock %}
+{% block products_subtitle %}{% trans "Saisissez les quantites comptees pour chaque produit avant cloture et validation." %}{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar,.actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .action-link,.submit-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 16px; border-radius:12px; border:1px solid #dbe5ef; background:#fff; color:#10233f; text-decoration:none; font-weight:700; }
+    .submit-btn { background:#0f766e; border-color:#0f766e; color:#fff; cursor:pointer; }
+    .table-shell { border:1px solid #dde7f0; border-radius:22px; background:#fff; box-shadow:0 16px 34px rgba(15,23,42,.05); overflow:hidden; }
+    .table-scroll { overflow-x:auto; }
+    .count-table { width:100%; border-collapse:collapse; min-width:980px; }
+    .count-table thead { background:#f8fafc; }
+    .count-table th,.count-table td { padding:14px 16px; border-bottom:1px solid #eef2f7; text-align:left; vertical-align:top; }
+    .count-table th { color:#475569; font-size:.88rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .count-table input,.count-table textarea { width:100%; padding:11px 12px; border-radius:12px; border:1px solid #d7dee7; }
+    .errorlist { margin:0; padding:0; list-style:none; color:#b91c1c; font-size:.9rem; }
+    .muted { color:#64748b; }
+</style>
+
+<div class="toolbar">
+    <div class="actions">
+        <a href="{% url 'inventory_detail' session.id %}" class="action-link">{% trans "Retour au detail" %}</a>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}
+    <ul class="errorlist">{{ formset.non_form_errors }}</ul>
+    {% endif %}
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="count-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Produit" %}</th>
+                        <th>{% trans "Stock theorique" %}</th>
+                        <th>{% trans "Quantite comptee" %}</th>
+                        <th>{% trans "Commentaire" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in line_forms %}
+                    <tr>
+                        <td>
+                            {{ row.form.line_id }}
+                            <strong>{{ row.line.produit.nom }}</strong>
+                        </td>
+                        <td>{{ row.line.theoretical_quantity }}</td>
+                        <td>
+                            {{ row.form.counted_quantity }}
+                            {{ row.form.counted_quantity.errors }}
+                        </td>
+                        <td>
+                            {{ row.form.comment }}
+                            {{ row.form.comment.errors }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="actions" style="margin-top:18px; justify-content:flex-end;">
+        <button type="submit" class="submit-btn">{% trans "Enregistrer les comptages" %}</button>
+    </div>
+</form>
+{% endblock %}

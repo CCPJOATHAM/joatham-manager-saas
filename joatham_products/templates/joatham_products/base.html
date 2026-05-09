@@ -10,6 +10,9 @@
 {% if can_view_stock_ui %}
 <a href="{% url 'stock_movement_list' %}" class="btn-link">{% trans "Mouvements stock" %}</a>
 {% endif %}
+{% if can_inventory_stock_ui %}
+<a href="{% url 'inventory_list' %}" class="btn-link">{% trans "Inventaires" %}</a>
+{% endif %}
 {% if can_manage_products_ui %}
 <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>
 {% endif %}

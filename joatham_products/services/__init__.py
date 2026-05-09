@@ -9,3 +9,13 @@ from .stock import (
     record_stock_movement,
     restore_invoice_stock,
 )
+from .inventory import (
+    InventoryOperationError,
+    add_products_to_inventory,
+    cancel_inventory_session,
+    close_inventory_session,
+    create_inventory_session,
+    record_inventory_count,
+    start_inventory_session,
+    validate_inventory_session,
+)

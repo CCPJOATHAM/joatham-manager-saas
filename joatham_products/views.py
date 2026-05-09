@@ -9,7 +9,13 @@ from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
 
-from .forms import ProduitCreateForm, ProduitUpdateForm, StockMovementForm
+from .forms import (
+    InventoryCountFormSet,
+    InventorySessionForm,
+    ProduitCreateForm,
+    ProduitUpdateForm,
+    StockMovementForm,
+)
 from .models import StockMovement
 from .selectors.products import (
     STOCK_FILTER_ALL,
@@ -18,7 +24,22 @@ from .selectors.products import (
     get_product_by_entreprise,
     get_product_counts_by_entreprise,
 )
+from .selectors.inventory import (
+    get_inventory_lines_for_session,
+    get_inventory_session_for_entreprise,
+    get_inventory_sessions_for_entreprise,
+    get_inventory_summary,
+)
 from .selectors.stock import get_stock_movements_for_entreprise
+from .services.inventory import (
+    InventoryOperationError,
+    cancel_inventory_session,
+    close_inventory_session,
+    create_inventory_session,
+    record_inventory_count,
+    start_inventory_session,
+    validate_inventory_session,
+)
 from .services.products_service import create_product_for_entreprise, list_products_for_entreprise, update_product_for_entreprise
 from .services.stock import StockOperationError, apply_adjustment, apply_manual_entry, apply_manual_exit
 
@@ -29,6 +50,7 @@ def _build_product_ui_permissions(user):
         "can_view_stock_ui": user_has_permission(user, "stock.view"),
         "can_move_stock_ui": user_has_permission(user, "stock.move"),
         "can_adjust_stock_ui": user_has_permission(user, "stock.adjust"),
+        "can_inventory_stock_ui": user_has_permission(user, "stock.inventory"),
     }
 
 
@@ -44,6 +66,16 @@ def _build_stock_type_label(movement_type):
         StockMovement.MovementType.TRANSFER_OUT: _("Transfert sortant"),
         StockMovement.MovementType.TRANSFER_IN: _("Transfert entrant"),
     }.get(movement_type, movement_type)
+
+
+def _build_inventory_status_label(status):
+    return {
+        "draft": _("Brouillon"),
+        "in_progress": _("En cours"),
+        "closed": _("Cloture"),
+        "validated": _("Valide"),
+        "cancelled": _("Annule"),
+    }.get(status, status)
 
 
 def _get_stock_filters_from_request(request, entreprise):
@@ -71,6 +103,20 @@ def _get_stock_filters_from_request(request, entreprise):
     }
 
 
+def _get_inventory_filters_from_request(request):
+    status = (request.GET.get("status") or "").strip()
+    date_debut = parse_date((request.GET.get("date_debut") or "").strip()) if request.GET.get("date_debut") else None
+    date_fin = parse_date((request.GET.get("date_fin") or "").strip()) if request.GET.get("date_fin") else None
+    return {
+        "status": status or None,
+        "date_debut": date_debut,
+        "date_fin": date_fin,
+        "selected_status": status,
+        "selected_date_debut": request.GET.get("date_debut", ""),
+        "selected_date_fin": request.GET.get("date_fin", ""),
+    }
+
+
 def _build_stock_operation_context(*, form, page_title, submit_label, help_text):
     return {
         "form": form,
@@ -79,6 +125,16 @@ def _build_stock_operation_context(*, form, page_title, submit_label, help_text)
         "help_text": help_text,
         "back_url": "stock_movement_list",
     }
+
+
+def _build_inventory_lines_data(lines):
+    return [
+        {
+            "instance": line,
+            "difference_label": f"{line.difference:+d}" if line.counted_quantity is not None else "-",
+        }
+        for line in lines
+    ]
 
 
 def _handle_stock_operation(*, request, entreprise, form, operation):
@@ -379,3 +435,197 @@ def stock_adjustment_create(request):
             **_build_product_ui_permissions(request.user),
         },
     )
+
+
+@permission_required("stock.view")
+@module_access_required("products")
+def inventory_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_inventory_filters_from_request(request)
+    sessions = get_inventory_sessions_for_entreprise(
+        entreprise,
+        status=filters["status"],
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+    )
+    rows = [
+        {
+            "instance": session,
+            "status_label": _build_inventory_status_label(session.status),
+        }
+        for session in sessions
+    ]
+    return render(
+        request,
+        "joatham_products/inventory_list.html",
+        {
+            "sessions": rows,
+            "status_choices": [
+                ("", _("Tous les statuts")),
+                ("draft", _("Brouillon")),
+                ("in_progress", _("En cours")),
+                ("closed", _("Cloture")),
+                ("validated", _("Valide")),
+                ("cancelled", _("Annule")),
+            ],
+            **filters,
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.inventory")
+@module_access_required("products")
+def inventory_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = InventorySessionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        session = create_inventory_session(
+            entreprise=entreprise,
+            name=form.cleaned_data["name"],
+            comment=form.cleaned_data["comment"],
+            utilisateur=request.user,
+            include_active_products=True,
+        )
+        messages.success(request, _("La session d'inventaire a ete creee avec succes."))
+        return redirect("inventory_detail", pk=session.id)
+
+    return render(
+        request,
+        "joatham_products/inventory_form.html",
+        {
+            "form": form,
+            "page_title": _("Nouvel inventaire physique"),
+            "submit_label": _("Creer l'inventaire"),
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.view")
+@module_access_required("products")
+def inventory_detail(request, pk):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    session = get_inventory_session_for_entreprise(entreprise, pk)
+    lines = get_inventory_lines_for_session(entreprise, session)
+    summary = get_inventory_summary(entreprise, session)
+    return render(
+        request,
+        "joatham_products/inventory_detail.html",
+        {
+            "session": session,
+            "status_label": _build_inventory_status_label(session.status),
+            "summary": summary,
+            "lines": _build_inventory_lines_data(lines),
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.inventory")
+@module_access_required("products")
+def inventory_count(request, pk):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    session = get_inventory_session_for_entreprise(entreprise, pk)
+    try:
+        if session.status == session.Status.DRAFT:
+            session = start_inventory_session(entreprise=entreprise, session_id=session.id)
+    except InventoryOperationError as exc:
+        messages.error(request, str(exc))
+        return redirect("inventory_detail", pk=session.id)
+
+    if session.status != session.Status.IN_PROGRESS:
+        messages.error(request, _("Seules les sessions en cours peuvent etre comptees."))
+        return redirect("inventory_detail", pk=session.id)
+
+    lines = list(get_inventory_lines_for_session(entreprise, session))
+    initial = [
+        {
+            "line_id": line.id,
+            "counted_quantity": line.counted_quantity if line.counted_quantity is not None else "",
+            "comment": line.comment,
+        }
+        for line in lines
+    ]
+    formset = InventoryCountFormSet(request.POST or None, initial=initial)
+
+    if request.method == "POST" and formset.is_valid():
+        try:
+            for form in formset:
+                record_inventory_count(
+                    entreprise=entreprise,
+                    session_id=session.id,
+                    line_id=form.cleaned_data["line_id"],
+                    counted_quantity=form.cleaned_data["counted_quantity"],
+                    comment=form.cleaned_data["comment"],
+                )
+        except InventoryOperationError as exc:
+            formset._non_form_errors = formset.error_class([str(exc)])
+        else:
+            messages.success(request, _("Les comptages ont ete enregistres avec succes."))
+            return redirect("inventory_detail", pk=session.id)
+
+    line_forms = []
+    for form, line in zip(formset.forms, lines):
+        line_forms.append({"form": form, "line": line})
+
+    return render(
+        request,
+        "joatham_products/inventory_count.html",
+        {
+            "session": session,
+            "status_label": _build_inventory_status_label(session.status),
+            "formset": formset,
+            "line_forms": line_forms,
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.inventory")
+@module_access_required("products")
+def inventory_close(request, pk):
+    if request.method != "POST":
+        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+    entreprise = get_user_entreprise_or_raise(request.user)
+    try:
+        close_inventory_session(entreprise=entreprise, session_id=pk)
+    except InventoryOperationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("La session d'inventaire a ete cloturee."))
+    return redirect("inventory_detail", pk=pk)
+
+
+@permission_required("stock.inventory")
+@module_access_required("products")
+def inventory_validate(request, pk):
+    if request.method != "POST":
+        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+    entreprise = get_user_entreprise_or_raise(request.user)
+    try:
+        validate_inventory_session(
+            entreprise=entreprise,
+            session_id=pk,
+            utilisateur=request.user,
+        )
+    except (InventoryOperationError, StockOperationError) as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("L'inventaire a ete valide et les ajustements ont ete enregistres."))
+    return redirect("inventory_detail", pk=pk)
+
+
+@permission_required("stock.inventory")
+@module_access_required("products")
+def inventory_cancel(request, pk):
+    if request.method != "POST":
+        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+    entreprise = get_user_entreprise_or_raise(request.user)
+    try:
+        cancel_inventory_session(entreprise=entreprise, session_id=pk)
+    except InventoryOperationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("La session d'inventaire a ete annulee."))
+    return redirect("inventory_detail", pk=pk)

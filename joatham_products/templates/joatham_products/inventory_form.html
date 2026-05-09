@@ -1,0 +1,39 @@
+{% extends "joatham_products/base.html" %}
+{% load i18n %}
+
+{% block products_title %}{{ page_title }}{% endblock %}
+{% block products_subtitle %}{% trans "Creez une session d'inventaire pour figer votre stock theorique avant comptage physique." %}{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { max-width: 820px; background:#fff; border:1px solid #dde7f0; border-radius:22px; padding:26px; box-shadow:0 18px 40px rgba(15,23,42,.06); }
+    .form-grid { display:grid; grid-template-columns:1fr; gap:18px; }
+    .field { display:flex; flex-direction:column; gap:8px; }
+    .field label { font-weight:700; color:#10233f; }
+    .field input,.field textarea { width:100%; padding:13px 14px; border-radius:12px; border:1px solid #d7dee7; }
+    .field input:focus,.field textarea:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 4px rgba(37,99,235,.08); }
+    .help { color:#64748b; line-height:1.6; margin:0 0 18px; }
+    .submit-btn { margin-top:20px; min-height:46px; padding:0 20px; border-radius:12px; border:1px solid #0f766e; background:linear-gradient(135deg,#0f766e,#115e59); color:#fff; font-weight:700; cursor:pointer; }
+    .errorlist { margin:0; padding:0; list-style:none; color:#b91c1c; font-size:.9rem; }
+</style>
+
+<div class="form-card">
+    <p class="help">{% trans "Le stock theorique des produits actifs sera fige a la creation de cette session. Les ajustements ne seront appliques qu'apres validation finale." %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="field">
+                <label for="{{ form.name.id_for_label }}">{% trans "Nom de l'inventaire" %}</label>
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+            <div class="field">
+                <label for="{{ form.comment.id_for_label }}">{% trans "Commentaire" %}</label>
+                {{ form.comment }}
+                {{ form.comment.errors }}
+            </div>
+        </div>
+        <button type="submit" class="submit-btn">{{ submit_label }}</button>
+    </form>
+</div>
+{% endblock %}
