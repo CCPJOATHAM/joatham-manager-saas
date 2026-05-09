@@ -4,6 +4,8 @@ from django.shortcuts import redirect, render
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
+from joatham_apprenants.services.export_service import build_report_metadata, build_xlsx_response
+from joatham_billing.pdf import render_pdf_response
 from core.services.quotas import PlanQuotaExceeded
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
@@ -30,6 +32,13 @@ from .selectors.inventory import (
     get_inventory_sessions_for_entreprise,
     get_inventory_summary,
 )
+from .selectors.reports import (
+    get_recent_stock_activity,
+    get_stock_report_inventory_summary,
+    get_stock_report_movement_type_summary,
+    get_stock_report_product_summary,
+    get_stock_report_snapshot,
+)
 from .selectors.stock import get_stock_movements_for_entreprise
 from .services.inventory import (
     InventoryOperationError,
@@ -51,6 +60,7 @@ def _build_product_ui_permissions(user):
         "can_move_stock_ui": user_has_permission(user, "stock.move"),
         "can_adjust_stock_ui": user_has_permission(user, "stock.adjust"),
         "can_inventory_stock_ui": user_has_permission(user, "stock.inventory"),
+        "can_export_stock_ui": user_has_permission(user, "stock.export"),
     }
 
 
@@ -135,6 +145,16 @@ def _build_inventory_lines_data(lines):
         }
         for line in lines
     ]
+
+
+def _normalize_stock_report_filters(filters):
+    return {
+        "produit": filters["produit"],
+        "movement_type": filters["movement_type"],
+        "date_debut": filters["date_debut"],
+        "date_fin": filters["date_fin"],
+        "source_app": filters["source_app"],
+    }
 
 
 def _handle_stock_operation(*, request, entreprise, form, operation):
@@ -329,10 +349,194 @@ def stock_movement_list(request):
             "source_choices": [
                 ("", _("Toutes les sources")),
                 ("joatham_billing", _("Facturation")),
+                ("joatham_products", _("Produits / inventaire")),
             ],
             **filters,
             **_build_product_ui_permissions(request.user),
         },
+    )
+
+
+@permission_required("stock.view")
+@module_access_required("products")
+def stock_reports(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_stock_filters_from_request(request, entreprise)
+    report_filters = _normalize_stock_report_filters(filters)
+    report = get_stock_report_snapshot(entreprise, **report_filters)
+    product_summary = get_stock_report_product_summary(entreprise, **report_filters)
+    movement_type_summary = get_stock_report_movement_type_summary(entreprise, **report_filters)
+    inventory_summary = get_stock_report_inventory_summary(
+        entreprise,
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+    )
+    recent_movements = get_recent_stock_activity(entreprise, limit=20, **report_filters)
+    products = list_products_for_entreprise(entreprise)
+
+    return render(
+        request,
+        "joatham_products/stock_reports.html",
+        {
+            "report": report,
+            "product_summary": product_summary,
+            "movement_type_summary": movement_type_summary,
+            "inventory_summary": inventory_summary,
+            "recent_movements": recent_movements,
+            "products": products,
+            "movement_types": [
+                (StockMovement.MovementType.MANUAL_ENTRY, _("Entree")),
+                (StockMovement.MovementType.MANUAL_EXIT, _("Sortie")),
+                (StockMovement.MovementType.ADJUSTMENT_POSITIVE, _("Ajustement +")),
+                (StockMovement.MovementType.ADJUSTMENT_NEGATIVE, _("Ajustement -")),
+                (StockMovement.MovementType.INVOICE_SALE, _("Vente facture")),
+                (StockMovement.MovementType.INVOICE_RESTORE, _("Restauration facture")),
+            ],
+            "source_choices": [
+                ("", _("Toutes les sources")),
+                ("joatham_billing", _("Facturation")),
+                ("joatham_products", _("Produits / inventaire")),
+            ],
+            **filters,
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.export")
+@module_access_required("products")
+def stock_movement_export_excel(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_stock_filters_from_request(request, entreprise)
+    movements = get_stock_movements_for_entreprise(
+        entreprise,
+        produit=filters["produit"],
+        movement_type=filters["movement_type"],
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+        source_app=filters["source_app"],
+    )
+    rows = [
+        [
+            movement.created_at.strftime("%d/%m/%Y %H:%M"),
+            movement.produit.nom,
+            _build_stock_type_label(movement.movement_type),
+            movement.quantity,
+            movement.stock_before,
+            movement.stock_after,
+            movement.reference,
+            movement.reason,
+            movement.comment,
+            movement.source_app,
+            movement.source_model,
+            movement.source_id if movement.source_id is not None else "",
+            movement.created_by.username if movement.created_by else "",
+        ]
+        for movement in movements
+    ]
+    return build_xlsx_response(
+        filename="mouvements-stock.xlsx",
+        sheet_name="Mouvements stock",
+        headers=[
+            "Date",
+            "Produit",
+            "Type",
+            "Quantite",
+            "Stock avant",
+            "Stock apres",
+            "Reference",
+            "Motif",
+            "Commentaire",
+            "Source app",
+            "Source model",
+            "Source id",
+            "Utilisateur",
+        ],
+        rows=rows,
+    )
+
+
+@permission_required("stock.export")
+@module_access_required("products")
+def inventory_export_excel(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_inventory_filters_from_request(request)
+    sessions = get_inventory_sessions_for_entreprise(
+        entreprise,
+        status=filters["status"],
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+    )
+    session_ids = list(sessions.values_list("id", flat=True))
+    lines = []
+    for session in sessions:
+        lines.extend(get_inventory_lines_for_session(entreprise, session))
+
+    rows = [
+        [
+            line.session.name,
+            _build_inventory_status_label(line.session.status),
+            line.produit.nom,
+            line.theoretical_quantity,
+            line.counted_quantity if line.counted_quantity is not None else "",
+            line.difference,
+            line.comment,
+            line.session.created_at.strftime("%d/%m/%Y %H:%M"),
+            line.session.validated_at.strftime("%d/%m/%Y %H:%M") if line.session.validated_at else "",
+        ]
+        for line in lines
+        if line.session_id in session_ids
+    ]
+    return build_xlsx_response(
+        filename="inventaires-stock.xlsx",
+        sheet_name="Inventaires stock",
+        headers=[
+            "Session",
+            "Statut",
+            "Produit",
+            "Stock theorique",
+            "Quantite comptee",
+            "Ecart",
+            "Commentaire ligne",
+            "Date creation session",
+            "Date validation",
+        ],
+        rows=rows,
+    )
+
+
+@permission_required("stock.export")
+@module_access_required("products")
+def stock_reports_export_pdf(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_stock_filters_from_request(request, entreprise)
+    report_filters = _normalize_stock_report_filters(filters)
+    report = get_stock_report_snapshot(entreprise, **report_filters)
+    product_summary = get_stock_report_product_summary(entreprise, **report_filters)
+    movement_type_summary = get_stock_report_movement_type_summary(entreprise, **report_filters)
+    inventory_summary = get_stock_report_inventory_summary(
+        entreprise,
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+    )
+    recent_movements = get_recent_stock_activity(entreprise, limit=20, **report_filters)
+    context = {
+        **build_report_metadata(entreprise=entreprise, title="Rapport stock"),
+        "report": report,
+        "product_summary": product_summary,
+        "movement_type_summary": movement_type_summary,
+        "inventory_summary": inventory_summary,
+        "recent_movements": recent_movements,
+        "selected_date_debut": filters["selected_date_debut"],
+        "selected_date_fin": filters["selected_date_fin"],
+        "selected_product_name": filters["produit"].nom if filters["produit"] else "",
+    }
+    return render_pdf_response(
+        request,
+        "joatham_products/stock_reports_pdf.html",
+        context,
+        "rapport-stock.pdf",
+        disposition="attachment",
     )
 
 

@@ -1,0 +1,123 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>{% trans "Rapport stock" %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #10233f; }
+        h1, h2 { margin: 0 0 10px; }
+        .meta { margin-bottom: 16px; color: #475569; }
+        .kpis { margin-bottom: 18px; }
+        .kpis td { padding: 4px 8px; border: 1px solid #d7dee7; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        th, td { border: 1px solid #d7dee7; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #f1f5f9; }
+        .section { margin-top: 18px; }
+    </style>
+</head>
+<body>
+    <h1>{% trans "Rapport stock" %}</h1>
+    <div class="meta">
+        <div><strong>{% trans "Entreprise :" %}</strong> {{ entreprise.nom }}</div>
+        <div><strong>{% trans "Date generation :" %}</strong> {{ date_generation }}</div>
+        <div><strong>{% trans "Periode :" %}</strong> {% if selected_date_debut or selected_date_fin %}{{ selected_date_debut|default:"-" }} - {{ selected_date_fin|default:"-" }}{% else %}{% trans "Toutes les dates" %}{% endif %}</div>
+        {% if selected_product_name %}<div><strong>{% trans "Produit filtre :" %}</strong> {{ selected_product_name }}</div>{% endif %}
+    </div>
+
+    <table class="kpis">
+        <tr>
+            <td>{% trans "Produits actifs" %}: {{ report.total_produits_actifs }}</td>
+            <td>{% trans "Produits en stock" %}: {{ report.produits_en_stock }}</td>
+            <td>{% trans "Ruptures" %}: {{ report.produits_rupture }}</td>
+            <td>{% trans "Stock faible" %}: {{ report.produits_stock_faible }}</td>
+        </tr>
+        <tr>
+            <td>{% trans "Mouvements" %}: {{ report.total_mouvements }}</td>
+            <td>{% trans "Entrees" %}: {{ report.total_entrees }}</td>
+            <td>{% trans "Sorties" %}: {{ report.total_sorties }}</td>
+            <td>{% trans "Inventaires valides" %}: {{ report.inventaires_valides }}</td>
+        </tr>
+        <tr>
+            <td>{% trans "Ajustements +" %}: {{ report.total_ajustements_positifs }}</td>
+            <td>{% trans "Ajustements -" %}: {{ report.total_ajustements_negatifs }}</td>
+            <td>{% trans "Inventaires avec ecarts" %}: {{ report.inventaires_avec_ecarts }}</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div class="section">
+        <h2>{% trans "Synthese par produit" %}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Produit" %}</th>
+                    <th>{% trans "Stock actuel" %}</th>
+                    <th>{% trans "Seuil" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Entrees" %}</th>
+                    <th>{% trans "Sorties" %}</th>
+                    <th>{% trans "Solde" %}</th>
+                    <th>{% trans "Dernier mouvement" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in product_summary %}
+                <tr>
+                    <td>{{ row.product.nom }}</td>
+                    <td>{{ row.stock_actuel }}</td>
+                    <td>{{ row.seuil_alerte }}</td>
+                    <td>{{ row.statut_stock_label }}</td>
+                    <td>{{ row.total_entrees }}</td>
+                    <td>{{ row.total_sorties }}</td>
+                    <td>{{ row.solde_mouvements }}</td>
+                    <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>{% trans "Synthese par type de mouvement" %}</h2>
+        <table>
+            <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Quantite totale" %}</th></tr></thead>
+            <tbody>
+                {% for row in movement_type_summary %}
+                <tr><td>{{ row.movement_label }}</td><td>{{ row.movement_count }}</td><td>{{ row.total_quantity }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>{% trans "Synthese inventaires" %}</h2>
+        <table>
+            <tbody>
+                <tr><td>{% trans "Brouillons" %}</td><td>{{ inventory_summary.draft_count }}</td><td>{% trans "En cours" %}</td><td>{{ inventory_summary.in_progress_count }}</td></tr>
+                <tr><td>{% trans "Clotures" %}</td><td>{{ inventory_summary.closed_count }}</td><td>{% trans "Valides" %}</td><td>{{ inventory_summary.validated_count }}</td></tr>
+                <tr><td>{% trans "Annules" %}</td><td>{{ inventory_summary.cancelled_count }}</td><td>{% trans "Inventaires avec ecarts" %}</td><td>{{ inventory_summary.inventories_with_differences }}</td></tr>
+                <tr><td>{% trans "Ecarts positifs" %}</td><td>{{ inventory_summary.positive_differences }}</td><td>{% trans "Ecarts negatifs" %}</td><td>{{ inventory_summary.negative_differences }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>{% trans "Derniers mouvements" %}</h2>
+        <table>
+            <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Source" %}</th></tr></thead>
+            <tbody>
+                {% for movement in recent_movements %}
+                <tr>
+                    <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ movement.produit.nom }}</td>
+                    <td>{{ movement.get_movement_type_display }}</td>
+                    <td>{{ movement.quantity }}</td>
+                    <td>{{ movement.source_app|default:"Manuelle" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

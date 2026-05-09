@@ -37,6 +37,9 @@
         {% if can_inventory_stock_ui %}
         <a href="{% url 'inventory_create' %}" class="action-link primary">{% trans "Nouvel inventaire" %}</a>
         {% endif %}
+        {% if can_export_stock_ui %}
+        <a href="{% url 'inventory_export_excel' %}?{% if selected_status %}status={{ selected_status|urlencode }}&amp;{% endif %}{% if selected_date_debut %}date_debut={{ selected_date_debut|urlencode }}&amp;{% endif %}{% if selected_date_fin %}date_fin={{ selected_date_fin|urlencode }}{% endif %}" class="action-link">{% trans "Export Excel" %}</a>
+        {% endif %}
     </div>
     <div class="filters-inline">
         <a href="{% url 'product_list' %}" class="action-link">{% trans "Retour aux produits" %}</a>
