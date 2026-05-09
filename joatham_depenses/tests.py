@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 
@@ -7,10 +8,18 @@ from core.services.quotas import FREE_PLAN_EXPENSE_MONTHLY_LIMIT, PlanQuotaExcee
 from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
 from joatham_billing.tests.factories import create_entreprise, create_user
 from core.services.currency import format_amount_for_entreprise, format_decimal_number
+from joatham_caisse.models import Caisse, MouvementCaisse
+from joatham_caisse.services.session import open_session
 from joatham_depenses.models import Depense
 from joatham_depenses.selectors.depenses import get_depenses_by_entreprise
 from joatham_depenses.forms import DepenseForm
-from joatham_depenses.services.depenses_service import create_depense_for_entreprise, get_depenses_kpis, get_depenses_total, list_depenses_for_entreprise
+from joatham_depenses.services.depenses_service import (
+    create_cash_movement_for_depense,
+    create_depense_for_entreprise,
+    get_depenses_kpis,
+    get_depenses_total,
+    list_depenses_for_entreprise,
+)
 from joatham_users.models import Abonnement
 
 
@@ -31,6 +40,13 @@ class DepensesServiceTests(TestCase):
             description="Transport",
             montant=Decimal("15.00"),
             entreprise=self.entreprise_b,
+        )
+        self.caisse = Caisse.objects.create(
+            entreprise=self.entreprise_a,
+            nom="Caisse depenses",
+            code="DEP-CASH",
+            devise="CDF",
+            cree_par=self.gestionnaire_a,
         )
 
     def test_depense_selector_scopes_to_entreprise(self):
@@ -107,3 +123,92 @@ class DepensesServiceTests(TestCase):
 
         with self.assertRaises(PlanQuotaExceeded):
             create_depense_for_entreprise(form, entreprise, utilisateur=owner)
+
+    def test_depense_without_cashbox_still_works(self):
+        form = DepenseForm(
+            data={"description": "Internet", "montant": "25.00"},
+            entreprise=self.entreprise_a,
+        )
+        self.assertTrue(form.is_valid())
+        depense = create_depense_for_entreprise(form, self.entreprise_a, utilisateur=self.gestionnaire_a)
+        self.assertIsNone(depense.caisse)
+        self.assertIsNone(depense.session_caisse)
+        self.assertFalse(
+            MouvementCaisse.objects.filter(
+                source_app="joatham_depenses",
+                source_model="Depense",
+                source_id=depense.id,
+            ).exists()
+        )
+
+    def test_depense_with_cashbox_and_open_session_creates_cash_movement(self):
+        session = open_session(
+            entreprise=self.entreprise_a,
+            caisse=self.caisse,
+            utilisateur=self.gestionnaire_a,
+            solde_initial=Decimal("100.00"),
+        )
+        form = DepenseForm(
+            data={"description": "Carburant", "montant": "30.00", "caisse": str(self.caisse.id)},
+            entreprise=self.entreprise_a,
+        )
+        self.assertTrue(form.is_valid())
+        depense = create_depense_for_entreprise(form, self.entreprise_a, utilisateur=self.gestionnaire_a)
+
+        self.assertEqual(depense.caisse_id, self.caisse.id)
+        self.assertEqual(depense.session_caisse_id, session.id)
+        mouvement = MouvementCaisse.objects.get(
+            source_app="joatham_depenses",
+            source_model="Depense",
+            source_id=depense.id,
+        )
+        self.assertEqual(mouvement.caisse_id, self.caisse.id)
+        self.assertEqual(mouvement.session_id, session.id)
+        self.assertEqual(mouvement.type_mouvement, MouvementCaisse.TypeMouvement.DEPENSE)
+
+    def test_depense_with_cashbox_without_open_session_is_rejected(self):
+        form = DepenseForm(
+            data={"description": "Loyer", "montant": "80.00", "caisse": str(self.caisse.id)},
+            entreprise=self.entreprise_a,
+        )
+        self.assertTrue(form.is_valid())
+
+        with self.assertRaises(ValueError):
+            create_depense_for_entreprise(form, self.entreprise_a, utilisateur=self.gestionnaire_a)
+
+    def test_depense_with_cashbox_from_other_tenant_is_rejected(self):
+        other_caisse = Caisse.objects.create(
+            entreprise=self.entreprise_b,
+            nom="Caisse externe",
+            code="DEP-EXT",
+            devise="CDF",
+            cree_par=create_user("gestion-dep-b", "gestionnaire", self.entreprise_b),
+        )
+        form = DepenseForm(
+            data={"description": "Mission", "montant": "20.00"},
+            entreprise=self.entreprise_a,
+        )
+        self.assertTrue(form.is_valid())
+        form.cleaned_data["caisse"] = other_caisse
+
+        with self.assertRaises(Http404):
+            create_depense_for_entreprise(form, self.entreprise_a, utilisateur=self.gestionnaire_a)
+
+    def test_no_double_cash_movement_for_same_depense(self):
+        session = open_session(
+            entreprise=self.entreprise_a,
+            caisse=self.caisse,
+            utilisateur=self.gestionnaire_a,
+            solde_initial=Decimal("100.00"),
+        )
+        depense = Depense.objects.create(
+            description="Maintenance",
+            montant=Decimal("12.00"),
+            entreprise=self.entreprise_a,
+            caisse=self.caisse,
+            session_caisse=session,
+        )
+        create_cash_movement_for_depense(depense=depense, entreprise=self.entreprise_a, utilisateur=self.gestionnaire_a)
+
+        with self.assertRaises(ValueError):
+            create_cash_movement_for_depense(depense=depense, entreprise=self.entreprise_a, utilisateur=self.gestionnaire_a)

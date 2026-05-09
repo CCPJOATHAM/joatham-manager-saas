@@ -129,6 +129,13 @@ NAV_ITEMS = [
         "prefixes": ["/depenses/"],
     },
     {
+        "label": _("Caisse"),
+        "url_name": "caisse_list",
+        "permission": "caisse.view",
+        "module": "caisse",
+        "prefixes": ["/caisse/"],
+    },
+    {
         "label": _("Produits"),
         "url_name": "product_list",
         "permission": "products.view",

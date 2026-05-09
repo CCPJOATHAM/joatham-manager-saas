@@ -534,6 +534,15 @@
                     </select>
                 </div>
                 <div class="field">
+                    <label for="paiement-caisse">Caisse (optionnel)</label>
+                    <select id="paiement-caisse" name="caisse">
+                        <option value="">Sans caisse</option>
+                        {% for caisse in caisses_actives %}
+                            <option value="{{ caisse.id }}">{{ caisse.nom }} ({{ caisse.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
                     <label for="paiement-reference">Reference</label>
                     <input id="paiement-reference" type="text" name="reference" placeholder="Reference, numero ou libelle">
                 </div>

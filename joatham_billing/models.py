@@ -251,6 +251,20 @@ class PaiementFacture(models.Model):
 
     facture = models.ForeignKey("Facture", on_delete=models.CASCADE, related_name="paiements")
     entreprise = models.ForeignKey("joatham_users.Entreprise", on_delete=models.CASCADE, related_name="paiements_factures")
+    caisse = models.ForeignKey(
+        "joatham_caisse.Caisse",
+        on_delete=models.SET_NULL,
+        related_name="paiements_factures",
+        null=True,
+        blank=True,
+    )
+    session_caisse = models.ForeignKey(
+        "joatham_caisse.SessionCaisse",
+        on_delete=models.SET_NULL,
+        related_name="paiements_factures",
+        null=True,
+        blank=True,
+    )
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     mode = models.CharField(max_length=20, choices=ModePaiement.choices, default=ModePaiement.ESPECES)
     reference = models.CharField(max_length=100, blank=True, default="")

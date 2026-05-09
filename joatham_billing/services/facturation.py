@@ -7,6 +7,10 @@ from django.shortcuts import get_object_or_404
 
 from core.audit import record_audit_event
 from core.services.quotas import assert_invoice_quota_available
+from core.services.tenancy import ensure_same_entreprise
+from joatham_caisse.models import Caisse, MouvementCaisse
+from joatham_caisse.selectors.session import get_open_session_for_caisse
+from joatham_caisse.services.mouvements import record_invoice_cash_payment
 from joatham_clients.models import Client
 from joatham_comptabilite.services.comptabilisation import (
     comptabiliser_facture_emise,
@@ -99,6 +103,62 @@ def _get_requested_product_quantities(lignes):
         requested[produit.id] = requested.get(produit.id, 0) + int(ligne["quantite"])
 
     return requested
+
+
+def _resolve_payment_cashbox_context(*, facture, mode, caisse):
+    if caisse in {None, ""}:
+        return None, None
+
+    if mode != PaiementFacture.ModePaiement.ESPECES:
+        raise PaiementFacturationError("La caisse ne peut etre utilisee qu'avec un paiement en especes.")
+
+    if not isinstance(caisse, Caisse):
+        caisse = Caisse.objects.filter(id=caisse).select_related("entreprise").first()
+    if caisse is None:
+        raise PaiementFacturationError("La caisse selectionnee est introuvable.")
+
+    try:
+        if caisse.entreprise_id != facture.entreprise_id:
+            raise PaiementFacturationError("La caisse selectionnee n'appartient pas a cette entreprise.")
+    except ValueError as exc:
+        raise PaiementFacturationError("La caisse selectionnee n'appartient pas a cette entreprise.") from exc
+    if not caisse.est_active:
+        raise PaiementFacturationError("La caisse selectionnee est inactive.")
+
+    session_caisse = get_open_session_for_caisse(caisse)
+    if session_caisse is None:
+        raise PaiementFacturationError("Aucune session ouverte n'est disponible pour la caisse selectionnee.")
+    try:
+        if session_caisse.entreprise_id != facture.entreprise_id:
+                raise PaiementFacturationError("La session ouverte de cette caisse n'appartient pas a cette entreprise.")
+    except ValueError as exc:
+        raise PaiementFacturationError("La session ouverte de cette caisse n'appartient pas a cette entreprise.") from exc
+    return caisse, session_caisse
+
+
+def _create_cash_movement_for_payment(*, paiement, utilisateur=None):
+    if paiement.caisse_id is None or paiement.session_caisse_id is None:
+        raise PaiementFacturationError("Le paiement doit etre rattache a une caisse et a une session ouverte.")
+
+    if MouvementCaisse.objects.filter(
+        entreprise=paiement.entreprise,
+        source_app="joatham_billing",
+        source_model="PaiementFacture",
+        source_id=paiement.id,
+    ).exists():
+        raise PaiementFacturationError("Un mouvement de caisse existe deja pour ce paiement.")
+
+    return record_invoice_cash_payment(
+        entreprise=paiement.entreprise,
+        caisse=paiement.caisse,
+        session=paiement.session_caisse,
+        montant=paiement.montant,
+        libelle=f"Paiement facture {paiement.facture.numero}",
+        reference=paiement.reference or f"PAY-{paiement.id}",
+        commentaire="Paiement facture enregistre depuis une caisse.",
+        paiement=paiement,
+        utilisateur=utilisateur,
+    )
 
 
 def _ensure_stock_available(*, entreprise, lignes):
@@ -418,7 +478,7 @@ def change_facture_status(*, facture, nouveau_statut, user, note=""):
 
 
 @transaction.atomic
-def register_payment(*, facture, montant, mode, user, reference="", note=""):
+def register_payment(*, facture, montant, mode, user, reference="", note="", caisse=None):
     if not user_has_permission(user, "billing.payments"):
         raise PermissionFacturationError("Seuls les proprietaires et comptables peuvent enregistrer un paiement.")
 
@@ -434,18 +494,29 @@ def register_payment(*, facture, montant, mode, user, reference="", note=""):
         raise PaiementFacturationError("Le montant du paiement doit etre strictement positif.")
     if montant > facture.reste_a_payer:
         raise PaiementFacturationError("Le paiement ne peut pas etre superieur au reste a payer.")
+    mode = mode or PaiementFacture.ModePaiement.ESPECES
     if mode not in dict(PaiementFacture.ModePaiement.choices):
         raise PaiementFacturationError("Le mode de paiement est invalide.")
+
+    caisse_obj, session_caisse = _resolve_payment_cashbox_context(
+        facture=facture,
+        mode=mode,
+        caisse=caisse,
+    )
 
     paiement = PaiementFacture.objects.create(
         facture=facture,
         entreprise=facture.entreprise,
+        caisse=caisse_obj,
+        session_caisse=session_caisse,
         montant=montant,
-        mode=mode or PaiementFacture.ModePaiement.ESPECES,
+        mode=mode,
         reference=reference,
         note=note,
     )
     facture.refresh_from_db()
+    if caisse_obj is not None:
+        _create_cash_movement_for_payment(paiement=paiement, utilisateur=user)
     comptabiliser_paiement_facture(paiement)
 
     logger.info(
@@ -460,7 +531,14 @@ def register_payment(*, facture, montant, mode, user, reference="", note=""):
         objet_type="PaiementFacture",
         objet_id=paiement.id,
         description=f"Paiement enregistre sur la facture {facture.numero}.",
-        metadata={"facture_id": facture.id, "facture_numero": facture.numero, "montant": str(paiement.montant), "mode": paiement.mode},
+        metadata={
+            "facture_id": facture.id,
+            "facture_numero": facture.numero,
+            "montant": str(paiement.montant),
+            "mode": paiement.mode,
+            "caisse_id": paiement.caisse_id,
+            "session_caisse_id": paiement.session_caisse_id,
+        },
     )
     return paiement
 

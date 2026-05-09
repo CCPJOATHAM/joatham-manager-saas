@@ -47,14 +47,14 @@ def _build_depenses_qr_data_uri(*, entreprise, total, date_generation):
 @module_access_required("expenses")
 def depenses_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    form = DepenseForm(request.POST or None)
+    form = DepenseForm(request.POST or None, entreprise=entreprise)
 
     if request.method == "POST":
         require_permission(request.user, "expenses.manage")
         if form.is_valid():
             try:
                 create_depense_for_entreprise(form, entreprise, utilisateur=request.user)
-            except PlanQuotaExceeded as exc:
+            except (PlanQuotaExceeded, ValueError) as exc:
                 messages.error(request, str(exc))
             else:
                 return redirect("depenses")

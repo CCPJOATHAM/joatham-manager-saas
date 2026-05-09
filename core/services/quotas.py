@@ -11,6 +11,7 @@ from joatham_users.models import Entreprise
 PREMIUM_REQUIRED_MESSAGE = "Cette fonctionnalite est reservee aux plans premium."
 FREE_PLAN_PRODUCT_LIMIT = 50
 FREE_PLAN_EXPENSE_MONTHLY_LIMIT = 50
+FREE_PLAN_CASHBOX_LIMIT = 1
 
 
 class PlanQuotaExceeded(ValueError):
@@ -59,6 +60,12 @@ def get_monthly_expense_count(entreprise, *, as_of=None):
     ).count()
 
 
+def get_active_cashbox_count(entreprise):
+    from joatham_caisse.models import Caisse
+
+    return Caisse.objects.filter(entreprise=entreprise, est_active=True).count()
+
+
 def assert_invoice_quota_available(entreprise, *, as_of=None):
     if not is_entreprise_on_free_plan(entreprise):
         return
@@ -105,4 +112,16 @@ def assert_expense_quota_available(entreprise, *, as_of=None):
     if expense_count >= FREE_PLAN_EXPENSE_MONTHLY_LIMIT:
         raise PlanQuotaExceeded(
             f"{PREMIUM_REQUIRED_MESSAGE} Le plan gratuit permet jusqu'a {FREE_PLAN_EXPENSE_MONTHLY_LIMIT} depenses par mois."
+        )
+
+
+def assert_cashbox_quota_available(entreprise):
+    if not is_entreprise_on_free_plan(entreprise):
+        return
+
+    _lock_entreprise_for_quota(entreprise)
+    cashbox_count = get_active_cashbox_count(entreprise)
+    if cashbox_count >= FREE_PLAN_CASHBOX_LIMIT:
+        raise PlanQuotaExceeded(
+            f"{PREMIUM_REQUIRED_MESSAGE} Le plan gratuit permet jusqu'a {FREE_PLAN_CASHBOX_LIMIT} caisse active."
         )

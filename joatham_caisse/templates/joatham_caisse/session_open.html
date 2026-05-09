@@ -1,0 +1,128 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Ouvrir une session{% endblock %}
+{% block content_title %}Ouvrir une session{% endblock %}
+{% block content_subtitle %}Demarrez une nouvelle session de caisse pour suivre les mouvements et le solde theorique de la journee.{% endblock %}
+
+{% block content %}
+<style>
+  .cash-form-shell,
+  .context-card {
+    max-width: 920px;
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .context-card {
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .context-card h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.18rem;
+  }
+  .context-card p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .cash-form-shell {
+    padding: 24px;
+  }
+  .cash-form-grid {
+    display: grid;
+    gap: 18px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field label {
+    font-weight: 700;
+    color: #10233f;
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid #d7dee7;
+  }
+  .field textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  }
+  .helper {
+    color: #7c8ea5;
+    font-size: 0.84rem;
+  }
+  .errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b91c1c;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #fff;
+  }
+</style>
+
+<div class="context-card">
+  <h2>{{ caisse.nom }}</h2>
+  <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}. L'ouverture initialise la session active et servira de base au calcul du solde theorique.</p>
+</div>
+
+<div class="cash-form-shell">
+  <form method="post">
+    {% csrf_token %}
+    <div class="cash-form-grid">
+      <div class="field">
+        <label for="{{ form.solde_initial.id_for_label }}">Solde initial</label>
+        {{ form.solde_initial }}
+        <div class="helper">Saisissez le montant reel present en caisse au demarrage de la session.</div>
+        {{ form.solde_initial.errors }}
+      </div>
+      <div class="field">
+        <label for="{{ form.commentaire_ouverture.id_for_label }}">Commentaire d'ouverture</label>
+        {{ form.commentaire_ouverture }}
+        <div class="helper">Ajoutez un contexte utile : equipe presente, point de depart, remarque operationnelle.</div>
+        {{ form.commentaire_ouverture.errors }}
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn primary">Ouvrir la session</button>
+      <a href="{% url 'caisse_detail' caisse.id %}" class="btn">Retour a la caisse</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

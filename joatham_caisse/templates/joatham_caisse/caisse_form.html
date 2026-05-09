@@ -1,0 +1,155 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block content_title %}{{ page_title }}{% endblock %}
+{% block content_subtitle %}Configurez une caisse claire, active et facile a exploiter pour vos operations quotidiennes.{% endblock %}
+
+{% block content %}
+<style>
+  .intro-card,
+  .cash-form-card {
+    max-width: 860px;
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .intro-card {
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .intro-card h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.16rem;
+  }
+  .intro-card p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .cash-form-card {
+    padding: 26px;
+  }
+  .cash-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field.full {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    font-weight: 700;
+    color: #10233f;
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid #d7dee7;
+  }
+  .field textarea:focus,
+  .field input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  }
+  .field.checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .helper {
+    color: #7c8ea5;
+    font-size: 0.84rem;
+  }
+  .submit-btn,
+  .secondary-btn {
+    margin-top: 20px;
+    min-height: 46px;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .submit-btn {
+    border: 1px solid #0f766e;
+    background: linear-gradient(135deg, #0f766e, #115e59);
+    color: #fff;
+    cursor: pointer;
+  }
+  .secondary-btn {
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b91c1c;
+  }
+  @media (max-width: 820px) {
+    .cash-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="intro-card">
+  <h2>Configuration de la caisse</h2>
+  <p>Renseignez un nom exploitable, un code unique, une devise et une courte description pour faciliter le pilotage et les controles ulterieurs.</p>
+</div>
+
+<div class="cash-form-card">
+  <form method="post">
+    {% csrf_token %}
+    <div class="cash-form-grid">
+      <div class="field">
+        <label for="{{ form.nom.id_for_label }}">Nom</label>
+        {{ form.nom }}{{ form.nom.errors }}
+        <div class="helper">Exemple : caisse principale, caisse boutique ou caisse accueil.</div>
+      </div>
+      <div class="field">
+        <label for="{{ form.code.id_for_label }}">Code</label>
+        {{ form.code }}{{ form.code.errors }}
+        <div class="helper">Le code doit rester simple, court et identifiable rapidement.</div>
+      </div>
+      <div class="field">
+        <label for="{{ form.devise.id_for_label }}">Devise</label>
+        {{ form.devise }}{{ form.devise.errors }}
+        <div class="helper">Utilisez la devise reellement pratiquee sur cette caisse.</div>
+      </div>
+      <div class="field checkbox">
+        {{ form.est_active }}
+        <label for="{{ form.est_active.id_for_label }}">Caisse active</label>
+        {{ form.est_active.errors }}
+      </div>
+      <div class="field full">
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description }}{{ form.description.errors }}
+        <div class="helper">Vous pouvez preciser l'emplacement, l'equipe ou le contexte d'utilisation.</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="submit-btn">{{ submit_label }}</button>
+      <a href="{% url 'caisse_list' %}" class="secondary-btn">Retour a la caisse</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

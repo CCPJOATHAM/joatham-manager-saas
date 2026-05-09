@@ -4,4 +4,4 @@ from ..models import Depense
 
 
 def get_depenses_by_entreprise(entreprise):
-    return scope_queryset_to_entreprise(Depense.objects.all(), entreprise).order_by("-date")
+    return scope_queryset_to_entreprise(Depense.objects.all(), entreprise).select_related("caisse", "session_caisse").order_by("-date")

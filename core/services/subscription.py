@@ -33,6 +33,7 @@ FREE_PLAN_MODULES = [
     "services",
     "expenses",
     "depenses",
+    "caisse",
     "products",
     "produits",
     "factures",

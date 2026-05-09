@@ -1,0 +1,468 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Caisse{% endblock %}
+{% block content_title %}Caisse{% endblock %}
+{% block content_subtitle %}Vue d'ensemble de vos caisses, de vos sessions ouvertes et des flux recents pour piloter l'activite quotidienne sans friction.{% endblock %}
+
+{% block content %}
+<style>
+  .cash-dashboard {
+    display: grid;
+    gap: 22px;
+  }
+  .cash-hero,
+  .cash-panel,
+  .cash-kpi {
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .cash-hero {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .cash-hero h2 {
+    margin: 0 0 8px;
+    font-size: 1.45rem;
+    color: #10233f;
+  }
+  .cash-hero p {
+    margin: 0;
+    max-width: 720px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .cash-hero-actions,
+  .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .cash-btn,
+  .ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+  .cash-btn {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #ffffff;
+  }
+  .ghost-btn {
+    background: #ffffff;
+    border-color: #dbe5ef;
+    color: #10233f;
+  }
+  .cash-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .cash-kpi {
+    padding: 18px 18px 16px;
+  }
+  .cash-kpi-label {
+    display: block;
+    color: #64748b;
+    font-size: 0.84rem;
+    margin-bottom: 6px;
+  }
+  .cash-kpi-value {
+    display: block;
+    color: #10233f;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+  .cash-kpi-meta {
+    display: block;
+    margin-top: 6px;
+    color: #7c8ea5;
+    font-size: 0.83rem;
+  }
+  .quick-actions-panel {
+    padding: 18px;
+  }
+  .quick-actions-panel h3 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.02rem;
+  }
+  .quick-actions-panel p {
+    margin: 0 0 16px;
+    color: #64748b;
+  }
+  .cash-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 22px;
+  }
+  .cash-panel {
+    overflow: hidden;
+  }
+  .cash-panel-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #eef2f7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .cash-panel-header h3 {
+    margin: 0;
+    font-size: 1.02rem;
+    color: #10233f;
+  }
+  .cash-panel-header p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+  }
+  .cash-table-wrap {
+    overflow-x: auto;
+  }
+  .cash-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 100%;
+  }
+  .cash-table th,
+  .cash-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .cash-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .cash-table td {
+    color: #10233f;
+    vertical-align: middle;
+  }
+  .cash-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border: 1px solid #e2e8f0;
+  }
+  .cash-badge.active,
+  .cash-badge.validated,
+  .cash-badge.entry {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #bbf7d0;
+  }
+  .cash-badge.open,
+  .cash-badge.payment {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+  .cash-badge.closed,
+  .cash-badge.adjustment {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  .cash-badge.exit,
+  .cash-badge.expense {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
+  }
+  .cash-badge.cancelled,
+  .cash-badge.rejected {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+  }
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid #dbe5ef;
+    background: #ffffff;
+    color: #10233f;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .amount-negative {
+    color: #b45309;
+    font-weight: 700;
+  }
+  .amount-positive {
+    color: #047857;
+    font-weight: 700;
+  }
+  .empty-state {
+    padding: 28px 20px;
+    color: #64748b;
+  }
+  @media (max-width: 1120px) {
+    .cash-kpis {
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+    .cash-panels {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 720px) {
+    .cash-hero,
+    .cash-panel-header {
+      padding: 18px;
+    }
+    .cash-kpis {
+      grid-template-columns: 1fr;
+    }
+    .cash-table th,
+    .cash-table td {
+      padding: 12px 14px;
+    }
+  }
+</style>
+
+<section class="cash-dashboard">
+  <div class="cash-hero">
+    <div>
+      <h2>Pilotage de caisse</h2>
+      <p>Suivez vos caisses actives, surveillez les sessions ouvertes, reperez les ecarts et retrouvez rapidement les derniers mouvements de votre entreprise.</p>
+    </div>
+    <div class="cash-hero-actions">
+      {% if can_create_caisse %}
+      <a href="{% url 'caisse_create' %}" class="cash-btn">Nouvelle caisse</a>
+      {% endif %}
+      <a href="#sessions-ouvertes" class="ghost-btn">Voir les sessions ouvertes</a>
+      <a href="#mouvements-recents" class="ghost-btn">Derniers mouvements</a>
+      <a href="#ecarts-recents" class="ghost-btn">Ecarts recents</a>
+    </div>
+  </div>
+
+  <div class="cash-kpis">
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Caisses actives</span>
+      <span class="cash-kpi-value">{{ dashboard.caisses_actives }}</span>
+      <span class="cash-kpi-meta">Caisses disponibles pour les operations du jour</span>
+    </div>
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Sessions ouvertes</span>
+      <span class="cash-kpi-value">{{ dashboard.sessions_ouvertes }}</span>
+      <span class="cash-kpi-meta">Sessions actuellement en exploitation</span>
+    </div>
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Entrees du jour</span>
+      <span class="cash-kpi-value">{{ dashboard.total_entrees_jour }}</span>
+      <span class="cash-kpi-meta">Encaissements et entrees confirmes aujourd'hui</span>
+    </div>
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Sorties du jour</span>
+      <span class="cash-kpi-value">{{ dashboard.total_sorties_jour }}</span>
+      <span class="cash-kpi-meta">Sorties, depenses et transferts confirmes aujourd'hui</span>
+    </div>
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Solde theorique ouvert</span>
+      <span class="cash-kpi-value">{{ dashboard.solde_theorique_ouvert }}</span>
+      <span class="cash-kpi-meta">Total theorique des sessions encore ouvertes</span>
+    </div>
+    <div class="cash-kpi">
+      <span class="cash-kpi-label">Ecarts recents</span>
+      <span class="cash-kpi-value">{{ dashboard.ecarts_recents|length }}</span>
+      <span class="cash-kpi-meta">Sessions recentes avec ecart detecte</span>
+    </div>
+  </div>
+
+  <div class="quick-actions-panel cash-panel">
+    <h3>Raccourcis utiles</h3>
+    <p>Accedez rapidement aux actions courantes du module caisse.</p>
+    <div class="quick-actions">
+      {% if can_create_caisse %}
+      <a href="{% url 'caisse_create' %}" class="cash-btn">Creer une caisse</a>
+      {% endif %}
+      <a href="#caisses-liste" class="ghost-btn">Voir les caisses</a>
+      <a href="#sessions-ouvertes" class="ghost-btn">Voir les sessions ouvertes</a>
+      <a href="#mouvements-recents" class="ghost-btn">Voir les operations</a>
+    </div>
+  </div>
+
+  <div class="cash-panels">
+    <div class="cash-panel" id="caisses-liste">
+      <div class="cash-panel-header">
+        <div>
+          <h3>Caisses</h3>
+          <p>Liste des caisses configurees avec acces direct a leur fiche detail.</p>
+        </div>
+      </div>
+      <div class="cash-table-wrap">
+        <table class="cash-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Code</th>
+              <th>Devise</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for caisse in caisses %}
+            <tr>
+              <td>{{ caisse.nom }}</td>
+              <td>{{ caisse.code }}</td>
+              <td>{{ caisse.devise }}</td>
+              <td>
+                <span class="cash-badge {% if caisse.est_active %}active{% else %}closed{% endif %}">
+                  {% if caisse.est_active %}Active{% else %}Inactive{% endif %}
+                </span>
+              </td>
+              <td><a href="{% url 'caisse_detail' caisse.id %}" class="action-link">Ouvrir</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty-state">Aucune caisse enregistree pour le moment.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cash-panel" id="sessions-ouvertes">
+      <div class="cash-panel-header">
+        <div>
+          <h3>Sessions ouvertes</h3>
+          <p>Suivi immediat des caisses encore en exploitation.</p>
+        </div>
+      </div>
+      <div class="cash-table-wrap">
+        <table class="cash-table">
+          <thead>
+            <tr>
+              <th>Caisse</th>
+              <th>Ouverture</th>
+              <th>Responsable</th>
+              <th>Solde theorique</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for session in dashboard.open_sessions %}
+            <tr>
+              <td>{{ session.caisse.nom }}</td>
+              <td>{{ session.date_ouverture|date:"d/m/Y H:i" }}</td>
+              <td>{{ session.utilisateur_ouverture }}</td>
+              <td>{{ session.solde_theorique }}</td>
+              <td><a href="{% url 'caisse_session_detail' session.id %}" class="action-link">Voir</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty-state">Aucune session ouverte actuellement.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="cash-panels">
+    <div class="cash-panel" id="mouvements-recents">
+      <div class="cash-panel-header">
+        <div>
+          <h3>Dernieres operations</h3>
+          <p>Historique recent des mouvements confirmes sur l'ensemble des caisses.</p>
+        </div>
+      </div>
+      <div class="cash-table-wrap">
+        <table class="cash-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Caisse</th>
+              <th>Type</th>
+              <th>Libelle</th>
+              <th>Montant</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for movement in dashboard.recent_movements %}
+            <tr>
+              <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+              <td>{{ movement.caisse.nom }}</td>
+              <td>
+                <span class="cash-badge {% if movement.type_mouvement == 'entree' %}entry{% elif movement.type_mouvement == 'paiement_facture' %}payment{% elif movement.type_mouvement == 'ajustement' %}adjustment{% elif movement.type_mouvement == 'depense' %}expense{% else %}exit{% endif %}">
+                  {{ movement.get_type_mouvement_display }}
+                </span>
+              </td>
+              <td>{{ movement.libelle }}</td>
+              <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
+              <td>{{ movement.reference|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="empty-state">Aucun mouvement confirme pour le moment.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cash-panel" id="ecarts-recents">
+      <div class="cash-panel-header">
+        <div>
+          <h3>Ecarts recents</h3>
+          <p>Sessions recentes qui meritent une verification ou une validation.</p>
+        </div>
+      </div>
+      <div class="cash-table-wrap">
+        <table class="cash-table">
+          <thead>
+            <tr>
+              <th>Caisse</th>
+              <th>Fermeture</th>
+              <th>Statut</th>
+              <th>Ecart</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for session in dashboard.ecarts_recents %}
+            <tr>
+              <td>{{ session.caisse.nom }}</td>
+              <td>{% if session.date_fermeture %}{{ session.date_fermeture|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+              <td>
+                <span class="cash-badge {% if session.statut == 'ouverte' %}open{% elif session.statut == 'validee' %}validated{% elif session.statut == 'annulee' %}cancelled{% else %}closed{% endif %}">
+                  {{ session.get_statut_display }}
+                </span>
+              </td>
+              <td class="{% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</td>
+              <td><a href="{% url 'caisse_session_detail' session.id %}" class="action-link">Verifier</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty-state">Aucun ecart recent a signaler.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

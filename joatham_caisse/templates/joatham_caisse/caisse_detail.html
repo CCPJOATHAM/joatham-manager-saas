@@ -1,0 +1,303 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}{{ caisse.nom }}{% endblock %}
+{% block content_title %}{{ caisse.nom }}{% endblock %}
+{% block content_subtitle %}Consultez le statut de cette caisse, son historique de sessions et les derniers mouvements qui lui sont rattaches.{% endblock %}
+
+{% block content %}
+<style>
+  .cash-detail {
+    display: grid;
+    gap: 22px;
+  }
+  .hero,
+  .panel,
+  .stat-card {
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .hero {
+    padding: 24px;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .hero h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.45rem;
+  }
+  .hero p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    min-height: 42px;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #fff;
+  }
+  .meta-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border: 1px solid #e2e8f0;
+  }
+  .badge.active,
+  .badge.open {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #bbf7d0;
+  }
+  .badge.inactive,
+  .badge.closed {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  .stat-card {
+    padding: 16px 18px;
+  }
+  .stat-label {
+    display: block;
+    color: #64748b;
+    font-size: 0.84rem;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    display: block;
+    color: #10233f;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+  .panel {
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #eef2f7;
+  }
+  .panel-header h3 {
+    margin: 0;
+    color: #10233f;
+    font-size: 1.02rem;
+  }
+  .panel-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table th,
+  .table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .table td {
+    color: #10233f;
+  }
+  .amount-positive {
+    color: #047857;
+    font-weight: 700;
+  }
+  .amount-negative {
+    color: #b45309;
+    font-weight: 700;
+  }
+  .empty-state {
+    padding: 24px 18px;
+    color: #64748b;
+  }
+  @media (max-width: 960px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+  }
+  @media (max-width: 720px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero,
+    .panel-header {
+      padding: 18px;
+    }
+    .table th,
+    .table td {
+      padding: 12px 14px;
+    }
+  }
+</style>
+
+<section class="cash-detail">
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <h2>{{ caisse.nom }}</h2>
+        <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}{% if caisse.description %} · {{ caisse.description }}{% endif %}</p>
+        <div class="meta-row">
+          <span class="badge {% if caisse.est_active %}active{% else %}inactive{% endif %}">
+            {% if caisse.est_active %}Caisse active{% else %}Caisse inactive{% endif %}
+          </span>
+          <span class="badge {% if open_cash_session %}open{% else %}closed{% endif %}">
+            {% if open_cash_session %}Session ouverte{% else %}Aucune session ouverte{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="actions">
+        {% if open_cash_session %}
+        <a href="{% url 'caisse_session_detail' open_cash_session.id %}" class="btn primary">Voir la session ouverte</a>
+        {% elif can_open_session %}
+        <a href="{% url 'caisse_open_session' caisse.id %}" class="btn primary">Ouvrir une session</a>
+        {% endif %}
+        <a href="{% url 'caisse_list' %}" class="btn">Retour a la liste</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Sessions visibles</span>
+      <span class="stat-value">{{ sessions|length }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Derniere ouverture</span>
+      <span class="stat-value">{% if sessions %}{{ sessions.0.date_ouverture|date:"d/m/Y H:i" }}{% else %}-{% endif %}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Session en cours</span>
+      <span class="stat-value">{% if open_cash_session %}{{ open_cash_session.solde_theorique }}{% else %}-{% endif %}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Derniers mouvements</span>
+      <span class="stat-value">{{ recent_movements|length }}</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Historique des sessions</h3>
+      <p>Retrouvez les ouvertures, fermetures et ecarts de cette caisse.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ouverture</th>
+            <th>Fermeture</th>
+            <th>Statut</th>
+            <th>Solde theorique</th>
+            <th>Ecart</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+          <tr>
+            <td>{{ session.date_ouverture|date:"d/m/Y H:i" }}</td>
+            <td>{% if session.date_fermeture %}{{ session.date_fermeture|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+            <td>
+              <span class="badge {% if session.statut == 'ouverte' %}open{% else %}closed{% endif %}">
+                {{ session.get_statut_display }}
+              </span>
+            </td>
+            <td>{{ session.solde_theorique }}</td>
+            <td class="{% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</td>
+            <td><a href="{% url 'caisse_session_detail' session.id %}" class="btn">Voir</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="empty-state">Aucune session pour cette caisse.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Derniers mouvements</h3>
+      <p>Apercu recent des operations rattachees a cette caisse.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Libelle</th>
+            <th>Montant</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for movement in recent_movements %}
+          <tr>
+            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.get_type_mouvement_display }}</td>
+            <td>{{ movement.libelle }}</td>
+            <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
+            <td>{{ movement.reference|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty-state">Aucun mouvement rattache a cette caisse pour le moment.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

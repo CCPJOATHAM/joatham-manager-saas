@@ -20,6 +20,7 @@ from core.services.currency import format_amount_for_entreprise, get_currency_co
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
+from joatham_caisse.selectors.caisse import get_caisses_by_entreprise
 from joatham_users.permissions import user_has_permission
 from .exceptions import FacturationError
 from .models import Facture, FactureHistorique, PaiementFacture
@@ -499,6 +500,7 @@ def facture_detail(request, id):
         "facture": facture,
         "line_rows": line_rows,
         "paiements": payment_rows,
+        "caisses_actives": get_caisses_by_entreprise(entreprise).filter(est_active=True),
         "historique": facture.historique.all()[:20],
         "statut_choices": Facture.Statut.choices,
         "mode_choices": PaiementFacture.ModePaiement.choices,
@@ -548,6 +550,7 @@ def add_paiement_facture(request, id):
                 mode=request.POST.get("mode") or PaiementFacture.ModePaiement.ESPECES,
                 reference=request.POST.get("reference", ""),
                 note=request.POST.get("note", ""),
+                caisse=request.POST.get("caisse") or None,
                 user=request.user,
             )
             messages.success(request, FLASH_MESSAGES["invoice_payment_created"])

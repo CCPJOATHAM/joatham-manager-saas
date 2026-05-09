@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.services.subscription import start_trial_for_entreprise
+from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
 from joatham_billing.models import Facture, Service
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement
@@ -41,6 +42,19 @@ class BillingViewsPremiumTests(TestCase):
             actif=True,
         )
         self.facture = create_facture_sample(self.entreprise, self.user, self.client_billing)
+        self.caisse = Caisse.objects.create(
+            entreprise=self.entreprise,
+            nom="Caisse premium",
+            code="CP-01",
+            est_active=True,
+            cree_par=self.user,
+        )
+        self.session_caisse = SessionCaisse.objects.create(
+            entreprise=self.entreprise,
+            caisse=self.caisse,
+            utilisateur_ouverture=self.user,
+            solde_initial=Decimal("100.00"),
+        )
         self.client.force_login(self.user)
 
     def test_facture_list_displays_premium_sections(self):
@@ -61,6 +75,13 @@ class BillingViewsPremiumTests(TestCase):
         self.assertContains(response, "Enregistrer un paiement")
         self.assertContains(response, "Historique")
         self.assertContains(response, self.facture.numero)
+
+    def test_facture_detail_exposes_optional_caisse_field_for_payment(self):
+        response = self.client.get(reverse("facture_detail", args=[self.facture.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="caisse"')
+        self.assertContains(response, self.caisse.nom)
 
     def test_facture_detail_displays_line_origin_badges(self):
         self.facture.statut = Facture.Statut.BROUILLON
@@ -229,3 +250,28 @@ class BillingViewsPremiumTests(TestCase):
         self.assertEqual(detail_response.status_code, 200)
         self.assertNotContains(detail_response, "Mettre a jour le statut")
         self.assertContains(detail_response, "Enregistrer un paiement")
+
+    def test_add_paiement_facture_with_caisse_creates_cash_movement(self):
+        response = self.client.post(
+            reverse("add_paiement_facture", args=[self.facture.id]),
+            {
+                "montant": "25.00",
+                "mode": "especes",
+                "reference": "ESP-VIEW",
+                "note": "Paiement via vue",
+                "caisse": str(self.caisse.id),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        paiement = self.facture.paiements.latest("id")
+        self.assertEqual(paiement.caisse_id, self.caisse.id)
+        self.assertEqual(paiement.session_caisse_id, self.session_caisse.id)
+        self.assertTrue(
+            MouvementCaisse.objects.filter(
+                entreprise=self.entreprise,
+                source_app="joatham_billing",
+                source_model="PaiementFacture",
+                source_id=paiement.id,
+            ).exists()
+        )

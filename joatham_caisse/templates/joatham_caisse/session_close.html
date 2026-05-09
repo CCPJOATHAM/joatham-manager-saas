@@ -1,0 +1,168 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Fermer une session{% endblock %}
+{% block content_title %}Fermer une session{% endblock %}
+{% block content_subtitle %}Confirmez le solde reel constate pour cloturer proprement la session et calculer l'ecart final.{% endblock %}
+
+{% block content %}
+<style>
+  .close-layout {
+    display: grid;
+    gap: 18px;
+    max-width: 960px;
+  }
+  .context-card,
+  .form-card {
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .context-card {
+    padding: 22px;
+  }
+  .context-card h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.18rem;
+  }
+  .context-card p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .stat {
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    background: #f8fbfd;
+  }
+  .stat-label {
+    display: block;
+    color: #64748b;
+    font-size: 0.84rem;
+    margin-bottom: 6px;
+  }
+  .stat strong {
+    color: #10233f;
+    font-size: 1.05rem;
+  }
+  .form-card {
+    padding: 24px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .field label {
+    font-weight: 700;
+    color: #10233f;
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid #d7dee7;
+  }
+  .field textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  }
+  .helper {
+    color: #7c8ea5;
+    font-size: 0.84rem;
+  }
+  .errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b91c1c;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #fff;
+  }
+  @media (max-width: 820px) {
+    .stat-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="close-layout">
+  <div class="context-card">
+    <h2>Cloture de la session {{ session.caisse.nom }}</h2>
+    <p>Renseignez le solde reel observe en fin de session. Le systeme comparera ce montant au solde theorique pour calculer l'ecart.</p>
+    <div class="stat-grid">
+      <div class="stat">
+        <span class="stat-label">Ouverture</span>
+        <strong>{{ session.date_ouverture|date:"d/m/Y H:i" }}</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Solde initial</span>
+        <strong>{{ session.solde_initial }}</strong>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Solde theorique actuel</span>
+        <strong>{{ session.solde_theorique }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label for="{{ form.solde_reel.id_for_label }}">Solde reel constate</label>
+        {{ form.solde_reel }}
+        <div class="helper">Saisissez le montant reel constate en caisse au moment de la fermeture.</div>
+        {{ form.solde_reel.errors }}
+      </div>
+      <div class="field">
+        <label for="{{ form.commentaire_fermeture.id_for_label }}">Commentaire de fermeture</label>
+        {{ form.commentaire_fermeture }}
+        <div class="helper">Ajoutez toute information utile pour la validation ou le controle ulterieur.</div>
+        {{ form.commentaire_fermeture.errors }}
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn primary">Fermer la session</button>
+        <a href="{% url 'caisse_session_detail' session.id %}" class="btn">Retour a la session</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

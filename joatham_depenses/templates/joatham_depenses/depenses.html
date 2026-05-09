@@ -138,6 +138,7 @@
     }
 
     .expense-form input,
+    .expense-form select,
     .filters-form input {
         width: 100%;
         padding: 12px 14px;
@@ -378,6 +379,10 @@
             <div class="field">
                 <label for="{{ form.montant.id_for_label }}">Montant</label>
                 {{ form.montant }}
+            </div>
+            <div class="field">
+                <label for="{{ form.caisse.id_for_label }}">Caisse</label>
+                {{ form.caisse }}
             </div>
             <div class="panel-actions">
                 <button type="submit">Ajouter la depense</button>

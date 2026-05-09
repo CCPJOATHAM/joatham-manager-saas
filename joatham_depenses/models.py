@@ -11,6 +11,20 @@ class Depense(models.Model):
         null=True,
         related_name="depenses",
     )
+    caisse = models.ForeignKey(
+        "joatham_caisse.Caisse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="depenses",
+    )
+    session_caisse = models.ForeignKey(
+        "joatham_caisse.SessionCaisse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="depenses",
+    )
 
     def __str__(self):
         return f"{self.description} - {self.montant} FC"

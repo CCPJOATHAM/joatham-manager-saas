@@ -1,0 +1,199 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Ajouter un mouvement{% endblock %}
+{% block content_title %}Ajouter un mouvement{% endblock %}
+{% block content_subtitle %}Enregistrez une entree, une sortie, une depense ou un ajustement sur une session de caisse ouverte.{% endblock %}
+
+{% block content %}
+<style>
+  .movement-layout {
+    display: grid;
+    gap: 18px;
+    max-width: 980px;
+  }
+  .context-card,
+  .form-card {
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .context-card {
+    padding: 22px;
+  }
+  .context-card h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.18rem;
+  }
+  .context-card p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .context-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .meta-box {
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    background: #f8fbfd;
+  }
+  .meta-box span {
+    display: block;
+    color: #64748b;
+    font-size: 0.84rem;
+    margin-bottom: 6px;
+  }
+  .meta-box strong {
+    color: #10233f;
+    font-size: 1.05rem;
+  }
+  .form-card {
+    padding: 24px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field.full {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    font-weight: 700;
+    color: #10233f;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid #d7dee7;
+  }
+  .field textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  }
+  .helper {
+    color: #7c8ea5;
+    font-size: 0.84rem;
+  }
+  .errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b91c1c;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #fff;
+  }
+  @media (max-width: 820px) {
+    .context-meta,
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="movement-layout">
+  <div class="context-card">
+    <h2>Session de {{ session.caisse.nom }}</h2>
+    <p>Ajoutez un mouvement sur la session ouverte pour garder le solde theorique a jour et tracer chaque operation de caisse.</p>
+    <div class="context-meta">
+      <div class="meta-box">
+        <span>Ouverture</span>
+        <strong>{{ session.date_ouverture|date:"d/m/Y H:i" }}</strong>
+      </div>
+      <div class="meta-box">
+        <span>Solde theorique</span>
+        <strong>{{ session.solde_theorique }}</strong>
+      </div>
+      <div class="meta-box">
+        <span>Statut</span>
+        <strong>{{ session.get_statut_display }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="field">
+          <label for="{{ form.type_mouvement.id_for_label }}">Type de mouvement</label>
+          {{ form.type_mouvement }}
+          <div class="helper">Choisissez la nature du flux a enregistrer sur la session.</div>
+          {{ form.type_mouvement.errors }}
+        </div>
+        <div class="field">
+          <label for="{{ form.montant.id_for_label }}">Montant</label>
+          {{ form.montant }}
+          <div class="helper">Le montant doit etre strictement positif.</div>
+          {{ form.montant.errors }}
+        </div>
+        <div class="field full">
+          <label for="{{ form.libelle.id_for_label }}">Libelle</label>
+          {{ form.libelle }}
+          <div class="helper">Utilisez un libelle clair pour faciliter le suivi et les controles.</div>
+          {{ form.libelle.errors }}
+        </div>
+        <div class="field">
+          <label for="{{ form.reference.id_for_label }}">Reference</label>
+          {{ form.reference }}
+          <div class="helper">Numero, piece justificative ou identifiant interne si disponible.</div>
+          {{ form.reference.errors }}
+        </div>
+        <div class="field full">
+          <label for="{{ form.commentaire.id_for_label }}">Commentaire</label>
+          {{ form.commentaire }}
+          <div class="helper">Ajoutez un contexte interne utile pour la validation ou l'audit.</div>
+          {{ form.commentaire.errors }}
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn primary">Enregistrer le mouvement</button>
+        <a href="{% url 'caisse_session_detail' session.id %}" class="btn">Retour a la session</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

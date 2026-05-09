@@ -1,0 +1,361 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Session {{ session.caisse.nom }}{% endblock %}
+{% block content_title %}Session {{ session.caisse.nom }}{% endblock %}
+{% block content_subtitle %}Suivi detaille des mouvements, des soldes et des decisions de controle pour cette session de caisse.{% endblock %}
+
+{% block content %}
+<style>
+  .session-view {
+    display: grid;
+    gap: 22px;
+  }
+  .hero,
+  .panel,
+  .stat-card {
+    border: 1px solid #dde7f0;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+  .hero {
+    padding: 24px;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .hero h2 {
+    margin: 0 0 8px;
+    color: #10233f;
+    font-size: 1.45rem;
+  }
+  .hero p {
+    margin: 0;
+    color: #64748b;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    min-height: 42px;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #dbe5ef;
+    background: #fff;
+    color: #10233f;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: rgba(37, 99, 235, 0.72);
+    color: #fff;
+  }
+  .btn.danger {
+    background: #fff5f5;
+    border-color: #fecaca;
+    color: #b91c1c;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border: 1px solid #e2e8f0;
+  }
+  .badge.open {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+  .badge.closed {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  .badge.validated,
+  .badge.entry {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #bbf7d0;
+  }
+  .badge.rejected {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+  }
+  .badge.expense,
+  .badge.exit {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
+  }
+  .badge.adjustment {
+    background: #f5f3ff;
+    color: #6d28d9;
+    border-color: #ddd6fe;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(140px, 1fr));
+    gap: 14px;
+  }
+  .stat-card {
+    padding: 16px 18px;
+  }
+  .stat-label {
+    display: block;
+    color: #64748b;
+    font-size: 0.84rem;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    display: block;
+    color: #10233f;
+    font-size: 1.08rem;
+    font-weight: 800;
+  }
+  .amount-positive {
+    color: #047857;
+  }
+  .amount-negative {
+    color: #b45309;
+  }
+  .panel {
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #eef2f7;
+  }
+  .panel-header h3 {
+    margin: 0;
+    color: #10233f;
+    font-size: 1.02rem;
+  }
+  .panel-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table th,
+  .table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .decision-card {
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #f8fbfd;
+  }
+  .decision-card h4 {
+    margin: 0 0 8px;
+    color: #10233f;
+  }
+  .decision-card p {
+    margin: 0 0 14px;
+    color: #64748b;
+  }
+  .decision-card textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #d7dee7;
+    resize: vertical;
+  }
+  .decision-card textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  }
+  .empty-state {
+    padding: 24px 18px;
+    color: #64748b;
+  }
+  @media (max-width: 1180px) {
+    .stats-grid {
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+    }
+  }
+  @media (max-width: 820px) {
+    .stats-grid,
+    .decision-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 720px) {
+    .hero,
+    .panel-header {
+      padding: 18px;
+    }
+    .table th,
+    .table td {
+      padding: 12px 14px;
+    }
+  }
+</style>
+
+<section class="session-view">
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <h2>Session {{ session.caisse.nom }}</h2>
+        <p>Ouverte le {{ session.date_ouverture|date:"d/m/Y H:i" }} · Responsable {{ session.utilisateur_ouverture }}</p>
+        <p style="margin-top:10px;">
+          <span class="badge {% if session.statut == 'ouverte' %}open{% elif session.statut == 'validee' %}validated{% elif session.statut == 'annulee' %}rejected{% else %}closed{% endif %}">
+            {{ session.get_statut_display }}
+          </span>
+        </p>
+      </div>
+      <div class="actions">
+        {% if session.statut == 'ouverte' and can_add_movement %}
+        <a href="{% url 'caisse_add_movement' session.id %}" class="btn">Ajouter un mouvement</a>
+        {% endif %}
+        {% if session.statut == 'ouverte' and can_close_session %}
+        <a href="{% url 'caisse_close_session' session.id %}" class="btn primary">Fermer la session</a>
+        {% endif %}
+        <a href="{% url 'caisse_detail' session.caisse.id %}" class="btn">Retour a la caisse</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Solde initial</span>
+      <span class="stat-value">{{ session.solde_initial }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Entrees</span>
+      <span class="stat-value amount-positive">{{ movement_totals.total_entrees }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Sorties</span>
+      <span class="stat-value amount-negative">{{ movement_totals.total_sorties }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Solde theorique</span>
+      <span class="stat-value">{{ session.solde_theorique }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Solde reel</span>
+      <span class="stat-value">{{ solde_reel_display }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Ecart</span>
+      <span class="stat-value {% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</span>
+    </div>
+  </div>
+
+  {% if session.statut == 'fermee' %}
+  {% if can_validate_session or can_reject_session %}
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Decision de controle</h3>
+      <p>Validez ou rejetez la session fermee avec un commentaire explicatif.</p>
+    </div>
+    <div style="padding:18px;">
+      <div class="decision-grid">
+        {% if can_validate_session %}
+        <form method="post" action="{% url 'caisse_validate_session' session.id %}" class="decision-card">
+          {% csrf_token %}
+          <h4>Valider la session</h4>
+          <p>Confirmez la cloture et conservez une trace du controle effectue.</p>
+          {{ decision_form.commentaire }}
+          <div style="margin-top:14px;">
+            <button type="submit" class="btn primary">Valider la session</button>
+          </div>
+        </form>
+        {% endif %}
+        {% if can_reject_session %}
+        <form method="post" action="{% url 'caisse_reject_session' session.id %}" class="decision-card">
+          {% csrf_token %}
+          <h4>Rejeter la session</h4>
+          <p>Signalez un point de controle ou un ecart necessitant un traitement.</p>
+          {{ decision_form.commentaire }}
+          <div style="margin-top:14px;">
+            <button type="submit" class="btn danger">Rejeter la session</button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Mouvements</h3>
+      <p>Historique des operations rattachees a cette session.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Libelle</th>
+            <th>Montant</th>
+            <th>Reference</th>
+            <th>Utilisateur</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for movement in movements %}
+          <tr>
+            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>
+              <span class="badge {% if movement.type_mouvement == 'entree' %}entry{% elif movement.type_mouvement == 'paiement_facture' %}open{% elif movement.type_mouvement == 'ajustement' %}adjustment{% elif movement.type_mouvement == 'depense' %}expense{% else %}exit{% endif %}">
+                {{ movement.get_type_mouvement_display }}
+              </span>
+            </td>
+            <td>{{ movement.libelle }}</td>
+            <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
+            <td>{{ movement.reference|default:"-" }}</td>
+            <td>{{ movement.cree_par|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="empty-state">Aucun mouvement pour cette session.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
