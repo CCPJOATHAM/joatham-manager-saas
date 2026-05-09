@@ -7,7 +7,7 @@ from core.models import ActivityLog
 from core.services.quotas import PlanQuotaExceeded
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
 from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
-from joatham_products.models import Produit
+from joatham_products.models import Produit, StockMovement
 from joatham_users.models import Abonnement
 
 from .factories import create_entreprise, create_user
@@ -15,9 +15,11 @@ from ..exceptions import PaiementFacturationError, WorkflowFacturationError
 from ..models import Facture, PaiementFacture, Service
 from ..services.facturation import (
     _create_cash_movement_for_payment,
+    apply_stock_for_facture,
     change_facture_status,
     create_facture,
     register_payment,
+    restore_stock_for_facture,
     update_facture,
 )
 
@@ -155,6 +157,13 @@ class BillingStockWorkflowTests(TestCase):
                     }
                 ],
             )
+        self.assertEqual(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=self.product,
+            ).count(),
+            0,
+        )
 
     def test_free_plan_blocks_invoice_creation_after_monthly_limit(self):
         free_plan = get_or_create_default_free_plan()
@@ -216,14 +225,15 @@ class BillingStockWorkflowTests(TestCase):
         self.assertEqual(self.product.quantite_stock, 0)
         self.assertTrue(facture.stock_applique)
         self.assertEqual(facture.statut, Facture.Statut.EMISE)
-        self.assertTrue(
-            ActivityLog.objects.filter(
-                entreprise=self.entreprise,
-                utilisateur=self.owner,
-                action="stock_facture_decremente",
-                objet_id=self.product.id,
-            ).exists()
+        mouvement = StockMovement.objects.get(
+            entreprise=self.entreprise,
+            produit=self.product,
+            movement_type=StockMovement.MovementType.INVOICE_SALE,
+            source_app="joatham_billing",
+            source_model="Facture",
+            source_id=facture.id,
         )
+        self.assertEqual(mouvement.quantity, 2)
 
     def test_update_brouillon_facture_revalidates_stock_without_double_decrement(self):
         facture = Facture.objects.create(
@@ -272,6 +282,15 @@ class BillingStockWorkflowTests(TestCase):
         facture.refresh_from_db()
         self.assertEqual(self.product.quantite_stock, 0)
         self.assertTrue(facture.stock_applique)
+        self.assertEqual(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=self.product,
+                movement_type=StockMovement.MovementType.INVOICE_SALE,
+                source_id=facture.id,
+            ).count(),
+            1,
+        )
 
     def test_annulation_restores_product_stock(self):
         facture = create_facture(
@@ -302,14 +321,15 @@ class BillingStockWorkflowTests(TestCase):
         facture.refresh_from_db()
         self.assertEqual(self.product.quantite_stock, 2)
         self.assertFalse(facture.stock_applique)
-        self.assertTrue(
-            ActivityLog.objects.filter(
-                entreprise=self.entreprise,
-                utilisateur=self.owner,
-                action="stock_facture_restaure",
-                objet_id=self.product.id,
-            ).exists()
+        mouvement = StockMovement.objects.get(
+            entreprise=self.entreprise,
+            produit=self.product,
+            movement_type=StockMovement.MovementType.INVOICE_RESTORE,
+            source_app="joatham_billing",
+            source_model="Facture",
+            source_id=facture.id,
         )
+        self.assertEqual(mouvement.quantity, 1)
 
     def test_service_lines_do_not_change_stock(self):
         facture = create_facture(
@@ -331,9 +351,9 @@ class BillingStockWorkflowTests(TestCase):
         self.assertEqual(self.product.quantite_stock, 2)
         self.assertTrue(facture.stock_applique)
         self.assertFalse(
-            ActivityLog.objects.filter(
+            StockMovement.objects.filter(
                 entreprise=self.entreprise,
-                action="stock_facture_decremente",
+                movement_type=StockMovement.MovementType.INVOICE_SALE,
             ).exists()
         )
 
@@ -355,6 +375,12 @@ class BillingStockWorkflowTests(TestCase):
         facture.refresh_from_db()
         self.assertEqual(self.product.quantite_stock, 2)
         self.assertTrue(facture.stock_applique)
+        self.assertFalse(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                movement_type=StockMovement.MovementType.INVOICE_SALE,
+            ).exists()
+        )
 
     def test_cross_tenant_product_is_rejected_before_any_stock_movement(self):
         with self.assertRaises(WorkflowFacturationError):
@@ -376,6 +402,66 @@ class BillingStockWorkflowTests(TestCase):
         self.foreign_product.refresh_from_db()
         self.assertEqual(self.product.quantite_stock, 2)
         self.assertEqual(self.foreign_product.quantite_stock, 10)
+
+    def test_apply_stock_for_facture_does_not_duplicate_movements_when_flag_is_true(self):
+        facture = create_facture(
+            entreprise=self.entreprise,
+            user=self.owner,
+            tva=0,
+            lignes=[
+                {
+                    "product_id": str(self.product.id),
+                    "designation": "",
+                    "quantite": 1,
+                    "prix": "",
+                }
+            ],
+        )
+
+        apply_stock_for_facture(facture=facture, user=self.owner)
+
+        self.assertEqual(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=self.product,
+                movement_type=StockMovement.MovementType.INVOICE_SALE,
+                source_id=facture.id,
+            ).count(),
+            1,
+        )
+
+    def test_restore_stock_for_facture_does_not_duplicate_movements_when_flag_is_false(self):
+        facture = create_facture(
+            entreprise=self.entreprise,
+            user=self.owner,
+            tva=0,
+            lignes=[
+                {
+                    "product_id": str(self.product.id),
+                    "designation": "",
+                    "quantite": 1,
+                    "prix": "",
+                }
+            ],
+        )
+        change_facture_status(
+            facture=facture,
+            nouveau_statut=Facture.Statut.ANNULEE,
+            user=self.owner,
+            note="Annulation de recette.",
+        )
+
+        restore_stock_for_facture(facture=facture, user=self.owner)
+
+        self.assertEqual(
+            StockMovement.objects.filter(
+                entreprise=self.entreprise,
+                produit=self.product,
+                movement_type=StockMovement.MovementType.INVOICE_RESTORE,
+                source_id=facture.id,
+            ).count(),
+            1,
+        )
 
 
 class BillingCashPaymentIntegrationTests(TestCase):

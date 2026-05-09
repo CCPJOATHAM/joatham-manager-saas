@@ -17,6 +17,12 @@ from joatham_comptabilite.services.comptabilisation import (
     comptabiliser_paiement_facture,
 )
 from joatham_products.models import Produit
+from joatham_products.services.stock import (
+    StockOperationError,
+    apply_invoice_sale,
+    assert_stock_available,
+    restore_invoice_stock,
+)
 from joatham_users.permissions import user_has_permission
 
 from ..exceptions import PaiementFacturationError, PermissionFacturationError, WorkflowFacturationError
@@ -178,13 +184,10 @@ def _ensure_stock_available(*, entreprise, lignes):
         produit = products.get(produit_id)
         if produit is None:
             raise WorkflowFacturationError("Le produit selectionne est invalide pour cette entreprise.")
-
-        stock_disponible = int(produit.quantite_stock or 0)
-        if quantite_demandee > stock_disponible:
-            raise WorkflowFacturationError(
-                f"Stock insuffisant pour le produit {produit.nom}. "
-                f"Stock disponible : {stock_disponible}, quantite demandee : {quantite_demandee}."
-            )
+        try:
+            assert_stock_available(produit=produit, quantity=quantite_demandee)
+        except StockOperationError as exc:
+            raise WorkflowFacturationError(str(exc)) from exc
 
     return products
 
@@ -207,27 +210,6 @@ def _mark_facture_stock_state(*, facture, applied):
     facture.save(update_fields=["stock_applique"])
 
 
-def _audit_stock_movement(*, facture, produit, quantite, stock_avant, stock_apres, user, action, description):
-    record_audit_event(
-        entreprise=facture.entreprise,
-        utilisateur=user,
-        action=action,
-        module="products",
-        objet_type="Produit",
-        objet_id=produit.id,
-        description=description,
-        metadata={
-            "facture_id": facture.id,
-            "facture_numero": facture.numero,
-            "produit_id": produit.id,
-            "produit_nom": produit.nom,
-            "quantite": quantite,
-            "stock_avant": stock_avant,
-            "stock_apres": stock_apres,
-        },
-    )
-
-
 def apply_stock_for_facture(*, facture, user):
     if facture.stock_applique:
         return
@@ -237,41 +219,17 @@ def apply_stock_for_facture(*, facture, user):
         _mark_facture_stock_state(facture=facture, applied=True)
         return
 
-    products = {
-        produit.id: produit
-        for produit in Produit.objects.select_for_update().filter(
-            entreprise=facture.entreprise,
-            id__in=requested.keys(),
-        )
-    }
-
     for produit_id, quantite_demandee in requested.items():
-        produit = products.get(produit_id)
-        if produit is None:
-            raise WorkflowFacturationError("Le produit selectionne est invalide pour cette entreprise.")
-
-        stock_disponible = int(produit.quantite_stock or 0)
-        if quantite_demandee > stock_disponible:
-            raise WorkflowFacturationError(
-                f"Stock insuffisant pour le produit {produit.nom}. "
-                f"Stock disponible : {stock_disponible}, quantite demandee : {quantite_demandee}."
+        try:
+            apply_invoice_sale(
+                entreprise=facture.entreprise,
+                produit=produit_id,
+                quantity=quantite_demandee,
+                facture=facture,
+                utilisateur=user,
             )
-
-    for produit_id, quantite_demandee in requested.items():
-        produit = products[produit_id]
-        stock_avant = int(produit.quantite_stock or 0)
-        produit.quantite_stock = stock_avant - quantite_demandee
-        produit.save(update_fields=["quantite_stock"])
-        _audit_stock_movement(
-            facture=facture,
-            produit=produit,
-            quantite=quantite_demandee,
-            stock_avant=stock_avant,
-            stock_apres=produit.quantite_stock,
-            user=user,
-            action="stock_facture_decremente",
-            description=f"Stock decremente apres emission de la facture {facture.numero}.",
-        )
+        except StockOperationError as exc:
+            raise WorkflowFacturationError(str(exc)) from exc
 
     _mark_facture_stock_state(facture=facture, applied=True)
 
@@ -285,31 +243,17 @@ def restore_stock_for_facture(*, facture, user):
         _mark_facture_stock_state(facture=facture, applied=False)
         return
 
-    products = {
-        produit.id: produit
-        for produit in Produit.objects.select_for_update().filter(
-            entreprise=facture.entreprise,
-            id__in=requested.keys(),
-        )
-    }
-
     for produit_id, quantite in requested.items():
-        produit = products.get(produit_id)
-        if produit is None:
-            continue
-        stock_avant = int(produit.quantite_stock or 0)
-        produit.quantite_stock = stock_avant + quantite
-        produit.save(update_fields=["quantite_stock"])
-        _audit_stock_movement(
-            facture=facture,
-            produit=produit,
-            quantite=quantite,
-            stock_avant=stock_avant,
-            stock_apres=produit.quantite_stock,
-            user=user,
-            action="stock_facture_restaure",
-            description=f"Stock restaure apres annulation de la facture {facture.numero}.",
-        )
+        try:
+            restore_invoice_stock(
+                entreprise=facture.entreprise,
+                produit=produit_id,
+                quantity=quantite,
+                facture=facture,
+                utilisateur=user,
+            )
+        except StockOperationError as exc:
+            raise WorkflowFacturationError(str(exc)) from exc
 
     _mark_facture_stock_state(facture=facture, applied=False)
 
