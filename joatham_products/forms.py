@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import Produit
+from .models import Produit, StockMovement
 
 
 class ProduitForm(forms.ModelForm):
@@ -36,3 +36,34 @@ class ProduitForm(forms.ModelForm):
         self.fields["prix_unitaire"].widget.attrs.update({"placeholder": "0.00", "step": "0.01", "min": "0"})
         self.fields["quantite_stock"].widget.attrs.update({"placeholder": "0", "min": "0"})
         self.fields["seuil_alerte"].widget.attrs.update({"placeholder": "0", "min": "0"})
+
+
+class StockMovementForm(forms.Form):
+    produit = forms.ModelChoiceField(queryset=Produit.objects.none(), label=_("Produit"))
+    movement_type = forms.ChoiceField(label=_("Type de mouvement"))
+    quantity = forms.IntegerField(min_value=1, label=_("Quantite"))
+    reference = forms.CharField(max_length=120, required=False, label=_("Reference"))
+    reason = forms.CharField(max_length=120, required=False, label=_("Motif"))
+    comment = forms.CharField(required=False, label=_("Commentaire"), widget=forms.Textarea(attrs={"rows": 3}))
+
+    def __init__(self, *args, entreprise=None, allowed_types=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        allowed_types = allowed_types or []
+        self.fields["produit"].queryset = Produit.objects.filter(entreprise=entreprise).order_by("nom", "id")
+        self.fields["movement_type"].choices = [
+            (code, label)
+            for code, label in StockMovement.MovementType.choices
+            if code in allowed_types
+        ]
+        self.fields["produit"].widget.attrs.update({"data-stock-form": "product"})
+        self.fields["quantity"].widget.attrs.update({"placeholder": "0", "min": "1"})
+        self.fields["reference"].widget.attrs.update({"placeholder": _("Bon, document ou reference interne")})
+        self.fields["reason"].widget.attrs.update({"placeholder": _("Expliquez brievement l'operation")})
+        self.fields["comment"].widget.attrs.update({"placeholder": _("Commentaire complementaire")})
+
+    def clean_movement_type(self):
+        movement_type = self.cleaned_data["movement_type"]
+        allowed_values = {choice[0] for choice in self.fields["movement_type"].choices}
+        if movement_type not in allowed_values:
+            raise forms.ValidationError(_("Le type de mouvement selectionne est invalide."))
+        return movement_type

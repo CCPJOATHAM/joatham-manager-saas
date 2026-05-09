@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 
 from core.services.quotas import PlanQuotaExceeded
@@ -7,7 +9,8 @@ from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
 
-from .forms import ProduitForm
+from .forms import ProduitForm, StockMovementForm
+from .models import StockMovement
 from .selectors.products import (
     STOCK_FILTER_ALL,
     STOCK_FILTER_LOW,
@@ -15,13 +18,114 @@ from .selectors.products import (
     get_product_by_entreprise,
     get_product_counts_by_entreprise,
 )
+from .selectors.stock import get_stock_movements_for_entreprise
 from .services.products_service import create_product_for_entreprise, list_products_for_entreprise, update_product_for_entreprise
+from .services.stock import StockOperationError, apply_adjustment, apply_manual_entry, apply_manual_exit
 
 
 def _build_product_ui_permissions(user):
     return {
         "can_manage_products_ui": user_has_permission(user, "products.manage"),
+        "can_view_stock_ui": user_has_permission(user, "stock.view"),
+        "can_move_stock_ui": user_has_permission(user, "stock.move"),
+        "can_adjust_stock_ui": user_has_permission(user, "stock.adjust"),
     }
+
+
+def _build_stock_type_label(movement_type):
+    return {
+        StockMovement.MovementType.MANUAL_ENTRY: _("Entree"),
+        StockMovement.MovementType.MANUAL_EXIT: _("Sortie"),
+        StockMovement.MovementType.ADJUSTMENT_POSITIVE: _("Ajustement +"),
+        StockMovement.MovementType.ADJUSTMENT_NEGATIVE: _("Ajustement -"),
+        StockMovement.MovementType.INVOICE_SALE: _("Vente facture"),
+        StockMovement.MovementType.INVOICE_RESTORE: _("Restauration facture"),
+        StockMovement.MovementType.INVENTORY_RECOUNT: _("Inventaire"),
+        StockMovement.MovementType.TRANSFER_OUT: _("Transfert sortant"),
+        StockMovement.MovementType.TRANSFER_IN: _("Transfert entrant"),
+    }.get(movement_type, movement_type)
+
+
+def _get_stock_filters_from_request(request, entreprise):
+    product_id = (request.GET.get("produit") or "").strip()
+    movement_type = (request.GET.get("movement_type") or "").strip()
+    source_app = (request.GET.get("source_app") or "").strip()
+    date_debut = parse_date((request.GET.get("date_debut") or "").strip()) if request.GET.get("date_debut") else None
+    date_fin = parse_date((request.GET.get("date_fin") or "").strip()) if request.GET.get("date_fin") else None
+
+    produit = None
+    if product_id:
+        produit = get_product_by_entreprise(entreprise, product_id)
+
+    return {
+        "produit": produit,
+        "movement_type": movement_type or None,
+        "date_debut": date_debut,
+        "date_fin": date_fin,
+        "source_app": source_app or None,
+        "selected_product_id": str(product_id) if product_id else "",
+        "selected_movement_type": movement_type,
+        "selected_source_app": source_app,
+        "selected_date_debut": request.GET.get("date_debut", ""),
+        "selected_date_fin": request.GET.get("date_fin", ""),
+    }
+
+
+def _build_stock_operation_context(*, form, page_title, submit_label, help_text):
+    return {
+        "form": form,
+        "page_title": page_title,
+        "submit_label": submit_label,
+        "help_text": help_text,
+        "back_url": "stock_movement_list",
+    }
+
+
+def _handle_stock_operation(*, request, entreprise, form, operation):
+    if request.method != "POST" or not form.is_valid():
+        return None
+
+    data = form.cleaned_data
+    try:
+        if operation == "entry":
+            apply_manual_entry(
+                entreprise=entreprise,
+                produit=data["produit"],
+                quantity=data["quantity"],
+                utilisateur=request.user,
+                reference=data["reference"],
+                reason=data["reason"],
+                comment=data["comment"],
+            )
+        elif operation == "exit":
+            apply_manual_exit(
+                entreprise=entreprise,
+                produit=data["produit"],
+                quantity=data["quantity"],
+                utilisateur=request.user,
+                reference=data["reference"],
+                reason=data["reason"],
+                comment=data["comment"],
+            )
+        elif operation == "adjustment":
+            apply_adjustment(
+                entreprise=entreprise,
+                produit=data["produit"],
+                quantity=data["quantity"],
+                movement_type=data["movement_type"],
+                utilisateur=request.user,
+                reference=data["reference"],
+                reason=data["reason"],
+                comment=data["comment"],
+            )
+        else:
+            raise PermissionDenied("Operation de stock invalide.")
+    except StockOperationError as exc:
+        form.add_error(None, str(exc))
+        return None
+
+    messages.success(request, _("Le mouvement de stock a ete enregistre avec succes."))
+    return redirect("stock_movement_list")
 
 
 @permission_required("products.view")
@@ -91,6 +195,7 @@ def product_create(request):
             "form": form,
             "page_title": _("Creer un produit"),
             "submit_label": _("Creer le produit"),
+            **_build_product_ui_permissions(request.user),
         },
     )
 
@@ -121,5 +226,153 @@ def product_update(request, product_id):
             "page_title": _("Modifier un produit"),
             "submit_label": _("Enregistrer les modifications"),
             "product": produit,
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.view")
+@module_access_required("products")
+def stock_movement_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_stock_filters_from_request(request, entreprise)
+    movements = get_stock_movements_for_entreprise(
+        entreprise,
+        produit=filters["produit"],
+        movement_type=filters["movement_type"],
+        date_debut=filters["date_debut"],
+        date_fin=filters["date_fin"],
+        source_app=filters["source_app"],
+    )
+    products = list_products_for_entreprise(entreprise)
+    rows = [
+        {
+            "instance": movement,
+            "type_label": _build_stock_type_label(movement.movement_type),
+        }
+        for movement in movements
+    ]
+
+    return render(
+        request,
+        "joatham_products/stock_movement_list.html",
+        {
+            "movements": rows,
+            "products": products,
+            "movement_types": [
+                (StockMovement.MovementType.MANUAL_ENTRY, _("Entree")),
+                (StockMovement.MovementType.MANUAL_EXIT, _("Sortie")),
+                (StockMovement.MovementType.ADJUSTMENT_POSITIVE, _("Ajustement +")),
+                (StockMovement.MovementType.ADJUSTMENT_NEGATIVE, _("Ajustement -")),
+                (StockMovement.MovementType.INVOICE_SALE, _("Vente facture")),
+                (StockMovement.MovementType.INVOICE_RESTORE, _("Restauration facture")),
+            ],
+            "source_choices": [
+                ("", _("Toutes les sources")),
+                ("joatham_billing", _("Facturation")),
+            ],
+            **filters,
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.move")
+@module_access_required("products")
+def stock_entry_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = StockMovementForm(
+        request.POST or None,
+        entreprise=entreprise,
+        allowed_types=[StockMovement.MovementType.MANUAL_ENTRY],
+        initial={"movement_type": StockMovement.MovementType.MANUAL_ENTRY},
+    )
+    response = _handle_stock_operation(
+        request=request,
+        entreprise=entreprise,
+        form=form,
+        operation="entry",
+    )
+    if response is not None:
+        return response
+    return render(
+        request,
+        "joatham_products/stock_movement_form.html",
+        {
+            **_build_stock_operation_context(
+                form=form,
+                page_title=_("Entree stock"),
+                submit_label=_("Enregistrer l'entree"),
+                help_text=_("Utilisez cette action pour enregistrer un reapprovisionnement ou une entree manuelle."),
+            ),
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.move")
+@module_access_required("products")
+def stock_exit_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = StockMovementForm(
+        request.POST or None,
+        entreprise=entreprise,
+        allowed_types=[StockMovement.MovementType.MANUAL_EXIT],
+        initial={"movement_type": StockMovement.MovementType.MANUAL_EXIT},
+    )
+    response = _handle_stock_operation(
+        request=request,
+        entreprise=entreprise,
+        form=form,
+        operation="exit",
+    )
+    if response is not None:
+        return response
+    return render(
+        request,
+        "joatham_products/stock_movement_form.html",
+        {
+            **_build_stock_operation_context(
+                form=form,
+                page_title=_("Sortie stock"),
+                submit_label=_("Enregistrer la sortie"),
+                help_text=_("Utilisez cette action pour enregistrer une sortie manuelle ou une perte constatee."),
+            ),
+            **_build_product_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("stock.adjust")
+@module_access_required("products")
+def stock_adjustment_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = StockMovementForm(
+        request.POST or None,
+        entreprise=entreprise,
+        allowed_types=[
+            StockMovement.MovementType.ADJUSTMENT_POSITIVE,
+            StockMovement.MovementType.ADJUSTMENT_NEGATIVE,
+        ],
+    )
+    response = _handle_stock_operation(
+        request=request,
+        entreprise=entreprise,
+        form=form,
+        operation="adjustment",
+    )
+    if response is not None:
+        return response
+    return render(
+        request,
+        "joatham_products/stock_movement_form.html",
+        {
+            **_build_stock_operation_context(
+                form=form,
+                page_title=_("Ajustement stock"),
+                submit_label=_("Enregistrer l'ajustement"),
+                help_text=_("Utilisez cette action pour corriger un ecart de stock apres verification interne."),
+            ),
+            **_build_product_ui_permissions(request.user),
         },
     )

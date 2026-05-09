@@ -7,6 +7,9 @@
 
 {% block top_actions %}
 <a href="{% url 'product_list' %}" class="btn-link">{% trans "Liste des produits" %}</a>
+{% if can_view_stock_ui %}
+<a href="{% url 'stock_movement_list' %}" class="btn-link">{% trans "Mouvements stock" %}</a>
+{% endif %}
 {% if can_manage_products_ui %}
 <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>
 {% endif %}

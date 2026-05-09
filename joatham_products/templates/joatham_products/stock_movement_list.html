@@ -1,0 +1,281 @@
+{% extends "joatham_products/base.html" %}
+{% load i18n %}
+
+{% block products_title %}{% trans "Mouvements de stock" %}{% endblock %}
+{% block products_subtitle %}{% trans "Consultez l'historique des entrees, sorties et ajustements de stock avec des filtres simples et utiles." %}{% endblock %}
+
+{% block content %}
+<style>
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .actions,
+    .filters-inline {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .action-link.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .filters-card,
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .filters-card {
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        padding: 12px 13px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+    }
+
+    .table-shell {
+        overflow: hidden;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .movements-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1120px;
+    }
+
+    .movements-table thead {
+        background: #f8fafc;
+    }
+
+    .movements-table th,
+    .movements-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .movements-table th {
+        color: #475569;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .badge.entry,
+    .badge.adjustment-positive {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .badge.exit,
+    .badge.adjustment-negative {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .badge.invoice {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+        .filter-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 720px) {
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="toolbar">
+    <div class="actions">
+        {% if can_move_stock_ui %}
+        <a href="{% url 'stock_entry_create' %}" class="action-link primary">{% trans "Entree stock" %}</a>
+        <a href="{% url 'stock_exit_create' %}" class="action-link">{% trans "Sortie stock" %}</a>
+        {% endif %}
+        {% if can_adjust_stock_ui %}
+        <a href="{% url 'stock_adjustment_create' %}" class="action-link">{% trans "Ajustement" %}</a>
+        {% endif %}
+    </div>
+    <div class="filters-inline">
+        <a href="{% url 'product_list' %}" class="action-link">{% trans "Retour aux produits" %}</a>
+    </div>
+</div>
+
+<div class="filters-card">
+    <form method="get">
+        <div class="filter-grid">
+            <div class="field">
+                <label for="produit">{% trans "Produit" %}</label>
+                <select name="produit" id="produit">
+                    <option value="">{% trans "Tous les produits" %}</option>
+                    {% for produit in products %}
+                    <option value="{{ produit.id }}"{% if selected_product_id == produit.id|stringformat:'s' %} selected{% endif %}>{{ produit.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="movement_type">{% trans "Type" %}</label>
+                <select name="movement_type" id="movement_type">
+                    <option value="">{% trans "Tous les types" %}</option>
+                    {% for code, label in movement_types %}
+                    <option value="{{ code }}"{% if selected_movement_type == code %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="date_debut">{% trans "Date debut" %}</label>
+                <input type="date" name="date_debut" id="date_debut" value="{{ selected_date_debut }}">
+            </div>
+            <div class="field">
+                <label for="date_fin">{% trans "Date fin" %}</label>
+                <input type="date" name="date_fin" id="date_fin" value="{{ selected_date_fin }}">
+            </div>
+            <div class="field">
+                <label for="source_app">{% trans "Source" %}</label>
+                <select name="source_app" id="source_app">
+                    {% for value, label in source_choices %}
+                    <option value="{{ value }}"{% if selected_source_app == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="actions" style="margin-top: 16px;">
+            <button type="submit" class="action-link primary">{% trans "Filtrer" %}</button>
+            <a href="{% url 'stock_movement_list' %}" class="action-link">{% trans "Reinitialiser" %}</a>
+        </div>
+    </form>
+</div>
+
+{% if movements %}
+<div class="table-shell">
+    <div class="table-scroll">
+        <table class="movements-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Produit" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Quantite" %}</th>
+                    <th>{% trans "Stock avant" %}</th>
+                    <th>{% trans "Stock apres" %}</th>
+                    <th>{% trans "Reference" %}</th>
+                    <th>{% trans "Motif" %}</th>
+                    <th>{% trans "Utilisateur" %}</th>
+                    <th>{% trans "Source" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in movements %}
+                <tr>
+                    <td>{{ row.instance.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ row.instance.produit.nom }}</td>
+                    <td>
+                        <span class="badge {% if row.instance.movement_type == 'manual_entry' or row.instance.movement_type == 'transfer_in' %}entry{% elif row.instance.movement_type == 'manual_exit' or row.instance.movement_type == 'transfer_out' %}exit{% elif row.instance.movement_type == 'adjustment_positive' %}adjustment-positive{% elif row.instance.movement_type == 'adjustment_negative' %}adjustment-negative{% else %}invoice{% endif %}">
+                            {{ row.type_label }}
+                        </span>
+                    </td>
+                    <td>{{ row.instance.quantity }}</td>
+                    <td>{{ row.instance.stock_before }}</td>
+                    <td>{{ row.instance.stock_after }}</td>
+                    <td>{{ row.instance.reference|default:"-" }}</td>
+                    <td>{{ row.instance.reason|default:"-" }}</td>
+                    <td>{% if row.instance.created_by %}{{ row.instance.created_by.username }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.source_app %}{{ row.instance.source_app }}{% else %}<span class="muted">{% trans "Manuelle" %}</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="table-shell">
+    <div class="empty-state">
+        <h3>{% trans "Aucun mouvement trouve" %}</h3>
+        <p class="muted">{% trans "Aucun mouvement de stock ne correspond aux filtres selectionnes." %}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

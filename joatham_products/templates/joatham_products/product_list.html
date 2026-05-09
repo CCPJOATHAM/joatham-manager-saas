@@ -243,6 +243,18 @@
         <a href="?stock={{ item.value }}" class="{% if item.value == selected_filter %}active{% endif %}">{{ item.label }}</a>
         {% endfor %}
     </div>
+    <div class="filters">
+        {% if can_view_stock_ui %}
+        <a href="{% url 'stock_movement_list' %}">{% trans "Mouvements stock" %}</a>
+        {% endif %}
+        {% if can_move_stock_ui %}
+        <a href="{% url 'stock_entry_create' %}">{% trans "Entree stock" %}</a>
+        <a href="{% url 'stock_exit_create' %}">{% trans "Sortie stock" %}</a>
+        {% endif %}
+        {% if can_adjust_stock_ui %}
+        <a href="{% url 'stock_adjustment_create' %}">{% trans "Ajustement" %}</a>
+        {% endif %}
+    </div>
 </div>
 
 {% if products %}
