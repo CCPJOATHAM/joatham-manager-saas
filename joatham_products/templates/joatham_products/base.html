@@ -10,6 +10,13 @@
 {% if can_view_stock_ui %}
 <a href="{% url 'stock_movement_list' %}" class="btn-link">{% trans "Mouvements stock" %}</a>
 {% endif %}
+{% if can_move_stock_ui %}
+<a href="{% url 'stock_entry_create' %}" class="btn-link">{% trans "Entree stock" %}</a>
+<a href="{% url 'stock_exit_create' %}" class="btn-link">{% trans "Sortie stock" %}</a>
+{% endif %}
+{% if can_adjust_stock_ui %}
+<a href="{% url 'stock_adjustment_create' %}" class="btn-link">{% trans "Ajustement stock" %}</a>
+{% endif %}
 {% if can_inventory_stock_ui %}
 <a href="{% url 'inventory_list' %}" class="btn-link">{% trans "Inventaires" %}</a>
 {% endif %}
@@ -19,4 +26,285 @@
 {% if can_manage_products_ui %}
 <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>
 {% endif %}
+{% endblock %}
+
+{% block before_content %}
+<style>
+    .section-card,
+    .filter-card,
+    .table-shell,
+    .kpi-card,
+    .panel-card {
+        border: 1px solid #dde7f0;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .section-card,
+    .filter-card,
+    .panel-card {
+        padding: 18px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .section-title {
+        margin: 0;
+        color: #10233f;
+        font-size: 1.05rem;
+        font-weight: 800;
+    }
+
+    .section-subtitle {
+        margin: 6px 0 0;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .toolbar,
+    .action-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .action-link,
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .action-link.primary,
+    .action-button.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
+    .action-link.success,
+    .action-button.success {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .action-link.warning,
+    .action-button.warning {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .action-link.danger,
+    .action-button.danger {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .filter-grid {
+        display: grid;
+        gap: 14px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        padding: 12px 13px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .kpi-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .kpi-card {
+        padding: 16px;
+    }
+
+    .kpi-label {
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .kpi-value {
+        display: block;
+        margin-top: 8px;
+        color: #10233f;
+        font-size: 1.2rem;
+        font-weight: 800;
+    }
+
+    .table-shell {
+        overflow: hidden;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table thead {
+        background: #f8fafc;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .data-table th {
+        color: #475569;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .data-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .badge.success {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .badge.warning {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .badge.danger {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .badge.info {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .badge.neutral {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+        color: #10233f;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 520px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .helper-card {
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .helper-text {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .errorlist,
+    .form-errors {
+        margin: 0 0 12px;
+        padding: 0;
+        list-style: none;
+        color: #b91c1c;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 720px) {
+        .action-row,
+        .toolbar {
+            align-items: stretch;
+        }
+    }
+</style>
 {% endblock %}

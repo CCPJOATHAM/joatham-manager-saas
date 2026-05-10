@@ -214,6 +214,7 @@ def product_list(request):
         stock_filter=None if selected_filter == STOCK_FILTER_ALL else selected_filter,
     )
     counts = get_product_counts_by_entreprise(entreprise)
+    en_stock_count = max((counts.get("actifs", 0) or 0) - (counts.get("stock_faible", 0) or 0), 0)
 
     product_rows = [
         {
@@ -239,6 +240,7 @@ def product_list(request):
                 {"value": STOCK_FILTER_LOW, "label": _("Stock faible")},
                 {"value": STOCK_FILTER_RUPTURE, "label": _("Rupture")},
             ],
+            "en_stock_count": en_stock_count,
             **counts,
             **_build_product_ui_permissions(request.user),
         },

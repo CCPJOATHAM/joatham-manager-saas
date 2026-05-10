@@ -6,154 +6,13 @@
 
 {% block content %}
 <style>
-    .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
-    }
-
-    .actions,
-    .filters-inline {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .action-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 40px;
-        padding: 0 14px;
-        border-radius: 12px;
-        border: 1px solid #dbe5ef;
-        background: #fff;
-        color: #10233f;
-        text-decoration: none;
-        font-weight: 700;
-    }
-
-    .action-link.primary {
-        background: #0f766e;
-        border-color: #0f766e;
-        color: #fff;
-    }
-
-    .filters-card,
-    .table-shell {
-        border: 1px solid #dde7f0;
-        border-radius: 22px;
-        background: #fff;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .filters-card {
-        padding: 18px;
-        margin-bottom: 18px;
-    }
-
     .filter-grid {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 14px;
-    }
-
-    .field {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .field label {
-        font-weight: 700;
-        color: #10233f;
-    }
-
-    .field input,
-    .field select {
-        width: 100%;
-        padding: 12px 13px;
-        border-radius: 12px;
-        border: 1px solid #d7dee7;
-    }
-
-    .table-shell {
-        overflow: hidden;
-    }
-
-    .table-scroll {
-        overflow-x: auto;
     }
 
     .movements-table {
-        width: 100%;
-        border-collapse: collapse;
         min-width: 1120px;
-    }
-
-    .movements-table thead {
-        background: #f8fafc;
-    }
-
-    .movements-table th,
-    .movements-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #eef2f7;
-        text-align: left;
-        vertical-align: middle;
-    }
-
-    .movements-table th {
-        color: #475569;
-        font-size: 0.88rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 32px;
-        padding: 0 10px;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 800;
-        border: 1px solid transparent;
-        white-space: nowrap;
-    }
-
-    .badge.entry,
-    .badge.adjustment-positive {
-        background: #ecfdf5;
-        border-color: #bbf7d0;
-        color: #047857;
-    }
-
-    .badge.exit,
-    .badge.adjustment-negative {
-        background: #fee2e2;
-        border-color: #fecaca;
-        color: #b91c1c;
-    }
-
-    .badge.invoice {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-        color: #1d4ed8;
-    }
-
-    .muted {
-        color: #64748b;
-    }
-
-    .empty-state {
-        padding: 48px 24px;
-        text-align: center;
     }
 
     @media (max-width: 1100px) {
@@ -169,11 +28,18 @@
     }
 </style>
 
+<div class="section-card" style="margin-bottom: 18px;">
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Journal d'exploitation stock" %}</h3>
+            <p class="section-subtitle">{% trans "Retrouvez toutes les variations de stock dans un historique simple, filtrable et exploitable." %}</p>
+        </div>
+    </div>
 <div class="toolbar">
     <div class="actions">
         {% if can_move_stock_ui %}
-        <a href="{% url 'stock_entry_create' %}" class="action-link primary">{% trans "Entree stock" %}</a>
-        <a href="{% url 'stock_exit_create' %}" class="action-link">{% trans "Sortie stock" %}</a>
+        <a href="{% url 'stock_entry_create' %}" class="action-link success">{% trans "Entree stock" %}</a>
+        <a href="{% url 'stock_exit_create' %}" class="action-link warning">{% trans "Sortie stock" %}</a>
         {% endif %}
         {% if can_adjust_stock_ui %}
         <a href="{% url 'stock_adjustment_create' %}" class="action-link">{% trans "Ajustement" %}</a>
@@ -181,13 +47,17 @@
         {% if can_export_stock_ui %}
         <a href="{% url 'stock_movement_export_excel' %}?{% if selected_product_id %}produit={{ selected_product_id|urlencode }}&amp;{% endif %}{% if selected_movement_type %}movement_type={{ selected_movement_type|urlencode }}&amp;{% endif %}{% if selected_date_debut %}date_debut={{ selected_date_debut|urlencode }}&amp;{% endif %}{% if selected_date_fin %}date_fin={{ selected_date_fin|urlencode }}&amp;{% endif %}{% if selected_source_app %}source_app={{ selected_source_app|urlencode }}{% endif %}" class="action-link">{% trans "Export Excel" %}</a>
         {% endif %}
+        {% if can_view_stock_ui %}
+        <a href="{% url 'stock_reports' %}" class="action-link primary">{% trans "Rapports stock" %}</a>
+        {% endif %}
     </div>
     <div class="filters-inline">
         <a href="{% url 'product_list' %}" class="action-link">{% trans "Retour aux produits" %}</a>
     </div>
 </div>
+</div>
 
-<div class="filters-card">
+<div class="filter-card" style="margin-bottom: 18px;">
     <form method="get">
         <div class="filter-grid">
             <div class="field">
@@ -235,7 +105,7 @@
 {% if movements %}
 <div class="table-shell">
     <div class="table-scroll">
-        <table class="movements-table">
+        <table class="data-table movements-table">
             <thead>
                 <tr>
                     <th>{% trans "Date" %}</th>
@@ -256,7 +126,7 @@
                     <td>{{ row.instance.created_at|date:"d/m/Y H:i" }}</td>
                     <td>{{ row.instance.produit.nom }}</td>
                     <td>
-                        <span class="badge {% if row.instance.movement_type == 'manual_entry' or row.instance.movement_type == 'transfer_in' %}entry{% elif row.instance.movement_type == 'manual_exit' or row.instance.movement_type == 'transfer_out' %}exit{% elif row.instance.movement_type == 'adjustment_positive' %}adjustment-positive{% elif row.instance.movement_type == 'adjustment_negative' %}adjustment-negative{% else %}invoice{% endif %}">
+                        <span class="badge {% if row.instance.movement_type == 'manual_entry' or row.instance.movement_type == 'transfer_in' %}success{% elif row.instance.movement_type == 'manual_exit' or row.instance.movement_type == 'transfer_out' %}warning{% elif row.instance.movement_type == 'adjustment_positive' %}success{% elif row.instance.movement_type == 'adjustment_negative' %}danger{% elif row.instance.movement_type == 'invoice_sale' or row.instance.movement_type == 'invoice_restore' %}info{% else %}neutral{% endif %}">
                             {{ row.type_label }}
                         </span>
                     </td>

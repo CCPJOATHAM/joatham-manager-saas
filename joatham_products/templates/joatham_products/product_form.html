@@ -8,11 +8,7 @@
 <style>
     .form-card {
         max-width: 820px;
-        background: #fff;
-        border: 1px solid #dde7f0;
-        border-radius: 22px;
         padding: 26px;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
     }
 
     .form-grid {
@@ -21,34 +17,8 @@
         gap: 18px;
     }
 
-    .field {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
     .field.full {
         grid-column: 1 / -1;
-    }
-
-    .field label {
-        font-weight: 700;
-        color: #10233f;
-    }
-
-    .field input,
-    .field textarea {
-        width: 100%;
-        padding: 13px 14px;
-        border-radius: 12px;
-        border: 1px solid #d7dee7;
-    }
-
-    .field input:focus,
-    .field textarea:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
     }
 
     .field.checkbox {
@@ -57,30 +27,15 @@
         gap: 10px;
     }
 
-    .help {
-        color: #64748b;
-        line-height: 1.6;
-        margin: 0 0 18px;
+    .stock-current-card {
+        margin-bottom: 18px;
     }
 
-    .errorlist {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        color: #b91c1c;
-        font-size: 0.9rem;
-    }
-
-    .submit-btn {
-        margin-top: 20px;
-        min-height: 46px;
-        padding: 0 20px;
-        border-radius: 12px;
-        border: 1px solid #0f766e;
-        background: linear-gradient(135deg, #0f766e, #115e59);
-        color: #fff;
-        font-weight: 700;
-        cursor: pointer;
+    .stock-current-value {
+        margin-top: 8px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #10233f;
     }
 
     @media (max-width: 820px) {
@@ -90,21 +45,39 @@
     }
 </style>
 
-<div class="form-card">
-    <p class="help">{% trans "Cette fiche vous permet de suivre le prix, la description commerciale et le stock de chaque produit sans entrer encore dans une logique complexe d'inventaire." %}</p>
+<div class="section-card form-card">
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{{ page_title }}</h3>
+            <p class="section-subtitle">{% trans "Renseignez la fiche produit en separant clairement les informations catalogue des operations de stock." %}</p>
+        </div>
+    </div>
+    <div class="helper-card helper-text" style="margin-bottom: 18px;">
+        {% if is_create_mode %}
+        {% trans "Le stock initial saisi ici sera trace automatiquement comme mouvement de stock afin de garder un historique fiable des variations." %}
+        {% else %}
+        {% trans "Le stock ne se modifie plus directement depuis cette fiche. Utilisez les operations stock dediees pour conserver un historique complet." %}
+        {% endif %}
+    </div>
     {% if not is_create_mode and product %}
-    <div class="help" style="padding: 16px 18px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
-        <strong>{% trans "Stock actuel :" %}</strong> {{ product.quantite_stock }}
-        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <div class="helper-card stock-current-card">
+        <div class="section-header" style="margin-bottom: 10px;">
+            <div>
+                <h4 class="section-title" style="font-size: 0.98rem;">{% trans "Stock actuel" %}</h4>
+                <p class="section-subtitle">{% trans "Ce niveau de stock est en lecture seule depuis la fiche produit." %}</p>
+            </div>
+        </div>
+        <div class="stock-current-value">{{ product.quantite_stock }}</div>
+        <div class="action-row" style="margin-top: 12px; justify-content: flex-start;">
             {% if can_view_stock_ui %}
-            <a href="{% url 'stock_movement_list' %}?produit={{ product.id }}" class="btn-link">{% trans "Voir les mouvements" %}</a>
+            <a href="{% url 'stock_movement_list' %}?produit={{ product.id }}" class="action-link">{% trans "Voir les mouvements" %}</a>
             {% endif %}
             {% if can_move_stock_ui %}
-            <a href="{% url 'stock_entry_create' %}" class="btn-link">{% trans "Entree stock" %}</a>
-            <a href="{% url 'stock_exit_create' %}" class="btn-link">{% trans "Sortie stock" %}</a>
+            <a href="{% url 'stock_entry_create' %}" class="action-link success">{% trans "Entree stock" %}</a>
+            <a href="{% url 'stock_exit_create' %}" class="action-link warning">{% trans "Sortie stock" %}</a>
             {% endif %}
             {% if can_adjust_stock_ui %}
-            <a href="{% url 'stock_adjustment_create' %}" class="btn-link">{% trans "Ajustement stock" %}</a>
+            <a href="{% url 'stock_adjustment_create' %}" class="action-link">{% trans "Ajustement stock" %}</a>
             {% endif %}
         </div>
     </div>
@@ -137,7 +110,7 @@
                 <label for="{{ form.quantite_stock.id_for_label }}">{% trans "Stock initial" %}</label>
                 {{ form.quantite_stock }}
                 {{ form.quantite_stock.errors }}
-                <small class="help" style="margin: 0;">{% trans "Ce stock initial sera enregistre comme mouvement de stock." %}</small>
+                <small class="helper-text">{% trans "Ce stock initial sera enregistre comme mouvement de stock." %}</small>
             </div>
             {% endif %}
             <div class="field">
@@ -151,7 +124,10 @@
                 {{ form.actif.errors }}
             </div>
         </div>
-        <button type="submit" class="submit-btn">{{ submit_label }}</button>
+        <div class="action-row" style="margin-top: 20px; justify-content: flex-start;">
+            <button type="submit" class="action-link primary" style="cursor: pointer;">{{ submit_label }}</button>
+            <a href="{% url 'product_list' %}" class="action-link">{% trans "Retour aux produits" %}</a>
+        </div>
     </form>
 </div>
 {% endblock %}

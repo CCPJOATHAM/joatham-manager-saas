@@ -6,36 +6,32 @@
 
 {% block content %}
 <style>
-    .toolbar,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.toolbar{justify-content:space-between;margin-bottom:18px}
-    .action-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:12px;border:1px solid #dbe5ef;background:#fff;color:#10233f;text-decoration:none;font-weight:700}
-    .action-link.primary{background:#0f766e;border-color:#0f766e;color:#fff}
-    .filters-card,.table-shell,.kpi-card,.section-card{border:1px solid #dde7f0;border-radius:22px;background:#fff;box-shadow:0 16px 34px rgba(15,23,42,.05)}
-    .filters-card,.section-card{padding:18px}.filters-card{margin-bottom:18px}.section-card{margin-bottom:18px}
-    .filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-    .field{display:flex;flex-direction:column;gap:8px}.field input,.field select{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #d7dee7}
-    .kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:18px}
-    .kpi-card{padding:16px}.kpi-label{color:#64748b;font-size:.85rem}.kpi-value{display:block;margin-top:8px;font-size:1.18rem;font-weight:800;color:#10233f}
-    .table-shell{overflow:hidden;margin-bottom:18px}.table-scroll{overflow-x:auto}.report-table{width:100%;border-collapse:collapse;min-width:920px}.report-table thead{background:#f8fafc}
-    .report-table th,.report-table td{padding:14px 16px;border-bottom:1px solid #eef2f7;text-align:left;vertical-align:middle}.report-table th{color:#475569;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-    .badge{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:800;border:1px solid transparent;white-space:nowrap}
-    .badge.en-stock{background:#ecfdf5;border-color:#bbf7d0;color:#047857}.badge.stock-faible{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.badge.rupture{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
-    .muted{color:#64748b}
-    @media (max-width:1180px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:720px){.filter-grid,.kpi-grid{grid-template-columns:1fr}}
+    .report-table { min-width:920px; }
+    .badge.en-stock { background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+    .badge.stock-faible { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
+    .badge.rupture { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
+    .inventory-status-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+    @media (max-width:1180px) { .filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:900px) { .inventory-status-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:720px) { .filter-grid,.kpi-grid,.inventory-status-grid { grid-template-columns:1fr; } }
 </style>
 
-<div class="toolbar">
-    <div class="actions">
-        {% if can_export_stock_ui %}
-        <a href="{% url 'stock_reports_export_pdf' %}?{% if selected_product_id %}produit={{ selected_product_id|urlencode }}&amp;{% endif %}{% if selected_movement_type %}movement_type={{ selected_movement_type|urlencode }}&amp;{% endif %}{% if selected_date_debut %}date_debut={{ selected_date_debut|urlencode }}&amp;{% endif %}{% if selected_date_fin %}date_fin={{ selected_date_fin|urlencode }}&amp;{% endif %}{% if selected_source_app %}source_app={{ selected_source_app|urlencode }}{% endif %}" class="action-link primary">{% trans "Export PDF" %}</a>
-        {% endif %}
-    </div>
-    <div class="actions">
-        <a href="{% url 'stock_movement_list' %}" class="action-link">{% trans "Voir les mouvements" %}</a>
+<div class="section-card">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">{% trans "Rapports stock" %}</h2>
+            <p class="section-subtitle">{% trans "Suivez les niveaux de stock, les ajustements, les inventaires et les mouvements recents sur une periode donnee." %}</p>
+        </div>
+        <div class="action-row">
+            <a href="{% url 'stock_movement_list' %}" class="action-link">{% trans "Voir les mouvements" %}</a>
+            {% if can_export_stock_ui %}
+            <a href="{% url 'stock_reports_export_pdf' %}?{% if selected_product_id %}produit={{ selected_product_id|urlencode }}&amp;{% endif %}{% if selected_movement_type %}movement_type={{ selected_movement_type|urlencode }}&amp;{% endif %}{% if selected_date_debut %}date_debut={{ selected_date_debut|urlencode }}&amp;{% endif %}{% if selected_date_fin %}date_fin={{ selected_date_fin|urlencode }}&amp;{% endif %}{% if selected_source_app %}source_app={{ selected_source_app|urlencode }}{% endif %}" class="action-link primary">{% trans "Export PDF" %}</a>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<div class="filters-card">
+<div class="filter-card">
     <form method="get">
         <div class="filter-grid">
             <div class="field">
@@ -73,7 +69,7 @@
                 </select>
             </div>
         </div>
-        <div class="actions" style="margin-top:16px;">
+        <div class="action-row" style="margin-top:16px;">
             <button type="submit" class="action-link primary">{% trans "Filtrer" %}</button>
             <a href="{% url 'stock_reports' %}" class="action-link">{% trans "Reinitialiser" %}</a>
         </div>
@@ -95,113 +91,137 @@
 </div>
 
 <div class="section-card">
-    <h3 style="margin-top:0;">{% trans "Synthese par produit" %}</h3>
-</div>
-<div class="table-shell">
-    <div class="table-scroll">
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>{% trans "Produit" %}</th>
-                    <th>{% trans "Stock actuel" %}</th>
-                    <th>{% trans "Seuil alerte" %}</th>
-                    <th>{% trans "Statut" %}</th>
-                    <th>{% trans "Entrees periode" %}</th>
-                    <th>{% trans "Sorties periode" %}</th>
-                    <th>{% trans "Solde mouvements" %}</th>
-                    <th>{% trans "Dernier mouvement" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in product_summary %}
-                <tr>
-                    <td>{{ row.product.nom }}</td>
-                    <td>{{ row.stock_actuel }}</td>
-                    <td>{{ row.seuil_alerte }}</td>
-                    <td><span class="badge {% if row.statut_stock == 'en_stock' %}en-stock{% elif row.statut_stock == 'stock_faible' %}stock-faible{% else %}rupture{% endif %}">{{ row.statut_stock_label }}</span></td>
-                    <td>{{ row.total_entrees }}</td>
-                    <td>{{ row.total_sorties }}</td>
-                    <td>{{ row.solde_mouvements }}</td>
-                    <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Synthese par produit" %}</h3>
+            <p class="section-subtitle">{% trans "Visualisez le niveau de stock courant et l'activite recente produit par produit." %}</p>
+        </div>
+    </div>
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="data-table report-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Produit" %}</th>
+                        <th>{% trans "Stock actuel" %}</th>
+                        <th>{% trans "Seuil alerte" %}</th>
+                        <th>{% trans "Statut" %}</th>
+                        <th>{% trans "Entrees periode" %}</th>
+                        <th>{% trans "Sorties periode" %}</th>
+                        <th>{% trans "Solde mouvements" %}</th>
+                        <th>{% trans "Dernier mouvement" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in product_summary %}
+                    <tr>
+                        <td>{{ row.product.nom }}</td>
+                        <td>{{ row.stock_actuel }}</td>
+                        <td>{{ row.seuil_alerte }}</td>
+                        <td><span class="badge {% if row.statut_stock == 'en_stock' %}en-stock{% elif row.statut_stock == 'stock_faible' %}stock-faible{% else %}rupture{% endif %}">{{ row.statut_stock_label }}</span></td>
+                        <td>{{ row.total_entrees }}</td>
+                        <td>{{ row.total_sorties }}</td>
+                        <td>{{ row.solde_mouvements }}</td>
+                        <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div class="section-card">
-    <h3 style="margin-top:0;">{% trans "Synthese par type de mouvement" %}</h3>
-</div>
-<div class="table-shell">
-    <div class="table-scroll">
-        <table class="report-table">
-            <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre de mouvements" %}</th><th>{% trans "Quantite totale" %}</th></tr></thead>
-            <tbody>
-                {% for row in movement_type_summary %}
-                <tr><td>{{ row.movement_label }}</td><td>{{ row.movement_count }}</td><td>{{ row.total_quantity }}</td></tr>
-                {% empty %}
-                <tr><td colspan="3" class="muted">{% trans "Aucun mouvement sur cette periode." %}</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Synthese par type de mouvement" %}</h3>
+            <p class="section-subtitle">{% trans "Reperez les familles de mouvements qui dominent la periode analysee." %}</p>
+        </div>
+    </div>
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="data-table report-table">
+                <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre de mouvements" %}</th><th>{% trans "Quantite totale" %}</th></tr></thead>
+                <tbody>
+                    {% for row in movement_type_summary %}
+                    <tr><td>{{ row.movement_label }}</td><td>{{ row.movement_count }}</td><td>{{ row.total_quantity }}</td></tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="muted">{% trans "Aucun mouvement sur cette periode." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div class="section-card">
-    <h3 style="margin-top:0;">{% trans "Synthese inventaires" %}</h3>
-    <p class="muted" style="margin-bottom:0;">
-        {% trans "Brouillons :" %} {{ inventory_summary.draft_count }} |
-        {% trans "En cours :" %} {{ inventory_summary.in_progress_count }} |
-        {% trans "Clotures :" %} {{ inventory_summary.closed_count }} |
-        {% trans "Valides :" %} {{ inventory_summary.validated_count }} |
-        {% trans "Annules :" %} {{ inventory_summary.cancelled_count }} |
-        {% trans "Ecarts positifs :" %} {{ inventory_summary.positive_differences }} |
-        {% trans "Ecarts negatifs :" %} {{ inventory_summary.negative_differences }}
-    </p>
-</div>
-<div class="table-shell">
-    <div class="table-scroll">
-        <table class="report-table">
-            <thead><tr><th>{% trans "Inventaire" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Date creation" %}</th><th>{% trans "Date validation" %}</th><th>{% trans "Action" %}</th></tr></thead>
-            <tbody>
-                {% for session in inventory_summary.recent_inventories %}
-                <tr>
-                    <td>{{ session.name }}</td>
-                    <td>{{ session.get_status_display }}</td>
-                    <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
-                    <td>{% if session.validated_at %}{{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                    <td><a href="{% url 'inventory_detail' session.id %}" class="action-link">{% trans "Voir" %}</a></td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="muted">{% trans "Aucun inventaire recent." %}</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Synthese inventaires" %}</h3>
+            <p class="section-subtitle">{% trans "Suivez l'etat des campagnes d'inventaire et les ecarts qui en decoulent." %}</p>
+        </div>
+    </div>
+    <div class="inventory-status-grid">
+        <div class="kpi-card"><span class="kpi-label">{% trans "Brouillons" %}</span><span class="kpi-value">{{ inventory_summary.draft_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "En cours" %}</span><span class="kpi-value">{{ inventory_summary.in_progress_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Clotures" %}</span><span class="kpi-value">{{ inventory_summary.closed_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Valides" %}</span><span class="kpi-value">{{ inventory_summary.validated_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Annules" %}</span><span class="kpi-value">{{ inventory_summary.cancelled_count }}</span></div>
+    </div>
+    <div class="helper-card" style="margin-bottom:18px;">
+        <span class="helper-text">
+            {% trans "Ecarts positifs :" %} {{ inventory_summary.positive_differences }} |
+            {% trans "Ecarts negatifs :" %} {{ inventory_summary.negative_differences }}
+        </span>
+    </div>
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="data-table report-table">
+                <thead><tr><th>{% trans "Inventaire" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Date creation" %}</th><th>{% trans "Date validation" %}</th><th>{% trans "Action" %}</th></tr></thead>
+                <tbody>
+                    {% for session in inventory_summary.recent_inventories %}
+                    <tr>
+                        <td>{{ session.name }}</td>
+                        <td>{{ session.get_status_display }}</td>
+                        <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{% if session.validated_at %}{{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                        <td><a href="{% url 'inventory_detail' session.id %}" class="action-link">{% trans "Voir" %}</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="muted">{% trans "Aucun inventaire recent." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div class="section-card">
-    <h3 style="margin-top:0;">{% trans "Derniers mouvements" %}</h3>
-</div>
-<div class="table-shell">
-    <div class="table-scroll">
-        <table class="report-table">
-            <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Source" %}</th></tr></thead>
-            <tbody>
-                {% for movement in recent_movements %}
-                <tr>
-                    <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
-                    <td>{{ movement.produit.nom }}</td>
-                    <td>{{ movement.get_movement_type_display }}</td>
-                    <td>{{ movement.quantity }}</td>
-                    <td>{% if movement.source_app %}{{ movement.source_app }}{% else %}<span class="muted">{% trans "Manuelle" %}</span>{% endif %}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="muted">{% trans "Aucune activite recente." %}</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Derniers mouvements" %}</h3>
+            <p class="section-subtitle">{% trans "Gardez un oeil sur les derniers evenements qui ont fait bouger le stock." %}</p>
+        </div>
+    </div>
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="data-table report-table">
+                <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Source" %}</th></tr></thead>
+                <tbody>
+                    {% for movement in recent_movements %}
+                    <tr>
+                        <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ movement.produit.nom }}</td>
+                        <td>{{ movement.get_movement_type_display }}</td>
+                        <td>{{ movement.quantity }}</td>
+                        <td>{% if movement.source_app %}{{ movement.source_app }}{% else %}<span class="muted">{% trans "Manuelle" %}</span>{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="muted">{% trans "Aucune activite recente." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

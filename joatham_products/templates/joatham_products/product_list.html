@@ -28,40 +28,8 @@
     }
 
     .stats-grid {
-        display: grid;
         grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
         margin-bottom: 20px;
-    }
-
-    .stat-card {
-        padding: 18px;
-        border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        border: 1px solid #dde7f0;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .stat-label {
-        color: #64748b;
-        font-size: 0.84rem;
-    }
-
-    .stat-value {
-        display: block;
-        margin-top: 8px;
-        color: #10233f;
-        font-size: 1.25rem;
-        font-weight: 800;
-    }
-
-    .toolbar {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        align-items: center;
-        margin-bottom: 18px;
-        flex-wrap: wrap;
     }
 
     .filters {
@@ -90,112 +58,37 @@
         border-color: #0f766e;
     }
 
-    .table-shell {
-        border: 1px solid #dde7f0;
-        border-radius: 24px;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
-    }
-
-    .products-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .products-table thead {
-        background: #f8fafc;
-    }
-
-    .products-table th,
-    .products-table td {
-        padding: 16px 18px;
-        border-bottom: 1px solid #eef2f7;
-        text-align: left;
-        vertical-align: middle;
-    }
-
-    .products-table th {
-        color: #475569;
-        font-size: 0.92rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-
-    .products-table tbody tr:hover {
-        background: #f8fbff;
-    }
-
     .product-name {
         font-weight: 800;
         color: #10233f;
     }
 
-    .muted {
-        color: #64748b;
-    }
-
-    .badge {
+    .stock-pill {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
+        gap: 8px;
         min-height: 34px;
         padding: 0 12px;
         border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 800;
-        border: 1px solid transparent;
-        white-space: nowrap;
-    }
-
-    .badge.en-stock {
-        background: #ecfdf5;
-        border-color: #bbf7d0;
-        color: #047857;
-    }
-
-    .badge.stock-faible {
-        background: #fff7ed;
-        border-color: #fed7aa;
-        color: #c2410c;
-    }
-
-    .badge.rupture {
-        background: #fee2e2;
-        border-color: #fecaca;
-        color: #b91c1c;
-    }
-
-    .action-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 36px;
-        padding: 0 12px;
-        border-radius: 10px;
-        border: 1px solid #dbe5ef;
-        background: #fff;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         color: #10233f;
-        text-decoration: none;
         font-weight: 700;
     }
 
-    .empty-state {
-        padding: 48px 24px;
-        text-align: center;
+    .catalog-shell {
+        display: grid;
+        gap: 18px;
     }
 
-    .empty-state h3 {
-        margin: 0 0 10px;
-        font-size: 1.35rem;
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
     }
 
-    .empty-state p {
-        margin: 0 auto 18px;
-        max-width: 460px;
-        color: #64748b;
-        line-height: 1.7;
+    .data-table {
+        min-width: 880px;
     }
 
     @media (max-width: 980px) {
@@ -218,25 +111,32 @@
     </div>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card">
-        <span class="stat-label">{% trans "Produits" %}</span>
-        <span class="stat-value">{{ total }}</span>
+<div class="kpi-grid stats-grid">
+    <div class="kpi-card">
+        <span class="kpi-label">{% trans "Produits actifs" %}</span>
+        <span class="kpi-value">{{ actifs }}</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">{% trans "Produits actifs" %}</span>
-        <span class="stat-value">{{ actifs }}</span>
+    <div class="kpi-card">
+        <span class="kpi-label">{% trans "En stock" %}</span>
+        <span class="kpi-value">{{ en_stock_count }}</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">{% trans "Stocks faibles" %}</span>
-        <span class="stat-value">{{ stock_faible }}</span>
+    <div class="kpi-card">
+        <span class="kpi-label">{% trans "Stocks faibles" %}</span>
+        <span class="kpi-value">{{ stock_faible }}</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">{% trans "Ruptures" %}</span>
-        <span class="stat-value">{{ rupture }}</span>
+    <div class="kpi-card">
+        <span class="kpi-label">{% trans "Ruptures" %}</span>
+        <span class="kpi-value">{{ rupture }}</span>
     </div>
 </div>
 
+<div class="section-card" style="margin-bottom: 18px;">
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Actions et filtres" %}</h3>
+            <p class="section-subtitle">{% trans "Combinez les raccourcis les plus utiles avec vos filtres de stock pour aller plus vite." %}</p>
+        </div>
+    </div>
 <div class="toolbar">
     <div class="filters">
         {% for item in filters %}
@@ -262,10 +162,13 @@
         {% endif %}
     </div>
 </div>
+</div>
 
 {% if products %}
+<div class="catalog-shell">
 <div class="table-shell">
-    <table class="products-table">
+    <div class="table-scroll">
+    <table class="data-table">
         <thead>
             <tr>
                 <th>{% trans "Produit" %}</th>
@@ -286,10 +189,10 @@
                 </td>
                 <td class="muted">{{ row.instance.reference|default:"-" }}</td>
                 <td>{{ row.instance.prix_unitaire }}</td>
-                <td>{{ row.instance.quantite_stock }}</td>
+                <td><span class="stock-pill">{{ row.instance.quantite_stock }}</span></td>
                 <td>{{ row.instance.seuil_alerte }}</td>
                 <td>
-                    <span class="badge {% if row.status == 'en_stock' %}en-stock{% elif row.status == 'stock_faible' %}stock-faible{% else %}rupture{% endif %}">
+                    <span class="badge {% if row.status == 'en_stock' %}success{% elif row.status == 'stock_faible' %}warning{% else %}danger{% endif %}">
                         {{ row.status_label }}
                     </span>
                 </td>
@@ -304,6 +207,8 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
+</div>
 </div>
 {% else %}
 <div class="table-shell">

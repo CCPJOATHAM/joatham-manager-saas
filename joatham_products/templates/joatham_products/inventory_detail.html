@@ -6,67 +6,49 @@
 
 {% block content %}
 <style>
-    .hero,.toolbar,.actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .hero { justify-content:space-between; margin-bottom:18px; }
     .actions { justify-content:flex-end; }
-    .action-link,.action-button { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:0 14px; border-radius:12px; border:1px solid #dbe5ef; background:#fff; color:#10233f; text-decoration:none; font-weight:700; }
-    .action-button { cursor:pointer; }
-    .action-button.primary,.action-link.primary { background:#0f766e; border-color:#0f766e; color:#fff; }
-    .action-button.warning { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
-    .action-button.danger { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
-    .badge { display:inline-flex; align-items:center; justify-content:center; min-height:34px; padding:0 12px; border-radius:999px; font-size:.8rem; font-weight:800; border:1px solid transparent; white-space:nowrap; }
-    .badge.draft { background:#f1f5f9; border-color:#cbd5e1; color:#475569; }
-    .badge.in-progress { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
-    .badge.closed { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
-    .badge.validated { background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
-    .badge.cancelled { background:#fee2e2; border-color:#fecaca; color:#b91c1c; }
-    .kpi-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
-    .kpi-card,.table-shell,.info-card { border:1px solid #dde7f0; border-radius:22px; background:#fff; box-shadow:0 16px 34px rgba(15,23,42,.05); }
-    .kpi-card { padding:16px; }
-    .kpi-label { color:#64748b; font-size:.85rem; }
-    .kpi-value { display:block; margin-top:8px; font-size:1.2rem; font-weight:800; color:#10233f; }
-    .info-card { padding:18px; margin-bottom:18px; }
-    .muted { color:#64748b; }
-    .table-shell { overflow:hidden; }
-    .table-scroll { overflow-x:auto; }
-    .lines-table { width:100%; border-collapse:collapse; min-width:900px; }
-    .lines-table thead { background:#f8fafc; }
-    .lines-table th,.lines-table td { padding:14px 16px; border-bottom:1px solid #eef2f7; text-align:left; vertical-align:middle; }
-    .lines-table th { color:#475569; font-size:.88rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .inventory-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .inventory-meta p { margin:0; }
+    .lines-table { min-width:900px; }
     @media (max-width: 1180px) { .kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-    @media (max-width: 720px) { .kpi-grid { grid-template-columns:1fr; } }
+    @media (max-width: 720px) { .kpi-grid, .inventory-meta { grid-template-columns:1fr; } }
 </style>
 
-<div class="hero">
-    <div>
-        <span class="badge {% if session.status == 'draft' %}draft{% elif session.status == 'in_progress' %}in-progress{% elif session.status == 'closed' %}closed{% elif session.status == 'validated' %}validated{% else %}cancelled{% endif %}">{{ status_label }}</span>
-        <p class="muted" style="margin:10px 0 0;">{% if session.comment %}{{ session.comment }}{% else %}{% trans "Aucun commentaire pour cette session." %}{% endif %}</p>
+<div class="section-card">
+    <div class="section-header">
+        <div>
+            <span class="badge {% if session.status == 'draft' %}neutral{% elif session.status == 'in_progress' %}info{% elif session.status == 'closed' %}warning{% elif session.status == 'validated' %}success{% else %}danger{% endif %}">{{ status_label }}</span>
+            <h2 class="section-title" style="margin-top:12px;">{{ session.name }}</h2>
+            <p class="section-subtitle">{% if session.comment %}{{ session.comment }}{% else %}{% trans "Aucun commentaire pour cette session." %}{% endif %}</p>
+        </div>
+        <div class="action-row actions">
+            <a href="{% url 'inventory_list' %}" class="action-link">{% trans "Retour aux inventaires" %}</a>
+            {% if can_inventory_stock_ui and session.status == 'draft' %}
+            <a href="{% url 'inventory_count' session.id %}" class="action-link primary">{% trans "Compter" %}</a>
+            {% elif can_inventory_stock_ui and session.status == 'in_progress' %}
+            <a href="{% url 'inventory_count' session.id %}" class="action-link primary">{% trans "Compter" %}</a>
+            {% endif %}
+            {% if can_inventory_stock_ui and session.status == 'in_progress' %}
+            <form method="post" action="{% url 'inventory_close' session.id %}">{% csrf_token %}<button type="submit" class="action-button warning">{% trans "Cloturer" %}</button></form>
+            {% endif %}
+            {% if can_inventory_stock_ui and session.status == 'closed' %}
+            <form method="post" action="{% url 'inventory_validate' session.id %}">{% csrf_token %}<button type="submit" class="action-button success">{% trans "Valider" %}</button></form>
+            {% endif %}
+            {% if can_inventory_stock_ui and session.status != 'validated' and session.status != 'cancelled' %}
+            <form method="post" action="{% url 'inventory_cancel' session.id %}">{% csrf_token %}<button type="submit" class="action-button danger">{% trans "Annuler" %}</button></form>
+            {% endif %}
+        </div>
     </div>
-    <div class="actions">
-        {% if can_inventory_stock_ui and session.status == 'draft' %}
-        <a href="{% url 'inventory_count' session.id %}" class="action-link primary">{% trans "Compter" %}</a>
-        {% elif can_inventory_stock_ui and session.status == 'in_progress' %}
-        <a href="{% url 'inventory_count' session.id %}" class="action-link primary">{% trans "Compter" %}</a>
-        {% endif %}
-        {% if can_inventory_stock_ui and session.status == 'in_progress' %}
-        <form method="post" action="{% url 'inventory_close' session.id %}">{% csrf_token %}<button type="submit" class="action-button warning">{% trans "Cloturer" %}</button></form>
-        {% endif %}
-        {% if can_inventory_stock_ui and session.status == 'closed' %}
-        <form method="post" action="{% url 'inventory_validate' session.id %}">{% csrf_token %}<button type="submit" class="action-button primary">{% trans "Valider" %}</button></form>
-        {% endif %}
-        {% if can_inventory_stock_ui and session.status != 'validated' and session.status != 'cancelled' %}
-        <form method="post" action="{% url 'inventory_cancel' session.id %}">{% csrf_token %}<button type="submit" class="action-button danger">{% trans "Annuler" %}</button></form>
-        {% endif %}
-    </div>
-</div>
 
-<div class="info-card">
-    <div class="muted">
-        <strong>{% trans "Createur :" %}</strong> {% if session.created_by %}{{ session.created_by.username }}{% else %}-{% endif %}
-        <span style="margin-left:18px;"><strong>{% trans "Date de creation :" %}</strong> {{ session.created_at|date:"d/m/Y H:i" }}</span>
-        {% if session.started_at %}<span style="margin-left:18px;"><strong>{% trans "Date de debut :" %}</strong> {{ session.started_at|date:"d/m/Y H:i" }}</span>{% endif %}
-        {% if session.closed_at %}<span style="margin-left:18px;"><strong>{% trans "Date de cloture :" %}</strong> {{ session.closed_at|date:"d/m/Y H:i" }}</span>{% endif %}
-        {% if session.validated_at %}<span style="margin-left:18px;"><strong>{% trans "Date de validation :" %}</strong> {{ session.validated_at|date:"d/m/Y H:i" }}</span>{% endif %}
+    <div class="helper-card">
+        <div class="inventory-meta muted">
+            <p><strong>{% trans "Createur :" %}</strong> {% if session.created_by %}{{ session.created_by.username }}{% else %}-{% endif %}</p>
+            <p><strong>{% trans "Date de creation :" %}</strong> {{ session.created_at|date:"d/m/Y H:i" }}</p>
+            <p>{% if session.started_at %}<strong>{% trans "Date de debut :" %}</strong> {{ session.started_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de debut :" %}</strong> -{% endif %}</p>
+            <p>{% if session.closed_at %}<strong>{% trans "Date de cloture :" %}</strong> {{ session.closed_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de cloture :" %}</strong> -{% endif %}</p>
+            <p>{% if session.validated_at %}<strong>{% trans "Date de validation :" %}</strong> {{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de validation :" %}</strong> -{% endif %}</p>
+            <p>{% if session.validated_by %}<strong>{% trans "Valide par :" %}</strong> {{ session.validated_by.username }}{% else %}<strong>{% trans "Valide par :" %}</strong> -{% endif %}</p>
+        </div>
     </div>
 </div>
 
@@ -79,30 +61,38 @@
     <div class="kpi-card"><span class="kpi-label">{% trans "Sans ecart" %}</span><span class="kpi-value">{{ summary.balanced_lines }}</span></div>
 </div>
 
-<div class="table-shell">
-    <div class="table-scroll">
-        <table class="lines-table">
-            <thead>
-                <tr>
-                    <th>{% trans "Produit" %}</th>
-                    <th>{% trans "Stock theorique" %}</th>
-                    <th>{% trans "Quantite comptee" %}</th>
-                    <th>{% trans "Ecart" %}</th>
-                    <th>{% trans "Commentaire" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in lines %}
-                <tr>
-                    <td>{{ row.instance.produit.nom }}</td>
-                    <td>{{ row.instance.theoretical_quantity }}</td>
-                    <td>{% if row.instance.counted_quantity == None %}<span class="muted">-</span>{% else %}{{ row.instance.counted_quantity }}{% endif %}</td>
-                    <td>{{ row.difference_label }}</td>
-                    <td>{{ row.instance.comment|default:"-" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="section-card">
+    <div class="section-header">
+        <div>
+            <h3 class="section-title">{% trans "Lignes d'inventaire" %}</h3>
+            <p class="section-subtitle">{% trans "Comparez le stock theorique, le stock compte et l'ecart produit par produit." %}</p>
+        </div>
+    </div>
+    <div class="table-shell">
+        <div class="table-scroll">
+            <table class="data-table lines-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Produit" %}</th>
+                        <th>{% trans "Stock theorique" %}</th>
+                        <th>{% trans "Quantite comptee" %}</th>
+                        <th>{% trans "Ecart" %}</th>
+                        <th>{% trans "Commentaire" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in lines %}
+                    <tr>
+                        <td>{{ row.instance.produit.nom }}</td>
+                        <td>{{ row.instance.theoretical_quantity }}</td>
+                        <td>{% if row.instance.counted_quantity == None %}<span class="muted">-</span>{% else %}{{ row.instance.counted_quantity }}{% endif %}</td>
+                        <td>{{ row.difference_label }}</td>
+                        <td>{{ row.instance.comment|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
