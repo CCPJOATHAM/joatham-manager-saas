@@ -213,7 +213,7 @@
 {% else %}
 <div class="table-shell">
     <div class="empty-state">
-        <h3>{% trans "Aucun produit trouve" %}</h3>
+        <h3>{% trans "Aucun produit trouvé" %}</h3>
         <p>{% trans "Commencez par creer un premier produit pour suivre son prix, son stock disponible et ses alertes de rupture." %}</p>
         {% if can_manage_products_ui %}
         <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>

@@ -287,7 +287,7 @@ class ProductViewsTests(TestCase):
         self.client.force_login(self.comptable)
         response = self.client.get(reverse("product_list"), {"stock": "rupture"})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Aucun produit trouve")
+        self.assertContains(response, "Aucun produit trouvé")
 
         self.produit.quantite_stock = 0
         self.produit.save(update_fields=["quantite_stock"])

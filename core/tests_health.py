@@ -1,10 +1,15 @@
 import json
+from datetime import date
+from decimal import Decimal
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from core.audit import record_audit_event
+from core.models import ActivityLog
 
 
 class HealthCheckTests(TestCase):
@@ -65,3 +70,37 @@ class AuditLoggingTests(TestCase):
                 )
 
         self.assertIsNone(result)
+
+    def test_record_audit_event_serializes_lazy_and_nested_metadata(self):
+        result = record_audit_event(
+            entreprise=None,
+            utilisateur=None,
+            action="test_action",
+            module="test_module",
+            objet_type="TestObject",
+            objet_id=1,
+            description=_("Description traduite"),
+            metadata={
+                "label": _("Valeur paresseuse"),
+                "nested": {
+                    "status": _("Statut imbrique"),
+                    "amount": Decimal("12.50"),
+                    "as_of": date(2026, 5, 10),
+                },
+                "items": [_("Element de liste"), Decimal("4.75"), timezone.now()],
+            },
+            fail_silently=False,
+        )
+
+        self.assertIsNotNone(result)
+        self.assertTrue(ActivityLog.objects.filter(pk=result.pk).exists())
+
+        audit = ActivityLog.objects.get(pk=result.pk)
+        self.assertEqual(audit.description, "Description traduite")
+        self.assertEqual(audit.metadata["label"], "Valeur paresseuse")
+        self.assertEqual(audit.metadata["nested"]["status"], "Statut imbrique")
+        self.assertEqual(audit.metadata["nested"]["amount"], "12.50")
+        self.assertEqual(audit.metadata["nested"]["as_of"], "2026-05-10")
+        self.assertEqual(audit.metadata["items"][0], "Element de liste")
+        self.assertEqual(audit.metadata["items"][1], "4.75")
+        self.assertIsInstance(audit.metadata["items"][2], str)
