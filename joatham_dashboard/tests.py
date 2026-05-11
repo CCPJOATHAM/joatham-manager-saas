@@ -17,7 +17,7 @@ from joatham_billing.tests.factories import create_client, create_entreprise, cr
 from joatham_depenses.models import Depense
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise, User, UserActiveSession
-from joatham_users.services.session_security import SESSION_CONFLICT_MESSAGE, SESSION_EXPIRED_MESSAGE
+from joatham_users.services.session_security import SESSION_EXPIRED_MESSAGE
 from .services.email_verification import email_verification_token_generator
 
 from .selectors.dashboard import get_dashboard_kpis_by_entreprise
@@ -123,7 +123,7 @@ class DashboardAccessTests(TestCase):
         login_page = self.client.get(reverse("login"))
         self.assertEqual(login_page.status_code, 200)
 
-    def test_login_blocks_second_active_session_for_same_user(self):
+    def test_login_with_existing_active_session_redirects_to_confirmation_page(self):
         first_response = self.client.post(
             reverse("login"),
             {"username": "owner-dash", "password": "testpass123"},
@@ -136,8 +136,78 @@ class DashboardAccessTests(TestCase):
             {"username": "owner-dash", "password": "testpass123"},
         )
 
-        self.assertEqual(second_response.status_code, 200)
-        self.assertContains(second_response, str(SESSION_CONFLICT_MESSAGE))
+        self.assertRedirects(second_response, reverse("login_session_conflict"))
+
+        confirmation_page = second_client.get(reverse("login_session_conflict"))
+        self.assertEqual(confirmation_page.status_code, 200)
+        self.assertContains(confirmation_page, "Session deja active")
+        self.assertContains(confirmation_page, "Deconnecter l'ancienne session et continuer")
+        self.assertContains(confirmation_page, "csrfmiddlewaretoken")
+        self.assertTrue(second_client.session.get("pending_login_session_conflict"))
+
+    def test_direct_access_to_session_conflict_without_pending_state_redirects_to_login(self):
+        response = self.client.get(reverse("login_session_conflict"))
+
+        self.assertRedirects(response, reverse("login"))
+
+    def test_session_conflict_cancel_keeps_previous_session_active(self):
+        self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        first_session_key = self.client.session.session_key
+
+        second_client = Client()
+        second_client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+
+        cancel_response = second_client.post(reverse("login_session_conflict"), {"action": "cancel"})
+
+        self.assertRedirects(cancel_response, reverse("login"))
+        self.assertTrue(UserActiveSession.objects.filter(user=self.proprietaire, session_key=first_session_key).exists())
+        self.assertTrue(Session.objects.filter(session_key=first_session_key).exists())
+        self.assertFalse(second_client.session.get("pending_login_session_conflict"))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                utilisateur=self.proprietaire,
+                action="session_conflict_cancelled",
+            ).exists()
+        )
+
+    def test_session_conflict_confirm_replaces_previous_session_and_logs_in_new_client(self):
+        self.client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+        first_session_key = self.client.session.session_key
+        self.assertTrue(Session.objects.filter(session_key=first_session_key).exists())
+
+        second_client = Client()
+        second_client.post(
+            reverse("login"),
+            {"username": "owner-dash", "password": "testpass123"},
+        )
+
+        continue_response = second_client.post(reverse("login_session_conflict"), {"action": "continue"})
+
+        self.assertRedirects(continue_response, reverse("admin_dashboard"))
+        active_session = UserActiveSession.objects.get(user=self.proprietaire)
+        self.assertEqual(active_session.session_key, second_client.session.session_key)
+        self.assertFalse(Session.objects.filter(session_key=first_session_key).exists())
+        self.assertFalse(second_client.session.get("pending_login_session_conflict"))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                utilisateur=self.proprietaire,
+                action="previous_session_terminated_for_new_login",
+            ).exists()
+        )
+
+        old_session_response = self.client.get(reverse("admin_dashboard"))
+        self.assertRedirects(old_session_response, reverse("login"), fetch_redirect_response=False)
 
     def test_logout_releases_active_session_for_new_login(self):
         self.client.post(
@@ -292,6 +362,12 @@ class DashboardAccessTests(TestCase):
 
         self.assertContains(response, "Comptabilite")
         self.assertContains(response, "Abonnement requis")
+
+        blocked = self.client.get(reverse("compta_dashboard"))
+        self.assertRedirects(
+            blocked,
+            reverse("abonnement_expire") + "?module=accounting&reason=active_subscription_required",
+        )
 
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")

@@ -230,6 +230,11 @@ def _get_item_state(user, item):
                     "visible": True,
                     "badge": _("Premium"),
                 }
+            if module_name == "accounting" and state.get("reason") == "active_subscription_required":
+                return {
+                    "visible": True,
+                    "badge": _("Abonnement requis"),
+                }
             return {"visible": False}
         except Exception:
             if module_name == "accounting":

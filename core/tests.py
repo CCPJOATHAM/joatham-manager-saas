@@ -1,4 +1,4 @@
-from django.core.exceptions import PermissionDenied
+﻿from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
@@ -6,6 +6,8 @@ from django.urls import reverse
 from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import Mock, patch
+
+import requests
 
 from joatham_billing.models import PaiementFacture
 from joatham_billing.services.facturation import register_payment
@@ -29,8 +31,10 @@ from .services.tenancy import (
     scope_queryset_to_entreprise,
 )
 from .services.subscription import (
+    activate_subscription_for_entreprise,
     build_subscription_payment_estimate,
     create_subscription_payment_request,
+    get_default_paid_plans,
     get_subscription_price_usd,
     refuse_subscription_payment,
     validate_subscription_payment,
@@ -189,9 +193,20 @@ class ExchangeRateServiceTests(TestCase):
 
     def test_plan_price_is_unavailable_without_api_or_cached_rate(self):
         plan = Abonnement.objects.create(nom="Pro", code="pro-cdf", prix=10, duree_jours=30, actif=True)
+        settings = PlatformSettings.get_solo()
+        settings.devise_plateforme = "USD"
+        settings.devise_defaut = "CDF"
+        settings.exchange_rate_provider = "exchangerate_api"
+        settings.save(update_fields=["devise_plateforme", "devise_defaut", "exchange_rate_provider"])
+        ExchangeRate.objects.filter(devise_source="USD", devise_cible="CDF").delete()
 
-        price = get_plan_price_for_company(plan, self.entreprise)
+        with patch(
+            "core.services.exchange_rates.requests.get",
+            side_effect=requests.RequestException("provider offline"),
+        ) as mocked_get:
+            price = get_plan_price_for_company(plan, self.entreprise)
 
+        mocked_get.assert_called_once_with("https://open.er-api.com/v6/latest/USD", timeout=5)
         self.assertTrue(price["unavailable"])
         self.assertEqual(price["official_amount"], Decimal("10.00"))
         self.assertEqual(price["official_currency"], "USD")
@@ -230,12 +245,22 @@ class ExchangeRateServiceTests(TestCase):
 
 
 class AuditLogTests(TestCase):
+    def _create_default_plan(self, code):
+        payload = next(plan for plan in get_default_paid_plans() if plan["code"] == code)
+        return Abonnement.objects.create(**payload, actif=True)
+
     def setUp(self):
         self.entreprise = create_entreprise("Entreprise Audit")
         self.entreprise_b = create_entreprise("Entreprise Audit B")
         self.gestionnaire = create_user("gestion-audit", "gestionnaire", self.entreprise)
         self.comptable = create_user("compta-audit", "comptable", self.entreprise)
         self.client_metier = create_client(self.entreprise, "Client Audit")
+        self.premium_plan = self._create_default_plan("premium")
+        activate_subscription_for_entreprise(
+            entreprise=self.entreprise,
+            plan=self.premium_plan,
+            utilisateur=self.comptable,
+        )
 
     def test_facture_creation_creates_audit_event_scoped_to_entreprise_and_user(self):
         facture = create_facture_sample(self.entreprise, self.gestionnaire, self.client_metier, Decimal("100"))
@@ -360,6 +385,21 @@ class AuditLogTests(TestCase):
         self.assertEqual(comptable_allowed.status_code, 200)
         self.assertContains(comptable_allowed, "Controle des flux")
 
+    def test_activity_log_view_redirects_when_plan_does_not_include_audit(self):
+        starter_company = create_entreprise("Starter Audit")
+        starter_owner = create_user("owner-starter-audit", "proprietaire", starter_company)
+        starter_plan = self._create_default_plan("starter")
+        activate_subscription_for_entreprise(
+            entreprise=starter_company,
+            plan=starter_plan,
+            utilisateur=starter_owner,
+        )
+
+        self.client.force_login(starter_owner)
+        response = self.client.get(reverse("activity_log_list"))
+
+        self.assertRedirects(response, reverse("abonnement_expire") + "?module=audit&reason=module_not_in_plan")
+
     def test_activity_log_view_filters_and_isolation_work(self):
         facture = create_facture_sample(self.entreprise, self.gestionnaire, self.client_metier, Decimal("100"))
         register_payment(
@@ -478,6 +518,12 @@ class SuperAdminDashboardTests(TestCase):
     def setUp(self):
         self.plan_basic = Abonnement.objects.create(nom="Basic", code="basic", prix=10, duree_jours=30, actif=True)
         self.plan_pro = Abonnement.objects.create(nom="Pro", code="pro", prix=30, duree_jours=30, actif=True)
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = False
+        settings.maintenance_modules = []
+        settings.maintenance_allowed_ips = ""
+        settings.message_maintenance = "Maintenance"
+        settings.save(update_fields=["mode_maintenance", "maintenance_modules", "maintenance_allowed_ips", "message_maintenance"])
         self.entreprise_a = create_entreprise("Entreprise Alpha")
         self.entreprise_b = create_entreprise("Entreprise Beta")
         self.owner = create_user("owner-super-test", "proprietaire", self.entreprise_a)
@@ -553,7 +599,7 @@ class SuperAdminDashboardTests(TestCase):
                 "Utilisateurs",
                 "Abonnements",
                 "Audit / logs",
-                "Parametres plateforme",
+                "Paramètres plateforme",
                 "Taux de change",
                 "Demandes SaaS",
             ],
@@ -570,7 +616,7 @@ class SuperAdminDashboardTests(TestCase):
         subscription_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Abonnements")
         users_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Utilisateurs")
         audit_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Audit / logs")
-        settings_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Parametres plateforme")
+        settings_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Paramètres plateforme")
         rates_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Taux de change")
         messages_item = next(item for item in response.context["dashboard_navigation"] if item["label"] == "Demandes SaaS")
 
@@ -989,7 +1035,7 @@ class SuperAdminDashboardTests(TestCase):
         self.client.force_login(self.owner)
         blocked = self.client.get(reverse("facture_list"))
         self.assertEqual(blocked.status_code, 503)
-        self.assertContains(blocked, "Le module Factures est momentanement en maintenance.", status_code=503)
+        self.assertContains(blocked, "Le module Factures est momentanément en maintenance.", status_code=503)
 
         allowed = self.client.get(reverse("admin_dashboard"))
         self.assertNotEqual(allowed.status_code, 503)
@@ -1132,6 +1178,12 @@ class SubscriptionPaymentTests(TestCase):
     def setUp(self):
         self.plan_basic = Abonnement.objects.create(nom="Basic", code="basic", prix=10, duree_jours=30, actif=True)
         self.plan_pro = Abonnement.objects.create(nom="Pro", code="pro", prix=30, duree_jours=30, actif=True)
+        settings = PlatformSettings.get_solo()
+        settings.mode_maintenance = False
+        settings.maintenance_modules = []
+        settings.maintenance_allowed_ips = ""
+        settings.message_maintenance = "Maintenance"
+        settings.save(update_fields=["mode_maintenance", "maintenance_modules", "maintenance_allowed_ips", "message_maintenance"])
         self.entreprise = create_entreprise("Entreprise Paiement")
         self.owner = create_user("owner-payment", "proprietaire", self.entreprise)
         self.super_admin = User.objects.create_user(
