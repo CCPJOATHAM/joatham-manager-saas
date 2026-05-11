@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
 from core.services.currency import format_amount_for_entreprise, get_currency_code, get_currency_wording
-from core.services.product_policy import module_access_required
+from core.services.product_policy import can_access_module, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
 from joatham_caisse.selectors.caisse import get_caisses_by_entreprise
@@ -496,11 +496,13 @@ def facture_detail(request, id):
             }
         )
 
+    can_link_cash_payments = can_access_module(request.user, "caisse_integrations")
     context = {
         "facture": facture,
         "line_rows": line_rows,
         "paiements": payment_rows,
-        "caisses_actives": get_caisses_by_entreprise(entreprise).filter(est_active=True),
+        "caisses_actives": get_caisses_by_entreprise(entreprise).filter(est_active=True) if can_link_cash_payments else [],
+        "can_link_cash_payments_ui": can_link_cash_payments,
         "historique": facture.historique.all()[:20],
         "statut_choices": Facture.Statut.choices,
         "mode_choices": PaiementFacture.ModePaiement.choices,

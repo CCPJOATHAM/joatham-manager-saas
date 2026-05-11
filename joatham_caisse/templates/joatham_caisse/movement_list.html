@@ -116,9 +116,13 @@
         <div class="actions">
           <button type="submit" class="btn">Filtrer</button>
           <a href="{% url 'caisse_movement_list' %}" class="ghost">Reinitialiser</a>
+          {% if can_export_cash %}
           <a href="{% url 'caisse_movement_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">Export Excel</a>
+          {% endif %}
           <a href="{% url 'caisse_session_list' %}" class="ghost">Voir les sessions</a>
+          {% if can_view_cash_reports %}
           <a href="{% url 'caisse_reports' %}" class="ghost">Voir les rapports</a>
+          {% endif %}
         </div>
       </form>
     </div>

@@ -85,6 +85,18 @@ class SubscriptionServiceTests(TestCase):
             trial_days=14,
         )
 
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertTrue(subscription.essai)
+        self.assertEqual(subscription.date_fin, timezone.localdate() + timedelta(days=14))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                utilisateur=self.owner,
+                action="essai_demarre",
+                objet_id=subscription.id,
+            ).exists()
+        )
+
     def test_start_free_plan_for_entreprise(self):
         free_plan = get_or_create_default_free_plan()
         subscription = start_free_plan_for_entreprise(
@@ -101,18 +113,6 @@ class SubscriptionServiceTests(TestCase):
                 entreprise=self.entreprise,
                 utilisateur=self.owner,
                 action="plan_gratuit_active",
-                objet_id=subscription.id,
-            ).exists()
-        )
-
-        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
-        self.assertTrue(subscription.essai)
-        self.assertEqual(subscription.date_fin, timezone.localdate() + timedelta(days=14))
-        self.assertTrue(
-            ActivityLog.objects.filter(
-                entreprise=self.entreprise,
-                utilisateur=self.owner,
-                action="essai_demarre",
                 objet_id=subscription.id,
             ).exists()
         )
@@ -620,8 +620,7 @@ class UserManagementTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "reservee aux plans premium")
+        self.assertRedirects(response, reverse("abonnement_expire") + "?module=users&reason=module_not_in_plan")
         self.assertFalse(User.objects.filter(email="blocked.freemium@example.com").exists())
 
     def test_user_form_renders_premium_layout(self):

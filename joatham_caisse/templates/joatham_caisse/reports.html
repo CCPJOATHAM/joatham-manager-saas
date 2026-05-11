@@ -74,7 +74,9 @@
         <div class="actions">
           <button type="submit" class="btn">Mettre a jour</button>
           <a href="{% url 'caisse_reports' %}" class="ghost">Reinitialiser</a>
+          {% if can_export_cash %}
           <a href="{% url 'caisse_reports_export_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">Export PDF</a>
+          {% endif %}
           <a href="{% url 'caisse_movement_list' %}" class="ghost">Voir les mouvements</a>
           <a href="{% url 'caisse_session_list' %}" class="ghost">Voir les sessions</a>
         </div>

@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
 
-from core.services.subscription import start_free_plan_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise, get_default_paid_plans
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_caisse.models import Caisse
 from joatham_caisse.selectors.reports import get_cash_report_snapshot
@@ -19,6 +19,7 @@ from joatham_caisse.services.mouvements import (
 )
 from joatham_caisse.services.session import close_session, open_session
 from joatham_caisse.services.validation import validate_session
+from joatham_users.models import Abonnement
 
 
 class CashReportsSelectorTests(TestCase):
@@ -156,6 +157,8 @@ class CashReportsViewsTests(TestCase):
     def setUp(self):
         self.entreprise = create_entreprise("Entreprise Vue Rapport")
         self.owner = create_user("owner-view-report", "proprietaire", self.entreprise)
+        pro_payload = next(plan for plan in get_default_paid_plans() if plan["code"] == "pro")
+        self.pro_plan = Abonnement.objects.create(**pro_payload, actif=True)
         self.caisse = Caisse.objects.create(
             entreprise=self.entreprise,
             nom="Caisse vue",
@@ -163,7 +166,7 @@ class CashReportsViewsTests(TestCase):
             devise="CDF",
             cree_par=self.owner,
         )
-        start_free_plan_for_entreprise(entreprise=self.entreprise, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.pro_plan, utilisateur=self.owner)
         self.session = open_session(
             entreprise=self.entreprise,
             caisse=self.caisse,
@@ -196,7 +199,7 @@ class CashReportsViewsTests(TestCase):
             devise="CDF",
             cree_par=self.autre_owner,
         )
-        start_free_plan_for_entreprise(entreprise=self.autre_entreprise, utilisateur=self.autre_owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.pro_plan, utilisateur=self.autre_owner)
         self.autre_session = open_session(
             entreprise=self.autre_entreprise,
             caisse=self.autre_caisse,

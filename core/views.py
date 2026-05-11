@@ -5,7 +5,6 @@ from django.db import models
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from urllib.parse import quote
-from decimal import Decimal
 
 from core.audit import record_audit_event
 from core.forms import EntrepriseSettingsForm, ExchangeRateManualForm, ManualSubscriptionPaymentForm, PaiementAbonnementForm, PlatformSettingsForm
@@ -18,8 +17,11 @@ from core.services.subscription import (
     create_subscription_plan_request,
     create_subscription_payment_request,
     get_current_subscription,
+    get_plan_feature_summary,
+    get_plan_quota_profile,
     get_pending_subscription_plan_request,
     get_subscription_payment_duration_options,
+    normalize_plan_code,
     register_manual_subscription_payment,
     refuse_subscription_plan_request,
     refresh_subscription_status,
@@ -190,6 +192,8 @@ def subscription_overview(request):
         "entreprise": entreprise,
         "currency_code": get_currency_code(entreprise),
         "subscription": subscription or get_current_subscription(entreprise),
+        "current_plan_features": get_plan_feature_summary(subscription.plan) if subscription else [],
+        "current_plan_quota_profile": get_plan_quota_profile(subscription.plan) if subscription else {},
         "paiements": get_subscription_payments_by_entreprise(entreprise)[:8],
         "featured_plan": featured_plan,
         "pricing_options": pricing_options,
@@ -234,24 +238,20 @@ def subscription_payment_create(request):
 def subscription_plan_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     subscription = refresh_subscription_status(entreprise)
-    plans = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
-    official_prices_by_name = {
-        "starter": Decimal("5.00"),
-        "pro": Decimal("10.00"),
-        "premium": Decimal("15.00"),
-    }
+    plans = list(Abonnement.objects.filter(actif=True).order_by("prix", "nom"))
+    plan_order = {"free": 0, "starter": 1, "pro": 2, "premium": 3, "business": 3}
+    plans.sort(key=lambda plan: (plan_order.get(normalize_plan_code(plan), 99), plan.prix, plan.nom))
     plan_cards = []
     for plan in plans:
         price_info = get_plan_price_for_company(plan, entreprise)
-        official_price = official_prices_by_name.get((plan.nom or "").strip().lower())
-        if official_price is not None:
-            price_info["official_amount"] = official_price
-            if not price_info.get("unavailable") and price_info.get("rate") is not None:
-                price_info["estimated_amount"] = (official_price * Decimal(str(price_info["rate"]))).quantize(Decimal("0.01"))
         plan_cards.append(
             {
                 "plan": plan,
                 "price_info": price_info,
+                "features": get_plan_feature_summary(plan),
+                "quota_profile": get_plan_quota_profile(plan),
+                "is_current": bool(subscription and subscription.plan_id == plan.id),
+                "is_free": plan.prix <= 0,
             }
         )
     pending_requests = get_subscription_payments_by_entreprise(entreprise).filter(

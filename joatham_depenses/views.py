@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
 from core.services.currency import format_amount_for_entreprise, format_decimal_number, get_currency_code, get_currency_display
 from core.services.quotas import PlanQuotaExceeded
-from core.services.product_policy import module_access_required
+from core.services.product_policy import can_access_module, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_billing.pdf import render_pdf_response
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
@@ -47,6 +47,7 @@ def _build_depenses_qr_data_uri(*, entreprise, total, date_generation):
 @module_access_required("expenses")
 def depenses_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
+    can_link_cash_expenses = can_access_module(request.user, "caisse_integrations")
     form = DepenseForm(request.POST or None, entreprise=entreprise)
 
     if request.method == "POST":
@@ -100,6 +101,7 @@ def depenses_list(request):
             "date_fin": date_fin or "",
             "search": recherche or "",
             "can_manage_expenses_ui": user_has_permission(request.user, "expenses.manage"),
+            "can_link_cash_expenses_ui": can_link_cash_expenses,
         },
     )
 

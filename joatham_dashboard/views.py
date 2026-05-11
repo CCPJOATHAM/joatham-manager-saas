@@ -23,12 +23,27 @@ from joatham_dashboard.services.password_reset import (
 from joatham_dashboard.services.email_verification import send_email_verification, verify_email_token
 from joatham_dashboard.services.onboarding import register_entreprise_owner
 from joatham_users.permissions import get_default_dashboard_name, permission_required, user_has_permission
-from joatham_users.services.session_security import login_with_single_active_session, logout_and_release_session
+from joatham_users.services.session_security import (
+    get_active_session_record,
+    login_with_single_active_session,
+    logout_and_release_session,
+    replace_existing_session_and_login,
+)
 
 from .services.dashboard_service import build_dashboard_context
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+PENDING_CONFLICT_USER_ID = "pending_conflict_user_id"
+PENDING_CONFLICT_FLAG = "pending_login_session_conflict"
+PENDING_CONFLICT_BACKEND = "pending_login_backend"
+
+
+def _clear_pending_session_conflict(request):
+    request.session.pop(PENDING_CONFLICT_USER_ID, None)
+    request.session.pop(PENDING_CONFLICT_FLAG, None)
+    request.session.pop(PENDING_CONFLICT_BACKEND, None)
 
 
 def public_home(request):
@@ -105,6 +120,7 @@ def login_view(request):
         messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour acceder a la page de connexion ou creer une nouvelle entreprise."))
         return redirect(get_default_dashboard_name(request.user))
 
+    _clear_pending_session_conflict(request)
     error = None
 
     if request.method == "POST":
@@ -165,8 +181,22 @@ def login_view(request):
                 logger.exception("login.session_login.failed user_id=%s", user.id)
                 raise
             if not login_result.allowed:
-                error = login_result.message
-                return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
+                request.session[PENDING_CONFLICT_USER_ID] = user.id
+                request.session[PENDING_CONFLICT_FLAG] = True
+                request.session[PENDING_CONFLICT_BACKEND] = getattr(user, "backend", "")
+                entreprise = getattr(user, "entreprise", None)
+                if entreprise is not None:
+                    record_audit_event(
+                        entreprise=entreprise,
+                        utilisateur=user,
+                        action="session_conflict_detected",
+                        module="auth",
+                        objet_type="User",
+                        objet_id=user.id,
+                        description=f"Conflit de session detecte pour {user.username}.",
+                        metadata={"role": getattr(user, "role", "")},
+                    )
+                return redirect("login_session_conflict")
             dashboard_name = get_default_dashboard_name(login_result.user)
             logger.info("login.redirect user_id=%s dashboard=%s", login_result.user.id, dashboard_name)
             return redirect(dashboard_name)
@@ -174,6 +204,72 @@ def login_view(request):
         error = _("Nom d'utilisateur ou mot de passe incorrect")
 
     return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
+
+
+def login_session_conflict_view(request):
+    pending_user_id = request.session.get(PENDING_CONFLICT_USER_ID)
+    has_pending_conflict = request.session.get(PENDING_CONFLICT_FLAG)
+
+    if not pending_user_id or not has_pending_conflict:
+        return redirect("login")
+
+    user = User.objects.filter(id=pending_user_id).select_related("entreprise").first()
+    if user is None:
+        _clear_pending_session_conflict(request)
+        return redirect("login")
+
+    if request.method == "POST":
+        action = (request.POST.get("action") or "").strip()
+        entreprise = getattr(user, "entreprise", None)
+
+        if action == "cancel":
+            if entreprise is not None:
+                record_audit_event(
+                    entreprise=entreprise,
+                    utilisateur=user,
+                    action="session_conflict_cancelled",
+                    module="auth",
+                    objet_type="User",
+                    objet_id=user.id,
+                    description=f"Conflit de session annule pour {user.username}.",
+                    metadata={"role": getattr(user, "role", "")},
+                )
+            _clear_pending_session_conflict(request)
+            messages.info(request, _("Connexion annulee. Votre session precedente reste active."))
+            return redirect("login")
+
+        if action == "continue":
+            backend = request.session.get(PENDING_CONFLICT_BACKEND) or getattr(user, "backend", "")
+            if backend:
+                user.backend = backend
+
+            previous_active_session = get_active_session_record(user)
+            previous_session_key = getattr(previous_active_session, "session_key", "")
+            login_result = replace_existing_session_and_login(request, user)
+            _clear_pending_session_conflict(request)
+
+            if entreprise is not None:
+                record_audit_event(
+                    entreprise=entreprise,
+                    utilisateur=user,
+                    action="previous_session_terminated_for_new_login",
+                    module="auth",
+                    objet_type="User",
+                    objet_id=user.id,
+                    description=f"Session precedente terminee pour connecter {user.username} sur un nouvel appareil.",
+                    metadata={"role": getattr(user, "role", ""), "previous_session_present": bool(previous_session_key)},
+                )
+
+            dashboard_name = get_default_dashboard_name(login_result.user)
+            return redirect(dashboard_name)
+
+        messages.error(request, _("Action de confirmation invalide."))
+
+    return render(
+        request,
+        "joatham_dashboard/session_conflict.html",
+        {"app_name": "JOATHAM Manager"},
+    )
 
 
 def signup_view(request):

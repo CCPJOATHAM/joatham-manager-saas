@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from core.audit import record_audit_event
+from core.services.product_policy import get_module_access_denied_message, get_module_access_state
 from core.services.quotas import assert_expense_quota_available
 from core.services.tenancy import ensure_same_entreprise
 from joatham_caisse.models import MouvementCaisse
@@ -26,6 +27,9 @@ def list_depenses_for_entreprise(entreprise, *, date_debut=None, date_fin=None, 
 def _resolve_cashbox_context(*, entreprise, caisse):
     if caisse is None:
         return None, None
+    state = get_module_access_state(entreprise, "caisse_integrations")
+    if not state["allowed"]:
+        raise ValueError(get_module_access_denied_message("caisse_integrations", state["reason"]))
     ensure_same_entreprise(caisse, entreprise)
     if not caisse.est_active:
         raise ValueError("La caisse selectionnee est inactive.")

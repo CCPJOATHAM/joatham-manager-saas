@@ -380,10 +380,12 @@
                 <label for="{{ form.montant.id_for_label }}">Montant</label>
                 {{ form.montant }}
             </div>
+            {% if can_link_cash_expenses_ui %}
             <div class="field">
                 <label for="{{ form.caisse.id_for_label }}">Caisse</label>
                 {{ form.caisse }}
             </div>
+            {% endif %}
             <div class="panel-actions">
                 <button type="submit">Ajouter la depense</button>
             </div>

@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import ActivityLog
-from core.services.quotas import PlanQuotaExceeded
+from core.services.quotas import FREE_PLAN_INVOICE_LIMIT, PlanQuotaExceeded
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
 from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
 from joatham_products.models import Produit, StockMovement
@@ -169,7 +169,7 @@ class BillingStockWorkflowTests(TestCase):
         free_plan = get_or_create_default_free_plan()
         start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
 
-        for index in range(100):
+        for index in range(FREE_PLAN_INVOICE_LIMIT):
             create_facture(
                 entreprise=self.entreprise,
                 user=self.owner,
@@ -198,7 +198,7 @@ class BillingStockWorkflowTests(TestCase):
             )
 
         self.product.refresh_from_db()
-        self.assertIn("100 factures par mois", str(context.exception))
+        self.assertIn(f"{FREE_PLAN_INVOICE_LIMIT} factures par mois", str(context.exception))
         self.assertEqual(self.product.quantite_stock, 2)
         self.assertEqual(
             Facture.objects.filter(entreprise=self.entreprise).count(),

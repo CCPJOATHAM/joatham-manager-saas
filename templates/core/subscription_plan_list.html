@@ -170,18 +170,34 @@
         </div>
 
         <div class="price">
+            {% if plan_card.is_free %}
+            <strong>0 {{ plan.devise|default:"USD" }}</strong>
+            <span>plan decouverte</span>
+            {% else %}
             <strong>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:"USD" }}</strong>
             <span>prix officiel par mois</span>
+            {% endif %}
             {% if plan.prix_annuel %}
             <span>{{ plan.prix_annuel }} {{ plan.devise|default:"USD" }} par an</span>
             {% endif %}
-            {% if not price_info.unavailable %}
+            {% if not plan_card.is_free and not price_info.unavailable %}
             <span>Equivalent estime : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
             <span>Taux utilise : 1 {{ price_info.official_currency }} = {{ price_info.rate }} {{ price_info.company_currency }}</span>
-            {% elif price_info.unavailable %}
+            {% elif not plan_card.is_free and price_info.unavailable %}
             <span>Conversion temporairement indisponible pour {{ price_info.company_currency }}</span>
             {% endif %}
         </div>
+
+        {% if plan_card.features %}
+        <div>
+            <div class="section-label">Avantages</div>
+            <div class="limits">
+                {% for feature in plan_card.features %}
+                <div class="limit-row"><span>{{ feature }}</span><strong>Inclus</strong></div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         <div>
             <div class="section-label">Modules inclus</div>
@@ -200,10 +216,13 @@
 
         <div class="limits">
             <div class="section-label">Limites</div>
-            <div class="limit-row"><span>Utilisateurs</span><strong>{{ plan.max_utilisateurs|default:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Factures / mois</span><strong>{{ plan.max_factures_mois|default:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Clients</span><strong>{{ plan.max_clients|default:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Apprenants</span><strong>{{ plan.max_apprenants|default:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Utilisateurs</span><strong>{{ plan.max_utilisateurs|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Factures / mois</span><strong>{{ plan.max_factures_mois|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Clients</span><strong>{{ plan.max_clients|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Produits</span><strong>{{ plan_card.quota_profile.max_produits|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Depenses / mois</span><strong>{{ plan_card.quota_profile.max_depenses_mois|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Caisses actives</span><strong>{{ plan_card.quota_profile.max_caisses|default_if_none:"Illimite" }}</strong></div>
+            <div class="limit-row"><span>Apprenants</span><strong>{{ plan.max_apprenants|default_if_none:"Illimite" }}</strong></div>
             <div class="limit-row"><span>Exports</span><strong>{% if plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
             <div class="limit-row"><span>Comptabilite</span><strong>{% if plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
         </div>
@@ -211,8 +230,8 @@
         <form method="post" class="plan-actions">
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ plan.id }}">
-            <button type="submit" class="btn-request" {% if plan.id in pending_plan_ids %}disabled{% endif %}>
-                {% if plan.id in pending_plan_ids %}Demande envoyee{% else %}Demander ce plan{% endif %}
+            <button type="submit" class="btn-request" {% if plan_card.is_free or plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyee{% else %}Demander ce plan{% endif %}
             </button>
         </form>
     </article>

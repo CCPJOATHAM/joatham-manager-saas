@@ -1,59 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from core.services.subscription import get_or_create_default_free_plan
+from core.services.subscription import get_default_paid_plans, get_or_create_default_free_plan
 from joatham_users.models import Abonnement
-
-
-DEFAULT_PLANS = [
-    {
-        "code": "starter",
-        "nom": "Starter",
-        "prix": 19,
-        "prix_annuel": 190,
-        "devise": "USD",
-        "duree_jours": 30,
-        "description": "L'essentiel pour demarrer avec la gestion commerciale JOATHAM Manager.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services", "produits", "caisse"],
-        "max_utilisateurs": 3,
-        "max_factures_mois": 100,
-        "max_clients": 200,
-        "max_apprenants": 0,
-        "acces_comptabilite": False,
-        "acces_exports": True,
-    },
-    {
-        "code": "pro",
-        "nom": "Pro",
-        "prix": 49,
-        "prix_annuel": 490,
-        "devise": "USD",
-        "duree_jours": 30,
-        "description": "Le plan complet pour piloter ventes, depenses, comptabilite et equipe.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "produits", "caisse", "comptabilite", "utilisateurs", "messages", "audit"],
-        "max_utilisateurs": 10,
-        "max_factures_mois": 500,
-        "max_clients": 1000,
-        "max_apprenants": 0,
-        "acces_comptabilite": True,
-        "acces_exports": True,
-    },
-    {
-        "code": "premium",
-        "nom": "Premium",
-        "prix": 99,
-        "prix_annuel": 990,
-        "devise": "USD",
-        "duree_jours": 30,
-        "description": "Pour les organisations qui veulent tous les modules et des capacites etendues.",
-        "modules_inclus": ["dashboard", "clients", "factures", "services", "depenses", "produits", "caisse", "comptabilite", "apprenants", "utilisateurs", "messages", "audit"],
-        "max_utilisateurs": None,
-        "max_factures_mois": None,
-        "max_clients": None,
-        "max_apprenants": None,
-        "acces_comptabilite": True,
-        "acces_exports": True,
-    },
-]
 
 
 class Command(BaseCommand):
@@ -64,7 +12,7 @@ class Command(BaseCommand):
         updated = 0
         free_plan = get_or_create_default_free_plan()
         self.stdout.write(f"{free_plan.nom} pret.")
-        for payload in DEFAULT_PLANS:
+        for payload in get_default_paid_plans():
             plan = Abonnement.objects.filter(code=payload["code"]).order_by("id").first()
             if plan is None:
                 plan = Abonnement.objects.filter(nom__iexact=payload["nom"]).order_by("id").first()

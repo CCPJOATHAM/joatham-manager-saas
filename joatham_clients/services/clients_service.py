@@ -1,5 +1,6 @@
 from core.services.tenancy import get_object_for_entreprise
 from core.audit import record_audit_event
+from core.services.quotas import assert_client_quota_available
 
 from ..models import Client
 from ..selectors.clients import get_clients_by_entreprise
@@ -14,6 +15,7 @@ def get_client_for_entreprise(entreprise, client_id):
 
 
 def create_client_for_entreprise(*, entreprise, nom, telephone, email, utilisateur=None):
+    assert_client_quota_available(entreprise)
     client = Client.objects.create(
         nom=(nom or "").strip(),
         telephone=(telephone or "").strip(),

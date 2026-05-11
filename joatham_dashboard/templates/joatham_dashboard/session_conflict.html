@@ -1,0 +1,133 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% trans "Session deja active" %} | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f3f6fb;
+            --panel: #ffffff;
+            --text: #10233f;
+            --muted: #64748b;
+            --line: #d9e2ec;
+            --brand: #0f766e;
+            --brand-strong: #115e59;
+            --warning-bg: #fff7ed;
+            --warning-border: #fed7aa;
+            --warning-text: #9a3412;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(192, 132, 26, 0.12), transparent 24%),
+                linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 620px;
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 28px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+            padding: 36px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        h1 {
+            margin: 18px 0 10px;
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            letter-spacing: -0.03em;
+        }
+
+        p {
+            margin: 0 0 14px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            border-color: var(--brand);
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(15, 118, 110, 0.24);
+        }
+
+        .security-note {
+            margin-top: 20px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <span class="eyebrow">{% trans "Verification de session" %}</span>
+        <h1>{% trans "Session deja active" %}</h1>
+        <p>{% trans "Votre compte est deja connecte sur un autre navigateur ou appareil." %}</p>
+        <p>{% trans "Pour des raisons de securite, un seul acces est autorise a la fois." %}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <button type="submit" name="action" value="cancel" class="btn">{% trans "Annuler" %}</button>
+                <button type="submit" name="action" value="continue" class="btn btn-primary">{% trans "Deconnecter l'ancienne session et continuer" %}</button>
+            </div>
+        </form>
+
+        <div class="security-note">
+            {% trans "Aucune information detaillee sur l'autre navigateur ou appareil n'est affichee ici." %}
+        </div>
+    </main>
+</body>
+</html>

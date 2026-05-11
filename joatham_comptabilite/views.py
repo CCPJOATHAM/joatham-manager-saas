@@ -134,7 +134,7 @@ def comptabilite_dashboard(request):
 
 
 @permission_required("accounting.export")
-@module_access_required("accounting")
+@module_access_required("accounting_exports")
 def export_report(request, report_slug, fmt):
     if report_slug not in REPORT_TEMPLATES:
         raise Http404("Rapport inconnu.")

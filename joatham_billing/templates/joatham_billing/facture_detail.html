@@ -533,6 +533,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                {% if can_link_cash_payments_ui %}
                 <div class="field">
                     <label for="paiement-caisse">Caisse (optionnel)</label>
                     <select id="paiement-caisse" name="caisse">
@@ -542,6 +543,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                {% endif %}
                 <div class="field">
                     <label for="paiement-reference">Reference</label>
                     <input id="paiement-reference" type="text" name="reference" placeholder="Reference, numero ou libelle">

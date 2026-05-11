@@ -111,7 +111,9 @@
           <button type="submit" class="btn">Filtrer</button>
           <a href="{% url 'caisse_session_list' %}" class="ghost">Reinitialiser</a>
           <a href="{% url 'caisse_list' %}" class="ghost">Retour dashboard</a>
+          {% if can_view_cash_reports %}
           <a href="{% url 'caisse_reports' %}" class="ghost">Voir les rapports</a>
+          {% endif %}
         </div>
       </form>
     </div>

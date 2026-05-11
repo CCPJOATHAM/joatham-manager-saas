@@ -215,11 +215,21 @@
         {% else %}
         <div class="info-box">Tous les modules autorisés par votre abonnement restent disponibles.</div>
         {% endif %}
+        {% if current_plan_features %}
         <div class="details" style="margin-top:14px;">
-            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default:"Illimité" }}</strong></div>
+            {% for feature in current_plan_features %}
+            <div class="detail-row"><span>{{ feature }}</span><strong>Inclus</strong></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="details" style="margin-top:14px;">
+            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Produits</span><strong>{{ current_plan_quota_profile.max_produits|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Depenses / mois</span><strong>{{ current_plan_quota_profile.max_depenses_mois|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Caisses actives</span><strong>{{ current_plan_quota_profile.max_caisses|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default_if_none:"Illimite" }}</strong></div>
             <div class="detail-row"><span>Comptabilité</span><strong>{% if subscription.plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
             <div class="detail-row"><span>Exports</span><strong>{% if subscription.plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
         </div>

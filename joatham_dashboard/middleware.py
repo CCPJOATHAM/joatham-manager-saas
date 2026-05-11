@@ -17,6 +17,7 @@ ALLOWED_UNVERIFIED_URL_NAMES = {
     "home",
     "public_home",
     "login",
+    "login_session_conflict",
     "logout",
     "set_language",
     "signup",

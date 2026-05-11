@@ -45,6 +45,12 @@ def get_request_session_cookie_key(request):
     return request.COOKIES.get(settings.SESSION_COOKIE_NAME, "")
 
 
+def get_active_session_record(user):
+    if user is None:
+        return None
+    return UserActiveSession.objects.filter(user=user).first()
+
+
 def login_with_single_active_session(request, user):
     UserModel = get_user_model()
     backend = getattr(user, "backend", None)
@@ -55,6 +61,41 @@ def login_with_single_active_session(request, user):
 
         if active_session and is_session_key_active(active_session.session_key):
             return SingleSessionLoginResult(False, locked_user, SESSION_CONFLICT_MESSAGE)
+
+        if backend:
+            locked_user.backend = backend
+
+        auth_login(request, locked_user)
+        request.session.save()
+        session_key = get_request_session_key(request)
+        now = timezone.now()
+
+        if active_session:
+            active_session.session_key = session_key
+            active_session.created_at = now
+            active_session.last_seen_at = now
+            active_session.save(update_fields=["session_key", "created_at", "last_seen_at"])
+        else:
+            UserActiveSession.objects.create(
+                user=locked_user,
+                session_key=session_key,
+                created_at=now,
+                last_seen_at=now,
+            )
+
+    return SingleSessionLoginResult(True, locked_user, None)
+
+
+def replace_existing_session_and_login(request, user):
+    UserModel = get_user_model()
+    backend = getattr(user, "backend", None)
+
+    with transaction.atomic():
+        locked_user = UserModel.objects.select_for_update().get(pk=user.pk)
+        active_session = UserActiveSession.objects.select_for_update().filter(user=locked_user).first()
+
+        if active_session and is_session_key_active(active_session.session_key):
+            Session.objects.filter(session_key=active_session.session_key).delete()
 
         if backend:
             locked_user.backend = backend

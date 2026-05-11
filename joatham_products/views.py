@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from joatham_apprenants.services.export_service import build_report_metadata, build_xlsx_response
 from joatham_billing.pdf import render_pdf_response
 from core.services.quotas import PlanQuotaExceeded
-from core.services.product_policy import module_access_required
+from core.services.product_policy import can_access_module, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, require_permission, user_has_permission
 
@@ -54,13 +54,16 @@ from .services.stock import StockOperationError, apply_adjustment, apply_manual_
 
 
 def _build_product_ui_permissions(user):
+    can_access_stock = can_access_module(user, "stock")
+    can_access_inventory = can_access_module(user, "inventory")
+    can_access_stock_exports = can_access_module(user, "stock_exports")
     return {
         "can_manage_products_ui": user_has_permission(user, "products.manage"),
-        "can_view_stock_ui": user_has_permission(user, "stock.view"),
-        "can_move_stock_ui": user_has_permission(user, "stock.move"),
-        "can_adjust_stock_ui": user_has_permission(user, "stock.adjust"),
-        "can_inventory_stock_ui": user_has_permission(user, "stock.inventory"),
-        "can_export_stock_ui": user_has_permission(user, "stock.export"),
+        "can_view_stock_ui": user_has_permission(user, "stock.view") and can_access_stock,
+        "can_move_stock_ui": user_has_permission(user, "stock.move") and can_access_stock,
+        "can_adjust_stock_ui": user_has_permission(user, "stock.adjust") and can_access_stock,
+        "can_inventory_stock_ui": user_has_permission(user, "stock.inventory") and can_access_inventory,
+        "can_export_stock_ui": user_has_permission(user, "stock.export") and can_access_stock_exports,
     }
 
 
@@ -313,7 +316,7 @@ def product_update(request, product_id):
 
 
 @permission_required("stock.view")
-@module_access_required("products")
+@module_access_required("stock")
 def stock_movement_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_stock_filters_from_request(request, entreprise)
@@ -360,7 +363,7 @@ def stock_movement_list(request):
 
 
 @permission_required("stock.view")
-@module_access_required("products")
+@module_access_required("stock_reports")
 def stock_reports(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_stock_filters_from_request(request, entreprise)
@@ -406,7 +409,7 @@ def stock_reports(request):
 
 
 @permission_required("stock.export")
-@module_access_required("products")
+@module_access_required("stock_exports")
 def stock_movement_export_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_stock_filters_from_request(request, entreprise)
@@ -459,7 +462,7 @@ def stock_movement_export_excel(request):
 
 
 @permission_required("stock.export")
-@module_access_required("products")
+@module_access_required("stock_exports")
 def inventory_export_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_inventory_filters_from_request(request)
@@ -508,7 +511,7 @@ def inventory_export_excel(request):
 
 
 @permission_required("stock.export")
-@module_access_required("products")
+@module_access_required("stock_exports")
 def stock_reports_export_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_stock_filters_from_request(request, entreprise)
@@ -543,7 +546,7 @@ def stock_reports_export_pdf(request):
 
 
 @permission_required("stock.move")
-@module_access_required("products")
+@module_access_required("stock")
 def stock_entry_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     form = StockMovementForm(
@@ -576,7 +579,7 @@ def stock_entry_create(request):
 
 
 @permission_required("stock.move")
-@module_access_required("products")
+@module_access_required("stock")
 def stock_exit_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     form = StockMovementForm(
@@ -609,7 +612,7 @@ def stock_exit_create(request):
 
 
 @permission_required("stock.adjust")
-@module_access_required("products")
+@module_access_required("stock")
 def stock_adjustment_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     form = StockMovementForm(
@@ -644,7 +647,7 @@ def stock_adjustment_create(request):
 
 
 @permission_required("stock.view")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_inventory_filters_from_request(request)
@@ -681,7 +684,7 @@ def inventory_list(request):
 
 
 @permission_required("stock.inventory")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     form = InventorySessionForm(request.POST or None)
@@ -709,7 +712,7 @@ def inventory_create(request):
 
 
 @permission_required("stock.view")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_detail(request, pk):
     entreprise = get_user_entreprise_or_raise(request.user)
     session = get_inventory_session_for_entreprise(entreprise, pk)
@@ -729,7 +732,7 @@ def inventory_detail(request, pk):
 
 
 @permission_required("stock.inventory")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_count(request, pk):
     entreprise = get_user_entreprise_or_raise(request.user)
     session = get_inventory_session_for_entreprise(entreprise, pk)
@@ -789,7 +792,7 @@ def inventory_count(request, pk):
 
 
 @permission_required("stock.inventory")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_close(request, pk):
     if request.method != "POST":
         raise PermissionDenied("Cette action doit etre soumise par formulaire.")
@@ -804,7 +807,7 @@ def inventory_close(request, pk):
 
 
 @permission_required("stock.inventory")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_validate(request, pk):
     if request.method != "POST":
         raise PermissionDenied("Cette action doit etre soumise par formulaire.")
@@ -823,7 +826,7 @@ def inventory_validate(request, pk):
 
 
 @permission_required("stock.inventory")
-@module_access_required("products")
+@module_access_required("inventory")
 def inventory_cancel(request, pk):
     if request.method != "POST":
         raise PermissionDenied("Cette action doit etre soumise par formulaire.")

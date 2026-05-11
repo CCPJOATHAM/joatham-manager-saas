@@ -257,7 +257,9 @@
       {% endif %}
       <a href="{% url 'caisse_session_list' %}" class="ghost-btn">Toutes les sessions</a>
       <a href="{% url 'caisse_movement_list' %}" class="ghost-btn">Tous les mouvements</a>
+      {% if can_view_cash_reports %}
       <a href="{% url 'caisse_reports' %}" class="ghost-btn">Rapports caisse</a>
+      {% endif %}
       <a href="#sessions-ouvertes" class="ghost-btn">Voir les sessions ouvertes</a>
     </div>
   </div>
@@ -304,7 +306,9 @@
       {% endif %}
       <a href="{% url 'caisse_session_list' %}" class="ghost-btn">Sessions</a>
       <a href="{% url 'caisse_movement_list' %}" class="ghost-btn">Mouvements</a>
+      {% if can_view_cash_reports %}
       <a href="{% url 'caisse_reports' %}" class="ghost-btn">Rapports</a>
+      {% endif %}
     </div>
   </div>
 

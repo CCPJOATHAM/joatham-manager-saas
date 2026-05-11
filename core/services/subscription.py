@@ -1,3 +1,4 @@
+import unicodedata
 from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import wraps
@@ -24,9 +25,14 @@ from joatham_users.models import Abonnement, AbonnementEntreprise
 DEFAULT_WHATSAPP_NUMBER = "243970258117"
 DEFAULT_WHATSAPP_MESSAGE = "Je veux payer mon abonnement JOATHAM Pro"
 FREE_PLAN_CODE = "free"
+STARTER_PLAN_CODE = "starter"
+PRO_PLAN_CODE = "pro"
+PREMIUM_PLAN_CODE = "premium"
+BUSINESS_PLAN_CODE = "business"
 FREE_PLAN_DURATION_DAYS = 365 * 100
-FREE_PLAN_INVOICE_LIMIT = 100
+FREE_PLAN_INVOICE_LIMIT = 20
 FREE_PLAN_USER_LIMIT = 1
+FREE_PLAN_CLIENT_LIMIT = 50
 FREE_PLAN_MODULES = [
     "dashboard",
     "clients",
@@ -36,10 +42,162 @@ FREE_PLAN_MODULES = [
     "caisse",
     "products",
     "produits",
+    "billing",
     "factures",
-    "apprenants",
+    "subscription",
     "abonnements",
 ]
+STARTER_PLAN_MODULES = [
+    "dashboard",
+    "clients",
+    "services",
+    "expenses",
+    "depenses",
+    "caisse",
+    "products",
+    "produits",
+    "billing",
+    "factures",
+    "subscription",
+    "abonnements",
+]
+PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
+    "stock",
+    "stock_reports",
+    "stock_exports",
+    "inventory",
+    "inventaire",
+    "caisse_reports",
+    "caisse_exports",
+    "caisse_integrations",
+    "caisse_validation",
+    "users",
+    "utilisateurs",
+]
+PREMIUM_PLAN_MODULES = PRO_PLAN_MODULES + [
+    "accounting",
+    "comptabilite",
+    "accounting_reports",
+    "accounting_exports",
+    "audit",
+    "audit_advanced",
+    "messages",
+    "apprenants",
+]
+PLAN_CODE_ALIASES = {
+    "gratuit": FREE_PLAN_CODE,
+    "decouverte": FREE_PLAN_CODE,
+    "starter": STARTER_PLAN_CODE,
+    "pro": PRO_PLAN_CODE,
+    "premium": PREMIUM_PLAN_CODE,
+    "business": PREMIUM_PLAN_CODE,
+    "premium_business": PREMIUM_PLAN_CODE,
+}
+PLAN_QUOTA_PROFILES = {
+    FREE_PLAN_CODE: {
+        "max_produits": 30,
+        "max_depenses_mois": 20,
+        "max_caisses": 1,
+    },
+    STARTER_PLAN_CODE: {
+        "max_produits": 300,
+        "max_depenses_mois": 100,
+        "max_caisses": 1,
+    },
+    PRO_PLAN_CODE: {
+        "max_produits": 3000,
+        "max_depenses_mois": 1000,
+        "max_caisses": 5,
+    },
+    PREMIUM_PLAN_CODE: {
+        "max_produits": None,
+        "max_depenses_mois": None,
+        "max_caisses": None,
+    },
+}
+UNLIMITED_QUOTA_PROFILE = {
+    "max_produits": None,
+    "max_depenses_mois": None,
+    "max_caisses": None,
+}
+DEFAULT_PAID_PLANS = [
+    {
+        "code": STARTER_PLAN_CODE,
+        "nom": "Starter",
+        "prix": 19,
+        "prix_annuel": Decimal("190.00"),
+        "devise": "USD",
+        "duree_jours": 30,
+        "description": "Facturation, clients, produits, depenses et caisse simple pour une petite activite.",
+        "modules_inclus": STARTER_PLAN_MODULES,
+        "max_utilisateurs": 3,
+        "max_factures_mois": 100,
+        "max_clients": 300,
+        "max_apprenants": 0,
+        "acces_comptabilite": False,
+        "acces_exports": True,
+    },
+    {
+        "code": PRO_PLAN_CODE,
+        "nom": "Pro",
+        "prix": 49,
+        "prix_annuel": Decimal("490.00"),
+        "devise": "USD",
+        "duree_jours": 30,
+        "description": "Gestion complete avec caisse avancee, stock, inventaire, rapports et exports.",
+        "modules_inclus": PRO_PLAN_MODULES,
+        "max_utilisateurs": 10,
+        "max_factures_mois": 1000,
+        "max_clients": 3000,
+        "max_apprenants": 0,
+        "acces_comptabilite": False,
+        "acces_exports": True,
+    },
+    {
+        "code": PREMIUM_PLAN_CODE,
+        "nom": "Premium / Business",
+        "prix": 99,
+        "prix_annuel": Decimal("990.00"),
+        "devise": "USD",
+        "duree_jours": 30,
+        "description": "Tous les modules actuels, comptabilite avancee, audit, rapports financiers et capacites etendues.",
+        "modules_inclus": PREMIUM_PLAN_MODULES,
+        "max_utilisateurs": None,
+        "max_factures_mois": None,
+        "max_clients": None,
+        "max_apprenants": None,
+        "acces_comptabilite": True,
+        "acces_exports": True,
+    },
+]
+PLAN_FEATURE_SUMMARY = {
+    FREE_PLAN_CODE: [
+        "Acces decouverte avec dashboard simple",
+        "Clients, produits, depenses et factures limites",
+        "Une caisse active pour tester les flux de base",
+        "Stock avance, inventaire, rapports avances et exports avances non inclus",
+    ],
+    STARTER_PLAN_CODE: [
+        "Facturation plus confortable",
+        "Clients, produits et depenses pour une petite equipe",
+        "Caisse simple avec une caisse active",
+        "Rapports de base et exports simples",
+    ],
+    PRO_PLAN_CODE: [
+        "Tout Starter",
+        "Stock avance, mouvements et inventaire physique",
+        "Rapports stock, caisse complete et exports Excel/PDF",
+        "Paiements facture et depenses rattaches a la caisse",
+        "Utilisateurs multiples et roles metier",
+    ],
+    PREMIUM_PLAN_CODE: [
+        "Tout Pro",
+        "Comptabilite avancee et rapports financiers",
+        "Audit avance, messagerie et tous les modules actuels",
+        "Utilisateurs, clients, produits et factures sans limite applicative",
+        "Support prioritaire et options futures",
+    ],
+}
 SUBSCRIPTION_PAYMENT_DURATIONS = {
     PaiementAbonnement.Duree.MENSUEL: {"label": "Mensuel", "days": 30, "multiplier": Decimal("1")},
     PaiementAbonnement.Duree.TRIMESTRIEL: {"label": "Trimestriel", "days": 90, "multiplier": Decimal("3")},
@@ -62,7 +220,31 @@ def get_subscription_for_entreprise(entreprise):
 
 
 def is_free_plan(plan):
-    return (getattr(plan, "code", "") or "").strip().lower() == FREE_PLAN_CODE
+    return normalize_plan_code(plan) == FREE_PLAN_CODE
+
+
+def normalize_plan_code(plan_or_code):
+    raw_code = getattr(plan_or_code, "code", plan_or_code)
+    code = (raw_code or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
+    if not code and hasattr(plan_or_code, "nom"):
+        code = (getattr(plan_or_code, "nom", "") or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
+    code = unicodedata.normalize("NFKD", code).encode("ascii", "ignore").decode("ascii")
+    while "__" in code:
+        code = code.replace("__", "_")
+    code = code.strip("_")
+    return PLAN_CODE_ALIASES.get(code, code)
+
+
+def get_plan_quota_profile(plan):
+    return {**UNLIMITED_QUOTA_PROFILE, **PLAN_QUOTA_PROFILES.get(normalize_plan_code(plan), {})}
+
+
+def get_plan_feature_summary(plan):
+    return PLAN_FEATURE_SUMMARY.get(normalize_plan_code(plan), [])
+
+
+def get_default_paid_plans():
+    return DEFAULT_PAID_PLANS
 
 
 def is_entreprise_on_free_plan(entreprise):
@@ -78,11 +260,11 @@ def get_or_create_default_free_plan():
         "devise": get_platform_currency(),
         "duree_jours": FREE_PLAN_DURATION_DAYS,
         "actif": True,
-        "description": "Plan gratuit permanent pour demarrer avec JOATHAM Manager.",
+        "description": "Acces decouverte pour tester JOATHAM Manager avec des limites fortes.",
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
-        "max_clients": 100,
+        "max_clients": FREE_PLAN_CLIENT_LIMIT,
         "max_apprenants": 0,
         "acces_comptabilite": False,
         "acces_exports": False,

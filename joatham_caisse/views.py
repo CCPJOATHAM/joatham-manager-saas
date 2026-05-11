@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.utils.dateparse import parse_date
 
 from core.services.quotas import PlanQuotaExceeded
-from core.services.product_policy import module_access_required
+from core.services.product_policy import can_access_module, get_module_access_denied_message, get_module_access_state, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_apprenants.services.export_service import build_report_metadata, build_xlsx_response
 from joatham_billing.pdf import render_pdf_response
@@ -42,6 +42,14 @@ def _parse_decimal(raw_value):
 
 def _parse_bool(raw_value):
     return str(raw_value).lower() in {"1", "true", "on", "yes"}
+
+
+def _build_caisse_ui_permissions(user):
+    return {
+        "can_view_cash_reports": can_access_module(user, "caisse_reports"),
+        "can_export_cash": can_access_module(user, "caisse_exports"),
+        "can_validate_cash_ui": can_access_module(user, "caisse_validation"),
+    }
 
 
 def _resolve_caisse_filter(entreprise, raw_value):
@@ -155,6 +163,7 @@ def caisse_list(request):
             "can_create_caisse": user_has_permission(request.user, "caisse.create"),
             "can_open_session": user_has_permission(request.user, "caisse.open_session"),
             "can_add_movement": user_has_permission(request.user, "caisse.add_movement"),
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
@@ -202,6 +211,7 @@ def session_list(request):
                 "open": sessions.filter(statut=SessionCaisse.Statut.OUVERTE).count(),
                 "with_ecart": sessions.exclude(ecart=0).count(),
             },
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
@@ -233,12 +243,13 @@ def movement_list(request):
             "movement_type_choices": MouvementCaisse.TypeMouvement.choices,
             "filters": movement_filters["raw"],
             "filter_query": movement_filters["query_string"],
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
 
 @permission_required("caisse.dashboard")
-@module_access_required("caisse")
+@module_access_required("caisse_reports")
 def cash_reports(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     caisses = list(get_caisses_by_entreprise(entreprise))
@@ -257,12 +268,13 @@ def cash_reports(request):
             "caisses": caisses,
             "filters": report_filters["raw"],
             "filter_query": report_filters["query_string"],
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
 
 @permission_required("caisse.export")
-@module_access_required("caisse")
+@module_access_required("caisse_exports")
 def movement_export_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     movement_filters = _get_movement_filters_from_request(request, entreprise)
@@ -312,7 +324,7 @@ def movement_export_excel(request):
 
 
 @permission_required("caisse.export")
-@module_access_required("caisse")
+@module_access_required("caisse_exports")
 def cash_reports_export_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     report_filters = _get_report_filters_from_request(request, entreprise)
@@ -386,6 +398,7 @@ def caisse_detail(request, caisse_id):
             "sessions": sessions,
             "recent_movements": recent_movements,
             "can_open_session": user_has_permission(request.user, "caisse.open_session"),
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
@@ -438,8 +451,11 @@ def session_detail(request, session_id):
             "solde_reel_display": session.solde_reel if session.solde_reel is not None else "-",
             "can_add_movement": user_has_permission(request.user, "caisse.add_movement"),
             "can_close_session": user_has_permission(request.user, "caisse.close_session"),
-            "can_validate_session": user_has_permission(request.user, "caisse.validate_session"),
-            "can_reject_session": user_has_permission(request.user, "caisse.reject_session"),
+            "can_validate_session": user_has_permission(request.user, "caisse.validate_session")
+            and can_access_module(request.user, "caisse_validation"),
+            "can_reject_session": user_has_permission(request.user, "caisse.reject_session")
+            and can_access_module(request.user, "caisse_validation"),
+            **_build_caisse_ui_permissions(request.user),
         },
     )
 
@@ -498,6 +514,10 @@ def add_movement_view(request, session_id):
             elif movement_type == "sortie":
                 record_cash_exit(**payload)
             elif movement_type == "depense":
+                state = get_module_access_state(entreprise, "caisse_integrations")
+                if not state["allowed"]:
+                    messages.error(request, get_module_access_denied_message("caisse_integrations", state["reason"]))
+                    return redirect("caisse_session_detail", session_id=session.id)
                 record_cash_expense(**payload)
             else:
                 record_adjustment(**payload)
@@ -515,7 +535,7 @@ def add_movement_view(request, session_id):
 
 
 @permission_required("caisse.validate_session")
-@module_access_required("caisse")
+@module_access_required("caisse_validation")
 def validate_session_view(request, session_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     session = get_session_by_entreprise(entreprise, session_id)
@@ -539,7 +559,7 @@ def validate_session_view(request, session_id):
 
 
 @permission_required("caisse.reject_session")
-@module_access_required("caisse")
+@module_access_required("caisse_validation")
 def reject_session_view(request, session_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     session = get_session_by_entreprise(entreprise, session_id)

@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from core.audit import record_audit_event
 from core.services.quotas import assert_invoice_quota_available
+from core.services.product_policy import get_module_access_denied_message, get_module_access_state
 from core.services.tenancy import ensure_same_entreprise
 from joatham_caisse.models import Caisse, MouvementCaisse
 from joatham_caisse.selectors.session import get_open_session_for_caisse
@@ -447,6 +448,10 @@ def register_payment(*, facture, montant, mode, user, reference="", note="", cai
         mode=mode,
         caisse=caisse,
     )
+    if caisse_obj is not None:
+        state = get_module_access_state(facture.entreprise, "caisse_integrations")
+        if not state["allowed"]:
+            raise PaiementFacturationError(get_module_access_denied_message("caisse_integrations", state["reason"]))
 
     paiement = PaiementFacture.objects.create(
         facture=facture,
