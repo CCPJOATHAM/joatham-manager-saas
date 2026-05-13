@@ -14,8 +14,7 @@ class InventoryOperationError(ValueError):
 def _get_locked_session_for_entreprise(*, entreprise, session):
     session_id = getattr(session, "id", session)
     locked = (
-        InventorySession.objects.select_for_update()
-        .select_related("entreprise", "created_by", "validated_by")
+        InventorySession.objects.select_for_update(of=("self",))
         .filter(id=session_id, entreprise=entreprise)
         .first()
     )
