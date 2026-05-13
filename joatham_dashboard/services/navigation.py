@@ -136,6 +136,13 @@ NAV_ITEMS = [
         "prefixes": ["/caisse/"],
     },
     {
+        "label": _("Paiements"),
+        "url_name": "payment_list",
+        "permission": "payments.view",
+        "module": "payments",
+        "prefixes": ["/paiements/"],
+    },
+    {
         "label": _("Produits"),
         "url_name": "product_list",
         "permission": "products.view",
@@ -230,7 +237,7 @@ def _get_item_state(user, item):
                     "visible": True,
                     "badge": _("Premium"),
                 }
-            if module_name == "accounting" and state.get("reason") == "active_subscription_required":
+            if state.get("reason") == "active_subscription_required":
                 return {
                     "visible": True,
                     "badge": _("Abonnement requis"),

@@ -23,6 +23,7 @@ def get_mouvements_for_entreprise(
     caisse=None,
     session=None,
     type_mouvement=None,
+    moyen_paiement=None,
     date_debut=None,
     date_fin=None,
     montant_min=None,
@@ -40,6 +41,8 @@ def get_mouvements_for_entreprise(
         queryset = queryset.filter(session=session)
     if type_mouvement:
         queryset = queryset.filter(type_mouvement=type_mouvement)
+    if moyen_paiement:
+        queryset = queryset.filter(moyen_paiement=moyen_paiement)
     if date_debut:
         queryset = queryset.filter(date_mouvement__date__gte=date_debut)
     if date_fin:

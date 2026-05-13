@@ -134,6 +134,7 @@ class MouvementCaisse(models.Model):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     devise = models.CharField(max_length=10, default="CDF")
+    moyen_paiement = models.CharField(max_length=30, blank=True, default="cash", db_index=True)
     libelle = models.CharField(max_length=255)
     reference = models.CharField(max_length=100, blank=True, default="")
     source_app = models.CharField(max_length=50, blank=True, default="")
@@ -162,6 +163,7 @@ class MouvementCaisse(models.Model):
             models.Index(fields=["session", "date_mouvement"], name="cash_move_session_date_idx"),
             models.Index(fields=["caisse", "date_mouvement"], name="cash_move_cashbox_date_idx"),
             models.Index(fields=["entreprise", "type_mouvement", "date_mouvement"], name="cash_mov_ent_type_dt_idx"),
+            models.Index(fields=["entreprise", "moyen_paiement", "date_mouvement"], name="cash_mov_ent_method_dt_idx"),
             models.Index(fields=["source_app", "source_model", "source_id"], name="cash_move_source_idx"),
         ]
 
@@ -170,6 +172,7 @@ class MouvementCaisse(models.Model):
             self.devise = getattr(self.caisse, "devise", "") or "CDF"
         self.libelle = (self.libelle or "").strip()
         self.reference = (self.reference or "").strip()
+        self.moyen_paiement = (self.moyen_paiement or "cash").strip()
         super().save(*args, **kwargs)
 
     def __str__(self):

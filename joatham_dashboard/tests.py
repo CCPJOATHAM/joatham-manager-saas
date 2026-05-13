@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.models import ActivityLog
-from core.services.subscription import activate_subscription_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise
 from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
 from joatham_depenses.models import Depense
@@ -344,29 +344,21 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Origine recente des flux")
         self.assertContains(response, self.gestionnaire.username)
 
-    def test_accounting_navigation_shows_subscription_required_badge_during_trial(self):
-        trial_entreprise = create_entreprise("Entreprise Trial Navigation")
-        trial_owner = create_user("owner-trial-nav", "proprietaire", trial_entreprise)
-        AbonnementEntreprise.objects.create(
-            entreprise=trial_entreprise,
-            plan=self.plan,
-            statut=AbonnementEntreprise.Statut.ESSAI,
-            date_debut=datetime.now().date(),
-            date_fin=datetime.now().date() + timedelta(days=14),
-            essai=True,
-            actif=True,
-        )
+    def test_accounting_navigation_shows_premium_badge_for_free_plan(self):
+        free_entreprise = create_entreprise("Entreprise Free Navigation")
+        free_owner = create_user("owner-free-nav", "proprietaire", free_entreprise)
+        activate_free_plan_for_entreprise(entreprise=free_entreprise, utilisateur=free_owner)
 
-        self.client.force_login(trial_owner)
+        self.client.force_login(free_owner)
         response = self.client.get(reverse("admin_dashboard"))
 
         self.assertContains(response, "Comptabilite")
-        self.assertContains(response, "Abonnement requis")
+        self.assertContains(response, "Premium")
 
         blocked = self.client.get(reverse("compta_dashboard"))
         self.assertRedirects(
             blocked,
-            reverse("abonnement_expire") + "?module=accounting&reason=active_subscription_required",
+            reverse("abonnement_expire") + "?module=accounting&reason=premium_required",
         )
 
 
@@ -413,8 +405,11 @@ class OnboardingSignupTests(TestCase):
         self.assertEqual(entreprise.pays, "Angola")
         self.assertEqual(entreprise.devise, "AOA")
         self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ACTIF)
+        self.assertTrue(subscription.actif)
         self.assertFalse(subscription.essai)
         self.assertEqual(subscription.plan.code, "free")
+        self.assertEqual(subscription.date_debut, timezone.localdate())
+        self.assertGreater(subscription.date_fin, timezone.localdate())
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("email-verification/confirm/", mail.outbox[0].body)
 

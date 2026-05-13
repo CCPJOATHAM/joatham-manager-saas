@@ -1,0 +1,86 @@
+{% extends "joatham_payments/base.html" %}
+
+{% block page_title %}Paiement {{ payment.id }}{% endblock %}
+{% block content_title %}Paiement {{ payment.reference|default:payment.id }}{% endblock %}
+{% block content_subtitle %}Detail, validation, liens facture et caisse pour cette transaction.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'payment_list' %}" class="btn-link">Retour paiements</a>
+{% endblock %}
+
+{% block content %}
+<section class="payments-shell">
+  <div class="payments-detail-grid">
+    <div class="payments-panel">
+      <div class="payments-panel-header">
+        <h3>Detail transaction</h3>
+        <p>Montant {{ amount_display }} via {{ payment.get_method_display }}.</p>
+      </div>
+      <div class="payments-panel-body">
+        <dl class="payments-definition">
+          <div><dt>Statut</dt><dd><span class="payments-badge {% if payment.status == 'confirme' %}confirmed{% elif payment.status == 'en_attente' %}pending{% elif payment.status == 'rejete' %}rejected{% else %}cancelled{% endif %}">{{ payment.get_status_display }}</span></dd></div>
+          <div><dt>Type</dt><dd>{{ payment.get_transaction_type_display }}</dd></div>
+          <div><dt>Moyen</dt><dd>{{ payment.get_method_display }}</dd></div>
+          <div><dt>Reference</dt><dd>{{ payment.reference|default:"-" }}</dd></div>
+          <div><dt>Date transaction</dt><dd>{{ payment.transaction_date|date:"d/m/Y H:i" }}</dd></div>
+          <div><dt>Date validation</dt><dd>{% if payment.validation_date %}{{ payment.validation_date|date:"d/m/Y H:i" }}{% else %}-{% endif %}</dd></div>
+          <div><dt>Cree par</dt><dd>{{ payment.created_by|default:"-" }}</dd></div>
+          <div><dt>Valide par</dt><dd>{{ payment.validated_by|default:"-" }}</dd></div>
+          <div><dt>Telephone</dt><dd>{{ payment.phone_number|default:"-" }}</dd></div>
+          <div><dt>Operateur</dt><dd>{% if payment.mobile_operator %}{{ payment.get_mobile_operator_display }}{% else %}-{% endif %}</dd></div>
+          <div><dt>Facture</dt><dd>{% if payment.facture %}<a href="{% url 'facture_detail' payment.facture.id %}">{{ payment.facture.numero }}</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>Depense</dt><dd>{% if payment.depense %}{{ payment.depense.description }}{% else %}-{% endif %}</dd></div>
+          <div><dt>Caisse</dt><dd>{% if payment.caisse %}<a href="{% url 'caisse_detail' payment.caisse.id %}">{{ payment.caisse.nom }}</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>Session caisse</dt><dd>{% if payment.session_caisse %}<a href="{% url 'caisse_session_detail' payment.session_caisse.id %}">{{ payment.session_caisse.date_ouverture|date:"d/m/Y H:i" }}</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>Mouvement caisse</dt><dd>{% if payment.mouvement_caisse %}<a href="{% url 'caisse_session_detail' payment.mouvement_caisse.session_id %}">Voir mouvement</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>Piece</dt><dd>{% if payment.attachment %}<a href="{{ payment.attachment.url }}" target="_blank">Voir piece</a>{% else %}-{% endif %}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="payments-panel">
+      <div class="payments-panel-header">
+        <h3>Actions</h3>
+        <p>Un paiement confirme lie a une facture ou a une caisse se corrige par une operation separee.</p>
+      </div>
+      <div class="payments-panel-body">
+        {% if payment.status == 'en_attente' and can_validate_payment %}
+        <form method="post" action="{% url 'payment_confirm' payment.id %}">
+          {% csrf_token %}
+          <button type="submit" class="payments-btn">Confirmer</button>
+        </form>
+        <form method="post" action="{% url 'payment_reject' payment.id %}" style="margin-top:14px;">
+          {% csrf_token %}
+          <div class="payments-field">
+            {{ decision_form.note.label_tag }}
+            {{ decision_form.note }}
+          </div>
+          <button type="submit" class="payments-danger" style="margin-top:10px;">Rejeter</button>
+        </form>
+        {% endif %}
+
+        {% if payment.status != 'annule' and can_cancel_payment %}
+        <form method="post" action="{% url 'payment_cancel' payment.id %}" style="margin-top:14px;">
+          {% csrf_token %}
+          <div class="payments-field">
+            <label for="id_cancel_note">Note annulation</label>
+            <textarea id="id_cancel_note" name="note" rows="3" class="form-control"></textarea>
+          </div>
+          <button type="submit" class="payments-danger" style="margin-top:10px;">Annuler</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="payments-panel">
+    <div class="payments-panel-header">
+      <h3>Note</h3>
+      <p>Informations internes rattachees a la transaction.</p>
+    </div>
+    <div class="payments-panel-body">
+      <p>{{ payment.note|linebreaksbr|default:"Aucune note." }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

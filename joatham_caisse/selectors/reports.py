@@ -100,6 +100,17 @@ def get_cash_report_snapshot(entreprise, *, caisse=None, date_debut=None, date_f
         .order_by("type_mouvement")
     ]
 
+    summary_by_method = [
+        {
+            "moyen_paiement": row["moyen_paiement"] or "cash",
+            "count": row["count"],
+            "total": _coalesce_amount(row["total"]),
+        }
+        for row in movements.values("moyen_paiement")
+        .annotate(count=Count("id"), total=Sum("montant"))
+        .order_by("moyen_paiement")
+    ]
+
     return {
         "total_entrees": _coalesce_amount(movement_totals.get("total_entrees")),
         "total_sorties": _coalesce_amount(movement_totals.get("total_sorties")),
@@ -115,6 +126,7 @@ def get_cash_report_snapshot(entreprise, *, caisse=None, date_debut=None, date_f
         "ecarts_negatifs": sessions.filter(ecart__lt=0).count(),
         "summary_by_caisse": summary_by_caisse,
         "summary_by_type": summary_by_type,
+        "summary_by_method": summary_by_method,
     }
 
 

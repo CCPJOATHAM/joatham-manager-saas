@@ -162,5 +162,34 @@
       </div>
     </div>
   </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Synthese par moyen de paiement</h3>
+      <p>Repartition des mouvements de caisse selon le canal utilise.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Moyen</th>
+            <th>Nombre</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in report.summary_by_method %}
+          <tr>
+            <td>{{ row.moyen_paiement }}</td>
+            <td>{{ row.count }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="empty-state">Aucun mouvement par moyen sur la periode selectionnee.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </section>
 {% endblock %}

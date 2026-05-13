@@ -24,6 +24,18 @@ from .services.session import close_session, open_session
 from .services.validation import reject_session, validate_session
 
 
+PAYMENT_METHOD_FILTER_CHOICES = [
+    ("cash", "Cash"),
+    ("mpesa", "M-Pesa"),
+    ("orange_money", "Orange Money"),
+    ("airtel_money", "Airtel Money"),
+    ("afrimoney", "Afrimoney"),
+    ("bank_transfer", "Virement bancaire"),
+    ("card", "Carte bancaire"),
+    ("other", "Autre"),
+]
+
+
 def _parse_int(raw_value):
     try:
         return int(raw_value)
@@ -101,6 +113,7 @@ def _get_movement_filters_from_request(request, entreprise):
     if selected_session and selected_caisse and selected_session.caisse_id != selected_caisse.id:
         selected_session = None
     type_mouvement = (request.GET.get("type_mouvement") or "").strip()
+    moyen_paiement = (request.GET.get("moyen_paiement") or "").strip()
     q = (request.GET.get("q") or "").strip()
     raw_date_debut = request.GET.get("date_debut", "")
     raw_date_fin = request.GET.get("date_fin", "")
@@ -120,6 +133,7 @@ def _get_movement_filters_from_request(request, entreprise):
             "caisse": selected_caisse.id if selected_caisse else "",
             "session": selected_session.id if selected_session else "",
             "type_mouvement": type_mouvement,
+            "moyen_paiement": moyen_paiement,
             "date_debut": raw_date_debut,
             "date_fin": raw_date_fin,
             "montant_min": raw_montant_min,
@@ -127,6 +141,7 @@ def _get_movement_filters_from_request(request, entreprise):
             "q": q,
         },
         "query_string": request.GET.urlencode(),
+        "moyen_paiement": moyen_paiement,
     }
 
 
@@ -227,6 +242,7 @@ def movement_list(request):
         caisse=movement_filters["selected_caisse"],
         session=movement_filters["selected_session"],
         type_mouvement=movement_filters["type_mouvement"] or None,
+        moyen_paiement=movement_filters["moyen_paiement"] or None,
         date_debut=movement_filters["date_debut"],
         date_fin=movement_filters["date_fin"],
         montant_min=movement_filters["montant_min"],
@@ -241,6 +257,7 @@ def movement_list(request):
             "caisses": caisses,
             "sessions": movement_filters["available_sessions"],
             "movement_type_choices": MouvementCaisse.TypeMouvement.choices,
+            "payment_method_choices": PAYMENT_METHOD_FILTER_CHOICES,
             "filters": movement_filters["raw"],
             "filter_query": movement_filters["query_string"],
             **_build_caisse_ui_permissions(request.user),
@@ -283,6 +300,7 @@ def movement_export_excel(request):
         caisse=movement_filters["selected_caisse"],
         session=movement_filters["selected_session"],
         type_mouvement=movement_filters["type_mouvement"] or None,
+        moyen_paiement=movement_filters["moyen_paiement"] or None,
         date_debut=movement_filters["date_debut"],
         date_fin=movement_filters["date_fin"],
         montant_min=movement_filters["montant_min"],
@@ -295,6 +313,7 @@ def movement_export_excel(request):
             movement.caisse.nom,
             f"{movement.session.id} - {movement.session.date_ouverture.strftime('%d/%m/%Y %H:%M')}",
             movement.get_type_mouvement_display(),
+            dict(PAYMENT_METHOD_FILTER_CHOICES).get(movement.moyen_paiement, movement.moyen_paiement or "Cash"),
             movement.montant,
             movement.devise,
             movement.libelle,
@@ -312,6 +331,7 @@ def movement_export_excel(request):
             "Caisse",
             "Session",
             "Type",
+            "Moyen paiement",
             "Montant",
             "Devise",
             "Libelle",

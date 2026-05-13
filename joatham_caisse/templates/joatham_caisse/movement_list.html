@@ -97,6 +97,15 @@
             <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="Libelle ou reference">
           </div>
           <div class="field">
+            <label for="id_moyen_paiement">Moyen paiement</label>
+            <select name="moyen_paiement" id="id_moyen_paiement">
+              <option value="">Tous les moyens</option>
+              {% for value, label in payment_method_choices %}
+              <option value="{{ value }}" {% if filters.moyen_paiement == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
             <label for="id_date_debut">Date debut</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
@@ -141,6 +150,7 @@
             <th>Caisse</th>
             <th>Session</th>
             <th>Type</th>
+            <th>Moyen</th>
             <th>Montant</th>
             <th>Libelle</th>
             <th>Reference</th>
@@ -159,6 +169,7 @@
                 {{ movement.get_type_mouvement_display }}
               </span>
             </td>
+            <td>{{ movement.moyen_paiement|default:"cash" }}</td>
             <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
             <td>{{ movement.libelle }}</td>
             <td>{{ movement.reference|default:"-" }}</td>
@@ -170,7 +181,7 @@
             <td><a href="{% url 'caisse_session_detail' movement.session.id %}" class="ghost">Voir session</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="9" class="empty-state">Aucun mouvement ne correspond aux filtres selectionnes.</td></tr>
+          <tr><td colspan="10" class="empty-state">Aucun mouvement ne correspond aux filtres selectionnes.</td></tr>
           {% endfor %}
         </tbody>
       </table>

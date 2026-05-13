@@ -6,7 +6,7 @@ from django.urls import reverse
 from core.models import ActivityLog
 from core.services.quotas import FREE_PLAN_INVOICE_LIMIT, PlanQuotaExceeded
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
-from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise, get_or_create_free_plan
 from joatham_products.models import Produit, StockMovement
 from joatham_users.models import Abonnement
 
@@ -33,8 +33,8 @@ class BillingServicesViewsTests(TestCase):
         self.comptable = create_user("accountant-services", "comptable", self.entreprise)
         self.owner_b = create_user("owner-services-b", "proprietaire", self.autre_entreprise)
         self.plan = Abonnement.objects.create(nom="Services", code="services", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
         self.service = Service.objects.create(
             entreprise=self.entreprise,
             nom="Assistance bureautique",
@@ -113,8 +113,8 @@ class BillingStockWorkflowTests(TestCase):
         self.owner = create_user("owner-stock", "proprietaire", self.entreprise)
         self.owner_b = create_user("owner-stock-b", "proprietaire", self.autre_entreprise)
         self.plan = Abonnement.objects.create(nom="Stock", code="stock", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
         self.product = Produit.objects.create(
             entreprise=self.entreprise,
             nom="Routeur Wi-Fi",
@@ -166,8 +166,8 @@ class BillingStockWorkflowTests(TestCase):
         )
 
     def test_free_plan_blocks_invoice_creation_after_monthly_limit(self):
-        free_plan = get_or_create_default_free_plan()
-        start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
+        free_plan = get_or_create_free_plan()
+        activate_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
 
         for index in range(FREE_PLAN_INVOICE_LIMIT):
             create_facture(
@@ -472,8 +472,8 @@ class BillingCashPaymentIntegrationTests(TestCase):
         self.owner_b = create_user("owner-payment-b", "proprietaire", self.autre_entreprise)
         self.comptable = create_user("comptable-payment", "comptable", self.entreprise)
         self.plan = Abonnement.objects.create(nom="Paiements", code="payments", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
         self.facture = create_facture(
             entreprise=self.entreprise,
             user=self.owner,

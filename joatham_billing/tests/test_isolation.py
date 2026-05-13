@@ -2,7 +2,7 @@ from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 
-from core.services.subscription import start_trial_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise
 from joatham_billing.selectors.billing import (
     get_clients_for_billing_by_entreprise,
     get_facture_by_entreprise,
@@ -24,8 +24,8 @@ class BillingIsolationTests(TestCase):
         self.user_a = create_user("user-a", "gestionnaire", self.entreprise_a)
         self.user_b = create_user("user-b", "gestionnaire", self.entreprise_b)
         self.plan = Abonnement.objects.create(nom="Billing", code="billing", prix=29, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.user_a)
-        start_trial_for_entreprise(entreprise=self.entreprise_b, plan=self.plan, utilisateur=self.user_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.user_a)
+        activate_subscription_for_entreprise(entreprise=self.entreprise_b, plan=self.plan, utilisateur=self.user_b)
         self.client_a = create_client(self.entreprise_a, "Client A")
         self.client_b = create_client(self.entreprise_b, "Client B")
         self.service_a = Service.objects.create(nom="Service A", prix=100, entreprise=self.entreprise_a)

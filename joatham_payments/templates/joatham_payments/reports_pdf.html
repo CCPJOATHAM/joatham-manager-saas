@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report_title }}</title>
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; color: #10233f; font-size: 11px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 14px; margin: 22px 0 8px; }
+    .muted { color: #64748b; }
+    .kpis { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    .kpis td { border: 1px solid #dde7f0; padding: 8px; width: 25%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #dde7f0; padding: 6px; text-align: left; }
+    th { background: #f1f5f9; }
+    .footer { margin-top: 24px; color: #64748b; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <h1>{{ report_title }}</h1>
+  <p class="muted">{{ entreprise.nom }} - genere le {{ date_footer }}</p>
+
+  <table class="kpis">
+    <tr>
+      <td><strong>Total encaisse</strong><br>{{ summary.total_encaisse }}</td>
+      <td><strong>En attente</strong><br>{{ summary.total_en_attente }}</td>
+      <td><strong>Rejete</strong><br>{{ summary.total_rejete }}</td>
+      <td><strong>Annule</strong><br>{{ summary.total_annule }}</td>
+    </tr>
+  </table>
+
+  <h2>Repartition par moyen</h2>
+  <table>
+    <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for row in method_breakdown %}
+      <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
+      {% empty %}
+      <tr><td colspan="3">Aucune donnee.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Repartition par statut</h2>
+  <table>
+    <thead><tr><th>Statut</th><th>Nombre</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for row in status_breakdown %}
+      <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
+      {% empty %}
+      <tr><td colspan="3">Aucune donnee.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Paiements recents</h2>
+  <table>
+    <thead><tr><th>Date</th><th>Moyen</th><th>Statut</th><th>Montant</th><th>Reference</th></tr></thead>
+    <tbody>
+      {% for payment in recent_payments %}
+      <tr>
+        <td>{{ payment.transaction_date|date:"d/m/Y H:i" }}</td>
+        <td>{{ payment.get_method_display }}</td>
+        <td>{{ payment.get_status_display }}</td>
+        <td>{{ payment.amount }} {{ payment.currency }}</td>
+        <td>{{ payment.reference|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Aucun paiement.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="footer">JOATHAM Manager - rapport paiements</p>
+</body>
+</html>
+

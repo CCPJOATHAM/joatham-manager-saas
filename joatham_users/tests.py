@@ -17,20 +17,20 @@ from core.selectors.subscriptions import get_subscription_with_plan_for_entrepri
 from core.services.quotas import PlanQuotaExceeded
 from core.services.tenancy import ensure_subscription_access_for_entreprise, get_subscription_access_state
 from core.services.subscription import (
+    activate_free_plan_for_entreprise,
     activate_subscription_for_entreprise,
     build_subscription_payment_estimate,
     get_current_subscription,
-    get_or_create_default_free_plan,
+    get_or_create_free_plan,
     get_subscription_for_entreprise,
     has_active_subscription_access,
     is_subscription_active,
     is_subscription_expired,
     refresh_subscription_status,
-    start_free_plan_for_entreprise,
     start_trial_for_entreprise,
     suspend_subscription_for_entreprise,
 )
-from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_TRIAL_OR_ACTIVE, can_access_module, get_module_access_level
+from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_INCLUDED_PLAN, can_access_module, get_module_access_level
 from joatham_billing.tests.factories import create_entreprise, create_user
 
 from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User
@@ -77,29 +77,21 @@ class SubscriptionServiceTests(TestCase):
             ).exists()
         )
 
-    def test_start_trial_for_entreprise(self):
-        subscription = start_trial_for_entreprise(
-            entreprise=self.entreprise,
-            plan=self.plan,
-            utilisateur=self.owner,
-            trial_days=14,
-        )
-
-        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
-        self.assertTrue(subscription.essai)
-        self.assertEqual(subscription.date_fin, timezone.localdate() + timedelta(days=14))
-        self.assertTrue(
-            ActivityLog.objects.filter(
+    def test_start_trial_for_entreprise_rejects_new_trials(self):
+        with self.assertRaisesMessage(ValueError, "creation de nouveaux essais est desactivee"):
+            start_trial_for_entreprise(
                 entreprise=self.entreprise,
+                plan=self.plan,
                 utilisateur=self.owner,
-                action="essai_demarre",
-                objet_id=subscription.id,
-            ).exists()
-        )
+                trial_days=14,
+            )
 
-    def test_start_free_plan_for_entreprise(self):
-        free_plan = get_or_create_default_free_plan()
-        subscription = start_free_plan_for_entreprise(
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+        self.assertFalse(ActivityLog.objects.filter(action="essai_demarre").exists())
+
+    def test_activate_free_plan_for_entreprise(self):
+        free_plan = get_or_create_free_plan()
+        subscription = activate_free_plan_for_entreprise(
             entreprise=self.entreprise,
             plan=free_plan,
             utilisateur=self.owner,
@@ -168,11 +160,10 @@ class SubscriptionServiceTests(TestCase):
         self.assertEqual(selected.plan_id, self.plan.id)
 
     def test_selector_returns_subscription_with_plan(self):
-        subscription = start_trial_for_entreprise(
+        subscription = activate_subscription_for_entreprise(
             entreprise=self.entreprise,
             plan=self.plan,
             utilisateur=self.owner,
-            trial_days=14,
         )
 
         selected = get_subscription_with_plan_for_entreprise(self.entreprise)
@@ -180,12 +171,15 @@ class SubscriptionServiceTests(TestCase):
         self.assertEqual(selected.id, subscription.id)
         self.assertEqual(selected.plan.nom, self.plan.nom)
 
-    def test_is_subscription_active_accepts_trial_by_default(self):
-        start_trial_for_entreprise(
+    def test_is_subscription_active_accepts_legacy_trial_by_default(self):
+        AbonnementEntreprise.objects.create(
             entreprise=self.entreprise,
             plan=self.plan,
-            utilisateur=self.owner,
-            trial_days=14,
+            statut=AbonnementEntreprise.Statut.ESSAI,
+            date_debut=timezone.localdate(),
+            date_fin=timezone.localdate() + timedelta(days=14),
+            essai=True,
+            actif=True,
         )
 
         self.assertTrue(is_subscription_active(self.entreprise))
@@ -362,12 +356,10 @@ class SubscriptionAccessTests(TestCase):
         response = self.client.get(reverse("admin_dashboard"))
         self.assertRedirects(response, reverse("abonnement_expire") + "?module=dashboard&reason=missing_subscription")
 
-    def test_dashboard_allows_access_for_trial_subscription(self):
-        start_trial_for_entreprise(
+    def test_dashboard_allows_access_for_free_plan(self):
+        activate_free_plan_for_entreprise(
             entreprise=self.entreprise,
-            plan=self.plan,
             utilisateur=self.owner,
-            trial_days=7,
         )
         self.client.force_login(self.gestionnaire)
         response = self.client.get(reverse("gestion_dashboard"))
@@ -419,17 +411,16 @@ class SubscriptionAccessTests(TestCase):
 
 class ProductPolicyTests(TestCase):
     def setUp(self):
-        self.entreprise_trial = create_entreprise("Entreprise Trial")
+        self.entreprise_legacy_trial = create_entreprise("Entreprise Legacy Trial")
         self.entreprise_active = create_entreprise("Entreprise Active")
         self.entreprise_free = create_entreprise("Entreprise Free")
         self.entreprise_none = create_entreprise("Entreprise None")
-        self.owner_trial = create_user("owner-trial", "proprietaire", self.entreprise_trial)
+        self.owner_legacy_trial = create_user("owner-legacy-trial", "proprietaire", self.entreprise_legacy_trial)
         self.owner_active = create_user("owner-active", "proprietaire", self.entreprise_active)
         self.owner_free = create_user("owner-free", "proprietaire", self.entreprise_free)
         self.owner_none = create_user("owner-none", "proprietaire", self.entreprise_none)
-        self.gestionnaire_trial = create_user("gestion-trial", "gestionnaire", self.entreprise_trial)
+        self.gestionnaire_legacy_trial = create_user("gestion-legacy-trial", "gestionnaire", self.entreprise_legacy_trial)
         self.gestionnaire_active = create_user("gestion-active", "gestionnaire", self.entreprise_active)
-        self.comptable_trial = create_user("compta-trial", "comptable", self.entreprise_trial)
         self.plan = Abonnement.objects.create(
             nom="Growth",
             code="growth",
@@ -437,35 +428,45 @@ class ProductPolicyTests(TestCase):
             duree_jours=30,
             actif=True,
         )
-        start_trial_for_entreprise(
-            entreprise=self.entreprise_trial,
+        AbonnementEntreprise.objects.create(
+            entreprise=self.entreprise_legacy_trial,
             plan=self.plan,
-            utilisateur=self.owner_trial,
-            trial_days=7,
+            statut=AbonnementEntreprise.Statut.ESSAI,
+            date_debut=timezone.localdate(),
+            date_fin=timezone.localdate() + timedelta(days=7),
+            essai=True,
+            actif=True,
         )
         activate_subscription_for_entreprise(
             entreprise=self.entreprise_active,
             plan=self.plan,
             utilisateur=self.owner_active,
         )
-        start_free_plan_for_entreprise(
+        activate_free_plan_for_entreprise(
             entreprise=self.entreprise_free,
             utilisateur=self.owner_free,
         )
 
-    def test_product_policy_levels_match_v1_strategy(self):
-        self.assertEqual(get_module_access_level("clients"), ACCESS_TRIAL_OR_ACTIVE)
-        self.assertEqual(get_module_access_level("expenses"), ACCESS_TRIAL_OR_ACTIVE)
-        self.assertEqual(get_module_access_level("billing"), ACCESS_TRIAL_OR_ACTIVE)
+    def test_product_policy_levels_match_current_plan_strategy(self):
+        self.assertEqual(get_module_access_level("clients"), ACCESS_INCLUDED_PLAN)
+        self.assertEqual(get_module_access_level("expenses"), ACCESS_INCLUDED_PLAN)
+        self.assertEqual(get_module_access_level("billing"), ACCESS_INCLUDED_PLAN)
         self.assertEqual(get_module_access_level("accounting"), ACCESS_ACTIVE_ONLY)
-        self.assertEqual(get_module_access_level("apprenants"), ACCESS_TRIAL_OR_ACTIVE)
+        self.assertEqual(get_module_access_level("apprenants"), ACCESS_INCLUDED_PLAN)
 
-    def test_trial_can_access_trial_or_active_modules(self):
-        self.assertTrue(can_access_module(self.owner_trial, "clients"))
-        self.assertTrue(can_access_module(self.owner_trial, "expenses"))
-        self.assertTrue(can_access_module(self.owner_trial, "billing"))
-        self.assertTrue(can_access_module(self.owner_trial, "apprenants"))
-        self.assertFalse(can_access_module(self.owner_trial, "accounting"))
+    def test_free_plan_can_access_only_included_modules(self):
+        self.assertTrue(can_access_module(self.owner_free, "clients"))
+        self.assertTrue(can_access_module(self.owner_free, "expenses"))
+        self.assertTrue(can_access_module(self.owner_free, "billing"))
+        self.assertFalse(can_access_module(self.owner_free, "apprenants"))
+        self.assertFalse(can_access_module(self.owner_free, "accounting"))
+
+    def test_legacy_trial_keeps_compatible_access(self):
+        self.assertTrue(can_access_module(self.owner_legacy_trial, "clients"))
+        self.assertTrue(can_access_module(self.owner_legacy_trial, "expenses"))
+        self.assertTrue(can_access_module(self.owner_legacy_trial, "billing"))
+        self.assertTrue(can_access_module(self.owner_legacy_trial, "apprenants"))
+        self.assertFalse(can_access_module(self.owner_legacy_trial, "accounting"))
 
     def test_active_can_access_all_targeted_modules(self):
         self.assertTrue(can_access_module(self.owner_active, "clients"))
@@ -478,25 +479,25 @@ class ProductPolicyTests(TestCase):
         self.assertFalse(can_access_module(self.owner_none, "clients"))
         self.assertFalse(can_access_module(self.owner_none, "billing"))
 
-    def test_clients_view_is_allowed_in_trial(self):
-        self.client.force_login(self.gestionnaire_trial)
+    def test_clients_view_is_allowed_with_free_plan(self):
+        self.client.force_login(self.owner_free)
         response = self.client.get(reverse("client_list"))
         self.assertEqual(response.status_code, 200)
 
-    def test_depenses_view_is_allowed_in_trial(self):
-        self.client.force_login(self.gestionnaire_trial)
+    def test_depenses_view_is_allowed_with_free_plan(self):
+        self.client.force_login(self.owner_free)
         response = self.client.get(reverse("depenses"))
         self.assertEqual(response.status_code, 200)
 
-    def test_billing_view_is_allowed_in_trial(self):
-        self.client.force_login(self.gestionnaire_trial)
+    def test_billing_view_is_allowed_with_free_plan(self):
+        self.client.force_login(self.owner_free)
         response = self.client.get(reverse("facture_list"))
         self.assertEqual(response.status_code, 200)
 
-    def test_accounting_view_is_refused_in_trial(self):
-        self.client.force_login(self.comptable_trial)
+    def test_accounting_view_is_refused_with_free_plan(self):
+        self.client.force_login(self.owner_free)
         response = self.client.get(reverse("compta_dashboard"))
-        self.assertRedirects(response, reverse("abonnement_expire") + "?module=accounting&reason=active_subscription_required")
+        self.assertRedirects(response, reverse("abonnement_expire") + "?module=accounting&reason=premium_required")
 
     def test_accounting_view_is_allowed_when_active(self):
         comptable_active = create_user("compta-active", "comptable", self.entreprise_active)
@@ -504,12 +505,15 @@ class ProductPolicyTests(TestCase):
         response = self.client.get(reverse("compta_dashboard"))
         self.assertEqual(response.status_code, 200)
 
-    def test_apprenants_view_is_allowed_in_trial(self):
-        self.client.force_login(self.gestionnaire_trial)
+    def test_apprenants_view_is_allowed_for_legacy_trial(self):
+        self.client.force_login(self.gestionnaire_legacy_trial)
         response = self.client.get(reverse("apprenant_list"))
         self.assertEqual(response.status_code, 200)
 
     def test_free_plan_locks_premium_modules(self):
+        self.assertFalse(can_access_module(self.owner_free, "inventory"))
+        self.assertFalse(can_access_module(self.owner_free, "stock_reports"))
+        self.assertFalse(can_access_module(self.owner_free, "stock_exports"))
         self.assertFalse(can_access_module(self.owner_free, "accounting"))
         self.assertFalse(can_access_module(self.owner_free, "audit"))
         self.assertFalse(can_access_module(self.owner_free, "messages"))
@@ -544,19 +548,17 @@ class UserManagementTests(TestCase):
             duree_jours=30,
             actif=True,
         )
-        start_trial_for_entreprise(
+        activate_subscription_for_entreprise(
             entreprise=self.entreprise,
             plan=self.plan,
             utilisateur=self.owner,
-            trial_days=14,
         )
-        start_trial_for_entreprise(
+        activate_subscription_for_entreprise(
             entreprise=self.autre_entreprise,
             plan=self.plan,
             utilisateur=self.external_user,
-            trial_days=14,
         )
-        start_free_plan_for_entreprise(
+        activate_free_plan_for_entreprise(
             entreprise=self.entreprise_free,
             utilisateur=self.owner_free,
         )

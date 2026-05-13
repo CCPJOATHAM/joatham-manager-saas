@@ -153,6 +153,28 @@
         </tbody>
     </table>
 
+    <p class="section-title">Synthese par moyen de paiement</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Moyen</th>
+                <th class="text-center">Nombre</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report.summary_by_method %}
+            <tr>
+                <td>{{ row.moyen_paiement }}</td>
+                <td class="text-center">{{ row.count }}</td>
+                <td class="text-right">{{ row.total }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="3">Aucun mouvement par moyen sur la periode selectionnee.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     <p class="section-title">Derniers mouvements filtres</p>
     <table>
         <thead>

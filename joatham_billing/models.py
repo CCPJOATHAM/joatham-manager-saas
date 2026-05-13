@@ -241,6 +241,11 @@ class PaiementFacture(models.Model):
         ESPECES = "especes", _("Especes")
         VIREMENT = "virement", _("Virement")
         MOBILE_MONEY = "mobile_money", "Mobile Money"
+        MPESA = "mpesa", "M-Pesa"
+        ORANGE_MONEY = "orange_money", "Orange Money"
+        AIRTEL_MONEY = "airtel_money", "Airtel Money"
+        AFRIMONEY = "afrimoney", "Afrimoney"
+        CARTE = "carte", _("Carte bancaire")
         CHEQUE = "cheque", _("Cheque")
         AUTRE = "autre", _("Autre")
 

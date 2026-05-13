@@ -34,6 +34,11 @@ MODULE_ACCESS_POLICY = {
     "stock_exports": ACCESS_INCLUDED_PLAN,
     "inventory": ACCESS_INCLUDED_PLAN,
     "billing": ACCESS_INCLUDED_PLAN,
+    "payments": ACCESS_INCLUDED_PLAN,
+    "mobile_money": ACCESS_INCLUDED_PLAN,
+    "payment_validation": ACCESS_INCLUDED_PLAN,
+    "payments_reports": ACCESS_INCLUDED_PLAN,
+    "payments_exports": ACCESS_INCLUDED_PLAN,
     "apprenants": ACCESS_INCLUDED_PLAN,
     "subscription": ACCESS_INCLUDED_PLAN,
     "accounting": ACCESS_PREMIUM,
@@ -62,6 +67,11 @@ MODULE_LABELS = {
     "stock_exports": "exports stock",
     "inventory": "inventaire physique",
     "billing": "facturation",
+    "payments": "paiements",
+    "mobile_money": "Mobile Money",
+    "payment_validation": "validation paiements",
+    "payments_reports": "rapports paiements",
+    "payments_exports": "exports paiements",
     "accounting": "comptabilite",
     "accounting_reports": "rapports financiers",
     "accounting_exports": "exports comptables",
@@ -91,6 +101,11 @@ PLAN_MODULE_ALIASES = {
     "stock_exports": {"stock_exports", "exports_stock", "exports"},
     "inventory": {"inventory", "inventaire"},
     "billing": {"billing", "factures"},
+    "payments": {"payments", "paiements"},
+    "mobile_money": {"mobile_money", "mobile-money", "mobilemoney"},
+    "payment_validation": {"payment_validation", "validation_paiements"},
+    "payments_reports": {"payments_reports", "rapports_paiements"},
+    "payments_exports": {"payments_exports", "exports_paiements", "exports"},
     "accounting": {"accounting", "comptabilite"},
     "accounting_reports": {"accounting_reports", "rapports_financiers"},
     "accounting_exports": {"accounting_exports", "exports_comptables", "exports"},
@@ -102,7 +117,7 @@ PLAN_MODULE_ALIASES = {
     "subscription": {"subscription", "abonnements"},
 }
 
-EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports"}
+EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports"}
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
 PREMIUM_DENIED_REASONS = {
     "premium_required",

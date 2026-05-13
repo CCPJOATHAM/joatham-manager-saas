@@ -1,0 +1,39 @@
+{% extends "joatham_payments/base.html" %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block content_title %}{{ page_title }}{% endblock %}
+{% block content_subtitle %}Saisissez un paiement manuel controle, lie si besoin a une facture, une depense ou une session caisse.{% endblock %}
+
+{% block content %}
+<section class="payments-shell">
+  <div class="payments-panel">
+    <div class="payments-panel-header">
+      <h3>Informations paiement</h3>
+      <p>Les paiements confirmes peuvent alimenter la facture et la caisse selon le canal choisi.</p>
+    </div>
+    <div class="payments-panel-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="payments-badge rejected">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="payments-filters">
+          {% for field in form %}
+          <div class="payments-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<small class="payments-badge rejected">{{ error }}</small>{% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        <div class="payments-actions">
+          <button type="submit" class="payments-btn">{{ submit_label }}</button>
+          <a href="{% url 'payment_list' %}" class="payments-ghost">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

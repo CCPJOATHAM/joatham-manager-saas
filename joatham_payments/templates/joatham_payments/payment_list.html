@@ -1,0 +1,166 @@
+{% extends "joatham_payments/base.html" %}
+
+{% block page_title %}Paiements{% endblock %}
+{% block content_title %}Paiements{% endblock %}
+{% block content_subtitle %}Suivi des encaissements, decaissements, remboursements et ajustements par canal de paiement.{% endblock %}
+
+{% block top_actions %}
+{% if can_create_payment %}
+<a href="{% url 'payment_create' %}" class="btn-link">Nouveau paiement</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="payments-shell">
+  <div class="payments-grid">
+    <div class="payments-kpi"><span>Total encaisse confirme</span><strong class="positive">{{ summary.total_encaisse }}</strong></div>
+    <div class="payments-kpi"><span>Total en attente</span><strong class="warning">{{ summary.total_en_attente }}</strong></div>
+    <div class="payments-kpi"><span>Total rejete</span><strong class="danger">{{ summary.total_rejete }}</strong></div>
+    <div class="payments-kpi"><span>Total annule</span><strong class="danger">{{ summary.total_annule }}</strong></div>
+  </div>
+
+  <div class="payments-panel">
+    <div class="payments-panel-header">
+      <h3>Filtres</h3>
+      <p>Recherchez par periode, statut, moyen, facture, caisse ou reference transaction.</p>
+    </div>
+    <div class="payments-panel-body">
+      <form method="get">
+        <div class="payments-filters">
+          <div class="payments-field">
+            <label for="id_status">Statut</label>
+            <select name="status" id="id_status">
+              <option value="">Tous les statuts</option>
+              {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="payments-field">
+            <label for="id_method">Moyen</label>
+            <select name="method" id="id_method">
+              <option value="">Tous les moyens</option>
+              {% for value, label in method_choices %}
+              <option value="{{ value }}" {% if filters.method == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="payments-field">
+            <label for="id_transaction_type">Type</label>
+            <select name="transaction_type" id="id_transaction_type">
+              <option value="">Tous les types</option>
+              {% for value, label in transaction_type_choices %}
+              <option value="{{ value }}" {% if filters.transaction_type == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="payments-field">
+            <label for="id_q">Recherche</label>
+            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="Reference, telephone, facture">
+          </div>
+          <div class="payments-field">
+            <label for="id_facture">Facture</label>
+            <select name="facture" id="id_facture">
+              <option value="">Toutes les factures</option>
+              {% for facture in factures %}
+              <option value="{{ facture.id }}" {% if filters.facture|stringformat:"s" == facture.id|stringformat:"s" %}selected{% endif %}>{{ facture.numero }} - {{ facture.client_display }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="payments-field">
+            <label for="id_caisse">Caisse</label>
+            <select name="caisse" id="id_caisse">
+              <option value="">Toutes les caisses</option>
+              {% for caisse in caisses %}
+              <option value="{{ caisse.id }}" {% if filters.caisse|stringformat:"s" == caisse.id|stringformat:"s" %}selected{% endif %}>{{ caisse.nom }} ({{ caisse.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="payments-field">
+            <label for="id_date_debut">Date debut</label>
+            <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
+          </div>
+          <div class="payments-field">
+            <label for="id_date_fin">Date fin</label>
+            <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
+          </div>
+        </div>
+        <div class="payments-actions">
+          <button type="submit" class="payments-btn">Filtrer</button>
+          <a href="{% url 'payment_list' %}" class="payments-ghost">Reinitialiser</a>
+          {% if can_view_payment_reports %}
+          <a href="{% url 'payment_reports' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">Rapports</a>
+          {% endif %}
+          {% if can_export_payments %}
+          <a href="{% url 'payment_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">Export Excel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="payments-panel">
+    <div class="payments-panel-header">
+      <h3>Transactions</h3>
+      <p>Liste operationnelle des paiements correspondant aux criteres actifs.</p>
+    </div>
+    <div class="payments-table-wrap">
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Moyen</th>
+            <th>Montant</th>
+            <th>Reference</th>
+            <th>Facture</th>
+            <th>Caisse</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in payments %}
+          <tr>
+            <td>{{ payment.transaction_date|date:"d/m/Y H:i" }}</td>
+            <td>{{ payment.get_transaction_type_display }}</td>
+            <td>{{ payment.get_method_display }}</td>
+            <td>{{ payment.amount }} {{ payment.currency }}</td>
+            <td>{{ payment.reference|default:"-" }}</td>
+            <td>{% if payment.facture %}{{ payment.facture.numero }}{% else %}-{% endif %}</td>
+            <td>{% if payment.caisse %}{{ payment.caisse.nom }}{% else %}-{% endif %}</td>
+            <td>
+              <span class="payments-badge {% if payment.status == 'confirme' %}confirmed{% elif payment.status == 'en_attente' %}pending{% elif payment.status == 'rejete' %}rejected{% else %}cancelled{% endif %}">
+                {{ payment.get_status_display }}
+              </span>
+            </td>
+            <td><a href="{% url 'payment_detail' payment.id %}" class="payments-ghost">Voir</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="payments-empty">Aucun paiement ne correspond aux filtres selectionnes.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="payments-panel">
+    <div class="payments-panel-header">
+      <h3>Repartition par moyen</h3>
+      <p>Lecture rapide du poids de chaque canal dans les paiements filtres.</p>
+    </div>
+    <div class="payments-table-wrap">
+      <table class="payments-table">
+        <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for row in method_breakdown %}
+          <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
+          {% empty %}
+          <tr><td colspan="3" class="payments-empty">Aucune repartition disponible.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

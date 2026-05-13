@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "joatham_products.apps.JoathamProductsConfig",
     "joatham_apprenants.apps.JoathamApprenantsConfig",
     "joatham_caisse.apps.JoathamCaisseConfig",
+    "joatham_payments.apps.JoathamPaymentsConfig",
 ]
 
 if REST_FRAMEWORK_AVAILABLE:

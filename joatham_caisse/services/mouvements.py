@@ -33,6 +33,7 @@ def record_mouvement(
     source_id=None,
     utilisateur=None,
     statut=MouvementCaisse.Statut.CONFIRME,
+    moyen_paiement="cash",
 ):
     _validate_open_session(entreprise, session, caisse)
     mouvement = MouvementCaisse.objects.create(
@@ -44,6 +45,7 @@ def record_mouvement(
         devise=caisse.devise,
         libelle=(libelle or "").strip(),
         reference=(reference or "").strip(),
+        moyen_paiement=(moyen_paiement or "cash").strip(),
         source_app=(source_app or "").strip(),
         source_model=(source_model or "").strip(),
         source_id=source_id,
@@ -65,6 +67,7 @@ def record_mouvement(
             "type_mouvement": mouvement.type_mouvement,
             "montant": str(mouvement.montant),
             "reference": mouvement.reference,
+            "moyen_paiement": mouvement.moyen_paiement,
             "source_app": mouvement.source_app,
             "source_model": mouvement.source_model,
             "source_id": mouvement.source_id,
@@ -84,6 +87,7 @@ def record_cash_entry(*, entreprise, caisse, session, montant, libelle, referenc
         reference=reference,
         commentaire=commentaire,
         utilisateur=utilisateur,
+        moyen_paiement="cash",
     )
 
 
@@ -98,6 +102,7 @@ def record_cash_exit(*, entreprise, caisse, session, montant, libelle, reference
         reference=reference,
         commentaire=commentaire,
         utilisateur=utilisateur,
+        moyen_paiement="cash",
     )
 
 
@@ -126,6 +131,7 @@ def record_cash_expense(
         source_model="Depense" if source_id else "",
         source_id=source_id,
         utilisateur=utilisateur,
+        moyen_paiement="cash",
     )
 
 
@@ -144,6 +150,7 @@ def record_invoice_cash_payment(
     source_model="",
     source_id=None,
     utilisateur=None,
+    moyen_paiement="cash",
 ):
     resolved_source_app = (source_app or "").strip()
     resolved_source_model = (source_model or "").strip()
@@ -171,6 +178,7 @@ def record_invoice_cash_payment(
         source_model=resolved_source_model,
         source_id=resolved_source_id,
         utilisateur=utilisateur,
+        moyen_paiement=moyen_paiement,
     )
 
 
@@ -185,4 +193,5 @@ def record_adjustment(*, entreprise, caisse, session, montant, libelle, referenc
         reference=reference,
         commentaire=commentaire,
         utilisateur=utilisateur,
+        moyen_paiement="cash",
     )

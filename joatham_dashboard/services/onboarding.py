@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from core.audit import record_audit_event
-from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, get_or_create_free_plan
 from joatham_users.models import Entreprise
 from joatham_users.permissions import ROLE_PROPRIETAIRE
 
@@ -68,6 +68,6 @@ def register_entreprise_owner(*, company_name, raison_sociale, owner_full_name, 
         metadata={"role": user.role},
     )
 
-    free_plan = get_or_create_default_free_plan()
-    start_free_plan_for_entreprise(entreprise=entreprise, plan=free_plan, utilisateur=user)
+    free_plan = get_or_create_free_plan()
+    activate_free_plan_for_entreprise(entreprise=entreprise, plan=free_plan, utilisateur=user)
     return user

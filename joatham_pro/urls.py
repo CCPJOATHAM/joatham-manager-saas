@@ -47,6 +47,7 @@ urlpatterns = [
     path('factures/', include('joatham_billing.urls')),
     path('depenses/', include('joatham_depenses.urls')),
     path('caisse/', include('joatham_caisse.urls')),
+    path('paiements/', include('joatham_payments.urls')),
     path('produits/', include('joatham_products.urls')),
     path('compta/', include('joatham_comptabilite.urls')),
     path('apprenants/', include('joatham_apprenants.urls')),

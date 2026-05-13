@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.urls import reverse
 
-from core.services.subscription import start_trial_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
 from joatham_billing.models import Facture, Service
 from joatham_products.models import Produit
@@ -23,7 +23,7 @@ class BillingViewsPremiumTests(TestCase):
             duree_jours=30,
             actif=True,
         )
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.user)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.user)
         self.client_billing = create_client(self.entreprise, "Client Premium")
         self.service = Service.objects.create(
             entreprise=self.entreprise,
