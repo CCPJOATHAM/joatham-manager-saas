@@ -4,7 +4,13 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from core.services.subscription import get_current_subscription, is_free_plan, refresh_subscription_status
+from core.services.subscription import (
+    PREMIUM_PLAN_CODE,
+    get_current_subscription,
+    is_free_plan,
+    normalize_plan_code,
+    refresh_subscription_status,
+)
 from core.services.tenancy import get_subscription_access_state, get_user_entreprise_or_raise
 
 ACCESS_INCLUDED_PLAN = "included_plan"
@@ -34,11 +40,11 @@ MODULE_ACCESS_POLICY = {
     "stock_exports": ACCESS_INCLUDED_PLAN,
     "inventory": ACCESS_INCLUDED_PLAN,
     "billing": ACCESS_INCLUDED_PLAN,
-    "payments": ACCESS_INCLUDED_PLAN,
-    "mobile_money": ACCESS_INCLUDED_PLAN,
-    "payment_validation": ACCESS_INCLUDED_PLAN,
-    "payments_reports": ACCESS_INCLUDED_PLAN,
-    "payments_exports": ACCESS_INCLUDED_PLAN,
+    "payments": ACCESS_PREMIUM,
+    "mobile_money": ACCESS_PREMIUM,
+    "payment_validation": ACCESS_PREMIUM,
+    "payments_reports": ACCESS_PREMIUM,
+    "payments_exports": ACCESS_PREMIUM,
     "apprenants": ACCESS_INCLUDED_PLAN,
     "subscription": ACCESS_INCLUDED_PLAN,
     "accounting": ACCESS_PREMIUM,
@@ -119,6 +125,7 @@ PLAN_MODULE_ALIASES = {
 
 EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports"}
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
+PAYMENTS_PREMIUM_MODULES = {"payments", "mobile_money", "payment_validation", "payments_reports", "payments_exports"}
 PREMIUM_DENIED_REASONS = {
     "premium_required",
     "feature_not_declared",
@@ -160,6 +167,14 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
     if state["allowed"]:
         plan = getattr(state["subscription"], "plan", None)
         if level == ACCESS_PREMIUM and is_free_plan(plan):
+            return {
+                "allowed": False,
+                "reason": "premium_required",
+                "level": level,
+                "subscription": state["subscription"],
+                "locked": True,
+            }
+        if module_name in PAYMENTS_PREMIUM_MODULES and normalize_plan_code(plan) != PREMIUM_PLAN_CODE:
             return {
                 "allowed": False,
                 "reason": "premium_required",

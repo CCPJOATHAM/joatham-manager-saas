@@ -5,7 +5,16 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import ActivityLog
-from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise, get_default_paid_plans, get_or_create_free_plan
+from core.services.subscription import (
+    FREE_PLAN_MODULES,
+    PREMIUM_PLAN_MODULES,
+    PRO_PLAN_MODULES,
+    STARTER_PLAN_MODULES,
+    activate_free_plan_for_entreprise,
+    activate_subscription_for_entreprise,
+    get_default_paid_plans,
+    get_or_create_free_plan,
+)
 from joatham_billing.models import Facture, PaiementFacture
 from joatham_billing.tests.factories import create_entreprise, create_facture_sample, create_user
 from joatham_caisse.models import Caisse, MouvementCaisse
@@ -31,10 +40,10 @@ class PaymentTransactionTests(TestCase):
         self.gestionnaire = create_user("manager-payments", "gestionnaire", self.entreprise)
         self.comptable = create_user("accountant-payments", "comptable", self.entreprise)
         self.other_owner = create_user("owner-payments-b", "proprietaire", self.other_entreprise)
-        pro_payload = next(plan for plan in get_default_paid_plans() if plan["code"] == "pro")
-        self.plan_pro = Abonnement.objects.create(**pro_payload, actif=True)
-        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan_pro, utilisateur=self.owner)
-        activate_subscription_for_entreprise(entreprise=self.other_entreprise, plan=self.plan_pro, utilisateur=self.other_owner)
+        premium_payload = next(plan for plan in get_default_paid_plans() if plan["code"] == "premium")
+        self.plan_premium = Abonnement.objects.create(**premium_payload, actif=True)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan_premium, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.other_entreprise, plan=self.plan_premium, utilisateur=self.other_owner)
         self.caisse = Caisse.objects.create(
             entreprise=self.entreprise,
             nom="Caisse principale",
@@ -217,17 +226,79 @@ class PaymentTransactionTests(TestCase):
         confirmed = confirm_payment_transaction(transaction_obj=payment, utilisateur=self.comptable)
         self.assertEqual(confirmed.status, PaymentTransaction.Status.CONFIRME)
 
-    def test_plan_access_blocks_reports_on_free_plan(self):
-        free_entreprise = create_entreprise("Entreprise Free Paiements")
-        free_owner = create_user("owner-free-payments", "proprietaire", free_entreprise)
-        free_plan = get_or_create_free_plan()
-        activate_free_plan_for_entreprise(entreprise=free_entreprise, plan=free_plan, utilisateur=free_owner)
+    def _create_official_plan(self, code):
+        payload = next(plan for plan in get_default_paid_plans() if plan["code"] == code)
+        return Abonnement.objects.create(**payload, actif=True)
 
-        self.client.force_login(free_owner)
-        list_response = self.client.get(reverse("payment_list"))
-        report_response = self.client.get(reverse("payment_reports"))
+    def _assert_payments_module_blocked_for_plan(self, *, plan_code, expected_reason):
+        entreprise = create_entreprise(f"Entreprise {plan_code} Paiements")
+        owner = create_user(f"owner-{plan_code}-payments", "proprietaire", entreprise)
+        if plan_code == "free":
+            plan = get_or_create_free_plan()
+            activate_free_plan_for_entreprise(entreprise=entreprise, plan=plan, utilisateur=owner)
+        else:
+            plan = self._create_official_plan(plan_code)
+            activate_subscription_for_entreprise(entreprise=entreprise, plan=plan, utilisateur=owner)
 
-        self.assertEqual(list_response.status_code, 200)
-        self.assertEqual(report_response.status_code, 302)
-        self.assertIn("module=payments_reports", report_response["Location"])
+        self.client.force_login(owner)
+        response = self.client.get(reverse("payment_list"))
 
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("module=payments", response["Location"])
+        self.assertIn(f"reason={expected_reason}", response["Location"])
+
+    def test_free_starter_and_pro_plans_block_payments_module(self):
+        self._assert_payments_module_blocked_for_plan(plan_code="free", expected_reason="premium_required")
+        self._assert_payments_module_blocked_for_plan(plan_code="starter", expected_reason="premium_required")
+        self._assert_payments_module_blocked_for_plan(plan_code="pro", expected_reason="premium_required")
+
+    def test_premium_plan_allows_payments_views_and_exports(self):
+        payment = create_payment_transaction(
+            entreprise=self.entreprise,
+            transaction_type=PaymentTransaction.TransactionType.ENCAISSEMENT,
+            method=PaymentTransaction.Method.CASH,
+            amount=Decimal("10.00"),
+            utilisateur=self.gestionnaire,
+        )
+        self.client.force_login(self.owner)
+
+        self.assertEqual(self.client.get(reverse("payment_list")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("payment_create")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("payment_reports")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("payment_export_excel")).status_code, 200)
+
+        confirm_response = self.client.post(reverse("payment_confirm", args=[payment.id]))
+        self.assertEqual(confirm_response.status_code, 302)
+        payment.refresh_from_db()
+        self.assertEqual(payment.status, PaymentTransaction.Status.CONFIRME)
+
+    def test_navigation_locks_payments_for_pro_and_links_it_for_premium(self):
+        pro_entreprise = create_entreprise("Entreprise Pro Navigation Paiements")
+        pro_owner = create_user("owner-pro-nav-payments", "proprietaire", pro_entreprise)
+        pro_plan = self._create_official_plan("pro")
+        activate_subscription_for_entreprise(entreprise=pro_entreprise, plan=pro_plan, utilisateur=pro_owner)
+
+        self.client.force_login(pro_owner)
+        pro_response = self.client.get(reverse("admin_dashboard"))
+        self.assertContains(pro_response, "Paiements")
+        self.assertContains(pro_response, "Premium")
+        self.assertNotContains(pro_response, reverse("payment_list"))
+
+        self.client.force_login(self.owner)
+        premium_response = self.client.get(reverse("admin_dashboard"))
+        self.assertContains(premium_response, reverse("payment_list"))
+
+    def test_default_plan_payloads_keep_payments_premium_only(self):
+        payment_modules = {
+            "payments",
+            "paiements",
+            "mobile_money",
+            "payment_validation",
+            "payments_reports",
+            "payments_exports",
+        }
+
+        self.assertTrue(payment_modules.isdisjoint(FREE_PLAN_MODULES))
+        self.assertTrue(payment_modules.isdisjoint(STARTER_PLAN_MODULES))
+        self.assertTrue(payment_modules.isdisjoint(PRO_PLAN_MODULES))
+        self.assertTrue(payment_modules.issubset(PREMIUM_PLAN_MODULES))

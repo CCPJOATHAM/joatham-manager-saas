@@ -240,7 +240,7 @@ def payment_reject(request, payment_id):
 
 @login_required
 @permission_required("payments.cancel")
-@module_access_required("payments")
+@module_access_required("payment_validation")
 def payment_cancel(request, payment_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     payment = get_payment_transaction_for_entreprise(entreprise, payment_id)

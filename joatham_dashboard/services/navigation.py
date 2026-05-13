@@ -141,6 +141,7 @@ NAV_ITEMS = [
         "permission": "payments.view",
         "module": "payments",
         "prefixes": ["/paiements/"],
+        "disabled_when_locked": True,
     },
     {
         "label": _("Produits"),
@@ -236,6 +237,7 @@ def _get_item_state(user, item):
                 return {
                     "visible": True,
                     "badge": _("Premium"),
+                    "disabled": bool(item.get("disabled_when_locked")),
                 }
             if state.get("reason") == "active_subscription_required":
                 return {
@@ -271,7 +273,7 @@ def build_navigation_for_request(request):
         if not item_state.get("visible"):
             continue
 
-        is_disabled = bool(item.get("disabled"))
+        is_disabled = bool(item.get("disabled") or item_state.get("disabled"))
         url = ""
         if not is_disabled:
             if item.get("url"):
