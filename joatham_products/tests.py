@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from core.models import ActivityLog
 from core.services.quotas import FREE_PLAN_PRODUCT_LIMIT, PlanQuotaExceeded
-from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise, get_or_create_free_plan
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
 
@@ -182,8 +182,8 @@ class ProductServicesTests(TestCase):
         )
 
     def test_free_plan_blocks_product_creation_after_limit(self):
-        free_plan = get_or_create_default_free_plan()
-        start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
+        free_plan = get_or_create_free_plan()
+        activate_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
 
         for index in range(FREE_PLAN_PRODUCT_LIMIT):
             Produit.objects.create(
@@ -218,8 +218,8 @@ class ProductViewsTests(TestCase):
         self.comptable = create_user("accountant-products-view", "comptable", self.entreprise)
         self.other_owner = create_user("owner-products-other", "proprietaire", self.autre_entreprise)
         self.plan = Abonnement.objects.create(nom="Produits", code="products", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.other_owner)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.other_owner)
         self.produit = Produit.objects.create(
             entreprise=self.entreprise,
             nom="Tablette",
@@ -282,6 +282,21 @@ class ProductViewsTests(TestCase):
 
         create_response = self.client.get(reverse("product_create"))
         self.assertEqual(create_response.status_code, 403)
+
+    def test_product_module_navigation_shows_inventory_link_for_stock_manager(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("product_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'aria-label="Navigation produits"')
+        self.assertContains(response, f'href="{reverse("product_list")}"')
+        self.assertContains(response, f'href="{reverse("stock_movement_list")}"')
+        self.assertContains(response, f'href="{reverse("stock_entry_create")}"')
+        self.assertContains(response, f'href="{reverse("stock_exit_create")}"')
+        self.assertContains(response, f'href="{reverse("stock_adjustment_create")}"')
+        self.assertContains(response, f'href="{reverse("inventory_list")}"')
+        self.assertContains(response, f'href="{reverse("stock_reports")}"')
 
     def test_product_list_filters_work(self):
         self.client.force_login(self.comptable)

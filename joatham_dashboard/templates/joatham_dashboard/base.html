@@ -770,6 +770,8 @@ body {
             </div>
 
             <div class="page-content">
+                {% block before_content %}{% endblock %}
+
                 {% if messages %}
                 <div class="messages">
                     {% for message in messages %}

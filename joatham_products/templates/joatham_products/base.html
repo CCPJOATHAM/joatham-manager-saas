@@ -6,30 +6,51 @@
 {% block content_subtitle %}{% block products_subtitle %}{% trans "Gestion des produits et du stock de votre entreprise." %}{% endblock %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'product_list' %}" class="btn-link">{% trans "Liste des produits" %}</a>
-{% if can_view_stock_ui %}
-<a href="{% url 'stock_movement_list' %}" class="btn-link">{% trans "Mouvements stock" %}</a>
-{% endif %}
-{% if can_move_stock_ui %}
-<a href="{% url 'stock_entry_create' %}" class="btn-link">{% trans "Entree stock" %}</a>
-<a href="{% url 'stock_exit_create' %}" class="btn-link">{% trans "Sortie stock" %}</a>
-{% endif %}
-{% if can_adjust_stock_ui %}
-<a href="{% url 'stock_adjustment_create' %}" class="btn-link">{% trans "Ajustement stock" %}</a>
-{% endif %}
-{% if can_inventory_stock_ui %}
-<a href="{% url 'inventory_list' %}" class="btn-link">{% trans "Inventaires" %}</a>
-{% endif %}
-{% if can_view_stock_ui or can_export_stock_ui %}
-<a href="{% url 'stock_reports' %}" class="btn-link">{% trans "Rapports stock" %}</a>
-{% endif %}
 {% if can_manage_products_ui %}
 <a href="{% url 'product_create' %}" class="btn-link primary">{% trans "Ajouter un produit" %}</a>
 {% endif %}
 {% endblock %}
 
-{% block before_content %}
+{% block extra_styles %}{{ block.super }}
 <style>
+    .products-module-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 14px;
+        border: 1px solid rgba(217, 230, 247, 0.86);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .products-module-nav a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 13px;
+        border-radius: 12px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .products-module-nav a:hover {
+        border-color: #bfdbfe;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .products-module-nav a.is-active {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
     .section-card,
     .filter-card,
     .table-shell,
@@ -307,4 +328,26 @@
         }
     }
 </style>
+{% endblock %}
+
+{% block before_content %}
+<nav class="products-module-nav" aria-label="{% trans 'Navigation produits' %}">
+    <a href="{% url 'product_list' %}" class="{% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_create' or request.resolver_match.url_name == 'product_update' %}is-active{% endif %}">{% trans "Produits" %}</a>
+    {% if can_view_stock_ui %}
+    <a href="{% url 'stock_movement_list' %}" class="{% if request.resolver_match.url_name == 'stock_movement_list' %}is-active{% endif %}">{% trans "Mouvements stock" %}</a>
+    {% endif %}
+    {% if can_move_stock_ui %}
+    <a href="{% url 'stock_entry_create' %}" class="{% if request.resolver_match.url_name == 'stock_entry_create' %}is-active{% endif %}">{% trans "Entree" %}</a>
+    <a href="{% url 'stock_exit_create' %}" class="{% if request.resolver_match.url_name == 'stock_exit_create' %}is-active{% endif %}">{% trans "Sortie" %}</a>
+    {% endif %}
+    {% if can_adjust_stock_ui %}
+    <a href="{% url 'stock_adjustment_create' %}" class="{% if request.resolver_match.url_name == 'stock_adjustment_create' %}is-active{% endif %}">{% trans "Ajustement" %}</a>
+    {% endif %}
+    {% if can_inventory_stock_ui %}
+    <a href="{% url 'inventory_list' %}" class="{% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_count' or request.resolver_match.url_name == 'inventory_close' or request.resolver_match.url_name == 'inventory_validate' or request.resolver_match.url_name == 'inventory_cancel' %}is-active{% endif %}">{% trans "Inventaires" %}</a>
+    {% endif %}
+    {% if can_view_stock_ui or can_export_stock_ui %}
+    <a href="{% url 'stock_reports' %}" class="{% if request.resolver_match.url_name == 'stock_reports' %}is-active{% endif %}">{% trans "Rapports stock" %}</a>
+    {% endif %}
+</nav>
 {% endblock %}
