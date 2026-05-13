@@ -2,7 +2,7 @@
 
 {% block page_title %}Pilotage SaaS | JOATHAM Manager{% endblock %}
 {% block content_title %}Pilotage SaaS{% endblock %}
-{% block content_subtitle %}Vue plateforme reservee aux abonnements, essais, paiements et statuts des comptes clients.{% endblock %}
+{% block content_subtitle %}Vue plateforme reservee aux abonnements, essais historiques, paiements et statuts des comptes clients.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">Rafraichir</a>
@@ -269,7 +269,7 @@
         <span class="value">{{ counts.total_accounts }}</span>
     </div>
     <div class="super-kpi essai">
-        <span class="label">En essai</span>
+        <span class="label">Essais historiques</span>
         <span class="value">{{ counts.essai }}</span>
     </div>
     <div class="super-kpi actif">
@@ -474,14 +474,16 @@
                             </div>
                         </form>
 
+                        {% if subscription and subscription.statut == "essai" and subscription.essai %}
                         <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                             <div class="action-row">
                                 <input type="number" name="trial_days" value="7" min="1" step="1">
-                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger essai</button>
+                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger acces historique</button>
                             </div>
                         </form>
+                        {% endif %}
 
                         <form method="post">
                             {% csrf_token %}

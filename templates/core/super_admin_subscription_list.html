@@ -2,7 +2,7 @@
 
 {% block page_title %}Abonnements | JOATHAM Manager{% endblock %}
 {% block content_title %}Abonnements{% endblock %}
-{% block content_subtitle %}Gestion des plans, statuts, echeances et essais des entreprises clientes.{% endblock %}
+{% block content_subtitle %}Gestion des plans, statuts, echeances et essais historiques des entreprises clientes.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
@@ -301,14 +301,16 @@
                             </div>
                         </form>
 
+                        {% if subscription and subscription.statut == "essai" and subscription.essai %}
                         <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                             <div class="action-row">
                                 <input type="number" name="trial_days" value="7" min="1" step="1">
-                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger essai</button>
+                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger acces historique</button>
                             </div>
                         </form>
+                        {% endif %}
 
                         <form method="post">
                             {% csrf_token %}

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from core.services.subscription import get_default_paid_plans, get_or_create_default_free_plan
+from core.services.subscription import deactivate_legacy_trial_plans, get_default_paid_plans, get_or_create_free_plan
 from joatham_users.models import Abonnement
 
 
@@ -10,8 +10,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         created = 0
         updated = 0
-        free_plan = get_or_create_default_free_plan()
+        free_plan = get_or_create_free_plan()
         self.stdout.write(f"{free_plan.nom} pret.")
+        legacy_count = deactivate_legacy_trial_plans()
         for payload in get_default_paid_plans():
             plan = Abonnement.objects.filter(code=payload["code"]).order_by("id").first()
             if plan is None:
@@ -28,4 +29,8 @@ class Command(BaseCommand):
                 updated += 1
             self.stdout.write(f"{plan.nom} pret.")
 
-        self.stdout.write(self.style.SUCCESS(f"Plans SaaS traites : {created} cree(s), {updated} mis a jour."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Plans SaaS traites : {created} cree(s), {updated} mis a jour, {legacy_count} essai(s) legacy desactive(s)."
+            )
+        )

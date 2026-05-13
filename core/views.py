@@ -16,11 +16,13 @@ from core.services.subscription import (
     build_subscription_pricing_matrix,
     create_subscription_plan_request,
     create_subscription_payment_request,
+    get_commercial_plans_queryset,
     get_current_subscription,
     get_plan_feature_summary,
     get_plan_quota_profile,
     get_pending_subscription_plan_request,
     get_subscription_payment_duration_options,
+    is_free_plan,
     normalize_plan_code,
     register_manual_subscription_payment,
     refuse_subscription_plan_request,
@@ -45,7 +47,7 @@ from core.services.super_admin import (
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
 from core.services.world import build_country_currency_map
-from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise, User
+from joatham_users.models import AbonnementEntreprise, Entreprise, User
 from joatham_users.permissions import permission_required
 
 from .selectors.audit import (
@@ -94,7 +96,7 @@ def _handle_super_admin_subscription_action(request, *, redirect_name):
             utilisateur=request.user,
             plan=plan,
         )
-        messages.success(request, f"Essai prolonge pour {entreprise.nom}.")
+        messages.success(request, f"Acces historique prolonge pour {entreprise.nom}.")
     elif action == "change_plan":
         if plan is None:
             raise ValueError("Veuillez selectionner un plan pour modifier l'abonnement.")
@@ -170,7 +172,7 @@ def activity_log_list(request):
 def subscription_overview(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     subscription = refresh_subscription_status(entreprise)
-    plans = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
+    plans = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
     for plan in plans:
         plan.company_price = get_plan_price_for_company(plan, entreprise)
     pricing_options = []
@@ -192,6 +194,7 @@ def subscription_overview(request):
         "entreprise": entreprise,
         "currency_code": get_currency_code(entreprise),
         "subscription": subscription or get_current_subscription(entreprise),
+        "is_current_free_plan": bool(subscription and is_free_plan(subscription.plan)),
         "current_plan_features": get_plan_feature_summary(subscription.plan) if subscription else [],
         "current_plan_quota_profile": get_plan_quota_profile(subscription.plan) if subscription else {},
         "paiements": get_subscription_payments_by_entreprise(entreprise)[:8],
@@ -220,7 +223,7 @@ def subscription_payment_create(request):
         messages.success(request, "Votre demande de paiement a ete envoyee. Elle sera activee apres validation.")
         return redirect("subscription_overview")
 
-    plans = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
+    plans = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
     duration_options = get_subscription_payment_duration_options()
     context = {
         "entreprise": entreprise,
@@ -238,7 +241,7 @@ def subscription_payment_create(request):
 def subscription_plan_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     subscription = refresh_subscription_status(entreprise)
-    plans = list(Abonnement.objects.filter(actif=True).order_by("prix", "nom"))
+    plans = list(get_commercial_plans_queryset().order_by("prix", "nom"))
     plan_order = {"free": 0, "starter": 1, "pro": 2, "premium": 3, "business": 3}
     plans.sort(key=lambda plan: (plan_order.get(normalize_plan_code(plan), 99), plan.prix, plan.nom))
     plan_cards = []
@@ -261,7 +264,7 @@ def subscription_plan_list(request):
     pending_plan_ids = set(pending_requests.values_list("plan_id", flat=True))
 
     if request.method == "POST":
-        plan = Abonnement.objects.filter(id=request.POST.get("plan_id"), actif=True, prix__gt=0).first()
+        plan = get_commercial_plans_queryset(include_free=False, paid_only=True).filter(id=request.POST.get("plan_id")).first()
         if plan is None:
             messages.error(request, "Plan indisponible.")
         else:
@@ -359,7 +362,7 @@ def super_admin_dashboard(request):
     context = {
         "counts": get_super_admin_subscription_counts(),
         "entreprises": get_super_admin_entreprise_queryset(search=search or None, statut=selected_statut or None),
-        "plans": Abonnement.objects.filter(actif=True).order_by("prix", "nom"),
+        "plans": get_commercial_plans_queryset().order_by("prix", "nom"),
         "selected_search": search,
         "selected_statut": selected_statut,
         "statut_choices": AbonnementEntreprise.Statut.choices,
@@ -432,7 +435,7 @@ def super_admin_subscription_list(request):
 
     context = {
         "entreprises": entreprises,
-        "plans": Abonnement.objects.filter(actif=True).order_by("prix", "nom"),
+        "plans": get_commercial_plans_queryset().order_by("prix", "nom"),
         "selected_search": search,
         "selected_statut": selected_statut,
         "statut_choices": AbonnementEntreprise.Statut.choices,

@@ -172,7 +172,7 @@
         <div class="price">
             {% if plan_card.is_free %}
             <strong>0 {{ plan.devise|default:"USD" }}</strong>
-            <span>plan decouverte</span>
+            <span>plan gratuit</span>
             {% else %}
             <strong>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:"USD" }}</strong>
             <span>prix officiel par mois</span>

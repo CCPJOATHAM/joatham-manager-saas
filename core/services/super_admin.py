@@ -6,13 +6,13 @@ from django.utils import timezone
 from core.audit import record_audit_event
 from core.services.subscription import (
     activate_subscription_for_entreprise,
+    get_commercial_plans_queryset,
     get_current_subscription,
     refresh_subscription_status,
-    start_trial_for_entreprise,
     suspend_subscription_for_entreprise,
     sync_legacy_entreprise_subscription_fields,
 )
-from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise
+from joatham_users.models import AbonnementEntreprise, Entreprise
 
 
 def refresh_all_subscription_statuses(*, utilisateur=None):
@@ -21,7 +21,7 @@ def refresh_all_subscription_statuses(*, utilisateur=None):
 
 
 def get_plan_for_super_admin(plan_id):
-    return get_object_or_404(Abonnement.objects.filter(actif=True), id=plan_id)
+    return get_object_or_404(get_commercial_plans_queryset(), id=plan_id)
 
 
 def get_entreprise_for_super_admin(entreprise_id):
@@ -79,22 +79,15 @@ def suspend_company_subscription(*, entreprise, utilisateur=None):
 def extend_company_trial(*, entreprise, days, utilisateur=None, plan=None):
     days = int(days or 0)
     if days <= 0:
-        raise ValueError("La prolongation d'essai doit etre strictement positive.")
+        raise ValueError("La prolongation d'acces historique doit etre strictement positive.")
 
     subscription = get_current_subscription(entreprise)
     today = timezone.localdate()
 
     if subscription is None:
-        selected_plan = plan or Abonnement.objects.filter(actif=True).order_by("prix", "id").first()
-        if selected_plan is None:
-            raise ValueError("Aucun plan actif n'est disponible pour demarrer un essai.")
-        return start_trial_for_entreprise(
-            entreprise=entreprise,
-            plan=selected_plan,
-            utilisateur=utilisateur,
-            date_debut=today,
-            trial_days=days,
-        )
+        raise ValueError("Aucun ancien essai n'est disponible a prolonger. Activez le plan Gratuit ou un plan payant.")
+    if subscription.statut != AbonnementEntreprise.Statut.ESSAI or not subscription.essai:
+        raise ValueError("Seuls les anciens abonnements en essai peuvent etre prolonges.")
 
     base_date = subscription.date_fin if subscription.date_fin and subscription.date_fin >= today else today
     subscription.date_fin = base_date + timedelta(days=days)
@@ -114,7 +107,7 @@ def extend_company_trial(*, entreprise, days, utilisateur=None, plan=None):
         module="super_admin",
         objet_type="AbonnementEntreprise",
         objet_id=subscription.id,
-        description=f"Essai prolonge de {days} jour(s) pour {entreprise.nom}.",
+        description=f"Acces historique prolonge de {days} jour(s) pour {entreprise.nom}.",
         metadata={"days": days, "plan_id": subscription.plan_id, "plan_nom": subscription.plan.nom},
     )
     return subscription

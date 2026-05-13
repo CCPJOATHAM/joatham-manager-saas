@@ -1,5 +1,7 @@
 from decimal import Decimal
+from io import StringIO
 
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -16,10 +18,12 @@ from core.services.quotas import (
     assert_product_quota_available,
 )
 from core.services.subscription import (
+    OFFICIAL_COMMERCIAL_PLAN_CODES,
+    activate_free_plan_for_entreprise,
     activate_subscription_for_entreprise,
+    get_commercial_plans_queryset,
     get_default_paid_plans,
-    get_or_create_default_free_plan,
-    start_free_plan_for_entreprise,
+    get_or_create_free_plan,
 )
 from joatham_billing.models import Facture
 from joatham_billing.tests.factories import create_entreprise, create_user
@@ -45,7 +49,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.pro_owner = create_user("owner-plan-pro", "proprietaire", self.pro_company)
         self.premium_owner = create_user("owner-plan-premium", "proprietaire", self.premium_company)
 
-        start_free_plan_for_entreprise(entreprise=self.free_company, utilisateur=self.free_owner)
+        activate_free_plan_for_entreprise(entreprise=self.free_company, utilisateur=self.free_owner)
         activate_subscription_for_entreprise(
             entreprise=self.starter_company,
             plan=create_default_plan("starter"),
@@ -66,6 +70,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertTrue(can_access_module(self.free_owner, "dashboard"))
         self.assertTrue(can_access_module(self.free_owner, "billing"))
         self.assertFalse(can_access_module(self.free_owner, "stock"))
+        self.assertFalse(can_access_module(self.free_owner, "stock_reports"))
         self.assertFalse(can_access_module(self.free_owner, "inventory"))
         self.assertFalse(can_access_module(self.free_owner, "stock_exports"))
         self.assertFalse(can_access_module(self.free_owner, "caisse_reports"))
@@ -82,12 +87,27 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertTrue(can_access_module(self.pro_owner, "stock_reports"))
         self.assertTrue(can_access_module(self.pro_owner, "stock_exports"))
         self.assertTrue(can_access_module(self.pro_owner, "inventory"))
+        self.assertTrue(can_access_module(self.pro_owner, "caisse_reports"))
+        self.assertTrue(can_access_module(self.pro_owner, "caisse_exports"))
         self.assertTrue(can_access_module(self.pro_owner, "caisse_integrations"))
+        self.assertTrue(can_access_module(self.pro_owner, "caisse_validation"))
         self.assertTrue(can_access_module(self.pro_owner, "users"))
         self.assertFalse(can_access_module(self.pro_owner, "accounting"))
 
     def test_premium_allows_every_current_advanced_module(self):
-        for module_name in ("stock", "inventory", "caisse_integrations", "accounting", "audit", "messages"):
+        for module_name in (
+            "stock",
+            "stock_reports",
+            "stock_exports",
+            "inventory",
+            "caisse_integrations",
+            "accounting_reports",
+            "accounting_exports",
+            "accounting",
+            "audit",
+            "audit_advanced",
+            "messages",
+        ):
             with self.subTest(module_name=module_name):
                 self.assertTrue(can_access_module(self.premium_owner, module_name))
 
@@ -96,8 +116,8 @@ class SubscriptionQuotaMatrixTests(TestCase):
     def setUp(self):
         self.entreprise = create_entreprise("Quotas Free")
         self.owner = create_user("owner-quota-free", "proprietaire", self.entreprise)
-        free_plan = get_or_create_default_free_plan()
-        start_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
+        free_plan = get_or_create_free_plan()
+        activate_free_plan_for_entreprise(entreprise=self.entreprise, plan=free_plan, utilisateur=self.owner)
 
     def test_free_plan_invoice_product_client_and_expense_quotas_are_enforced(self):
         for index in range(FREE_PLAN_INVOICE_LIMIT):
@@ -138,3 +158,26 @@ class SubscriptionQuotaMatrixTests(TestCase):
             )
         with self.assertRaises(PlanQuotaExceeded):
             assert_expense_quota_available(self.entreprise, as_of=timezone.localdate())
+
+
+class SaasPlanSeedTests(TestCase):
+    def test_seed_keeps_only_official_commercial_plans_active(self):
+        legacy_trial = Abonnement.objects.create(
+            nom="Plan d'essai",
+            code="trial-default",
+            prix=0,
+            duree_jours=14,
+            actif=True,
+            description="Ancienne offre commerciale",
+        )
+
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        legacy_trial.refresh_from_db()
+        self.assertFalse(legacy_trial.actif)
+        self.assertIn("legacy", legacy_trial.description)
+
+        official_codes = set(OFFICIAL_COMMERCIAL_PLAN_CODES)
+        commercial_codes = set(get_commercial_plans_queryset().values_list("code", flat=True))
+        self.assertEqual(commercial_codes, official_codes)
+        self.assertFalse(get_commercial_plans_queryset().filter(code="trial-default").exists())

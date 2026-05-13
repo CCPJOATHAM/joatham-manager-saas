@@ -8,7 +8,7 @@ from django.utils import timezone
 if importlib.util.find_spec("rest_framework") is not None:
     from rest_framework.test import APITestCase
 
-    from core.services.subscription import activate_subscription_for_entreprise, start_trial_for_entreprise, suspend_subscription_for_entreprise
+    from core.services.subscription import activate_subscription_for_entreprise, suspend_subscription_for_entreprise
     from joatham_apprenants.models import Apprenant, Formation, InscriptionFormation
     from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
     from joatham_depenses.models import Depense
@@ -26,7 +26,7 @@ if importlib.util.find_spec("rest_framework") is not None:
             self.gestionnaire_b = create_user("gestion-api-b", "gestionnaire", self.entreprise_b)
             self.plan = Abonnement.objects.create(nom="API", code="api", prix=30, duree_jours=30, actif=True)
 
-            start_trial_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.owner_a)
+            activate_subscription_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.owner_a)
             activate_subscription_for_entreprise(entreprise=self.entreprise_b, plan=self.plan, utilisateur=self.gestionnaire_b)
 
             self.client_a = create_client(self.entreprise_a, "Client API A")

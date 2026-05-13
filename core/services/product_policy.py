@@ -7,41 +7,42 @@ from django.urls import reverse
 from core.services.subscription import get_current_subscription, is_free_plan, refresh_subscription_status
 from core.services.tenancy import get_subscription_access_state, get_user_entreprise_or_raise
 
-ACCESS_FREEMIUM = "freemium"
+ACCESS_INCLUDED_PLAN = "included_plan"
 ACCESS_PREMIUM = "premium"
 ACCESS_LOCKED = "locked"
-ACCESS_FREE = ACCESS_FREEMIUM
-ACCESS_TRIAL_OR_ACTIVE = ACCESS_FREEMIUM
+ACCESS_FREE = ACCESS_INCLUDED_PLAN
+ACCESS_FREEMIUM = ACCESS_INCLUDED_PLAN
+ACCESS_TRIAL_OR_ACTIVE = ACCESS_INCLUDED_PLAN
 ACCESS_ACTIVE_ONLY = ACCESS_PREMIUM
 
 
 MODULE_ACCESS_POLICY = {
-    "dashboard": ACCESS_FREEMIUM,
-    "clients": ACCESS_FREEMIUM,
-    "services": ACCESS_FREEMIUM,
-    "expenses": ACCESS_FREEMIUM,
-    "depenses": ACCESS_FREEMIUM,
-    "caisse": ACCESS_FREEMIUM,
-    "caisse_reports": ACCESS_FREEMIUM,
-    "caisse_exports": ACCESS_FREEMIUM,
-    "caisse_integrations": ACCESS_FREEMIUM,
-    "caisse_validation": ACCESS_FREEMIUM,
-    "products": ACCESS_FREEMIUM,
-    "produits": ACCESS_FREEMIUM,
-    "stock": ACCESS_FREEMIUM,
-    "stock_reports": ACCESS_FREEMIUM,
-    "stock_exports": ACCESS_FREEMIUM,
-    "inventory": ACCESS_FREEMIUM,
-    "billing": ACCESS_FREEMIUM,
-    "apprenants": ACCESS_FREEMIUM,
-    "subscription": ACCESS_FREEMIUM,
+    "dashboard": ACCESS_INCLUDED_PLAN,
+    "clients": ACCESS_INCLUDED_PLAN,
+    "services": ACCESS_INCLUDED_PLAN,
+    "expenses": ACCESS_INCLUDED_PLAN,
+    "depenses": ACCESS_INCLUDED_PLAN,
+    "caisse": ACCESS_INCLUDED_PLAN,
+    "caisse_reports": ACCESS_INCLUDED_PLAN,
+    "caisse_exports": ACCESS_INCLUDED_PLAN,
+    "caisse_integrations": ACCESS_INCLUDED_PLAN,
+    "caisse_validation": ACCESS_INCLUDED_PLAN,
+    "products": ACCESS_INCLUDED_PLAN,
+    "produits": ACCESS_INCLUDED_PLAN,
+    "stock": ACCESS_INCLUDED_PLAN,
+    "stock_reports": ACCESS_INCLUDED_PLAN,
+    "stock_exports": ACCESS_INCLUDED_PLAN,
+    "inventory": ACCESS_INCLUDED_PLAN,
+    "billing": ACCESS_INCLUDED_PLAN,
+    "apprenants": ACCESS_INCLUDED_PLAN,
+    "subscription": ACCESS_INCLUDED_PLAN,
     "accounting": ACCESS_PREMIUM,
     "accounting_reports": ACCESS_PREMIUM,
     "accounting_exports": ACCESS_PREMIUM,
     "audit": ACCESS_PREMIUM,
     "audit_advanced": ACCESS_PREMIUM,
     "messages": ACCESS_PREMIUM,
-    "users": ACCESS_FREEMIUM,
+    "users": ACCESS_INCLUDED_PLAN,
 }
 
 
@@ -139,7 +140,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
     state = get_subscription_access_state(
         entreprise,
         as_of=as_of,
-        allow_trial=(level == ACCESS_FREEMIUM),
+        allow_trial=(level == ACCESS_INCLUDED_PLAN),
     )
     if state["allowed"]:
         plan = getattr(state["subscription"], "plan", None)
@@ -208,12 +209,12 @@ def get_module_access_denied_message(module_name, reason):
     if reason == "feature_not_declared":
         return "Cette fonctionnalite n'est pas disponible dans l'offre actuelle."
     if reason == "active_subscription_required":
-        return f"Le module {module_label} est reserve aux entreprises avec un abonnement actif."
+        return f"Le module {module_label} necessite un plan actif compatible."
     if reason == "missing_subscription":
         return f"Le module {module_label} necessite un plan actif."
     if reason in {"inactive_subscription", "expired_subscription"}:
-        return f"L'acces au module {module_label} est indisponible car l'abonnement de votre entreprise n'est plus actif."
-    return f"Vous ne pouvez pas acceder au module {module_label} avec l'etat actuel de votre abonnement."
+        return f"L'acces au module {module_label} est indisponible car le plan actuel de votre entreprise n'est plus actif."
+    return f"Vous ne pouvez pas acceder au module {module_label} avec votre plan actuel."
 
 
 def module_access_required(module_name):

@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import ExchangeRate, PaiementAbonnement, PlatformSettings
 from core.services.exchange_rates import get_company_currency, get_plan_price_for_company
+from core.services.subscription import get_commercial_plans_queryset
 from core.services.world import get_country_choices, get_currency_choices
 from joatham_users.models import Abonnement, Entreprise
 
@@ -155,7 +156,7 @@ class PaiementAbonnementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["plan"].queryset = Abonnement.objects.filter(actif=True, prix__gt=0).order_by("prix", "nom")
+        self.fields["plan"].queryset = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
         self.fields["telephone_paiement"].required = False
         self.fields["preuve_paiement"].required = False
 
@@ -198,7 +199,7 @@ class ManualSubscriptionPaymentForm(forms.Form):
     def __init__(self, *args, entreprise=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.entreprise = entreprise
-        self.fields["plan"].queryset = Abonnement.objects.filter(actif=True).order_by("prix", "nom")
+        self.fields["plan"].queryset = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
         subscription = getattr(entreprise, "abonnement_entreprise", None) if entreprise is not None else None
         current_plan = getattr(subscription, "plan", None)
         if current_plan is not None:
@@ -256,7 +257,7 @@ class PlatformSettingsForm(forms.ModelForm):
             "exchange_rate_api_key": "Cle API taux de change",
             "exchange_rate_cache_hours": "Cache taux en heures",
             "allow_manual_exchange_rate_fallback": "Autoriser fallback manuel",
-            "duree_essai_jours": "Duree essai gratuit",
+            "duree_essai_jours": "Duree de compatibilite essai",
             "mode_maintenance": "Mode maintenance",
             "message_maintenance": "Message maintenance",
             "maintenance_allowed_ips": "IPs autorisees",

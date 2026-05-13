@@ -517,6 +517,8 @@ class AuditLogTests(TestCase):
 class SuperAdminDashboardTests(TestCase):
     def setUp(self):
         self.plan_basic = Abonnement.objects.create(nom="Basic", code="basic", prix=10, duree_jours=30, actif=True)
+        starter_payload = next(plan for plan in get_default_paid_plans() if plan["code"] == "starter")
+        self.plan_starter = Abonnement.objects.create(**starter_payload, actif=True)
         self.plan_pro = Abonnement.objects.create(nom="Pro", code="pro", prix=30, duree_jours=30, actif=True)
         settings = PlatformSettings.get_solo()
         settings.mode_maintenance = False
@@ -665,7 +667,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Jours restants")
         self.assertContains(response, "Activer")
         self.assertContains(response, "Changer plan")
-        self.assertContains(response, "Prolonger essai")
+        self.assertContains(response, "Prolonger acces historique")
         self.assertContains(response, "Suspendre")
 
     def test_super_admin_can_manage_subscription_from_subscription_page(self):
@@ -676,13 +678,13 @@ class SuperAdminDashboardTests(TestCase):
             {
                 "action": "change_plan",
                 "entreprise_id": self.entreprise_b.id,
-                "plan_id": self.plan_basic.id,
+                "plan_id": self.plan_starter.id,
             },
         )
 
         self.assertRedirects(response, reverse("super_admin_subscription_list"))
         subscription_b = AbonnementEntreprise.objects.get(entreprise=self.entreprise_b)
-        self.assertEqual(subscription_b.plan, self.plan_basic)
+        self.assertEqual(subscription_b.plan, self.plan_starter)
 
     def test_super_admin_user_list_shows_users_and_safe_actions(self):
         self.client.force_login(self.super_admin)
@@ -872,6 +874,29 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Taux utilise")
         self.assertNotContains(response, "Conversion temporairement indisponible")
 
+    def test_subscription_interfaces_do_not_offer_legacy_trial_plan(self):
+        legacy_trial_plan = Abonnement.objects.create(
+            nom="Plan d'essai",
+            code="trial-default",
+            prix=0,
+            duree_jours=14,
+            actif=True,
+        )
+
+        self.client.force_login(self.owner)
+        plan_response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(plan_response.status_code, 200)
+        self.assertNotIn(legacy_trial_plan, list(plan_response.context["plans"]))
+        self.assertNotContains(plan_response, "Plan d'essai")
+
+        self.client.force_login(self.super_admin)
+        admin_response = self.client.get(reverse("super_admin_subscription_list"))
+
+        self.assertEqual(admin_response.status_code, 200)
+        self.assertNotIn(legacy_trial_plan, list(admin_response.context["plans"]))
+        self.assertNotContains(admin_response, "Plan d'essai")
+
     def test_super_admin_subscription_list_can_validate_plan_request(self):
         paiement = PaiementAbonnement.objects.create(
             entreprise=self.entreprise_a,
@@ -900,7 +925,8 @@ class SuperAdminDashboardTests(TestCase):
         subscription = self.entreprise_a.abonnement_entreprise
         subscription.refresh_from_db()
         self.assertEqual(subscription.plan, self.plan_pro)
-        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertEqual(subscription.statut, AbonnementEntreprise.Statut.ACTIF)
+        self.assertFalse(subscription.essai)
         self.assertTrue(ActivityLog.objects.filter(action="abonnement_plan_demande_validee", objet_id=paiement.id).exists())
 
     def test_super_admin_subscription_list_shows_plan_request_actions(self):
@@ -1065,7 +1091,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(status_response, "Entreprise Beta")
         self.assertNotContains(status_response, "Entreprise Alpha")
 
-    def test_super_admin_can_activate_suspend_extend_trial_and_change_plan(self):
+    def test_super_admin_can_activate_suspend_extend_legacy_trial_and_change_plan(self):
         self.client.force_login(self.super_admin)
 
         activate_response = self.client.post(
@@ -1097,28 +1123,51 @@ class SuperAdminDashboardTests(TestCase):
             {
                 "action": "change_plan",
                 "entreprise_id": self.entreprise_b.id,
-                "plan_id": self.plan_basic.id,
+                "plan_id": self.plan_starter.id,
             },
         )
         self.assertRedirects(change_plan_response, reverse("super_admin_dashboard"))
         subscription_b.refresh_from_db()
-        self.assertEqual(subscription_b.plan, self.plan_basic)
+        self.assertEqual(subscription_b.plan, self.plan_starter)
 
-        previous_end = subscription_b.date_fin
+        legacy_entreprise = create_entreprise("Entreprise Legacy Trial")
+        legacy_subscription = AbonnementEntreprise.objects.create(
+            entreprise=legacy_entreprise,
+            plan=self.plan_basic,
+            statut=AbonnementEntreprise.Statut.ESSAI,
+            date_debut=date.today(),
+            date_fin=date.today() + timedelta(days=7),
+            essai=True,
+            actif=True,
+        )
+        previous_end = legacy_subscription.date_fin
         extend_response = self.client.post(
+            reverse("super_admin_dashboard"),
+            {
+                "action": "extend_trial",
+                "entreprise_id": legacy_entreprise.id,
+                "trial_days": 7,
+                "plan_id": self.plan_starter.id,
+            },
+        )
+        self.assertRedirects(extend_response, reverse("super_admin_dashboard"))
+        legacy_subscription.refresh_from_db()
+        self.assertEqual(legacy_subscription.statut, AbonnementEntreprise.Statut.ESSAI)
+        self.assertEqual(legacy_subscription.plan, self.plan_starter)
+        self.assertGreater(legacy_subscription.date_fin, previous_end)
+
+        blocked_extend_response = self.client.post(
             reverse("super_admin_dashboard"),
             {
                 "action": "extend_trial",
                 "entreprise_id": self.entreprise_b.id,
                 "trial_days": 7,
-                "plan_id": self.plan_basic.id,
+                "plan_id": self.plan_starter.id,
             },
         )
-        self.assertRedirects(extend_response, reverse("super_admin_dashboard"))
+        self.assertRedirects(blocked_extend_response, reverse("super_admin_dashboard"))
         subscription_b.refresh_from_db()
-        self.assertEqual(subscription_b.statut, AbonnementEntreprise.Statut.ESSAI)
-        self.assertEqual(subscription_b.plan, self.plan_basic)
-        self.assertGreater(subscription_b.date_fin, previous_end)
+        self.assertNotEqual(subscription_b.statut, AbonnementEntreprise.Statut.ESSAI)
 
     def test_super_admin_company_deactivation_requires_exact_name_confirmation(self):
         self.client.force_login(self.super_admin)
@@ -1176,7 +1225,7 @@ class SuperAdminDashboardTests(TestCase):
 
 class SubscriptionPaymentTests(TestCase):
     def setUp(self):
-        self.plan_basic = Abonnement.objects.create(nom="Basic", code="basic", prix=10, duree_jours=30, actif=True)
+        self.plan_basic = Abonnement.objects.create(nom="Starter", code="starter", prix=10, duree_jours=30, actif=True)
         self.plan_pro = Abonnement.objects.create(nom="Pro", code="pro", prix=30, duree_jours=30, actif=True)
         settings = PlatformSettings.get_solo()
         settings.mode_maintenance = False

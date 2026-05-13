@@ -201,7 +201,7 @@
             </div>
             <div class="detail-row"><span>Date de début</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
             <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Période d'essai</span><strong>{% if subscription.essai %}Oui{% else %}Non{% endif %}</strong></div>
+            <div class="detail-row"><span>Plan gratuit</span><strong>{% if is_current_free_plan %}Oui{% else %}Non{% endif %}</strong></div>
             <div class="detail-row"><span>Accès courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
             <div class="detail-row"><span>Renouvellement</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
         </div>
@@ -287,7 +287,7 @@
     <h2>Actions disponibles</h2>
     <p>
         {% if subscription %}
-            Selon l'état de votre abonnement, vous pouvez passer au plan payant, demander une réactivation ou préparer un changement de plan.
+            Selon votre plan actuel, vous pouvez passer a un plan superieur, demander une reactivation ou preparer un changement de plan.
         {% else %}
             Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué.
         {% endif %}
@@ -297,7 +297,7 @@
         <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Choisir un plan</a>
         {% if subscription %}
             {% if subscription.statut == "essai" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Passer au plan payant</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Choisir un plan superieur</a>
             {% elif subscription.statut == "expire" or subscription.statut == "suspendu" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver l'abonnement</a>
             {% elif subscription.statut == "actif" %}

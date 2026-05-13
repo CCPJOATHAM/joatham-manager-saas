@@ -4,6 +4,7 @@ from decimal import Decimal
 from functools import wraps
 
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils import timezone
 
@@ -29,6 +30,18 @@ STARTER_PLAN_CODE = "starter"
 PRO_PLAN_CODE = "pro"
 PREMIUM_PLAN_CODE = "premium"
 BUSINESS_PLAN_CODE = "business"
+OFFICIAL_COMMERCIAL_PLAN_CODES = (
+    FREE_PLAN_CODE,
+    STARTER_PLAN_CODE,
+    PRO_PLAN_CODE,
+    PREMIUM_PLAN_CODE,
+)
+OFFICIAL_PAID_PLAN_CODES = (
+    STARTER_PLAN_CODE,
+    PRO_PLAN_CODE,
+    PREMIUM_PLAN_CODE,
+)
+LEGACY_TRIAL_PLAN_CODES = ("trial-default", "trial_default", "trial")
 FREE_PLAN_DURATION_DAYS = 365 * 100
 FREE_PLAN_INVOICE_LIMIT = 20
 FREE_PLAN_USER_LIMIT = 1
@@ -223,6 +236,10 @@ def is_free_plan(plan):
     return normalize_plan_code(plan) == FREE_PLAN_CODE
 
 
+def is_official_commercial_plan(plan):
+    return normalize_plan_code(plan) in OFFICIAL_COMMERCIAL_PLAN_CODES
+
+
 def normalize_plan_code(plan_or_code):
     raw_code = getattr(plan_or_code, "code", plan_or_code)
     code = (raw_code or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
@@ -247,12 +264,47 @@ def get_default_paid_plans():
     return DEFAULT_PAID_PLANS
 
 
+def get_commercial_plans_queryset(*, include_free=True, paid_only=False):
+    plan_codes = OFFICIAL_COMMERCIAL_PLAN_CODES if include_free else OFFICIAL_PAID_PLAN_CODES
+    queryset = Abonnement.objects.filter(actif=True, code__in=plan_codes)
+    if paid_only:
+        queryset = queryset.filter(prix__gt=0)
+    return queryset
+
+
+def deactivate_legacy_trial_plans():
+    legacy_filter = Q()
+    for code in LEGACY_TRIAL_PLAN_CODES:
+        legacy_filter |= Q(code__iexact=code)
+    for name in ("Essai", "Plan d'essai", "Trial", "Trial default"):
+        legacy_filter |= Q(nom__iexact=name)
+
+    official_codes = set(OFFICIAL_COMMERCIAL_PLAN_CODES)
+    deactivated = 0
+    for plan in Abonnement.objects.filter(legacy_filter).order_by("id"):
+        if normalize_plan_code(plan) in official_codes:
+            continue
+
+        update_fields = []
+        if plan.actif:
+            plan.actif = False
+            update_fields.append("actif")
+        legacy_note = "Plan legacy inactif conserve uniquement pour les anciens abonnements historiques."
+        if legacy_note not in (plan.description or ""):
+            plan.description = f"{plan.description}\n{legacy_note}".strip()
+            update_fields.append("description")
+        if update_fields:
+            plan.save(update_fields=update_fields)
+            deactivated += 1
+    return deactivated
+
+
 def is_entreprise_on_free_plan(entreprise):
     subscription = get_subscription_for_entreprise(entreprise)
     return bool(subscription and is_free_plan(getattr(subscription, "plan", None)))
 
 
-def get_or_create_default_free_plan():
+def get_or_create_free_plan():
     defaults = {
         "nom": "Gratuit",
         "prix": 0,
@@ -260,7 +312,7 @@ def get_or_create_default_free_plan():
         "devise": get_platform_currency(),
         "duree_jours": FREE_PLAN_DURATION_DAYS,
         "actif": True,
-        "description": "Acces decouverte pour tester JOATHAM Manager avec des limites fortes.",
+        "description": "Plan gratuit actif pour demarrer JOATHAM Manager avec des limites fortes.",
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
@@ -291,8 +343,12 @@ def get_or_create_default_free_plan():
     return Abonnement.objects.create(code=FREE_PLAN_CODE, **defaults)
 
 
+def get_or_create_default_free_plan():
+    return get_or_create_free_plan()
+
+
 def get_or_create_default_trial_plan():
-    return get_or_create_default_free_plan()
+    return get_or_create_free_plan()
 
 
 def get_default_trial_days():
@@ -437,6 +493,9 @@ def create_subscription_payment_request(
     telephone_paiement="",
     utilisateur=None,
 ):
+    if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
+        raise ValueError("Plan indisponible.")
+
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
     montant = estimate["amount_usd"]
     paiement = PaiementAbonnement.objects.create(
@@ -477,7 +536,7 @@ def create_subscription_payment_request(
 def create_subscription_plan_request(*, entreprise, plan, utilisateur=None):
     if entreprise is None:
         raise ValueError("Entreprise introuvable.")
-    if plan is None or not getattr(plan, "actif", False):
+    if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
         raise ValueError("Plan indisponible.")
 
     existing_request = (
@@ -567,17 +626,14 @@ def validate_subscription_plan_request(*, entreprise, super_admin=None):
         )
     else:
         subscription.plan = plan
-        if subscription.statut == AbonnementEntreprise.Statut.ESSAI and subscription.actif:
-            update_fields = ["plan"]
-        else:
-            subscription.statut = AbonnementEntreprise.Statut.ACTIF
-            subscription.actif = True
-            subscription.essai = False
-            if not subscription.date_debut or subscription.date_debut > today:
-                subscription.date_debut = today
-            if not subscription.date_fin or subscription.date_fin < today:
-                subscription.date_fin = today + timedelta(days=plan.duree_jours)
-            update_fields = ["plan", "statut", "actif", "essai", "date_debut", "date_fin"]
+        subscription.statut = AbonnementEntreprise.Statut.ACTIF
+        subscription.actif = True
+        subscription.essai = False
+        if not subscription.date_debut or subscription.date_debut > today:
+            subscription.date_debut = today
+        if not subscription.date_fin or subscription.date_fin < today:
+            subscription.date_fin = today + timedelta(days=plan.duree_jours)
+        update_fields = ["plan", "statut", "actif", "essai", "date_debut", "date_fin"]
         subscription.save(update_fields=update_fields)
 
     _sync_legacy_entreprise_subscription_fields(entreprise, subscription)
@@ -700,6 +756,8 @@ def register_manual_subscription_payment(
         raise ValueError("Entreprise introuvable.")
     if plan is None:
         raise ValueError("Veuillez selectionner un plan.")
+    if not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
+        raise ValueError("Plan indisponible.")
 
     amount = Decimal(str(montant or "0")).quantize(Decimal("0.01"))
     if amount <= 0:
@@ -860,37 +918,42 @@ def refuse_subscription_payment(*, paiement, super_admin, notes_validation=""):
 
 
 def start_trial_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut=None, trial_days=None):
+    existing_subscription = get_current_subscription(entreprise)
+    if (
+        existing_subscription is None
+        or existing_subscription.statut != AbonnementEntreprise.Statut.ESSAI
+        or not existing_subscription.essai
+    ):
+        raise ValueError("La creation de nouveaux essais est desactivee. Activez le plan Gratuit ou un plan payant.")
+
     date_debut = date_debut or timezone.localdate()
     duration = trial_days or get_default_trial_days() or plan.duree_jours
-    date_fin = date_debut + timedelta(days=duration)
-    subscription, _ = AbonnementEntreprise.objects.update_or_create(
-        entreprise=entreprise,
-        defaults={
-            "plan": plan,
-            "statut": AbonnementEntreprise.Statut.ESSAI,
-            "date_debut": date_debut,
-            "date_fin": date_fin,
-            "essai": True,
-            "actif": True,
-        },
-    )
+    base_date = existing_subscription.date_fin if existing_subscription.date_fin and existing_subscription.date_fin >= date_debut else date_debut
+    existing_subscription.plan = plan
+    existing_subscription.statut = AbonnementEntreprise.Statut.ESSAI
+    existing_subscription.date_debut = existing_subscription.date_debut or date_debut
+    existing_subscription.date_fin = base_date + timedelta(days=duration)
+    existing_subscription.essai = True
+    existing_subscription.actif = True
+    existing_subscription.save(update_fields=["plan", "statut", "date_debut", "date_fin", "essai", "actif"])
+    subscription = existing_subscription
     _sync_legacy_entreprise_subscription_fields(entreprise, subscription)
     record_audit_event(
         entreprise=entreprise,
         utilisateur=utilisateur,
-        action="essai_demarre",
+        action="essai_prolonge",
         module="subscription",
         objet_type="AbonnementEntreprise",
         objet_id=subscription.id,
-        description=f"Essai demarre sur le plan {plan.nom}.",
+        description=f"Ancien essai prolonge sur le plan {plan.nom}.",
         metadata={"plan_id": plan.id, "plan_nom": plan.nom, "statut": subscription.statut},
     )
     return subscription
 
 
-def start_free_plan_for_entreprise(*, entreprise, plan=None, utilisateur=None, date_debut=None):
+def activate_free_plan_for_entreprise(*, entreprise, plan=None, utilisateur=None, date_debut=None):
     date_debut = date_debut or timezone.localdate()
-    plan = plan or get_or_create_default_free_plan()
+    plan = plan or get_or_create_free_plan()
     date_fin = date_debut + timedelta(days=plan.duree_jours or FREE_PLAN_DURATION_DAYS)
     subscription, _ = AbonnementEntreprise.objects.update_or_create(
         entreprise=entreprise,
@@ -916,6 +979,15 @@ def start_free_plan_for_entreprise(*, entreprise, plan=None, utilisateur=None, d
         metadata={"plan_id": plan.id, "plan_nom": plan.nom, "statut": subscription.statut},
     )
     return subscription
+
+
+def start_free_plan_for_entreprise(*, entreprise, plan=None, utilisateur=None, date_debut=None):
+    return activate_free_plan_for_entreprise(
+        entreprise=entreprise,
+        plan=plan,
+        utilisateur=utilisateur,
+        date_debut=date_debut,
+    )
 
 
 def suspend_subscription_for_entreprise(*, entreprise, utilisateur=None):
