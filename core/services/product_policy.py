@@ -174,13 +174,21 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "subscription": state["subscription"],
                 "locked": True,
             }
-        if module_name in PAYMENTS_PREMIUM_MODULES and normalize_plan_code(plan) != PREMIUM_PLAN_CODE:
+        if module_name in PAYMENTS_PREMIUM_MODULES:
+            if normalize_plan_code(plan) != PREMIUM_PLAN_CODE:
+                return {
+                    "allowed": False,
+                    "reason": "premium_required",
+                    "level": level,
+                    "subscription": state["subscription"],
+                    "locked": True,
+                }
             return {
-                "allowed": False,
-                "reason": "premium_required",
+                "allowed": True,
+                "reason": None,
                 "level": level,
                 "subscription": state["subscription"],
-                "locked": True,
+                "locked": False,
             }
 
         included_modules = set(getattr(plan, "modules_inclus", None) or [])

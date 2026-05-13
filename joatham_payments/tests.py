@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import ActivityLog
+from core.services.product_policy import get_module_access_state
 from core.services.subscription import (
     FREE_PLAN_MODULES,
     PREMIUM_PLAN_MODULES,
@@ -302,3 +303,22 @@ class PaymentTransactionTests(TestCase):
         self.assertTrue(payment_modules.isdisjoint(STARTER_PLAN_MODULES))
         self.assertTrue(payment_modules.isdisjoint(PRO_PLAN_MODULES))
         self.assertTrue(payment_modules.issubset(PREMIUM_PLAN_MODULES))
+
+    def test_premium_plan_code_allows_payments_even_when_stored_modules_are_stale(self):
+        stale_entreprise = create_entreprise("Entreprise Premium Stale Paiements")
+        stale_owner = create_user("owner-premium-stale-payments", "proprietaire", stale_entreprise)
+        stale_plan = Abonnement.objects.create(
+            nom="Premium / Business",
+            code="premium",
+            prix=99,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard", "billing"],
+            acces_exports=False,
+        )
+        activate_subscription_for_entreprise(entreprise=stale_entreprise, plan=stale_plan, utilisateur=stale_owner)
+
+        self.assertTrue(get_module_access_state(stale_entreprise, "payments")["allowed"])
+        self.assertTrue(get_module_access_state(stale_entreprise, "payment_validation")["allowed"])
+        self.assertTrue(get_module_access_state(stale_entreprise, "payments_reports")["allowed"])
+        self.assertTrue(get_module_access_state(stale_entreprise, "payments_exports")["allowed"])
