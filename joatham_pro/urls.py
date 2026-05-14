@@ -5,6 +5,7 @@ from django.urls import path, include
 
 from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
+from core import reports_views
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
 from joatham_dashboard.views import public_home
 from joatham_messages.views import public_question_create, public_question_success, public_question_thanks, send_public_question_invitation, super_admin_messages, super_admin_public_question_reply, update_lead_status
@@ -37,6 +38,9 @@ urlpatterns = [
     path('profil/', profile_view, name='profile'),
     path('', include('joatham_dashboard.urls')),  # accueil
     path('audit/', include('core.urls')),
+    path('rapports-avances/', reports_views.advanced_reports, name='advanced_reports'),
+    path('rapports-avances/export/excel/', reports_views.advanced_reports_export_excel, name='advanced_reports_export_excel'),
+    path('rapports-avances/export/pdf/', reports_views.advanced_reports_export_pdf, name='advanced_reports_export_pdf'),
     path('abonnement/', include('core.subscription_urls')),
     path('entreprise/', include('core.company_urls')),
     path('utilisateurs/', include('joatham_users.urls')),

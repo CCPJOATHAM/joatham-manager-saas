@@ -23,7 +23,7 @@ def _can_export(user):
 
 @permission_required("reports.advanced_view")
 @module_access_required("advanced_reports")
-def advanced_reports_dashboard(request):
+def advanced_reports(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _build_filters(request, entreprise)
     context = build_advanced_report_context(entreprise, filters)
@@ -34,6 +34,9 @@ def advanced_reports_dashboard(request):
         }
     )
     return render(request, "core/advanced_reports.html", context)
+
+
+advanced_reports_dashboard = advanced_reports
 
 
 @permission_required("reports.export")
