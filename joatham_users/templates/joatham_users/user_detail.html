@@ -1,0 +1,85 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{{ full_name }} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Detail utilisateur" %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez les informations du compte sans quitter le contexte de votre entreprise." %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour aux utilisateurs" %}</a>
+{% if target_user.normalized_role != "proprietaire" %}
+<a href="{% url 'user_update' target_user.id %}" class="btn-link primary">{% trans "Modifier role" %}</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .detail-card {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .detail-label {
+        display: block;
+        color: #64748b;
+        font-size: 0.84rem;
+        margin-bottom: 6px;
+    }
+
+    .detail-value {
+        color: #10233f;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    @media (max-width: 760px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="detail-grid">
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Nom" %}</span>
+        <span class="detail-value">{{ full_name }}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "E-mail" %}</span>
+        <span class="detail-value">{% if target_user.email %}{{ target_user.email }}{% else %}{{ target_user.username }}{% endif %}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Role" %}</span>
+        <span class="detail-value">{{ target_user.get_role_display }}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Statut" %}</span>
+        <span class="detail-value">{% if target_user.is_active %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Email verifie" %}</span>
+        <span class="detail-value">{% if target_user.email_verified %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Derniere connexion" %}</span>
+        <span class="detail-value">{{ target_user.last_login|date:"d/m/Y H:i"|default:"-" }}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Date de creation" %}</span>
+        <span class="detail-value">{{ target_user.date_joined|date:"d/m/Y H:i" }}</span>
+    </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Telephone" %}</span>
+        <span class="detail-value">{{ target_user.telephone|default:"-" }}</span>
+    </div>
+</div>
+{% endblock %}

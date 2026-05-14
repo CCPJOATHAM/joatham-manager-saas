@@ -34,7 +34,14 @@ from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_INCLUDED_PLA
 from joatham_billing.tests.factories import create_entreprise, create_user
 
 from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User
-from .services.invitations import REMINDER_ERROR, REMINDER_SENT, REMINDER_SKIPPED, send_invitation_reminder
+from .services.invitations import (
+    COMPANY_INVITATION_SOURCE_PREFIX,
+    REMINDER_ERROR,
+    REMINDER_SENT,
+    REMINDER_SKIPPED,
+    build_company_invitation_source,
+    send_invitation_reminder,
+)
 
 
 class SubscriptionServiceTests(TestCase):
@@ -531,8 +538,14 @@ class ProductPolicyTests(TestCase):
         self.assertRedirects(response, reverse("abonnement_expire") + "?module=dashboard&reason=missing_subscription")
 
 
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="support@joatham.local",
+    JOATHAM_APP_URL="https://app.joatham.test",
+)
 class UserManagementTests(TestCase):
     def setUp(self):
+        mail.outbox = []
         self.entreprise = create_entreprise("Entreprise Utilisateurs")
         self.autre_entreprise = create_entreprise("Entreprise Externe")
         self.entreprise_free = create_entreprise("Entreprise Freemium")
@@ -581,6 +594,29 @@ class UserManagementTests(TestCase):
         self.assertContains(response, "Gestionnaire")
         self.assertContains(response, "Comptable")
         self.assertContains(response, "Actif")
+        self.assertContains(response, "Invitations en attente")
+        self.assertContains(response, "Quota utilise")
+
+    def test_user_list_is_limited_to_current_company(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("user_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.gestionnaire.username)
+        self.assertNotContains(response, self.external_user.username)
+
+    def test_owner_can_filter_user_list(self):
+        self.gestionnaire.email = "gestion.filtre@example.com"
+        self.gestionnaire.save(update_fields=["email"])
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("user_list"), {"role": User.Role.COMPTABLE})
+        self.assertContains(response, self.comptable.username)
+        self.assertNotContains(response, self.gestionnaire.username)
+
+        response = self.client.get(reverse("user_list"), {"q": "gestion.filtre"})
+        self.assertContains(response, "gestion.filtre@example.com")
+        self.assertNotContains(response, self.comptable.username)
 
     def test_non_owner_cannot_access_user_management(self):
         self.client.force_login(self.gestionnaire)
@@ -608,6 +644,163 @@ class UserManagementTests(TestCase):
         self.assertEqual(created_user.entreprise, self.entreprise)
         self.assertEqual(created_user.role, User.Role.GESTIONNAIRE)
         self.assertEqual(created_user.telephone, "+243900000099")
+
+    def test_owner_can_invite_gestionnaire(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("user_invite"),
+            {
+                "full_name": "Marie Invitee",
+                "email": "marie.invitee@example.com",
+                "role": User.Role.GESTIONNAIRE,
+            },
+        )
+
+        self.assertRedirects(response, reverse("user_list"))
+        invitation = EntrepriseInvitation.objects.get(email="marie.invitee@example.com")
+        self.assertEqual(invitation.source, build_company_invitation_source(self.entreprise, User.Role.GESTIONNAIRE))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/utilisateurs/invitations/", mail.outbox[0].body)
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                utilisateur=self.owner,
+                action="utilisateur_invite",
+                objet_id=invitation.id,
+            ).exists()
+        )
+
+    def test_owner_can_invite_comptable(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("user_invite"),
+            {
+                "full_name": "Claude Comptable",
+                "email": "claude.comptable@example.com",
+                "role": User.Role.COMPTABLE,
+            },
+        )
+
+        self.assertRedirects(response, reverse("user_list"))
+        invitation = EntrepriseInvitation.objects.get(email="claude.comptable@example.com")
+        self.assertIn(f"{COMPANY_INVITATION_SOURCE_PREFIX}:{self.entreprise.id}:{User.Role.COMPTABLE}", invitation.source)
+
+    def test_invitation_is_blocked_when_quota_is_exceeded(self):
+        quota_entreprise = create_entreprise("Entreprise Quota Users")
+        quota_owner = create_user("owner-quota-users", User.Role.PROPRIETAIRE, quota_entreprise)
+        quota_plan = Abonnement.objects.create(
+            nom="Quota",
+            code="quota",
+            prix=10.0,
+            duree_jours=30,
+            actif=True,
+            max_utilisateurs=1,
+        )
+        activate_subscription_for_entreprise(
+            entreprise=quota_entreprise,
+            plan=quota_plan,
+            utilisateur=quota_owner,
+        )
+
+        self.client.force_login(quota_owner)
+        response = self.client.post(
+            reverse("user_invite"),
+            {
+                "full_name": "Invite Bloque",
+                "email": "invite.bloque@example.com",
+                "role": User.Role.GESTIONNAIRE,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Votre plan permet jusqu'a 1 utilisateur")
+        self.assertFalse(EntrepriseInvitation.objects.filter(email="invite.bloque@example.com").exists())
+
+    def test_invitation_is_blocked_when_email_is_already_used(self):
+        self.gestionnaire.email = "gestionnaire.used@example.com"
+        self.gestionnaire.save(update_fields=["email"])
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("user_invite"),
+            {
+                "full_name": "Doublon",
+                "email": "gestionnaire.used@example.com",
+                "role": User.Role.GESTIONNAIRE,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Un utilisateur de cette entreprise utilise deja cet email")
+        self.assertFalse(EntrepriseInvitation.objects.filter(email="gestionnaire.used@example.com").exists())
+
+    def test_invitation_is_blocked_when_active_duplicate_exists(self):
+        EntrepriseInvitation.objects.create(
+            email="duplicate.invite@example.com",
+            full_name="Duplicate Invite",
+            source=build_company_invitation_source(self.entreprise, User.Role.COMPTABLE),
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("user_invite"),
+            {
+                "full_name": "Duplicate Invite",
+                "email": "duplicate.invite@example.com",
+                "role": User.Role.COMPTABLE,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Une invitation active existe deja pour cet email")
+        self.assertEqual(EntrepriseInvitation.objects.filter(email="duplicate.invite@example.com").count(), 1)
+
+    def test_owner_can_resend_and_cancel_invitation(self):
+        invitation = EntrepriseInvitation.objects.create(
+            email="resend.invite@example.com",
+            full_name="Resend Invite",
+            source=build_company_invitation_source(self.entreprise, User.Role.GESTIONNAIRE),
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_invitation_resend", args=[invitation.id]))
+        self.assertRedirects(response, reverse("user_list"))
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.reminder_count, 1)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(ActivityLog.objects.filter(action="invitation_renvoyee", objet_id=invitation.id).exists())
+
+        response = self.client.post(reverse("user_invitation_cancel", args=[invitation.id]))
+        self.assertRedirects(response, reverse("user_list"))
+        invitation.refresh_from_db()
+        self.assertTrue(invitation.is_used)
+        self.assertTrue(ActivityLog.objects.filter(action="invitation_annulee", objet_id=invitation.id).exists())
+
+    def test_invited_user_can_accept_company_invitation(self):
+        invitation = EntrepriseInvitation.objects.create(
+            email="accept.invite@example.com",
+            full_name="Accept Invite",
+            source=build_company_invitation_source(self.entreprise, User.Role.GESTIONNAIRE),
+        )
+
+        response = self.client.get(reverse("user_invitation_accept", args=[invitation.token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "accept.invite@example.com")
+
+        response = self.client.post(
+            reverse("user_invitation_accept", args=[invitation.token]),
+            {
+                "password": "Motdepasse123!",
+                "password_confirm": "Motdepasse123!",
+            },
+        )
+        self.assertRedirects(response, reverse("gestion_dashboard"))
+        invitation.refresh_from_db()
+        accepted_user = User.objects.get(email="accept.invite@example.com")
+        self.assertEqual(accepted_user.entreprise, self.entreprise)
+        self.assertEqual(accepted_user.role, User.Role.GESTIONNAIRE)
+        self.assertTrue(invitation.is_used)
+        self.assertTrue(ActivityLog.objects.filter(action="invitation_acceptee", objet_id=invitation.id).exists())
 
     def test_free_plan_blocks_company_user_creation(self):
         self.client.force_login(self.owner_free)
@@ -660,6 +853,33 @@ class UserManagementTests(TestCase):
         self.assertEqual(managed_user.role, User.Role.GESTIONNAIRE)
         self.assertEqual(managed_user.telephone, "+243222")
 
+    def test_non_owner_cannot_change_company_user_role(self):
+        self.client.force_login(self.gestionnaire)
+        response = self.client.post(
+            reverse("user_update", args=[self.comptable.id]),
+            {
+                "full_name": "Comptable Bloque",
+                "email": "blocked.role@example.com",
+                "telephone": "",
+                "role": User.Role.GESTIONNAIRE,
+                "password": "",
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+
+        self.client.force_login(self.comptable)
+        response = self.client.post(
+            reverse("user_update", args=[self.gestionnaire.id]),
+            {
+                "full_name": "Gestionnaire Bloque",
+                "email": "blocked.role.2@example.com",
+                "telephone": "",
+                "role": User.Role.COMPTABLE,
+                "password": "",
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_owner_can_toggle_user_status(self):
         managed_user = User.objects.create_user(
             username="toggle@example.com",
@@ -673,6 +893,35 @@ class UserManagementTests(TestCase):
         self.assertRedirects(response, reverse("user_list"))
         managed_user.refresh_from_db()
         self.assertFalse(managed_user.is_active)
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                action="utilisateur_statut_modifie",
+                objet_id=managed_user.id,
+            ).exists()
+        )
+
+    def test_owner_cannot_deactivate_owner_account_from_company_management(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_toggle_active", args=[self.owner.id]))
+        self.assertRedirects(response, reverse("user_list"))
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+
+    def test_owner_can_remove_secondary_user_access(self):
+        managed_user = User.objects.create_user(
+            username="remove-access@example.com",
+            email="remove-access@example.com",
+            password="Initial123!",
+            role=User.Role.COMPTABLE,
+            entreprise=self.entreprise,
+        )
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_remove_access", args=[managed_user.id]))
+        self.assertRedirects(response, reverse("user_list"))
+        managed_user.refresh_from_db()
+        self.assertFalse(managed_user.is_active)
+        self.assertTrue(ActivityLog.objects.filter(action="utilisateur_acces_retire", objet_id=managed_user.id).exists())
 
     def test_owner_can_delete_secondary_user(self):
         managed_user = User.objects.create_user(
@@ -690,6 +939,9 @@ class UserManagementTests(TestCase):
     def test_multi_entreprise_isolation_prevents_cross_company_access(self):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("user_update", args=[self.external_user.id]))
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(reverse("user_detail", args=[self.external_user.id]))
         self.assertEqual(response.status_code, 404)
 
     def test_owner_can_update_company_settings_with_tva_and_referentiel(self):

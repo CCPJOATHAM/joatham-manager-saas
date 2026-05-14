@@ -3,85 +3,67 @@
 
 {% block page_title %}{% trans "Utilisateurs" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Utilisateurs" %}{% endblock %}
-{% block content_subtitle %}{% trans "Pilotez les comptes de votre entreprise avec une vue claire des roles, des statuts et des actions disponibles." %}{% endblock %}
+{% block content_subtitle %}{% trans "Pilotez les acces de votre entreprise avec des roles clairs, des invitations controlees et une isolation stricte par entreprise." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'user_create' %}" class="btn-link primary">{% trans "Ajouter un utilisateur" %}</a>
+<a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
+<a href="{% url 'user_create' %}" class="btn-link">{% trans "Ajouter un utilisateur" %}</a>
 {% endblock %}
 
 {% block content %}
 <style>
-    .hero {
+    .users-hero {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         gap: 18px;
-        margin-bottom: 26px;
+        margin-bottom: 24px;
         flex-wrap: wrap;
     }
 
-    .hero h2 {
+    .users-hero h2 {
         margin: 0;
         font-size: 1.65rem;
-        letter-spacing: -0.03em;
     }
 
-    .hero p {
+    .users-hero p {
         margin: 8px 0 0;
         color: #64748b;
-        max-width: 720px;
+        max-width: 760px;
         line-height: 1.6;
     }
 
-    .hero-actions {
+    .hero-actions,
+    .table-actions,
+    .inline-actions {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
         align-items: center;
     }
 
-    .hero-actions .btn-link {
-        min-height: 44px;
-        padding: 0 18px;
-        border-radius: 12px;
-    }
-
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
         gap: 14px;
-        margin-bottom: 22px;
+        margin-bottom: 20px;
     }
 
-    .stat-card {
-        display: grid;
-        grid-template-columns: 48px minmax(0, 1fr);
-        gap: 14px;
-        align-items: center;
-        padding: 18px;
-        border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+    .stat-card,
+    .filter-panel,
+    .table-shell {
+        background: #fff;
         border: 1px solid #dde7f0;
         box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
 
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #eef6ff;
-        color: #2563eb;
-    }
-
-    .stat-icon svg {
-        width: 22px;
-        height: 22px;
+    .stat-card {
+        border-radius: 18px;
+        padding: 18px;
     }
 
     .stat-label {
+        display: block;
         color: #64748b;
         font-size: 0.84rem;
         line-height: 1.35;
@@ -89,86 +71,79 @@
 
     .stat-value {
         display: block;
-        margin-top: 3px;
+        margin-top: 5px;
         color: #10233f;
-        font-size: 1.08rem;
+        font-size: 1.25rem;
         font-weight: 800;
-        letter-spacing: -0.02em;
     }
 
     .stat-meta {
         display: block;
-        margin-top: 3px;
+        margin-top: 4px;
         color: #64748b;
-        font-size: 0.8rem;
+        font-size: 0.82rem;
+        line-height: 1.4;
     }
 
-    .page-grid {
+    .filter-panel {
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .filters-grid {
         display: grid;
-        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-        gap: 20px;
-        align-items: start;
+        grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(220px, 2fr) auto;
+        gap: 14px;
+        align-items: end;
     }
 
-    .panel {
-        background: #fff;
-        border: 1px solid #dde7f0;
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
     }
 
-    .panel h3 {
-        margin: 0 0 8px;
-        font-size: 1.08rem;
+    .filter-field label {
+        color: #334155;
+        font-weight: 700;
+        font-size: 0.9rem;
     }
 
-    .panel-subtitle {
-        margin: 0 0 18px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-
-    .info-list {
-        display: grid;
-        gap: 12px;
-    }
-
-    .info-row {
-        padding: 14px 16px;
-        border-radius: 16px;
-        background: #f8fbff;
-        border: 1px solid #d9e6fb;
-    }
-
-    .info-row strong {
-        display: block;
+    .filter-field input,
+    .filter-field select {
+        min-height: 42px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        padding: 0 12px;
         color: #10233f;
-        margin-bottom: 4px;
+        background: #fff;
     }
 
-    .info-row span {
-        color: #64748b;
-        line-height: 1.6;
-        font-size: 0.92rem;
+    .filter-submit {
+        min-height: 42px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 1px solid #0f766e;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
     }
 
     .table-shell {
-        border: 1px solid #dde7f0;
-        border-radius: 24px;
+        border-radius: 18px;
         overflow: hidden;
-        background: #fff;
-        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+        margin-bottom: 22px;
     }
 
     .table-toolbar {
         display: flex;
         justify-content: space-between;
+        gap: 14px;
         align-items: center;
-        gap: 12px;
         padding: 18px 20px;
         border-bottom: 1px solid #eef2f7;
-        background: #ffffff;
         flex-wrap: wrap;
     }
 
@@ -181,54 +156,31 @@
         margin: 4px 0 0;
         color: #64748b;
         font-size: 0.92rem;
+        line-height: 1.5;
     }
 
-    .table-meta {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .meta-pill {
-        display: inline-flex;
-        align-items: center;
-        min-height: 34px;
-        padding: 0 12px;
-        border-radius: 999px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        font-size: 0.84rem;
-        font-weight: 700;
-    }
-
-    .users-table {
+    .data-table {
         width: 100%;
         border-collapse: collapse;
     }
 
-    .users-table thead {
+    .data-table thead {
         background: #f8fafc;
     }
 
-    .users-table th,
-    .users-table td {
-        padding: 16px 18px;
+    .data-table th,
+    .data-table td {
+        padding: 14px 16px;
         border-bottom: 1px solid #eef2f7;
         text-align: left;
         vertical-align: middle;
     }
 
-    .users-table th {
+    .data-table th {
         color: #475569;
-        font-size: 0.92rem;
-        font-weight: 700;
+        font-size: 0.8rem;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-
-    .users-table tbody tr:hover {
-        background: #f8fbff;
     }
 
     .user-name {
@@ -236,60 +188,52 @@
         color: #10233f;
     }
 
-    .user-email {
-        margin-top: 4px;
+    .user-email,
+    .muted {
         color: #64748b;
         font-size: 0.88rem;
+        line-height: 1.45;
     }
 
-    .role-badge,
-    .status-badge {
+    .badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 34px;
-        padding: 0 12px;
+        min-height: 30px;
+        padding: 0 10px;
         border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
         border: 1px solid transparent;
+        font-size: 0.78rem;
+        font-weight: 800;
         white-space: nowrap;
     }
 
-    .role-owner {
+    .badge-owner,
+    .badge-verified {
         background: #eef6ff;
         border-color: #bfdbfe;
         color: #1d4ed8;
     }
 
-    .role-manager {
+    .badge-manager,
+    .badge-active {
         background: #ecfdf5;
         border-color: #bbf7d0;
         color: #047857;
     }
 
-    .role-accountant {
+    .badge-accountant,
+    .badge-pending {
         background: #fff7ed;
         border-color: #fed7aa;
         color: #c2410c;
     }
 
-    .status-active {
-        background: #dcfce7;
-        border-color: #bbf7d0;
-        color: #166534;
-    }
-
-    .status-inactive {
-        background: #fee2e2;
+    .badge-inactive,
+    .badge-unverified {
+        background: #fff1f2;
         border-color: #fecaca;
-        color: #991b1b;
-    }
-
-    .actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        color: #b91c1c;
     }
 
     .action-btn,
@@ -298,39 +242,37 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 36px;
-        padding: 0 12px;
+        min-height: 34px;
+        padding: 0 11px;
         border-radius: 10px;
         border: 1px solid #dbe5ef;
         background: #fff;
         color: #10233f;
         text-decoration: none;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
-        font-size: 0.84rem;
+        font-size: 0.82rem;
     }
 
-    .action-btn.primary {
+    .action-btn.primary,
+    .action-form .primary {
         background: #eef6ff;
         border-color: #bfdbfe;
         color: #1d4ed8;
     }
 
-    .action-btn.success,
     .action-form .success {
         background: #f0fdf4;
         border-color: #bbf7d0;
         color: #166534;
     }
 
-    .action-btn.warning,
     .action-form .warning {
         background: #fff7ed;
         border-color: #fed7aa;
         color: #9a3412;
     }
 
-    .action-btn.danger,
     .action-form .danger {
         background: #fff1f2;
         border-color: #fecaca;
@@ -344,162 +286,131 @@
     .owner-note {
         background: #f8fafc;
         color: #64748b;
-        border-color: #e2e8f0;
     }
 
     .empty-state {
-        padding: 60px 24px;
+        padding: 44px 20px;
         text-align: center;
-        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-    }
-
-    .empty-state h3 {
-        margin: 0 0 10px;
-        font-size: 1.35rem;
-    }
-
-    .empty-state p {
-        margin: 0 auto 18px;
-        max-width: 480px;
         color: #64748b;
-        line-height: 1.7;
-    }
-
-    .empty-state .btn-link {
-        display: inline-flex;
-    }
-
-    .empty-state .helper {
-        margin-top: 10px;
-        color: #94a3b8;
-        font-size: 0.92rem;
     }
 
     @media (max-width: 1180px) {
         .stats-grid {
-            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            grid-template-columns: repeat(2, minmax(150px, 1fr));
         }
 
-        .page-grid {
-            grid-template-columns: 1fr;
+        .filters-grid {
+            grid-template-columns: 1fr 1fr;
         }
     }
 
     @media (max-width: 760px) {
-        .stats-grid {
+        .stats-grid,
+        .filters-grid {
             grid-template-columns: 1fr;
+        }
+
+        .data-table {
+            min-width: 980px;
         }
     }
 </style>
 
-<div class="hero">
+<div class="users-hero">
     <div>
         <h2>{% trans "Gestion des utilisateurs" %}</h2>
-        <p>{% trans "Administrez les comptes gestionnaire et comptable de votre entreprise depuis une interface plus claire, avec une lecture immediate des roles, des statuts et des actions disponibles." %}</p>
+        <p>{% trans "Administrez les comptes de votre entreprise, suivez les invitations en attente et gardez une lecture nette du quota autorise par votre abonnement." %}</p>
     </div>
     <div class="hero-actions">
-        <a href="{% url 'user_list' %}" class="btn-link">{% trans "Actualiser la liste" %}</a>
-        <a href="{% url 'user_create' %}" class="btn-link primary">{% trans "Ajouter un utilisateur" %}</a>
+        <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
+        <a href="{% url 'user_create' %}" class="btn-link">{% trans "Ajouter un utilisateur" %}</a>
     </div>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="10" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="stat-label">{% trans "Utilisateurs total" %}</span>
-            <span class="stat-value">{{ total_users }}</span>
-            <span class="stat-meta">{{ proprietaire_count }} {% trans "proprietaire principal" %}</span>
-        </div>
+        <span class="stat-label">{% trans "Utilisateurs total" %}</span>
+        <span class="stat-value">{{ total_users }}</span>
+        <span class="stat-meta">{{ active_users }} {% trans "actif" %}{{ active_users|pluralize:"s" }}</span>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:#eefcf6; color:#047857;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 7 9 18l-5-5"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="stat-label">{% trans "Comptes actifs" %}</span>
-            <span class="stat-value">{{ active_users }}</span>
-            <span class="stat-meta">{{ inactive_users }} {% trans "inactif" %}{{ inactive_users|pluralize:"s" }}</span>
-        </div>
+        <span class="stat-label">{% trans "Invitations en attente" %}</span>
+        <span class="stat-value">{{ pending_invitations }}</span>
+        <span class="stat-meta">{% trans "Acces non encore active" %}</span>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:#eef6ff; color:#1d4ed8;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2v20"></path>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="stat-label">{% trans "Gestionnaires" %}</span>
-            <span class="stat-value">{{ gestionnaire_count }}</span>
-            <span class="stat-meta">{% trans "Comptes de pilotage operationnel" %}</span>
-        </div>
+        <span class="stat-label">{% trans "Gestionnaires" %}</span>
+        <span class="stat-value">{{ gestionnaire_count }}</span>
+        <span class="stat-meta">{% trans "Operations quotidiennes" %}</span>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:#fff7ed; color:#c2410c;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 3v18h18"></path>
-                <path d="M19 9 13 15 10 12 6 16"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="stat-label">{% trans "Comptables" %}</span>
-            <span class="stat-value">{{ comptable_count }}</span>
-            <span class="stat-meta">{% trans "Comptes de suivi financier" %}</span>
-        </div>
+        <span class="stat-label">{% trans "Comptables" %}</span>
+        <span class="stat-value">{{ comptable_count }}</span>
+        <span class="stat-meta">{% trans "Finance et rapports" %}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">{% trans "Quota utilise" %}</span>
+        <span class="stat-value">{{ quota_used }} / {{ quota_label }}</span>
+        <span class="stat-meta">
+            {% if quota_is_unlimited %}
+            {% trans "Limite non appliquee" %}
+            {% else %}
+            {{ quota_remaining }} {% trans "place" %}{{ quota_remaining|pluralize:"s" }} {% trans "disponible" %}{{ quota_remaining|pluralize:"s" }}
+            {% endif %}
+        </span>
     </div>
 </div>
 
-<div class="page-grid">
-    <div class="panel">
-        <h3>{% trans "Bonnes pratiques" %}</h3>
-        <p class="panel-subtitle">{% trans "Le proprietaire garde la maitrise des comptes de l'entreprise. Les roles restent simples et explicites pour eviter les erreurs de configuration." %}</p>
-        <div class="info-list">
-            <div class="info-row">
-                <strong>{% trans "Proprietaire" %}</strong>
-                <span>{% trans "Compte principal de l'entreprise. Il reste visible dans la liste mais ne propose pas d'action destructive depuis cet ecran." %}</span>
-            </div>
-            <div class="info-row">
-                <strong>{% trans "Gestionnaire" %}</strong>
-                <span>{% trans "Role adapte au pilotage quotidien des clients, factures, depenses et modules operationnels autorises." %}</span>
-            </div>
-            <div class="info-row">
-                <strong>{% trans "Comptable" %}</strong>
-                <span>{% trans "Role oriente suivi financier et comptable, avec un acces cible selon les permissions deja en place." %}</span>
-            </div>
+<form class="filter-panel" method="get" action="{% url 'user_list' %}">
+    <div class="filters-grid">
+        <div class="filter-field">
+            <label for="role-filter">{% trans "Role" %}</label>
+            <select id="role-filter" name="role">
+                {% for value, label in role_filter_choices %}
+                <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="status-filter">{% trans "Statut" %}</label>
+            <select id="status-filter" name="status">
+                {% for value, label in status_filter_choices %}
+                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="search-filter">{% trans "Recherche" %}</label>
+            <input id="search-filter" type="search" name="q" value="{{ search_query }}" placeholder="{% trans 'Nom, email ou telephone' %}">
+        </div>
+        <button class="filter-submit" type="submit">{% trans "Filtrer" %}</button>
+    </div>
+</form>
+
+<div class="table-shell">
+    <div class="table-toolbar">
+        <div>
+            <h3>{% trans "Utilisateurs de l'entreprise" %}</h3>
+            <p>{% trans "Chaque ligne est limitee a l'entreprise connectee. Les comptes proprietaires restent proteges contre les actions sensibles." %}</p>
+        </div>
+        <div class="table-actions">
+            <span class="badge badge-active">{{ active_users }} {% trans "actif" %}{{ active_users|pluralize:"s" }}</span>
+            <span class="badge badge-inactive">{{ inactive_users }} {% trans "inactif" %}{{ inactive_users|pluralize:"s" }}</span>
         </div>
     </div>
 
-    <div class="table-shell">
-        <div class="table-toolbar">
-            <div>
-                <h3>{% trans "Equipe de l'entreprise" %}</h3>
-                <p>{% trans "Retrouvez chaque compte avec son role, son statut et ses actions de gestion dans une vue de travail plus lisible." %}</p>
-            </div>
-            <div class="table-meta">
-                <span class="meta-pill">{{ total_users }} {% trans "utilisateur" %}{{ total_users|pluralize:"s" }}</span>
-                <span class="meta-pill">{{ active_users }} {% trans "actif" %}{{ active_users|pluralize:"s" }}</span>
-            </div>
-        </div>
-
-        {% if users %}
-        <table class="users-table">
+    {% if users %}
+    <div style="overflow-x:auto;">
+        <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 25%;">{% trans "Utilisateur" %}</th>
-                    <th style="width: 17%;">{% trans "Telephone" %}</th>
-                    <th style="width: 16%;">{% trans "Role" %}</th>
-                    <th style="width: 14%;">{% trans "Statut" %}</th>
-                    <th style="width: 28%;">{% trans "Actions" %}</th>
+                    <th>{% trans "Nom" %}</th>
+                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Cree le" %}</th>
+                    <th>{% trans "Derniere connexion" %}</th>
+                    <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -507,34 +418,49 @@
                 <tr>
                     <td>
                         <div class="user-name">{{ managed_user.full_name }}</div>
-                        <div class="user-email">{{ managed_user.email_display }}</div>
+                        <div class="user-email">{{ managed_user.telephone_display }}</div>
                     </td>
-                    <td>{{ managed_user.telephone_display }}</td>
                     <td>
                         {% if managed_user.instance.normalized_role == "proprietaire" %}
-                        <span class="role-badge role-owner">{{ managed_user.instance.get_role_display }}</span>
+                        <span class="badge badge-owner">{{ managed_user.instance.get_role_display }}</span>
                         {% elif managed_user.instance.normalized_role == "gestionnaire" %}
-                        <span class="role-badge role-manager">{{ managed_user.instance.get_role_display }}</span>
+                        <span class="badge badge-manager">{{ managed_user.instance.get_role_display }}</span>
                         {% else %}
-                        <span class="role-badge role-accountant">{{ managed_user.instance.get_role_display }}</span>
+                        <span class="badge badge-accountant">{{ managed_user.instance.get_role_display }}</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if managed_user.instance.is_active %}
-                        <span class="status-badge status-active">{% trans "Actif" %}</span>
+                        <span class="badge badge-active">{% trans "Actif" %}</span>
                         {% else %}
-                        <span class="status-badge status-inactive">{% trans "Inactif" %}</span>
+                        <span class="badge badge-inactive">{% trans "Inactif" %}</span>
                         {% endif %}
                     </td>
                     <td>
-                        <div class="actions">
+                        <div>{{ managed_user.email_display }}</div>
+                        {% if managed_user.email_verified %}
+                        <span class="badge badge-verified">{% trans "Email verifie" %}</span>
+                        {% else %}
+                        <span class="badge badge-unverified">{% trans "Email non verifie" %}</span>
+                        {% endif %}
+                    </td>
+                    <td class="muted">{{ managed_user.created_display|date:"d/m/Y H:i" }}</td>
+                    <td class="muted">{{ managed_user.last_login_display|date:"d/m/Y H:i"|default:"-" }}</td>
+                    <td>
+                        <div class="inline-actions">
+                            <a href="{% url 'user_detail' managed_user.instance.id %}" class="action-btn">{% trans "Detail" %}</a>
                             {% if not managed_user.is_owner %}
-                            <a href="{% url 'user_update' managed_user.instance.id %}" class="action-btn primary">{% trans "Modifier" %}</a>
+                            <a href="{% url 'user_update' managed_user.instance.id %}" class="action-btn primary">{% trans "Modifier role" %}</a>
                             <form method="post" action="{% url 'user_toggle_active' managed_user.instance.id %}" class="action-form">
                                 {% csrf_token %}
                                 <button type="submit" class="{% if managed_user.instance.is_active %}warning{% else %}success{% endif %}">
-                                    {% if managed_user.instance.is_active %}{% trans "Desactiver" %}{% else %}{% trans "Activer" %}{% endif %}
+                                    {% if managed_user.instance.is_active %}{% trans "Desactiver" %}{% else %}{% trans "Reactiver" %}{% endif %}
                                 </button>
+                            </form>
+                            {% trans "Retirer l'acces de cet utilisateur ?" as remove_confirm_label %}
+                            <form method="post" action="{% url 'user_remove_access' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('{{ remove_confirm_label|escapejs }}');">
+                                {% csrf_token %}
+                                <button type="submit" class="danger">{% trans "Retirer acces" %}</button>
                             </form>
                             {% trans "Confirmer la suppression de cet utilisateur ?" as delete_confirm_label %}
                             <form method="post" action="{% url 'user_delete' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('{{ delete_confirm_label|escapejs }}');">
@@ -550,14 +476,68 @@
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="empty-state">
-            <h3>{% trans "Aucun utilisateur secondaire pour le moment" %}</h3>
-            <p>{% trans "Ajoutez un gestionnaire ou un comptable pour deleguer certaines operations de votre entreprise tout en gardant le controle proprietaire." %}</p>
-            <a href="{% url 'user_create' %}" class="btn-link primary">{% trans "Ajouter un utilisateur" %}</a>
-            <div class="helper">{% trans "Le compte proprietaire principal reste votre point d'entree pour administrer l'equipe." %}</div>
-        </div>
-        {% endif %}
     </div>
+    {% else %}
+    <div class="empty-state">
+        {% trans "Aucun utilisateur ne correspond aux filtres appliques." %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="table-shell">
+    <div class="table-toolbar">
+        <div>
+            <h3>{% trans "Invitations en attente" %}</h3>
+            <p>{% trans "Les invitations restent rattachees a votre entreprise et comptent dans le quota tant qu'elles sont actives." %}</p>
+        </div>
+        <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
+    </div>
+
+    {% if pending_invitations_list %}
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Invite" %}</th>
+                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Creee le" %}</th>
+                    <th>{% trans "Expiration" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invitation in pending_invitations_list %}
+                <tr>
+                    <td>
+                        <div class="user-name">{{ invitation.full_name }}</div>
+                        <div class="user-email">{{ invitation.email_display }}</div>
+                    </td>
+                    <td><span class="badge badge-accountant">{{ invitation.role_label }}</span></td>
+                    <td><span class="badge badge-pending">{% trans "Invitation en attente" %}</span></td>
+                    <td class="muted">{{ invitation.created_display|date:"d/m/Y H:i" }}</td>
+                    <td class="muted">{{ invitation.expires_display|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div class="inline-actions">
+                            <form method="post" action="{% url 'user_invitation_resend' invitation.instance.id %}" class="action-form">
+                                {% csrf_token %}
+                                <button type="submit" class="primary">{% trans "Renvoyer invitation" %}</button>
+                            </form>
+                            <form method="post" action="{% url 'user_invitation_cancel' invitation.instance.id %}" class="action-form">
+                                {% csrf_token %}
+                                <button type="submit" class="danger">{% trans "Annuler" %}</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        {% trans "Aucune invitation active pour le moment." %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

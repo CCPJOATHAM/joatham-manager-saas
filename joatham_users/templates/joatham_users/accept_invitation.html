@@ -1,0 +1,98 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Activation invitation" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Activation de votre acces" %}{% endblock %}
+{% block content_subtitle %}{% trans "Finalisez votre compte JOATHAM Manager pour rejoindre l'entreprise qui vous a invite." %}{% endblock %}
+
+{% block content %}
+<style>
+    .activation-card {
+        max-width: 620px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        padding: 26px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .activation-card h2 {
+        margin: 0 0 8px;
+        color: #10233f;
+    }
+
+    .activation-card p {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+    }
+
+    .field label {
+        color: #10233f;
+        font-weight: 800;
+    }
+
+    .field input {
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        padding: 0 13px;
+    }
+
+    .errorlist {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: #b91c1c;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .submit-btn {
+        margin-top: 20px;
+        min-height: 46px;
+        padding: 0 20px;
+        border-radius: 12px;
+        border: 1px solid #0f766e;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+    }
+</style>
+
+<div class="activation-card">
+    {% if invitation_is_invalid %}
+    <h2>{% trans "Invitation non valide" %}</h2>
+    <p>{% trans "Cette invitation a deja ete utilisee, annulee ou expiree. Demandez une nouvelle invitation au proprietaire de l'entreprise." %}</p>
+    {% else %}
+    <h2>{% trans "Bienvenue sur JOATHAM Manager" %}</h2>
+    <p>
+        {% trans "Invitation pour" %} <strong>{{ invitation.email }}</strong>.
+        {% trans "Role prevu" %} : <strong>{{ role_label }}</strong>.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="field">
+            <label for="{{ form.password.id_for_label }}">{% trans "Mot de passe" %}</label>
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+        <div class="field">
+            <label for="{{ form.password_confirm.id_for_label }}">{% trans "Confirmer le mot de passe" %}</label>
+            {{ form.password_confirm }}
+            {{ form.password_confirm.errors }}
+        </div>
+        <button type="submit" class="submit-btn">{% trans "Activer mon acces" %}</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

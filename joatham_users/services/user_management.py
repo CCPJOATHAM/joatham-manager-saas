@@ -41,6 +41,16 @@ def _ensure_email_available(email, *, exclude_user_id=None):
     return normalized_email
 
 
+def _ensure_secondary_user(target_user):
+    if target_user.normalized_role == User.Role.PROPRIETAIRE:
+        raise ValueError("Le compte proprietaire ne peut pas etre modifie depuis cette interface.")
+
+
+def _ensure_not_self(target_user, owner_user, action_label):
+    if target_user.id == owner_user.id:
+        raise ValueError(f"Vous ne pouvez pas {action_label} votre propre compte.")
+
+
 @transaction.atomic
 def create_company_user(*, entreprise, owner_user, full_name, email, telephone, role, password):
     _ensure_manageable_role(role)
@@ -73,9 +83,7 @@ def create_company_user(*, entreprise, owner_user, full_name, email, telephone, 
 
 @transaction.atomic
 def update_company_user(*, target_user, owner_user, full_name, email, telephone, role, password=""):
-    if target_user.normalized_role == User.Role.PROPRIETAIRE:
-        raise ValueError("Le compte proprietaire ne peut pas etre modifie depuis cette interface.")
-
+    _ensure_secondary_user(target_user)
     _ensure_manageable_role(role)
     normalized_email = _ensure_email_available(email, exclude_user_id=target_user.id)
     first_name, last_name = _split_full_name(full_name)
@@ -105,8 +113,9 @@ def update_company_user(*, target_user, owner_user, full_name, email, telephone,
 
 @transaction.atomic
 def toggle_company_user_active(*, target_user, owner_user):
-    if target_user.normalized_role == User.Role.PROPRIETAIRE:
-        raise ValueError("Le compte proprietaire ne peut pas etre desactive.")
+    _ensure_secondary_user(target_user)
+    if target_user.is_active:
+        _ensure_not_self(target_user, owner_user, "desactiver")
 
     target_user.is_active = not target_user.is_active
     target_user.save(update_fields=["is_active"])
@@ -125,10 +134,8 @@ def toggle_company_user_active(*, target_user, owner_user):
 
 @transaction.atomic
 def delete_company_user(*, target_user, owner_user):
-    if target_user.normalized_role == User.Role.PROPRIETAIRE:
-        raise ValueError("Le compte proprietaire ne peut pas etre supprime.")
-    if target_user.id == owner_user.id:
-        raise ValueError("Vous ne pouvez pas supprimer votre propre compte.")
+    _ensure_secondary_user(target_user)
+    _ensure_not_self(target_user, owner_user, "supprimer")
 
     user_id = target_user.id
     email = target_user.email or target_user.username
@@ -144,3 +151,23 @@ def delete_company_user(*, target_user, owner_user):
         description=f"Utilisateur {email} supprime.",
         metadata={"email": email},
     )
+
+
+@transaction.atomic
+def remove_company_user_access(*, target_user, owner_user):
+    _ensure_secondary_user(target_user)
+    _ensure_not_self(target_user, owner_user, "retirer")
+
+    target_user.is_active = False
+    target_user.save(update_fields=["is_active"])
+    record_audit_event(
+        entreprise=target_user.entreprise,
+        utilisateur=owner_user,
+        action="utilisateur_acces_retire",
+        module="users",
+        objet_type="User",
+        objet_id=target_user.id,
+        description=f"Acces retire pour {target_user.email or target_user.username}.",
+        metadata={"email": target_user.email or target_user.username},
+    )
+    return target_user

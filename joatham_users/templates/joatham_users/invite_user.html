@@ -1,0 +1,180 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Inviter un utilisateur" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Inviter un utilisateur" %}{% endblock %}
+{% block content_subtitle %}{% trans "Envoyez une invitation rattachee a votre entreprise avec un role gestionnaire ou comptable." %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour aux utilisateurs" %}</a>
+{% endblock %}
+
+{% block content %}
+<style>
+    .invite-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel,
+    .form-card {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .panel {
+        padding: 22px;
+    }
+
+    .panel h3 {
+        margin: 0 0 10px;
+        font-size: 1.08rem;
+        color: #10233f;
+    }
+
+    .panel p,
+    .panel li {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .panel ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .form-card {
+        padding: 24px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field.full {
+        grid-column: 1 / -1;
+    }
+
+    .field label {
+        color: #10233f;
+        font-weight: 800;
+        font-size: 0.95rem;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        padding: 0 13px;
+        color: #10233f;
+    }
+
+    .errorlist {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: #b91c1c;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        margin: 0 0 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #b91c1c;
+    }
+
+    .form-footer {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .footer-note {
+        color: #64748b;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        max-width: 540px;
+    }
+
+    .submit-btn {
+        min-height: 46px;
+        padding: 0 20px;
+        border-radius: 12px;
+        border: 1px solid #0f766e;
+        background: #0f766e;
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+        .invite-grid,
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="invite-grid">
+    <div class="panel">
+        <h3>{% trans "Regles appliquees" %}</h3>
+        <p>{% trans "L'invitation est limitee a votre entreprise et respecte automatiquement le quota utilisateur de votre abonnement." %}</p>
+        <ul>
+            <li>{% trans "Roles autorises : gestionnaire et comptable." %}</li>
+            <li>{% trans "Aucun autre proprietaire ne peut etre invite depuis cet ecran." %}</li>
+            <li>{% trans "Les doublons et invitations actives identiques sont bloques." %}</li>
+        </ul>
+    </div>
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="form-grid">
+                <div class="field full">
+                    <label for="{{ form.full_name.id_for_label }}">{% trans "Nom complet" %}</label>
+                    {{ form.full_name }}
+                    {{ form.full_name.errors }}
+                </div>
+                <div class="field">
+                    <label for="{{ form.email.id_for_label }}">{% trans "E-mail" %}</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <div class="field">
+                    <label for="{{ form.role.id_for_label }}">{% trans "Role" %}</label>
+                    {{ form.role }}
+                    {{ form.role.errors }}
+                </div>
+            </div>
+            <div class="form-footer">
+                <div class="footer-note">{% trans "Le lien d'activation permettra a la personne invitee de definir son mot de passe avant d'acceder a JOATHAM Manager." %}</div>
+                <button type="submit" class="submit-btn">{% trans "Envoyer l'invitation" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

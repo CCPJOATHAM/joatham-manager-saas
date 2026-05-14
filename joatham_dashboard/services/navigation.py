@@ -184,8 +184,9 @@ NAV_ITEMS = [
     {
         "label": _("Utilisateurs"),
         "url_name": "user_list",
-        "permission": "users.manage",
+        "permission": "users.view",
         "module": "users",
+        "roles": ["proprietaire"],
         "prefixes": ["/utilisateurs/"],
     },
     {

@@ -132,7 +132,20 @@ def assert_user_quota_available(entreprise):
     _lock_entreprise_for_quota(entreprise)
     User = get_user_model()
     user_count = User.objects.filter(entreprise=entreprise).count()
-    if user_count >= limit:
+    pending_invitation_count = 0
+    try:
+        from joatham_users.models import EntrepriseInvitation
+        from joatham_users.services.invitations import COMPANY_INVITATION_SOURCE_PREFIX
+
+        pending_invitation_count = EntrepriseInvitation.objects.filter(
+            source__startswith=f"{COMPANY_INVITATION_SOURCE_PREFIX}:{entreprise.id}:",
+            is_used=False,
+            expires_at__gt=timezone.now(),
+        ).count()
+    except Exception:
+        pending_invitation_count = 0
+
+    if user_count + pending_invitation_count >= limit:
         raise PlanQuotaExceeded(
             f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} utilisateur(s)."
         )

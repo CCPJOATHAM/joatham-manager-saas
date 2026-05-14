@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 
 
@@ -51,6 +52,66 @@ class UserManagementForm(forms.Form):
                 "autocomplete": "new-password",
             }
         )
+
+
+class UserInviteForm(forms.Form):
+    full_name = forms.CharField(max_length=150, label=_("Nom complet"))
+    email = forms.EmailField(label=_("E-mail"))
+    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Role"))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["full_name"].widget.attrs.update(
+            {
+                "placeholder": _("Nom complet de l'utilisateur"),
+                "autocomplete": "name",
+            }
+        )
+        self.fields["email"].widget.attrs.update(
+            {
+                "placeholder": "adresse@entreprise.com",
+                "autocomplete": "email",
+            }
+        )
+        self.fields["role"].widget.attrs.update({"aria-label": _("Role")})
+
+
+class InvitationAcceptanceForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        label=_("Mot de passe"),
+        help_text=_("Choisissez un mot de passe securise pour activer votre acces."),
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput,
+        label=_("Confirmer le mot de passe"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        self.fields["password"].widget.attrs.update(
+            {
+                "placeholder": _("Mot de passe securise"),
+                "autocomplete": "new-password",
+            }
+        )
+        self.fields["password_confirm"].widget.attrs.update(
+            {
+                "placeholder": _("Repetez le mot de passe"),
+                "autocomplete": "new-password",
+            }
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+        if password and password_confirm and password != password_confirm:
+            self.add_error("password_confirm", _("Les mots de passe ne correspondent pas."))
+        if password:
+            validate_password(password, self.user)
+        return cleaned_data
 
 
 class ProfileUpdateForm(forms.ModelForm):
