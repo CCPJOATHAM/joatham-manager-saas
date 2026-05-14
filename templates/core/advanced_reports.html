@@ -1,0 +1,445 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Rapports avances{% endblock %}
+{% block content_title %}Rapports avances{% endblock %}
+{% block content_subtitle %}Vue decisionnelle globale de la performance de l'entreprise.{% endblock %}
+
+{% block top_actions %}
+{% if can_export_advanced_reports %}
+<a href="{% url 'advanced_reports_export_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="btn-link">Export PDF</a>
+<a href="{% url 'advanced_reports_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="btn-link primary">Export Excel</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+.reports-shell {
+    display: grid;
+    gap: 22px;
+}
+
+.reports-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-soft);
+}
+
+.filter-field {
+    display: grid;
+    gap: 6px;
+}
+
+.filter-field label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.reports-kpis,
+.reports-grid,
+.mini-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.reports-kpis {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+}
+
+.reports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mini-grid {
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+}
+
+.report-panel,
+.kpi-tile,
+.mini-tile {
+    border: 1px solid var(--line);
+    background: #FFFFFF;
+    border-radius: 14px;
+}
+
+.report-panel {
+    padding: 18px;
+    min-width: 0;
+}
+
+.report-panel h3 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+}
+
+.kpi-tile,
+.mini-tile {
+    padding: 14px;
+}
+
+.kpi-label,
+.mini-label,
+.row-muted {
+    color: var(--muted);
+}
+
+.kpi-label,
+.mini-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.kpi-value {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-strong);
+    font-size: 1.28rem;
+    font-weight: 900;
+}
+
+.mini-value {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-strong);
+    font-weight: 900;
+}
+
+.bar-list {
+    display: grid;
+    gap: 10px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: minmax(86px, 130px) 1fr minmax(100px, auto);
+    gap: 10px;
+    align-items: center;
+}
+
+.bar-track {
+    min-height: 10px;
+    border-radius: 999px;
+    background: #EAF2FF;
+    overflow: hidden;
+}
+
+.bar-fill {
+    display: block;
+    width: max(4px, var(--bar));
+    height: 10px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2563EB, #14B8A6);
+}
+
+.status-badge {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0 10px;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    font-weight: 800;
+    font-size: 0.78rem;
+}
+
+.split-table {
+    display: grid;
+    gap: 16px;
+}
+
+.table-scroll.compact th,
+.table-scroll.compact td {
+    padding: 9px 10px;
+}
+
+@media (max-width: 1100px) {
+    .reports-filters,
+    .reports-grid,
+    .reports-kpis,
+    .mini-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .reports-filters,
+    .reports-grid,
+    .reports-kpis,
+    .mini-grid,
+    .bar-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reports-shell">
+    <form method="get" class="reports-filters">
+        <div class="filter-field">
+            <label for="period">Periode</label>
+            <select id="period" name="period">
+                {% for value,label in period_choices %}
+                <option value="{{ value }}" {% if filters.period == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="date_debut">Date debut</label>
+            <input id="date_debut" type="date" name="date_debut" value="{{ filters.date_debut }}">
+        </div>
+        <div class="filter-field">
+            <label for="date_fin">Date fin</label>
+            <input id="date_fin" type="date" name="date_fin" value="{{ filters.date_fin }}">
+        </div>
+        <div class="filter-field">
+            <label for="devise">Devise</label>
+            <select id="devise" name="devise">
+                {% for currency in currency_choices %}
+                <option value="{{ currency }}" {% if filters.devise == currency %}selected{% endif %}>{{ currency }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="caisse">Caisse</label>
+            <select id="caisse" name="caisse">
+                <option value="">Toutes les caisses</option>
+                {% for caisse in caisses %}
+                <option value="{{ caisse.id }}" {% if filters.caisse == caisse.id %}selected{% endif %}>{{ caisse.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="moyen_paiement">Moyen paiement</label>
+            <select id="moyen_paiement" name="moyen_paiement">
+                {% for value,label in payment_method_choices %}
+                <option value="{{ value }}" {% if filters.moyen_paiement == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="statut_facture">Statut facture</label>
+            <select id="statut_facture" name="statut_facture">
+                {% for value,label in invoice_status_choices %}
+                <option value="{{ value }}" {% if filters.statut_facture == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label for="statut_paiement">Statut paiement</label>
+            <select id="statut_paiement" name="statut_paiement">
+                {% for value,label in payment_status_choices %}
+                <option value="{{ value }}" {% if filters.statut_paiement == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button type="submit">Appliquer</button>
+            <a href="{% url 'advanced_reports' %}" class="btn-link">Reinitialiser</a>
+        </div>
+    </form>
+
+    <section class="reports-kpis">
+        {% for card in report.financial_cards %}
+        <article class="kpi-tile">
+            <span class="kpi-label">{{ card.label }}</span>
+            <strong class="kpi-value">{{ card.value }}</strong>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="reports-grid">
+        <article class="report-panel">
+            <h3>Evolution des ventes</h3>
+            <div class="bar-list">
+                {% for row in report.sales.evolution %}
+                <div class="bar-row">
+                    <span class="row-muted">{{ row.label }}</span>
+                    <span class="bar-track"><span class="bar-fill" style="--bar: {{ row.percent }}%;"></span></span>
+                    <strong>{{ row.total_display }}</strong>
+                </div>
+                {% empty %}
+                <p class="row-muted">Aucune vente dans cette periode.</p>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Indicateurs de gestion</h3>
+            <div class="mini-grid">
+                {% for card in report.management_cards %}
+                <div class="mini-tile">
+                    <span class="mini-label">{{ card.label }}</span>
+                    <strong class="mini-value">{{ card.value }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Top clients</h3>
+            <div class="table-scroll compact">
+                <table>
+                    <thead><tr><th>Client</th><th>Factures</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for client in report.sales.top_clients %}
+                        <tr><td>{{ client.name }}</td><td>{{ client.count }}</td><td>{{ client.total_display }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="3">Aucune donnee client.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Top produits et services</h3>
+            <div class="table-scroll compact">
+                <table>
+                    <thead><tr><th>Designation</th><th>Quantite</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for item in report.sales.top_items %}
+                        <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>{{ item.total_display }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="3">Aucune ligne de vente.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Analyse paiements</h3>
+            <div class="mini-grid">
+                <div class="mini-tile"><span class="mini-label">Mobile Money</span><strong class="mini-value">{{ report.payments.total_mobile_money_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Cash</span><strong class="mini-value">{{ report.payments.total_cash_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Banque</span><strong class="mini-value">{{ report.payments.total_bank_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">En attente</span><strong class="mini-value">{{ report.payments.pending_count }}</strong></div>
+            </div>
+            <div class="table-scroll compact" style="margin-top:14px;">
+                <table>
+                    <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th><th>Confirme</th></tr></thead>
+                    <tbody>
+                        {% for row in report.payments.method_breakdown %}
+                        <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td><td>{{ row.confirmed_total_display }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Statuts paiements</h3>
+            <div class="table-scroll compact">
+                <table>
+                    <thead><tr><th>Statut</th><th>Nombre</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for row in report.payments.status_breakdown %}
+                        <tr><td><span class="status-badge">{{ row.label }}</span></td><td>{{ row.count }}</td><td>{{ row.total_display }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Analyse caisse</h3>
+            <div class="mini-grid">
+                <div class="mini-tile"><span class="mini-label">Entrees</span><strong class="mini-value">{{ report.cash.total_entries_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Sorties</span><strong class="mini-value">{{ report.cash.total_exits_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Sessions ouvertes</span><strong class="mini-value">{{ report.cash.open_sessions }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Ecarts</span><strong class="mini-value">{{ report.cash.sessions_with_gap }}</strong></div>
+            </div>
+            <div class="table-scroll compact" style="margin-top:14px;">
+                <table>
+                    <thead><tr><th>Caisse</th><th>Entrees</th><th>Sorties</th><th>Solde</th></tr></thead>
+                    <tbody>
+                        {% for row in report.cash.balance_by_caisse %}
+                        <tr><td>{{ row.name }}</td><td>{{ row.total_entries_display }}</td><td>{{ row.total_exits_display }}</td><td>{{ row.balance_display }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="4">Aucun mouvement de caisse.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Analyse stock</h3>
+            <div class="mini-grid">
+                <div class="mini-tile"><span class="mini-label">Valeur stock</span><strong class="mini-value">{{ report.stock.stock_value_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Stock faible</span><strong class="mini-value">{{ report.stock.low_stock_count }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Rupture</span><strong class="mini-value">{{ report.stock.out_of_stock_count }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Ecarts inventaire</span><strong class="mini-value">{{ report.stock.inventory_gap_count }}</strong></div>
+            </div>
+            <div class="table-scroll compact" style="margin-top:14px;">
+                <table>
+                    <thead><tr><th>Produit</th><th>Statut</th><th>Stock</th><th>Seuil</th><th>Valeur</th></tr></thead>
+                    <tbody>
+                        {% for row in report.stock.alert_product_rows %}
+                        <tr><td>{{ row.name }}</td><td><span class="status-badge">{{ row.status }}</span></td><td>{{ row.quantity }}</td><td>{{ row.threshold }}</td><td>{{ row.value_display }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="5">Aucune alerte stock.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Depenses</h3>
+            <div class="mini-grid">
+                <div class="mini-tile"><span class="mini-label">Total</span><strong class="mini-value">{{ report.expenses.total_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Nombre</span><strong class="mini-value">{{ report.expenses.count }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Comptabilite</span><strong class="mini-value">{{ report.accounting.result_label }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Resultat compta</span><strong class="mini-value">{{ report.accounting.result_display }}</strong></div>
+            </div>
+            <div class="bar-list" style="margin-top:14px;">
+                {% for row in report.expenses.evolution %}
+                <div class="bar-row">
+                    <span class="row-muted">{{ row.label }}</span>
+                    <span class="bar-track"><span class="bar-fill" style="--bar: {{ row.percent }}%;"></span></span>
+                    <strong>{{ row.total_display }}</strong>
+                </div>
+                {% empty %}
+                <p class="row-muted">Aucune depense dans cette periode.</p>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="report-panel">
+            <h3>Factures a surveiller</h3>
+            <div class="split-table">
+                <div class="table-scroll compact">
+                    <table>
+                        <thead><tr><th>Facture</th><th>Client</th><th>Date</th><th>Total</th></tr></thead>
+                        <tbody>
+                            {% for row in report.sales.unpaid_invoice_rows %}
+                            <tr><td>{{ row.numero }}</td><td>{{ row.client }}</td><td>{{ row.date }}</td><td>{{ row.amount_display }}</td></tr>
+                            {% empty %}
+                            <tr><td colspan="4">Aucune facture impayee.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+    </section>
+</div>
+{% endblock %}

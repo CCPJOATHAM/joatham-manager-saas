@@ -19,6 +19,7 @@ MAINTENANCE_MODULE_CHOICES = [
     ("comptabilite", _("Comptabilite")),
     ("apprenants", _("Apprenants")),
     ("abonnements", _("Abonnements")),
+    ("rapports", _("Rapports avances")),
     ("utilisateurs", _("Utilisateurs")),
     ("messages", _("Messagerie")),
 ]

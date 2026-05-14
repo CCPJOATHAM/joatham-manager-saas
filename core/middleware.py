@@ -16,6 +16,7 @@ MODULE_LABELS = {
     "comptabilite": _("Comptabilite"),
     "apprenants": _("Apprenants"),
     "abonnements": _("Abonnements"),
+    "rapports": _("Rapports avances"),
     "utilisateurs": _("Utilisateurs"),
     "messages": _("Messagerie"),
 }
@@ -29,6 +30,7 @@ MODULE_PREFIXES = [
     ("comptabilite", ("/compta/",)),
     ("apprenants", ("/apprenants/",)),
     ("abonnements", ("/abonnement/",)),
+    ("rapports", ("/rapports-avances/",)),
     ("utilisateurs", ("/utilisateurs/",)),
     ("messages", ("/messages/",)),
 ]

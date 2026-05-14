@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report_title }}</title>
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; color: #10233f; font-size: 10.5px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 14px; margin: 20px 0 8px; }
+    .muted { color: #64748b; }
+    .kpis { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    .kpis td { border: 1px solid #dde7f0; padding: 8px; width: 25%; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #dde7f0; padding: 6px; text-align: left; }
+    th { background: #f1f5f9; }
+    .footer { margin-top: 24px; color: #64748b; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <h1>{{ report_title }}</h1>
+  <p class="muted">{{ entreprise.nom }} - genere le {{ date_footer }}</p>
+
+  <table class="kpis">
+    <tr>
+      {% for card in report.financial_cards|slice:":4" %}
+      <td><strong>{{ card.label }}</strong><br>{{ card.value }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for card in report.financial_cards|slice:"4:8" %}
+      <td><strong>{{ card.label }}</strong><br>{{ card.value }}</td>
+      {% endfor %}
+    </tr>
+  </table>
+
+  <h2>Indicateurs de gestion</h2>
+  <table>
+    <tbody>
+      {% for card in report.management_cards %}
+      <tr><th>{{ card.label }}</th><td>{{ card.value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Top clients</h2>
+  <table>
+    <thead><tr><th>Client</th><th>Factures</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for row in report.sales.top_clients %}
+      <tr><td>{{ row.name }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td></tr>
+      {% empty %}
+      <tr><td colspan="3">Aucune donnee.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Paiements par moyen</h2>
+  <table>
+    <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th><th>Confirme</th></tr></thead>
+    <tbody>
+      {% for row in report.payments.method_breakdown %}
+      <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td><td>{{ row.confirmed_total_display }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Caisse et stock</h2>
+  <table>
+    <tbody>
+      <tr><th>Entrees caisse</th><td>{{ report.cash.total_entries_display }}</td><th>Sorties caisse</th><td>{{ report.cash.total_exits_display }}</td></tr>
+      <tr><th>Valeur stock</th><td>{{ report.stock.stock_value_display }}</td><th>Ruptures</th><td>{{ report.stock.out_of_stock_count }}</td></tr>
+      <tr><th>Stock faible</th><td>{{ report.stock.low_stock_count }}</td><th>Ecarts inventaire</th><td>{{ report.stock.inventory_gap_count }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Factures impayees recentes</h2>
+  <table>
+    <thead><tr><th>Facture</th><th>Client</th><th>Date</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for row in report.sales.unpaid_invoice_rows %}
+      <tr><td>{{ row.numero }}</td><td>{{ row.client }}</td><td>{{ row.date }}</td><td>{{ row.amount_display }}</td></tr>
+      {% empty %}
+      <tr><td colspan="4">Aucune facture impayee.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="footer">JOATHAM Manager - rapport avance</p>
+</body>
+</html>

@@ -50,6 +50,9 @@ MODULE_ACCESS_POLICY = {
     "accounting": ACCESS_PREMIUM,
     "accounting_reports": ACCESS_PREMIUM,
     "accounting_exports": ACCESS_PREMIUM,
+    "advanced_reports": ACCESS_PREMIUM,
+    "advanced_reports_exports": ACCESS_PREMIUM,
+    "business_dashboard": ACCESS_PREMIUM,
     "audit": ACCESS_PREMIUM,
     "audit_advanced": ACCESS_PREMIUM,
     "messages": ACCESS_PREMIUM,
@@ -81,6 +84,9 @@ MODULE_LABELS = {
     "accounting": "comptabilite",
     "accounting_reports": "rapports financiers",
     "accounting_exports": "exports comptables",
+    "advanced_reports": "rapports avances",
+    "advanced_reports_exports": "exports rapports avances",
+    "business_dashboard": "tableau de bord decisionnel",
     "apprenants": "apprenants",
     "users": "utilisateurs",
     "audit": "journal d'activites",
@@ -115,6 +121,9 @@ PLAN_MODULE_ALIASES = {
     "accounting": {"accounting", "comptabilite"},
     "accounting_reports": {"accounting_reports", "rapports_financiers"},
     "accounting_exports": {"accounting_exports", "exports_comptables", "exports"},
+    "advanced_reports": {"advanced_reports", "rapports_avances"},
+    "advanced_reports_exports": {"advanced_reports_exports", "exports_rapports_avances", "exports"},
+    "business_dashboard": {"business_dashboard", "tableau_bord_decisionnel"},
     "apprenants": {"apprenants"},
     "users": {"users", "utilisateurs"},
     "audit": {"audit"},
@@ -123,9 +132,11 @@ PLAN_MODULE_ALIASES = {
     "subscription": {"subscription", "abonnements"},
 }
 
-EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports"}
+EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports", "advanced_reports_exports"}
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
 PAYMENTS_PREMIUM_MODULES = {"payments", "mobile_money", "payment_validation", "payments_reports", "payments_exports"}
+ADVANCED_REPORTS_PREMIUM_MODULES = {"advanced_reports", "advanced_reports_exports", "business_dashboard"}
+PREMIUM_CODE_ONLY_MODULES = PAYMENTS_PREMIUM_MODULES | ADVANCED_REPORTS_PREMIUM_MODULES
 PREMIUM_DENIED_REASONS = {
     "premium_required",
     "feature_not_declared",
@@ -174,7 +185,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "subscription": state["subscription"],
                 "locked": True,
             }
-        if module_name in PAYMENTS_PREMIUM_MODULES:
+        if module_name in PREMIUM_CODE_ONLY_MODULES:
             if normalize_plan_code(plan) != PREMIUM_PLAN_CODE:
                 return {
                     "allowed": False,

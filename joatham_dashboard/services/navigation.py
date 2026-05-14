@@ -101,6 +101,15 @@ NAV_ITEMS = [
         "badge_counter": "unread_messages",
     },
     {
+        "label": _("Rapports avances"),
+        "url_name": "advanced_reports",
+        "permission": "reports.advanced_view",
+        "module": "advanced_reports",
+        "roles": ["proprietaire", "comptable"],
+        "prefixes": ["/rapports-avances/"],
+        "disabled_when_locked": True,
+    },
+    {
         "label": _("Organisation"),
         "url_name": "company_settings",
         "permission": "company.manage",
