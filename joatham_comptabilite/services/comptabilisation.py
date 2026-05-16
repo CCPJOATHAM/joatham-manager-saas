@@ -121,11 +121,15 @@ def comptabiliser_facture_emise(facture: Facture):
     compte_client = get_compte(facture.entreprise, "411")
     compte_vente = get_compte(facture.entreprise, "701")
     compte_tva = get_compte(facture.entreprise, "443")
+    montant_vente_net = facture.total_ht - facture.total_reduction
+    if montant_vente_net < Decimal("0"):
+        raise ValidationError("Les reductions ne peuvent pas depasser le montant hors taxe.")
 
     lignes = [
         {"compte": compte_client, "debit": facture.total_net, "credit": Decimal("0"), "libelle": facture.libelle if hasattr(facture, "libelle") else facture.numero},
-        {"compte": compte_vente, "debit": Decimal("0"), "credit": facture.total_ht, "libelle": "Vente facture"},
     ]
+    if montant_vente_net > Decimal("0"):
+        lignes.append({"compte": compte_vente, "debit": Decimal("0"), "credit": montant_vente_net, "libelle": "Vente facture"})
     if facture.total_tva > Decimal("0"):
         lignes.append({"compte": compte_tva, "debit": Decimal("0"), "credit": facture.total_tva, "libelle": "TVA collectee"})
 
@@ -151,10 +155,17 @@ def comptabiliser_paiement_facture(paiement: PaiementFacture):
     facture = paiement.facture
     journal = get_journal(facture.entreprise, "TR")
     compte_client = get_compte(facture.entreprise, "411")
-    compte_tresorerie = get_compte(
-        facture.entreprise,
-        "521" if paiement.mode in {PaiementFacture.ModePaiement.VIREMENT, PaiementFacture.ModePaiement.CHEQUE, PaiementFacture.ModePaiement.MOBILE_MONEY} else "531",
-    )
+    bank_like_modes = {
+        PaiementFacture.ModePaiement.VIREMENT,
+        PaiementFacture.ModePaiement.CHEQUE,
+        PaiementFacture.ModePaiement.MOBILE_MONEY,
+        PaiementFacture.ModePaiement.MPESA,
+        PaiementFacture.ModePaiement.ORANGE_MONEY,
+        PaiementFacture.ModePaiement.AIRTEL_MONEY,
+        PaiementFacture.ModePaiement.AFRIMONEY,
+        PaiementFacture.ModePaiement.CARTE,
+    }
+    compte_tresorerie = get_compte(facture.entreprise, "521" if paiement.mode in bank_like_modes else "531")
 
     return create_balanced_entry(
         entreprise=facture.entreprise,

@@ -29,6 +29,7 @@ class HealthCheckTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Cache-Control"], "no-store")
 
+    @override_settings(DEBUG=True, HEALTH_CHECK_TOKEN="")
     def test_database_health_check_returns_ok(self):
         response = self.client.get(reverse("database_health_check"))
 
@@ -36,6 +37,7 @@ class HealthCheckTests(TestCase):
         self.assertEqual(response["Cache-Control"], "no-store")
         self.assertEqual(json.loads(response.content), {"status": "ok"})
 
+    @override_settings(DEBUG=True, HEALTH_CHECK_TOKEN="")
     def test_database_health_check_hides_failure_details(self):
         with patch("core.health.connection.cursor", side_effect=Exception("db password should never leak")):
             response = self.client.get(reverse("database_health_check"))
@@ -43,6 +45,13 @@ class HealthCheckTests(TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertEqual(json.loads(response.content), {"status": "error"})
         self.assertNotIn("password", response.content.decode("utf-8").lower())
+
+    @override_settings(DEBUG=False, HEALTH_CHECK_TOKEN="")
+    def test_database_health_check_requires_token_when_debug_is_disabled(self):
+        response = self.client.get(reverse("database_health_check"))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content), {"status": "forbidden"})
 
     @override_settings(HEALTH_CHECK_TOKEN="expected-token")
     def test_database_health_check_can_be_token_protected(self):

@@ -321,6 +321,11 @@ body {
     justify-content: flex-end;
 }
 
+.logout-form {
+    display: inline-flex;
+    margin: 0;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -603,6 +608,7 @@ body {
     .top-actions,
     .topbar-meta,
     .language-switcher,
+    .logout-form,
     .btn-link,
     .language-select,
     .language-submit {
@@ -764,7 +770,10 @@ body {
                     </div>
                     <div class="top-actions">
                         {% block top_actions %}{% endblock %}
-                        <a href="{% url 'logout' %}" class="btn-link danger">{% trans "Deconnexion" %}</a>
+                        <form method="post" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-link danger">{% trans "Deconnexion" %}</button>
+                        </form>
                     </div>
                 </div>
             </div>

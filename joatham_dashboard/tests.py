@@ -118,10 +118,15 @@ class DashboardAccessTests(TestCase):
 
     def test_logout_route_disconnects_and_redirects_to_login(self):
         self.client.force_login(self.proprietaire)
-        response = self.client.get(reverse("logout"))
+        response = self.client.post(reverse("logout"))
         self.assertRedirects(response, reverse("login"))
         login_page = self.client.get(reverse("login"))
         self.assertEqual(login_page.status_code, 200)
+
+    def test_logout_route_rejects_get(self):
+        self.client.force_login(self.proprietaire)
+        response = self.client.get(reverse("logout"))
+        self.assertEqual(response.status_code, 405)
 
     def test_login_with_existing_active_session_redirects_to_confirmation_page(self):
         first_response = self.client.post(
@@ -216,7 +221,7 @@ class DashboardAccessTests(TestCase):
         )
         self.assertTrue(UserActiveSession.objects.filter(user=self.proprietaire).exists())
 
-        logout_response = self.client.get(reverse("logout"))
+        logout_response = self.client.post(reverse("logout"))
         self.assertRedirects(logout_response, reverse("login"))
         self.assertFalse(UserActiveSession.objects.filter(user=self.proprietaire).exists())
 
@@ -330,6 +335,7 @@ class DashboardAccessTests(TestCase):
         self.client.force_login(self.gestionnaire)
         response = self.client.get(reverse("gestion_dashboard"))
         self.assertNotContains(response, reverse("company_settings"))
+        self.assertNotContains(response, reverse("user_list"))
         self.assertNotContains(response, reverse("subscription_overview"))
         self.assertNotContains(response, reverse("activity_log_list"))
 
@@ -337,6 +343,7 @@ class DashboardAccessTests(TestCase):
         self.client.force_login(self.comptable)
         response = self.client.get(reverse("comptable_dashboard"))
         self.assertNotContains(response, reverse("company_settings"))
+        self.assertNotContains(response, reverse("user_list"))
         self.assertNotContains(response, reverse("subscription_overview"))
         self.assertNotContains(response, reverse("activity_log_list"))
         self.assertContains(response, "Vue de controle financier")

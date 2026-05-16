@@ -6,7 +6,7 @@ from joatham_users.permissions import permission_required
 
 from .services.clients_service import (
     create_client_for_entreprise,
-    delete_client,
+    delete_client as delete_client_service,
     get_client_for_entreprise,
     list_clients_for_entreprise,
     update_client,
@@ -48,14 +48,16 @@ def add_client(request):
 
 
 @permission_required("clients.manage")
+@module_access_required("clients")
 def delete_client(request, id):
     entreprise = get_user_entreprise_or_raise(request.user)
     client = get_client_for_entreprise(entreprise, id)
-    delete_client(client)
+    delete_client_service(client)
     return redirect("client_list")
 
 
 @permission_required("clients.manage")
+@module_access_required("clients")
 def edit_client(request, id):
     entreprise = get_user_entreprise_or_raise(request.user)
     client = get_client_for_entreprise(entreprise, id)

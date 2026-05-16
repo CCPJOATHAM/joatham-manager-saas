@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from core.audit import record_audit_event
 from core.services.product_policy import get_module_label, module_access_required
@@ -406,6 +407,7 @@ def email_verification_resend_view(request):
     return redirect("email_verification_sent")
 
 
+@require_POST
 def logout_view(request):
     logout_and_release_session(request)
     messages.success(request, FLASH_MESSAGES["logged_out"])

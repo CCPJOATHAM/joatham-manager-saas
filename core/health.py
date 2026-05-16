@@ -24,7 +24,7 @@ def health_check(request):
 def _is_database_health_authorized(request):
     expected_token = getattr(settings, "HEALTH_CHECK_TOKEN", "")
     if not expected_token:
-        return True
+        return bool(getattr(settings, "DEBUG", False))
     provided_token = request.headers.get("X-Health-Token") or request.GET.get("token", "")
     return constant_time_compare(provided_token, expected_token)
 
