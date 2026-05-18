@@ -714,7 +714,8 @@ class UserManagementTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Votre plan permet jusqu'a 1 utilisateur")
+        self.assertContains(response, "Cette fonctionnalite n&#x27;est pas incluse dans votre plan actuel")
+        self.assertContains(response, "Votre plan permet jusqu&#x27;a 1 utilisateur(s), invitations en attente incluses.")
         self.assertFalse(EntrepriseInvitation.objects.filter(email="invite.bloque@example.com").exists())
 
     def test_invitation_is_blocked_when_email_is_already_used(self):
