@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
+from joatham_billing.services.facturation import create_facture
 from joatham_comptabilite.models import CompteComptable, EcritureComptable, JournalComptable
 from joatham_comptabilite.services.bootstrap import bootstrap_comptabilite_entreprise
 from joatham_comptabilite.services.comptabilisation import (
@@ -10,7 +11,7 @@ from joatham_comptabilite.services.comptabilisation import (
     comptabiliser_paiement_facture,
 )
 
-from .factories import create_depense, create_entreprise, create_facture_and_payment, create_user
+from .factories import create_client, create_depense, create_entreprise, create_facture_and_payment, create_user
 
 
 class ComptabilisationTests(TestCase):
@@ -41,6 +42,25 @@ class ComptabilisationTests(TestCase):
             ).count(),
             1,
         )
+
+    def test_facture_entry_with_reductions_is_balanced(self):
+        client = create_client(self.entreprise, "Client Reduction")
+        facture = create_facture(
+            entreprise=self.entreprise,
+            user=self.gestionnaire,
+            client_id=client.id,
+            tva=Decimal("16"),
+            remise=Decimal("10"),
+            rabais=Decimal("5"),
+            ristourne=Decimal("2"),
+            lignes=[{"designation": "Prestation reduite", "quantite": 1, "prix": Decimal("100")}],
+        )
+
+        ecriture = comptabiliser_facture_emise(facture)
+
+        self.assertTrue(ecriture.est_equilibree())
+        self.assertEqual(ecriture.total_debit, facture.total_net)
+        self.assertEqual(ecriture.total_credit, facture.total_net)
 
     def test_payment_entry_is_balanced_and_idempotent(self):
         facture, paiement = create_facture_and_payment(self.entreprise, self.gestionnaire, self.comptable)
