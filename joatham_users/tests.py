@@ -560,6 +560,7 @@ class UserManagementTests(TestCase):
             prix=15.0,
             duree_jours=30,
             actif=True,
+            max_utilisateurs=10,
         )
         activate_subscription_for_entreprise(
             entreprise=self.entreprise,
