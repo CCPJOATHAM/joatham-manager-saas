@@ -1,0 +1,256 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Services | JOATHAM Manager{% endblock %}
+{% block content_title %}Services{% endblock %}
+{% block content_subtitle %}Gérez votre catalogue de prestations immatérielles sans le mélanger au module Produits.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'service_list' %}" class="btn-link">Liste des services</a>
+{% if can_manage_services_ui %}
+<a href="{% url 'service_create' %}" class="btn-link primary">Ajouter un service</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.65rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 740px;
+        line-height: 1.6;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .stat-value {
+        display: block;
+        margin-top: 8px;
+        color: #10233f;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+    }
+
+    .services-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .services-table thead {
+        background: #f8fafc;
+    }
+
+    .services-table th,
+    .services-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .services-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .services-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .service-name {
+        font-weight: 800;
+        color: #10233f;
+    }
+
+    .price {
+        font-weight: 800;
+        color: #1d4ed8;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .badge.active {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .badge.inactive {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-link,
+    .action-form button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.84rem;
+    }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 460px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Services</h2>
+        <p>Retrouvez ici vos prestations immatérielles, avec leur prix, leur statut et un accès simple pour tenir votre catalogue à jour.</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Services</span>
+        <span class="stat-value">{{ service_count }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Services actifs</span>
+        <span class="stat-value">{{ active_count }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Services inactifs</span>
+        <span class="stat-value">{{ inactive_count }}</span>
+    </div>
+</div>
+
+{% if services %}
+<div class="table-shell">
+    <table class="services-table">
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th>Prix</th>
+                <th>État</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>
+                    <div class="service-name">{{ service.nom }}</div>
+                    <div style="color:#64748b;">Prestation immatérielle</div>
+                </td>
+                <td class="price">{{ service.prix }}</td>
+                <td>
+                    {% if service.actif %}
+                    <span class="badge active">Actif</span>
+                    {% else %}
+                    <span class="badge inactive">Inactif</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if can_manage_services_ui %}
+                    <div class="actions">
+                        <a href="{% url 'service_update' service.id %}" class="action-link">Modifier</a>
+                        <form method="post" action="{% url 'service_toggle_status' service.id %}" class="action-form">
+                            {% csrf_token %}
+                            <button type="submit">{% if service.actif %}Désactiver{% else %}Activer{% endif %}</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span style="color:#64748b;">Lecture seule</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-shell">
+    <div class="empty-state">
+        <h3>Aucun service enregistré</h3>
+        <p>Commencez par ajouter une première prestation pour constituer votre catalogue de services.</p>
+        {% if can_manage_services_ui %}
+        <a href="{% url 'service_create' %}" class="btn-link primary">Ajouter un service</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
