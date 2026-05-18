@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from core.services.product_policy import can_access_module, get_module_access_state
+from core.services.product_policy import can_access_module, get_module_access_level, get_module_access_state
 from core.services.quotas import (
     FREE_PLAN_CLIENT_LIMIT,
     FREE_PLAN_EXPENSE_MONTHLY_LIMIT,
@@ -110,6 +110,38 @@ class SubscriptionPlanMatrixTests(TestCase):
         ):
             with self.subTest(module_name=module_name):
                 self.assertTrue(can_access_module(self.premium_owner, module_name))
+
+    def test_premium_module_aliases_share_the_same_access_decision(self):
+        for english_name, french_name in (
+            ("billing", "factures"),
+            ("accounting", "comptabilite"),
+            ("payments", "paiements"),
+            ("products", "produits"),
+            ("inventory", "inventaire"),
+            ("users", "utilisateurs"),
+            ("subscription", "abonnements"),
+            ("expenses", "depenses"),
+        ):
+            with self.subTest(module=english_name):
+                self.assertEqual(get_module_access_level(english_name), get_module_access_level(french_name))
+                self.assertTrue(can_access_module(self.premium_owner, english_name))
+                self.assertTrue(can_access_module(self.premium_owner, french_name))
+
+    def test_starter_plan_does_not_gain_premium_alias_access(self):
+        for module_name in ("accounting", "comptabilite", "payments", "paiements", "inventory", "inventaire"):
+            with self.subTest(module=module_name):
+                self.assertFalse(can_access_module(self.starter_owner, module_name))
+
+    def test_starter_plan_keeps_access_to_included_aliases(self):
+        for english_name, french_name in (
+            ("billing", "factures"),
+            ("products", "produits"),
+            ("subscription", "abonnements"),
+            ("expenses", "depenses"),
+        ):
+            with self.subTest(module=english_name):
+                self.assertTrue(can_access_module(self.starter_owner, english_name))
+                self.assertTrue(can_access_module(self.starter_owner, french_name))
 
 
 class SubscriptionQuotaMatrixTests(TestCase):

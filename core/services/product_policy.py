@@ -132,6 +132,22 @@ PLAN_MODULE_ALIASES = {
     "subscription": {"subscription", "abonnements"},
 }
 
+_MODULE_ALIAS_OWNERS = {}
+_AMBIGUOUS_MODULE_ALIASES = set()
+for canonical_module, aliases in PLAN_MODULE_ALIASES.items():
+    for alias in {canonical_module, *aliases}:
+        existing_owner = _MODULE_ALIAS_OWNERS.get(alias)
+        if existing_owner and existing_owner != canonical_module:
+            _AMBIGUOUS_MODULE_ALIASES.add(alias)
+        else:
+            _MODULE_ALIAS_OWNERS[alias] = canonical_module
+
+MODULE_CANONICAL_NAMES = {
+    alias: canonical_module
+    for alias, canonical_module in _MODULE_ALIAS_OWNERS.items()
+    if alias not in _AMBIGUOUS_MODULE_ALIASES
+}
+
 EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports", "advanced_reports_exports"}
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
 PAYMENTS_PREMIUM_MODULES = {"payments", "mobile_money", "payment_validation", "payments_reports", "payments_exports"}
@@ -146,20 +162,31 @@ PREMIUM_DENIED_REASONS = {
 }
 
 
+def get_canonical_module_name(module_name):
+    return MODULE_CANONICAL_NAMES.get(module_name, module_name)
+
+
 def get_module_access_level(module_name):
-    return MODULE_ACCESS_POLICY.get(module_name, ACCESS_LOCKED)
+    return MODULE_ACCESS_POLICY.get(get_canonical_module_name(module_name), ACCESS_LOCKED)
 
 
 def get_module_label(module_name):
-    return MODULE_LABELS.get(module_name, module_name)
+    canonical_module = get_canonical_module_name(module_name)
+    return MODULE_LABELS.get(module_name) or MODULE_LABELS.get(canonical_module, module_name)
 
 
 def get_plan_module_aliases(module_name):
-    return set(PLAN_MODULE_ALIASES.get(module_name, {module_name})) | {module_name}
+    canonical_module = get_canonical_module_name(module_name)
+    return (
+        set(PLAN_MODULE_ALIASES.get(canonical_module, {canonical_module}))
+        | set(PLAN_MODULE_ALIASES.get(module_name, set()))
+        | {canonical_module, module_name}
+    )
 
 
 def get_module_access_state(entreprise, module_name, *, as_of=None):
-    level = get_module_access_level(module_name)
+    canonical_module = get_canonical_module_name(module_name)
+    level = get_module_access_level(canonical_module)
     if level == ACCESS_LOCKED:
         return {
             "allowed": False,
@@ -185,7 +212,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "subscription": state["subscription"],
                 "locked": True,
             }
-        if module_name in PREMIUM_CODE_ONLY_MODULES:
+        if canonical_module in PREMIUM_CODE_ONLY_MODULES:
             if normalize_plan_code(plan) != PREMIUM_PLAN_CODE:
                 return {
                     "allowed": False,
@@ -203,7 +230,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
             }
 
         included_modules = set(getattr(plan, "modules_inclus", None) or [])
-        accepted_plan_modules = get_plan_module_aliases(module_name)
+        accepted_plan_modules = get_plan_module_aliases(canonical_module)
         if included_modules and included_modules.isdisjoint(accepted_plan_modules):
             return {
                 "allowed": False,
@@ -212,7 +239,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "subscription": state["subscription"],
                 "locked": True,
             }
-        if module_name in ACCOUNTING_MODULES and plan is not None and not getattr(plan, "acces_comptabilite", True):
+        if canonical_module in ACCOUNTING_MODULES and plan is not None and not getattr(plan, "acces_comptabilite", True):
             return {
                 "allowed": False,
                 "reason": "accounting_not_in_plan",
@@ -220,7 +247,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "subscription": state["subscription"],
                 "locked": True,
             }
-        if module_name in EXPORT_MODULES and plan is not None and not getattr(plan, "acces_exports", True):
+        if canonical_module in EXPORT_MODULES and plan is not None and not getattr(plan, "acces_exports", True):
             return {
                 "allowed": False,
                 "reason": "exports_not_in_plan",
