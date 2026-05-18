@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from core.models import ActivityLog
 from core.selectors.audit import get_inscription_billing_history
-from core.services.subscription import start_trial_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise
 from joatham_billing.models import Facture
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
@@ -352,8 +352,15 @@ class ApprenantsRoleUiTests(TestCase):
         self.owner = create_user("owner-ui-appr", "proprietaire", self.entreprise)
         self.user = self.owner
         self.comptable = create_user("compta-ui-appr", "comptable", self.entreprise)
-        self.plan = Abonnement.objects.create(nom="Apprenants UI", code="appr-ui", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        self.plan = Abonnement.objects.create(
+            nom="Apprenants UI",
+            code="appr-ui",
+            prix=10,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["apprenants"],
+        )
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
         self.apprenant = Apprenant.objects.create(entreprise=self.entreprise, nom="Alpha", prenom="Test")
         self.formation = Formation.objects.create(entreprise=self.entreprise, nom="Formation", prix=Decimal("100.00"))
         self.inscription = InscriptionFormation.objects.create(
@@ -652,9 +659,16 @@ class ApprenantsViewsTests(TestCase):
         self.proprietaire = create_user("owner-views", "proprietaire", self.entreprise)
         self.gestionnaire = create_user("gestion-views", "gestionnaire", self.entreprise)
         self.comptable = create_user("compta-views", "comptable", self.entreprise)
-        self.plan = Abonnement.objects.create(nom="Apprenants", code="apprenants", prix=24, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.proprietaire)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.proprietaire)
+        self.plan = Abonnement.objects.create(
+            nom="Apprenants",
+            code="apprenants",
+            prix=24,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["apprenants"],
+        )
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.proprietaire)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan)
         self.apprenant = Apprenant.objects.create(entreprise=self.entreprise, nom="Lema", prenom="Sarah")
         self.apprenant_externe = Apprenant.objects.create(entreprise=self.autre_entreprise, nom="Externe", prenom="Test")
         self.formation = Formation.objects.create(entreprise=self.entreprise, nom="Excel", prix=Decimal("75.00"))
@@ -705,6 +719,29 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(response.context["kpis"]["total_restant"], Decimal("50.00"))
         self.assertIn("alerts", response.context)
         self.assertNotContains(response, "150.00")
+
+    def test_apprenants_module_access_blocks_direct_urls(self):
+        self.plan.modules_inclus = ["dashboard"]
+        self.plan.save(update_fields=["modules_inclus"])
+        self.client.force_login(self.gestionnaire)
+
+        blocked_urls = [
+            reverse("apprenant_list"),
+            reverse("formation_list"),
+            reverse("formation_update", args=[self.formation.id]),
+            reverse("inscription_create"),
+            reverse("inscription_detail", args=[self.inscription.id]),
+            reverse("paiement_inscription_create", args=[self.inscription.id]),
+            reverse("inscription_generate_facture", args=[self.inscription.id]),
+            reverse("apprenants_pdf"),
+            reverse("inscriptions_excel"),
+        ]
+
+        for url in blocked_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 302)
+                self.assertIn("module=apprenants", response["Location"])
 
     def test_gestionnaire_can_create_apprenant(self):
         self.client.force_login(self.gestionnaire)
@@ -1061,6 +1098,15 @@ class ApprenantsExportViewsTests(TestCase):
         self.autre_entreprise = create_entreprise("Entreprise Export B")
         self.gestionnaire = create_user("gestion-export", "gestionnaire", self.entreprise)
         self.comptable = create_user("compta-export", "comptable", self.entreprise)
+        self.plan = Abonnement.objects.create(
+            nom="Apprenants Exports",
+            code="appr-exports",
+            prix=24,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["apprenants"],
+        )
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.gestionnaire)
         self.apprenant = Apprenant.objects.create(
             entreprise=self.entreprise,
             nom="Lukusa",
