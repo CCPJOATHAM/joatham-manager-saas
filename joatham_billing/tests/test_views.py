@@ -251,6 +251,22 @@ class BillingViewsPremiumTests(TestCase):
         self.assertNotContains(detail_response, "Mettre a jour le statut")
         self.assertContains(detail_response, "Enregistrer un paiement")
 
+    def test_billing_module_access_blocks_direct_sensitive_urls(self):
+        self.plan.modules_inclus = ["dashboard"]
+        self.plan.save(update_fields=["modules_inclus"])
+        blocked_urls = [
+            reverse("facture_list"),
+            reverse("edit_facture", args=[self.facture.id]),
+            reverse("change_facture_status", args=[self.facture.id]),
+            reverse("add_paiement_facture", args=[self.facture.id]),
+            reverse("payer_facture", args=[self.facture.id]),
+        ]
+
+        for url in blocked_urls:
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("module=billing", response["Location"])
+
     def test_add_paiement_facture_with_caisse_creates_cash_movement(self):
         response = self.client.post(
             reverse("add_paiement_facture", args=[self.facture.id]),

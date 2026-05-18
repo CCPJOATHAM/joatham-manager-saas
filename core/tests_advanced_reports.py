@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from core.selectors.reports import get_financial_summary, get_payment_analysis, get_stock_analysis
+from core.selectors.reports import get_financial_summary, get_payment_analysis, get_sales_analysis, get_stock_analysis
 from core.services.product_policy import can_access_module
 from core.services.reports import build_advanced_report_payload
 from core.services.subscription import (
@@ -241,6 +241,24 @@ class AdvancedReportsCalculationTests(TestCase):
         self.assertEqual(summary["paid_invoice_count"], 1)
         self.assertEqual(summary["unpaid_invoice_count"], 1)
         self.assertEqual(summary["pending_payment_count"], 1)
+
+    def test_financial_reports_use_invoice_total_net_with_reductions(self):
+        create_facture(
+            entreprise=self.entreprise,
+            user=self.owner,
+            client_id=self.client_obj.id,
+            tva=Decimal("16"),
+            remise=Decimal("10"),
+            lignes=[{"designation": "Formation avec remise", "quantite": 1, "prix": Decimal("100.00")}],
+        )
+
+        summary = get_financial_summary(self.entreprise, self.filters)
+        self.assertEqual(summary["revenue_total"], Decimal("256.00"))
+        self.assertEqual(summary["remaining_total"], Decimal("166.00"))
+
+        sales = get_sales_analysis(self.entreprise, self.filters)
+        self.assertEqual(sales["evolution"][0]["total"], Decimal("256.00"))
+        self.assertEqual(sales["top_clients"][0]["total"], Decimal("256.00"))
 
     def test_payment_method_and_status_breakdown(self):
         payments = get_payment_analysis(self.entreprise, self.filters)

@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.utils import timezone
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.db.models.functions import TruncDay, TruncMonth
 
@@ -260,8 +261,17 @@ def get_advanced_expenses_queryset(entreprise, *, date_debut=None, date_fin=None
     return queryset
 
 
+def _iter_invoices_with_totals(queryset):
+    if hasattr(queryset, "prefetch_related"):
+        return queryset.prefetch_related("lignes", "paiements")
+    return queryset
+
+
 def _sum_invoice_amounts(queryset):
-    return _coalesce_amount(queryset.aggregate(total=Sum("montant")).get("total"))
+    total = ZERO
+    for facture in _iter_invoices_with_totals(queryset):
+        total += Decimal(facture.total_net or 0)
+    return total
 
 
 def _get_collected_amount(entreprise, filters):
@@ -360,30 +370,35 @@ def get_sales_analysis(entreprise, filters):
         currency=filters.get("currency"),
     )
     active_invoices = invoices.exclude(statut=Facture.Statut.ANNULEE)
-    group_function = TruncMonth if filters.get("group_by") == "month" else TruncDay
+    group_by_month = filters.get("group_by") == "month"
+    period_buckets = {}
+    client_buckets = {}
+    for facture in _iter_invoices_with_totals(active_invoices.select_related("client")):
+        invoice_date = timezone.localtime(facture.date) if timezone.is_aware(facture.date) else facture.date
+        period = invoice_date.replace(day=1).date() if group_by_month else invoice_date.date()
+        period_bucket = period_buckets.setdefault(period, {"period": period, "total": ZERO, "count": 0})
+        period_bucket["total"] += Decimal(facture.total_net or 0)
+        period_bucket["count"] += 1
+
+        client_name = facture.client.nom if facture.client_id else facture.client_nom
+        client_key = (facture.client_id, client_name or "Client non renseigne")
+        client_bucket = client_buckets.setdefault(
+            client_key,
+            {"client_id": facture.client_id, "name": client_key[1], "total": ZERO, "count": 0},
+        )
+        client_bucket["total"] += Decimal(facture.total_net or 0)
+        client_bucket["count"] += 1
+
     evolution = [
         {
             "period": row["period"],
-            "label": row["period"].strftime("%m/%Y" if filters.get("group_by") == "month" else "%d/%m"),
-            "total": _coalesce_amount(row["total"]),
+            "label": row["period"].strftime("%m/%Y" if group_by_month else "%d/%m"),
+            "total": row["total"],
             "count": row["count"],
         }
-        for row in active_invoices.annotate(period=group_function("date"))
-        .values("period")
-        .annotate(total=Sum("montant"), count=Count("id"))
-        .order_by("period")
+        for row in sorted(period_buckets.values(), key=lambda item: item["period"])
     ]
-    top_clients = [
-        {
-            "client_id": row["client_id"],
-            "name": row["client__nom"] or row["client_nom"] or "Client non renseigne",
-            "total": _coalesce_amount(row["total"]),
-            "count": row["count"],
-        }
-        for row in active_invoices.values("client_id", "client__nom", "client_nom")
-        .annotate(total=Sum("montant"), count=Count("id"))
-        .order_by("-total", "client__nom")[:8]
-    ]
+    top_clients = sorted(client_buckets.values(), key=lambda item: (-item["total"], item["name"]))[:8]
     line_amount = ExpressionWrapper(F("quantite") * F("prix_unitaire"), output_field=DecimalField(max_digits=14, decimal_places=2))
     top_items = [
         {

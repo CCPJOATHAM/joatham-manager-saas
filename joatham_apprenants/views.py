@@ -112,6 +112,7 @@ def apprenant_create(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def formation_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formations = get_formations_by_entreprise(entreprise)
@@ -123,6 +124,7 @@ def formation_list(request):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def formation_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     context = {"entreprise": entreprise, "formation": None, **_get_apprenants_ui_permissions(request.user)}
@@ -149,6 +151,7 @@ def formation_create(request):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def formation_update(request, formation_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     formation = get_formation_by_entreprise(entreprise, formation_id)
@@ -176,6 +179,7 @@ def formation_update(request, formation_id):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def formation_toggle_status(request, formation_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     formation = get_formation_by_entreprise(entreprise, formation_id)
@@ -189,6 +193,7 @@ def formation_toggle_status(request, formation_id):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def inscription_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     apprenants = get_apprenants_by_entreprise(entreprise).filter(actif=True)
@@ -226,6 +231,7 @@ def inscription_create(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def inscription_detail(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -266,6 +272,7 @@ def inscription_detail(request, inscription_id):
 
 
 @permission_required("apprenants.payments")
+@module_access_required("apprenants")
 def paiement_inscription_create(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -300,6 +307,7 @@ def paiement_inscription_create(request, inscription_id):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def inscription_generate_facture(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -319,6 +327,7 @@ def inscription_generate_facture(request, inscription_id):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def inscription_link_existing_facture(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -339,6 +348,7 @@ def inscription_link_existing_facture(request, inscription_id):
 
 
 @permission_required("apprenants.manage")
+@module_access_required("apprenants")
 def inscription_unlink_facture(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -359,6 +369,7 @@ def inscription_unlink_facture(request, inscription_id):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def apprenants_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     apprenants = get_apprenants_by_entreprise(entreprise)
@@ -376,6 +387,7 @@ def apprenants_pdf(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def apprenants_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     apprenants = get_apprenants_by_entreprise(entreprise)
@@ -399,6 +411,7 @@ def apprenants_excel(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def formations_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formations = get_formations_by_entreprise(entreprise)
@@ -416,6 +429,7 @@ def formations_pdf(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def formations_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formations = get_formations_by_entreprise(entreprise)
@@ -441,6 +455,7 @@ def _get_inscriptions_export_queryset(request, entreprise):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def inscriptions_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscriptions = _get_inscriptions_export_queryset(request, entreprise)
@@ -458,6 +473,7 @@ def inscriptions_pdf(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def inscriptions_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscriptions = _get_inscriptions_export_queryset(request, entreprise)
@@ -482,6 +498,7 @@ def inscriptions_excel(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def inscription_paiements_pdf(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -501,6 +518,7 @@ def inscription_paiements_pdf(request, inscription_id):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def inscription_paiements_excel(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
@@ -525,6 +543,7 @@ def inscription_paiements_excel(request, inscription_id):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def apprenants_dashboard_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formation_id = request.GET.get("formation", "").strip()
@@ -548,6 +567,7 @@ def apprenants_dashboard_pdf(request):
 
 
 @permission_required("apprenants.view")
+@module_access_required("apprenants")
 def apprenants_dashboard_excel(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     formation_id = request.GET.get("formation", "").strip()

@@ -246,6 +246,7 @@ def facture_pdf(request, id):
 
 
 @login_required
+@module_access_required("billing")
 def payer_facture(request, id):
     can_record_payment(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -380,6 +381,7 @@ def add_facture(request):
 
 
 @login_required
+@module_access_required("billing")
 def edit_facture(request, id):
     can_manage_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -521,6 +523,7 @@ def facture_detail(request, id):
 
 
 @login_required
+@module_access_required("billing")
 def change_facture_status_view(request, id):
     can_manage_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -540,6 +543,7 @@ def change_facture_status_view(request, id):
 
 
 @login_required
+@module_access_required("billing")
 def add_paiement_facture(request, id):
     can_record_payment(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
