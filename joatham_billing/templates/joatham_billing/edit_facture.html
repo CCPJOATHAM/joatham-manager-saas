@@ -1,0 +1,420 @@
+{% extends "joatham_billing/base.html" %}
+
+{% block content %}
+<style>
+.editor-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.editor-grid input,
+.editor-grid select,
+.editor-grid button,
+.line-table input,
+.line-table select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d7dee7;
+    border-radius: 8px;
+}
+
+.line-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.line-table th,
+.line-table td {
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    vertical-align: top;
+}
+
+.catalog-meta {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.82rem;
+}
+
+.catalog-meta.low {
+    color: #b45309;
+}
+
+.catalog-meta.out {
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+.summary {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.summary-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: #f8fafc;
+}
+
+.summary-card strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.summary-card span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+</style>
+
+<div class="editor-card">
+    <h2>Modifier {{ facture.numero }}</h2>
+    <p>Edition autorisee uniquement tant que la facture est en brouillon.</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="editor-grid">
+            <div>
+                <label>Client enregistre</label>
+                <select name="client" id="client">
+                    <option value="">-- Aucun --</option>
+                    {% for client in clients %}
+                        <option value="{{ client.id }}" {% if facture.client_id == client.id %}selected{% endif %}>{{ client.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Client occasionnel</label>
+                <input type="text" name="client_nom" id="client_nom" value="{{ facture.client_nom|default:'' }}">
+            </div>
+            <div>
+                <label>TVA (%)</label>
+                <input type="number" step="0.01" min="0" name="tva" id="tva" value="{{ facture.tva|default:default_tva }}">
+            </div>
+            <div>
+                <label>Remise (%)</label>
+                <input type="number" step="0.01" min="0" id="remise" name="remise" value="{{ facture.remise }}">
+            </div>
+            <div>
+                <label>Rabais (%)</label>
+                <input type="number" step="0.01" min="0" id="rabais" name="rabais" value="{{ facture.rabais }}">
+            </div>
+            <div>
+                <label>Ristourne (%)</label>
+                <input type="number" step="0.01" min="0" id="ristourne" name="ristourne" value="{{ facture.ristourne }}">
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-add" onclick="ajouterLigne()">Ajouter une ligne</button>
+
+        <table class="line-table" id="table_facture">
+            <tr>
+                <th>Produit</th>
+                <th>Service</th>
+                <th>Libellé</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+            {% for ligne in facture.lignes.all %}
+            <tr>
+                <td>
+                    <select name="product_id[]" class="product_select">
+                        <option value="">-- Choisir --</option>
+                        {% for product in products %}
+                            <option
+                                value="{{ product.id }}"
+                                data-name="{{ product.nom }}"
+                                data-description="{{ product.description|default:'' }}"
+                                data-prix="{{ product.prix_unitaire }}"
+                                data-stock="{{ product.quantite_stock }}"
+                                data-seuil="{{ product.seuil_alerte }}"
+                                data-status="{{ product.stock_status }}"
+                                {% if ligne.produit_id == product.id %}selected{% endif %}
+                            >
+                                {{ product.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <span class="catalog-meta product-status"></span>
+                </td>
+                <td>
+                    <select name="service_id[]" class="service_select">
+                        <option value="">-- Choisir --</option>
+                        {% for service in services %}
+                            <option value="{{ service.id }}" data-name="{{ service.nom }}" data-prix="{{ service.prix }}" {% if not ligne.produit_id and ligne.designation == service.nom %}selected{% endif %}>
+                                {{ service.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="text" name="designation[]" class="designation_input" value="{{ ligne.designation }}"></td>
+                <td><input type="number" name="quantite[]" class="qte" value="{{ ligne.quantite }}" min="1"></td>
+                <td><input type="number" step="0.01" name="prix[]" class="prix" value="{{ ligne.prix_unitaire }}" min="0"></td>
+                <td><input type="text" class="total_ligne" readonly></td>
+                <td><button type="button" onclick="supprimerLigne(this)">Supprimer</button></td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div class="summary">
+            <h3>Prévisualisation des totaux</h3>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <strong>Quantité totale</strong>
+                    <span id="total_quantite">0</span>
+                </div>
+                <div class="summary-card">
+                    <strong>Total HT</strong>
+                    <span id="total_ht">0</span>
+                </div>
+                <div class="summary-card">
+                    <strong>TVA</strong>
+                    <span id="total_tva">0</span>
+                </div>
+                <div class="summary-card">
+                    <strong>Réductions</strong>
+                    <span id="total_reduction">0</span>
+                </div>
+                <div class="summary-card">
+                    <strong>Total net</strong>
+                    <span id="total_net">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-print" onclick="return confirm('Confirmer la modification de cette facture brouillon ?')">Enregistrer les modifications</button>
+            <a href="/factures/{{ facture.id }}/" class="btn btn-download">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+const currencyCode = "{{ currency_code|default:'CDF'|escapejs }}";
+
+function formatMoney(value) {
+    return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: currencyCode,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value || 0);
+}
+
+function getProductWarning(option) {
+    if (!option || !option.value) return { text: "", className: "" };
+    const stock = parseFloat(option.getAttribute("data-stock") || "0");
+    const seuil = parseFloat(option.getAttribute("data-seuil") || "0");
+    if (stock <= 0) {
+        return { text: "Rupture de stock", className: "out" };
+    }
+    if (stock <= seuil) {
+        return { text: "Stock faible", className: "low" };
+    }
+    return { text: "", className: "" };
+}
+
+function renderProductWarning(row) {
+    const productSelect = row.querySelector(".product_select");
+    const statusNode = row.querySelector(".product-status");
+    if (!productSelect || !statusNode) return;
+    const option = productSelect.options[productSelect.selectedIndex];
+    const warning = getProductWarning(option);
+    statusNode.className = "catalog-meta product-status" + (warning.className ? ` ${warning.className}` : "");
+    statusNode.textContent = warning.text;
+}
+
+function calculer() {
+    let totalHt = 0;
+    let totalQuantite = 0;
+
+    document.querySelectorAll("#table_facture tr").forEach((row, index) => {
+        if (index === 0) return;
+        const qte = row.querySelector(".qte");
+        const prix = row.querySelector(".prix");
+        const total = row.querySelector(".total_ligne");
+        if (!qte || !prix || !total) return;
+
+        const qteValue = parseFloat(qte.value) || 0;
+        const prixValue = parseFloat(prix.value) || 0;
+        const value = qteValue * prixValue;
+        total.value = formatMoney(value);
+        totalHt += value;
+        totalQuantite += qteValue;
+    });
+
+    const tva = parseFloat(document.getElementById("tva").value || 0);
+    const remise = parseFloat(document.getElementById("remise").value || 0);
+    const rabais = parseFloat(document.getElementById("rabais").value || 0);
+    const ristourne = parseFloat(document.getElementById("ristourne").value || 0);
+
+    const totalTva = totalHt * tva / 100;
+    const totalReduction = totalHt * remise / 100 + totalHt * rabais / 100 + totalHt * ristourne / 100;
+    const totalNet = totalHt + totalTva - totalReduction;
+
+    document.getElementById("total_quantite").innerText = totalQuantite.toFixed(0);
+    document.getElementById("total_ht").innerText = formatMoney(totalHt);
+    document.getElementById("total_tva").innerText = formatMoney(totalTva);
+    document.getElementById("total_reduction").innerText = formatMoney(totalReduction);
+    document.getElementById("total_net").innerText = formatMoney(totalNet);
+}
+
+function setupRow(row) {
+    const productSelect = row.querySelector(".product_select");
+    const serviceSelect = row.querySelector(".service_select");
+    const designation = row.querySelector(".designation_input");
+    const qte = row.querySelector(".qte");
+    const prix = row.querySelector(".prix");
+
+    if (productSelect && designation && prix) {
+        productSelect.addEventListener("change", function() {
+            const option = productSelect.options[productSelect.selectedIndex];
+            if (productSelect.value !== "" && option) {
+                designation.value = option.getAttribute("data-description") || option.getAttribute("data-name") || "";
+                const productPrice = option.getAttribute("data-prix");
+                if (productPrice) {
+                    prix.value = productPrice;
+                }
+                if (serviceSelect) {
+                    serviceSelect.value = "";
+                }
+            }
+            renderProductWarning(row);
+            calculer();
+        });
+    }
+
+    if (serviceSelect && designation && prix) {
+        serviceSelect.addEventListener("change", function() {
+            const option = serviceSelect.options[serviceSelect.selectedIndex];
+            if (serviceSelect.value !== "" && option) {
+                designation.value = option.getAttribute("data-name") || "";
+                const servicePrice = option.getAttribute("data-prix");
+                if (servicePrice) {
+                    prix.value = servicePrice;
+                }
+                if (productSelect) {
+                    productSelect.value = "";
+                }
+            }
+            renderProductWarning(row);
+            calculer();
+        });
+    }
+
+    if (designation) designation.addEventListener("input", calculer);
+    if (qte) qte.addEventListener("input", calculer);
+    if (prix) prix.addEventListener("input", calculer);
+
+    renderProductWarning(row);
+}
+
+function ajouterLigne() {
+    const table = document.getElementById("table_facture");
+    const row = table.insertRow(-1);
+    row.innerHTML = `
+        <td>
+            <select name="product_id[]" class="product_select">
+                <option value="">-- Choisir --</option>
+                {% for product in products %}
+                    <option
+                        value="{{ product.id }}"
+                        data-name="{{ product.nom|escapejs }}"
+                        data-description="{{ product.description|default:''|escapejs }}"
+                        data-prix="{{ product.prix_unitaire }}"
+                        data-stock="{{ product.quantite_stock }}"
+                        data-seuil="{{ product.seuil_alerte }}"
+                        data-status="{{ product.stock_status }}"
+                    >
+                        {{ product.nom|escapejs }}
+                    </option>
+                {% endfor %}
+            </select>
+            <span class="catalog-meta product-status"></span>
+        </td>
+        <td>
+            <select name="service_id[]" class="service_select">
+                <option value="">-- Choisir --</option>
+                {% for service in services %}
+                    <option value="{{ service.id }}" data-name="{{ service.nom|escapejs }}" data-prix="{{ service.prix }}">
+                        {{ service.nom|escapejs }}
+                    </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><input type="text" name="designation[]" class="designation_input"></td>
+        <td><input type="number" name="quantite[]" class="qte" value="1" min="1"></td>
+        <td><input type="number" step="0.01" name="prix[]" class="prix" value="0" min="0"></td>
+        <td><input type="text" class="total_ligne" readonly></td>
+        <td><button type="button" onclick="supprimerLigne(this)">Supprimer</button></td>
+    `;
+    setupRow(row);
+    calculer();
+}
+
+function supprimerLigne(button) {
+    const table = document.getElementById("table_facture");
+    if (table.rows.length <= 2) return;
+    button.closest("tr").remove();
+    calculer();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const client = document.getElementById("client");
+    const clientNom = document.getElementById("client_nom");
+
+    client.addEventListener("change", () => {
+        clientNom.disabled = client.value !== "";
+        if (client.value !== "") clientNom.value = "";
+    });
+
+    clientNom.addEventListener("input", () => {
+        client.disabled = clientNom.value !== "";
+        if (clientNom.value !== "") client.value = "";
+    });
+
+    document.querySelectorAll("#table_facture tr").forEach((row, index) => {
+        if (index === 0) return;
+        setupRow(row);
+    });
+
+    document.getElementById("tva").addEventListener("input", calculer);
+    document.getElementById("remise").addEventListener("input", calculer);
+    document.getElementById("rabais").addEventListener("input", calculer);
+    document.getElementById("ristourne").addEventListener("input", calculer);
+
+    calculer();
+});
+</script>
+{% endblock %}

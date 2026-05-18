@@ -1,0 +1,468 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ facture.numero }}{% endblock %}
+
+{% block pdf_styles %}
+        @page {
+            size: A4;
+            margin: 9mm 10mm 12mm 10mm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 9px;
+            color: #1f2933;
+            -pdf-keep-in-frame-mode: shrink;
+        }
+
+        .page {
+            width: 100%;
+        }
+
+        .report-shell {
+            padding: 4px 6px 6px;
+            background: #ffffff;
+        }
+
+        .copy-block {
+            padding: 0;
+            margin: 0;
+        }
+
+        .copy-block--page-break {
+            page-break-before: always;
+        }
+
+        .header-table,
+        .details-table,
+        .summary-table,
+        .bank-legal-table,
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td,
+        .bank-legal-table td,
+        .footer-table td {
+            border: none;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .copy-label {
+            margin-bottom: 2px;
+            text-align: right;
+        }
+
+        .copy-badge {
+            display: inline-block;
+            background: #eef2f7;
+            color: #0f172a;
+            font-size: 8px;
+            font-weight: bold;
+            padding: 2px 7px;
+        }
+
+        .company-block {
+            padding-right: 8px;
+        }
+
+        .company-header {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .company-header td {
+            border: none;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .logo-cell {
+            width: 58px;
+            padding-right: 6px;
+        }
+
+        .logo-box {
+            width: 52px;
+            height: 52px;
+            padding: 1px;
+            background: #fff;
+        }
+
+        .logo-box img {
+            width: 48px;
+            height: 48px;
+        }
+
+        .invoice-block {
+            text-align: right;
+            padding-left: 4px;
+            padding-right: 3px;
+        }
+
+        .qr-block {
+            text-align: right;
+            padding-left: 4px;
+        }
+
+        .brand-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0f172a;
+            text-transform: uppercase;
+            line-height: 1.15;
+            margin-bottom: 1px;
+        }
+
+        .brand-subtitle {
+            font-size: 8px;
+            color: #52606d;
+            line-height: 1.22;
+        }
+
+        .invoice-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .invoice-number {
+            font-size: 10px;
+            font-weight: bold;
+            color: #334155;
+            margin-top: 1px;
+        }
+
+        .invoice-date {
+            font-size: 8px;
+            color: #52606d;
+            margin-top: 2px;
+            line-height: 1.22;
+        }
+
+        .qr-box {
+            display: inline-block;
+            padding: 2px;
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .qr-box img {
+            width: 62px;
+            height: 62px;
+        }
+
+        .qr-caption {
+            font-size: 6px;
+            color: #52606d;
+            margin-top: 1px;
+        }
+
+        .spacer-sm {
+            height: 2px;
+            line-height: 2px;
+            font-size: 2px;
+        }
+
+        .client-line,
+        .amount-in-words,
+        .info-card {
+            padding: 4px 0;
+        }
+
+        .client-line {
+            background: transparent;
+            line-height: 1.22;
+            border-bottom: 1px solid #dde7f0;
+        }
+
+        .client-line strong {
+            color: #334155;
+        }
+
+        .details-table {
+            page-break-inside: auto;
+        }
+
+        .details-table th {
+            background: #eef2f7;
+            color: #0f172a;
+            font-size: 8px;
+            text-transform: uppercase;
+            border: none;
+            border-bottom: 1px solid #cfd8e3;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .details-table td {
+            border: none;
+            border-bottom: 1px solid #e5edf5;
+            padding: 3px 3px;
+            font-size: 8px;
+            vertical-align: middle;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .numeric-col {
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .summary-wrap {
+            width: 39%;
+            margin-left: auto;
+        }
+
+        .summary-table td {
+            border: none;
+            border-bottom: 1px solid #e5edf5;
+            padding: 3px 4px;
+            vertical-align: middle;
+        }
+
+        .summary-label {
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .grand-total td {
+            background: #f1f5f9;
+            font-weight: bold;
+            font-size: 10px;
+            border-bottom: none;
+            padding-top: 5px;
+        }
+
+        .amount-in-words {
+            background: transparent;
+            line-height: 1.28;
+            border-top: 1px solid #e5edf5;
+        }
+
+        .section-title {
+            font-size: 8px;
+            font-weight: bold;
+            color: #52606d;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .bank-legal-table .info-card {
+            min-height: 38px;
+            background: transparent;
+            border-top: 1px solid #e5edf5;
+        }
+
+        .card-split-left {
+            padding-right: 4px;
+        }
+
+        .card-split-right {
+            padding-left: 4px;
+        }
+
+        .bank-legal-table p {
+            margin: 0 0 1px 0;
+            line-height: 1.22;
+        }
+
+        .footer {
+            border-top: 1px solid #dde7f0;
+            padding-top: 4px;
+            font-size: 7px;
+            color: #52606d;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .cut-line {
+            margin: 5px 0 4px 0;
+            border-top: 1px dashed #5b6573;
+            padding-top: 2px;
+            text-align: center;
+            font-size: 8px;
+            color: #5b6573;
+        }
+{% endblock %}
+
+{% block pdf_content %}
+    <div class="page">
+        {% for copy in copies %}
+            <div class="copy-block{% if copy.force_page_break %} copy-block--page-break{% endif %}">
+                <div class="report-shell">
+                    <div class="copy-label">
+                        <span class="copy-badge">{{ copy.label }}</span>
+                    </div>
+
+                    <table class="header-table">
+                        <tr>
+                            <td width="54%" class="company-block">
+                                <table class="company-header">
+                                    <tr>
+                                        {% if legal_information.logo_data_uri %}
+                                        <td class="logo-cell">
+                                            <div class="logo-box">
+                                                <img src="{{ legal_information.logo_data_uri }}" alt="Logo">
+                                            </div>
+                                        </td>
+                                        {% endif %}
+                                        <td>
+                                            <div class="brand-title">{{ legal_information.primary_name }}</div>
+                                            {% if legal_information.secondary_name %}
+                                                <div class="brand-subtitle">{{ legal_information.secondary_name }}</div>
+                                            {% endif %}
+                                            {% if legal_information.address %}
+                                                <div class="brand-subtitle">{{ legal_information.address }}</div>
+                                            {% endif %}
+                                            {% if legal_information.city or legal_information.country %}
+                                                <div class="brand-subtitle">{{ legal_information.city }}{% if legal_information.city and legal_information.country %} - {% endif %}{{ legal_information.country }}</div>
+                                            {% endif %}
+                                            {% if legal_information.phone or legal_information.email %}
+                                                <div class="brand-subtitle">{% if legal_information.phone %}Tel : {{ legal_information.phone }}{% endif %}{% if legal_information.phone and legal_information.email %} | {% endif %}{% if legal_information.email %}Email : {{ legal_information.email }}{% endif %}</div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td width="26%" class="invoice-block">
+                                <div class="invoice-title">FACTURE</div>
+                                <div class="invoice-number">No {{ facture.numero }}</div>
+                                <div class="invoice-date">
+                                    Date : {{ facture.date|date:"d/m/Y" }}<br>
+                                    Heure : {{ facture.date|date:"H:i:s" }}
+                                </div>
+                            </td>
+                            <td width="20%" class="qr-block">
+                                <div class="qr-box">
+                                    <img src="{{ qr_code_data_uri }}" alt="QR facture">
+                                    <div class="qr-caption">Verification facture</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <div class="client-line">
+                        <strong>Client :</strong> {{ client_name|default:"Client non renseigne" }}
+                    </div>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th width="7%">#</th>
+                            <th width="47%">Prestations</th>
+                            <th width="12%" class="numeric-col">Qte</th>
+                            <th width="15%" class="numeric-col">P.U</th>
+                            <th width="9%" class="numeric-col">TVA</th>
+                            <th width="10%" class="numeric-col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in lignes %}
+                            <tr>
+                                <td class="text-right">{{ ligne.index }}</td>
+                                <td class="text-left">{{ ligne.designation }}</td>
+                                <td class="numeric-col">{{ ligne.quantite }}</td>
+                                <td class="numeric-col">{{ ligne.prix_unitaire }}</td>
+                                <td class="numeric-col">{{ tva_display }}%</td>
+                                <td class="numeric-col">{{ ligne.total }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-left">Aucune ligne de facturation enregistree.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <div class="summary-wrap">
+                        <table class="summary-table">
+                            <tr>
+                                <td class="summary-label">Total HT</td>
+                                <td class="text-right">{{ summary.total_ht }}</td>
+                            </tr>
+                            <tr>
+                                <td class="summary-label">{{ summary.tva_label }}</td>
+                                <td class="text-right">{{ summary.total_tva }}</td>
+                            </tr>
+                            <tr>
+                                <td class="summary-label">Reduction</td>
+                                <td class="text-right">{{ summary.total_reduction }}</td>
+                            </tr>
+                            <tr class="grand-total">
+                                <td>TOTAL NET</td>
+                                <td class="text-right">{{ summary.total_net }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <div class="amount-in-words">
+                        <strong>Arrete a :</strong> {{ summary.amount_in_words }}
+                    </div>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <table class="bank-legal-table">
+                        <tr>
+                            <td width="50%" class="card-split-left">
+                                <div class="info-card">
+                                    <div class="section-title">Coordonnees bancaires</div>
+                                    {% if legal_information.bank_name %}<p><strong>Banque :</strong> {{ legal_information.bank_name }}</p>{% endif %}
+                                    {% if legal_information.bank_account %}<p><strong>Compte :</strong> {{ legal_information.bank_account }}</p>{% endif %}
+                                </div>
+                            </td>
+                            <td width="50%" class="card-split-right">
+                                <div class="info-card">
+                                    <div class="section-title">Informations legales</div>
+                                    {% if legal_information.impot %}<p><strong>No Impot :</strong> {{ legal_information.impot }}</p>{% endif %}
+                                    {% if legal_information.rccm %}<p><strong>RCCM :</strong> {{ legal_information.rccm }}</p>{% endif %}
+                                    {% if legal_information.id_nat %}<p><strong>ID NAT :</strong> {{ legal_information.id_nat }}</p>{% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="spacer-sm">&nbsp;</div>
+
+                    <div class="footer">
+                        <table class="footer-table">
+                            <tr>
+                                <td width="62%" class="footer-left">Facture générée automatiquement par JOATHAM Manager</td>
+                                <td width="38%" class="footer-right">{{ footer_datetime }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {% if not forloop.last and compact_layout %}
+                <div class="cut-line">Decouper ici</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
