@@ -1,0 +1,738 @@
+{% extends "joatham_billing/base.html" %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 26px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.7rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 720px;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .hero-actions .btn {
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+    }
+
+    .hero-actions .btn-print {
+        background: #ffffff;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .hero-actions .btn-add {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .kpi-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+        border: 1px solid #dde7f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6ff;
+        color: #2563eb;
+    }
+
+    .kpi-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .kpi-label {
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.35;
+    }
+
+    .kpi-value {
+        display: block;
+        margin-top: 3px;
+        color: #10233f;
+        font-size: 1.08rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .kpi-meta {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .page-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel h3 {
+        margin: 0 0 8px;
+        font-size: 1.08rem;
+    }
+
+    .panel-subtitle {
+        margin: 0 0 18px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .filters-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field label {
+        font-weight: 700;
+        color: #10233f;
+        font-size: 0.95rem;
+    }
+
+    .filters-form input,
+    .filters-form select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        background: #fff;
+    }
+
+    .panel-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .panel-actions button,
+    .panel-actions a {
+        min-height: 42px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 1px solid #d7dee7;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .panel-actions button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        border-color: #2563eb;
+    }
+
+    .panel-actions a {
+        background: #fff;
+        color: #10233f;
+    }
+
+    .helper-card {
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 16px;
+        background: #f8fbff;
+        border: 1px solid #d9e6fb;
+    }
+
+    .helper-card strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #10233f;
+    }
+
+    .helper-card p {
+        margin: 0;
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 0.92rem;
+    }
+
+    .table-shell {
+        border: 1px solid #dde7f0;
+        border-radius: 24px;
+        overflow: visible;
+        background: #fff;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.06);
+    }
+
+    .table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    .table-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7;
+        background: #ffffff;
+        flex-wrap: wrap;
+    }
+
+    .table-toolbar h3 {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+    .table-toolbar p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .table-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .factures-table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+    }
+
+    .factures-table thead {
+        background: #f8fafc;
+    }
+
+    .factures-table th,
+    .factures-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .factures-table th {
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .factures-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .invoice-number {
+        font-weight: 800;
+        color: #10233f;
+        text-decoration: none;
+    }
+
+    .client-name {
+        color: #10233f;
+        font-weight: 700;
+    }
+
+    .date-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .amount-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .amount-pill.total {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .amount-pill.paid {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .amount-pill.remaining {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .status-brouillon {
+        background: #eef2f7;
+        border-color: #d7dee7;
+        color: #52606d;
+    }
+
+    .status-emise {
+        background: #e0f2fe;
+        border-color: #bae6fd;
+        color: #075985;
+    }
+
+    .status-payee {
+        background: #dcfce7;
+        border-color: #bbf7d0;
+        color: #166534;
+    }
+
+    .status-annulee {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+    }
+
+    .status-partial {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #9a3412;
+    }
+
+    .actions-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .actions-group .btn {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 10px;
+        font-size: 0.84rem;
+    }
+
+    .actions-group .btn-print {
+        background: #fff;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .actions-group .btn-download {
+        background: #f8fafc;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .actions-group .btn-add {
+        background: #eef6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .actions-group .btn-paid {
+        background: linear-gradient(135deg, #0f766e, #115e59);
+        border: 1px solid #0f766e;
+        color: #fff;
+    }
+
+    .empty-state {
+        padding: 60px 24px;
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .empty-state h3 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+    }
+
+    .empty-state p {
+        margin: 0 auto 18px;
+        max-width: 480px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .empty-state .btn-link {
+        display: inline-flex;
+    }
+
+    .empty-state .helper {
+        margin-top: 10px;
+        color: #94a3b8;
+        font-size: 0.92rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+
+    .pagination .btn {
+        min-height: 38px;
+        border-radius: 10px;
+        padding: 0 14px;
+    }
+
+    .pagination .btn-print {
+        background: #fff;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .pagination span {
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    @media (max-width: 1180px) {
+        .kpi-grid {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+
+        .page-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 780px) {
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero">
+    <div>
+        <h2>Facturation</h2>
+        <p>Pilotez vos factures, suivez les encaissements et retrouvez rapidement les documents PDF de votre entreprise dans une interface plus lisible et plus professionnelle.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{% url 'facture_list' %}" class="btn btn-print">Actualiser la liste</a>
+        {% if can_manage_factures_ui %}
+        <a href="{% url 'add_facture' %}" class="btn btn-add">Nouvelle facture</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                <path d="M8 9h8M8 13h5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="kpi-label">Factures visibles</span>
+            <span class="kpi-value">{{ facture_count }}</span>
+            <span class="kpi-meta">{{ paid_count }} payee{{ paid_count|pluralize:"s" }}</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:#eef6ff; color:#1d4ed8;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 6v12M7 10.5c0-1.38 2.24-2.5 5-2.5s5 1.12 5 2.5-2.24 2.5-5 2.5-5 1.12-5 2.5S9.24 18 12 18s5-1.12 5-2.5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="kpi-label">Montant facture</span>
+            <span class="kpi-value">{{ total_emis_display }}</span>
+            <span class="kpi-meta">Total emis sur la selection courante</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:#eefcf6; color:#047857;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20 7 9 18l-5-5"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="kpi-label">Montant encaisse</span>
+            <span class="kpi-value">{{ total_encaisse_display }}</span>
+            <span class="kpi-meta">{{ partial_count }} facture{{ partial_count|pluralize:"s" }} avec paiement partiel</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fff7ed; color:#c2410c;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 8v5"></path>
+                <path d="M12 16h.01"></path>
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+            </svg>
+        </div>
+        <div>
+            <span class="kpi-label">Reste a encaisser</span>
+            <span class="kpi-value">{{ total_restant_display }}</span>
+            <span class="kpi-meta">{{ overdue_count }} facture{{ overdue_count|pluralize:"s" }} non soldee{{ overdue_count|pluralize:"s" }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="page-grid">
+    <div class="panel">
+        <h3>Filtres et actions</h3>
+        <p class="panel-subtitle">Affinez la liste par client, statut ou periode, puis reprenez rapidement vos actions de facturation.</p>
+
+        <form method="get" class="filters-form">
+            <div class="field">
+                <label for="billing-search">Recherche</label>
+                <input id="billing-search" type="text" name="search" placeholder="Numero, client ou mot-cle" value="{{ request.GET.search }}">
+            </div>
+
+            <div class="field">
+                <label for="billing-client">Client</label>
+                <select id="billing-client" name="client">
+                    <option value="">Tous les clients</option>
+                    {% for client in clients %}
+                        <option value="{{ client.id }}" {% if request.GET.client == client.id|stringformat:"s" %}selected{% endif %}>{{ client.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="billing-statut">Statut</label>
+                <select id="billing-statut" name="statut">
+                    <option value="">Tous les statuts</option>
+                    {% for value, label in statut_choices %}
+                        <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                    <option value="paye" {% if request.GET.statut == "paye" %}selected{% endif %}>Payee</option>
+                    <option value="impaye" {% if request.GET.statut == "impaye" %}selected{% endif %}>Impayee</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="billing-date-debut">Date debut</label>
+                <input id="billing-date-debut" type="date" name="date_debut" value="{{ request.GET.date_debut }}">
+            </div>
+
+            <div class="field">
+                <label for="billing-date-fin">Date fin</label>
+                <input id="billing-date-fin" type="date" name="date_fin" value="{{ request.GET.date_fin }}">
+            </div>
+
+            <div class="panel-actions">
+                <button type="submit">Appliquer les filtres</button>
+                <a href="{% url 'facture_list' %}">Reinitialiser</a>
+                {% if can_manage_factures_ui %}
+                <a href="{% url 'add_facture' %}">Creer une facture</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <div class="helper-card">
+            <strong>Lecture rapide</strong>
+            <p>Le tableau met en avant le total facture, le montant deja encaisse et le reste a percevoir pour faciliter le suivi commercial et le recouvrement.</p>
+        </div>
+    </div>
+
+    <div>
+        <div class="table-shell">
+            <div class="table-toolbar">
+                <div>
+                    <h3>Liste des factures</h3>
+                    <p>Vue operationnelle des documents de facturation avec acces direct au detail, au PDF et a l'enregistrement d'un paiement.</p>
+                </div>
+                <div class="table-meta">
+                    <span class="meta-pill">{{ facture_count }} facture{{ facture_count|pluralize:"s" }}</span>
+                    <span class="meta-pill">Devise : {{ currency_code }}</span>
+                </div>
+            </div>
+
+            {% if factures %}
+                <div class="table-scroll">
+                <table class="factures-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 14%;">Numero</th>
+                            <th style="width: 18%;">Client</th>
+                            <th style="width: 14%;">Date</th>
+                            <th style="width: 13%;">Total</th>
+                            <th style="width: 13%;">Encaisse</th>
+                            <th style="width: 13%;">Reste</th>
+                            <th style="width: 10%;">Statut</th>
+                            <th style="width: 15%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in factures %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'facture_detail' row.instance.id %}" class="invoice-number">{{ row.instance.numero }}</a>
+                            </td>
+                            <td>
+                                <div class="client-name">{{ row.client_name }}</div>
+                            </td>
+                            <td>
+                                <span class="date-pill">{{ row.date_display }}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="amount-pill total">{{ row.total_net_display }}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="amount-pill paid">{{ row.total_paye_display }}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="amount-pill remaining">{{ row.reste_a_payer_display }}</span>
+                            </td>
+                            <td>
+                                {% if row.is_partial %}
+                                    <span class="status-chip status-partial">Partiellement payee</span>
+                                {% elif row.instance.statut == "brouillon" %}
+                                    <span class="status-chip status-brouillon">Brouillon</span>
+                                {% elif row.instance.statut == "emise" %}
+                                    <span class="status-chip status-emise">Emise</span>
+                                {% elif row.instance.statut == "payee" %}
+                                    <span class="status-chip status-payee">Payee</span>
+                                {% elif row.instance.statut == "annulee" %}
+                                    <span class="status-chip status-annulee">Annulee</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions-group">
+                                    <a href="{% url 'facture_detail' row.instance.id %}" class="btn btn-print">Detail</a>
+                                    {% if can_manage_factures_ui and row.instance.statut == "brouillon" %}
+                                        <a href="{% url 'edit_facture' row.instance.id %}" class="btn btn-add">Modifier</a>
+                                    {% endif %}
+                                    <a href="{% url 'facture_pdf' row.instance.id %}" target="_blank" class="btn btn-print">PDF</a>
+                                    <a href="{% url 'facture_pdf' row.instance.id %}?mode=download" class="btn btn-download">Telecharger</a>
+                                    {% if can_record_payments_ui and row.can_pay %}
+                                        <a href="{% url 'payer_facture' row.instance.id %}" class="btn btn-paid" onclick="return confirm('Confirmer l\\'enregistrement du paiement complet ?');">Payer</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Aucune facture pour le moment</h3>
+                    <p>Commencez par creer votre premiere facture pour suivre vos encaissements, generer un PDF professionnel et alimenter votre activite commerciale.</p>
+                    {% if can_manage_factures_ui %}
+                    <a href="{% url 'add_facture' %}" class="btn-link">Ajouter une facture</a>
+                    {% endif %}
+                    <div class="helper">Les filtres actifs peuvent aussi masquer vos documents deja crees.</div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if page_obj %}
+        <div class="pagination">
+            <div>
+                {% if page_obj.has_previous %}
+                    <a class="btn btn-print" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&client={{ request.GET.client }}&statut={{ request.GET.statut }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">Precedent</a>
+                {% endif %}
+            </div>
+            <span>Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            <div>
+                {% if page_obj.has_next %}
+                    <a class="btn btn-print" href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}&client={{ request.GET.client }}&statut={{ request.GET.statut }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">Suivant</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
