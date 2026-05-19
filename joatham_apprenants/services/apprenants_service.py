@@ -10,6 +10,30 @@ from core.services.tenancy import ensure_same_entreprise, get_object_for_entrepr
 from ..models import Apprenant, Formation, InscriptionFormation, PaiementInscription
 
 
+def _parse_amount(value, error_message):
+    try:
+        amount = Decimal(str(value if value is not None else 0))
+    except (InvalidOperation, ValueError):
+        raise ValidationError(error_message)
+    if not amount.is_finite():
+        raise ValidationError(error_message)
+    return amount
+
+
+def _validate_payment_mode(mode_paiement):
+    mode = mode_paiement or PaiementInscription.ModePaiement.ESPECES
+    if mode not in dict(PaiementInscription.ModePaiement.choices):
+        raise ValidationError("Le mode de paiement est invalide.")
+    return mode
+
+
+def _validate_inscription_status(statut):
+    statut_value = statut or InscriptionFormation.Statut.EN_COURS
+    if statut_value not in dict(InscriptionFormation.Statut.choices):
+        raise ValidationError("Le statut de l'inscription est invalide.")
+    return statut_value
+
+
 def create_apprenant(
     *,
     entreprise,
@@ -142,11 +166,19 @@ def inscrire_apprenant_a_formation(
 
     ensure_same_entreprise(apprenant, entreprise)
     ensure_same_entreprise(formation, entreprise)
+    statut = _validate_inscription_status(statut)
 
-    montant_prevu_value = (
-        Decimal(str(montant_prevu)) if montant_prevu not in (None, "") else Decimal(str(formation.prix or 0))
+    montant_prevu_value = _parse_amount(
+        montant_prevu if montant_prevu not in (None, "") else formation.prix or 0,
+        "Le montant total de l'inscription est invalide.",
     )
-    montant_paye_value = Decimal(str(montant_paye or 0))
+    montant_paye_value = _parse_amount(montant_paye or 0, "Le montant initial paye est invalide.")
+    if montant_prevu_value < Decimal("0.00"):
+        raise ValidationError("Le montant total de l'inscription ne peut pas etre negatif.")
+    if montant_paye_value < Decimal("0.00"):
+        raise ValidationError("Le montant initial paye ne peut pas etre negatif.")
+    if montant_paye_value > montant_prevu_value:
+        raise ValidationError("Le montant initial paye ne peut pas etre superieur au montant total.")
 
     inscription_data = {
         "entreprise": entreprise,
@@ -225,22 +257,20 @@ def create_paiement_inscription(
     if baseline_montant_paye < Decimal("0.00"):
         baseline_montant_paye = Decimal("0.00")
 
-    try:
-        montant_value = Decimal(str(montant or 0))
-    except (InvalidOperation, ValueError):
-        raise ValidationError("Le montant du paiement est invalide.")
+    montant_value = _parse_amount(montant or 0, "Le montant du paiement est invalide.")
     if montant_value <= Decimal("0.00"):
         raise ValidationError("Le montant du paiement doit etre strictement positif.")
 
     solde_restant = Decimal(str(inscription.montant_prevu or 0)) - baseline_montant_paye - Decimal(str(paiements_existants))
     if montant_value > solde_restant:
         raise ValidationError("Le paiement ne peut pas etre superieur au solde restant.")
+    mode_paiement = _validate_payment_mode(mode_paiement)
 
     paiement_data = {
         "entreprise": entreprise,
         "inscription": inscription,
         "montant": montant_value,
-        "mode_paiement": mode_paiement or PaiementInscription.ModePaiement.ESPECES,
+        "mode_paiement": mode_paiement,
         "reference": (reference or "").strip(),
         "observations": (observations or "").strip(),
         "utilisateur": utilisateur,

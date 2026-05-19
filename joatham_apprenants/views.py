@@ -216,15 +216,19 @@ def inscription_create(request):
             context["error"] = _("Les montants saisis sont invalides.")
             return render(request, "joatham_apprenants/inscription_form.html", context, status=400)
 
-        inscrire_apprenant_a_formation(
-            entreprise=entreprise,
-            apprenant_id=request.POST.get("apprenant"),
-            formation_id=request.POST.get("formation"),
-            statut=request.POST.get("statut") or InscriptionFormation.Statut.EN_COURS,
-            montant_prevu=montant_prevu,
-            montant_paye=montant_paye,
-            utilisateur=request.user,
-        )
+        try:
+            inscrire_apprenant_a_formation(
+                entreprise=entreprise,
+                apprenant_id=request.POST.get("apprenant"),
+                formation_id=request.POST.get("formation"),
+                statut=request.POST.get("statut") or InscriptionFormation.Statut.EN_COURS,
+                montant_prevu=montant_prevu,
+                montant_paye=montant_paye,
+                utilisateur=request.user,
+            )
+        except ValidationError as exc:
+            context["error"] = exc.messages[0] if hasattr(exc, "messages") else str(exc)
+            return render(request, "joatham_apprenants/inscription_form.html", context, status=400)
         return redirect("apprenant_list")
 
     return render(request, "joatham_apprenants/inscription_form.html", context)
