@@ -224,6 +224,48 @@ class ApprenantsServicesTests(TestCase):
             ).exists()
         )
 
+    def test_create_paiement_refuses_zero_amount(self):
+        with self.assertRaises(ValidationError):
+            create_paiement_inscription(
+                entreprise=self.entreprise,
+                inscription_id=self.inscription.id,
+                montant=Decimal("0.00"),
+                utilisateur=self.user,
+            )
+
+        self.inscription.refresh_from_db()
+        self.assertEqual(self.inscription.montant_paye, Decimal("0.00"))
+        self.assertEqual(self.inscription.solde, Decimal("250.00"))
+        self.assertFalse(PaiementInscription.objects.filter(inscription=self.inscription).exists())
+
+    def test_create_paiement_refuses_negative_amount(self):
+        with self.assertRaises(ValidationError):
+            create_paiement_inscription(
+                entreprise=self.entreprise,
+                inscription_id=self.inscription.id,
+                montant=Decimal("-10.00"),
+                utilisateur=self.user,
+            )
+
+        self.inscription.refresh_from_db()
+        self.assertEqual(self.inscription.montant_paye, Decimal("0.00"))
+        self.assertEqual(self.inscription.solde, Decimal("250.00"))
+        self.assertFalse(PaiementInscription.objects.filter(inscription=self.inscription).exists())
+
+    def test_create_paiement_refuses_amount_greater_than_remaining_balance(self):
+        with self.assertRaises(ValidationError):
+            create_paiement_inscription(
+                entreprise=self.entreprise,
+                inscription_id=self.inscription.id,
+                montant=Decimal("251.00"),
+                utilisateur=self.user,
+            )
+
+        self.inscription.refresh_from_db()
+        self.assertEqual(self.inscription.montant_paye, Decimal("0.00"))
+        self.assertEqual(self.inscription.solde, Decimal("250.00"))
+        self.assertFalse(PaiementInscription.objects.filter(inscription=self.inscription).exists())
+
     def test_multiple_paiements_recalculate_cumulative_totals(self):
         create_paiement_inscription(
             entreprise=self.entreprise,
@@ -865,6 +907,22 @@ class ApprenantsViewsTests(TestCase):
         self.inscription.refresh_from_db()
         self.assertEqual(self.inscription.montant_paye, Decimal("55.00"))
         self.assertEqual(self.inscription.solde, Decimal("20.00"))
+
+    def test_paiement_view_refuses_amount_greater_than_remaining_balance(self):
+        self.client.force_login(self.gestionnaire)
+        response = self.client.post(
+            reverse("paiement_inscription_create", args=[self.inscription.id]),
+            {
+                "montant": "51.00",
+                "mode_paiement": PaiementInscription.ModePaiement.ESPECES,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "Le paiement ne peut pas etre superieur au solde restant.", status_code=400)
+        self.inscription.refresh_from_db()
+        self.assertEqual(self.inscription.montant_paye, Decimal("25.00"))
+        self.assertEqual(self.inscription.solde, Decimal("50.00"))
 
     def test_comptable_can_access_paiement_form(self):
         self.client.force_login(self.comptable)

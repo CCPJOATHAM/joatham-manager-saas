@@ -292,15 +292,19 @@ def paiement_inscription_create(request, inscription_id):
             context["error"] = _("Le montant saisi est invalide.")
             return render(request, "joatham_apprenants/paiement_form.html", context, status=400)
 
-        create_paiement_inscription(
-            entreprise=entreprise,
-            inscription_id=inscription.id,
-            montant=montant,
-            mode_paiement=request.POST.get("mode_paiement"),
-            reference=request.POST.get("reference", ""),
-            observations=request.POST.get("observations", ""),
-            utilisateur=request.user,
-        )
+        try:
+            create_paiement_inscription(
+                entreprise=entreprise,
+                inscription_id=inscription.id,
+                montant=montant,
+                mode_paiement=request.POST.get("mode_paiement"),
+                reference=request.POST.get("reference", ""),
+                observations=request.POST.get("observations", ""),
+                utilisateur=request.user,
+            )
+        except ValidationError as exc:
+            context["error"] = exc.messages[0] if hasattr(exc, "messages") else str(exc)
+            return render(request, "joatham_apprenants/paiement_form.html", context, status=400)
         return redirect("inscription_detail", inscription_id=inscription.id)
 
     return render(request, "joatham_apprenants/paiement_form.html", context)
