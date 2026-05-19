@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from core.services.subscription import start_trial_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise
 from joatham_billing.models import Facture
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
@@ -182,8 +182,8 @@ class StockReportsViewsTests(TestCase):
         self.gestionnaire = create_user("manager-stock-report-view", "gestionnaire", self.entreprise)
         self.owner_b = create_user("owner-stock-report-view-b", "proprietaire", self.autre_entreprise)
         self.plan = Abonnement.objects.create(nom="Produits rapports", code="products", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
         self.product = Produit.objects.create(
             entreprise=self.entreprise,
             nom="Serveur rack",

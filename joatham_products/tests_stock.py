@@ -1,3 +1,5 @@
+import warnings
+from datetime import date
 from decimal import Decimal
 
 from django.test import TestCase
@@ -110,6 +112,27 @@ class StockMovementServiceTests(TestCase):
                         quantity=invalid_quantity,
                         utilisateur=self.owner,
                     )
+                with self.assertRaises(StockOperationError):
+                    apply_manual_exit(
+                        entreprise=self.entreprise,
+                        produit=self.produit,
+                        quantity=invalid_quantity,
+                        utilisateur=self.owner,
+                    )
+
+    def test_negative_unit_cost_is_rejected(self):
+        with self.assertRaises(StockOperationError):
+            apply_manual_entry(
+                entreprise=self.entreprise,
+                produit=self.produit,
+                quantity=2,
+                utilisateur=self.owner,
+                unit_cost=Decimal("-1.00"),
+            )
+
+        self.produit.refresh_from_db()
+        self.assertEqual(self.produit.quantite_stock, 10)
+        self.assertFalse(StockMovement.objects.filter(entreprise=self.entreprise).exists())
 
     def test_cross_tenant_product_is_rejected(self):
         with self.assertRaises(StockOperationError):
@@ -247,6 +270,25 @@ class StockMovementSelectorsTests(TestCase):
     def test_recent_selector_respects_limit(self):
         movements = list(get_recent_stock_movements(self.entreprise, limit=2))
         self.assertEqual(len(movements), 2)
+
+    def test_date_filters_do_not_emit_naive_datetime_warnings(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            list(
+                get_stock_movements_for_entreprise(
+                    self.entreprise,
+                    date_debut=date.today(),
+                    date_fin=date.today(),
+                )
+            )
+
+        self.assertFalse(
+            any(
+                issubclass(warning.category, RuntimeWarning)
+                and "naive datetime" in str(warning.message).lower()
+                for warning in caught
+            )
+        )
 
 
 class StockPermissionsTests(TestCase):

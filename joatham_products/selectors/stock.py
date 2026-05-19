@@ -1,5 +1,7 @@
 from datetime import date, datetime, time
 
+from django.utils import timezone
+
 from core.services.tenancy import scope_queryset_to_entreprise
 
 from ..models import StockMovement
@@ -9,9 +11,11 @@ def _apply_date_filter(queryset, field_name, value, lookup_suffix):
     if not value:
         return queryset
     if isinstance(value, datetime):
-        return queryset.filter(**{f"{field_name}__{lookup_suffix}": value})
+        normalized = timezone.make_aware(value) if timezone.is_naive(value) else value
+        return queryset.filter(**{f"{field_name}__{lookup_suffix}": normalized})
     if isinstance(value, date):
         normalized = datetime.combine(value, time.min if lookup_suffix == "gte" else time.max)
+        normalized = timezone.make_aware(normalized)
         return queryset.filter(**{f"{field_name}__{lookup_suffix}": normalized})
     return queryset.filter(**{f"{field_name}__{lookup_suffix}": value})
 
