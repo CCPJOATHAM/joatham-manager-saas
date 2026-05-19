@@ -1,9 +1,28 @@
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 
 from core.audit import record_audit_event
 from core.services.tenancy import ensure_same_entreprise
 
 from ..models import MouvementCaisse, SessionCaisse
+
+
+def _normalize_positive_amount(value):
+    try:
+        normalized = Decimal(str(value or "0"))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise ValueError("Le montant du mouvement doit etre valide.") from exc
+    if normalized <= Decimal("0.00"):
+        raise ValueError("Le montant du mouvement doit etre strictement positif.")
+    return normalized
+
+
+def _normalize_required_text(value, message):
+    normalized = (value or "").strip()
+    if not normalized:
+        raise ValueError(message)
+    return normalized
 
 
 def _validate_open_session(entreprise, session, caisse):
@@ -36,6 +55,11 @@ def record_mouvement(
     moyen_paiement="cash",
 ):
     _validate_open_session(entreprise, session, caisse)
+    valid_types = {choice for choice, _label in MouvementCaisse.TypeMouvement.choices}
+    if type_mouvement not in valid_types:
+        raise ValueError("Le type de mouvement de caisse est invalide.")
+    montant = _normalize_positive_amount(montant)
+    libelle = _normalize_required_text(libelle, "Le libelle du mouvement est obligatoire.")
     mouvement = MouvementCaisse.objects.create(
         entreprise=entreprise,
         caisse=caisse,
@@ -43,7 +67,7 @@ def record_mouvement(
         type_mouvement=type_mouvement,
         montant=montant,
         devise=caisse.devise,
-        libelle=(libelle or "").strip(),
+        libelle=libelle,
         reference=(reference or "").strip(),
         moyen_paiement=(moyen_paiement or "cash").strip(),
         source_app=(source_app or "").strip(),

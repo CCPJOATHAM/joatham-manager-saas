@@ -5,7 +5,11 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.services.quotas import FREE_PLAN_EXPENSE_MONTHLY_LIMIT, PlanQuotaExceeded
-from core.services.subscription import get_or_create_default_free_plan, start_free_plan_for_entreprise, start_trial_for_entreprise
+from core.services.subscription import (
+    activate_subscription_for_entreprise,
+    get_or_create_default_free_plan,
+    start_free_plan_for_entreprise,
+)
 from joatham_billing.tests.factories import create_entreprise, create_user
 from core.services.currency import format_amount_for_entreprise, format_decimal_number
 from joatham_caisse.models import Caisse, MouvementCaisse
@@ -30,7 +34,7 @@ class DepensesServiceTests(TestCase):
         self.gestionnaire_a = create_user("gestion-dep-a", "gestionnaire", self.entreprise_a)
         self.comptable_a = create_user("compta-dep-a", "comptable", self.entreprise_a)
         self.plan = Abonnement.objects.create(nom="Depenses", code="depenses", prix=19, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.gestionnaire_a)
+        activate_subscription_for_entreprise(entreprise=self.entreprise_a, plan=self.plan, utilisateur=self.gestionnaire_a)
         self.depense_a = Depense.objects.create(
             description="Papeterie",
             montant=Decimal("40.00"),
@@ -81,7 +85,7 @@ class DepensesServiceTests(TestCase):
     def test_depenses_page_displays_total_and_empty_state(self):
         empty_entreprise = create_entreprise("Entreprise Depenses Vide")
         empty_user = create_user("gestion-dep-empty", "gestionnaire", empty_entreprise)
-        start_trial_for_entreprise(entreprise=empty_entreprise, plan=self.plan, utilisateur=empty_user)
+        activate_subscription_for_entreprise(entreprise=empty_entreprise, plan=self.plan, utilisateur=empty_user)
         self.client.force_login(empty_user)
         response = self.client.get(reverse("depenses"))
         self.assertEqual(response.status_code, 200)

@@ -8,6 +8,13 @@ from ..models import Caisse, SessionCaisse
 from ..selectors.caisse import get_caisses_by_entreprise
 
 
+def _normalize_required_text(value, message):
+    normalized = (value or "").strip()
+    if not normalized:
+        raise ValueError(message)
+    return normalized
+
+
 def list_caisses_for_entreprise(entreprise):
     return get_caisses_by_entreprise(entreprise)
 
@@ -23,15 +30,17 @@ def create_caisse(
     est_active=True,
     utilisateur=None,
 ):
+    nom = _normalize_required_text(nom, "Le nom de la caisse est obligatoire.")
+    code = _normalize_required_text(code, "Le code de la caisse est obligatoire.")
     if est_active:
         assert_cashbox_quota_available(entreprise)
-    if Caisse.objects.filter(entreprise=entreprise, code=(code or "").strip()).exists():
+    if Caisse.objects.filter(entreprise=entreprise, code=code).exists():
         raise ValueError("Une caisse avec ce code existe deja dans votre entreprise.")
 
     caisse = Caisse.objects.create(
         entreprise=entreprise,
-        nom=(nom or "").strip(),
-        code=(code or "").strip(),
+        nom=nom,
+        code=code,
         description=(description or "").strip(),
         devise=(devise or getattr(entreprise, "devise", "") or "CDF").strip().upper(),
         est_active=est_active,
@@ -66,9 +75,10 @@ def update_caisse(
     utilisateur=None,
 ):
     ensure_same_entreprise(caisse, entreprise)
+    nom = _normalize_required_text(nom, "Le nom de la caisse est obligatoire.")
+    normalized_code = _normalize_required_text(code, "Le code de la caisse est obligatoire.")
     if est_active and not caisse.est_active:
         assert_cashbox_quota_available(entreprise)
-    normalized_code = (code or "").strip()
     if Caisse.objects.filter(entreprise=entreprise, code=normalized_code).exclude(pk=caisse.pk).exists():
         raise ValueError("Une caisse avec ce code existe deja dans votre entreprise.")
 
@@ -79,7 +89,7 @@ def update_caisse(
         "devise": caisse.devise,
         "est_active": caisse.est_active,
     }
-    caisse.nom = (nom or "").strip()
+    caisse.nom = nom
     caisse.code = normalized_code
     caisse.description = (description or "").strip()
     caisse.devise = (devise or getattr(entreprise, "devise", "") or "CDF").strip().upper()
