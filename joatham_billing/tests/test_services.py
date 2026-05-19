@@ -523,6 +523,74 @@ class BillingCashPaymentIntegrationTests(TestCase):
             ).exists()
         )
 
+    def test_register_payment_rejects_zero_amount(self):
+        with self.assertRaises(PaiementFacturationError):
+            register_payment(
+                facture=self.facture,
+                montant="0",
+                mode=PaiementFacture.ModePaiement.VIREMENT,
+                user=self.comptable,
+            )
+
+        self.facture.refresh_from_db()
+        self.assertEqual(self.facture.total_paye, Decimal("0"))
+        self.assertEqual(self.facture.reste_a_payer, Decimal("100"))
+
+    def test_register_payment_rejects_negative_amount(self):
+        with self.assertRaises(PaiementFacturationError):
+            register_payment(
+                facture=self.facture,
+                montant="-10",
+                mode=PaiementFacture.ModePaiement.VIREMENT,
+                user=self.comptable,
+            )
+
+        self.facture.refresh_from_db()
+        self.assertEqual(self.facture.total_paye, Decimal("0"))
+        self.assertEqual(self.facture.reste_a_payer, Decimal("100"))
+
+    def test_register_payment_rejects_amount_greater_than_remaining_balance(self):
+        with self.assertRaises(PaiementFacturationError):
+            register_payment(
+                facture=self.facture,
+                montant="101",
+                mode=PaiementFacture.ModePaiement.VIREMENT,
+                user=self.comptable,
+            )
+
+        self.facture.refresh_from_db()
+        self.assertEqual(self.facture.total_paye, Decimal("0"))
+        self.assertEqual(self.facture.reste_a_payer, Decimal("100"))
+
+    def test_partial_payment_keeps_invoice_open_and_partially_paid(self):
+        register_payment(
+            facture=self.facture,
+            montant="25",
+            mode=PaiementFacture.ModePaiement.VIREMENT,
+            user=self.comptable,
+        )
+
+        self.facture.refresh_from_db()
+        self.assertEqual(self.facture.total_paye, Decimal("25"))
+        self.assertEqual(self.facture.reste_a_payer, Decimal("75"))
+        self.assertEqual(self.facture.statut, Facture.Statut.EMISE)
+        self.assertFalse(self.facture.paye)
+        self.assertTrue(self.facture.est_partiellement_payee)
+
+    def test_full_payment_marks_invoice_as_paid(self):
+        register_payment(
+            facture=self.facture,
+            montant="100",
+            mode=PaiementFacture.ModePaiement.VIREMENT,
+            user=self.comptable,
+        )
+
+        self.facture.refresh_from_db()
+        self.assertEqual(self.facture.total_paye, Decimal("100"))
+        self.assertEqual(self.facture.reste_a_payer, Decimal("0"))
+        self.assertEqual(self.facture.statut, Facture.Statut.PAYEE)
+        self.assertTrue(self.facture.paye)
+
     def test_register_cash_payment_with_caisse_creates_cash_movement(self):
         paiement = register_payment(
             facture=self.facture,

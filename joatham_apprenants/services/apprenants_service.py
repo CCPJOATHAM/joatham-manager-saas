@@ -1,5 +1,6 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 
@@ -224,10 +225,21 @@ def create_paiement_inscription(
     if baseline_montant_paye < Decimal("0.00"):
         baseline_montant_paye = Decimal("0.00")
 
+    try:
+        montant_value = Decimal(str(montant or 0))
+    except (InvalidOperation, ValueError):
+        raise ValidationError("Le montant du paiement est invalide.")
+    if montant_value <= Decimal("0.00"):
+        raise ValidationError("Le montant du paiement doit etre strictement positif.")
+
+    solde_restant = Decimal(str(inscription.montant_prevu or 0)) - baseline_montant_paye - Decimal(str(paiements_existants))
+    if montant_value > solde_restant:
+        raise ValidationError("Le paiement ne peut pas etre superieur au solde restant.")
+
     paiement_data = {
         "entreprise": entreprise,
         "inscription": inscription,
-        "montant": Decimal(str(montant or 0)),
+        "montant": montant_value,
         "mode_paiement": mode_paiement or PaiementInscription.ModePaiement.ESPECES,
         "reference": (reference or "").strip(),
         "observations": (observations or "").strip(),

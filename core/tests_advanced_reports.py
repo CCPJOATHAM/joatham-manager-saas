@@ -260,6 +260,38 @@ class AdvancedReportsCalculationTests(TestCase):
         self.assertEqual(sales["evolution"][0]["total"], Decimal("256.00"))
         self.assertEqual(sales["top_clients"][0]["total"], Decimal("256.00"))
 
+    def test_financial_summary_does_not_double_count_linked_payment_transactions(self):
+        invoice = create_facture(
+            entreprise=self.entreprise,
+            user=self.owner,
+            client_id=self.client_obj.id,
+            tva=Decimal("0"),
+            lignes=[{"designation": "Mission encaissee", "quantite": 1, "prix": Decimal("70.00")}],
+        )
+        payment = PaiementFacture.objects.create(
+            facture=invoice,
+            montant=Decimal("70.00"),
+            mode=PaiementFacture.ModePaiement.MPESA,
+            statut=PaiementFacture.StatutPaiement.VALIDE,
+        )
+        PaymentTransaction.objects.create(
+            entreprise=self.entreprise,
+            facture=invoice,
+            paiement_facture=payment,
+            transaction_type=PaymentTransaction.TransactionType.ENCAISSEMENT,
+            method=PaymentTransaction.Method.MPESA,
+            amount=Decimal("70.00"),
+            currency="CDF",
+            status=PaymentTransaction.Status.CONFIRME,
+            reference="LINKED-MPESA",
+        )
+
+        summary = get_financial_summary(self.entreprise, self.filters)
+
+        self.assertEqual(summary["revenue_total"], Decimal("220.00"))
+        self.assertEqual(summary["collected_total"], Decimal("175.00"))
+        self.assertEqual(summary["remaining_total"], Decimal("60.00"))
+
     def test_payment_method_and_status_breakdown(self):
         payments = get_payment_analysis(self.entreprise, self.filters)
         method_totals = {row["code"]: row for row in payments["method_breakdown"]}
