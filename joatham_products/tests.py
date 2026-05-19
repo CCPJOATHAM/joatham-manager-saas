@@ -16,7 +16,7 @@ from .selectors.products import (
     get_product_counts_by_entreprise,
     get_products_by_entreprise,
 )
-from .services.products_service import create_product_for_entreprise, update_product_for_entreprise
+from .services.products_service import ProductOperationError, create_product_for_entreprise, update_product_for_entreprise
 
 
 class ProductSelectorsTests(TestCase):
@@ -134,6 +134,33 @@ class ProductServicesTests(TestCase):
             ).exists()
         )
 
+    def test_create_product_rejects_invalid_business_values(self):
+        base_payload = {
+            "entreprise": self.entreprise,
+            "nom": "Produit valide",
+            "description": "",
+            "reference": "",
+            "prix_unitaire": Decimal("10.00"),
+            "quantite_stock": 1,
+            "seuil_alerte": 0,
+            "actif": True,
+            "utilisateur": self.owner,
+        }
+        invalid_cases = [
+            {"nom": "   "},
+            {"prix_unitaire": Decimal("-1.00")},
+            {"quantite_stock": -1},
+            {"seuil_alerte": -1},
+        ]
+
+        for invalid_values in invalid_cases:
+            with self.subTest(invalid_values=invalid_values):
+                with self.assertRaises(ProductOperationError):
+                    create_product_for_entreprise(**{**base_payload, **invalid_values})
+
+        self.assertFalse(Produit.objects.filter(entreprise=self.entreprise).exists())
+        self.assertFalse(StockMovement.objects.filter(entreprise=self.entreprise).exists())
+
     def test_update_product_keeps_existing_stock(self):
         produit = create_product_for_entreprise(
             entreprise=self.entreprise,
@@ -180,6 +207,38 @@ class ProductServicesTests(TestCase):
                 objet_id=produit.id,
             ).exists()
         )
+
+    def test_update_product_rejects_negative_price_without_changing_product(self):
+        produit = create_product_for_entreprise(
+            entreprise=self.entreprise,
+            nom="Souris",
+            description="Souris optique",
+            reference="MOUSE-1",
+            prix_unitaire=Decimal("12.00"),
+            quantite_stock=3,
+            seuil_alerte=1,
+            actif=True,
+            utilisateur=self.owner,
+        )
+
+        with self.assertRaises(ProductOperationError):
+            update_product_for_entreprise(
+                entreprise=self.entreprise,
+                product_id=produit.id,
+                nom="Souris modifiee",
+                description="",
+                reference="MOUSE-1",
+                prix_unitaire=Decimal("-1.00"),
+                quantite_stock=99,
+                seuil_alerte=1,
+                actif=True,
+                utilisateur=self.owner,
+            )
+
+        produit.refresh_from_db()
+        self.assertEqual(produit.nom, "Souris")
+        self.assertEqual(produit.prix_unitaire, Decimal("12.00"))
+        self.assertEqual(produit.quantite_stock, 3)
 
     def test_free_plan_blocks_product_creation_after_limit(self):
         free_plan = get_or_create_free_plan()
@@ -328,5 +387,33 @@ class ProductViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'name="quantite_stock"', html=False)
         self.assertContains(response, "Stock actuel")
+
+    def test_product_create_rejects_negative_price_and_initial_stock(self):
+        self.client.force_login(self.owner)
+        invalid_payloads = [
+            {
+                "nom": "Produit prix invalide",
+                "reference": "BAD-PRICE",
+                "prix_unitaire": "-1.00",
+                "quantite_stock": "1",
+                "seuil_alerte": "0",
+                "actif": "on",
+            },
+            {
+                "nom": "Produit stock invalide",
+                "reference": "BAD-STOCK",
+                "prix_unitaire": "10.00",
+                "quantite_stock": "-1",
+                "seuil_alerte": "0",
+                "actif": "on",
+            },
+        ]
+
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                response = self.client.post(reverse("product_create"), payload)
+                self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(Produit.objects.filter(entreprise=self.entreprise, reference__in=["BAD-PRICE", "BAD-STOCK"]).exists())
 
 

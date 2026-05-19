@@ -49,7 +49,12 @@ from .services.inventory import (
     start_inventory_session,
     validate_inventory_session,
 )
-from .services.products_service import create_product_for_entreprise, list_products_for_entreprise, update_product_for_entreprise
+from .services.products_service import (
+    ProductOperationError,
+    create_product_for_entreprise,
+    list_products_for_entreprise,
+    update_product_for_entreprise,
+)
 from .services.stock import StockOperationError, apply_adjustment, apply_manual_entry, apply_manual_exit
 
 
@@ -265,6 +270,8 @@ def product_create(request):
             )
         except PlanQuotaExceeded as exc:
             messages.error(request, str(exc))
+        except ProductOperationError as exc:
+            form.add_error(None, str(exc))
         else:
             messages.success(request, _("Le produit a ete cree avec succes."))
             return redirect("product_list")
@@ -291,15 +298,19 @@ def product_update(request, product_id):
     form = ProduitUpdateForm(request.POST or None, instance=produit)
 
     if request.method == "POST" and form.is_valid():
-        update_product_for_entreprise(
-            entreprise=entreprise,
-            product_id=produit.id,
-            utilisateur=request.user,
-            quantite_stock=produit.quantite_stock,
-            **form.cleaned_data,
-        )
-        messages.success(request, _("Le produit a ete mis a jour avec succes."))
-        return redirect("product_list")
+        try:
+            update_product_for_entreprise(
+                entreprise=entreprise,
+                product_id=produit.id,
+                utilisateur=request.user,
+                quantite_stock=produit.quantite_stock,
+                **form.cleaned_data,
+            )
+        except ProductOperationError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Le produit a ete mis a jour avec succes."))
+            return redirect("product_list")
 
     return render(
         request,

@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 
 from core.audit import record_audit_event
@@ -43,6 +45,18 @@ def _normalize_source_id(source_id):
         raise StockOperationError("La source du mouvement est invalide.") from exc
 
 
+def _normalize_optional_non_negative_decimal(value, field_label):
+    if value in {None, ""}:
+        return None
+    try:
+        normalized = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise StockOperationError(f"{field_label} est invalide.") from exc
+    if normalized < 0:
+        raise StockOperationError(f"{field_label} ne peut pas etre negatif.")
+    return normalized
+
+
 def _get_locked_product_for_entreprise(*, entreprise, produit):
     produit_id = getattr(produit, "id", produit)
     locked = (
@@ -81,6 +95,7 @@ def record_stock_movement(
         raise StockOperationError("Le produit selectionne est invalide pour cette entreprise.")
 
     quantity = _normalize_positive_quantity(quantity)
+    unit_cost = _normalize_optional_non_negative_decimal(unit_cost, "Le cout unitaire")
     stock_before = int(stock_before or 0)
     stock_after = int(stock_after or 0)
 

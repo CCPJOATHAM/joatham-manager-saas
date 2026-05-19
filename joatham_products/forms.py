@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
@@ -27,6 +29,8 @@ class BaseProduitForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["prix_unitaire"].min_value = Decimal("0")
+        self.fields["seuil_alerte"].min_value = 0
         self.fields["nom"].widget.attrs.update({"placeholder": _("Nom du produit")})
         self.fields["description"].widget = forms.Textarea(
             attrs={"rows": 3, "placeholder": _("Description commerciale ou technique")}

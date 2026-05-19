@@ -1,14 +1,17 @@
+import warnings
+from datetime import date
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 
-from core.services.subscription import start_trial_for_entreprise
+from core.services.subscription import activate_subscription_for_entreprise
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
 
 from .models import InventoryLine, InventorySession, Produit, StockMovement
+from .selectors.inventory import get_inventory_sessions_for_entreprise
 from .services.inventory import (
     InventoryOperationError,
     cancel_inventory_session,
@@ -275,6 +278,27 @@ class InventoryServicesTests(TestCase):
         with self.assertRaises(InventoryOperationError):
             record_inventory_count(entreprise=self.autre_entreprise, session_id=session.id, line_id=line.id, counted_quantity=9, comment="")
 
+    def test_inventory_session_date_filters_do_not_emit_naive_datetime_warnings(self):
+        create_inventory_session(entreprise=self.entreprise, name="Inventaire date", utilisateur=self.owner)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            list(
+                get_inventory_sessions_for_entreprise(
+                    self.entreprise,
+                    date_debut=date.today(),
+                    date_fin=date.today(),
+                )
+            )
+
+        self.assertFalse(
+            any(
+                issubclass(warning.category, RuntimeWarning)
+                and "naive datetime" in str(warning.message).lower()
+                for warning in caught
+            )
+        )
+
 
 class InventoryViewsTests(TestCase):
     def setUp(self):
@@ -285,8 +309,8 @@ class InventoryViewsTests(TestCase):
         self.comptable = create_user("accountant-inventory-ui", "comptable", self.entreprise)
         self.owner_b = create_user("owner-inventory-ui-b", "proprietaire", self.autre_entreprise)
         self.plan = Abonnement.objects.create(nom="Produits Inventaire", code="products", prix=10, duree_jours=30, actif=True)
-        start_trial_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
-        start_trial_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
+        activate_subscription_for_entreprise(entreprise=self.entreprise, plan=self.plan, utilisateur=self.owner)
+        activate_subscription_for_entreprise(entreprise=self.autre_entreprise, plan=self.plan, utilisateur=self.owner_b)
         self.product = Produit.objects.create(
             entreprise=self.entreprise,
             nom="Serveur",
