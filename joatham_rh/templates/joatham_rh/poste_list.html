@@ -1,0 +1,54 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_subtitle %}{% trans "Structurez les fonctions et postes utilises dans les dossiers employes." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Postes" %}</h2>
+        <p>{% trans "Liste simple des fonctions disponibles pour votre entreprise." %}</p>
+    </div>
+    <div class="rh-actions">
+        <span class="rh-count">{{ poste_count }} {% trans "poste(s)" %}</span>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_poste_create' %}" class="rh-action-link primary">{% trans "Nouveau poste" %}</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if postes %}
+<div class="rh-table-shell">
+    <div class="table-scroll">
+        <table class="rh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Nom" %}</th>
+                    <th>{% trans "Description" %}</th>
+                    <th>{% trans "Etat" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poste in postes %}
+                <tr>
+                    <td><strong>{{ poste.nom }}</strong></td>
+                    <td class="rh-muted">{{ poste.description|default:"-" }}</td>
+                    <td>{% if poste.actif %}<span class="rh-badge success">{% trans "Actif" %}</span>{% else %}<span class="rh-badge">{% trans "Inactif" %}</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rh-table-shell">
+    <div class="rh-empty">
+        <h3>{% trans "Aucun poste cree" %}</h3>
+        <p>{% trans "Creez les fonctions principales de votre activite avant d'ajouter les employes." %}</p>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_poste_create' %}" class="btn-link primary">{% trans "Creer un poste" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

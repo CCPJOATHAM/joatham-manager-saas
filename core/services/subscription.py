@@ -105,6 +105,10 @@ PREMIUM_PLAN_MODULES = PRO_PLAN_MODULES + [
     "audit_advanced",
     "messages",
     "apprenants",
+    "rh",
+    "hr",
+    "ressources_humaines",
+    "human_resources",
 ]
 PLAN_CODE_ALIASES = {
     "gratuit": FREE_PLAN_CODE,
@@ -218,6 +222,7 @@ PLAN_FEATURE_SUMMARY = {
         "Tableau de bord decisionnel et rapports avances globaux",
         "Exports avances paiements et comptabilite",
         "Audit avance, messagerie et tous les modules actuels",
+        "Ressources humaines de base",
         "Utilisateurs, clients, produits et factures sans limite applicative",
         "Support prioritaire et options futures",
     ],

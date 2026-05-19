@@ -1,0 +1,99 @@
+from django import forms
+from django.utils.translation import gettext_lazy as _
+
+from .models import Employe, Poste, Presence
+
+
+class PosteForm(forms.ModelForm):
+    class Meta:
+        model = Poste
+        fields = ["nom", "description", "actif"]
+        labels = {
+            "nom": _("Nom du poste"),
+            "description": _("Description"),
+            "actif": _("Poste actif"),
+        }
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["nom"].widget.attrs.update({"placeholder": _("Exemple : Responsable boutique")})
+        self.fields["description"].widget.attrs.update({"placeholder": _("Responsabilites principales")})
+
+
+class EmployeForm(forms.ModelForm):
+    class Meta:
+        model = Employe
+        fields = [
+            "matricule",
+            "nom",
+            "prenom",
+            "sexe",
+            "telephone",
+            "email",
+            "adresse",
+            "poste",
+            "type_contrat",
+            "date_embauche",
+            "salaire_base",
+            "statut",
+            "actif",
+        ]
+        labels = {
+            "matricule": _("Matricule"),
+            "nom": _("Nom"),
+            "prenom": _("Prenom"),
+            "sexe": _("Sexe"),
+            "telephone": _("Telephone"),
+            "email": _("Email"),
+            "adresse": _("Adresse"),
+            "poste": _("Poste"),
+            "type_contrat": _("Type de contrat"),
+            "date_embauche": _("Date d'embauche"),
+            "salaire_base": _("Salaire de base"),
+            "statut": _("Statut"),
+            "actif": _("Employe actif"),
+        }
+        widgets = {
+            "date_embauche": forms.DateInput(attrs={"type": "date"}),
+            "adresse": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["poste"].queryset = Poste.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "id")
+        self.fields["poste"].required = False
+        self.fields["salaire_base"].min_value = 0
+        self.fields["matricule"].widget.attrs.update({"placeholder": _("Exemple : RH-001")})
+        self.fields["nom"].widget.attrs.update({"placeholder": _("Nom de famille")})
+        self.fields["prenom"].widget.attrs.update({"placeholder": _("Prenom")})
+        self.fields["telephone"].widget.attrs.update({"placeholder": _("Telephone")})
+        self.fields["email"].widget.attrs.update({"placeholder": _("email@exemple.com")})
+        self.fields["salaire_base"].widget.attrs.update({"placeholder": "0.00", "min": "0", "step": "0.01"})
+
+
+class PresenceForm(forms.ModelForm):
+    class Meta:
+        model = Presence
+        fields = ["employe", "date", "statut", "heure_arrivee", "heure_depart", "note"]
+        labels = {
+            "employe": _("Employe"),
+            "date": _("Date"),
+            "statut": _("Statut"),
+            "heure_arrivee": _("Heure d'arrivee"),
+            "heure_depart": _("Heure de depart"),
+            "note": _("Note"),
+        }
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}),
+            "heure_arrivee": forms.TimeInput(attrs={"type": "time"}),
+            "heure_depart": forms.TimeInput(attrs={"type": "time"}),
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        self.fields["note"].widget.attrs.update({"placeholder": _("Observation courte")})

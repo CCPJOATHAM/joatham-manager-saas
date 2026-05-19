@@ -182,6 +182,14 @@ NAV_ITEMS = [
         "prefixes": ["/apprenants/"],
     },
     {
+        "label": _("Ressources humaines"),
+        "url_name": "rh_employe_list",
+        "permission": "rh.view",
+        "module": "rh",
+        "prefixes": ["/rh/"],
+        "hide_when_locked": True,
+    },
+    {
         "label": _("Utilisateurs"),
         "url_name": "user_list",
         "permission": "users.view",
@@ -244,6 +252,8 @@ def _get_item_state(user, item):
             if state.get("allowed"):
                 return {"visible": True}
             if state.get("reason") in PREMIUM_DENIED_REASONS:
+                if item.get("hide_when_locked"):
+                    return {"visible": False}
                 return {
                     "visible": True,
                     "badge": _("Premium"),

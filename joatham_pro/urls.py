@@ -55,6 +55,7 @@ urlpatterns = [
     path('produits/', include('joatham_products.urls')),
     path('compta/', include('joatham_comptabilite.urls')),
     path('apprenants/', include('joatham_apprenants.urls')),
+    path('rh/', include('joatham_rh.urls')),
 ]
 
 if getattr(settings, "REST_FRAMEWORK_AVAILABLE", False):

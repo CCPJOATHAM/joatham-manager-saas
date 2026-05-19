@@ -1,0 +1,32 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_title %}{{ page_title }}{% endblock %}
+{% block rh_subtitle %}{% trans "Renseignez uniquement les informations utiles au dossier RH de base." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{{ page_title }}</h2>
+        <p>{% trans "Le matricule reste unique par entreprise." %}</p>
+    </div>
+</div>
+
+<form method="post" class="rh-card">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="rh-form-grid">
+        {% for field in form %}
+        <div class="rh-field {% if field.name == 'adresse' %}full{% endif %}">
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="rh-actions" style="margin-top: 18px;">
+        <a href="{% if employe %}{% url 'rh_employe_detail' employe.id %}{% else %}{% url 'rh_employe_list' %}{% endif %}" class="rh-action-link">{% trans "Annuler" %}</a>
+        <button type="submit" class="rh-action-button primary">{{ submit_label }}</button>
+    </div>
+</form>
+{% endblock %}

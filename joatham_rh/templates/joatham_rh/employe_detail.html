@@ -1,0 +1,84 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_title %}{{ employe.nom }} {{ employe.prenom }}{% endblock %}
+{% block rh_subtitle %}{% trans "Dossier RH de l'employe." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{{ employe.nom }} {{ employe.prenom }}</h2>
+        <p>{{ employe.matricule }} - {{ employe.poste.nom|default:"Poste non renseigne" }}</p>
+    </div>
+    {% if can_manage_rh_ui %}
+    <a href="{% url 'rh_employe_update' employe.id %}" class="rh-action-link primary">{% trans "Modifier" %}</a>
+    {% endif %}
+</div>
+
+<div class="rh-detail-grid">
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Statut" %}</span>
+        <span class="rh-kpi-value">{{ status_label }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Contrat" %}</span>
+        <span class="rh-kpi-value">{{ employe.get_type_contrat_display }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Date d'embauche" %}</span>
+        <span class="rh-kpi-value">{{ employe.date_embauche }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Salaire de base" %}</span>
+        <span class="rh-kpi-value">{{ employe.salaire_base|default:"-" }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Telephone" %}</span>
+        <span class="rh-kpi-value">{{ employe.telephone|default:"-" }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Email" %}</span>
+        <span class="rh-kpi-value">{{ employe.email|default:"-" }}</span>
+    </div>
+</div>
+
+<div class="rh-card">
+    <div class="rh-header">
+        <div>
+            <h3>{% trans "Presences recentes" %}</h3>
+            <p>{% trans "Les vingt derniers pointages simples de cet employe." %}</p>
+        </div>
+        {% if can_record_presence_ui %}
+        <a href="{% url 'rh_presence_create' %}" class="rh-action-link">{% trans "Ajouter une presence" %}</a>
+        {% endif %}
+    </div>
+    {% if presences %}
+    <div class="rh-table-shell">
+        <div class="table-scroll">
+            <table class="rh-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Statut" %}</th>
+                        <th>{% trans "Arrivee" %}</th>
+                        <th>{% trans "Depart" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in presences %}
+                    <tr>
+                        <td>{{ row.instance.date }}</td>
+                        <td>{{ row.status_label }}</td>
+                        <td>{{ row.instance.heure_arrivee|default:"-" }}</td>
+                        <td>{{ row.instance.heure_depart|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <p class="rh-muted">{% trans "Aucune presence recente pour cet employe." %}</p>
+    {% endif %}
+</div>
+{% endblock %}

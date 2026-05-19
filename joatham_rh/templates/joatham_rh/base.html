@@ -1,0 +1,242 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Ressources humaines" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% block rh_title %}{% trans "Ressources humaines" %}{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block rh_subtitle %}{% trans "Employes, postes et presences de votre entreprise." %}{% endblock %}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'rh_employe_list' %}" class="btn-link">{% trans "Employes" %}</a>
+{% if can_manage_rh_ui %}
+<a href="{% url 'rh_employe_create' %}" class="btn-link primary">{% trans "Ajouter" %}</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_styles %}{{ block.super }}
+<style>
+    .rh-module-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 14px;
+        border: 1px solid rgba(217, 230, 247, 0.86);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .rh-module-nav a,
+    .rh-action-link,
+    .rh-action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 13px;
+        border-radius: 12px;
+        border: 1px solid #dbe5ef;
+        background: #fff;
+        color: #10233f;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .rh-module-nav a.is-active,
+    .rh-action-link.primary,
+    .rh-action-button.primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+
+    .rh-card,
+    .rh-table-shell,
+    .rh-kpi-card {
+        border: 1px solid #dde7f0;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    }
+
+    .rh-card {
+        padding: 18px;
+    }
+
+    .rh-header,
+    .rh-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .rh-header {
+        margin-bottom: 18px;
+    }
+
+    .rh-header h2,
+    .rh-card h3 {
+        margin: 0;
+        color: #10233f;
+    }
+
+    .rh-header p,
+    .rh-muted,
+    .rh-empty p {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .rh-count {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #dde7f0;
+        color: #475569;
+        font-weight: 800;
+    }
+
+    .rh-table-shell {
+        overflow: hidden;
+    }
+
+    .rh-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+    }
+
+    .rh-table th,
+    .rh-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .rh-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .rh-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 800;
+        font-size: 0.78rem;
+    }
+
+    .rh-badge.success {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #047857;
+    }
+
+    .rh-badge.warning {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #c2410c;
+    }
+
+    .rh-badge.danger {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .rh-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 16px;
+    }
+
+    .rh-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .rh-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .rh-field label {
+        color: #10233f;
+        font-weight: 800;
+    }
+
+    .rh-field input,
+    .rh-field select,
+    .rh-field textarea {
+        width: 100%;
+    }
+
+    .rh-error,
+    .errorlist {
+        color: #b91c1c;
+        list-style: none;
+        margin: 0 0 12px;
+        padding: 0;
+    }
+
+    .rh-empty {
+        padding: 44px 24px;
+        text-align: center;
+    }
+
+    .rh-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .rh-kpi-card {
+        padding: 16px;
+    }
+
+    .rh-kpi-label {
+        display: block;
+        color: #64748b;
+        font-size: 0.84rem;
+        margin-bottom: 6px;
+    }
+
+    .rh-kpi-value {
+        color: #10233f;
+        font-weight: 900;
+    }
+
+    @media (max-width: 760px) {
+        .rh-form-grid,
+        .rh-detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block before_content %}
+<nav class="rh-module-nav" aria-label="{% trans 'Navigation ressources humaines' %}">
+    <a href="{% url 'rh_employe_list' %}" class="{% if request.resolver_match.url_name == 'rh_employe_list' or request.resolver_match.url_name == 'rh_employe_detail' or request.resolver_match.url_name == 'rh_employe_create' or request.resolver_match.url_name == 'rh_employe_update' %}is-active{% endif %}">{% trans "Employes" %}</a>
+    <a href="{% url 'rh_poste_list' %}" class="{% if request.resolver_match.url_name == 'rh_poste_list' or request.resolver_match.url_name == 'rh_poste_create' %}is-active{% endif %}">{% trans "Postes" %}</a>
+    <a href="{% url 'rh_presence_list' %}" class="{% if request.resolver_match.url_name == 'rh_presence_list' or request.resolver_match.url_name == 'rh_presence_create' %}is-active{% endif %}">{% trans "Presences" %}</a>
+</nav>
+{% endblock %}
