@@ -1,0 +1,66 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_subtitle %}{% trans "Suivez les dossiers employes de votre entreprise, avec matricule, poste et statut." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Employes" %}</h2>
+        <p>{% trans "Base RH simple pour identifier les collaborateurs, leur poste et leur situation." %}</p>
+    </div>
+    <span class="rh-count">{{ employe_count }} {% trans "employe(s)" %}</span>
+</div>
+
+{% if employes %}
+<div class="rh-table-shell">
+    <div class="table-scroll">
+        <table class="rh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Matricule" %}</th>
+                    <th>{% trans "Nom" %}</th>
+                    <th>{% trans "Poste" %}</th>
+                    <th>{% trans "Contrat" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in employes %}
+                <tr>
+                    <td><strong>{{ row.instance.matricule }}</strong></td>
+                    <td>{{ row.instance.nom }} {{ row.instance.prenom }}</td>
+                    <td class="rh-muted">{{ row.instance.poste.nom|default:"-" }}</td>
+                    <td>{{ row.instance.get_type_contrat_display }}</td>
+                    <td>
+                        <span class="rh-badge {% if row.instance.statut == 'actif' %}success{% elif row.instance.statut == 'suspendu' %}warning{% else %}danger{% endif %}">
+                            {{ row.status_label }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="rh-actions">
+                            <a href="{% url 'rh_employe_detail' row.instance.id %}" class="rh-action-link">{% trans "Voir" %}</a>
+                            {% if can_manage_rh_ui %}
+                            <a href="{% url 'rh_employe_update' row.instance.id %}" class="rh-action-link primary">{% trans "Modifier" %}</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rh-table-shell">
+    <div class="rh-empty">
+        <h3>{% trans "Aucun employe enregistre" %}</h3>
+        <p>{% trans "Ajoutez un premier employe pour constituer le dossier RH de votre entreprise." %}</p>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_employe_create' %}" class="btn-link primary">{% trans "Ajouter un employe" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

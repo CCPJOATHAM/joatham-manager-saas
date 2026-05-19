@@ -57,6 +57,7 @@ MODULE_ACCESS_POLICY = {
     "audit_advanced": ACCESS_PREMIUM,
     "messages": ACCESS_PREMIUM,
     "users": ACCESS_INCLUDED_PLAN,
+    "rh": ACCESS_PREMIUM,
 }
 
 
@@ -93,6 +94,7 @@ MODULE_LABELS = {
     "audit_advanced": "audit avance",
     "messages": "messagerie",
     "subscription": "abonnement",
+    "rh": "ressources humaines",
 }
 
 PLAN_MODULE_ALIASES = {
@@ -130,6 +132,7 @@ PLAN_MODULE_ALIASES = {
     "audit_advanced": {"audit_advanced", "audit_avance"},
     "messages": {"messages"},
     "subscription": {"subscription", "abonnements"},
+    "rh": {"rh", "hr", "ressources_humaines", "human_resources"},
 }
 
 _MODULE_ALIAS_OWNERS = {}
@@ -152,7 +155,8 @@ EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "paym
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
 PAYMENTS_PREMIUM_MODULES = {"payments", "mobile_money", "payment_validation", "payments_reports", "payments_exports"}
 ADVANCED_REPORTS_PREMIUM_MODULES = {"advanced_reports", "advanced_reports_exports", "business_dashboard"}
-PREMIUM_CODE_ONLY_MODULES = PAYMENTS_PREMIUM_MODULES | ADVANCED_REPORTS_PREMIUM_MODULES
+RH_PREMIUM_MODULES = {"rh"}
+PREMIUM_CODE_ONLY_MODULES = PAYMENTS_PREMIUM_MODULES | ADVANCED_REPORTS_PREMIUM_MODULES | RH_PREMIUM_MODULES
 PREMIUM_DENIED_REASONS = {
     "premium_required",
     "feature_not_declared",

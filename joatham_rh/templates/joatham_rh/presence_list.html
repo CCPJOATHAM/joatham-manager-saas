@@ -1,0 +1,60 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_subtitle %}{% trans "Consultez les presences simples enregistrees par entreprise." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Presences" %}</h2>
+        <p>{% trans "Pointages simples : present, absent, retard ou conge." %}</p>
+    </div>
+    <div class="rh-actions">
+        <span class="rh-count">{{ presence_count }} {% trans "presence(s)" %}</span>
+        {% if can_record_presence_ui %}
+        <a href="{% url 'rh_presence_create' %}" class="rh-action-link primary">{% trans "Ajouter" %}</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if presences %}
+<div class="rh-table-shell">
+    <div class="table-scroll">
+        <table class="rh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Employe" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Arrivee" %}</th>
+                    <th>{% trans "Depart" %}</th>
+                    <th>{% trans "Note" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in presences %}
+                <tr>
+                    <td>{{ row.instance.date }}</td>
+                    <td>{{ row.instance.employe.matricule }} - {{ row.instance.employe.nom }} {{ row.instance.employe.prenom }}</td>
+                    <td>{{ row.status_label }}</td>
+                    <td>{{ row.instance.heure_arrivee|default:"-" }}</td>
+                    <td>{{ row.instance.heure_depart|default:"-" }}</td>
+                    <td class="rh-muted">{{ row.instance.note|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rh-table-shell">
+    <div class="rh-empty">
+        <h3>{% trans "Aucune presence enregistree" %}</h3>
+        <p>{% trans "Enregistrez les presences quotidiennes lorsque vous etes pret." %}</p>
+        {% if can_record_presence_ui %}
+        <a href="{% url 'rh_presence_create' %}" class="btn-link primary">{% trans "Ajouter une presence" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
