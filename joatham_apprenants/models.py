@@ -53,6 +53,11 @@ class InscriptionFormation(models.Model):
         TERMINEE = "terminee", _("Terminee")
         ANNULEE = "annulee", _("Annulee")
 
+    class StatutPaiement(models.TextChoices):
+        IMPAYE = "impaye", _("Impaye")
+        PARTIEL = "partiel", _("Partiel")
+        PAYE = "paye", _("Paye")
+
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
         on_delete=models.CASCADE,
@@ -93,6 +98,17 @@ class InscriptionFormation(models.Model):
     def save(self, *args, **kwargs):
         self.solde = Decimal(self.montant_prevu or 0) - Decimal(self.montant_paye or 0)
         super().save(*args, **kwargs)
+
+    @property
+    def statut_paiement(self):
+        montant_prevu = Decimal(self.montant_prevu or 0)
+        montant_paye = Decimal(self.montant_paye or 0)
+        solde = Decimal(self.solde or 0)
+        if montant_prevu <= Decimal("0.00") or solde <= Decimal("0.00"):
+            return self.StatutPaiement.PAYE
+        if montant_paye <= Decimal("0.00"):
+            return self.StatutPaiement.IMPAYE
+        return self.StatutPaiement.PARTIEL
 
     def __str__(self):
         return f"{self.apprenant} - {self.formation}"
