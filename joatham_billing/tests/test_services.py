@@ -614,6 +614,15 @@ class BillingCashPaymentIntegrationTests(TestCase):
         self.assertEqual(mouvement.session_id, self.session.id)
         self.assertEqual(mouvement.type_mouvement, MouvementCaisse.TypeMouvement.PAIEMENT_FACTURE)
         self.assertEqual(mouvement.montant, Decimal("30"))
+        self.assertEqual(
+            MouvementCaisse.objects.filter(
+                entreprise=self.entreprise,
+                source_app="joatham_billing",
+                source_model="PaiementFacture",
+                source_id=paiement.id,
+            ).count(),
+            1,
+        )
 
     def test_register_cash_payment_without_open_session_is_rejected(self):
         self.session.statut = SessionCaisse.Statut.FERMEE

@@ -4,10 +4,10 @@ from django.http import Http404
 from django.test import TestCase
 
 from joatham_billing.tests.factories import create_entreprise, create_user
-from joatham_caisse.models import Caisse, MouvementCaisse, ValidationCaisse
+from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse, ValidationCaisse
 from joatham_caisse.selectors.mouvements import get_cash_flow_totals_for_session
 from joatham_caisse.services.caisse import create_caisse, deactivate_caisse
-from joatham_caisse.services.mouvements import record_cash_entry, record_cash_exit
+from joatham_caisse.services.mouvements import record_cash_entry, record_cash_exit, record_mouvement
 from joatham_caisse.services.session import close_session, compute_theoretical_balance, open_session
 from joatham_caisse.services.validation import reject_session, validate_session
 
@@ -36,6 +36,35 @@ class CaisseServicesTests(TestCase):
         )
         self.assertEqual(caisse.entreprise, self.entreprise)
         self.assertEqual(caisse.code, "CAISSE-002")
+
+    def test_create_caisse_rejects_blank_name_or_code(self):
+        invalid_payloads = [
+            {"nom": "   ", "code": "CAISSE-BLANK-NAME"},
+            {"nom": "Caisse sans code", "code": "   "},
+        ]
+
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                with self.assertRaises(ValueError):
+                    create_caisse(
+                        entreprise=self.entreprise,
+                        devise="CDF",
+                        utilisateur=self.owner,
+                        **payload,
+                    )
+
+        self.assertFalse(Caisse.objects.filter(entreprise=self.entreprise, code__in=["CAISSE-BLANK-NAME", ""]).exists())
+
+    def test_open_session_rejects_negative_initial_balance(self):
+        with self.assertRaises(ValueError):
+            open_session(
+                entreprise=self.entreprise,
+                caisse=self.caisse,
+                utilisateur=self.owner,
+                solde_initial=Decimal("-1.00"),
+            )
+
+        self.assertEqual(self.caisse.sessions.count(), 0)
 
     def test_open_session_blocks_double_opening(self):
         open_session(
@@ -76,6 +105,67 @@ class CaisseServicesTests(TestCase):
                 libelle="Entree tardive",
                 utilisateur=self.owner,
             )
+
+    def test_record_movement_rejects_non_positive_amounts(self):
+        session = open_session(
+            entreprise=self.entreprise,
+            caisse=self.caisse,
+            utilisateur=self.owner,
+            solde_initial=Decimal("100.00"),
+        )
+
+        for invalid_amount in (Decimal("0.00"), Decimal("-5.00")):
+            with self.subTest(invalid_amount=invalid_amount):
+                with self.assertRaises(ValueError):
+                    record_cash_entry(
+                        entreprise=self.entreprise,
+                        caisse=self.caisse,
+                        session=session,
+                        montant=invalid_amount,
+                        libelle="Montant invalide",
+                        utilisateur=self.owner,
+                    )
+                with self.assertRaises(ValueError):
+                    record_cash_exit(
+                        entreprise=self.entreprise,
+                        caisse=self.caisse,
+                        session=session,
+                        montant=invalid_amount,
+                        libelle="Montant invalide",
+                        utilisateur=self.owner,
+                    )
+
+        self.assertEqual(MouvementCaisse.objects.filter(session=session).count(), 0)
+
+    def test_record_movement_rejects_invalid_type_and_blank_label(self):
+        session = open_session(
+            entreprise=self.entreprise,
+            caisse=self.caisse,
+            utilisateur=self.owner,
+            solde_initial=Decimal("100.00"),
+        )
+
+        with self.assertRaises(ValueError):
+            record_mouvement(
+                entreprise=self.entreprise,
+                caisse=self.caisse,
+                session=session,
+                type_mouvement="type_inconnu",
+                montant=Decimal("10.00"),
+                libelle="Mouvement invalide",
+                utilisateur=self.owner,
+            )
+        with self.assertRaises(ValueError):
+            record_cash_entry(
+                entreprise=self.entreprise,
+                caisse=self.caisse,
+                session=session,
+                montant=Decimal("10.00"),
+                libelle="   ",
+                utilisateur=self.owner,
+            )
+
+        self.assertEqual(MouvementCaisse.objects.filter(session=session).count(), 0)
 
     def test_wrong_tenant_is_blocked(self):
         session = open_session(
@@ -129,6 +219,26 @@ class CaisseServicesTests(TestCase):
         session.refresh_from_db()
         self.assertEqual(session.solde_theorique, Decimal("130.00"))
         self.assertEqual(session.ecart, Decimal("-2.00"))
+
+    def test_close_session_rejects_negative_real_balance(self):
+        session = open_session(
+            entreprise=self.entreprise,
+            caisse=self.caisse,
+            utilisateur=self.owner,
+            solde_initial=Decimal("100.00"),
+        )
+
+        with self.assertRaises(ValueError):
+            close_session(
+                entreprise=self.entreprise,
+                session=session,
+                utilisateur=self.owner,
+                solde_reel=Decimal("-1.00"),
+            )
+
+        session.refresh_from_db()
+        self.assertEqual(session.statut, SessionCaisse.Statut.OUVERTE)
+        self.assertIsNone(session.solde_reel)
 
     def test_validation_is_allowed_only_after_closing(self):
         session = open_session(

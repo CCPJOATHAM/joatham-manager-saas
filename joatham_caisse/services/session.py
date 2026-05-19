@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone
@@ -11,6 +11,16 @@ from ..selectors.mouvements import get_cash_flow_totals_for_session
 from ..selectors.session import get_open_session_for_caisse
 
 
+def _normalize_non_negative_amount(value, field_label):
+    try:
+        normalized = Decimal(str(value or "0"))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise ValueError(f"{field_label} est invalide.") from exc
+    if normalized < Decimal("0.00"):
+        raise ValueError(f"{field_label} ne peut pas etre negatif.")
+    return normalized
+
+
 def compute_theoretical_balance(session):
     totals = get_cash_flow_totals_for_session(session)
     total_entrees = Decimal(str(totals["total_entrees"]))
@@ -21,6 +31,7 @@ def compute_theoretical_balance(session):
 @transaction.atomic
 def open_session(*, entreprise, caisse, utilisateur, solde_initial=Decimal("0.00"), commentaire=""):
     ensure_same_entreprise(caisse, entreprise)
+    solde_initial = _normalize_non_negative_amount(solde_initial, "Le solde initial")
     if not caisse.est_active:
         raise ValueError("Cette caisse est inactive.")
     if get_open_session_for_caisse(caisse) is not None:
@@ -56,7 +67,7 @@ def close_session(*, entreprise, session, utilisateur, solde_reel, commentaire="
         raise ValueError("Seule une session ouverte peut etre fermee.")
 
     solde_theorique = compute_theoretical_balance(session)
-    solde_reel = Decimal(str(solde_reel))
+    solde_reel = _normalize_non_negative_amount(solde_reel, "Le solde reel")
     ecart = solde_reel - solde_theorique
     session.solde_theorique = solde_theorique
     session.solde_reel = solde_reel
