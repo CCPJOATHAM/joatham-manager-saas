@@ -107,6 +107,7 @@ def depenses_list(request):
 
 
 @permission_required("expenses.export")
+@module_access_required("expenses")
 def depenses_pdf(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     date_debut = request.GET.get("date_debut")

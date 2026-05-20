@@ -251,6 +251,8 @@ def _get_item_state(user, item):
             state = _get_module_state(user, module_name)
             if state.get("allowed"):
                 return {"visible": True}
+            if state.get("reason") == "module_not_in_plan":
+                return {"visible": False}
             if state.get("reason") in PREMIUM_DENIED_REASONS:
                 if item.get("hide_when_locked"):
                     return {"visible": False}

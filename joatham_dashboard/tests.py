@@ -323,6 +323,8 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Imprimante A4")
         self.assertContains(response, "Routeur fibre")
         self.assertContains(response, reverse("product_list"))
+        self.assertContains(response, "Gestion SaaS securisee par JOATHAM Manager")
+        self.assertNotContains(response, "Facture generee automatiquement par JOATHAM Manager")
 
     def test_dashboard_selector_detects_stock_alerts_with_company_isolation(self):
         kpis = get_dashboard_kpis_by_entreprise(self.entreprise)
@@ -366,6 +368,39 @@ class DashboardAccessTests(TestCase):
         self.assertRedirects(
             blocked,
             reverse("abonnement_expire") + "?module=accounting&reason=premium_required",
+        )
+
+    def test_navigation_hides_modules_explicitly_missing_from_plan(self):
+        limited_entreprise = create_entreprise("Entreprise Navigation Limitee")
+        limited_owner = create_user("owner-limited-nav", "proprietaire", limited_entreprise)
+        limited_plan = Abonnement.objects.create(
+            nom="Navigation limitee",
+            code="starter",
+            prix=19,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard"],
+        )
+        activate_subscription_for_entreprise(
+            entreprise=limited_entreprise,
+            plan=limited_plan,
+            utilisateur=limited_owner,
+        )
+
+        self.client.force_login(limited_owner)
+        response = self.client.get(reverse("admin_dashboard"))
+        labels = [item["label"] for item in response.context["dashboard_navigation"]]
+
+        self.assertIn("Dashboard", labels)
+        self.assertNotIn("Clients", labels)
+        self.assertNotIn("Factures", labels)
+        self.assertNotIn("Comptabilite", labels)
+        self.assertNotIn("Ressources humaines", labels)
+
+        blocked = self.client.get(reverse("compta_dashboard"))
+        self.assertRedirects(
+            blocked,
+            reverse("abonnement_expire") + "?module=accounting&reason=module_not_in_plan",
         )
 
 
