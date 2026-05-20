@@ -1,14 +1,14 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_title %}{% trans "Rapports RH" %}{% endblock %}
-{% block rh_subtitle %}{% trans "Indicateurs simples pour suivre les effectifs, presences et conges." %}{% endblock %}
+{% block rh_title %}{% trans "Tableau de bord RH" %}{% endblock %}
+{% block rh_subtitle %}{% trans "Vue d'ensemble de la gestion des ressources humaines." %}{% endblock %}
 
 {% block content %}
-<div class="rh-header">
+<div class="rh-dashboard-hero">
     <div>
-        <h2>{% trans "Rapports RH" %}</h2>
-        <p>{% trans "Periode du mois en cours" %} : {{ report.month_start }} - {{ report.month_end }}</p>
+        <h2>{% trans "Tableau de bord RH" %}</h2>
+        <p>{% trans "Vue d'ensemble de la gestion des ressources humaines avec les donnees reelles de votre entreprise." %} {{ report.month_start }} - {{ report.month_end }}</p>
     </div>
     <div class="rh-actions">
         <a href="{% url 'rh_reports_export_csv' %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
@@ -18,73 +18,182 @@
 
 <div class="rh-detail-grid">
     <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Total employes" %}</span>
-        <span class="rh-kpi-value">{{ report.total_employes }}</span>
+        <div class="rh-kpi-main">
+            <span class="rh-kpi-label">{% trans "Total Employes" %}</span>
+            <span class="rh-kpi-value">{{ report.total_employes }}</span>
+            <span class="rh-kpi-note">{% trans "Dossiers enregistres" %}</span>
+        </div>
+        <span class="rh-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
+        </span>
     </div>
     <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Employes actifs" %}</span>
-        <span class="rh-kpi-value">{{ report.employes_actifs }}</span>
+        <div class="rh-kpi-main">
+            <span class="rh-kpi-label">{% trans "Employes Actifs" %}</span>
+            <span class="rh-kpi-value">{{ report.employes_actifs }}</span>
+            <span class="rh-kpi-note">{% trans "Statut actif" %}</span>
+        </div>
+        <span class="rh-kpi-icon success" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><path d="M16 21v-2a4 4 0 0 0-4-4H8"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        </span>
     </div>
     <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Suspendus" %}</span>
-        <span class="rh-kpi-value">{{ report.employes_suspendus }}</span>
+        <div class="rh-kpi-main">
+            <span class="rh-kpi-label">{% trans "Conges en Attente" %}</span>
+            <span class="rh-kpi-value">{{ report.conges_en_attente }}</span>
+            <span class="rh-kpi-note">{% trans "Demandes a traiter" %}</span>
+        </div>
+        <span class="rh-kpi-icon warning" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path></svg>
+        </span>
     </div>
     <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Sortis" %}</span>
-        <span class="rh-kpi-value">{{ report.employes_sortis }}</span>
-    </div>
-    <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Presences du mois" %}</span>
-        <span class="rh-kpi-value">{{ report.presences_mois }}</span>
-    </div>
-    <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Absences du mois" %}</span>
-        <span class="rh-kpi-value">{{ report.absences_mois }}</span>
-    </div>
-    <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Conges du mois" %}</span>
-        <span class="rh-kpi-value">{{ report.conges_mois }}</span>
-    </div>
-    <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Conges en attente" %}</span>
-        <span class="rh-kpi-value">{{ report.conges_en_attente }}</span>
-    </div>
-    <div class="rh-kpi-card">
-        <span class="rh-kpi-label">{% trans "Conges approuves" %}</span>
-        <span class="rh-kpi-value">{{ report.conges_approuves }}</span>
+        <div class="rh-kpi-main">
+            <span class="rh-kpi-label">{% trans "Presences Aujourd'hui" %}</span>
+            <span class="rh-kpi-value">{{ report.presences_aujourdhui }}</span>
+            <span class="rh-kpi-note">{% trans "Pointages du jour" %}</span>
+        </div>
+        <span class="rh-kpi-icon accent" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        </span>
     </div>
 </div>
 
 <div class="rh-card">
-    <div class="rh-header">
-        <div>
-            <h3>{% trans "Repartition par poste" %}</h3>
-            <p>{% trans "Vue simple des effectifs par fonction." %}</p>
+    <h3 class="rh-section-title">
+        <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
+        {% trans "Activite recente" %}
+    </h3>
+    {% if report.recent_employes or report.recent_presences or report.recent_conges or report.recent_documents %}
+        <div class="rh-activity-list">
+            {% for employe in report.recent_employes %}
+            <div class="rh-activity-item">
+                <div class="rh-activity-left">
+                    <span class="rh-activity-dot success" aria-hidden="true"></span>
+                    <div>
+                        <strong>{% trans "Nouvel employe enregistre" %}</strong>
+                        <span>{{ employe.nom }} {{ employe.prenom }} - {{ employe.matricule }}</span>
+                    </div>
+                </div>
+                <span>{{ employe.poste.nom|default:"-" }}</span>
+            </div>
+            {% endfor %}
+            {% for conge in report.recent_conges %}
+            <div class="rh-activity-item">
+                <div class="rh-activity-left">
+                    <span class="rh-activity-dot warning" aria-hidden="true"></span>
+                    <div>
+                        <strong>{% trans "Demande de conge" %}</strong>
+                        <span>{{ conge.employe.nom }} {{ conge.employe.prenom }}</span>
+                    </div>
+                </div>
+                <span>{{ conge.get_statut_display }}</span>
+            </div>
+            {% endfor %}
+            {% for document in report.recent_documents %}
+            <div class="rh-activity-item">
+                <div class="rh-activity-left">
+                    <span class="rh-activity-dot accent" aria-hidden="true"></span>
+                    <div>
+                        <strong>{{ document.titre }}</strong>
+                        <span>{{ document.employe.nom }} {{ document.employe.prenom }}</span>
+                    </div>
+                </div>
+                <span>{{ document.get_type_document_display }}</span>
+            </div>
+            {% endfor %}
+            {% for presence in report.recent_presences %}
+            <div class="rh-activity-item">
+                <div class="rh-activity-left">
+                    <span class="rh-activity-dot" aria-hidden="true"></span>
+                    <div>
+                        <strong>{% trans "Presence" %}</strong>
+                        <span>{{ presence.employe.nom }} {{ presence.employe.prenom }} - {{ presence.date }}</span>
+                    </div>
+                </div>
+                <span>{{ presence.get_statut_display }}</span>
+            </div>
+            {% endfor %}
         </div>
-    </div>
-    {% if report.repartition_postes %}
-    <div class="rh-table-shell">
-        <div class="table-scroll">
-            <table class="rh-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Poste" %}</th>
-                        <th>{% trans "Employes" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in report.repartition_postes %}
-                    <tr>
-                        <td>{{ row.poste }}</td>
-                        <td>{{ row.total }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% else %}
+        <p class="rh-muted">{% trans "Aucune activite RH recente a afficher." %}</p>
+    {% endif %}
+</div>
+
+<div class="rh-card rh-spaced-card">
+    <h3 class="rh-section-title">
+        <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 8.8 8.5 2 9.4l5 4.8L5.8 21 12 17.7 18.2 21 17 14.2l5-4.8-6.8-.9Z"></path></svg></span>
+        {% trans "Employes recents" %}
+    </h3>
+    {% if report.recent_employes %}
+    <div class="rh-person-list">
+        {% for employe in report.recent_employes %}
+        <div class="rh-person-row">
+            <div class="rh-person-main">
+                <span class="rh-avatar">{{ employe.nom|slice:":1" }}{{ employe.prenom|slice:":1" }}</span>
+                <div class="rh-person-text">
+                    <strong>{{ employe.nom }} {{ employe.prenom }}</strong>
+                    <span>{{ employe.poste.nom|default:"-" }} - {{ employe.matricule }}</span>
+                </div>
+            </div>
+            <span class="rh-badge {% if employe.statut == 'actif' %}success{% elif employe.statut == 'suspendu' %}warning{% else %}danger{% endif %}">{{ employe.get_statut_display }}</span>
         </div>
+        {% endfor %}
     </div>
     {% else %}
-    <p class="rh-muted">{% trans "Aucune repartition disponible." %}</p>
+    <p class="rh-muted">{% trans "Aucun employe recent." %}</p>
     {% endif %}
+</div>
+
+<div class="rh-mini-grid">
+    <div class="rh-mini-card">
+        <span class="rh-kpi-label">{% trans "Presences du mois" %}</span>
+        <strong>{{ report.presences_mois }}</strong>
+        <p class="rh-muted">{% trans "Total des presences enregistrees sur la periode." %}</p>
+    </div>
+    <div class="rh-mini-card success">
+        <span class="rh-kpi-label">{% trans "Documents RH" %}</span>
+        <strong>{{ report.documents_total }}</strong>
+        <p class="rh-muted">{% trans "Documents rattaches aux dossiers employes." %}</p>
+    </div>
+    <div class="rh-mini-card accent">
+        <span class="rh-kpi-label">{% trans "Absences et conges du mois" %}</span>
+        <strong>{{ report.absences_mois }}</strong>
+        <p class="rh-muted">{% trans "Absences et conges saisis pendant le mois." %}</p>
+    </div>
+</div>
+
+<div class="rh-dashboard-grid rh-spaced-card">
+    <div class="rh-card" id="rh-reports-section">
+        <h3 class="rh-section-title">
+            <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19v-6"></path><path d="M12 19V9"></path><path d="M16 19v-4"></path><path d="M20 19V7"></path></svg></span>
+            {% trans "Rapports RH" %}
+        </h3>
+        <p class="rh-muted">{% trans "Repartition actuelle des effectifs par poste." %}</p>
+        {% if report.repartition_postes %}
+        <div class="rh-table-shell">
+            <div class="table-scroll">
+                <table class="rh-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Poste" %}</th>
+                            <th>{% trans "Employes" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report.repartition_postes %}
+                        <tr>
+                            <td>{{ row.poste }}</td>
+                            <td><span class="rh-badge success">{{ row.total }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <p class="rh-muted">{% trans "Aucune repartition disponible." %}</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

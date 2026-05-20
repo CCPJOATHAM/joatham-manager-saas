@@ -1,8 +1,10 @@
+import re
 from datetime import date
 from decimal import Decimal
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.html import strip_tags
 
 from core.services.product_policy import can_access_module
 from core.services.subscription import (
@@ -114,6 +116,31 @@ class RhFoundationTests(TestCase):
         self.assertContains(response, "+243970258117")
         self.assertContains(response, "contact@joatham.test")
         self.assertNotContains(response, "JOATHAM Manager")
+
+    def _assert_no_figma_dummy_content(self, response):
+        html = response.content.decode(response.charset or "utf-8", errors="replace")
+        html_without_styles = re.sub(
+            r"<style\b[^>]*>.*?</style>",
+            "",
+            html,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        visible_text = strip_tags(html_without_styles)
+        figma_dummy_values = [
+            "247",
+            "234",
+            "Marie Kouassi",
+            "Jean Koffi",
+            "Awa Diallo",
+            "Kofi Mensah",
+            "Amina Ndiaye",
+            "Kwame Asante",
+            "Fatou Sow",
+            "Satisfaction 4.6/5",
+            "Version 2.0",
+        ]
+        for value in figma_dummy_values:
+            self.assertNotIn(value, visible_text)
 
     def test_default_premium_plan_includes_rh_aliases(self):
         premium = next(plan for plan in get_default_paid_plans() if plan["code"] == PREMIUM_PLAN_CODE)
@@ -531,15 +558,58 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_reports"))
 
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tableau de bord RH")
         self.assertContains(response, "Rapports RH")
 
     def test_rh_navigation_contains_phase8_entries_when_module_is_active(self):
         self.client.force_login(self.owner_a)
         response = self.client.get(reverse("rh_employe_list"))
 
+        self.assertContains(response, "Tableau de bord")
         self.assertContains(response, "Conges")
         self.assertContains(response, "Documents")
         self.assertContains(response, "Rapports")
+        self.assertContains(response, "Exports")
+        self.assertContains(response, "Impressions")
+
+    def test_rh_dashboard_uses_real_data_without_figma_placeholders(self):
+        employe = self._create_employe(matricule="RH-UI001", nom="DesignReel")
+        record_presence(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date=date(2026, 5, 20),
+            statut=Presence.Statut.PRESENT,
+            utilisateur=self.owner_a,
+        )
+        create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 21),
+            date_fin=date(2026, 5, 22),
+            utilisateur=self.owner_a,
+        )
+        create_document_rh(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Contrat design premium",
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_reports"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tableau de bord RH")
+        self.assertContains(response, "Activite recente")
+        self.assertContains(response, "Employes recents")
+        self.assertContains(response, "RH-UI001")
+        self.assertContains(response, "DesignReel")
+        self.assertContains(response, "Contrat design premium")
+        self.assertContains(response, reverse("rh_reports_export_csv"))
+        self.assertContains(response, reverse("rh_reports_print"))
+        self._assert_no_figma_dummy_content(response)
 
     def test_employe_export_csv_allowed_with_rh_module(self):
         employe = self._create_employe(matricule="RH-X001", nom="Export")

@@ -117,12 +117,14 @@ def get_rh_report_snapshot(entreprise, *, as_of=None):
     month_end = next_month - timedelta(days=1)
 
     employes = scope_queryset_to_entreprise(Employe.objects.all(), entreprise)
-    presences_month = scope_queryset_to_entreprise(Presence.objects.all(), entreprise).filter(
+    presences = scope_queryset_to_entreprise(Presence.objects.all(), entreprise)
+    presences_month = presences.filter(
         date__gte=month_start,
         date__lte=month_end,
     )
     conges = scope_queryset_to_entreprise(DemandeConge.objects.all(), entreprise)
     conges_month = conges.filter(date_debut__lte=month_end, date_fin__gte=month_start)
+    documents = scope_queryset_to_entreprise(DocumentRH.objects.all(), entreprise)
     repartition_postes = (
         employes.values("poste__nom")
         .annotate(total=Count("id"))
@@ -135,10 +137,36 @@ def get_rh_report_snapshot(entreprise, *, as_of=None):
         "employes_suspendus": employes.filter(statut=Employe.Statut.SUSPENDU).count(),
         "employes_sortis": employes.filter(statut=Employe.Statut.SORTI).count(),
         "presences_mois": presences_month.filter(statut=Presence.Statut.PRESENT).count(),
+        "presences_aujourdhui": presences.filter(date=as_of, statut=Presence.Statut.PRESENT).count(),
         "absences_mois": presences_month.filter(statut__in=[Presence.Statut.ABSENT, Presence.Statut.CONGE]).count(),
         "conges_mois": conges_month.filter(statut=DemandeConge.Statut.APPROUVE).count(),
         "conges_en_attente": conges.filter(statut=DemandeConge.Statut.EN_ATTENTE).count(),
         "conges_approuves": conges.filter(statut=DemandeConge.Statut.APPROUVE).count(),
+        "documents_total": documents.count(),
+        "recent_employes": list(
+            scope_queryset_to_entreprise(
+                Employe.objects.select_related("poste"),
+                entreprise,
+            ).order_by("-created_at", "-id")[:5]
+        ),
+        "recent_presences": list(
+            scope_queryset_to_entreprise(
+                Presence.objects.select_related("employe"),
+                entreprise,
+            ).order_by("-created_at", "-id")[:5]
+        ),
+        "recent_conges": list(
+            scope_queryset_to_entreprise(
+                DemandeConge.objects.select_related("employe"),
+                entreprise,
+            ).order_by("-created_at", "-id")[:5]
+        ),
+        "recent_documents": list(
+            scope_queryset_to_entreprise(
+                DocumentRH.objects.select_related("employe"),
+                entreprise,
+            ).order_by("-created_at", "-id")[:5]
+        ),
         "repartition_postes": [
             {"poste": row["poste__nom"] or "Sans poste", "total": row["total"]}
             for row in repartition_postes
