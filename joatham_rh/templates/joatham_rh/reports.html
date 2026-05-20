@@ -1,0 +1,86 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_title %}{% trans "Rapports RH" %}{% endblock %}
+{% block rh_subtitle %}{% trans "Indicateurs simples pour suivre les effectifs, presences et conges." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Rapports RH" %}</h2>
+        <p>{% trans "Periode du mois en cours" %} : {{ report.month_start }} - {{ report.month_end }}</p>
+    </div>
+</div>
+
+<div class="rh-detail-grid">
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Total employes" %}</span>
+        <span class="rh-kpi-value">{{ report.total_employes }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Employes actifs" %}</span>
+        <span class="rh-kpi-value">{{ report.employes_actifs }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Suspendus" %}</span>
+        <span class="rh-kpi-value">{{ report.employes_suspendus }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Sortis" %}</span>
+        <span class="rh-kpi-value">{{ report.employes_sortis }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Presences du mois" %}</span>
+        <span class="rh-kpi-value">{{ report.presences_mois }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Absences du mois" %}</span>
+        <span class="rh-kpi-value">{{ report.absences_mois }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Conges du mois" %}</span>
+        <span class="rh-kpi-value">{{ report.conges_mois }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Conges en attente" %}</span>
+        <span class="rh-kpi-value">{{ report.conges_en_attente }}</span>
+    </div>
+    <div class="rh-kpi-card">
+        <span class="rh-kpi-label">{% trans "Conges approuves" %}</span>
+        <span class="rh-kpi-value">{{ report.conges_approuves }}</span>
+    </div>
+</div>
+
+<div class="rh-card">
+    <div class="rh-header">
+        <div>
+            <h3>{% trans "Repartition par poste" %}</h3>
+            <p>{% trans "Vue simple des effectifs par fonction." %}</p>
+        </div>
+    </div>
+    {% if report.repartition_postes %}
+    <div class="rh-table-shell">
+        <div class="table-scroll">
+            <table class="rh-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Poste" %}</th>
+                        <th>{% trans "Employes" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report.repartition_postes %}
+                    <tr>
+                        <td>{{ row.poste }}</td>
+                        <td>{{ row.total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <p class="rh-muted">{% trans "Aucune repartition disponible." %}</p>
+    {% endif %}
+</div>
+{% endblock %}

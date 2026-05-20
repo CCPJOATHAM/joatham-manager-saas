@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import Employe, Poste, Presence
+from .models import DemandeConge, DocumentRH, Employe, Poste, Presence
 
 
 class PosteForm(forms.ModelForm):
@@ -97,3 +97,49 @@ class PresenceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
         self.fields["note"].widget.attrs.update({"placeholder": _("Observation courte")})
+
+
+class DemandeCongeForm(forms.ModelForm):
+    class Meta:
+        model = DemandeConge
+        fields = ["employe", "type_conge", "date_debut", "date_fin", "motif"]
+        labels = {
+            "employe": _("Employe"),
+            "type_conge": _("Type de conge"),
+            "date_debut": _("Date debut"),
+            "date_fin": _("Date fin"),
+            "motif": _("Motif"),
+        }
+        widgets = {
+            "date_debut": forms.DateInput(attrs={"type": "date"}),
+            "date_fin": forms.DateInput(attrs={"type": "date"}),
+            "motif": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        self.fields["motif"].widget.attrs.update({"placeholder": _("Motif ou precision courte")})
+
+
+class DocumentRHForm(forms.ModelForm):
+    class Meta:
+        model = DocumentRH
+        fields = ["employe", "type_document", "titre", "description", "date_document"]
+        labels = {
+            "employe": _("Employe"),
+            "type_document": _("Type de document"),
+            "titre": _("Titre"),
+            "description": _("Description"),
+            "date_document": _("Date du document"),
+        }
+        widgets = {
+            "date_document": forms.DateInput(attrs={"type": "date"}),
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        self.fields["titre"].widget.attrs.update({"placeholder": _("Exemple : Contrat de travail")})
+        self.fields["description"].widget.attrs.update({"placeholder": _("Reference ou note interne")})

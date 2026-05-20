@@ -1,0 +1,25 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_title %}{{ page_title }}{% endblock %}
+{% block rh_subtitle %}{% trans "Reference documentaire simple, sans upload fichier pour garder le module leger." %}{% endblock %}
+
+{% block content %}
+<form method="post" class="rh-card">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="rh-form-grid">
+        {% for field in form %}
+        <div class="rh-field {% if field.name == 'description' %}full{% endif %}">
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="rh-actions" style="margin-top: 18px;">
+        <a href="{% url 'rh_document_list' %}" class="rh-action-link">{% trans "Annuler" %}</a>
+        <button type="submit" class="rh-action-button primary">{{ submit_label }}</button>
+    </div>
+</form>
+{% endblock %}

@@ -12,4 +12,11 @@ urlpatterns = [
     path("postes/nouveau/", views.poste_create, name="rh_poste_create"),
     path("presences/", views.presence_list, name="rh_presence_list"),
     path("presences/nouveau/", views.presence_create, name="rh_presence_create"),
+    path("conges/", views.conge_list, name="rh_conge_list"),
+    path("conges/nouveau/", views.conge_create, name="rh_conge_create"),
+    path("conges/<int:conge_id>/approuver/", views.conge_approve, name="rh_conge_approve"),
+    path("conges/<int:conge_id>/refuser/", views.conge_refuse, name="rh_conge_refuse"),
+    path("documents/", views.document_list, name="rh_document_list"),
+    path("documents/nouveau/", views.document_create, name="rh_document_create"),
+    path("rapports/", views.rh_reports, name="rh_reports"),
 ]

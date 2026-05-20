@@ -1,26 +1,43 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, user_has_permission
 
-from .forms import EmployeForm, PosteForm, PresenceForm
-from .models import Employe, Presence
+from .forms import DemandeCongeForm, DocumentRHForm, EmployeForm, PosteForm, PresenceForm
+from .models import DemandeConge, Employe, Presence
 from .selectors.rh import (
+    get_conge_by_entreprise,
+    get_conges_by_entreprise,
+    get_documents_by_entreprise,
     get_employe_by_entreprise,
     get_employes_by_entreprise,
     get_postes_by_entreprise,
     get_presences_by_entreprise,
+    get_rh_report_snapshot,
 )
-from .services.rh import RhOperationError, create_employe, create_poste, record_presence, update_employe
+from .services.rh import (
+    RhOperationError,
+    approve_conge,
+    create_conge,
+    create_document_rh,
+    create_employe,
+    create_poste,
+    record_presence,
+    refuse_conge,
+    update_employe,
+)
 
 
 def _build_rh_ui_permissions(user):
     return {
         "can_manage_rh_ui": user_has_permission(user, "rh.manage"),
         "can_record_presence_ui": user_has_permission(user, "rh.presence"),
+        "can_manage_documents_ui": user_has_permission(user, "rh.documents"),
+        "can_view_reports_ui": user_has_permission(user, "rh.reports"),
     }
 
 
@@ -39,6 +56,26 @@ def _build_presence_status_label(status):
         Presence.Statut.RETARD: _("Retard"),
         Presence.Statut.CONGE: _("Conge"),
     }.get(status, status)
+
+
+def _build_conge_status_label(status):
+    return {
+        DemandeConge.Statut.BROUILLON: _("Brouillon"),
+        DemandeConge.Statut.EN_ATTENTE: _("En attente"),
+        DemandeConge.Statut.APPROUVE: _("Approuve"),
+        DemandeConge.Statut.REFUSE: _("Refuse"),
+        DemandeConge.Statut.ANNULE: _("Annule"),
+    }.get(status, status)
+
+
+def _build_conge_type_label(type_conge):
+    return {
+        DemandeConge.TypeConge.ANNUEL: _("Annuel"),
+        DemandeConge.TypeConge.MALADIE: _("Maladie"),
+        DemandeConge.TypeConge.EXCEPTIONNEL: _("Exceptionnel"),
+        DemandeConge.TypeConge.SANS_SOLDE: _("Sans solde"),
+        DemandeConge.TypeConge.AUTRE: _("Autre"),
+    }.get(type_conge, type_conge)
 
 
 @permission_required("rh.view")
@@ -246,6 +283,160 @@ def presence_create(request):
             "form": form,
             "page_title": _("Nouvelle presence"),
             "submit_label": _("Enregistrer la presence"),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def conge_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    conges = [
+        {
+            "instance": conge,
+            "status_label": _build_conge_status_label(conge.statut),
+            "type_label": _build_conge_type_label(conge.type_conge),
+        }
+        for conge in get_conges_by_entreprise(entreprise)
+    ]
+    return render(
+        request,
+        "joatham_rh/conge_list.html",
+        {
+            "conges": conges,
+            "conge_count": len(conges),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.manage")
+@module_access_required("rh")
+def conge_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = DemandeCongeForm(request.POST or None, entreprise=entreprise)
+    if request.method == "POST" and form.is_valid():
+        try:
+            create_conge(
+                entreprise=entreprise,
+                utilisateur=request.user,
+                **form.cleaned_data,
+            )
+        except RhOperationError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("La demande de conge a ete creee avec succes."))
+            return redirect("rh_conge_list")
+
+    return render(
+        request,
+        "joatham_rh/conge_form.html",
+        {
+            "form": form,
+            "page_title": _("Nouvelle demande de conge"),
+            "submit_label": _("Creer la demande"),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@require_POST
+@permission_required("rh.manage")
+@module_access_required("rh")
+def conge_approve(request, conge_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    conge = get_conge_by_entreprise(entreprise, conge_id)
+    try:
+        approve_conge(
+            entreprise=entreprise,
+            conge=conge,
+            decide_par=request.user,
+            commentaire_decision=request.POST.get("commentaire_decision", ""),
+        )
+    except RhOperationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("La demande de conge a ete approuvee."))
+    return redirect("rh_conge_list")
+
+
+@require_POST
+@permission_required("rh.manage")
+@module_access_required("rh")
+def conge_refuse(request, conge_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    conge = get_conge_by_entreprise(entreprise, conge_id)
+    try:
+        refuse_conge(
+            entreprise=entreprise,
+            conge=conge,
+            decide_par=request.user,
+            commentaire_decision=request.POST.get("commentaire_decision", ""),
+        )
+    except RhOperationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("La demande de conge a ete refusee."))
+    return redirect("rh_conge_list")
+
+
+@permission_required("rh.documents")
+@module_access_required("rh")
+def document_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    documents = get_documents_by_entreprise(entreprise)
+    return render(
+        request,
+        "joatham_rh/document_list.html",
+        {
+            "documents": documents,
+            "document_count": documents.count(),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.documents")
+@module_access_required("rh")
+def document_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = DocumentRHForm(request.POST or None, entreprise=entreprise)
+    if request.method == "POST" and form.is_valid():
+        try:
+            create_document_rh(
+                entreprise=entreprise,
+                utilisateur=request.user,
+                **form.cleaned_data,
+            )
+        except RhOperationError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Le document RH a ete enregistre avec succes."))
+            return redirect("rh_document_list")
+
+    return render(
+        request,
+        "joatham_rh/document_form.html",
+        {
+            "form": form,
+            "page_title": _("Nouveau document RH"),
+            "submit_label": _("Enregistrer le document"),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def rh_reports(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    report = get_rh_report_snapshot(entreprise)
+    return render(
+        request,
+        "joatham_rh/reports.html",
+        {
+            "report": report,
             **_build_rh_ui_permissions(request.user),
         },
     )

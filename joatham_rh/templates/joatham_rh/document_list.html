@@ -1,0 +1,58 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_subtitle %}{% trans "Classez les references RH simples sans upload de fichier dans cette phase." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Documents RH" %}</h2>
+        <p>{% trans "Contrats, attestations, certificats et autres references internes." %}</p>
+    </div>
+    <div class="rh-actions">
+        <span class="rh-count">{{ document_count }} {% trans "document(s)" %}</span>
+        {% if can_manage_documents_ui %}
+        <a href="{% url 'rh_document_create' %}" class="rh-action-link primary">{% trans "Nouveau document" %}</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if documents %}
+<div class="rh-table-shell">
+    <div class="table-scroll">
+        <table class="rh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Titre" %}</th>
+                    <th>{% trans "Employe" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Description" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td><strong>{{ document.titre }}</strong></td>
+                    <td>{{ document.employe.matricule }} - {{ document.employe.nom }} {{ document.employe.prenom }}</td>
+                    <td>{{ document.get_type_document_display }}</td>
+                    <td>{{ document.date_document|default:"-" }}</td>
+                    <td class="rh-muted">{{ document.description|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rh-table-shell">
+    <div class="rh-empty">
+        <h3>{% trans "Aucun document RH" %}</h3>
+        <p>{% trans "Ajoutez les references essentielles sans stocker encore de fichier physique." %}</p>
+        {% if can_manage_documents_ui %}
+        <a href="{% url 'rh_document_create' %}" class="btn-link primary">{% trans "Ajouter un document" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
