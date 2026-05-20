@@ -1,0 +1,133 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
+<head>
+    <meta charset="utf-8">
+    <title>{% block print_title %}JOATHAM Manager RH{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            color: #0f172a;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #fff;
+        }
+
+        .print-page {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .print-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            border-bottom: 2px solid #dbe5ef;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 1.6rem;
+        }
+
+        h2 {
+            margin: 26px 0 12px;
+            font-size: 1.05rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .box {
+            border: 1px solid #dbe5ef;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .label {
+            display: block;
+            color: #64748b;
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #e5edf7;
+            padding: 9px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #334155;
+            font-size: 0.84rem;
+        }
+
+        .print-actions {
+            margin-bottom: 18px;
+        }
+
+        .print-actions button {
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 8px;
+            border: 1px solid #2563eb;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        @media print {
+            .print-actions {
+                display: none;
+            }
+
+            .print-page {
+                max-width: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="print-page">
+        <div class="print-actions">
+            <button type="button" onclick="window.print()">{% trans "Imprimer" %}</button>
+        </div>
+        <header class="print-header">
+            <div>
+                <div class="brand">JOATHAM Manager</div>
+                <div class="muted">{% trans "Ressources humaines" %}</div>
+            </div>
+            <div class="muted">
+                {% if entreprise_identity.primary_name %}{{ entreprise_identity.primary_name }}{% endif %}
+            </div>
+        </header>
+        {% block print_content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -17,6 +17,43 @@
     </div>
 </div>
 
+<div class="rh-tool-row">
+    {% if can_view_reports_ui %}
+    <a href="{% url 'rh_presence_export_csv' %}{% if query_string %}?{{ query_string }}{% endif %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
+    {% endif %}
+</div>
+
+<form method="get" class="rh-filter-form">
+    <div class="rh-field">
+        <label for="date_debut">{% trans "Date debut" %}</label>
+        <input type="date" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+    </div>
+    <div class="rh-field">
+        <label for="date_fin">{% trans "Date fin" %}</label>
+        <input type="date" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+    </div>
+    <div class="rh-field">
+        <label for="employe">{% trans "Employe" %}</label>
+        <select id="employe" name="employe">
+            <option value="">{% trans "Tous" %}</option>
+            {% for employe in employes_filter %}
+            <option value="{{ employe.id }}" {% if filters.employe_id == employe.id|stringformat:'s' %}selected{% endif %}>{{ employe.matricule }} - {{ employe.nom }} {{ employe.prenom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="rh-field">
+        <label for="statut">{% trans "Statut" %}</label>
+        <select id="statut" name="statut">
+            <option value="">{% trans "Tous" %}</option>
+            {% for value,label in statut_choices %}
+            <option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
+    <a href="{% url 'rh_presence_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+</form>
+
 {% if presences %}
 <div class="rh-table-shell">
     <div class="table-scroll">

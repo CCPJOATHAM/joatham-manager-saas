@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from core.services.tenancy import get_object_for_entreprise, scope_queryset_to_entreprise
@@ -19,13 +19,23 @@ def get_poste_by_entreprise(entreprise, poste_id):
     return get_object_for_entreprise(Poste.objects.all(), entreprise, id=poste_id)
 
 
-def get_employes_by_entreprise(entreprise, *, active_only=False):
+def get_employes_by_entreprise(entreprise, *, active_only=False, statut=None, poste_id=None, search=None):
     queryset = (
         scope_queryset_to_entreprise(Employe.objects.select_related("poste"), entreprise)
         .order_by("nom", "prenom", "id")
     )
     if active_only:
         queryset = queryset.filter(actif=True)
+    if statut:
+        queryset = queryset.filter(statut=statut)
+    if poste_id:
+        queryset = queryset.filter(poste_id=poste_id)
+    if search:
+        queryset = queryset.filter(
+            Q(matricule__icontains=search)
+            | Q(nom__icontains=search)
+            | Q(prenom__icontains=search)
+        )
     return queryset
 
 
@@ -37,18 +47,36 @@ def get_employe_by_entreprise(entreprise, employe_id):
     )
 
 
-def get_presences_by_entreprise(entreprise):
-    return (
+def get_presences_by_entreprise(entreprise, *, date_debut=None, date_fin=None, employe_id=None, statut=None):
+    queryset = (
         scope_queryset_to_entreprise(Presence.objects.select_related("employe", "employe__poste"), entreprise)
         .order_by("-date", "employe__nom", "id")
     )
+    if date_debut:
+        queryset = queryset.filter(date__gte=date_debut)
+    if date_fin:
+        queryset = queryset.filter(date__lte=date_fin)
+    if employe_id:
+        queryset = queryset.filter(employe_id=employe_id)
+    if statut:
+        queryset = queryset.filter(statut=statut)
+    return queryset
 
 
-def get_conges_by_entreprise(entreprise):
-    return (
+def get_conges_by_entreprise(entreprise, *, statut=None, type_conge=None, date_debut=None, date_fin=None):
+    queryset = (
         scope_queryset_to_entreprise(DemandeConge.objects.select_related("employe", "approuve_par"), entreprise)
         .order_by("-date_debut", "-id")
     )
+    if statut:
+        queryset = queryset.filter(statut=statut)
+    if type_conge:
+        queryset = queryset.filter(type_conge=type_conge)
+    if date_debut:
+        queryset = queryset.filter(date_fin__gte=date_debut)
+    if date_fin:
+        queryset = queryset.filter(date_debut__lte=date_fin)
+    return queryset
 
 
 def get_conge_by_entreprise(entreprise, conge_id):
@@ -59,11 +87,16 @@ def get_conge_by_entreprise(entreprise, conge_id):
     )
 
 
-def get_documents_by_entreprise(entreprise):
-    return (
+def get_documents_by_entreprise(entreprise, *, type_document=None, employe_id=None):
+    queryset = (
         scope_queryset_to_entreprise(DocumentRH.objects.select_related("employe"), entreprise)
         .order_by("-created_at", "-id")
     )
+    if type_document:
+        queryset = queryset.filter(type_document=type_document)
+    if employe_id:
+        queryset = queryset.filter(employe_id=employe_id)
+    return queryset
 
 
 def get_document_by_entreprise(entreprise, document_id):

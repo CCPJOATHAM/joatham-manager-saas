@@ -10,9 +10,13 @@
         <h2>{{ employe.nom }} {{ employe.prenom }}</h2>
         <p>{{ employe.matricule }} - {{ employe.poste.nom|default:"Poste non renseigne" }}</p>
     </div>
-    {% if can_manage_rh_ui %}
-    <a href="{% url 'rh_employe_update' employe.id %}" class="rh-action-link primary">{% trans "Modifier" %}</a>
-    {% endif %}
+    <div class="rh-actions">
+        <a href="{% url 'rh_employe_list' %}" class="rh-action-link">{% trans "Retour" %}</a>
+        <a href="{% url 'rh_employe_print' employe.id %}" class="rh-action-link">{% trans "Imprimer" %}</a>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_employe_update' employe.id %}" class="rh-action-link primary">{% trans "Modifier" %}</a>
+        {% endif %}
+    </div>
 </div>
 
 <div class="rh-detail-grid">

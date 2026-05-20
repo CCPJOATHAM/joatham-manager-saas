@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
@@ -8,7 +9,7 @@ from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, user_has_permission
 
 from .forms import DemandeCongeForm, DocumentRHForm, EmployeForm, PosteForm, PresenceForm
-from .models import DemandeConge, Employe, Presence
+from .models import DemandeConge, DocumentRH, Employe, Presence
 from .selectors.rh import (
     get_conge_by_entreprise,
     get_conges_by_entreprise,
@@ -30,6 +31,7 @@ from .services.rh import (
     refuse_conge,
     update_employe,
 )
+from .services.exports import build_csv_response, format_date, format_datetime, format_time
 
 
 def _build_rh_ui_permissions(user):
@@ -78,11 +80,65 @@ def _build_conge_type_label(type_conge):
     }.get(type_conge, type_conge)
 
 
+def _get_choice(value, choices):
+    value = (value or "").strip()
+    accepted = {choice[0] for choice in choices}
+    return value if value in accepted else ""
+
+
+def _get_int_filter(value):
+    value = (value or "").strip()
+    return value if value.isdigit() else ""
+
+
+def _get_date_filter(value):
+    value = (value or "").strip()
+    return parse_date(value) if value else None
+
+
+def _get_employe_filters(request):
+    return {
+        "search": (request.GET.get("q") or "").strip(),
+        "statut": _get_choice(request.GET.get("statut"), Employe.Statut.choices),
+        "poste_id": _get_int_filter(request.GET.get("poste")),
+    }
+
+
+def _get_presence_filters(request):
+    return {
+        "date_debut": _get_date_filter(request.GET.get("date_debut")),
+        "date_fin": _get_date_filter(request.GET.get("date_fin")),
+        "employe_id": _get_int_filter(request.GET.get("employe")),
+        "statut": _get_choice(request.GET.get("statut"), Presence.Statut.choices),
+    }
+
+
+def _get_conge_filters(request):
+    return {
+        "statut": _get_choice(request.GET.get("statut"), DemandeConge.Statut.choices),
+        "type_conge": _get_choice(request.GET.get("type_conge"), DemandeConge.TypeConge.choices),
+        "date_debut": _get_date_filter(request.GET.get("date_debut")),
+        "date_fin": _get_date_filter(request.GET.get("date_fin")),
+    }
+
+
+def _get_document_filters(request):
+    return {
+        "type_document": _get_choice(request.GET.get("type_document"), DocumentRH.TypeDocument.choices),
+        "employe_id": _get_int_filter(request.GET.get("employe")),
+    }
+
+
+def _query_string(request):
+    return request.GET.urlencode()
+
+
 @permission_required("rh.view")
 @module_access_required("rh")
 def employe_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    employes = get_employes_by_entreprise(entreprise)
+    filters = _get_employe_filters(request)
+    employes = get_employes_by_entreprise(entreprise, **filters)
     rows = [
         {
             "instance": employe,
@@ -96,6 +152,10 @@ def employe_list(request):
         {
             "employes": rows,
             "employe_count": len(rows),
+            "filters": filters,
+            "postes": get_postes_by_entreprise(entreprise, active_only=True),
+            "statut_choices": Employe.Statut.choices,
+            "query_string": _query_string(request),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -240,12 +300,13 @@ def poste_create(request):
 @module_access_required("rh")
 def presence_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_presence_filters(request)
     presences = [
         {
             "instance": presence,
             "status_label": _build_presence_status_label(presence.statut),
         }
-        for presence in get_presences_by_entreprise(entreprise)
+        for presence in get_presences_by_entreprise(entreprise, **filters)
     ]
     return render(
         request,
@@ -253,6 +314,10 @@ def presence_list(request):
         {
             "presences": presences,
             "presence_count": len(presences),
+            "filters": filters,
+            "employes_filter": get_employes_by_entreprise(entreprise, active_only=True),
+            "statut_choices": Presence.Statut.choices,
+            "query_string": _query_string(request),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -292,13 +357,14 @@ def presence_create(request):
 @module_access_required("rh")
 def conge_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_conge_filters(request)
     conges = [
         {
             "instance": conge,
             "status_label": _build_conge_status_label(conge.statut),
             "type_label": _build_conge_type_label(conge.type_conge),
         }
-        for conge in get_conges_by_entreprise(entreprise)
+        for conge in get_conges_by_entreprise(entreprise, **filters)
     ]
     return render(
         request,
@@ -306,6 +372,10 @@ def conge_list(request):
         {
             "conges": conges,
             "conge_count": len(conges),
+            "filters": filters,
+            "statut_choices": DemandeConge.Statut.choices,
+            "type_choices": DemandeConge.TypeConge.choices,
+            "query_string": _query_string(request),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -385,13 +455,18 @@ def conge_refuse(request, conge_id):
 @module_access_required("rh")
 def document_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    documents = get_documents_by_entreprise(entreprise)
+    filters = _get_document_filters(request)
+    documents = get_documents_by_entreprise(entreprise, **filters)
     return render(
         request,
         "joatham_rh/document_list.html",
         {
             "documents": documents,
             "document_count": documents.count(),
+            "filters": filters,
+            "employes_filter": get_employes_by_entreprise(entreprise, active_only=True),
+            "type_choices": DocumentRH.TypeDocument.choices,
+            "query_string": _query_string(request),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -439,4 +514,171 @@ def rh_reports(request):
             "report": report,
             **_build_rh_ui_permissions(request.user),
         },
+    )
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def employe_print(request, employe_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    employe = get_employe_by_entreprise(entreprise, employe_id)
+    return render(
+        request,
+        "joatham_rh/print_employe.html",
+        {
+            "employe": employe,
+            "status_label": _build_status_label(employe.statut),
+            "presences": Presence.objects.filter(entreprise=entreprise, employe=employe).order_by("-date", "-id")[:12],
+            "conges": get_conges_by_entreprise(entreprise).filter(employe=employe)[:12],
+            "documents": get_documents_by_entreprise(entreprise).filter(employe=employe)[:12],
+        },
+    )
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def employe_list_print(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_employe_filters(request)
+    employes = get_employes_by_entreprise(entreprise, **filters)
+    return render(
+        request,
+        "joatham_rh/print_employe_list.html",
+        {
+            "employes": employes,
+            "filters": filters,
+        },
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def rh_reports_print(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    return render(
+        request,
+        "joatham_rh/print_reports.html",
+        {
+            "report": get_rh_report_snapshot(entreprise),
+        },
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def employe_export_csv(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    employes = get_employes_by_entreprise(entreprise, **_get_employe_filters(request))
+    return build_csv_response(
+        filename="joatham-rh-employes.csv",
+        headers=["Matricule", "Nom", "Prenom", "Poste", "Contrat", "Statut", "Telephone", "Email", "Date embauche", "Salaire base"],
+        rows=[
+            [
+                employe.matricule,
+                employe.nom,
+                employe.prenom,
+                employe.poste.nom if employe.poste else "",
+                employe.get_type_contrat_display(),
+                _build_status_label(employe.statut),
+                employe.telephone,
+                employe.email,
+                format_date(employe.date_embauche),
+                employe.salaire_base or "",
+            ]
+            for employe in employes
+        ],
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def presence_export_csv(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    presences = get_presences_by_entreprise(entreprise, **_get_presence_filters(request))
+    return build_csv_response(
+        filename="joatham-rh-presences.csv",
+        headers=["Date", "Matricule", "Employe", "Statut", "Heure arrivee", "Heure depart", "Note"],
+        rows=[
+            [
+                format_date(presence.date),
+                presence.employe.matricule,
+                f"{presence.employe.nom} {presence.employe.prenom}",
+                _build_presence_status_label(presence.statut),
+                format_time(presence.heure_arrivee),
+                format_time(presence.heure_depart),
+                presence.note,
+            ]
+            for presence in presences
+        ],
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def conge_export_csv(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    conges = get_conges_by_entreprise(entreprise, **_get_conge_filters(request))
+    return build_csv_response(
+        filename="joatham-rh-conges.csv",
+        headers=["Matricule", "Employe", "Type", "Date debut", "Date fin", "Statut", "Decide par", "Date decision", "Motif"],
+        rows=[
+            [
+                conge.employe.matricule,
+                f"{conge.employe.nom} {conge.employe.prenom}",
+                _build_conge_type_label(conge.type_conge),
+                format_date(conge.date_debut),
+                format_date(conge.date_fin),
+                _build_conge_status_label(conge.statut),
+                conge.approuve_par.username if conge.approuve_par else "",
+                format_datetime(conge.date_decision),
+                conge.motif,
+            ]
+            for conge in conges
+        ],
+    )
+
+
+@permission_required("rh.documents")
+@module_access_required("rh")
+def document_export_csv(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    documents = get_documents_by_entreprise(entreprise, **_get_document_filters(request))
+    return build_csv_response(
+        filename="joatham-rh-documents.csv",
+        headers=["Titre", "Matricule", "Employe", "Type", "Date document", "Description"],
+        rows=[
+            [
+                document.titre,
+                document.employe.matricule,
+                f"{document.employe.nom} {document.employe.prenom}",
+                document.get_type_document_display(),
+                format_date(document.date_document),
+                document.description,
+            ]
+            for document in documents
+        ],
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def rh_reports_export_csv(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    report = get_rh_report_snapshot(entreprise)
+    rows = [
+        ["Total employes", report["total_employes"]],
+        ["Employes actifs", report["employes_actifs"]],
+        ["Employes suspendus", report["employes_suspendus"]],
+        ["Employes sortis", report["employes_sortis"]],
+        ["Presences du mois", report["presences_mois"]],
+        ["Absences du mois", report["absences_mois"]],
+        ["Conges du mois", report["conges_mois"]],
+        ["Conges en attente", report["conges_en_attente"]],
+        ["Conges approuves", report["conges_approuves"]],
+    ]
+    rows.extend([f"Poste - {row['poste']}", row["total"]] for row in report["repartition_postes"])
+    return build_csv_response(
+        filename="joatham-rh-rapport-synthetique.csv",
+        headers=["Indicateur", "Valeur"],
+        rows=rows,
     )

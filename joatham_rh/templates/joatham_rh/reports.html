@@ -10,6 +10,10 @@
         <h2>{% trans "Rapports RH" %}</h2>
         <p>{% trans "Periode du mois en cours" %} : {{ report.month_start }} - {{ report.month_end }}</p>
     </div>
+    <div class="rh-actions">
+        <a href="{% url 'rh_reports_export_csv' %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
+        <a href="{% url 'rh_reports_print' %}" class="rh-action-link">{% trans "Imprimer" %}</a>
+    </div>
 </div>
 
 <div class="rh-detail-grid">
