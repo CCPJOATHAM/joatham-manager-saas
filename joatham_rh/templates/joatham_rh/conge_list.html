@@ -1,0 +1,79 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_subtitle %}{% trans "Suivez les demandes de conge sans gestion avancee des soldes." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Conges" %}</h2>
+        <p>{% trans "Demandes simples : en attente, approuvees, refusees ou annulees." %}</p>
+    </div>
+    <div class="rh-actions">
+        <span class="rh-count">{{ conge_count }} {% trans "demande(s)" %}</span>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_conge_create' %}" class="rh-action-link primary">{% trans "Nouvelle demande" %}</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if conges %}
+<div class="rh-table-shell">
+    <div class="table-scroll">
+        <table class="rh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Employe" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Debut" %}</th>
+                    <th>{% trans "Fin" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in conges %}
+                <tr>
+                    <td>{{ row.instance.employe.matricule }} - {{ row.instance.employe.nom }} {{ row.instance.employe.prenom }}</td>
+                    <td>{{ row.type_label }}</td>
+                    <td>{{ row.instance.date_debut }}</td>
+                    <td>{{ row.instance.date_fin }}</td>
+                    <td>
+                        <span class="rh-badge {% if row.instance.statut == 'approuve' %}success{% elif row.instance.statut == 'en_attente' or row.instance.statut == 'brouillon' %}warning{% elif row.instance.statut == 'refuse' %}danger{% endif %}">
+                            {{ row.status_label }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if can_manage_rh_ui and row.instance.statut == "en_attente" %}
+                        <div class="rh-actions">
+                            <form method="post" action="{% url 'rh_conge_approve' row.instance.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="rh-action-button primary">{% trans "Approuver" %}</button>
+                            </form>
+                            <form method="post" action="{% url 'rh_conge_refuse' row.instance.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="rh-action-button">{% trans "Refuser" %}</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="rh-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rh-table-shell">
+    <div class="rh-empty">
+        <h3>{% trans "Aucune demande de conge" %}</h3>
+        <p>{% trans "Enregistrez une premiere demande lorsque votre equipe en a besoin." %}</p>
+        {% if can_manage_rh_ui %}
+        <a href="{% url 'rh_conge_create' %}" class="btn-link primary">{% trans "Nouvelle demande" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

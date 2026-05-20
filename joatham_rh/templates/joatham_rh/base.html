@@ -238,5 +238,12 @@
     <a href="{% url 'rh_employe_list' %}" class="{% if request.resolver_match.url_name == 'rh_employe_list' or request.resolver_match.url_name == 'rh_employe_detail' or request.resolver_match.url_name == 'rh_employe_create' or request.resolver_match.url_name == 'rh_employe_update' %}is-active{% endif %}">{% trans "Employes" %}</a>
     <a href="{% url 'rh_poste_list' %}" class="{% if request.resolver_match.url_name == 'rh_poste_list' or request.resolver_match.url_name == 'rh_poste_create' %}is-active{% endif %}">{% trans "Postes" %}</a>
     <a href="{% url 'rh_presence_list' %}" class="{% if request.resolver_match.url_name == 'rh_presence_list' or request.resolver_match.url_name == 'rh_presence_create' %}is-active{% endif %}">{% trans "Presences" %}</a>
+    <a href="{% url 'rh_conge_list' %}" class="{% if request.resolver_match.url_name == 'rh_conge_list' or request.resolver_match.url_name == 'rh_conge_create' %}is-active{% endif %}">{% trans "Conges" %}</a>
+    {% if can_manage_documents_ui %}
+    <a href="{% url 'rh_document_list' %}" class="{% if request.resolver_match.url_name == 'rh_document_list' or request.resolver_match.url_name == 'rh_document_create' %}is-active{% endif %}">{% trans "Documents" %}</a>
+    {% endif %}
+    {% if can_view_reports_ui %}
+    <a href="{% url 'rh_reports' %}" class="{% if request.resolver_match.url_name == 'rh_reports' %}is-active{% endif %}">{% trans "Rapports" %}</a>
+    {% endif %}
 </nav>
 {% endblock %}

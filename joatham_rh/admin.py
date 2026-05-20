@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Employe, Poste, Presence
+from .models import DemandeConge, DocumentRH, Employe, Poste, Presence
 
 
 @admin.register(Poste)
@@ -22,3 +22,17 @@ class PresenceAdmin(admin.ModelAdmin):
     list_display = ("employe", "entreprise", "date", "statut", "heure_arrivee", "heure_depart")
     list_filter = ("statut", "date", "entreprise")
     search_fields = ("employe__matricule", "employe__nom", "employe__prenom", "entreprise__nom")
+
+
+@admin.register(DemandeConge)
+class DemandeCongeAdmin(admin.ModelAdmin):
+    list_display = ("employe", "entreprise", "type_conge", "date_debut", "date_fin", "statut")
+    list_filter = ("type_conge", "statut", "entreprise")
+    search_fields = ("employe__matricule", "employe__nom", "employe__prenom", "motif", "entreprise__nom")
+
+
+@admin.register(DocumentRH)
+class DocumentRHAdmin(admin.ModelAdmin):
+    list_display = ("titre", "employe", "entreprise", "type_document", "date_document")
+    list_filter = ("type_document", "entreprise")
+    search_fields = ("titre", "description", "employe__matricule", "employe__nom", "employe__prenom", "entreprise__nom")

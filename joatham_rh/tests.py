@@ -13,9 +13,22 @@ from core.services.subscription import (
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement
 
-from .models import Employe, Presence
-from .selectors.rh import get_employes_by_entreprise
-from .services.rh import RhOperationError, create_employe, create_poste, record_presence
+from .models import DemandeConge, DocumentRH, Employe, Presence
+from .selectors.rh import (
+    get_conges_by_entreprise,
+    get_documents_by_entreprise,
+    get_employes_by_entreprise,
+    get_rh_report_snapshot,
+)
+from .services.rh import (
+    RhOperationError,
+    approve_conge,
+    create_conge,
+    create_document_rh,
+    create_employe,
+    create_poste,
+    record_presence,
+)
 
 
 class RhFoundationTests(TestCase):
@@ -257,3 +270,239 @@ class RhFoundationTests(TestCase):
 
         self.assertIn("Ressources humaines", premium_labels)
         self.assertNotIn("Ressources humaines", starter_labels)
+
+    def test_create_conge_valid(self):
+        employe = self._create_employe(matricule="RH-C001")
+
+        conge = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 4),
+            date_fin=date(2026, 5, 8),
+            motif="Repos annuel",
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(conge.entreprise, self.entreprise_a)
+        self.assertEqual(conge.employe, employe)
+        self.assertEqual(conge.statut, DemandeConge.Statut.EN_ATTENTE)
+
+    def test_create_conge_rejects_end_before_start(self):
+        employe = self._create_employe(matricule="RH-C002")
+
+        with self.assertRaisesMessage(RhOperationError, "La date de fin doit etre superieure ou egale"):
+            create_conge(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                type_conge=DemandeConge.TypeConge.ANNUEL,
+                date_debut=date(2026, 5, 8),
+                date_fin=date(2026, 5, 4),
+                utilisateur=self.owner_a,
+            )
+
+    def test_create_conge_rejects_foreign_employee(self):
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-C003")
+
+        with self.assertRaisesMessage(RhOperationError, "L'employe selectionne appartient a une autre entreprise."):
+            create_conge(
+                entreprise=self.entreprise_a,
+                employe=employe_b,
+                type_conge=DemandeConge.TypeConge.MALADIE,
+                date_debut=date(2026, 5, 4),
+                date_fin=date(2026, 5, 5),
+                utilisateur=self.owner_a,
+            )
+
+    def test_approve_conge_valid(self):
+        employe = self._create_employe(matricule="RH-C004")
+        conge = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_conge=DemandeConge.TypeConge.EXCEPTIONNEL,
+            date_debut=date(2026, 5, 4),
+            date_fin=date(2026, 5, 4),
+            utilisateur=self.owner_a,
+        )
+
+        approved = approve_conge(entreprise=self.entreprise_a, conge=conge, decide_par=self.manager_a)
+
+        self.assertEqual(approved.statut, DemandeConge.Statut.APPROUVE)
+        self.assertEqual(approved.approuve_par, self.manager_a)
+        self.assertIsNotNone(approved.date_decision)
+
+    def test_create_conge_rejects_unknown_status(self):
+        employe = self._create_employe(matricule="RH-C005")
+
+        with self.assertRaisesMessage(RhOperationError, "Le statut de conge est invalide."):
+            create_conge(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                type_conge=DemandeConge.TypeConge.AUTRE,
+                date_debut=date(2026, 5, 4),
+                date_fin=date(2026, 5, 5),
+                statut="a_verifier",
+                utilisateur=self.owner_a,
+            )
+
+    def test_conge_selector_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-C006")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-C007")
+        conge_a = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 4),
+            date_fin=date(2026, 5, 5),
+            utilisateur=self.owner_a,
+        )
+        create_conge(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 4),
+            date_fin=date(2026, 5, 5),
+            utilisateur=self.owner_b,
+        )
+
+        self.assertEqual(list(get_conges_by_entreprise(self.entreprise_a)), [conge_a])
+
+    def test_create_document_rh_valid(self):
+        employe = self._create_employe(matricule="RH-D001")
+
+        document = create_document_rh(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Contrat de travail",
+            description="Reference interne",
+            date_document=date(2026, 5, 1),
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(document.entreprise, self.entreprise_a)
+        self.assertEqual(document.employe, employe)
+        self.assertEqual(document.titre, "Contrat de travail")
+
+    def test_create_document_rh_requires_title(self):
+        employe = self._create_employe(matricule="RH-D002")
+
+        with self.assertRaisesMessage(RhOperationError, "Le titre du document est obligatoire."):
+            create_document_rh(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                type_document=DocumentRH.TypeDocument.ATTESTATION,
+                titre="",
+                utilisateur=self.owner_a,
+            )
+
+    def test_create_document_rh_rejects_foreign_employee(self):
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-D003")
+
+        with self.assertRaisesMessage(RhOperationError, "L'employe selectionne appartient a une autre entreprise."):
+            create_document_rh(
+                entreprise=self.entreprise_a,
+                employe=employe_b,
+                type_document=DocumentRH.TypeDocument.CERTIFICAT,
+                titre="Certificat medical",
+                utilisateur=self.owner_a,
+            )
+
+    def test_document_selector_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-D004")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-D005")
+        document_a = create_document_rh(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Contrat A",
+            utilisateur=self.owner_a,
+        )
+        create_document_rh(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Contrat B",
+            utilisateur=self.owner_b,
+        )
+
+        self.assertEqual(list(get_documents_by_entreprise(self.entreprise_a)), [document_a])
+
+    def test_rh_reports_are_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-R001")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-R002")
+        record_presence(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            date=date(2026, 5, 6),
+            statut=Presence.Statut.PRESENT,
+            utilisateur=self.owner_a,
+        )
+        record_presence(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            date=date(2026, 5, 6),
+            statut=Presence.Statut.ABSENT,
+            utilisateur=self.owner_b,
+        )
+        conge_a = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 7),
+            date_fin=date(2026, 5, 8),
+            utilisateur=self.owner_a,
+        )
+        approve_conge(entreprise=self.entreprise_a, conge=conge_a, decide_par=self.manager_a)
+        create_conge(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            type_conge=DemandeConge.TypeConge.MALADIE,
+            date_debut=date(2026, 5, 7),
+            date_fin=date(2026, 5, 8),
+            utilisateur=self.owner_b,
+        )
+
+        report = get_rh_report_snapshot(self.entreprise_a, as_of=date(2026, 5, 19))
+
+        self.assertEqual(report["total_employes"], 1)
+        self.assertEqual(report["presences_mois"], 1)
+        self.assertEqual(report["absences_mois"], 0)
+        self.assertEqual(report["conges_approuves"], 1)
+        self.assertEqual(report["conges_en_attente"], 0)
+
+    def test_rh_reports_access_denied_without_module(self):
+        entreprise = create_entreprise("Entreprise Starter Reports RH")
+        owner = create_user("owner-rh-reports-starter", "proprietaire", entreprise)
+        starter_plan = Abonnement.objects.create(
+            nom="Starter Reports RH",
+            code="starter",
+            prix=19,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard"],
+        )
+        activate_subscription_for_entreprise(entreprise=entreprise, plan=starter_plan, utilisateur=owner)
+
+        self.client.force_login(owner)
+        response = self.client.get(reverse("rh_reports"))
+
+        self.assertRedirects(
+            response,
+            reverse("abonnement_expire") + "?module=rh&reason=premium_required",
+        )
+
+    def test_rh_reports_access_allowed_with_premium(self):
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_reports"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rapports RH")
+
+    def test_rh_navigation_contains_phase8_entries_when_module_is_active(self):
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_list"))
+
+        self.assertContains(response, "Conges")
+        self.assertContains(response, "Documents")
+        self.assertContains(response, "Rapports")

@@ -1,11 +1,12 @@
 from decimal import Decimal, InvalidOperation
 
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from core.audit import record_audit_event
 
-from ..models import Employe, Poste, Presence
+from ..models import DemandeConge, DocumentRH, Employe, Poste, Presence
 
 
 class RhOperationError(ValueError):
@@ -28,6 +29,12 @@ def _normalize_date(value, message):
             raise RhOperationError(message)
         return parsed
     return value
+
+
+def _normalize_optional_date(value):
+    if value in {None, ""}:
+        return None
+    return _normalize_date(value, "La date du document est invalide.")
 
 
 def _normalize_salary(value):
@@ -222,3 +229,134 @@ def record_presence(*, entreprise, employe, date, statut, heure_arrivee=None, he
         metadata={"presence_id": presence.id, "employe_id": employe.id, "date": normalized_date},
     )
     return presence
+
+
+def _ensure_valid_date_range(date_debut, date_fin):
+    normalized_start = _normalize_date(date_debut, "La date de debut est obligatoire.")
+    normalized_end = _normalize_date(date_fin, "La date de fin est obligatoire.")
+    if normalized_end < normalized_start:
+        raise RhOperationError("La date de fin doit etre superieure ou egale a la date de debut.")
+    return normalized_start, normalized_end
+
+
+@transaction.atomic
+def create_conge(
+    *,
+    entreprise,
+    employe,
+    type_conge,
+    date_debut,
+    date_fin,
+    motif="",
+    statut=DemandeConge.Statut.EN_ATTENTE,
+    utilisateur=None,
+):
+    _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
+    normalized_start, normalized_end = _ensure_valid_date_range(date_debut, date_fin)
+    conge = DemandeConge.objects.create(
+        entreprise=entreprise,
+        employe=employe,
+        type_conge=_validate_choice(type_conge, DemandeConge.TypeConge.choices, "Le type de conge est invalide."),
+        date_debut=normalized_start,
+        date_fin=normalized_end,
+        motif=(motif or "").strip(),
+        statut=_validate_choice(statut, DemandeConge.Statut.choices, "Le statut de conge est invalide."),
+    )
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="rh_conge_created",
+        module="rh",
+        objet_type="DemandeConge",
+        objet_id=conge.id,
+        description=f"Demande de conge creee pour {employe.matricule}.",
+        metadata={"conge_id": conge.id, "employe_id": employe.id, "statut": conge.statut},
+    )
+    return conge
+
+
+def _ensure_conge_can_be_decided(conge):
+    if conge.statut == DemandeConge.Statut.ANNULE:
+        raise RhOperationError("Une demande annulee ne peut pas etre approuvee ou refusee.")
+    if conge.statut == DemandeConge.Statut.APPROUVE:
+        raise RhOperationError("Une demande approuvee ne peut plus etre modifiee.")
+    if conge.statut == DemandeConge.Statut.REFUSE:
+        raise RhOperationError("Une demande deja refusee ne peut plus etre modifiee.")
+    return conge
+
+
+@transaction.atomic
+def decide_conge(*, entreprise, conge, statut, decide_par=None, commentaire_decision=""):
+    _ensure_same_entreprise(conge, entreprise, "La demande de conge appartient a une autre entreprise.")
+    _ensure_conge_can_be_decided(conge)
+    if statut not in {DemandeConge.Statut.APPROUVE, DemandeConge.Statut.REFUSE}:
+        raise RhOperationError("La decision de conge est invalide.")
+    conge.statut = statut
+    conge.approuve_par = decide_par
+    conge.date_decision = timezone.now()
+    conge.commentaire_decision = (commentaire_decision or "").strip()
+    conge.save(update_fields=["statut", "approuve_par", "date_decision", "commentaire_decision", "updated_at"])
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=decide_par,
+        action="rh_conge_decided",
+        module="rh",
+        objet_type="DemandeConge",
+        objet_id=conge.id,
+        description=f"Demande de conge {conge.statut} pour {conge.employe.matricule}.",
+        metadata={"conge_id": conge.id, "statut": conge.statut},
+    )
+    return conge
+
+
+def approve_conge(*, entreprise, conge, decide_par=None, commentaire_decision=""):
+    return decide_conge(
+        entreprise=entreprise,
+        conge=conge,
+        statut=DemandeConge.Statut.APPROUVE,
+        decide_par=decide_par,
+        commentaire_decision=commentaire_decision,
+    )
+
+
+def refuse_conge(*, entreprise, conge, decide_par=None, commentaire_decision=""):
+    return decide_conge(
+        entreprise=entreprise,
+        conge=conge,
+        statut=DemandeConge.Statut.REFUSE,
+        decide_par=decide_par,
+        commentaire_decision=commentaire_decision,
+    )
+
+
+@transaction.atomic
+def create_document_rh(
+    *,
+    entreprise,
+    employe,
+    type_document,
+    titre,
+    description="",
+    date_document=None,
+    utilisateur=None,
+):
+    _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
+    document = DocumentRH.objects.create(
+        entreprise=entreprise,
+        employe=employe,
+        type_document=_validate_choice(type_document, DocumentRH.TypeDocument.choices, "Le type de document RH est invalide."),
+        titre=_clean_required(titre, "Le titre du document est obligatoire."),
+        description=(description or "").strip(),
+        date_document=_normalize_optional_date(date_document),
+    )
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="rh_document_created",
+        module="rh",
+        objet_type="DocumentRH",
+        objet_id=document.id,
+        description=f"Document RH cree : {document.titre}.",
+        metadata={"document_id": document.id, "employe_id": employe.id, "type_document": document.type_document},
+    )
+    return document
