@@ -32,11 +32,6 @@
 {% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'company_settings' %}" class="btn-link">{% trans "Entreprise" %}</a>
-<a href="{% url 'user_list' %}" class="btn-link">{% trans "Utilisateurs" %}</a>
-<a href="{% url 'user_create' %}" class="btn-link primary"><span aria-hidden="true" class="btn-link-icon">+</span>{% trans "Ajouter un utilisateur" %}</a>
-<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Abonnement" %}</a>
-<a href="{% url 'activity_log_list' %}" class="btn-link">{% trans "Controle des flux" %}</a>
 {% endblock %}
 
 {% block extra_styles %}
@@ -213,8 +208,7 @@
 .dashboard-hero-main,
 .dashboard-hero-side,
 .dashboard-stat-card,
-.dashboard-section-card,
-.dashboard-module-card {
+.dashboard-section-card {
     border: 1px solid var(--dashboard-line);
     border-radius: 18px;
     background: var(--dashboard-card);
@@ -258,34 +252,6 @@
     line-height: 1.75;
 }
 
-.dashboard-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 28px;
-}
-
-.dashboard-cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid var(--dashboard-line-blue);
-    border-radius: 12px;
-    background: #ffffff;
-    color: #0369a1;
-    font-weight: 850;
-    text-decoration: none;
-}
-
-.dashboard-cta.primary {
-    border-color: var(--dashboard-accent);
-    background: var(--dashboard-accent);
-    color: #ffffff;
-    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
-}
-
 .dashboard-hero-side {
     display: grid;
     align-content: start;
@@ -317,7 +283,6 @@
 
 .dashboard-side-item span,
 .dashboard-stat-label,
-.dashboard-module-card span,
 .dashboard-section-kicker {
     color: var(--dashboard-muted);
     font-size: 0.84rem;
@@ -378,7 +343,6 @@
 }
 
 .dashboard-stat-icon,
-.dashboard-module-icon,
 .dashboard-section-icon {
     display: inline-flex;
     align-items: center;
@@ -411,7 +375,6 @@
 }
 
 .dashboard-stat-icon svg,
-.dashboard-module-icon svg,
 .dashboard-section-icon svg {
     width: 22px;
     height: 22px;
@@ -452,49 +415,10 @@
     text-decoration: none !important;
 }
 
-.dashboard-module-grid {
+.dashboard-executive-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px;
-}
-
-.dashboard-module-card {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
-    gap: 13px;
-    align-items: center;
-    min-height: 92px;
-    padding: 16px;
-    color: var(--dashboard-text);
-    text-decoration: none;
-    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-
-a.dashboard-module-card:hover {
-    border-color: var(--dashboard-line-blue);
-    box-shadow: var(--dashboard-shadow-strong);
-    transform: translateY(-2px);
-}
-
-.dashboard-module-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-    background: var(--dashboard-accent-soft);
-    color: var(--dashboard-accent-dark);
-}
-
-.dashboard-module-card strong {
-    display: block;
-    color: var(--dashboard-heading);
-    font-size: 0.95rem;
-    font-weight: 900;
-}
-
-.dashboard-module-card span {
-    display: block;
-    margin-top: 4px;
-    line-height: 1.45;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
 }
 
 .dashboard-lower-grid {
@@ -663,6 +587,7 @@ a.dashboard-module-card:hover {
         justify-content: flex-start;
     }
 
+    .dashboard-executive-grid,
     .dashboard-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -697,6 +622,7 @@ a.dashboard-module-card:hover {
     .main .language-switcher,
     .main .top-actions,
     .dashboard-side-grid,
+    .dashboard-executive-grid,
     .dashboard-stat-grid,
     .dashboard-finance-grid {
         grid-template-columns: 1fr;
@@ -736,16 +662,15 @@ a.dashboard-module-card:hover {
 <div class="dashboard-shell dashboard-owner-premium">
     <section class="dashboard-hero">
         <div class="dashboard-hero-main">
-            <span class="dashboard-pill">{% trans "Cockpit entreprise" %}</span>
-            <h2 aria-label="{% trans 'Bienvenue dans votre cockpit JOATHAM Manager' %}">
-                {% trans "Bienvenue dans votre cockpit" %} <span>JOATHAM</span> Manager
+            <span class="dashboard-pill">{% trans "Tableau de bord executif" %}</span>
+            <h2>
+                {% if entreprise_identity.primary_name %}
+                    {{ entreprise_identity.primary_name }}
+                {% else %}
+                    {% trans "Mon entreprise" %}
+                {% endif %}
             </h2>
-            <p>{% trans "Un tableau de bord central pour suivre les ventes, les encaissements, les clients, les alertes et les modules actifs de votre entreprise." %}</p>
-            <div class="dashboard-hero-actions">
-                <a href="{% url 'add_facture' %}" class="dashboard-cta primary">{% trans "Nouvelle facture" %}</a>
-                <a href="{% url 'add_client' %}" class="dashboard-cta">{% trans "Ajouter un client" %}</a>
-                <a href="{% url 'activity_log_list' %}" class="dashboard-cta">{% trans "Voir les flux" %}</a>
-            </div>
+            <p>{% trans "Vue d'ensemble de l'activite de votre entreprise : finances, portefeuille clients, activites recentes et alertes importantes." %}</p>
         </div>
 
         <aside class="dashboard-hero-side" aria-label="{% trans 'Resume entreprise' %}">
@@ -762,78 +687,57 @@ a.dashboard-module-card:hover {
         </aside>
     </section>
 
-    <section class="dashboard-stat-grid" aria-label="{% trans 'Indicateurs principaux' %}">
-        <article class="dashboard-stat-card">
-            <div class="dashboard-stat-copy">
-                <span class="dashboard-stat-label">{% trans "Chiffre d'affaires" %}</span>
-                <span class="dashboard-stat-value">{{ total_ca }}</span>
-                <span class="dashboard-stat-note">{% trans "Facturation emise a date" %}</span>
-            </div>
-            <span class="dashboard-stat-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg>
-            </span>
-        </article>
-        <article class="dashboard-stat-card">
-            <div class="dashboard-stat-copy">
-                <span class="dashboard-stat-label">{% trans "Encaissements" %}</span>
-                <span class="dashboard-stat-value">{{ total_encaisse }}</span>
-                <span class="dashboard-stat-note">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
-            </div>
-            <span class="dashboard-stat-icon success" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg>
-            </span>
-        </article>
-        <article class="dashboard-stat-card">
-            <div class="dashboard-stat-copy">
-                <span class="dashboard-stat-label">{% trans "Reste a encaisser" %}</span>
-                <span class="dashboard-stat-value">{{ reste_encaisser }}</span>
-                <span class="dashboard-stat-note warning">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
-            </div>
-            <span class="dashboard-stat-icon warning" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
-            </span>
-        </article>
-        <article class="dashboard-stat-card">
-            <div class="dashboard-stat-copy">
-                <span class="dashboard-stat-label">{% trans "Portefeuille client" %}</span>
-                <span class="dashboard-stat-value">{{ nombre_clients }}</span>
-                <span class="dashboard-stat-note">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
-            </div>
-            <span class="dashboard-stat-icon accent" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
-            </span>
-        </article>
-    </section>
-
-    <section class="dashboard-section-card">
+    <section class="dashboard-section-card" aria-label="{% trans 'Resume financier' %}">
         <div class="dashboard-section-header">
             <div>
                 <h3 class="dashboard-section-title">
-                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg></span>
-                    {% trans "Modules de gestion" %}
+                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
+                    {% trans "Resume financier" %}
                 </h3>
-                <span class="dashboard-section-kicker">{% trans "Les acces affiches respectent deja les permissions et l'abonnement." %}</span>
+                <span class="dashboard-section-kicker">{% trans "Les indicateurs essentiels pour lire rapidement la situation." %}</span>
             </div>
         </div>
-        <div class="dashboard-module-grid">
-            {% for item in dashboard_navigation %}
-            {% if item.is_disabled %}
-            <div class="dashboard-module-card" aria-disabled="true">
-                <span class="dashboard-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
-                <span>
-                    <strong>{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</strong>
-                    <span>{% if item.badge %}{{ item.badge }}{% else %}{% trans "Module verrouille" %}{% endif %}</span>
+        <div class="dashboard-stat-grid">
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-copy">
+                    <span class="dashboard-stat-label">{% trans "Chiffre d'affaires" %}</span>
+                    <span class="dashboard-stat-value">{{ total_ca }}</span>
+                    <span class="dashboard-stat-note">{% trans "Facturation emise a date" %}</span>
+                </div>
+                <span class="dashboard-stat-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg>
                 </span>
-            </div>
-            {% else %}
-            <a href="{{ item.url }}" class="dashboard-module-card">
-                <span class="dashboard-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19v-6"></path><path d="M12 19V9"></path><path d="M16 19v-4"></path><path d="M20 19V7"></path></svg></span>
-                <span><strong>{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</strong><span>{% trans "Ouvrir le module" %}{% if item.badge %} - {{ item.badge }}{% endif %}</span></span>
-            </a>
-            {% endif %}
-            {% empty %}
-            <div class="dashboard-empty">{% trans "Aucun module disponible pour ce profil." %}</div>
-            {% endfor %}
+            </article>
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-copy">
+                    <span class="dashboard-stat-label">{% trans "Encaissements" %}</span>
+                    <span class="dashboard-stat-value">{{ total_encaisse }}</span>
+                    <span class="dashboard-stat-note">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
+                </div>
+                <span class="dashboard-stat-icon success" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                </span>
+            </article>
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-copy">
+                    <span class="dashboard-stat-label">{% trans "Reste a encaisser" %}</span>
+                    <span class="dashboard-stat-value">{{ reste_encaisser }}</span>
+                    <span class="dashboard-stat-note warning">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
+                </div>
+                <span class="dashboard-stat-icon warning" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                </span>
+            </article>
+            <article class="dashboard-stat-card">
+                <div class="dashboard-stat-copy">
+                    <span class="dashboard-stat-label">{% trans "Portefeuille client" %}</span>
+                    <span class="dashboard-stat-value">{{ nombre_clients }}</span>
+                    <span class="dashboard-stat-note">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
+                </div>
+                <span class="dashboard-stat-icon accent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
+                </span>
+            </article>
         </div>
     </section>
 
@@ -855,6 +759,26 @@ a.dashboard-module-card:hover {
                 <div class="dashboard-finance-item"><span>{% trans "Factures du mois" %}</span><strong>{{ total_mois }}</strong></div>
                 <div class="dashboard-finance-item"><span>{% trans "Factures du jour" %}</span><strong>{{ total_jour }}</strong></div>
                 <div class="dashboard-finance-item"><span>{% trans "Depenses du jour" %}</span><strong>{{ depense_jour }}</strong></div>
+            </div>
+        </article>
+
+        <article class="dashboard-section-card">
+            <div class="dashboard-section-header">
+                <div>
+                    <h3 class="dashboard-section-title">
+                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg></span>
+                        {% trans "Portefeuille clients" %}
+                    </h3>
+                    <span class="dashboard-section-kicker">{% trans "Lecture rapide de la base clients et des creances." %}</span>
+                </div>
+            </div>
+            <div class="dashboard-finance-grid">
+                <div class="dashboard-finance-item"><span>{% trans "Clients actifs" %}</span><strong>{{ nombre_clients }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures a relancer" %}</span><strong>{{ impayees }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Creances clients" %}</span><strong>{{ reste_encaisser }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures soldees" %}</span><strong>{{ payees }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }}</strong></div>
             </div>
         </article>
 
@@ -898,9 +822,19 @@ a.dashboard-module-card:hover {
                 </h3>
                 <span class="dashboard-section-kicker">{% trans "Alertes stock et abonnement" %}</span>
             </div>
-            <a href="{% url 'product_list' %}" class="dashboard-section-link">{% trans "Voir tout" %}</a>
         </div>
         <div class="dashboard-alert-list">
+            {% if impayees %}
+            <div class="dashboard-alert-item warning">
+                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
+                <div class="dashboard-alert-copy">
+                    <strong>{% trans "Factures impayees" %}</strong>
+                    <span>{% trans "Des factures restent a encaisser et doivent etre suivies." %}</span>
+                </div>
+                <span class="dashboard-alert-count">{{ impayees }}</span>
+            </div>
+            {% endif %}
+
             {% if rupture_products_count %}
             <div class="dashboard-alert-item danger">
                 <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
@@ -944,8 +878,8 @@ a.dashboard-module-card:hover {
             </div>
             {% endif %}
 
-            {% if not rupture_products_count and not low_stock_products_count and not subscription %}
-            <div class="dashboard-empty">{% trans "Aucune alerte pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
+            {% if not impayees and not rupture_products_count and not low_stock_products_count and not subscription %}
+            <div class="dashboard-empty">{% trans "Aucune alerte pour le moment. Les principaux indicateurs sont stables." %}</div>
             {% endif %}
         </div>
     </section>
