@@ -571,6 +571,198 @@ body {
     cursor: pointer;
 }
 
+/* Phase 12: global premium visual layer inspired by the RH module. */
+body {
+    background: #f5f7fb;
+}
+
+.app-shell {
+    grid-template-columns: 272px minmax(0, 1fr);
+    background: #f5f7fb;
+}
+
+.sidebar {
+    position: sticky;
+    top: 0;
+    padding: 18px 16px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 18px 0 46px rgba(15, 23, 42, 0.04);
+    z-index: 40;
+}
+
+.sidebar .brand,
+.sidebar .company-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.sidebar .brand {
+    padding: 18px 16px;
+    border: 0;
+}
+
+.sidebar .brand::before {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0.72), rgba(255, 255, 255, 0));
+}
+
+.brand-title {
+    color: #0ea5e9;
+}
+
+.brand-subtitle,
+.company-card .muted,
+.sidebar-footer {
+    color: #64748b;
+}
+
+.company-card .label {
+    color: #6b7280;
+    letter-spacing: 0;
+}
+
+.nav {
+    gap: 3px;
+}
+
+.nav a,
+.nav .nav-disabled {
+    min-height: 48px;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #5b6472;
+    box-shadow: none;
+}
+
+.nav a:hover {
+    background: #f1f9ff;
+    color: #0284c7;
+    border-color: #cfe9f8;
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.10);
+}
+
+.nav a.is-active {
+    position: relative;
+    background: #eaf6ff;
+    color: #0284c7;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.nav a.is-active::after {
+    content: "";
+    position: absolute;
+    right: -16px;
+    top: 7px;
+    bottom: 7px;
+    width: 4px;
+    border-radius: 999px;
+    background: #0ea5e9;
+}
+
+.nav-icon {
+    border-radius: 9px;
+    background: #eaf6ff;
+    color: #0ea5e9;
+}
+
+.nav a.is-active .nav-icon {
+    background: #ddf2ff;
+    color: #0284c7;
+}
+
+.nav-label {
+    font-weight: 750;
+}
+
+.nav-badge {
+    background: #eaf6ff;
+    color: #0284c7;
+}
+
+.nav a.is-active .nav-badge {
+    background: #ffffff;
+    color: #0284c7;
+}
+
+.topbar {
+    padding: 24px 32px 18px;
+    background: rgba(245, 247, 251, 0.92);
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: none;
+}
+
+.topbar .subtitle {
+    color: #64748b;
+}
+
+.badge,
+.language-select,
+.language-submit,
+.btn-link,
+.topbar .badge,
+.topbar .language-select,
+.topbar .language-submit,
+.topbar .btn-link {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+}
+
+.btn-link:hover,
+.language-submit:hover,
+.topbar .btn-link:hover,
+.topbar .language-submit:hover {
+    border-color: #bae6fd;
+    background: #f8fafc;
+    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.10);
+}
+
+.btn-link.primary,
+.topbar .btn-link.primary {
+    border-color: #0ea5e9;
+    background: #0ea5e9;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
+}
+
+.page-content {
+    padding: 28px 32px;
+}
+
+.content-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.message {
+    border-color: #bae6fd;
+    border-radius: 12px;
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.table-scroll {
+    border-radius: 12px;
+}
+
+.content-card input:not([type="checkbox"]):not([type="radio"]),
+.content-card select,
+.content-card textarea,
+.content-card button,
+.content-card input[type="submit"],
+.content-card input[type="button"] {
+    border-radius: 12px;
+}
+
 @media (max-width: 980px) {
     .app-shell {
         grid-template-columns: 1fr;
@@ -628,8 +820,8 @@ body {
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
-    <div class="app-shell">
-        <aside class="sidebar">
+    <div class="app-shell dashboard-layout-premium">
+        <aside class="sidebar premium-sidebar">
             <div class="brand">
                 <div class="brand-title">JOATHAM Manager</div>
                 <div class="brand-subtitle">{% trans "Un espace de gestion structure pour une utilisation SaaS claire selon le role." %}</div>

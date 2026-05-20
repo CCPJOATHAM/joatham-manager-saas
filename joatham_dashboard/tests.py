@@ -324,6 +324,8 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Routeur fibre")
         self.assertContains(response, reverse("product_list"))
         self.assertContains(response, "Gestion SaaS securisee par JOATHAM Manager")
+        self.assertContains(response, "dashboard-layout-premium")
+        self.assertContains(response, "premium-sidebar")
         self.assertNotContains(response, "Facture generee automatiquement par JOATHAM Manager")
 
     def test_dashboard_selector_detects_stock_alerts_with_company_isolation(self):
