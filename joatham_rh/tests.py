@@ -572,6 +572,17 @@ class RhFoundationTests(TestCase):
         self.assertContains(response, "Exports")
         self.assertContains(response, "Impressions")
 
+    def test_rh_sidebar_toggle_assets_are_rendered(self):
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_reports"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="rh-sidebar"')
+        self.assertContains(response, 'id="rh-sidebar-toggle"')
+        self.assertContains(response, 'aria-controls="rh-sidebar"')
+        self.assertContains(response, "rh-sidebar-collapsed")
+        self.assertContains(response, 'addEventListener("click"')
+
     def test_rh_dashboard_uses_real_data_without_figma_placeholders(self):
         employe = self._create_employe(matricule="RH-UI001", nom="DesignReel")
         record_presence(
