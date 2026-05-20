@@ -35,6 +35,28 @@ class RhFoundationTests(TestCase):
     def setUp(self):
         self.entreprise_a = create_entreprise("Entreprise RH A")
         self.entreprise_b = create_entreprise("Entreprise RH B")
+        self.entreprise_a.raison_sociale = "CYBER CENTRE ET PAPETERIE JOATHAM"
+        self.entreprise_a.rccm = "RCCM-123"
+        self.entreprise_a.id_nat = "IDN-456"
+        self.entreprise_a.numero_impot = "NIF-789"
+        self.entreprise_a.adresse = "Avenue WOLA KITOKO"
+        self.entreprise_a.ville = "Matadi"
+        self.entreprise_a.pays = "RDC"
+        self.entreprise_a.telephone = "+243970258117"
+        self.entreprise_a.email = "contact@joatham.test"
+        self.entreprise_a.save(
+            update_fields=[
+                "raison_sociale",
+                "rccm",
+                "id_nat",
+                "numero_impot",
+                "adresse",
+                "ville",
+                "pays",
+                "telephone",
+                "email",
+            ]
+        )
         self.owner_a = create_user("owner-rh-a", "proprietaire", self.entreprise_a)
         self.manager_a = create_user("manager-rh-a", "gestionnaire", self.entreprise_a)
         self.owner_b = create_user("owner-rh-b", "proprietaire", self.entreprise_b)
@@ -80,6 +102,18 @@ class RhFoundationTests(TestCase):
             statut=Employe.Statut.ACTIF,
             utilisateur=self.owner_a,
         )
+
+    def _assert_print_company_identity(self, response):
+        self.assertContains(response, "CYBER CENTRE ET PAPETERIE JOATHAM")
+        self.assertContains(response, "RCCM : RCCM-123")
+        self.assertContains(response, "ID Nat : IDN-456")
+        self.assertContains(response, "Numero impot : NIF-789")
+        self.assertContains(response, "Avenue WOLA KITOKO")
+        self.assertContains(response, "Matadi")
+        self.assertContains(response, "RDC")
+        self.assertContains(response, "+243970258117")
+        self.assertContains(response, "contact@joatham.test")
+        self.assertNotContains(response, "JOATHAM Manager")
 
     def test_default_premium_plan_includes_rh_aliases(self):
         premium = next(plan for plan in get_default_paid_plans() if plan["code"] == PREMIUM_PLAN_CODE)
@@ -720,6 +754,25 @@ class RhFoundationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Fiche employe")
         self.assertContains(response, employe.matricule)
+        self._assert_print_company_identity(response)
+
+    def test_employe_list_print_uses_company_identity(self):
+        self._create_employe(matricule="RH-P002")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_list_print"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Liste employes")
+        self._assert_print_company_identity(response)
+
+    def test_rh_reports_print_uses_company_identity(self):
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_reports_print"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rapport RH synthetique")
+        self._assert_print_company_identity(response)
 
     def test_rh_pages_show_export_and_print_links_when_authorized(self):
         self.client.force_login(self.owner_a)

@@ -526,6 +526,7 @@ def employe_print(request, employe_id):
         request,
         "joatham_rh/print_employe.html",
         {
+            "entreprise": entreprise,
             "employe": employe,
             "status_label": _build_status_label(employe.statut),
             "presences": Presence.objects.filter(entreprise=entreprise, employe=employe).order_by("-date", "-id")[:12],
@@ -545,6 +546,7 @@ def employe_list_print(request):
         request,
         "joatham_rh/print_employe_list.html",
         {
+            "entreprise": entreprise,
             "employes": employes,
             "filters": filters,
         },
@@ -559,6 +561,7 @@ def rh_reports_print(request):
         request,
         "joatham_rh/print_reports.html",
         {
+            "entreprise": entreprise,
             "report": get_rh_report_snapshot(entreprise),
         },
     )
