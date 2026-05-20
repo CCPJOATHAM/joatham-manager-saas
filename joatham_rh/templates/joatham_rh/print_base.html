@@ -3,7 +3,7 @@
 <html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <meta charset="utf-8">
-    <title>{% block print_title %}JOATHAM Manager RH{% endblock %}</title>
+    <title>{% block print_title %}{% trans "Document RH" %}{% endblock %}</title>
     <style>
         body {
             margin: 0;
@@ -19,22 +19,41 @@
         }
 
         .print-header {
-            display: flex;
-            justify-content: space-between;
-            gap: 18px;
-            align-items: flex-start;
+            text-align: center;
             border-bottom: 2px solid #dbe5ef;
-            padding-bottom: 16px;
+            padding-bottom: 18px;
             margin-bottom: 24px;
         }
 
-        .brand {
+        .company-name {
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0;
         }
 
-        .muted {
+        .muted,
+        .company-meta,
+        .print-footer {
             color: #64748b;
+        }
+
+        .company-meta {
+            margin-top: 6px;
+            font-size: 0.88rem;
+        }
+
+        .company-meta span + span::before {
+            content: " | ";
+        }
+
+        .print-footer {
+            border-top: 1px solid #dbe5ef;
+            margin-top: 34px;
+            padding-top: 12px;
+            text-align: center;
+            font-size: 0.84rem;
+            line-height: 1.5;
         }
 
         h1 {
@@ -119,15 +138,35 @@
             <button type="button" onclick="window.print()">{% trans "Imprimer" %}</button>
         </div>
         <header class="print-header">
-            <div>
-                <div class="brand">JOATHAM Manager</div>
-                <div class="muted">{% trans "Ressources humaines" %}</div>
+            <div class="company-name">
+                {% firstof entreprise.raison_sociale entreprise.nom entreprise_identity.primary_name %}
             </div>
-            <div class="muted">
-                {% if entreprise_identity.primary_name %}{{ entreprise_identity.primary_name }}{% endif %}
-            </div>
+            {% if entreprise.rccm or entreprise.id_nat or entreprise.numero_impot %}
+                <div class="company-meta">
+                    {% if entreprise.rccm %}<span>RCCM : {{ entreprise.rccm }}</span>{% endif %}
+                    {% if entreprise.id_nat %}<span>ID Nat : {{ entreprise.id_nat }}</span>{% endif %}
+                    {% if entreprise.numero_impot %}<span>Numero impot : {{ entreprise.numero_impot }}</span>{% endif %}
+                </div>
+            {% endif %}
         </header>
         {% block print_content %}{% endblock %}
+        <footer class="print-footer">
+            {% if entreprise.adresse or entreprise.ville or entreprise.pays %}
+                <div>
+                    Adresse :
+                    {% if entreprise.adresse %}{{ entreprise.adresse }}{% endif %}
+                    {% if entreprise.ville %}{% if entreprise.adresse %}, {% endif %}{{ entreprise.ville }}{% endif %}
+                    {% if entreprise.pays %}{% if entreprise.adresse or entreprise.ville %}, {% endif %}{{ entreprise.pays }}{% endif %}
+                </div>
+            {% endif %}
+            {% if entreprise.telephone or entreprise.email %}
+                <div>
+                    {% if entreprise.telephone %}Tel. : {{ entreprise.telephone }}{% endif %}
+                    {% if entreprise.telephone and entreprise.email %} | {% endif %}
+                    {% if entreprise.email %}Email : {{ entreprise.email }}{% endif %}
+                </div>
+            {% endif %}
+        </footer>
     </main>
 </body>
 </html>
