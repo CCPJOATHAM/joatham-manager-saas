@@ -326,6 +326,14 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Gestion SaaS securisee par JOATHAM Manager")
         self.assertContains(response, "dashboard-layout-premium")
         self.assertContains(response, "premium-sidebar")
+        self.assertContains(response, "Menu principal")
+        self.assertContains(response, "dashboard-owner-premium")
+        self.assertContains(response, "Modules de gestion")
+        self.assertContains(response, "Pilotage financier")
+        self.assertContains(response, "Nouvelle facture")
+        self.assertNotContains(response, "Marie Kouassi")
+        self.assertNotContains(response, "Kofi Mensah")
+        self.assertNotContains(response, "Satisfaction 4.6/5")
         self.assertNotContains(response, "Facture generee automatiquement par JOATHAM Manager")
 
     def test_dashboard_selector_detects_stock_alerts_with_company_isolation(self):

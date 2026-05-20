@@ -689,6 +689,16 @@ body {
     color: #0284c7;
 }
 
+.nav-section-label {
+    display: block;
+    margin: 2px 8px 8px;
+    color: #6b7280;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
 .topbar {
     padding: 24px 32px 18px;
     background: rgba(245, 247, 251, 0.92);
@@ -763,6 +773,16 @@ body {
     border-radius: 12px;
 }
 
+.dashboard-layout-premium .brand-title {
+    color: #0ea5e9;
+    font-size: 1.26rem;
+    line-height: 1.26;
+}
+
+.dashboard-layout-premium .company-card {
+    background: #f8fafc;
+}
+
 @media (max-width: 980px) {
     .app-shell {
         grid-template-columns: 1fr;
@@ -823,8 +843,8 @@ body {
     <div class="app-shell dashboard-layout-premium">
         <aside class="sidebar premium-sidebar">
             <div class="brand">
-                <div class="brand-title">JOATHAM Manager</div>
-                <div class="brand-subtitle">{% trans "Un espace de gestion structure pour une utilisation SaaS claire selon le role." %}</div>
+                <div class="brand-title">JOATHAM<br>Manager</div>
+                <div class="brand-subtitle">{% trans "Interface SaaS claire pour piloter les modules de votre entreprise." %}</div>
             </div>
 
             <div class="company-card">
@@ -849,6 +869,7 @@ body {
             </div>
 
             <nav class="nav">
+                <span class="nav-section-label">{% trans "Menu principal" %}</span>
                 {% for item in dashboard_navigation %}
                 {% if item.is_disabled %}
                 <span class="nav-disabled" aria-disabled="true">

@@ -13,9 +13,7 @@
         {% endif %}
     </div>
     <div class="dashboard-company-copy">
-        {% if entreprise_identity.secondary_name %}
-        <div class="dashboard-company-alias">{{ entreprise_identity.secondary_name }}</div>
-        {% endif %}
+        <span class="dashboard-eyebrow">{% trans "Tableau de bord principal" %}</span>
         <h1>
             {% if entreprise_identity.primary_name %}
                 {{ entreprise_identity.primary_name }}
@@ -44,81 +42,38 @@
 {% block extra_styles %}
 <style>
 .main {
-    --dashboard-bg: #F5F7FB;
-    --dashboard-bg-soft: #F8FAFC;
-    --dashboard-card: #FFFFFF;
-    --dashboard-card-soft: #F8FAFC;
-    --dashboard-line: #E5E7EB;
-    --dashboard-line-soft: #E8EEF6;
-    --dashboard-heading: #0F172A;
-    --dashboard-text: #1E293B;
-    --dashboard-muted: #475569;
-    --dashboard-muted-soft: #64748B;
-    --dashboard-accent: #0EA5E9;
-    --dashboard-accent-soft: #EAF6FF;
-    --dashboard-success: #16A34A;
-    --dashboard-warning: #F59E0B;
-    --dashboard-danger: #EF4444;
+    --dashboard-bg: #f5f7fb;
+    --dashboard-card: #ffffff;
+    --dashboard-card-soft: #f8fafc;
+    --dashboard-line: #e5e7eb;
+    --dashboard-line-blue: #bae6fd;
+    --dashboard-heading: #0f172a;
+    --dashboard-text: #1e293b;
+    --dashboard-muted: #64748b;
+    --dashboard-accent: #0ea5e9;
+    --dashboard-accent-dark: #0284c7;
+    --dashboard-accent-soft: #eaf6ff;
+    --dashboard-success: #22c55e;
+    --dashboard-warning: #f59e0b;
+    --dashboard-danger: #ef4444;
     --dashboard-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-    --dashboard-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.04);
-    min-width: 0;
-    width: 100%;
-    max-width: none;
-    box-sizing: border-box;
+    --dashboard-shadow-strong: 0 22px 54px rgba(14, 165, 233, 0.12);
     background: var(--dashboard-bg);
     color: var(--dashboard-text);
 }
 
-.app-shell,
-.main .topbar,
-.main .page-content,
-.main .content-card,
-.dashboard-shell {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
 .main .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: minmax(360px, 0.95fr) minmax(560px, 1.05fr);
     align-items: center;
-    gap: 40px;
-    padding: 28px 40px 24px;
-    border-bottom: 1px solid #E5E7EB;
-    background: rgba(245, 247, 251, 0.92);
+    padding: 24px 34px;
+    background: rgba(245, 247, 251, 0.94);
+    border-bottom: 1px solid var(--dashboard-line);
     box-shadow: none;
-    backdrop-filter: blur(16px);
-}
-
-.main .topbar-heading {
-    min-width: 0;
-}
-
-.main .topbar h1 {
-    margin: 0;
-    color: var(--dashboard-heading);
-    font-size: clamp(1.6rem, 2.2vw, 2.15rem);
-    font-weight: 900;
-    letter-spacing: 0;
-    line-height: 1.1;
-}
-
-.main .topbar .subtitle {
-    max-width: 720px;
-    color: #334155;
-    font-size: 1rem;
-    line-height: 1.7;
 }
 
 .dashboard-company-header {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     min-width: 0;
 }
 
@@ -126,30 +81,28 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 70px;
-    height: 70px;
-    flex: 0 0 70px;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
     overflow: hidden;
-    border: 1px solid rgba(125, 211, 252, 0.72);
-    border-radius: 14px;
-    background: #FFFFFF;
-    color: #0369A1;
-    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.14);
+    border: 1px solid var(--dashboard-line-blue);
+    border-radius: 16px;
+    background: #ffffff;
+    color: var(--dashboard-accent-dark);
+    box-shadow: 0 16px 32px rgba(14, 165, 233, 0.13);
 }
 
 .dashboard-company-mark img {
-    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 10px;
-    background: #FFFFFF;
+    padding: 9px;
+    background: #ffffff;
 }
 
 .dashboard-company-mark span {
-    font-size: 1.85rem;
+    font-size: 1.8rem;
     font-weight: 900;
-    line-height: 1;
     text-transform: uppercase;
 }
 
@@ -157,699 +110,572 @@
     min-width: 0;
 }
 
-.dashboard-company-copy h1 {
-    overflow-wrap: anywhere;
+.dashboard-eyebrow {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--dashboard-accent-dark);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
 }
 
-.dashboard-company-alias {
-    margin-bottom: 7px;
-    color: #075985;
-    font-size: 0.78rem;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-    line-height: 1.25;
-    text-transform: uppercase;
+.dashboard-company-copy h1 {
+    margin: 0;
+    color: var(--dashboard-heading);
+    font-size: clamp(1.55rem, 2.1vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
 }
 
 .dashboard-company-badges {
     display: flex;
-    align-items: center;
-    gap: 8px;
     flex-wrap: wrap;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 11px;
 }
 
-.dashboard-company-badges span {
+.dashboard-company-badges span,
+.dashboard-pill {
     display: inline-flex;
     align-items: center;
-    min-height: 30px;
+    min-height: 32px;
     padding: 0 11px;
-    border: 1px solid #BAE6FD;
+    border: 1px solid var(--dashboard-line-blue);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
+    background: #f0f9ff;
     color: #075985;
     font-size: 0.78rem;
     font-weight: 850;
-    box-shadow: none;
 }
 
 .main .identity-bar {
     display: grid;
     justify-items: end;
-    align-content: center;
-    gap: 16px;
-    min-width: 0;
-    width: 100%;
-    max-width: none;
+    gap: 14px;
 }
 
 .main .topbar-meta,
 .main .language-switcher,
 .main .top-actions {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 12px;
+    justify-content: flex-end;
+    gap: 10px;
     flex-wrap: wrap;
-    max-width: 100%;
 }
 
 .main .language-select,
 .main .language-submit,
 .main .btn-link,
 .main .badge {
-    min-height: 48px;
-    border: 1px solid var(--dashboard-line);
+    min-height: 44px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.78);
-    color: var(--dashboard-heading);
-    box-shadow: 0 12px 26px rgba(14, 116, 144, 0.10);
-}
-
-.main .language-select {
-    padding: 0 42px 0 18px;
-    font-weight: 650;
-}
-
-.main .language-submit,
-.main .btn-link {
-    padding: 0 20px;
-    font-weight: 800;
-    text-align: center;
-    white-space: normal;
-}
-
-.main .btn-link:hover,
-.main .language-submit:hover {
-    border-color: #BFCCDA;
-    transform: translateY(-1px);
+    border: 1px solid var(--dashboard-line);
+    background: #ffffff;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
 }
 
 .main .btn-link.primary {
-    gap: 10px;
     border-color: var(--dashboard-accent);
-    background: #0EA5E9;
-    color: #FFFFFF;
+    background: var(--dashboard-accent);
+    color: #ffffff;
     box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
 }
 
-.main .btn-link-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    line-height: 1;
-}
-
-.main .btn-link.danger {
-    border-color: #FBD1D1;
-    background: #FFF5F5;
-    color: #DC2626;
-    box-shadow: 0 10px 24px rgba(220, 38, 38, 0.06);
-}
-
-.main .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0 18px;
-    font-size: 0.92rem;
-    font-weight: 650;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-}
-
 .main .page-content {
-    padding: 0 36px 28px;
+    padding: 0 34px 34px;
     background: transparent !important;
-    color: var(--dashboard-text);
 }
 
 .main .content-card {
-    overflow: visible;
     padding: 0;
+    overflow: visible;
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
 }
 
-.main .content-card h1,
-.main .content-card h2,
-.main .content-card h3,
-.main .content-card h4,
-.main .content-card strong {
-    color: var(--dashboard-heading);
-}
-
-.main .content-card p,
-.main .content-card li,
-.main .content-card small,
-.main .content-card label {
-    color: var(--dashboard-muted);
-}
-
 .dashboard-shell {
     display: grid;
-    gap: 20px;
+    gap: 24px;
 }
 
-.hero-panel,
-.metric-card,
-.section-card {
+.dashboard-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.dashboard-hero-main,
+.dashboard-hero-side,
+.dashboard-stat-card,
+.dashboard-section-card,
+.dashboard-module-card {
     border: 1px solid var(--dashboard-line);
-    background: #FFFFFF;
+    border-radius: 18px;
+    background: var(--dashboard-card);
     box-shadow: var(--dashboard-shadow);
 }
 
-.hero-panel {
-    display: grid;
-    grid-template-columns: minmax(520px, 1fr) minmax(310px, 380px);
-    gap: 34px;
-    align-items: start;
-    min-height: 220px;
-    padding: 32px;
-    border-radius: 12px;
+.dashboard-hero-main {
+    position: relative;
+    overflow: hidden;
+    min-height: 255px;
+    padding: 34px;
 }
 
-.hero-main {
-    display: flex;
-    align-items: flex-start;
-    gap: 24px;
-    min-width: 0;
+.dashboard-hero-main::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 7px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--dashboard-accent), #38bdf8);
 }
 
-.hero-main > div:last-child {
-    min-width: 0;
-}
-
-.hero-icon,
-.quick-icon,
-.timeline-icon,
-.alert-icon,
-.metric-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-}
-
-.hero-icon {
-    width: 84px;
-    height: 84px;
-    border-radius: 14px;
-    background: var(--dashboard-accent-soft);
-    color: var(--dashboard-accent);
-}
-
-.hero-icon svg,
-.metric-icon svg,
-.quick-icon svg,
-.timeline-icon svg,
-.alert-icon svg {
-    width: 24px;
-    height: 24px;
-}
-
-.hero-panel h2 {
-    margin: 0 0 16px;
-    color: var(--dashboard-heading);
-    font-size: clamp(2rem, 3vw, 2.55rem);
-    font-weight: 900;
-    letter-spacing: 0;
-    line-height: 1.12;
-    word-break: normal;
-    overflow-wrap: normal;
-}
-
-.hero-panel h2 span {
-    color: var(--dashboard-accent);
-}
-
-.hero-panel p {
-    max-width: 680px;
+.dashboard-hero-main h2 {
+    max-width: 760px;
     margin: 0;
-    color: #334155;
-    font-size: 1rem;
-    line-height: 1.8;
-    word-break: normal;
-    overflow-wrap: normal;
+    color: var(--dashboard-heading);
+    font-size: clamp(2.15rem, 4vw, 3.25rem);
+    font-weight: 900;
+    line-height: 1.04;
 }
 
-.hero-summary {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.dashboard-hero-main h2 span {
+    color: var(--dashboard-accent);
+}
+
+.dashboard-hero-main p {
+    max-width: 720px;
+    margin: 18px 0 0;
+    color: var(--dashboard-muted);
+    font-size: 1.02rem;
+    line-height: 1.75;
+}
+
+.dashboard-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
-    justify-self: end;
-    align-content: start;
-    width: 100%;
+    margin-top: 28px;
 }
 
-.hero-pill {
+.dashboard-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    padding: 10px 14px;
-    border: 1px solid var(--dashboard-line);
+    padding: 0 16px;
+    border: 1px solid var(--dashboard-line-blue);
     border-radius: 12px;
-    background: #FFFFFF;
-    color: #1E3A5F;
-    font-size: 0.86rem;
+    background: #ffffff;
+    color: #0369a1;
     font-weight: 850;
-    text-align: center;
-    word-break: normal;
-    overflow-wrap: normal;
-    box-shadow: var(--dashboard-shadow-soft);
+    text-decoration: none;
 }
 
-.hero-pill.subscription-pill {
-    grid-column: 1 / -1;
-    gap: 10px;
+.dashboard-cta.primary {
+    border-color: var(--dashboard-accent);
+    background: var(--dashboard-accent);
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: #22C55E;
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.10);
+.dashboard-hero-side {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
 }
 
-.metric-grid {
+.dashboard-side-title {
+    margin: 0;
+    color: var(--dashboard-heading);
+    font-size: 1.08rem;
+    font-weight: 900;
+}
+
+.dashboard-side-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dashboard-side-item {
+    min-height: 82px;
+    padding: 14px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.dashboard-side-item span,
+.dashboard-stat-label,
+.dashboard-module-card span,
+.dashboard-section-kicker {
+    color: var(--dashboard-muted);
+    font-size: 0.84rem;
+}
+
+.dashboard-side-item strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--dashboard-heading);
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.dashboard-stat-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 18px;
 }
 
-.metric-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    min-height: 168px;
-    padding: 24px;
-    border-radius: 12px;
-}
-
-.metric-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #EAF2FF;
-    color: var(--dashboard-accent);
-}
-
-.metric-icon.warning {
-    background: #FFF7ED;
-    color: var(--dashboard-warning);
-}
-
-.metric-label {
-    display: block;
-    margin-bottom: 10px;
-    color: #1E3A5F;
-    font-size: 0.74rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-}
-
-.metric-value {
-    display: block;
-    color: var(--dashboard-heading);
-    font-size: clamp(1.72rem, 2.1vw, 2.25rem);
-    font-weight: 900;
-    line-height: 1.05;
-    white-space: normal;
-    word-break: normal;
-    overflow-wrap: normal;
-}
-
-.metric-meta,
-.metric-trend {
-    display: block;
-    margin-top: 11px;
-    color: var(--dashboard-muted);
-    font-size: 0.88rem;
-    line-height: 1.45;
-}
-
-.metric-trend {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 9px;
-    color: var(--dashboard-success);
-    font-weight: 800;
-}
-
-.metric-trend.warning {
-    color: #DC2626;
-}
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-    gap: 22px;
-    align-items: stretch;
-}
-
-.section-card {
-    min-width: 0;
-    padding: 22px;
-    border-radius: 12px;
-}
-
-.section-header {
+.dashboard-stat-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 16px;
+    min-height: 150px;
+    padding: 24px;
+}
+
+.dashboard-stat-copy {
+    min-width: 0;
+}
+
+.dashboard-stat-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.dashboard-stat-value {
+    display: block;
+    color: var(--dashboard-heading);
+    font-size: clamp(1.7rem, 2.4vw, 2.25rem);
+    font-weight: 900;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-stat-note {
+    display: block;
+    margin-top: 10px;
+    color: #047857;
+    font-size: 0.84rem;
+    font-weight: 800;
+}
+
+.dashboard-stat-note.warning {
+    color: #c2410c;
+}
+
+.dashboard-stat-icon,
+.dashboard-module-icon,
+.dashboard-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: #ffffff;
+    background: var(--dashboard-accent);
+}
+
+.dashboard-stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    box-shadow: 0 14px 26px rgba(14, 165, 233, 0.24);
+}
+
+.dashboard-stat-icon.success {
+    background: var(--dashboard-success);
+    box-shadow: 0 14px 26px rgba(34, 197, 94, 0.22);
+}
+
+.dashboard-stat-icon.warning {
+    background: var(--dashboard-warning);
+    box-shadow: 0 14px 26px rgba(245, 158, 11, 0.22);
+}
+
+.dashboard-stat-icon.accent {
+    background: #a855f7;
+    box-shadow: 0 14px 26px rgba(126, 34, 206, 0.22);
+}
+
+.dashboard-stat-icon svg,
+.dashboard-module-icon svg,
+.dashboard-section-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.dashboard-section-card {
+    padding: 24px;
+}
+
+.dashboard-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 18px;
 }
 
-.section-title {
+.dashboard-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 0;
     color: var(--dashboard-heading);
-    font-size: 1.18rem;
+    font-size: 1.12rem;
     font-weight: 900;
-    letter-spacing: 0;
 }
 
-.section-link {
-    color: var(--dashboard-accent) !important;
+.dashboard-section-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+}
+
+.dashboard-section-link {
+    color: var(--dashboard-accent-dark) !important;
     font-size: 0.88rem;
     font-weight: 850;
     text-decoration: none !important;
 }
 
-.section-kicker {
-    display: block;
-    margin-top: 4px;
-    color: var(--dashboard-muted-soft);
-    font-size: 0.78rem;
-    font-weight: 750;
+.dashboard-module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
 }
 
-.quick-actions-grid {
+.dashboard-module-card {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 13px;
+    align-items: center;
+    min-height: 92px;
+    padding: 16px;
+    color: var(--dashboard-text);
+    text-decoration: none;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+a.dashboard-module-card:hover {
+    border-color: var(--dashboard-line-blue);
+    box-shadow: var(--dashboard-shadow-strong);
+    transform: translateY(-2px);
+}
+
+.dashboard-module-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--dashboard-accent-soft);
+    color: var(--dashboard-accent-dark);
+}
+
+.dashboard-module-card strong {
+    display: block;
+    color: var(--dashboard-heading);
+    font-size: 0.95rem;
+    font-weight: 900;
+}
+
+.dashboard-module-card span {
+    display: block;
+    margin-top: 4px;
+    line-height: 1.45;
+}
+
+.dashboard-lower-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    gap: 24px;
+}
+
+.dashboard-finance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
-.quick-action-card {
+.dashboard-finance-item {
+    padding: 16px;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 14px;
+    background: var(--dashboard-card-soft);
+}
+
+.dashboard-finance-item span,
+.dashboard-timeline-copy span,
+.dashboard-alert-copy span {
+    display: block;
+    color: var(--dashboard-muted);
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.dashboard-finance-item strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--dashboard-heading);
+    font-size: 1.08rem;
+    font-weight: 900;
+}
+
+.dashboard-timeline {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 16px;
+}
+
+.dashboard-timeline-item {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.dashboard-timeline-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.dashboard-dot {
+    width: 8px;
+    height: 8px;
+    margin-top: 7px;
+    border-radius: 999px;
+    background: var(--dashboard-accent);
+}
+
+.dashboard-timeline-copy strong,
+.dashboard-alert-copy strong {
+    display: block;
+    color: var(--dashboard-heading);
+    font-size: 0.92rem;
+    font-weight: 900;
+    line-height: 1.4;
+}
+
+.dashboard-timeline-meta {
+    color: var(--dashboard-muted);
+    font-size: 0.78rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.dashboard-alert-list {
+    display: grid;
+    gap: 12px;
+}
+
+.dashboard-alert-item {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
     gap: 12px;
     align-items: center;
     min-height: 74px;
     padding: 14px;
     border: 1px solid var(--dashboard-line);
-    border-radius: 12px;
-    background: #FFFFFF;
-    color: var(--dashboard-text);
-    text-decoration: none;
-    box-shadow: none;
-    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    border-radius: 14px;
+    background: #ffffff;
 }
 
-.quick-action-card:hover {
-    border-color: #BBD0EA;
-    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.10);
-    transform: translateY(-2px);
+.dashboard-alert-item.danger {
+    border-color: #fecaca;
+    background: #fff7f7;
 }
 
-.quick-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: var(--dashboard-accent-soft);
-    color: var(--dashboard-accent);
+.dashboard-alert-item.warning {
+    border-color: #fed7aa;
+    background: #fff9f0;
 }
 
-.quick-action-card strong {
-    display: block;
-    color: var(--dashboard-heading);
-    font-size: 0.9rem;
-    font-weight: 900;
+.dashboard-alert-item.info {
+    border-color: var(--dashboard-line-blue);
+    background: #f0f9ff;
 }
 
-.quick-action-card strong + span {
-    display: block;
-    margin-top: 4px;
-    color: var(--dashboard-muted);
-    font-size: 0.78rem;
-    line-height: 1.4;
-}
-
-.timeline {
-    display: grid;
-    gap: 16px;
-    position: relative;
-}
-
-.timeline::before {
-    content: "";
-    position: absolute;
-    top: 14px;
-    bottom: 14px;
-    left: 15px;
-    width: 1px;
-    background: #DDE7F0;
-}
-
-.timeline-item {
-    position: relative;
-    display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) auto;
-    gap: 12px;
-    align-items: start;
-}
-
-.timeline-icon {
-    position: relative;
-    z-index: 1;
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: #EAF2FF;
-    color: var(--dashboard-accent);
-}
-
-.timeline-icon.color-2 {
-    background: #ECFDF3;
-    color: #16A34A;
-}
-
-.timeline-icon.color-3 {
-    background: #FFF7ED;
-    color: #F59E0B;
-}
-
-.timeline-icon.color-4 {
-    background: #EFF6FF;
-    color: #0EA5E9;
-}
-
-.timeline-copy strong {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 900;
-    line-height: 1.4;
-}
-
-.timeline-copy span {
-    display: block;
-    margin-top: 3px;
-    color: var(--dashboard-muted);
-    font-size: 0.84rem;
-    line-height: 1.5;
-}
-
-.timeline-meta {
-    color: #1E3A5F;
-    font-size: 0.8rem;
-    font-weight: 750;
-    white-space: nowrap;
-}
-
-.empty-hint {
-    padding: 18px;
-    border: 1px dashed #C9D7E6;
-    border-radius: 12px;
-    background: #F8FAFC;
-    color: var(--dashboard-muted);
-    line-height: 1.6;
-    text-align: center;
-}
-
-.alerts-list {
-    display: grid;
-    gap: 14px;
-}
-
-.alert-item {
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    gap: 12px;
+.dashboard-alert-icon {
+    display: inline-flex;
     align-items: center;
-    min-height: 72px;
-    padding: 14px;
-    border: 1px solid var(--dashboard-line);
-    border-radius: 12px;
-    background: #FFFFFF;
-}
-
-.alert-item.danger {
-    border-color: #F8D4D4;
-    background: #FFF6F6;
-}
-
-.alert-item.warning {
-    border-color: #F7E2BC;
-    background: #FFF9F0;
-}
-
-.alert-item.info {
-    border-color: #D4E2FF;
-    background: #F7FAFF;
-}
-
-.alert-icon {
+    justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 999px;
+    border-radius: 13px;
+    background: var(--dashboard-accent-soft);
+    color: var(--dashboard-accent-dark);
 }
 
-.alert-item.danger .alert-icon {
-    background: #FFE4E6;
-    color: var(--dashboard-danger);
+.dashboard-alert-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
-.alert-item.warning .alert-icon {
-    background: #FFF1D6;
-    color: var(--dashboard-warning);
-}
-
-.alert-item.info .alert-icon {
-    background: #EAF2FF;
-    color: var(--dashboard-accent);
-}
-
-.alert-copy strong {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 900;
-}
-
-.alert-copy span {
-    display: block;
-    margin-top: 4px;
-    color: var(--dashboard-muted);
-    font-size: 0.82rem;
-    line-height: 1.45;
-}
-
-.alert-count {
+.dashboard-alert-count {
     color: var(--dashboard-heading);
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     font-weight: 900;
 }
 
-.alert-products {
+.dashboard-alert-products {
     display: grid;
     gap: 5px;
-    margin-top: 9px;
+    margin-top: 8px;
 }
 
-.alert-products small {
+.dashboard-alert-products small {
     color: var(--dashboard-muted);
-    font-size: 0.78rem;
 }
 
-.finance-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 16px;
-}
-
-.finance-strip div {
-    padding: 13px;
-    border: 1px solid var(--dashboard-line);
-    border-radius: 12px;
-    background: #FFFFFF;
-}
-
-.finance-strip span,
-.finance-strip strong {
-    display: block;
-}
-
-.finance-strip span {
+.dashboard-empty {
+    padding: 20px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    background: var(--dashboard-card-soft);
     color: var(--dashboard-muted);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.finance-strip strong {
-    margin-top: 7px;
-    color: var(--dashboard-heading);
-    font-size: 1rem;
-    font-weight: 900;
+    text-align: center;
+    line-height: 1.6;
 }
 
 @media (max-width: 1320px) {
     .main .topbar {
         grid-template-columns: 1fr;
-        gap: 20px;
     }
 
-    .main .identity-bar {
-        justify-items: start;
-    }
-
+    .main .identity-bar,
     .main .topbar-meta,
     .main .language-switcher,
     .main .top-actions {
+        justify-items: start;
         justify-content: flex-start;
     }
 
-    .metric-grid {
+    .dashboard-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 1180px) {
-    .hero-panel {
+@media (max-width: 1120px) {
+    .dashboard-hero,
+    .dashboard-lower-grid {
         grid-template-columns: 1fr;
     }
-
-    .hero-summary {
-        justify-self: stretch;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
-    }
 }
 
-@media (max-width: 980px) {
-    .main .topbar {
-        padding: 24px;
-    }
-
-    .main .identity-bar,
-    .main .language-switcher,
-    .main .top-actions {
-        justify-content: flex-start;
-    }
-
-    .main .page-content {
-        padding: 0 24px 24px;
-    }
-
-}
-
-@media (max-width: 720px) {
+@media (max-width: 760px) {
     .main .topbar,
     .main .page-content {
         padding-left: 16px;
@@ -867,343 +693,261 @@
         width: 100%;
     }
 
-    .main .language-switcher,
     .main .topbar-meta,
-    .main .top-actions {
-        display: grid;
+    .main .language-switcher,
+    .main .top-actions,
+    .dashboard-side-grid,
+    .dashboard-stat-grid,
+    .dashboard-finance-grid {
         grid-template-columns: 1fr;
     }
 
-    .hero-panel,
-    .metric-card,
-    .section-card {
-        border-radius: 18px;
+    .dashboard-company-header,
+    .dashboard-stat-card,
+    .dashboard-section-header,
+    .dashboard-alert-item {
+        align-items: flex-start;
     }
 
-    .hero-panel {
-        padding: 22px;
-    }
-
-    .hero-main {
+    .dashboard-stat-card,
+    .dashboard-section-header {
         flex-direction: column;
     }
 
-    .hero-icon {
-        width: 68px;
-        height: 68px;
+    .dashboard-hero-main,
+    .dashboard-hero-side,
+    .dashboard-section-card {
+        padding: 22px;
     }
 
-    .hero-summary,
-    .metric-grid,
-    .dashboard-grid,
-    .quick-actions-grid,
-    .finance-strip {
-        grid-template-columns: 1fr;
+    .dashboard-timeline-item {
+        grid-template-columns: 12px minmax(0, 1fr);
     }
 
-    .timeline-item {
-        grid-template-columns: 32px minmax(0, 1fr);
-    }
-
-    .timeline-meta {
+    .dashboard-timeline-meta {
         grid-column: 2;
         white-space: normal;
-    }
-
-    .alert-item {
-        grid-template-columns: 40px minmax(0, 1fr);
-    }
-
-    .alert-count {
-        grid-column: 2;
     }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-shell">
-    <section class="hero-panel">
-        <div class="hero-main">
-            <div class="hero-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 17l6-6 4 4 7-9"></path>
-                    <path d="M14 6h6v6"></path>
-                </svg>
-            </div>
-            <div>
-                <h2 aria-label="{% trans 'Bienvenue dans votre cockpit JOATHAM Manager' %}">
-                    {% trans "Bienvenue dans votre cockpit" %} <span>JOATHAM</span> Manager
-                </h2>
-                <p>{% trans "Retrouvez en un coup d'oeil les indicateurs cles de l'entreprise, les acces rapides vers les modules utiles et l'etat global du produit pour agir plus vite chaque jour." %}</p>
+<div class="dashboard-shell dashboard-owner-premium">
+    <section class="dashboard-hero">
+        <div class="dashboard-hero-main">
+            <span class="dashboard-pill">{% trans "Cockpit entreprise" %}</span>
+            <h2 aria-label="{% trans 'Bienvenue dans votre cockpit JOATHAM Manager' %}">
+                {% trans "Bienvenue dans votre cockpit" %} <span>JOATHAM</span> Manager
+            </h2>
+            <p>{% trans "Un tableau de bord central pour suivre les ventes, les encaissements, les clients, les alertes et les modules actifs de votre entreprise." %}</p>
+            <div class="dashboard-hero-actions">
+                <a href="{% url 'add_facture' %}" class="dashboard-cta primary">{% trans "Nouvelle facture" %}</a>
+                <a href="{% url 'add_client' %}" class="dashboard-cta">{% trans "Ajouter un client" %}</a>
+                <a href="{% url 'activity_log_list' %}" class="dashboard-cta">{% trans "Voir les flux" %}</a>
             </div>
         </div>
-        <div class="hero-summary" aria-label="{% trans 'Resume du dashboard' %}">
-            <span class="hero-pill">{% trans "Devise" %} : {{ entreprise_identity.currency_code }}</span>
-            <span class="hero-pill">{% trans "Clients" %} : {{ nombre_clients }}</span>
-            <span class="hero-pill">{% trans "Factures" %} : {{ nombre_factures }}</span>
+
+        <aside class="dashboard-hero-side" aria-label="{% trans 'Resume entreprise' %}">
+            <h3 class="dashboard-side-title">{% trans "Resume de l'entreprise" %}</h3>
+            <div class="dashboard-side-grid">
+                <div class="dashboard-side-item"><span>{% trans "Devise" %}</span><strong>{{ entreprise_identity.currency_code }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Clients" %}</span><strong>{{ nombre_clients }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }}</strong></div>
+            </div>
             {% if subscription %}
-            <span class="hero-pill subscription-pill"><span class="status-dot" aria-hidden="true"></span>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
+            <span class="dashboard-pill">{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
             {% endif %}
+        </aside>
+    </section>
+
+    <section class="dashboard-stat-grid" aria-label="{% trans 'Indicateurs principaux' %}">
+        <article class="dashboard-stat-card">
+            <div class="dashboard-stat-copy">
+                <span class="dashboard-stat-label">{% trans "Chiffre d'affaires" %}</span>
+                <span class="dashboard-stat-value">{{ total_ca }}</span>
+                <span class="dashboard-stat-note">{% trans "Facturation emise a date" %}</span>
+            </div>
+            <span class="dashboard-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg>
+            </span>
+        </article>
+        <article class="dashboard-stat-card">
+            <div class="dashboard-stat-copy">
+                <span class="dashboard-stat-label">{% trans "Encaissements" %}</span>
+                <span class="dashboard-stat-value">{{ total_encaisse }}</span>
+                <span class="dashboard-stat-note">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
+            </div>
+            <span class="dashboard-stat-icon success" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg>
+            </span>
+        </article>
+        <article class="dashboard-stat-card">
+            <div class="dashboard-stat-copy">
+                <span class="dashboard-stat-label">{% trans "Reste a encaisser" %}</span>
+                <span class="dashboard-stat-value">{{ reste_encaisser }}</span>
+                <span class="dashboard-stat-note warning">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
+            </div>
+            <span class="dashboard-stat-icon warning" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+            </span>
+        </article>
+        <article class="dashboard-stat-card">
+            <div class="dashboard-stat-copy">
+                <span class="dashboard-stat-label">{% trans "Portefeuille client" %}</span>
+                <span class="dashboard-stat-value">{{ nombre_clients }}</span>
+                <span class="dashboard-stat-note">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
+            </div>
+            <span class="dashboard-stat-icon accent" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
+            </span>
+        </article>
+    </section>
+
+    <section class="dashboard-section-card">
+        <div class="dashboard-section-header">
+            <div>
+                <h3 class="dashboard-section-title">
+                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg></span>
+                    {% trans "Modules de gestion" %}
+                </h3>
+                <span class="dashboard-section-kicker">{% trans "Les acces affiches respectent deja les permissions et l'abonnement." %}</span>
+            </div>
+        </div>
+        <div class="dashboard-module-grid">
+            {% for item in dashboard_navigation %}
+            {% if item.is_disabled %}
+            <div class="dashboard-module-card" aria-disabled="true">
+                <span class="dashboard-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <span>
+                    <strong>{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</strong>
+                    <span>{% if item.badge %}{{ item.badge }}{% else %}{% trans "Module verrouille" %}{% endif %}</span>
+                </span>
+            </div>
+            {% else %}
+            <a href="{{ item.url }}" class="dashboard-module-card">
+                <span class="dashboard-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19v-6"></path><path d="M12 19V9"></path><path d="M16 19v-4"></path><path d="M20 19V7"></path></svg></span>
+                <span><strong>{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</strong><span>{% trans "Ouvrir le module" %}{% if item.badge %} - {{ item.badge }}{% endif %}</span></span>
+            </a>
+            {% endif %}
+            {% empty %}
+            <div class="dashboard-empty">{% trans "Aucun module disponible pour ce profil." %}</div>
+            {% endfor %}
         </div>
     </section>
 
-    <section class="metric-grid" aria-label="{% trans 'Indicateurs principaux' %}">
-        <article class="metric-card">
-            <div class="metric-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v20"></path>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path>
-                </svg>
-            </div>
-            <div>
-                <span class="metric-label">{% trans "Chiffre d'affaires" %}</span>
-                <span class="metric-value">{{ total_ca }}</span>
-                <span class="metric-meta">{% trans "Facturation emise a date" %}</span>
-                <span class="metric-trend">{% trans "Suivi a jour" %}</span>
-            </div>
-        </article>
-
-        <article class="metric-card">
-            <div class="metric-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 6L9 17l-5-5"></path>
-                    <circle cx="12" cy="12" r="9"></circle>
-                </svg>
-            </div>
-            <div>
-                <span class="metric-label">{% trans "Encaissements" %}</span>
-                <span class="metric-value">{{ total_encaisse }}</span>
-                <span class="metric-meta">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
-                <span class="metric-trend">{% trans "Paiements suivis" %}</span>
-            </div>
-        </article>
-
-        <article class="metric-card">
-            <div class="metric-icon warning" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 9v4"></path>
-                    <path d="M12 17h.01"></path>
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-                </svg>
-            </div>
-            <div>
-                <span class="metric-label">{% trans "Reste a encaisser" %}</span>
-                <span class="metric-value">{{ reste_encaisser }}</span>
-                <span class="metric-meta">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
-                <span class="metric-trend warning">{% trans "Relances a prioriser" %}</span>
-            </div>
-        </article>
-
-        <article class="metric-card">
-            <div class="metric-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="10" cy="7" r="4"></circle>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-            </div>
-            <div>
-                <span class="metric-label">{% trans "Portefeuille client" %}</span>
-                <span class="metric-value">{{ nombre_clients }}</span>
-                <span class="metric-meta">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
-                <span class="metric-trend">{% trans "Base active" %}</span>
-            </div>
-        </article>
-    </section>
-
-    <section class="dashboard-grid">
-        <article class="section-card">
-            <div class="section-header">
+    <section class="dashboard-lower-grid">
+        <article class="dashboard-section-card">
+            <div class="dashboard-section-header">
                 <div>
-                    <h3 class="section-title">{% trans "Actions rapides" %}</h3>
-                    <span class="section-kicker">{% trans "Acces directs aux operations courantes" %}</span>
+                    <h3 class="dashboard-section-title">
+                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
+                        {% trans "Pilotage financier" %}
+                    </h3>
+                    <span class="dashboard-section-kicker">{% trans "Synthese rapide des montants suivis." %}</span>
                 </div>
             </div>
-            <div class="quick-actions-grid">
-                <a href="{% url 'add_facture' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <path d="M14 2v6h6"></path>
-                            <path d="M12 18v-6"></path>
-                            <path d="M9 15h6"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Nouvelle facture" %}</strong><span>{% trans "Creer une facture" %}</span></span>
-                </a>
-
-                <a href="{% url 'add_client' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M19 8v6"></path>
-                            <path d="M22 11h-6"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Ajouter un client" %}</strong><span>{% trans "Enregistrer un client" %}</span></span>
-                </a>
-
-                <a href="{% url 'depenses' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 1v22"></path>
-                            <path d="M17 5H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Nouvelle depense" %}</strong><span>{% trans "Ajouter une depense" %}</span></span>
-                </a>
-
-                <a href="{% url 'compte_resultat' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 3v18h18"></path>
-                            <path d="M7 14l4-4 3 3 5-6"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Rapport financier" %}</strong><span>{% trans "Voir les rapports" %}</span></span>
-                </a>
-
-                <a href="{% url 'user_list' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Gerer l'equipe" %}</strong><span>{% trans "Utilisateurs et roles" %}</span></span>
-                </a>
-
-                <a href="{% url 'company_settings' %}" class="quick-action-card">
-                    <span class="quick-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.38 1.05V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8.6 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1.05-.38H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .38-1.05V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15.4 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.23.38.36.8.36 1.24"></path>
-                        </svg>
-                    </span>
-                    <span><strong>{% trans "Parametres" %}</strong><span>{% trans "Configuration" %}</span></span>
-                </a>
-            </div>
-
-            <div class="finance-strip" aria-label="{% trans 'Vue financiere complementaire' %}">
-                <div><span>{% trans "Depenses" %}</span><strong>{{ total_depenses }}</strong></div>
-                <div><span>{% trans "Benefice" %}</span><strong>{{ benefice }}</strong></div>
-                <div><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong></div>
+            <div class="dashboard-finance-grid">
+                <div class="dashboard-finance-item"><span>{% trans "Depenses" %}</span><strong>{{ total_depenses }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Benefice" %}</span><strong>{{ benefice }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures du mois" %}</span><strong>{{ total_mois }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures du jour" %}</span><strong>{{ total_jour }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Depenses du jour" %}</span><strong>{{ depense_jour }}</strong></div>
             </div>
         </article>
 
-        <article class="section-card">
-            <div class="section-header">
+        <article class="dashboard-section-card">
+            <div class="dashboard-section-header">
                 <div>
-                    <h3 class="section-title">{% trans "Activite recente" %}</h3>
-                    <span class="section-kicker">{% trans "Dernieres operations relevees" %}</span>
+                    <h3 class="dashboard-section-title">
+                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                        {% trans "Activite recente" %}
+                    </h3>
+                    <span class="dashboard-section-kicker">{% trans "Dernieres operations relevees" %}</span>
                 </div>
-                <a href="{% url 'activity_log_list' %}" class="section-link">{% trans "Voir tout" %}</a>
+                <a href="{% url 'activity_log_list' %}" class="dashboard-section-link">{% trans "Voir tout" %}</a>
             </div>
-
             {% if recent_activity %}
-            <div class="timeline">
+            <div class="dashboard-timeline">
                 {% for log in recent_activity %}
-                <div class="timeline-item">
-                    <span class="timeline-icon color-{{ forloop.counter }}" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 8v4l3 3"></path>
-                            <circle cx="12" cy="12" r="9"></circle>
-                        </svg>
-                    </span>
-                    <div class="timeline-copy">
+                <div class="dashboard-timeline-item">
+                    <span class="dashboard-dot" aria-hidden="true"></span>
+                    <div class="dashboard-timeline-copy">
                         <strong>{{ log.module|title }} - {{ log.action }}</strong>
                         <span>{{ log.description }}</span>
                         {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
                     </div>
-                    <time class="timeline-meta">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+                    <time class="dashboard-timeline-meta">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="empty-hint">{% trans "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone." %}</div>
+            <div class="dashboard-empty">{% trans "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone." %}</div>
             {% endif %}
         </article>
+    </section>
 
-        <article class="section-card">
-            <div class="section-header">
-                <div>
-                    <h3 class="section-title">{% trans "Alertes & notifications" %}</h3>
-                    <span class="section-kicker">{% trans "Alertes stock" %}</span>
-                </div>
-                <a href="{% url 'product_list' %}" class="section-link">{% trans "Voir tout" %}</a>
+    <section class="dashboard-section-card">
+        <div class="dashboard-section-header">
+            <div>
+                <h3 class="dashboard-section-title">
+                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
+                    {% trans "Alertes & notifications" %}
+                </h3>
+                <span class="dashboard-section-kicker">{% trans "Alertes stock et abonnement" %}</span>
             </div>
-
-            <div class="alerts-list">
-                {% if rupture_products_count %}
-                <div class="alert-item danger">
-                    <span class="alert-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 9v4"></path>
-                            <path d="M12 17h.01"></path>
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-                        </svg>
-                    </span>
-                    <div class="alert-copy">
-                        <strong>{% trans "Produits en rupture" %}</strong>
-                        <span>{% trans "Quantite en stock inferieure ou egale a 0." %}</span>
-                        <div class="alert-products">
-                            {% for product in rupture_products %}
-                            <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }}</small>
-                            {% endfor %}
-                        </div>
+            <a href="{% url 'product_list' %}" class="dashboard-section-link">{% trans "Voir tout" %}</a>
+        </div>
+        <div class="dashboard-alert-list">
+            {% if rupture_products_count %}
+            <div class="dashboard-alert-item danger">
+                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
+                <div class="dashboard-alert-copy">
+                    <strong>{% trans "Produits en rupture" %}</strong>
+                    <span>{% trans "Quantite en stock inferieure ou egale a 0." %}</span>
+                    <div class="dashboard-alert-products">
+                        {% for product in rupture_products %}
+                        <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }}</small>
+                        {% endfor %}
                     </div>
-                    <span class="alert-count">{{ rupture_products_count }}</span>
                 </div>
-                {% endif %}
-
-                {% if low_stock_products_count %}
-                <div class="alert-item warning">
-                    <span class="alert-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-                            <path d="M12 9v4"></path>
-                            <path d="M12 17h.01"></path>
-                        </svg>
-                    </span>
-                    <div class="alert-copy">
-                        <strong>{% trans "Produits en stock faible" %}</strong>
-                        <span>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</span>
-                        <div class="alert-products">
-                            {% for product in low_stock_products %}
-                            <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <span class="alert-count">{{ low_stock_products_count }}</span>
-                </div>
-                {% endif %}
-
-                {% if subscription %}
-                <div class="alert-item info">
-                    <span class="alert-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 6L9 17l-5-5"></path>
-                            <circle cx="12" cy="12" r="9"></circle>
-                        </svg>
-                    </span>
-                    <div class="alert-copy">
-                        <strong>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</strong>
-                        <span>{% trans "Plan actuel" %} : {{ subscription.plan.nom }} | {% trans "Fin" %} : {{ subscription.date_fin|date:"d/m/Y" }}</span>
-                    </div>
-                    <span class="alert-count">OK</span>
-                </div>
-                {% endif %}
-
-                {% if not rupture_products_count and not low_stock_products_count and not subscription %}
-                <div class="empty-hint">{% trans "Aucune alerte pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
-                {% endif %}
+                <span class="dashboard-alert-count">{{ rupture_products_count }}</span>
             </div>
-        </article>
+            {% endif %}
+
+            {% if low_stock_products_count %}
+            <div class="dashboard-alert-item warning">
+                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <div class="dashboard-alert-copy">
+                    <strong>{% trans "Produits en stock faible" %}</strong>
+                    <span>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</span>
+                    <div class="dashboard-alert-products">
+                        {% for product in low_stock_products %}
+                        <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+                <span class="dashboard-alert-count">{{ low_stock_products_count }}</span>
+            </div>
+            {% endif %}
+
+            {% if subscription %}
+            <div class="dashboard-alert-item info">
+                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <div class="dashboard-alert-copy">
+                    <strong>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</strong>
+                    <span>{% trans "Plan actuel" %} : {{ subscription.plan.nom }} | {% trans "Fin" %} : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                </div>
+                <span class="dashboard-alert-count">OK</span>
+            </div>
+            {% endif %}
+
+            {% if not rupture_products_count and not low_stock_products_count and not subscription %}
+            <div class="dashboard-empty">{% trans "Aucune alerte pour le moment. Vos produits restent au-dessus des seuils de vigilance." %}</div>
+            {% endif %}
+        </div>
     </section>
 </div>
 {% endblock %}
