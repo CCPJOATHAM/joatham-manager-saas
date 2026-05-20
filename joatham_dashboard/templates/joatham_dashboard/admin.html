@@ -662,24 +662,26 @@
 <div class="dashboard-shell dashboard-owner-premium">
     <section class="dashboard-hero">
         <div class="dashboard-hero-main">
-            <span class="dashboard-pill">{% trans "Tableau de bord executif" %}</span>
-            <h2>
+            <span class="dashboard-pill">
                 {% if entreprise_identity.primary_name %}
                     {{ entreprise_identity.primary_name }}
                 {% else %}
                     {% trans "Mon entreprise" %}
                 {% endif %}
+            </span>
+            <h2>
+                {% trans "Tableau de bord exécutif" %}
             </h2>
-            <p>{% trans "Vue d'ensemble de l'activite de votre entreprise : finances, portefeuille clients, activites recentes et alertes importantes." %}</p>
+            <p>{% trans "Vue d’ensemble de l’activité de votre entreprise : finances, portefeuille clients, activités récentes et alertes importantes." %}</p>
         </div>
 
-        <aside class="dashboard-hero-side" aria-label="{% trans 'Resume entreprise' %}">
-            <h3 class="dashboard-side-title">{% trans "Resume de l'entreprise" %}</h3>
+        <aside class="dashboard-hero-side" aria-label="{% trans 'Résumé entreprise' %}">
+            <h3 class="dashboard-side-title">{% trans "Résumé de l’entreprise" %}</h3>
             <div class="dashboard-side-grid">
                 <div class="dashboard-side-item"><span>{% trans "Devise" %}</span><strong>{{ entreprise_identity.currency_code }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Clients" %}</span><strong>{{ nombre_clients }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Clients" %}</span><strong>{{ nombre_clients }} client{{ nombre_clients|pluralize:"s" }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }} facture{{ nombre_factures|pluralize:"s" }}</strong></div>
+                <div class="dashboard-side-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</strong></div>
             </div>
             {% if subscription %}
             <span class="dashboard-pill">{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
@@ -687,12 +689,12 @@
         </aside>
     </section>
 
-    <section class="dashboard-section-card" aria-label="{% trans 'Resume financier' %}">
+    <section class="dashboard-section-card" aria-label="{% trans 'Résumé financier' %}">
         <div class="dashboard-section-header">
             <div>
                 <h3 class="dashboard-section-title">
                     <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
-                    {% trans "Resume financier" %}
+                    {% trans "Résumé financier" %}
                 </h3>
                 <span class="dashboard-section-kicker">{% trans "Les indicateurs essentiels pour lire rapidement la situation." %}</span>
             </div>
@@ -702,7 +704,7 @@
                 <div class="dashboard-stat-copy">
                     <span class="dashboard-stat-label">{% trans "Chiffre d'affaires" %}</span>
                     <span class="dashboard-stat-value">{{ total_ca }}</span>
-                    <span class="dashboard-stat-note">{% trans "Facturation emise a date" %}</span>
+                    <span class="dashboard-stat-note">{% trans "Facturation émise à date" %}</span>
                 </div>
                 <span class="dashboard-stat-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg>
@@ -712,7 +714,7 @@
                 <div class="dashboard-stat-copy">
                     <span class="dashboard-stat-label">{% trans "Encaissements" %}</span>
                     <span class="dashboard-stat-value">{{ total_encaisse }}</span>
-                    <span class="dashboard-stat-note">{{ payees }} {% trans "facture(s) soldee(s)" %}</span>
+                    <span class="dashboard-stat-note">{{ payees }} facture{{ payees|pluralize:"s" }} soldée{{ payees|pluralize:"s" }}</span>
                 </div>
                 <span class="dashboard-stat-icon success" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg>
@@ -720,9 +722,9 @@
             </article>
             <article class="dashboard-stat-card">
                 <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Reste a encaisser" %}</span>
+                    <span class="dashboard-stat-label">{% trans "Reste à encaisser" %}</span>
                     <span class="dashboard-stat-value">{{ reste_encaisser }}</span>
-                    <span class="dashboard-stat-note warning">{{ impayees }} {% trans "facture(s) a suivre" %}</span>
+                    <span class="dashboard-stat-note warning">{{ impayees }} facture{{ impayees|pluralize:"s" }} à suivre</span>
                 </div>
                 <span class="dashboard-stat-icon warning" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
@@ -730,9 +732,9 @@
             </article>
             <article class="dashboard-stat-card">
                 <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Portefeuille client" %}</span>
+                    <span class="dashboard-stat-label">{% trans "Portefeuille clients" %}</span>
                     <span class="dashboard-stat-value">{{ nombre_clients }}</span>
-                    <span class="dashboard-stat-note">{{ nombre_apprenants }} {% trans "apprenant(s) actif(s)" %}</span>
+                    <span class="dashboard-stat-note">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</span>
                 </div>
                 <span class="dashboard-stat-icon accent" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
@@ -749,16 +751,16 @@
                         <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
                         {% trans "Pilotage financier" %}
                     </h3>
-                    <span class="dashboard-section-kicker">{% trans "Synthese rapide des montants suivis." %}</span>
+                    <span class="dashboard-section-kicker">{% trans "Synthèse rapide des montants suivis." %}</span>
                 </div>
             </div>
             <div class="dashboard-finance-grid">
-                <div class="dashboard-finance-item"><span>{% trans "Depenses" %}</span><strong>{{ total_depenses }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Benefice" %}</span><strong>{{ benefice }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Dépenses" %}</span><strong>{{ total_depenses }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Bénéfice" %}</span><strong>{{ benefice }}</strong></div>
                 <div class="dashboard-finance-item"><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong></div>
                 <div class="dashboard-finance-item"><span>{% trans "Factures du mois" %}</span><strong>{{ total_mois }}</strong></div>
                 <div class="dashboard-finance-item"><span>{% trans "Factures du jour" %}</span><strong>{{ total_jour }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Depenses du jour" %}</span><strong>{{ depense_jour }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Dépenses du jour" %}</span><strong>{{ depense_jour }}</strong></div>
             </div>
         </article>
 
@@ -769,16 +771,16 @@
                         <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg></span>
                         {% trans "Portefeuille clients" %}
                     </h3>
-                    <span class="dashboard-section-kicker">{% trans "Lecture rapide de la base clients et des creances." %}</span>
+                    <span class="dashboard-section-kicker">{% trans "Lecture rapide de la base clients et des créances." %}</span>
                 </div>
             </div>
             <div class="dashboard-finance-grid">
-                <div class="dashboard-finance-item"><span>{% trans "Clients actifs" %}</span><strong>{{ nombre_clients }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures a relancer" %}</span><strong>{{ impayees }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Creances clients" %}</span><strong>{{ reste_encaisser }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures soldees" %}</span><strong>{{ payees }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Clients actifs" %}</span><strong>{{ nombre_clients }} client{{ nombre_clients|pluralize:"s" }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }} facture{{ nombre_factures|pluralize:"s" }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures à relancer" %}</span><strong>{{ impayees }} facture{{ impayees|pluralize:"s" }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Créances clients" %}</span><strong>{{ reste_encaisser }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Factures soldées" %}</span><strong>{{ payees }} facture{{ payees|pluralize:"s" }}</strong></div>
+                <div class="dashboard-finance-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</strong></div>
             </div>
         </article>
 
@@ -787,9 +789,9 @@
                 <div>
                     <h3 class="dashboard-section-title">
                         <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
-                        {% trans "Activite recente" %}
+                        {% trans "Activité récente" %}
                     </h3>
-                    <span class="dashboard-section-kicker">{% trans "Dernieres operations relevees" %}</span>
+                    <span class="dashboard-section-kicker">{% trans "Dernières opérations relevées" %}</span>
                 </div>
                 <a href="{% url 'activity_log_list' %}" class="dashboard-section-link">{% trans "Voir tout" %}</a>
             </div>
@@ -808,7 +810,7 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div class="dashboard-empty">{% trans "Aucune activite recente n'est encore disponible. Les prochaines actions sur les modules metier alimenteront automatiquement cette zone." %}</div>
+            <div class="dashboard-empty">{% trans "Aucune activité récente n’est encore disponible. Les prochaines actions sur les modules métier alimenteront automatiquement cette zone." %}</div>
             {% endif %}
         </article>
     </section>
@@ -828,8 +830,8 @@
             <div class="dashboard-alert-item warning">
                 <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
                 <div class="dashboard-alert-copy">
-                    <strong>{% trans "Factures impayees" %}</strong>
-                    <span>{% trans "Des factures restent a encaisser et doivent etre suivies." %}</span>
+                    <strong>{% trans "Factures impayées" %}</strong>
+                    <span>{% trans "Des factures restent à encaisser et doivent être suivies." %}</span>
                 </div>
                 <span class="dashboard-alert-count">{{ impayees }}</span>
             </div>
@@ -840,7 +842,7 @@
                 <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
                 <div class="dashboard-alert-copy">
                     <strong>{% trans "Produits en rupture" %}</strong>
-                    <span>{% trans "Quantite en stock inferieure ou egale a 0." %}</span>
+                    <span>{% trans "Quantité en stock inférieure ou égale à 0." %}</span>
                     <div class="dashboard-alert-products">
                         {% for product in rupture_products %}
                         <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }}</small>
@@ -856,7 +858,7 @@
                 <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
                 <div class="dashboard-alert-copy">
                     <strong>{% trans "Produits en stock faible" %}</strong>
-                    <span>{% trans "Stock positif mais inferieur ou egal au seuil d'alerte." %}</span>
+                    <span>{% trans "Stock positif mais inférieur ou égal au seuil d’alerte." %}</span>
                     <div class="dashboard-alert-products">
                         {% for product in low_stock_products %}
                         <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</small>
