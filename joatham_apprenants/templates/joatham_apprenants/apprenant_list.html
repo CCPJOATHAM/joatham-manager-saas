@@ -50,7 +50,12 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5" class="empty">Aucun apprenant pour le moment.</td>
+                    <td colspan="5" class="empty">
+                        Aucun apprenant enregistre pour le moment.
+                        {% if can_add_apprenants_ui %}
+                        <a href="{% url 'apprenant_create' %}" style="margin-left:8px;">Ajouter un apprenant</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -89,7 +94,12 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7" class="empty">Aucune inscription enregistree.</td>
+                    <td colspan="7" class="empty">
+                        Aucune inscription enregistree pour le moment.
+                        {% if can_manage_apprenants_ui %}
+                        <a href="{% url 'inscription_create' %}" style="margin-left:8px;">Nouvelle inscription</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

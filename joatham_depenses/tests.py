@@ -82,6 +82,27 @@ class DepensesServiceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
 
+    def test_depenses_pdf_redirects_when_expenses_module_missing_from_plan(self):
+        entreprise = create_entreprise("Entreprise Depenses Sans Module")
+        owner = create_user("owner-dep-no-module", "proprietaire", entreprise)
+        limited_plan = Abonnement.objects.create(
+            nom="Plan sans depenses",
+            code="starter",
+            prix=19,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard"],
+        )
+        activate_subscription_for_entreprise(entreprise=entreprise, plan=limited_plan, utilisateur=owner)
+
+        self.client.force_login(owner)
+        response = self.client.get(reverse("depenses_pdf"))
+
+        self.assertRedirects(
+            response,
+            reverse("abonnement_expire") + "?module=expenses&reason=module_not_in_plan",
+        )
+
     def test_depenses_page_displays_total_and_empty_state(self):
         empty_entreprise = create_entreprise("Entreprise Depenses Vide")
         empty_user = create_user("gestion-dep-empty", "gestionnaire", empty_entreprise)
