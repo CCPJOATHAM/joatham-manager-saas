@@ -12,6 +12,40 @@
     <span class="rh-count">{{ employe_count }} {% trans "employe(s)" %}</span>
 </div>
 
+<div class="rh-tool-row">
+    {% if can_view_reports_ui %}
+    <a href="{% url 'rh_employe_export_csv' %}{% if query_string %}?{{ query_string }}{% endif %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
+    {% endif %}
+    <a href="{% url 'rh_employe_list_print' %}{% if query_string %}?{{ query_string }}{% endif %}" class="rh-action-link">{% trans "Imprimer la liste" %}</a>
+</div>
+
+<form method="get" class="rh-filter-form">
+    <div class="rh-field">
+        <label for="q">{% trans "Recherche" %}</label>
+        <input type="text" id="q" name="q" value="{{ filters.search }}" placeholder="{% trans 'Nom ou matricule' %}">
+    </div>
+    <div class="rh-field">
+        <label for="statut">{% trans "Statut" %}</label>
+        <select id="statut" name="statut">
+            <option value="">{% trans "Tous" %}</option>
+            {% for value,label in statut_choices %}
+            <option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="rh-field">
+        <label for="poste">{% trans "Poste" %}</label>
+        <select id="poste" name="poste">
+            <option value="">{% trans "Tous" %}</option>
+            {% for poste in postes %}
+            <option value="{{ poste.id }}" {% if filters.poste_id == poste.id|stringformat:'s' %}selected{% endif %}>{{ poste.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
+    <a href="{% url 'rh_employe_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+</form>
+
 {% if employes %}
 <div class="rh-table-shell">
     <div class="table-scroll">

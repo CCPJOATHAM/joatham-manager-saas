@@ -17,6 +17,35 @@
     </div>
 </div>
 
+<div class="rh-tool-row">
+    {% if can_manage_documents_ui %}
+    <a href="{% url 'rh_document_export_csv' %}{% if query_string %}?{{ query_string }}{% endif %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
+    {% endif %}
+</div>
+
+<form method="get" class="rh-filter-form">
+    <div class="rh-field">
+        <label for="type_document">{% trans "Type document" %}</label>
+        <select id="type_document" name="type_document">
+            <option value="">{% trans "Tous" %}</option>
+            {% for value,label in type_choices %}
+            <option value="{{ value }}" {% if filters.type_document == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="rh-field">
+        <label for="employe">{% trans "Employe" %}</label>
+        <select id="employe" name="employe">
+            <option value="">{% trans "Tous" %}</option>
+            {% for employe in employes_filter %}
+            <option value="{{ employe.id }}" {% if filters.employe_id == employe.id|stringformat:'s' %}selected{% endif %}>{{ employe.matricule }} - {{ employe.nom }} {{ employe.prenom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
+    <a href="{% url 'rh_document_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+</form>
+
 {% if documents %}
 <div class="rh-table-shell">
     <div class="table-scroll">

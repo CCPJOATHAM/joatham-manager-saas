@@ -17,6 +17,43 @@
     </div>
 </div>
 
+<div class="rh-tool-row">
+    {% if can_view_reports_ui %}
+    <a href="{% url 'rh_conge_export_csv' %}{% if query_string %}?{{ query_string }}{% endif %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
+    {% endif %}
+</div>
+
+<form method="get" class="rh-filter-form">
+    <div class="rh-field">
+        <label for="statut">{% trans "Statut" %}</label>
+        <select id="statut" name="statut">
+            <option value="">{% trans "Tous" %}</option>
+            {% for value,label in statut_choices %}
+            <option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="rh-field">
+        <label for="type_conge">{% trans "Type" %}</label>
+        <select id="type_conge" name="type_conge">
+            <option value="">{% trans "Tous" %}</option>
+            {% for value,label in type_choices %}
+            <option value="{{ value }}" {% if filters.type_conge == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="rh-field">
+        <label for="date_debut">{% trans "Depuis" %}</label>
+        <input type="date" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+    </div>
+    <div class="rh-field">
+        <label for="date_fin">{% trans "Jusqu'au" %}</label>
+        <input type="date" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+    </div>
+    <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
+    <a href="{% url 'rh_conge_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+</form>
+
 {% if conges %}
 <div class="rh-table-shell">
     <div class="table-scroll">

@@ -1,0 +1,32 @@
+{% extends "joatham_rh/print_base.html" %}
+{% load i18n %}
+
+{% block print_title %}{% trans "Liste employes" %}{% endblock %}
+
+{% block print_content %}
+<h1>{% trans "Liste employes" %}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Matricule" %}</th>
+            <th>{% trans "Nom" %}</th>
+            <th>{% trans "Poste" %}</th>
+            <th>{% trans "Contrat" %}</th>
+            <th>{% trans "Statut" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employe in employes %}
+        <tr>
+            <td>{{ employe.matricule }}</td>
+            <td>{{ employe.nom }} {{ employe.prenom }}</td>
+            <td>{{ employe.poste.nom|default:"-" }}</td>
+            <td>{{ employe.get_type_contrat_display }}</td>
+            <td>{{ employe.get_statut_display }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="muted">{% trans "Aucun employe a imprimer." %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

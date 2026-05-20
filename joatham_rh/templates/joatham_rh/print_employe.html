@@ -1,0 +1,66 @@
+{% extends "joatham_rh/print_base.html" %}
+{% load i18n %}
+
+{% block print_title %}{% trans "Fiche employe" %} - {{ employe.matricule }}{% endblock %}
+
+{% block print_content %}
+<h1>{% trans "Fiche employe" %}</h1>
+<p class="muted">{{ employe.matricule }} - {{ employe.nom }} {{ employe.prenom }}</p>
+
+<section class="grid">
+    <div class="box"><span class="label">{% trans "Statut" %}</span>{{ status_label }}</div>
+    <div class="box"><span class="label">{% trans "Poste" %}</span>{{ employe.poste.nom|default:"-" }}</div>
+    <div class="box"><span class="label">{% trans "Contrat" %}</span>{{ employe.get_type_contrat_display }}</div>
+    <div class="box"><span class="label">{% trans "Date embauche" %}</span>{{ employe.date_embauche }}</div>
+    <div class="box"><span class="label">{% trans "Telephone" %}</span>{{ employe.telephone|default:"-" }}</div>
+    <div class="box"><span class="label">{% trans "Email" %}</span>{{ employe.email|default:"-" }}</div>
+</section>
+
+<h2>{% trans "Presences recentes" %}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Statut" %}</th>
+            <th>{% trans "Arrivee" %}</th>
+            <th>{% trans "Depart" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for presence in presences %}
+        <tr>
+            <td>{{ presence.date }}</td>
+            <td>{{ presence.get_statut_display }}</td>
+            <td>{{ presence.heure_arrivee|default:"-" }}</td>
+            <td>{{ presence.heure_depart|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="muted">{% trans "Aucune presence recente." %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>{% trans "Conges recents" %}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Debut" %}</th>
+            <th>{% trans "Fin" %}</th>
+            <th>{% trans "Statut" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for conge in conges %}
+        <tr>
+            <td>{{ conge.get_type_conge_display }}</td>
+            <td>{{ conge.date_debut }}</td>
+            <td>{{ conge.date_fin }}</td>
+            <td>{{ conge.get_statut_display }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="muted">{% trans "Aucun conge recent." %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

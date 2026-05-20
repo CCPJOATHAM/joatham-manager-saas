@@ -506,3 +506,227 @@ class RhFoundationTests(TestCase):
         self.assertContains(response, "Conges")
         self.assertContains(response, "Documents")
         self.assertContains(response, "Rapports")
+
+    def test_employe_export_csv_allowed_with_rh_module(self):
+        employe = self._create_employe(matricule="RH-X001", nom="Export")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("joatham-rh-employes.csv", response["Content-Disposition"])
+        self.assertIn(employe.matricule, content)
+        self.assertIn("Export", content)
+
+    def test_employe_export_csv_denied_without_rh_module(self):
+        entreprise = create_entreprise("Entreprise Starter Export RH")
+        owner = create_user("owner-rh-export-starter", "proprietaire", entreprise)
+        starter_plan = Abonnement.objects.create(
+            nom="Starter Export RH",
+            code="starter",
+            prix=19,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard"],
+        )
+        activate_subscription_for_entreprise(entreprise=entreprise, plan=starter_plan, utilisateur=owner)
+
+        self.client.force_login(owner)
+        response = self.client.get(reverse("rh_employe_export_csv"))
+
+        self.assertRedirects(
+            response,
+            reverse("abonnement_expire") + "?module=rh&reason=premium_required",
+        )
+
+    def test_employe_export_csv_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-X002", nom="AlphaExport")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-X003", nom="BetaExport")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertIn(employe_a.matricule, content)
+        self.assertNotIn(employe_b.matricule, content)
+        self.assertNotIn("BetaExport", content)
+
+    def test_presence_export_csv_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-X004")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-X005")
+        record_presence(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            date=date(2026, 5, 8),
+            statut=Presence.Statut.PRESENT,
+            utilisateur=self.owner_a,
+        )
+        record_presence(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            date=date(2026, 5, 8),
+            statut=Presence.Statut.ABSENT,
+            utilisateur=self.owner_b,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_presence_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertIn(employe_a.matricule, content)
+        self.assertNotIn(employe_b.matricule, content)
+
+    def test_conge_export_csv_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-X006")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-X007")
+        create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 10),
+            date_fin=date(2026, 5, 12),
+            utilisateur=self.owner_a,
+        )
+        create_conge(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            type_conge=DemandeConge.TypeConge.MALADIE,
+            date_debut=date(2026, 5, 10),
+            date_fin=date(2026, 5, 12),
+            utilisateur=self.owner_b,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_conge_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertIn(employe_a.matricule, content)
+        self.assertNotIn(employe_b.matricule, content)
+
+    def test_document_export_csv_is_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-X008")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-X009")
+        create_document_rh(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Document Alpha",
+            utilisateur=self.owner_a,
+        )
+        create_document_rh(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Document Beta",
+            utilisateur=self.owner_b,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_document_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertIn("Document Alpha", content)
+        self.assertNotIn("Document Beta", content)
+
+    def test_rh_report_export_csv_contains_correct_data(self):
+        employe = self._create_employe(matricule="RH-X010")
+        record_presence(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date=date(2026, 5, 8),
+            statut=Presence.Statut.PRESENT,
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_reports_export_csv"))
+        content = response.content.decode("utf-8-sig")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Total employes,1", content)
+        self.assertIn("Presences du mois,1", content)
+
+    def test_employe_list_filters_by_status_and_poste(self):
+        poste_a = self._create_poste(nom="Poste filtre actif")
+        poste_b = self._create_poste(nom="Poste filtre suspendu")
+        employe_a = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F001",
+            nom="FiltreActif",
+            prenom="Junior",
+            poste=poste_a,
+            date_embauche=date(2026, 1, 10),
+            statut=Employe.Statut.ACTIF,
+            utilisateur=self.owner_a,
+        )
+        employe_b = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F002",
+            nom="FiltreSuspendu",
+            prenom="Junior",
+            poste=poste_b,
+            date_embauche=date(2026, 1, 10),
+            statut=Employe.Statut.SUSPENDU,
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(
+            reverse("rh_employe_list"),
+            {"statut": Employe.Statut.ACTIF, "poste": str(poste_a.id), "q": "Filtre"},
+        )
+
+        self.assertContains(response, employe_a.matricule)
+        self.assertNotContains(response, employe_b.matricule)
+
+    def test_conge_list_filters_by_status_and_type(self):
+        employe = self._create_employe(matricule="RH-F003")
+        other_employe = self._create_employe(matricule="RH-F004")
+        approved = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 10),
+            date_fin=date(2026, 5, 12),
+            utilisateur=self.owner_a,
+        )
+        approve_conge(entreprise=self.entreprise_a, conge=approved, decide_par=self.manager_a)
+        pending = create_conge(
+            entreprise=self.entreprise_a,
+            employe=other_employe,
+            type_conge=DemandeConge.TypeConge.MALADIE,
+            date_debut=date(2026, 6, 10),
+            date_fin=date(2026, 6, 12),
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(
+            reverse("rh_conge_list"),
+            {"statut": DemandeConge.Statut.APPROUVE, "type_conge": DemandeConge.TypeConge.ANNUEL},
+        )
+
+        self.assertContains(response, "Annuel")
+        self.assertContains(response, approved.employe.matricule)
+        self.assertNotContains(response, pending.employe.matricule)
+
+    def test_employe_print_view_is_available(self):
+        employe = self._create_employe(matricule="RH-P001")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_print", args=[employe.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Fiche employe")
+        self.assertContains(response, employe.matricule)
+
+    def test_rh_pages_show_export_and_print_links_when_authorized(self):
+        self.client.force_login(self.owner_a)
+        employee_response = self.client.get(reverse("rh_employe_list"))
+        report_response = self.client.get(reverse("rh_reports"))
+
+        self.assertContains(employee_response, reverse("rh_employe_export_csv"))
+        self.assertContains(employee_response, reverse("rh_employe_list_print"))
+        self.assertContains(report_response, reverse("rh_reports_export_csv"))
+        self.assertContains(report_response, reverse("rh_reports_print"))
