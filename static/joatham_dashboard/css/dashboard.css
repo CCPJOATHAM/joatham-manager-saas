@@ -58,7 +58,9 @@ a {
 .app-shell {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
+    max-width: 100%;
     min-height: 100vh;
+    overflow-x: hidden;
     background: var(--jm-bg);
 }
 
@@ -259,6 +261,8 @@ a {
 
 .main {
     min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
     background: var(--jm-bg);
 }
 
@@ -267,13 +271,22 @@ a {
     top: 0;
     z-index: 30;
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(280px, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
     gap: 24px;
     align-items: start;
     padding: 22px 32px 16px;
     background: rgba(245, 247, 251, 0.96);
     border-bottom: 1px solid var(--jm-line);
     backdrop-filter: blur(14px);
+}
+
+.topbar-heading,
+.identity-bar,
+.topbar-meta,
+.top-actions,
+.language-switcher {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .topbar h1 {
@@ -324,6 +337,15 @@ a {
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 9px;
+}
+
+.topbar-meta .badge,
+.top-actions .btn-link {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
 }
 
 .logout-form {
@@ -413,11 +435,15 @@ a {
 }
 
 .page-content {
+    min-width: 0;
+    max-width: 100%;
     padding: 28px 32px 34px;
 }
 
 .content-card {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 24px;
     overflow-x: auto;
     border: 1px solid var(--jm-line);
@@ -1365,6 +1391,8 @@ a {
 .super-admin-filters {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) minmax(190px, 0.38fr) auto;
+    min-width: 0;
+    max-width: 100%;
     gap: 14px;
     align-items: end;
     margin-bottom: 22px;
@@ -1402,18 +1430,43 @@ a {
     gap: 9px;
 }
 
+.super-admin-dashboard,
+.super-admin-dashboard .owner-panel,
+.super-admin-dashboard .kpi-card,
+.super-admin-dashboard .quick-action,
+.super-admin-dashboard .manager-info-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.super-admin-dashboard .kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.super-admin-dashboard .quick-actions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
 .super-admin-table-shell {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     border: 1px solid var(--jm-line);
     border-radius: var(--jm-radius);
     background: var(--jm-surface);
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
 }
 
 .super-admin-table {
-    width: max-content !important;
-    min-width: 1180px;
+    width: 100% !important;
+    min-width: 920px;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .super-admin-table th,
@@ -1422,6 +1475,7 @@ a {
     border-bottom: 1px solid var(--jm-line);
     text-align: left;
     vertical-align: top;
+    overflow-wrap: anywhere;
 }
 
 .super-admin-table th {
@@ -1430,6 +1484,47 @@ a {
     font-size: 0.78rem;
     font-weight: 900;
     text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.super-admin-table th:nth-child(1),
+.super-admin-table td:nth-child(1) {
+    width: 22%;
+}
+
+.super-admin-table th:nth-child(2),
+.super-admin-table td:nth-child(2) {
+    width: 21%;
+}
+
+.super-admin-table th:nth-child(3),
+.super-admin-table td:nth-child(3),
+.super-admin-table th:nth-child(5),
+.super-admin-table td:nth-child(5) {
+    width: 9%;
+}
+
+.super-admin-table th:nth-child(4),
+.super-admin-table td:nth-child(4),
+.super-admin-table th:nth-child(6),
+.super-admin-table td:nth-child(6) {
+    width: 14%;
+}
+
+.super-admin-table th:last-child,
+.super-admin-table td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    width: 210px;
+    min-width: 210px;
+    background: var(--jm-surface);
+    box-shadow: -12px 0 24px rgba(15, 23, 42, 0.08);
+}
+
+.super-admin-table th:last-child {
+    z-index: 2;
+    background: var(--jm-surface-soft);
 }
 
 .super-admin-table tr:last-child td {
@@ -1506,7 +1601,8 @@ a {
 .super-admin-payment-actions {
     display: grid;
     gap: 10px;
-    min-width: 290px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .super-admin-row-actions form,
@@ -1515,10 +1611,16 @@ a {
     gap: 8px;
 }
 
-.action-row {
+.super-admin-dashboard .action-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
     gap: 8px;
+}
+
+.super-admin-dashboard .btn-small {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
 }
 
 .btn-small {
@@ -1689,6 +1791,29 @@ a {
     }
 }
 
+@media (max-width: 1200px) {
+    .topbar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .identity-bar,
+    .topbar-meta,
+    .top-actions,
+    .language-switcher {
+        justify-items: start;
+        justify-content: flex-start;
+    }
+
+    .super-admin-dashboard .kpi-grid,
+    .super-admin-dashboard .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .super-admin-table {
+        min-width: 860px;
+    }
+}
+
 @media (max-width: 1120px) {
     .app-shell {
         grid-template-columns: 1fr;
@@ -1733,7 +1858,24 @@ a {
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 992px) {
+    .super-admin-dashboard .kpi-grid,
+    .super-admin-dashboard .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .super-admin-row-actions,
+    .super-admin-payment-actions {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .super-admin-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
     .sidebar,
     .topbar,
     .page-content {
@@ -1786,6 +1928,16 @@ a {
         grid-template-columns: 1fr;
     }
 
+    .super-admin-table {
+        min-width: 720px;
+    }
+
+    .super-admin-row-actions,
+    .super-admin-payment-actions {
+        min-width: 0;
+        max-width: 100%;
+    }
+
     .section-heading,
     .kpi-header,
     .alert-card {
@@ -1803,5 +1955,29 @@ a {
     .timeline-time {
         grid-column: 2;
         white-space: normal;
+    }
+}
+
+@media (max-width: 560px) {
+    .sidebar,
+    .topbar,
+    .page-content {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .super-admin-dashboard .kpi-grid,
+    .super-admin-dashboard .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .super-admin-table {
+        min-width: 680px;
+    }
+
+    .super-admin-row-actions,
+    .super-admin-payment-actions {
+        min-width: 0;
+        max-width: 100%;
     }
 }
