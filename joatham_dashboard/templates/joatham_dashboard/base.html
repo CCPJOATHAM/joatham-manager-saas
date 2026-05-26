@@ -78,10 +78,10 @@
                         </span>
                         <span class="nav-badge-group">
                             {% if item.badge_count %}
-                            <span class="nav-badge">{{ item.badge_count }}</span>
+                            <span class="nav-badge nav-badge-count">{{ item.badge_count }}</span>
                             {% endif %}
                             {% if item.badge %}
-                            <span class="nav-badge">{% trans item.badge %}</span>
+                            <span class="nav-badge nav-badge-feature {% if item.badge == 'Premium' %}is-premium{% elif item.badge == 'Abonnement requis' %}is-subscription{% endif %}">{% trans item.badge %}</span>
                             {% endif %}
                         </span>
                     {% if item.is_disabled %}
