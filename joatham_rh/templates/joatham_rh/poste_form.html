@@ -2,12 +2,13 @@
 {% load i18n %}
 
 {% block rh_title %}{{ page_title }}{% endblock %}
-{% block rh_subtitle %}{% trans "Ajoutez une fonction simple reutilisable dans les dossiers employes." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Ajoutez un poste RH generique et reutilisable dans les dossiers employes." %}{% endblock %}
 
 {% block content %}
 <form method="post" class="rh-card">
     {% csrf_token %}
     {{ form.non_field_errors }}
+    <p class="rh-muted">{% trans "Le poste RH décrit la fonction réelle de l'employe dans l'entreprise." %}</p>
     <div class="rh-form-grid">
         {% for field in form %}
         <div class="rh-field {% if field.name == 'description' %}full{% endif %}">

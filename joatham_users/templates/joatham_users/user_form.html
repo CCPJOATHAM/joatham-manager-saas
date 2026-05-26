@@ -3,7 +3,7 @@
 
 {% block page_title %}{{ page_title }} | JOATHAM Manager{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}{% trans "Creation et mise a jour des comptes gestionnaire et comptable de l'entreprise, avec un formulaire plus lisible et rassurant pour le proprietaire." %}{% endblock %}
+{% block content_subtitle %}{% trans "Creation et mise a jour des comptes gestionnaire et comptable de l'entreprise, avec un rôle d'accès explicite pour JOATHAM Manager." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour a la liste" %}</a>
@@ -212,10 +212,10 @@
 <div class="hero">
     <div>
         <h2>{{ page_title }}</h2>
-        <p>{% if form_mode == "create" %}{% trans "Ajoutez un nouveau compte a votre entreprise en definissant simplement son role, ses coordonnees et son acces initial." %}{% else %}{% trans "Mettez a jour les informations du compte selectionne sans toucher aux regles de securite et d'isolation deja en place." %}{% endif %}</p>
+        <p>{% if form_mode == "create" %}{% trans "Ajoutez un nouveau compte a votre entreprise en definissant simplement son rôle d'accès, ses coordonnees et son acces initial." %}{% else %}{% trans "Mettez a jour les informations du compte selectionne sans toucher aux regles de securite et d'isolation deja en place." %}{% endif %}</p>
     </div>
     <div class="hero-badges">
-        <span class="hero-badge">{% trans "Roles geres : Gestionnaire / Comptable" %}</span>
+        <span class="hero-badge">{% trans "Rôles d'accès gérés : Gestionnaire / Comptable" %}</span>
         {% if target_user %}
         <span class="hero-badge">{% trans "Utilisateur concerne" %} : {{ target_user.username }}</span>
         {% endif %}
@@ -232,8 +232,8 @@
                 <span>{% trans "Utilisez le nom complet de la personne pour retrouver rapidement le bon compte dans la liste." %}</span>
             </div>
             <div class="guidance-item">
-                <strong>{% trans "Role" %}</strong>
-                <span>{% trans "Choisissez un role explicite selon l'usage prevu. Les permissions existantes restent appliquees automatiquement." %}</span>
+                <strong>{% trans "Rôle d'accès" %}</strong>
+                <span>{% trans "Le rôle d'accès définit les modules et actions autorisés dans JOATHAM Manager." %}</span>
             </div>
             <div class="guidance-item">
                 <strong>{% trans "Mot de passe" %}</strong>
@@ -269,9 +269,10 @@
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.role.id_for_label }}">{% trans "Role" %}</label>
+                    <label for="{{ form.role.id_for_label }}">{% trans "Rôle d'accès" %}</label>
                     {{ form.role }}
                     {{ form.role.errors }}
+                    <small>{% trans "Le rôle d'accès définit les modules et actions autorisés dans JOATHAM Manager." %}</small>
                 </div>
 
                 <div class="field">

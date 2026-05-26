@@ -9,9 +9,9 @@ class PosteForm(forms.ModelForm):
         model = Poste
         fields = ["nom", "description", "actif"]
         labels = {
-            "nom": _("Nom du poste"),
+            "nom": _("Nom du poste RH"),
             "description": _("Description"),
-            "actif": _("Poste actif"),
+            "actif": _("Poste RH actif"),
         }
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),
@@ -19,8 +19,8 @@ class PosteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["nom"].widget.attrs.update({"placeholder": _("Exemple : Responsable boutique")})
-        self.fields["description"].widget.attrs.update({"placeholder": _("Responsabilites principales")})
+        self.fields["nom"].widget.attrs.update({"placeholder": _("Exemple : Responsable stock")})
+        self.fields["description"].widget.attrs.update({"placeholder": _("Fonction reelle et responsabilites principales")})
 
 
 class EmployeForm(forms.ModelForm):
@@ -49,7 +49,7 @@ class EmployeForm(forms.ModelForm):
             "telephone": _("Telephone"),
             "email": _("Email"),
             "adresse": _("Adresse"),
-            "poste": _("Poste"),
+            "poste": _("Poste RH"),
             "type_contrat": _("Type de contrat"),
             "date_embauche": _("Date d'embauche"),
             "salaire_base": _("Salaire de base"),

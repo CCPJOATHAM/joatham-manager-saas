@@ -3,7 +3,7 @@
 
 {% block page_title %}{% trans "Utilisateurs" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Utilisateurs" %}{% endblock %}
-{% block content_subtitle %}{% trans "Pilotez les acces de votre entreprise avec des roles clairs, des invitations controlees et une isolation stricte par entreprise." %}{% endblock %}
+{% block content_subtitle %}{% trans "Pilotez les acces de votre entreprise avec des rôles d'accès clairs, des invitations controlees et une isolation stricte par entreprise." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
@@ -336,7 +336,7 @@
     <div class="stat-card">
         <span class="stat-label">{% trans "Invitations en attente" %}</span>
         <span class="stat-value">{{ pending_invitations }}</span>
-        <span class="stat-meta">{% trans "Acces non encore active" %}</span>
+        <span class="stat-meta">{% trans "Accès non encore activé" %}</span>
     </div>
     <div class="stat-card">
         <span class="stat-label">{% trans "Gestionnaires" %}</span>
@@ -364,7 +364,7 @@
 <form class="filter-panel" method="get" action="{% url 'user_list' %}">
     <div class="filters-grid">
         <div class="filter-field">
-            <label for="role-filter">{% trans "Role" %}</label>
+            <label for="role-filter">{% trans "Rôle d'accès" %}</label>
             <select id="role-filter" name="role">
                 {% for value, label in role_filter_choices %}
                 <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
@@ -405,7 +405,7 @@
             <thead>
                 <tr>
                     <th>{% trans "Nom" %}</th>
-                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Email" %}</th>
                     <th>{% trans "Cree le" %}</th>
@@ -448,19 +448,19 @@
                     <td class="muted">{{ managed_user.last_login_display|date:"d/m/Y H:i"|default:"-" }}</td>
                     <td>
                         <div class="inline-actions">
-                            <a href="{% url 'user_detail' managed_user.instance.id %}" class="action-btn">{% trans "Detail" %}</a>
+                            <a href="{% url 'user_detail' managed_user.instance.id %}" class="action-btn">{% trans "Détail" %}</a>
                             {% if not managed_user.is_owner %}
-                            <a href="{% url 'user_update' managed_user.instance.id %}" class="action-btn primary">{% trans "Modifier role" %}</a>
+                            <a href="{% url 'user_update' managed_user.instance.id %}" class="action-btn primary">{% trans "Modifier rôle d'accès" %}</a>
                             <form method="post" action="{% url 'user_toggle_active' managed_user.instance.id %}" class="action-form">
                                 {% csrf_token %}
                                 <button type="submit" class="{% if managed_user.instance.is_active %}warning{% else %}success{% endif %}">
-                                    {% if managed_user.instance.is_active %}{% trans "Desactiver" %}{% else %}{% trans "Reactiver" %}{% endif %}
+                                    {% if managed_user.instance.is_active %}{% trans "Désactiver" %}{% else %}{% trans "Réactiver" %}{% endif %}
                                 </button>
                             </form>
                             {% trans "Retirer l'acces de cet utilisateur ?" as remove_confirm_label %}
                             <form method="post" action="{% url 'user_remove_access' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('{{ remove_confirm_label|escapejs }}');">
                                 {% csrf_token %}
-                                <button type="submit" class="danger">{% trans "Retirer acces" %}</button>
+                                <button type="submit" class="danger">{% trans "Retirer l'accès" %}</button>
                             </form>
                             {% trans "Confirmer la suppression de cet utilisateur ?" as delete_confirm_label %}
                             <form method="post" action="{% url 'user_delete' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('{{ delete_confirm_label|escapejs }}');">
@@ -499,7 +499,7 @@
             <thead>
                 <tr>
                     <th>{% trans "Invite" %}</th>
-                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Creee le" %}</th>
                     <th>{% trans "Expiration" %}</th>

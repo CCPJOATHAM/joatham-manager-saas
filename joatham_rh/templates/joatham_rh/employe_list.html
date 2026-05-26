@@ -1,13 +1,13 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Suivez les dossiers employes de votre entreprise, avec matricule, poste et statut." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Suivez les dossiers employes de votre entreprise, avec matricule, poste RH et statut." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
         <h2>{% trans "Employes" %}</h2>
-        <p>{% trans "Base RH simple pour identifier les collaborateurs, leur poste et leur situation." %}</p>
+        <p>{% trans "Base RH simple pour identifier les collaborateurs, leur poste RH et leur situation." %}</p>
     </div>
     <span class="rh-count">{{ employe_count }} {% trans "employe(s)" %}</span>
 </div>
@@ -34,7 +34,7 @@
         </select>
     </div>
     <div class="rh-field">
-        <label for="poste">{% trans "Poste" %}</label>
+        <label for="poste">{% trans "Poste RH" %}</label>
         <select id="poste" name="poste">
             <option value="">{% trans "Tous" %}</option>
             {% for poste in postes %}
@@ -54,7 +54,7 @@
                 <tr>
                     <th>{% trans "Matricule" %}</th>
                     <th>{% trans "Nom" %}</th>
-                    <th>{% trans "Poste" %}</th>
+                    <th>{% trans "Poste RH" %}</th>
                     <th>{% trans "Contrat" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Actions" %}</th>

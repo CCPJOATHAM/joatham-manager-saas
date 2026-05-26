@@ -3,7 +3,7 @@
 
 {% block page_title %}{% trans "Inviter un utilisateur" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Inviter un utilisateur" %}{% endblock %}
-{% block content_subtitle %}{% trans "Envoyez une invitation rattachee a votre entreprise avec un role gestionnaire ou comptable." %}{% endblock %}
+{% block content_subtitle %}{% trans "Envoyez une invitation rattachee a votre entreprise avec un rôle d'accès gestionnaire ou comptable." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour aux utilisateurs" %}</a>
@@ -141,7 +141,8 @@
         <h3>{% trans "Regles appliquees" %}</h3>
         <p>{% trans "L'invitation est limitee a votre entreprise et respecte automatiquement le quota utilisateur de votre abonnement." %}</p>
         <ul>
-            <li>{% trans "Roles autorises : gestionnaire et comptable." %}</li>
+            <li>{% trans "Rôles d'accès autorisés : gestionnaire et comptable." %}</li>
+            <li>{% trans "Le rôle d'accès définit les modules et actions autorisés dans JOATHAM Manager." %}</li>
             <li>{% trans "Aucun autre proprietaire ne peut etre invite depuis cet ecran." %}</li>
             <li>{% trans "Les doublons et invitations actives identiques sont bloques." %}</li>
         </ul>
@@ -165,7 +166,7 @@
                     {{ form.email.errors }}
                 </div>
                 <div class="field">
-                    <label for="{{ form.role.id_for_label }}">{% trans "Role" %}</label>
+                    <label for="{{ form.role.id_for_label }}">{% trans "Rôle d'accès" %}</label>
                     {{ form.role }}
                     {{ form.role.errors }}
                 </div>

@@ -2,13 +2,13 @@
 {% load i18n %}
 
 {% block rh_title %}{{ page_title }}{% endblock %}
-{% block rh_subtitle %}{% trans "Renseignez uniquement les informations utiles au dossier RH de base." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Renseignez uniquement les informations utiles au dossier RH de base, dont le poste RH si disponible." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
         <h2>{{ page_title }}</h2>
-        <p>{% trans "Le matricule reste unique par entreprise." %}</p>
+        <p>{% trans "Le matricule reste unique par entreprise. Le poste RH décrit la fonction réelle de l'employe." %}</p>
     </div>
 </div>
 

@@ -2,13 +2,13 @@
 {% load i18n %}
 
 {% block page_title %}{{ full_name }} | JOATHAM Manager{% endblock %}
-{% block content_title %}{% trans "Detail utilisateur" %}{% endblock %}
+{% block content_title %}{% trans "Détail utilisateur" %}{% endblock %}
 {% block content_subtitle %}{% trans "Consultez les informations du compte sans quitter le contexte de votre entreprise." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour aux utilisateurs" %}</a>
 {% if target_user.normalized_role != "proprietaire" %}
-<a href="{% url 'user_update' target_user.id %}" class="btn-link primary">{% trans "Modifier role" %}</a>
+<a href="{% url 'user_update' target_user.id %}" class="btn-link primary">{% trans "Modifier rôle d'accès" %}</a>
 {% endif %}
 {% endblock %}
 
@@ -58,7 +58,7 @@
         <span class="detail-value">{% if target_user.email %}{{ target_user.email }}{% else %}{{ target_user.username }}{% endif %}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Role" %}</span>
+        <span class="detail-label">{% trans "Rôle d'accès" %}</span>
         <span class="detail-value">{{ target_user.get_role_display }}</span>
     </div>
     <div class="detail-card">

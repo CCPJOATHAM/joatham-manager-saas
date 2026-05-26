@@ -1,3 +1,4 @@
+import html
 import tempfile
 from io import StringIO
 from datetime import timedelta
@@ -595,6 +596,8 @@ class UserManagementTests(TestCase):
         self.assertContains(response, "Compte proprietaire principal")
         self.assertContains(response, "Gestionnaire")
         self.assertContains(response, "Comptable")
+        content = html.unescape(response.content.decode(response.charset or "utf-8", errors="replace"))
+        self.assertIn("Rôle d'accès", content)
         self.assertContains(response, "Actif")
         self.assertContains(response, "Invitations en attente")
         self.assertContains(response, "Quota utilise")
@@ -828,7 +831,9 @@ class UserManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Repere rapide")
         self.assertContains(response, "Nom complet")
-        self.assertContains(response, "Roles geres : Gestionnaire / Comptable")
+        content = html.unescape(response.content.decode(response.charset or "utf-8", errors="replace"))
+        self.assertIn("Rôles d'accès gérés : Gestionnaire / Comptable", content)
+        self.assertIn("Le rôle d'accès définit les modules et actions autorisés dans JOATHAM Manager.", content)
 
     def test_owner_can_update_company_user(self):
         managed_user = User.objects.create_user(

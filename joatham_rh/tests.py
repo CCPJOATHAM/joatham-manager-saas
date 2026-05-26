@@ -307,6 +307,7 @@ class RhFoundationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Employes")
+        self.assertContains(response, "Poste RH")
 
     def test_navigation_shows_rh_only_with_access(self):
         self.client.force_login(self.owner_a)
@@ -566,6 +567,7 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_employe_list"))
 
         self.assertContains(response, "Tableau de bord")
+        self.assertContains(response, "Postes RH")
         self.assertContains(response, "Conges")
         self.assertContains(response, "Documents")
         self.assertContains(response, "Rapports")

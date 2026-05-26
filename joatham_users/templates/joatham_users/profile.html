@@ -403,7 +403,7 @@
                     <strong>{{ profile_user.telephone|default:"-" }}</strong>
                 </div>
                 <div class="profile-detail">
-                    <span>{% trans "Role" %}</span>
+                    <span>{% trans "Rôle d'accès" %}</span>
                     <strong>{{ profile_user.get_role_display }}</strong>
                 </div>
                 <div class="profile-detail">
@@ -470,7 +470,7 @@
             </div>
 
             <div class="profile-lock-note">
-                {% trans "Email, role et entreprise sont affiches pour controle, mais restent non modifiables par l'utilisateur dans cette version." %}
+                {% trans "Email, rôle d'accès et entreprise sont affiches pour controle, mais restent non modifiables par l'utilisateur dans cette version." %}
             </div>
 
             <div class="profile-actions">

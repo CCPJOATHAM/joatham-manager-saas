@@ -8,7 +8,7 @@
 <div class="rh-header">
     <div>
         <h2>{{ employe.nom }} {{ employe.prenom }}</h2>
-        <p>{{ employe.matricule }} - {{ employe.poste.nom|default:"Poste non renseigne" }}</p>
+        <p>{{ employe.matricule }} - {{ employe.poste.nom|default:"Poste RH non renseigne" }}</p>
     </div>
     <div class="rh-actions">
         <a href="{% url 'rh_employe_list' %}" class="rh-action-link">{% trans "Retour" %}</a>

@@ -9,7 +9,7 @@
 
 <section class="grid">
     <div class="box"><span class="label">{% trans "Statut" %}</span>{{ status_label }}</div>
-    <div class="box"><span class="label">{% trans "Poste" %}</span>{{ employe.poste.nom|default:"-" }}</div>
+    <div class="box"><span class="label">{% trans "Poste RH" %}</span>{{ employe.poste.nom|default:"-" }}</div>
     <div class="box"><span class="label">{% trans "Contrat" %}</span>{{ employe.get_type_contrat_display }}</div>
     <div class="box"><span class="label">{% trans "Date embauche" %}</span>{{ employe.date_embauche }}</div>
     <div class="box"><span class="label">{% trans "Telephone" %}</span>{{ employe.telephone|default:"-" }}</div>

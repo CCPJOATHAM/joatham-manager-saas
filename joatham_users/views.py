@@ -42,8 +42,8 @@ from .services.user_management import (
 User = get_user_model()
 
 ROLE_FILTER_CHOICES = [
-    ("", _("Tous les roles")),
-    (User.Role.PROPRIETAIRE, _("Proprietaire")),
+    ("", _("Tous les rôles d'accès")),
+    (User.Role.PROPRIETAIRE, _("Propriétaire")),
     (User.Role.GESTIONNAIRE, _("Gestionnaire")),
     (User.Role.COMPTABLE, _("Comptable")),
 ]

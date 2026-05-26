@@ -17,7 +17,7 @@ class UserManagementForm(forms.Form):
     full_name = forms.CharField(max_length=150, label=_("Nom"))
     email = forms.EmailField(label=_("E-mail"))
     telephone = forms.CharField(max_length=50, required=False, label=_("Telephone"))
-    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Role"))
+    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Rôle d'accès"))
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput,
@@ -45,7 +45,7 @@ class UserManagementForm(forms.Form):
                 "autocomplete": "tel",
             }
         )
-        self.fields["role"].widget.attrs.update({"aria-label": _("Role")})
+        self.fields["role"].widget.attrs.update({"aria-label": _("Rôle d'accès")})
         self.fields["password"].widget.attrs.update(
             {
                 "placeholder": _("Mot de passe securise"),
@@ -57,7 +57,7 @@ class UserManagementForm(forms.Form):
 class UserInviteForm(forms.Form):
     full_name = forms.CharField(max_length=150, label=_("Nom complet"))
     email = forms.EmailField(label=_("E-mail"))
-    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Role"))
+    role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Rôle d'accès"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -73,7 +73,7 @@ class UserInviteForm(forms.Form):
                 "autocomplete": "email",
             }
         )
-        self.fields["role"].widget.attrs.update({"aria-label": _("Role")})
+        self.fields["role"].widget.attrs.update({"aria-label": _("Rôle d'accès")})
 
 
 class InvitationAcceptanceForm(forms.Form):
