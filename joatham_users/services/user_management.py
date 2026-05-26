@@ -1,11 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, transaction
+from django.db.models.deletion import ProtectedError
 
 from core.audit import record_audit_event
 from core.services.quotas import assert_user_quota_available
 
+from .session_security import release_active_session
+
 
 User = get_user_model()
+
+
+USER_DELETE_DELETED = "deleted"
+USER_DELETE_DEACTIVATED_FOR_HISTORY = "deactivated_for_history"
+IGNORED_DELETE_HISTORY_ACCESSORS = {"active_session"}
 
 
 ALLOWED_MANAGED_ROLES = {
@@ -49,6 +58,55 @@ def _ensure_secondary_user(target_user):
 def _ensure_not_self(target_user, owner_user, action_label):
     if target_user.id == owner_user.id:
         raise ValueError(f"Vous ne pouvez pas {action_label} votre propre compte.")
+
+
+def _has_related_history(target_user):
+    for relation in target_user._meta.related_objects:
+        accessor_name = relation.get_accessor_name()
+        if not accessor_name or accessor_name in IGNORED_DELETE_HISTORY_ACCESSORS:
+            continue
+
+        try:
+            related = getattr(target_user, accessor_name)
+        except ObjectDoesNotExist:
+            continue
+
+        if relation.one_to_one:
+            return True
+
+        if hasattr(related, "exists") and related.exists():
+            return True
+
+        if hasattr(related, "all") and related.all().exists():
+            return True
+
+    return False
+
+
+def _deactivate_user_for_history(*, target_user, owner_user, reason):
+    was_active = target_user.is_active
+    if was_active:
+        target_user.is_active = False
+        target_user.save(update_fields=["is_active"])
+
+    release_active_session(target_user)
+    record_audit_event(
+        entreprise=target_user.entreprise,
+        utilisateur=owner_user,
+        action="utilisateur_desactive_historique",
+        module="users",
+        objet_type="User",
+        objet_id=target_user.id,
+        description=(
+            f"Utilisateur {target_user.email or target_user.username} desactive afin de preserver la tracabilite."
+        ),
+        metadata={
+            "email": target_user.email or target_user.username,
+            "reason": reason,
+            "was_active": was_active,
+        },
+    )
+    return USER_DELETE_DEACTIVATED_FOR_HISTORY
 
 
 @transaction.atomic
@@ -140,7 +198,24 @@ def delete_company_user(*, target_user, owner_user):
     user_id = target_user.id
     email = target_user.email or target_user.username
     entreprise = target_user.entreprise
-    target_user.delete()
+
+    if _has_related_history(target_user):
+        return _deactivate_user_for_history(
+            target_user=target_user,
+            owner_user=owner_user,
+            reason="related_history",
+        )
+
+    try:
+        with transaction.atomic():
+            target_user.delete()
+    except (ProtectedError, IntegrityError):
+        return _deactivate_user_for_history(
+            target_user=target_user,
+            owner_user=owner_user,
+            reason="protected_relation",
+        )
+
     record_audit_event(
         entreprise=entreprise,
         utilisateur=owner_user,
@@ -151,6 +226,7 @@ def delete_company_user(*, target_user, owner_user):
         description=f"Utilisateur {email} supprime.",
         metadata={"email": email},
     )
+    return USER_DELETE_DELETED
 
 
 @transaction.atomic

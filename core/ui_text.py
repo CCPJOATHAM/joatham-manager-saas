@@ -14,6 +14,9 @@ FLASH_MESSAGES = {
     "user_created": _("L'utilisateur a ete cree avec succes."),
     "user_updated": _("L'utilisateur a ete mis a jour avec succes."),
     "user_deleted": _("L'utilisateur a ete supprime avec succes."),
+    "user_deactivated_history": _(
+        "Cet utilisateur possède déjà un historique. Il a été désactivé afin de préserver la traçabilité."
+    ),
 }
 
 

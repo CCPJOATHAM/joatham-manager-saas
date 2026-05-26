@@ -32,8 +32,9 @@ from core.services.subscription import (
 )
 from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_INCLUDED_PLAN, can_access_module, get_module_access_level
 from joatham_billing.tests.factories import create_entreprise, create_user
+from joatham_caisse.models import Caisse, SessionCaisse
 
-from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User
+from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User, UserActiveSession
 from .services.invitations import (
     COMPANY_INVITATION_SOURCE_PREFIX,
     REMINDER_ERROR,
@@ -937,6 +938,56 @@ class UserManagementTests(TestCase):
         response = self.client.post(reverse("user_delete", args=[managed_user.id]))
         self.assertRedirects(response, reverse("user_list"))
         self.assertFalse(User.objects.filter(id=managed_user.id).exists())
+
+    def test_owner_delete_user_with_business_history_soft_deactivates(self):
+        managed_user = User.objects.create_user(
+            username="history-delete@example.com",
+            email="history-delete@example.com",
+            password="Initial123!",
+            role=User.Role.GESTIONNAIRE,
+            entreprise=self.entreprise,
+        )
+        caisse = Caisse.objects.create(
+            entreprise=self.entreprise,
+            nom="Caisse historique",
+            code="HIST-1",
+            devise="CDF",
+            cree_par=self.owner,
+        )
+        SessionCaisse.objects.create(
+            entreprise=self.entreprise,
+            caisse=caisse,
+            utilisateur_ouverture=managed_user,
+            solde_initial=Decimal("0.00"),
+        )
+        UserActiveSession.objects.create(user=managed_user, session_key="history-delete-session")
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_delete", args=[managed_user.id]), follow=True)
+
+        self.assertRedirects(response, reverse("user_list"))
+        managed_user.refresh_from_db()
+        self.assertFalse(managed_user.is_active)
+        self.assertFalse(UserActiveSession.objects.filter(user=managed_user).exists())
+        self.assertContains(response, "Cet utilisateur possède déjà un historique")
+        self.assertFalse(self.client.login(username=managed_user.username, password="Initial123!"))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                action="utilisateur_desactive_historique",
+                objet_id=managed_user.id,
+            ).exists()
+        )
+
+    def test_owner_cannot_delete_owner_account_from_company_management(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_delete", args=[self.owner.id]), follow=True)
+
+        self.assertRedirects(response, reverse("user_list"))
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assertTrue(User.objects.filter(id=self.owner.id).exists())
+        self.assertContains(response, "Le compte proprietaire ne peut pas etre modifie depuis cette interface.")
 
     def test_multi_entreprise_isolation_prevents_cross_company_access(self):
         self.client.force_login(self.owner)

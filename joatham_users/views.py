@@ -30,6 +30,7 @@ from .services.invitations import (
     create_company_invitation,
 )
 from .services.user_management import (
+    USER_DELETE_DEACTIVATED_FOR_HISTORY,
     create_company_user,
     delete_company_user,
     remove_company_user_access,
@@ -302,11 +303,14 @@ def user_delete(request, user_id):
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
     if request.method == "POST":
         try:
-            delete_company_user(target_user=target_user, owner_user=request.user)
+            delete_result = delete_company_user(target_user=target_user, owner_user=request.user)
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, FLASH_MESSAGES["user_deleted"])
+            if delete_result == USER_DELETE_DEACTIVATED_FOR_HISTORY:
+                messages.warning(request, FLASH_MESSAGES["user_deactivated_history"])
+            else:
+                messages.success(request, FLASH_MESSAGES["user_deleted"])
     return redirect("user_list")
 
 
