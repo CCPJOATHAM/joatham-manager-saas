@@ -32,6 +32,7 @@
 html,
 body {
     min-height: 100%;
+    width: 100%;
     max-width: 100%;
     overflow-x: hidden;
 }
@@ -58,6 +59,7 @@ a {
 .app-shell {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
+    width: 100%;
     max-width: 100%;
     min-height: 100vh;
     overflow-x: hidden;
@@ -260,6 +262,7 @@ a {
 }
 
 .main {
+    width: 100%;
     min-width: 0;
     max-width: 100%;
     overflow-x: hidden;
@@ -271,7 +274,7 @@ a {
     top: 0;
     z-index: 30;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 540px);
     gap: 24px;
     align-items: start;
     padding: 22px 32px 16px;
@@ -325,7 +328,9 @@ a {
 
 .identity-bar {
     display: grid;
+    justify-self: end;
     justify-items: end;
+    width: 100%;
     gap: 11px;
 }
 
@@ -348,6 +353,14 @@ a {
     text-align: center;
 }
 
+.topbar-meta .badge {
+    max-width: min(100%, 280px);
+}
+
+.topbar-meta .profile-link {
+    max-width: min(100%, 180px);
+}
+
 .logout-form {
     display: inline-flex;
     margin: 0;
@@ -357,6 +370,8 @@ a {
 .language-select,
 .language-submit,
 .btn-link {
+    min-width: 0;
+    max-width: 100%;
     min-height: 38px;
     border: 1px solid var(--jm-line);
     border-radius: var(--jm-radius);
@@ -568,6 +583,8 @@ a {
 .accountant-dashboard,
 .super-admin-dashboard {
     display: grid;
+    min-width: 0;
+    max-width: 100%;
     gap: 24px;
 }
 
@@ -1464,6 +1481,7 @@ a {
 
 .super-admin-table {
     width: 100% !important;
+    max-width: none;
     min-width: 920px;
     border-collapse: collapse;
     table-layout: fixed;
@@ -1525,6 +1543,76 @@ a {
 .super-admin-table th:last-child {
     z-index: 2;
     background: var(--jm-surface-soft);
+}
+
+.super-admin-payments-table {
+    min-width: 1080px;
+}
+
+.super-admin-payments-table th:nth-child(1),
+.super-admin-payments-table td:nth-child(1) {
+    width: 18%;
+}
+
+.super-admin-payments-table th:nth-child(2),
+.super-admin-payments-table td:nth-child(2) {
+    width: 12%;
+}
+
+.super-admin-payments-table th:nth-child(3),
+.super-admin-payments-table td:nth-child(3) {
+    width: 14%;
+}
+
+.super-admin-payments-table th:nth-child(4),
+.super-admin-payments-table td:nth-child(4),
+.super-admin-payments-table th:nth-child(6),
+.super-admin-payments-table td:nth-child(6) {
+    width: 12%;
+}
+
+.super-admin-payments-table th:nth-child(5),
+.super-admin-payments-table td:nth-child(5),
+.super-admin-payments-table th:nth-child(7),
+.super-admin-payments-table td:nth-child(7) {
+    width: 10%;
+}
+
+.super-admin-payments-table th:last-child,
+.super-admin-payments-table td:last-child {
+    width: 250px;
+    min-width: 250px;
+}
+
+.super-admin-companies-table {
+    min-width: 1000px;
+}
+
+.super-admin-companies-table th:nth-child(1),
+.super-admin-companies-table td:nth-child(1),
+.super-admin-companies-table th:nth-child(2),
+.super-admin-companies-table td:nth-child(2) {
+    width: 21%;
+}
+
+.super-admin-companies-table th:nth-child(3),
+.super-admin-companies-table td:nth-child(3),
+.super-admin-companies-table th:nth-child(5),
+.super-admin-companies-table td:nth-child(5) {
+    width: 9%;
+}
+
+.super-admin-companies-table th:nth-child(4),
+.super-admin-companies-table td:nth-child(4),
+.super-admin-companies-table th:nth-child(6),
+.super-admin-companies-table td:nth-child(6) {
+    width: 14%;
+}
+
+.super-admin-companies-table th:last-child,
+.super-admin-companies-table td:last-child {
+    width: 240px;
+    min-width: 240px;
 }
 
 .super-admin-table tr:last-child td {
@@ -1600,6 +1688,7 @@ a {
 .super-admin-row-actions,
 .super-admin-payment-actions {
     display: grid;
+    align-content: start;
     gap: 10px;
     min-width: 0;
     max-width: 100%;
@@ -1608,19 +1697,34 @@ a {
 .super-admin-row-actions form,
 .super-admin-payment-actions form {
     display: grid;
+    min-width: 0;
     gap: 8px;
 }
 
 .super-admin-dashboard .action-row {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 8px;
+    min-width: 0;
+}
+
+.super-admin-dashboard .action-row select,
+.super-admin-dashboard .action-row input {
+    flex: 1 1 132px;
+    min-width: 0;
 }
 
 .super-admin-dashboard .btn-small {
     width: 100%;
+    min-width: 0;
     white-space: normal;
     text-align: center;
+}
+
+.super-admin-dashboard .action-row .btn-small {
+    flex: 1 1 112px;
+    width: auto;
 }
 
 .btn-small {
@@ -1777,6 +1881,13 @@ a {
     text-align: center;
 }
 
+@media (max-width: 1440px) {
+    .kpi-grid,
+    .super-admin-dashboard .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 1320px) {
     .kpi-grid,
     .quick-actions-grid,
@@ -1800,6 +1911,7 @@ a {
     .topbar-meta,
     .top-actions,
     .language-switcher {
+        justify-self: stretch;
         justify-items: start;
         justify-content: flex-start;
     }
@@ -1811,6 +1923,14 @@ a {
 
     .super-admin-table {
         min-width: 860px;
+    }
+
+    .super-admin-payments-table {
+        min-width: 980px;
+    }
+
+    .super-admin-companies-table {
+        min-width: 900px;
     }
 }
 
@@ -1840,6 +1960,7 @@ a {
     .topbar-meta,
     .top-actions,
     .language-switcher {
+        justify-self: stretch;
         justify-items: start;
         justify-content: flex-start;
     }
@@ -1872,6 +1993,14 @@ a {
 
     .super-admin-table {
         min-width: 800px;
+    }
+
+    .super-admin-payments-table {
+        min-width: 900px;
+    }
+
+    .super-admin-companies-table {
+        min-width: 820px;
     }
 }
 
@@ -1924,12 +2053,25 @@ a {
         width: 100%;
     }
 
-    .action-row {
+    .super-admin-dashboard .action-row {
+        display: grid;
         grid-template-columns: 1fr;
+    }
+
+    .super-admin-dashboard .action-row .btn-small {
+        width: 100%;
     }
 
     .super-admin-table {
         min-width: 720px;
+    }
+
+    .super-admin-payments-table {
+        min-width: 820px;
+    }
+
+    .super-admin-companies-table {
+        min-width: 760px;
     }
 
     .super-admin-row-actions,
@@ -1973,6 +2115,14 @@ a {
 
     .super-admin-table {
         min-width: 680px;
+    }
+
+    .super-admin-payments-table {
+        min-width: 760px;
+    }
+
+    .super-admin-companies-table {
+        min-width: 720px;
     }
 
     .super-admin-row-actions,
