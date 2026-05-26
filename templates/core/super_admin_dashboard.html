@@ -1,507 +1,455 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Pilotage SaaS | JOATHAM Manager{% endblock %}
-{% block content_title %}Pilotage SaaS{% endblock %}
-{% block content_subtitle %}Vue plateforme reservee aux abonnements, essais historiques, paiements et statuts des comptes clients.{% endblock %}
+{% block page_title %}Administration SaaS | JOATHAM Manager{% endblock %}
+{% block content_title %}Administration SaaS{% endblock %}
+{% block content_subtitle %}Plateforme JOATHAM Manager / pilotage global{% endblock %}
+{% block content_card_class %}super-admin-content-card{% endblock %}
 
 {% block top_actions %}
+<a href="{% url 'super_admin_company_list' %}" class="btn-link">Entreprises</a>
+<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">Abonnements</a>
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">Rafraichir</a>
 {% endblock %}
 
 {% block content %}
-<style>
-    .toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 14px;
-        align-items: end;
-        margin-bottom: 18px;
-    }
+<div class="super-admin-dashboard">
+    <section class="super-admin-hero" aria-label="Administration SaaS">
+        <div class="hero-copy">
+            <div class="hero-title-row">
+                <span class="hero-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
+                </span>
+                <h2>Administration SaaS</h2>
+            </div>
+            <p>Vue globale de la plateforme JOATHAM Manager : entreprises, abonnements, paiements et activite commerciale.</p>
+            <div class="hero-badge-row">
+                {% if user_role_label %}
+                <span class="hero-badge">{{ user_role_label }}</span>
+                {% endif %}
+                <span class="hero-badge">Plateforme active</span>
+                <span class="hero-badge">{{ counts.total_accounts }} entreprise{{ counts.total_accounts|pluralize:"s" }}</span>
+                <span class="hero-badge">{{ counts.actif }} abonnement{{ counts.actif|pluralize:"s" }} actif{{ counts.actif|pluralize:"s" }}</span>
+            </div>
+        </div>
+        <aside class="super-admin-hero-focus" aria-label="Paiements a valider">
+            <span>Paiements</span>
+            <strong>{{ counts.pending_payments }}</strong>
+            <small>en attente</small>
+        </aside>
+    </section>
 
-    .filter-form {
-        display: grid;
-        grid-template-columns: minmax(260px, 1.4fr) minmax(180px, 0.7fr) auto;
-        gap: 12px;
-        align-items: end;
-    }
+    <section id="dashboard-global" class="kpi-grid" aria-label="KPI plateforme">
+        <article class="kpi-card is-revenue">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Entreprises inscrites</span>
+                    <strong class="kpi-value">{{ counts.total_accounts }}</strong>
+                    <span class="kpi-subtitle">Comptes clients actifs sur la plateforme.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ counts.inactive_entreprises }} entreprise{{ counts.inactive_entreprises|pluralize:"s" }} inactive{{ counts.inactive_entreprises|pluralize:"s" }} conservee{{ counts.inactive_entreprises|pluralize:"s" }}.</div>
+        </article>
 
-    .filter-form label {
-        display: block;
-        margin-bottom: 6px;
-        color: #475569;
-        font-size: 0.86rem;
-        font-weight: 700;
-    }
+        <article class="kpi-card is-cash">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Abonnements actifs</span>
+                    <strong class="kpi-value">{{ counts.actif }}</strong>
+                    <span class="kpi-subtitle">Entreprises avec abonnement actif.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ counts.essai }} essai{{ counts.essai|pluralize:"s" }} historique{{ counts.essai|pluralize:"s" }}.</div>
+        </article>
 
-    .filter-form input,
-    .filter-form select {
-        width: 100%;
-        min-height: 42px;
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-    }
+        <article class="kpi-card is-due">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Paiements en attente</span>
+                    <strong class="kpi-value">{{ counts.pending_payments }}</strong>
+                    <span class="kpi-subtitle">Demandes d'abonnement a valider.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">Paiements manuels non encore traites.</div>
+        </article>
 
-    .super-grid {
-        display: grid;
-        grid-template-columns: repeat(6, minmax(150px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-    }
+        <article class="kpi-card is-clients">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Plans actifs</span>
+                    <strong class="kpi-value">{{ plans|length }}</strong>
+                    <span class="kpi-subtitle">Plans commerciaux disponibles.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 16 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ counts.expire }} abonnement{{ counts.expire|pluralize:"s" }} expire{{ counts.expire|pluralize:"s" }}.</div>
+        </article>
 
-    .super-kpi {
-        padding: 18px;
-        border-radius: 20px;
-        border: 1px solid #dde7f0;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
+        <article class="kpi-card is-profit">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Revenus valides</span>
+                    <strong class="kpi-value">{{ counts.validated_revenue }}</strong>
+                    <span class="kpi-subtitle">Total des paiements valides en USD.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M19 9 13 15 10 12 6 16"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">Montant calcule depuis les paiements d'abonnement valides.</div>
+        </article>
+    </section>
 
-    .super-kpi .label {
-        color: #64748b;
-        font-size: 0.84rem;
-    }
+    <section class="owner-panel" aria-label="Actions rapides Super Admin">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
+                </span>
+                <div>
+                    <h3>Actions rapides Super Admin</h3>
+                    <span class="section-kicker">Acces directs aux zones de pilotage global de la plateforme.</span>
+                </div>
+            </div>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="{% url 'super_admin_company_list' %}" class="quick-action is-blue">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path></svg></span>
+                <strong>Gerer les entreprises</strong>
+            </a>
+            <a href="#super-admin-paiements" class="quick-action is-green">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg></span>
+                <strong>Voir les paiements</strong>
+            </a>
+            <a href="{% url 'super_admin_subscription_list' %}" class="quick-action is-purple">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 16 10 5 10-5"></path></svg></span>
+                <strong>Gerer les plans</strong>
+            </a>
+            <a href="{% url 'super_admin_subscription_list' %}" class="quick-action is-orange">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
+                <strong>Voir les abonnements</strong>
+            </a>
+            <a href="{% url 'super_admin_messages' %}" class="quick-action is-magenta">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg></span>
+                <strong>Voir les messages/questions</strong>
+            </a>
+            <a href="{% url 'super_admin_settings' %}" class="quick-action is-red">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg></span>
+                <strong>Parametres plateforme</strong>
+            </a>
+        </div>
+    </section>
 
-    .super-kpi .value {
-        display: block;
-        margin-top: 8px;
-        font-size: 1.7rem;
-        font-weight: 800;
-        color: #10233f;
-        letter-spacing: -0.03em;
-    }
+    <section id="super-admin-alertes" class="owner-panel" aria-label="Points à surveiller">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                </span>
+                <div>
+                    <h3>Points à surveiller</h3>
+                    <span class="section-kicker">Alertes plateforme construites uniquement depuis les compteurs disponibles.</span>
+                </div>
+            </div>
+        </div>
+        <div class="alert-list">
+            {% if counts.pending_payments %}
+            <div class="alert-card is-warning">
+                <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg></span>
+                <div class="alert-copy">
+                    <strong>Paiements en attente</strong>
+                    <span>{{ counts.pending_payments }} paiement{{ counts.pending_payments|pluralize:"s" }} d'abonnement a traiter.</span>
+                </div>
+                <span class="alert-count">{{ counts.pending_payments }}</span>
+            </div>
+            {% endif %}
 
-    .super-kpi.essai { border-color: #fde68a; background: #fffdf4; }
-    .super-kpi.actif { border-color: #bbf7d0; background: #f5fff8; }
-    .super-kpi.expire { border-color: #fecaca; background: #fff7f7; }
-    .super-kpi.suspendu { border-color: #cbd5e1; background: #f8fafc; }
-    .super-kpi.future { border-color: #dbeafe; background: #f8fbff; }
+            {% if counts.expire %}
+            <div class="alert-card is-danger">
+                <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
+                <div class="alert-copy">
+                    <strong>Abonnements expires</strong>
+                    <span>{{ counts.expire }} abonnement{{ counts.expire|pluralize:"s" }} expire{{ counts.expire|pluralize:"s" }}.</span>
+                </div>
+                <span class="alert-count">{{ counts.expire }}</span>
+            </div>
+            {% endif %}
 
-    .table-shell {
-        overflow-x: auto;
-        border: 1px solid #dde7f0;
-        border-radius: 22px;
-        background: #fff;
-    }
+            {% if counts.suspendu %}
+            <div class="alert-card is-info">
+                <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>
+                <div class="alert-copy">
+                    <strong>Abonnements suspendus</strong>
+                    <span>{{ counts.suspendu }} compte{{ counts.suspendu|pluralize:"s" }} client{{ counts.suspendu|pluralize:"s" }} suspendu{{ counts.suspendu|pluralize:"s" }}.</span>
+                </div>
+                <span class="alert-count">{{ counts.suspendu }}</span>
+            </div>
+            {% endif %}
 
-    .super-table {
-        width: 100%;
-        min-width: 1120px;
-        border-collapse: collapse;
-    }
+            {% if not counts.pending_payments and not counts.expire and not counts.suspendu %}
+            <div class="dashboard-empty">Aucun point critique a surveiller pour le moment.</div>
+            {% endif %}
+        </div>
+    </section>
 
-    .super-table th,
-    .super-table td {
-        padding: 14px 16px;
-        text-align: left;
-        vertical-align: top;
-        border-bottom: 1px solid #e2e8f0;
-    }
+    <section id="super-admin-paiements" class="owner-panel" aria-label="Paiements en attente">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
+                </span>
+                <div>
+                    <h3>Paiements en attente</h3>
+                    <span class="section-kicker">Paiements d'abonnement en attente de validation ou de refus.</span>
+                </div>
+            </div>
+        </div>
+        {% if pending_payments %}
+        <div class="super-admin-table-shell">
+            <table class="super-admin-table">
+                <thead>
+                    <tr>
+                        <th>Entreprise</th>
+                        <th>Plan</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Reference</th>
+                        <th>Preuve</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paiement in pending_payments %}
+                    <tr>
+                        <td>
+                            <div class="stacked">
+                                <strong>{{ paiement.entreprise.nom }}</strong>
+                                {% if paiement.entreprise.raison_sociale %}
+                                <span class="muted">{{ paiement.entreprise.raison_sociale }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ paiement.plan.nom }}</td>
+                        <td>
+                            <div class="stacked">
+                                <strong>{{ paiement.montant_usd|default:paiement.montant }} USD</strong>
+                                <span class="muted">{{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:paiement.entreprise.devise }}</span>
+                            </div>
+                        </td>
+                        <td>{{ paiement.date_creation|date:"d/m/Y H:i" }}</td>
+                        <td><span class="super-status-badge status-en-attente">{{ paiement.get_statut_display }}</span></td>
+                        <td>{{ paiement.reference_paiement }}</td>
+                        <td>
+                            {% if paiement.preuve_paiement %}
+                            <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">Voir la preuve</a>
+                            {% else %}
+                            <span class="muted">Aucune preuve</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="super-admin-payment-actions">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
+                                    <input type="text" name="notes_validation" placeholder="Note interne (optionnel)">
+                                    <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider le paiement</button>
+                                </form>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
+                                    <input type="text" name="notes_validation" placeholder="Motif du refus (optionnel)">
+                                    <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser le paiement</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="dashboard-empty">Aucun paiement en attente pour le moment.</div>
+        {% endif %}
+    </section>
 
-    .super-table th {
-        background: #f8fafc;
-        color: #475569;
-        font-size: 0.82rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
+    <section id="super-admin-entreprises" class="owner-panel" aria-label="Entreprises">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path></svg>
+                </span>
+                <div>
+                    <h3>Entreprises</h3>
+                    <span class="section-kicker">Suivi des comptes clients, statuts d'abonnement et actions SaaS.</span>
+                </div>
+            </div>
+            <a href="{% url 'super_admin_company_list' %}" class="section-link">Voir tout</a>
+        </div>
 
-    .super-table tr:last-child td {
-        border-bottom: 0;
-    }
+        <form method="get" class="super-admin-filters">
+            <div class="super-admin-filter-field">
+                <label for="id_q">Rechercher une entreprise</label>
+                <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email proprietaire">
+            </div>
+            <div class="super-admin-filter-field">
+                <label for="id_statut">Statut abonnement</label>
+                <select id="id_statut" name="statut">
+                    <option value="">Tous les statuts</option>
+                    {% for value, label in statut_choices %}
+                    <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="super-admin-filter-actions">
+                <button type="submit" class="btn-small primary">Filtrer</button>
+                <a href="{% url 'super_admin_dashboard' %}" class="btn-small">Reinitialiser</a>
+            </div>
+        </form>
 
-    .stacked {
-        display: grid;
-        gap: 6px;
-    }
+        <div class="super-admin-table-shell">
+            <table class="super-admin-table">
+                <thead>
+                    <tr>
+                        <th>Entreprise</th>
+                        <th>Contact principal</th>
+                        <th>Statut</th>
+                        <th>Abonnement</th>
+                        <th>Echeance</th>
+                        <th>Derniere demande</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entreprise in entreprises %}
+                    {% with subscription=entreprise.abonnement_entreprise %}
+                    <tr>
+                        <td>
+                            <div class="stacked">
+                                <strong>{{ entreprise.nom }}</strong>
+                                {% if entreprise.raison_sociale %}
+                                <span class="muted">{{ entreprise.raison_sociale }}</span>
+                                {% endif %}
+                                <span class="muted">{{ entreprise.ville|default:"-" }}{% if entreprise.pays %}, {{ entreprise.pays }}{% endif %}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stacked">
+                                <strong>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</strong>
+                                {% if entreprise.owner_username %}
+                                <span class="muted">@{{ entreprise.owner_username }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if entreprise.is_active %}
+                            <span class="super-status-badge status-actif">Active</span>
+                            {% else %}
+                            <span class="super-status-badge status-suspendu">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if subscription %}
+                            <div class="stacked">
+                                <strong>{{ subscription.plan.nom }}</strong>
+                                <span class="super-status-badge status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
+                            </div>
+                            {% else %}
+                            <span class="super-status-badge status-none">Aucun abonnement</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if subscription and subscription.date_fin %}
+                                {{ subscription.date_fin|date:"d/m/Y" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="stacked">
+                                {% if entreprise.last_payment_created_at %}
+                                <strong>{{ entreprise.last_payment_created_at|date:"d/m/Y" }}</strong>
+                                <span class="muted">{{ entreprise.last_payment_amount|default:"0" }} - {{ entreprise.last_payment_status|default:"-" }}</span>
+                                {% else %}
+                                <span class="muted">Aucune demande</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="super-admin-row-actions">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <div class="action-row">
+                                        <select name="plan_id" class="plan-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
+                                            <option value="">Choisir un plan</option>
+                                            {% for plan in plans %}
+                                            <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>Activer</button>
+                                    </div>
+                                </form>
 
-    .muted {
-        color: #64748b;
-        font-size: 0.88rem;
-    }
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <div class="action-row">
+                                        <select name="plan_id" class="plan-select plan-change-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
+                                            <option value="">Conserver le plan</option>
+                                            {% for plan in plans %}
+                                            <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>Changer plan</button>
+                                    </div>
+                                </form>
 
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 800;
-        white-space: nowrap;
-    }
+                                {% if subscription and subscription.statut == "essai" and subscription.essai %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <div class="action-row">
+                                        <input type="number" name="trial_days" value="7" min="1" step="1">
+                                        <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger acces historique</button>
+                                    </div>
+                                </form>
+                                {% endif %}
 
-    .status-essai { background: #fef3c7; color: #92400e; }
-    .status-actif { background: #dcfce7; color: #166534; }
-    .status-expire { background: #fee2e2; color: #b91c1c; }
-    .status-suspendu { background: #e2e8f0; color: #334155; }
-    .status-none { background: #eef2ff; color: #4338ca; }
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
+                                    <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>Suspendre</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="super-admin-table-empty">Aucun compte client ne correspond aux filtres.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    .row-actions {
-        display: grid;
-        gap: 10px;
-        min-width: 280px;
-    }
-
-    .row-actions form {
-        display: grid;
-        gap: 8px;
-    }
-
-    .row-actions select,
-    .row-actions input {
-        width: 100%;
-        padding: 9px 10px;
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-    }
-
-    .action-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 8px;
-    }
-
-    .btn-small {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 38px;
-        padding: 0 12px;
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        color: #10233f;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .btn-small[disabled] {
-        opacity: 0.45;
-        cursor: not-allowed;
-    }
-
-    .btn-small.primary {
-        background: #0f766e;
-        border-color: #0f766e;
-        color: #fff;
-    }
-
-    .btn-small.warning {
-        background: #fff7ed;
-        border-color: #fdba74;
-        color: #c2410c;
-    }
-
-    .btn-small.danger {
-        background: #fff1f2;
-        border-color: #fecdd3;
-        color: #be123c;
-    }
-
-    .payments-panel {
-        margin-bottom: 24px;
-        padding: 20px;
-        border-radius: 22px;
-        border: 1px solid #dde7f0;
-        background: #fff;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .payments-panel h2 {
-        margin: 0 0 14px;
-        color: #10233f;
-        font-size: 1.15rem;
-    }
-
-    .payment-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .platform-map {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 24px;
-    }
-
-    .platform-map-item {
-        padding: 16px;
-        border-radius: 16px;
-        border: 1px solid #dde7f0;
-        background: #fff;
-    }
-
-    .platform-map-item strong {
-        display: block;
-        color: #10233f;
-        margin-bottom: 6px;
-    }
-
-    @media (max-width: 1180px) {
-        .toolbar,
-        .filter-form {
-            grid-template-columns: 1fr;
-        }
-
-        .super-grid {
-            grid-template-columns: repeat(2, minmax(160px, 1fr));
-        }
-    }
-
-    @media (max-width: 760px) {
-        .super-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .platform-map {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div id="dashboard-global" class="super-grid">
-    <div class="super-kpi">
-        <span class="label">Comptes clients</span>
-        <span class="value">{{ counts.total_accounts }}</span>
-    </div>
-    <div class="super-kpi essai">
-        <span class="label">Essais historiques</span>
-        <span class="value">{{ counts.essai }}</span>
-    </div>
-    <div class="super-kpi actif">
-        <span class="label">Actives</span>
-        <span class="value">{{ counts.actif }}</span>
-    </div>
-    <div class="super-kpi expire">
-        <span class="label">Expirees</span>
-        <span class="value">{{ counts.expire }}</span>
-    </div>
-    <div class="super-kpi suspendu">
-        <span class="label">Suspendues</span>
-        <span class="value">{{ counts.suspendu }}</span>
-    </div>
-    <div class="super-kpi future">
-        <span class="label">Revenus valides</span>
-        <span class="value">{{ counts.validated_revenue }}</span>
-    </div>
-</div>
-
-<div class="platform-map">
-    <div id="utilisateurs" class="platform-map-item">
-        <strong>Utilisateurs</strong>
-        <span class="muted">Vue globale via les comptes clients et contacts proprietaires.</span>
-    </div>
-    <div id="audit-logs" class="platform-map-item">
-        <strong>Audit / logs</strong>
-        <span class="muted">Actions plateforme tracees lors des validations, suspensions et changements d'abonnement.</span>
-    </div>
-    <div id="parametres-plateforme" class="platform-map-item">
-        <strong>Parametres plateforme</strong>
-        <span class="muted">Plans, statuts et actions SaaS disponibles depuis ce pilotage global.</span>
-    </div>
-</div>
-
-<section id="abonnements" class="payments-panel">
-    <h2>Paiements d'abonnement en attente</h2>
-    {% if pending_payments %}
-    <div class="table-shell">
-        <table class="super-table">
-            <thead>
-                <tr>
-                    <th>Compte client</th>
-                    <th>Plan</th>
-                    <th>Période</th>
-                    <th>Montant USD</th>
-                    <th>Montant estimatif local</th>
-                    <th>Référence</th>
-                    <th>Preuve</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for paiement in pending_payments %}
-                <tr>
-                    <td>{{ paiement.entreprise.nom }}</td>
-                    <td>{{ paiement.plan.nom }}</td>
-                    <td>{{ paiement.get_duree_display }}</td>
-                    <td>{{ paiement.montant_usd|default:paiement.montant }} USD</td>
-                    <td>{{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:paiement.entreprise.devise }}</td>
-                    <td>{{ paiement.reference_paiement }}</td>
-                    <td>
-                        {% if paiement.preuve_paiement %}
-                        <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">Voir la preuve</a>
-                        {% else %}
-                        <span class="muted">Aucune preuve</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="payment-actions">
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                <input type="text" name="notes_validation" placeholder="Note interne (optionnel)">
-                                <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider le paiement</button>
-                            </form>
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                <input type="text" name="notes_validation" placeholder="Motif du refus (optionnel)">
-                                <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser le paiement</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="muted">Aucun paiement en attente pour le moment.</p>
-    {% endif %}
-</section>
-
-<div id="abonnements-entreprises" class="toolbar">
-    <form method="get" class="filter-form">
+    <section class="manager-info-card" aria-label="Espace Super Admin">
         <div>
-            <label for="id_q">Rechercher un compte client</label>
-            <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email proprietaire">
+            <strong>Espace Super Admin</strong>
+            <p>Cet espace permet de piloter la plateforme JOATHAM Manager, suivre les entreprises clientes, contrôler les abonnements et valider les paiements.</p>
         </div>
-        <div>
-            <label for="id_statut">Filtrer par statut</label>
-            <select id="id_statut" name="statut">
-                <option value="">Tous les statuts</option>
-                {% for value, label in statut_choices %}
-                <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button type="submit" class="btn-small primary">Filtrer</button>
-            <a href="{% url 'super_admin_dashboard' %}" class="btn-small" style="text-decoration:none;">Reinitialiser</a>
-        </div>
-    </form>
+    </section>
 </div>
+{% endblock %}
 
-<div class="table-shell">
-    <table class="super-table">
-        <thead>
-            <tr>
-                <th>Compte client</th>
-                <th>Contact principal</th>
-                <th>Plan</th>
-                <th>Statut abonnement</th>
-                <th>Echeance</th>
-                <th>Derniere demande</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entreprise in entreprises %}
-            {% with subscription=entreprise.abonnement_entreprise %}
-            <tr>
-                <td>
-                    <div class="stacked">
-                        <strong>{{ entreprise.nom }}</strong>
-                        {% if entreprise.raison_sociale %}
-                        <span class="muted">{{ entreprise.raison_sociale }}</span>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="stacked">
-                        <strong>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</strong>
-                        {% if entreprise.owner_username %}
-                        <span class="muted">@{{ entreprise.owner_username }}</span>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>{% if subscription %}{{ subscription.plan.nom }}{% else %}-{% endif %}</td>
-                <td>
-                    {% if subscription %}
-                    <span class="status-badge status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
-                    {% else %}
-                    <span class="status-badge status-none">Aucun abonnement</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if subscription and subscription.date_fin %}
-                        {{ subscription.date_fin|date:"d/m/Y" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    <div class="stacked">
-                        {% if entreprise.last_payment_created_at %}
-                        <strong>{{ entreprise.last_payment_created_at|date:"d/m/Y" }}</strong>
-                        <span class="muted">{{ entreprise.last_payment_amount|default:"0" }} - {{ entreprise.last_payment_status|default:"-" }}</span>
-                        {% else %}
-                        <span class="muted">Aucune demande</span>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="row-actions">
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
-                            <div class="action-row">
-                                <select name="plan_id" class="plan-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
-                                    <option value="">Choisir un plan</option>
-                                    {% for plan in plans %}
-                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>Activer</button>
-                            </div>
-                        </form>
-
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
-                            <div class="action-row">
-                                <select name="plan_id" class="plan-select plan-change-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
-                                    <option value="">Conserver le plan</option>
-                                    {% for plan in plans %}
-                                    <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>Changer plan</button>
-                            </div>
-                        </form>
-
-                        {% if subscription and subscription.statut == "essai" and subscription.essai %}
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
-                            <div class="action-row">
-                                <input type="number" name="trial_days" value="7" min="1" step="1">
-                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger acces historique</button>
-                            </div>
-                        </form>
-                        {% endif %}
-
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
-                            <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>Suspendre</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% endwith %}
-            {% empty %}
-            <tr>
-                <td colspan="7">Aucun compte client n'est encore enregistre.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% block extra_scripts %}
 <script>
     document.querySelectorAll(".plan-change-select").forEach(function (select) {
         const button = select.closest("form").querySelector(".change-plan-button");

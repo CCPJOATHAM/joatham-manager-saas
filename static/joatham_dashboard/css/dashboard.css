@@ -428,7 +428,8 @@ a {
 
 .content-card.owner-content-card,
 .content-card.manager-content-card,
-.content-card.accountant-content-card {
+.content-card.accountant-content-card,
+.content-card.super-admin-content-card {
     padding: 0;
     overflow: visible;
     border: 0;
@@ -538,14 +539,16 @@ a {
 
 .owner-dashboard,
 .manager-dashboard,
-.accountant-dashboard {
+.accountant-dashboard,
+.super-admin-dashboard {
     display: grid;
     gap: 24px;
 }
 
 .owner-hero,
 .manager-hero,
-.accountant-hero {
+.accountant-hero,
+.super-admin-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 122px;
     gap: 20px;
@@ -571,8 +574,15 @@ a {
     box-shadow: 0 24px 58px rgba(2, 132, 199, 0.18);
 }
 
+.super-admin-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    background: linear-gradient(135deg, #0284c7 0%, #334155 48%, #4f46e5 100%);
+    box-shadow: 0 24px 58px rgba(51, 65, 85, 0.18);
+}
+
 .manager-hero-focus,
-.accountant-hero-focus {
+.accountant-hero-focus,
+.super-admin-hero-focus {
     display: grid;
     place-items: center;
     min-height: 118px;
@@ -586,12 +596,15 @@ a {
 .manager-hero-focus span,
 .manager-hero-focus small,
 .accountant-hero-focus span,
-.accountant-hero-focus small {
+.accountant-hero-focus small,
+.super-admin-hero-focus span,
+.super-admin-hero-focus small {
     color: rgba(255, 255, 255, 0.8);
 }
 
 .manager-hero-focus strong,
-.accountant-hero-focus strong {
+.accountant-hero-focus strong,
+.super-admin-hero-focus strong {
     color: #ffffff;
     font-size: 2.4rem;
     font-weight: 950;
@@ -599,13 +612,15 @@ a {
 }
 
 .manager-hero-focus small,
-.accountant-hero-focus small {
+.accountant-hero-focus small,
+.super-admin-hero-focus small {
     font-size: 0.84rem;
 }
 
 .owner-hero h2,
 .manager-hero h2,
-.accountant-hero h2 {
+.accountant-hero h2,
+.super-admin-hero h2 {
     margin: 0;
     color: #ffffff;
     font-size: clamp(1.9rem, 3vw, 2.7rem);
@@ -615,7 +630,8 @@ a {
 
 .owner-hero p,
 .manager-hero p,
-.accountant-hero p {
+.accountant-hero p,
+.super-admin-hero p {
     max-width: 720px;
     margin: 12px 0 0;
     color: rgba(255, 255, 255, 0.9);
@@ -1346,6 +1362,211 @@ a {
     --status-line: #bae6fd;
 }
 
+.super-admin-filters {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(190px, 0.38fr) auto;
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 22px;
+}
+
+.super-admin-filter-field {
+    display: grid;
+    gap: 7px;
+}
+
+.super-admin-filter-field label {
+    color: var(--jm-heading);
+    font-size: 0.86rem;
+    font-weight: 850;
+}
+
+.super-admin-filter-field input,
+.super-admin-filter-field select,
+.super-admin-row-actions select,
+.super-admin-row-actions input,
+.super-admin-payment-actions input {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid var(--jm-line);
+    border-radius: var(--jm-radius);
+    background: var(--jm-surface);
+    color: var(--jm-text);
+    font: inherit;
+}
+
+.super-admin-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.super-admin-table-shell {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--jm-line);
+    border-radius: var(--jm-radius);
+    background: var(--jm-surface);
+}
+
+.super-admin-table {
+    width: max-content !important;
+    min-width: 1180px;
+    border-collapse: collapse;
+}
+
+.super-admin-table th,
+.super-admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--jm-line);
+    text-align: left;
+    vertical-align: top;
+}
+
+.super-admin-table th {
+    background: var(--jm-surface-soft);
+    color: var(--jm-muted);
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.super-admin-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.super-admin-table-empty {
+    color: var(--jm-muted);
+    text-align: center !important;
+}
+
+.super-admin-dashboard .stacked {
+    display: grid;
+    gap: 6px;
+}
+
+.super-admin-dashboard .muted {
+    color: var(--jm-muted);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.super-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.super-status-badge.status-actif {
+    border-color: #bbf7d0;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.super-status-badge.status-essai {
+    border-color: #fde68a;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.super-status-badge.status-expire {
+    border-color: #fecaca;
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.super-status-badge.status-suspendu {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.super-status-badge.status-none {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.super-status-badge.status-en-attente {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.super-admin-row-actions,
+.super-admin-payment-actions {
+    display: grid;
+    gap: 10px;
+    min-width: 290px;
+}
+
+.super-admin-row-actions form,
+.super-admin-payment-actions form {
+    display: grid;
+    gap: 8px;
+}
+
+.action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--jm-line);
+    border-radius: var(--jm-radius);
+    background: var(--jm-surface);
+    color: var(--jm-heading);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 850;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.btn-small:hover {
+    border-color: #cfe9f8;
+    background: #f8fafc;
+}
+
+.btn-small.primary {
+    border-color: var(--jm-primary-strong);
+    background: var(--jm-primary-strong);
+    color: #ffffff;
+}
+
+.btn-small.warning {
+    border-color: #fdba74;
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.btn-small.danger {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.btn-small[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .manager-info-card {
     display: flex;
     align-items: center;
@@ -1501,8 +1722,13 @@ a {
     .owner-hero,
     .manager-hero,
     .accountant-hero,
+    .super-admin-hero,
     .client-summary,
     .invoice-donut-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .super-admin-filters {
         grid-template-columns: 1fr;
     }
 }
@@ -1543,9 +1769,21 @@ a {
     .owner-hero,
     .manager-hero,
     .accountant-hero,
+    .super-admin-hero,
     .owner-panel,
     .kpi-card {
         padding: 20px;
+    }
+
+    .super-admin-filter-actions,
+    .super-admin-filter-actions .btn-small,
+    .action-row,
+    .action-row .btn-small {
+        width: 100%;
+    }
+
+    .action-row {
+        grid-template-columns: 1fr;
     }
 
     .section-heading,
