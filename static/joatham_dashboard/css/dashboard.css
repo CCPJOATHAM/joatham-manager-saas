@@ -284,6 +284,15 @@ a {
     line-height: 1.15;
 }
 
+.topbar h1.topbar-company-title {
+    max-width: 980px;
+    font-size: 2.15rem;
+    font-weight: 950;
+    line-height: 1.08;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
 .topbar-subtitle {
     margin-top: 7px;
     color: var(--jm-muted);
@@ -1308,6 +1317,11 @@ a {
     .page-content {
         padding-left: 16px;
         padding-right: 16px;
+    }
+
+    .topbar h1.topbar-company-title {
+        font-size: 1.45rem;
+        line-height: 1.12;
     }
 
     .topbar-meta,

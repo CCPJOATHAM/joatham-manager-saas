@@ -102,10 +102,18 @@
             <div class="topbar">
                 <div class="topbar-heading">
                     {% block topbar_heading %}
-                    <h1>{% block content_title %}{% trans "Tableau de bord" %}{% endblock %}</h1>
+                    <h1 class="{% if user_role_key == 'proprietaire' %}topbar-company-title{% endif %}">
+                        {% if user_role_key == "proprietaire" and entreprise_identity.primary_name %}
+                            {{ entreprise_identity.primary_name|upper }}{% if entreprise_identity.secondary_name %} ({{ entreprise_identity.secondary_name|upper }}){% endif %}
+                        {% else %}
+                            {% block content_title %}{% trans "Tableau de bord" %}{% endblock %}
+                        {% endif %}
+                    </h1>
                     <div class="topbar-subtitle">
                         {% block content_subtitle %}
-                            {% if entreprise_identity.primary_name %}
+                            {% if user_role_key == "proprietaire" and user_role_label %}
+                                {{ user_role_label }}
+                            {% elif entreprise_identity.primary_name %}
                                 {{ entreprise_identity.primary_name }}{% if entreprise_identity.secondary_name %} ({{ entreprise_identity.secondary_name }}){% endif %}{% if user_role_label %} / {{ user_role_label }}{% endif %}
                             {% elif user_role_key == "super_admin" %}
                                 {% trans "Plateforme JOATHAM Manager" %}{% if user_role_label %} / {{ user_role_label }}{% endif %}
