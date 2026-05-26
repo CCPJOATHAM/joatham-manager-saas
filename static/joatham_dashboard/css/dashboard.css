@@ -1256,7 +1256,7 @@ a {
 .timeline-list {
     position: relative;
     display: grid;
-    gap: 16px;
+    gap: 14px;
 }
 
 .timeline-list::before {
@@ -1274,7 +1274,7 @@ a {
     display: grid;
     grid-template-columns: 38px minmax(0, 1fr) auto;
     gap: 14px;
-    align-items: center;
+    align-items: start;
     min-height: 76px;
     padding: 14px;
     box-shadow: none;
@@ -1293,6 +1293,10 @@ a {
     color: #ffffff;
 }
 
+.timeline-copy {
+    min-width: 0;
+}
+
 .timeline-copy strong {
     display: block;
     color: var(--jm-heading);
@@ -1309,6 +1313,11 @@ a {
 }
 
 .timeline-time {
+    justify-self: end;
+    padding: 5px 8px;
+    border: 1px solid var(--jm-line);
+    border-radius: 999px;
+    background: var(--jm-surface-soft);
     color: var(--jm-muted);
     font-size: 0.78rem;
     font-weight: 750;
@@ -1324,7 +1333,7 @@ a {
     display: grid;
     grid-template-columns: 42px minmax(0, 1fr) auto;
     gap: 14px;
-    align-items: center;
+    align-items: start;
     min-height: 88px;
     padding: 16px;
     box-shadow: none;
@@ -1390,6 +1399,7 @@ a {
 }
 
 .alert-count {
+    align-self: center;
     color: var(--alert-color, var(--jm-heading));
     font-weight: 900;
     min-width: 30px;
@@ -1522,6 +1532,10 @@ a {
     gap: 14px;
     align-items: end;
     margin-bottom: 22px;
+    padding: 14px;
+    border: 1px solid var(--jm-line);
+    border-radius: var(--jm-radius);
+    background: var(--jm-surface-soft);
 }
 
 .super-admin-filter-field {
@@ -1548,6 +1562,18 @@ a {
     background: var(--jm-surface);
     color: var(--jm-text);
     font: inherit;
+    line-height: 1.25;
+    transition: border-color var(--jm-transition), box-shadow var(--jm-transition), background var(--jm-transition);
+}
+
+.super-admin-filter-field input:focus,
+.super-admin-filter-field select:focus,
+.super-admin-row-actions select:focus,
+.super-admin-row-actions input:focus,
+.super-admin-payment-actions input:focus {
+    border-color: var(--jm-primary-strong);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
+    outline: 0;
 }
 
 .super-admin-filter-actions {
@@ -1580,12 +1606,14 @@ a {
     min-width: 0;
     max-width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     border: 1px solid var(--jm-line);
     border-radius: var(--jm-radius);
     background: var(--jm-surface);
     scrollbar-gutter: stable;
     -webkit-overflow-scrolling: touch;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
 }
 
 .super-admin-table {
@@ -1602,6 +1630,7 @@ a {
     border-bottom: 1px solid var(--jm-line);
     text-align: left;
     vertical-align: top;
+    line-height: 1.45;
     overflow-wrap: anywhere;
 }
 
@@ -1612,6 +1641,29 @@ a {
     font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
+}
+
+.super-admin-table td strong {
+    color: var(--jm-heading);
+    font-weight: 900;
+}
+
+.super-admin-table a {
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.super-admin-table a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.super-admin-table tbody tr {
+    transition: background var(--jm-transition);
+}
+
+.super-admin-table tbody tr:hover td {
+    background: #fbfdff;
 }
 
 .super-admin-table th:nth-child(1),
@@ -1647,6 +1699,10 @@ a {
     min-width: 210px;
     background: var(--jm-surface);
     box-shadow: -12px 0 24px rgba(15, 23, 42, 0.08);
+}
+
+.super-admin-table tbody tr:hover td:last-child {
+    background: #fbfdff;
 }
 
 .super-admin-table th:last-child {
@@ -1729,13 +1785,33 @@ a {
 }
 
 .super-admin-table-empty {
+    padding: 26px 18px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     color: var(--jm-muted);
     text-align: center !important;
+}
+
+.super-admin-table-empty::before {
+    content: "";
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    margin-right: 9px;
+    border: 2px solid #bae6fd;
+    border-radius: 999px;
+    background: #e0f2fe;
+    vertical-align: -1px;
 }
 
 .super-admin-dashboard .stacked {
     display: grid;
     gap: 6px;
+    min-width: 0;
+}
+
+.super-admin-dashboard .stacked strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .super-admin-dashboard .muted {
@@ -1800,7 +1876,7 @@ a {
 .super-admin-payment-actions {
     display: grid;
     align-content: start;
-    gap: 10px;
+    gap: 9px;
     min-width: 0;
     max-width: 100%;
 }
@@ -1810,6 +1886,17 @@ a {
     display: grid;
     min-width: 0;
     gap: 8px;
+    padding: 8px;
+    border: 1px solid #edf2f7;
+    border-radius: var(--jm-radius);
+    background: #fbfdff;
+}
+
+.super-admin-row-actions form:only-child,
+.super-admin-payment-actions form:only-child {
+    padding: 0;
+    border: 0;
+    background: transparent;
 }
 
 .super-admin-dashboard .action-row {
@@ -2028,14 +2115,30 @@ a {
 }
 
 .dashboard-empty {
-    padding: 18px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 68px;
+    padding: 16px 18px;
     border: 1px dashed #cbd5e1;
     border-radius: var(--jm-radius);
     background: linear-gradient(135deg, #ffffff 0%, var(--jm-surface-soft) 100%);
     color: var(--jm-muted);
     line-height: 1.6;
-    text-align: center;
+    text-align: left;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.dashboard-empty::before {
+    content: "";
+    width: 34px;
+    height: 34px;
+    border: 1px solid #bae6fd;
+    border-radius: var(--jm-radius);
+    background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
 }
 
 @media (max-width: 1440px) {
