@@ -426,7 +426,8 @@ a {
     box-shadow: var(--jm-shadow);
 }
 
-.content-card.owner-content-card {
+.content-card.owner-content-card,
+.content-card.manager-content-card {
     padding: 0;
     overflow: visible;
     border: 0;
@@ -534,12 +535,14 @@ a {
     color: var(--jm-heading);
 }
 
-.owner-dashboard {
+.owner-dashboard,
+.manager-dashboard {
     display: grid;
     gap: 24px;
 }
 
-.owner-hero {
+.owner-hero,
+.manager-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 122px;
     gap: 20px;
@@ -553,7 +556,41 @@ a {
     box-shadow: 0 24px 58px rgba(37, 99, 235, 0.22);
 }
 
-.owner-hero h2 {
+.manager-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
+    background: linear-gradient(135deg, #0284c7 0%, #0f766e 58%, #4338ca 100%);
+    box-shadow: 0 24px 58px rgba(15, 118, 110, 0.18);
+}
+
+.manager-hero-focus {
+    display: grid;
+    place-items: center;
+    min-height: 118px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: var(--jm-radius);
+    background: rgba(255, 255, 255, 0.14);
+    text-align: center;
+}
+
+.manager-hero-focus span,
+.manager-hero-focus small {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.manager-hero-focus strong {
+    color: #ffffff;
+    font-size: 2.4rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.manager-hero-focus small {
+    font-size: 0.84rem;
+}
+
+.owner-hero h2,
+.manager-hero h2 {
     margin: 0;
     color: #ffffff;
     font-size: clamp(1.9rem, 3vw, 2.7rem);
@@ -561,7 +598,8 @@ a {
     line-height: 1.08;
 }
 
-.owner-hero p {
+.owner-hero p,
+.manager-hero p {
     max-width: 720px;
     margin: 12px 0 0;
     color: rgba(255, 255, 255, 0.9);
@@ -1179,6 +1217,73 @@ a {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.manager-pill-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.manager-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 76px;
+    padding: 18px;
+    border: 1px solid var(--jm-line);
+    border-radius: var(--jm-radius);
+    background: var(--jm-surface);
+    color: var(--jm-heading);
+    text-decoration: none;
+    box-shadow: var(--jm-shadow);
+}
+
+.manager-pill span {
+    color: var(--jm-muted);
+    font-size: 0.86rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.manager-pill strong {
+    color: var(--jm-primary);
+    font-size: 1.35rem;
+    font-weight: 950;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.manager-two-column {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.manager-info-card {
+    display: flex;
+    align-items: center;
+    min-height: 118px;
+    padding: 24px 26px;
+    border: 1px solid #bae6fd;
+    border-radius: var(--jm-radius);
+    background: #f0f9ff;
+    color: var(--jm-heading);
+}
+
+.manager-info-card strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 950;
+}
+
+.manager-info-card p {
+    max-width: 900px;
+    margin: 8px 0 0;
+    color: var(--jm-muted);
+    line-height: 1.55;
+}
+
 .quick-action {
     display: grid;
     place-items: center;
@@ -1265,11 +1370,13 @@ a {
 
 @media (max-width: 1320px) {
     .kpi-grid,
-    .quick-actions-grid {
+    .quick-actions-grid,
+    .manager-pill-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .insight-grid {
+    .insight-grid,
+    .manager-two-column {
         grid-template-columns: 1fr;
     }
 }
@@ -1305,6 +1412,7 @@ a {
     }
 
     .owner-hero,
+    .manager-hero,
     .client-summary,
     .invoice-donut-layout {
         grid-template-columns: 1fr;
@@ -1339,11 +1447,13 @@ a {
     .financial-grid,
     .client-metrics,
     .client-actions,
-    .quick-actions-grid {
+    .quick-actions-grid,
+    .manager-pill-grid {
         grid-template-columns: 1fr;
     }
 
     .owner-hero,
+    .manager-hero,
     .owner-panel,
     .kpi-card {
         padding: 20px;

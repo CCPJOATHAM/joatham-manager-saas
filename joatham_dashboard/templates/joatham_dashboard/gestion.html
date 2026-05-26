@@ -1,331 +1,281 @@
 {% extends "joatham_dashboard/base.html" %}
 
 {% block page_title %}Dashboard Gestionnaire | JOATHAM Manager{% endblock %}
-{% block content_title %}Dashboard gestionnaire{% endblock %}
-{% block content_subtitle %}Une vue operationnelle claire pour piloter les ventes, les depenses, les clients et les apprenants au quotidien.{% endblock %}
+{% block content_title %}Pilotage quotidien{% endblock %}
+{% block content_subtitle %}Espace gestionnaire / operations courantes{% endblock %}
+{% block content_card_class %}manager-content-card{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'client_list' %}" class="btn-link">Clients</a>
 <a href="{% url 'facture_list' %}" class="btn-link">Factures</a>
+<a href="{% url 'client_list' %}" class="btn-link">Clients</a>
 <a href="{% url 'depenses' %}" class="btn-link">Depenses</a>
 <a href="{% url 'apprenant_list' %}" class="btn-link primary">Apprenants</a>
 {% endblock %}
 
 {% block content %}
-<style>
-    .hero {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
-
-    .hero h2 {
-        margin: 0;
-        font-size: 1.65rem;
-        letter-spacing: -0.03em;
-    }
-
-    .hero p {
-        margin: 8px 0 0;
-        color: #64748b;
-        max-width: 760px;
-        line-height: 1.6;
-    }
-
-    .hero-pills {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .hero-pill {
-        display: inline-flex;
-        align-items: center;
-        min-height: 36px;
-        padding: 0 14px;
-        border-radius: 999px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        font-size: 0.84rem;
-        font-weight: 700;
-    }
-
-    .premium-kpis {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-    }
-
-    .premium-card {
-        display: grid;
-        grid-template-columns: 48px minmax(0, 1fr);
-        gap: 14px;
-        align-items: center;
-        padding: 18px;
-        border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        border: 1px solid #dde7f0;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .premium-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #eef6ff;
-        color: #2563eb;
-    }
-
-    .premium-icon svg {
-        width: 22px;
-        height: 22px;
-    }
-
-    .premium-label {
-        color: #64748b;
-        font-size: 0.84rem;
-        line-height: 1.35;
-    }
-
-    .premium-value {
-        display: block;
-        margin-top: 3px;
-        color: #10233f;
-        font-size: 1.08rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-    }
-
-    .premium-meta {
-        display: block;
-        margin-top: 3px;
-        color: #64748b;
-        font-size: 0.8rem;
-    }
-
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-    }
-
-    .quick-action-card {
-        display: block;
-        text-decoration: none;
-        padding: 18px;
-        border-radius: 20px;
-        background: linear-gradient(145deg, #ffffff, #f8fafc);
-        border: 1px solid #dde7f0;
-        color: #10233f;
-        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
-    }
-
-    .quick-action-card strong {
-        display: block;
-        font-size: 1rem;
-        margin-bottom: 8px;
-    }
-
-    .quick-action-card span {
-        color: #64748b;
-        line-height: 1.6;
-        font-size: 0.92rem;
-    }
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
-        align-items: start;
-    }
-
-    .section-card {
-        background: #fff;
-        border: 1px solid #dde7f0;
-        border-radius: 24px;
-        padding: 22px;
-        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
-    }
-
-    .section-card h3 {
-        margin: 0 0 8px;
-        font-size: 1.08rem;
-    }
-
-    .section-subtitle {
-        margin: 0 0 16px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-
-    .list-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        padding: 16px;
-    }
-
-    .list-card ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 10px;
-    }
-
-    .list-card li {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .list-card li:last-child {
-        border-bottom: 0;
-        padding-bottom: 0;
-    }
-
-    @media (max-width: 1180px) {
-        .premium-kpis,
-        .quick-actions {
-            grid-template-columns: repeat(2, minmax(180px, 1fr));
-        }
-
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 760px) {
-        .premium-kpis,
-        .quick-actions {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="hero">
-    <div>
-        <h2>Pilotage quotidien</h2>
-        <p>Suivez l'activite commerciale et operationnelle de l'entreprise avec un tableau de bord plus utile, plus lisible et oriente action.</p>
-    </div>
-    <div class="hero-pills">
-        <span class="hero-pill">Clients : {{ nombre_clients }}</span>
-        <span class="hero-pill">Factures : {{ nombre_factures }}</span>
-        <span class="hero-pill">Apprenants : {{ nombre_apprenants }}</span>
-    </div>
-</div>
-
-<div class="premium-kpis">
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2v20"></path>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
-            </svg>
+<div class="manager-dashboard">
+    <section class="manager-hero" aria-label="Pilotage quotidien">
+        <div class="hero-copy">
+            <div class="hero-title-row">
+                <span class="hero-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+                </span>
+                <h2>Pilotage quotidien</h2>
+            </div>
+            <p>Suivi des operations courantes : facturation, clients, encaissements, depenses et apprenants.</p>
+            <div class="hero-badge-row">
+                {% if user_role_label %}
+                <span class="hero-badge">{{ user_role_label }}</span>
+                {% endif %}
+                {% if subscription %}
+                <span class="hero-badge">Abonnement : {{ subscription.get_statut_display }}</span>
+                {% endif %}
+                {% if entreprise_identity.currency_code %}
+                <span class="hero-badge">Devise : {{ entreprise_identity.currency_code }}</span>
+                {% endif %}
+            </div>
         </div>
-        <div>
-            <span class="premium-label">Facturation du mois</span>
-            <span class="premium-value">{{ total_mois }}</span>
-            <span class="premium-meta">Production commerciale recente</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#eefcf6; color:#047857;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 7 9 18l-5-5"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Encaissements</span>
-            <span class="premium-value">{{ total_encaisse }}</span>
-            <span class="premium-meta">{{ payees }} facture{{ payees|pluralize:"s" }} soldee{{ payees|pluralize:"s" }}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#fff7ed; color:#c2410c;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 8v5"></path>
-                <path d="M12 16h.01"></path>
-                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Reste a relancer</span>
-            <span class="premium-value">{{ reste_encaisser }}</span>
-            <span class="premium-meta">{{ impayees }} facture{{ impayees|pluralize:"s" }} en attente</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#eef6ff; color:#1d4ed8;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="10" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Portefeuille actif</span>
-            <span class="premium-value">{{ nombre_clients }}</span>
-            <span class="premium-meta">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</span>
-        </div>
-    </div>
-</div>
+        <aside class="manager-hero-focus" aria-label="Operations du jour">
+            <span>A suivre</span>
+            <strong>{{ impayees }}</strong>
+            <small>facture{{ impayees|pluralize:"s" }} impayee{{ impayees|pluralize:"s" }}</small>
+        </aside>
+    </section>
 
-<div class="quick-actions">
-    <a href="{% url 'client_list' %}" class="quick-action-card">
-        <strong>Clients</strong>
-        <span>Ouvrez le portefeuille client et poursuivez vos actions commerciales en cours.</span>
-    </a>
-    <a href="{% url 'facture_list' %}" class="quick-action-card">
-        <strong>Factures</strong>
-        <span>Retrouvez les factures a suivre, les PDFs et les paiements lies.</span>
-    </a>
-    <a href="{% url 'depenses' %}" class="quick-action-card">
-        <strong>Depenses</strong>
-        <span>Suivez les sorties financieres et les tendances recentes du module depenses.</span>
-    </a>
-    <a href="{% url 'apprenant_list' %}" class="quick-action-card">
-        <strong>Apprenants</strong>
-        <span>Accedez aux apprenants, inscriptions et paiements de formation.</span>
-    </a>
-</div>
-
-<div class="dashboard-grid">
-    <section class="section-card">
-        <h3>Synthese operationnelle</h3>
-        <p class="section-subtitle">Les indicateurs les plus utiles pour prioriser les actions commerciales et de suivi.</p>
-        <div class="list-card">
-            <ul>
-                <li><span>Chiffre d'affaires cumule</span><strong>{{ total_ca }}</strong></li>
-                <li><span>Benefice estime</span><strong>{{ benefice }}</strong></li>
-                <li><span>TVA cumulee</span><strong>{{ total_tva }}</strong></li>
-                <li><span>Depenses du mois</span><strong>{{ depense_mois }}</strong></li>
-            </ul>
+    <section class="owner-panel" aria-label="Actions rapides">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
+                </span>
+                <div>
+                    <h3>Actions rapides</h3>
+                    <span class="section-kicker">Les raccourcis utiles pour agir sans perdre de temps.</span>
+                </div>
+            </div>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="{% url 'add_facture' %}" class="quick-action is-blue">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <strong>Creer une facture</strong>
+            </a>
+            <a href="{% url 'add_client' %}" class="quick-action is-magenta">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg></span>
+                <strong>Ajouter un client</strong>
+            </a>
+            <a href="{% url 'depenses' %}" class="quick-action is-green">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
+                <strong>Enregistrer une depense</strong>
+            </a>
+            <a href="{% url 'facture_list' %}" class="quick-action is-orange">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
+                <strong>Voir les factures</strong>
+            </a>
+            <a href="{% url 'client_list' %}" class="quick-action is-red">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></span>
+                <strong>Voir les clients</strong>
+            </a>
+            <a href="{% url 'apprenant_list' %}" class="quick-action is-purple">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 4 2 10l10 6 10-6Z"></path><path d="M6 12v5c3 2 9 2 12 0v-5"></path></svg></span>
+                <strong>Voir les apprenants</strong>
+            </a>
         </div>
     </section>
 
-    <section class="section-card">
-        <h3>Priorites du jour</h3>
-        <p class="section-subtitle">Une lecture simple pour savoir ou agir ensuite dans le produit.</p>
-        <div class="list-card">
-            <ul>
-                <li><span>Factures aujourd'hui</span><strong>{{ total_jour }}</strong></li>
-                <li><span>Depenses aujourd'hui</span><strong>{{ depense_jour }}</strong></li>
-                <li><span>Factures a relancer</span><strong>{{ impayees }}</strong></li>
-                <li><span>Clients suivis</span><strong>{{ nombre_clients }}</strong></li>
-            </ul>
+    <section class="kpi-grid" aria-label="Indicateurs operationnels">
+        <article class="kpi-card is-revenue">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Facturation du mois</span>
+                    <strong class="kpi-value">{{ total_mois }}</strong>
+                    <span class="kpi-subtitle">Production commerciale recente.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">Total du mois calcule par le backend.</div>
+        </article>
+
+        <article class="kpi-card is-cash">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Encaissements</span>
+                    <strong class="kpi-value">{{ total_encaisse }}</strong>
+                    <span class="kpi-subtitle">Montants percus et paiements valides.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 9 18l-5-5"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ payees }} facture{{ payees|pluralize:"s" }} payee{{ payees|pluralize:"s" }}.</div>
+        </article>
+
+        <article class="kpi-card is-due">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Reste a relancer</span>
+                    <strong class="kpi-value">{{ reste_encaisser }}</strong>
+                    <span class="kpi-subtitle">Montants encore dus par les clients.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ impayees }} facture{{ impayees|pluralize:"s" }} en attente.</div>
+        </article>
+
+        <article class="kpi-card is-clients">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Portefeuille actif</span>
+                    <strong class="kpi-value">{{ nombre_clients }}</strong>
+                    <span class="kpi-subtitle">Clients suivis dans l'entreprise.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}.</div>
+        </article>
+    </section>
+
+    <section class="manager-pill-grid" aria-label="Raccourcis metier">
+        <a href="{% url 'client_list' %}" class="manager-pill">
+            <span>Clients</span>
+            <strong>{{ nombre_clients }}</strong>
+        </a>
+        <a href="{% url 'facture_list' %}" class="manager-pill">
+            <span>Factures</span>
+            <strong>{{ nombre_factures }}</strong>
+        </a>
+        <a href="{% url 'apprenant_list' %}" class="manager-pill">
+            <span>Apprenants</span>
+            <strong>{{ nombre_apprenants }}</strong>
+        </a>
+        <a href="{% url 'depenses' %}" class="manager-pill">
+            <span>Depenses mois</span>
+            <strong>{{ depense_mois }}</strong>
+        </a>
+    </section>
+
+    <section class="owner-panel" aria-label="Synthese operationnelle">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
+                </span>
+                <div>
+                    <h3>Synthese operationnelle</h3>
+                    <span class="section-kicker">Les indicateurs utiles pour arbitrer les actions du jour.</span>
+                </div>
+            </div>
+        </div>
+        <div class="financial-grid manager-financial-grid">
+            <div class="mini-stat is-blue"><span>Ventes du jour</span><strong>{{ total_jour }}</strong><small>Facturation journaliere</small></div>
+            <div class="mini-stat is-blue"><span>Ventes du mois</span><strong>{{ total_mois }}</strong><small>Facturation mensuelle</small></div>
+            <div class="mini-stat is-red"><span>Depenses du jour</span><strong>{{ depense_jour }}</strong><small>Sorties du jour</small></div>
+            <div class="mini-stat is-red"><span>Depenses du mois</span><strong>{{ depense_mois }}</strong><small>Sorties mensuelles</small></div>
+            <div class="mini-stat is-green"><span>Factures payees</span><strong>{{ payees }}</strong><small>Factures</small></div>
+            <div class="mini-stat is-amber"><span>Factures impayees</span><strong>{{ impayees }}</strong><small>Factures</small></div>
+        </div>
+    </section>
+
+    <section class="manager-two-column">
+        <article class="owner-panel" aria-label="Priorites du jour">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Priorites du jour</h3>
+                        <span class="section-kicker">Alertes basees uniquement sur les donnees disponibles.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-list">
+                {% if impayees %}
+                <div class="alert-card is-danger">
+                    <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
+                    <div class="alert-copy">
+                        <strong>Factures impayees</strong>
+                        <span>{{ impayees }} facture{{ impayees|pluralize:"s" }} en attente. Montant a relancer : {{ reste_encaisser }}.</span>
+                    </div>
+                    <span class="alert-count">{{ impayees }}</span>
+                </div>
+                {% endif %}
+
+                {% if rupture_products_count %}
+                <div class="alert-card is-danger">
+                    <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
+                    <div class="alert-copy">
+                        <strong>Produits en rupture</strong>
+                        <span>Quantite en stock inferieure ou egale a 0.</span>
+                        <div class="alert-products">
+                            {% for product in rupture_products %}
+                            <small>{{ product.nom }} - Stock actuel : {{ product.quantite_stock }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="alert-count">{{ rupture_products_count }}</span>
+                </div>
+                {% endif %}
+
+                {% if low_stock_products_count %}
+                <div class="alert-card is-warning">
+                    <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                    <div class="alert-copy">
+                        <strong>Stock faible</strong>
+                        <span>Produits dont le stock est positif mais inferieur ou egal au seuil d'alerte.</span>
+                        <div class="alert-products">
+                            {% for product in low_stock_products %}
+                            <small>{{ product.nom }} - Stock actuel : {{ product.quantite_stock }} | Seuil : {{ product.seuil_alerte }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="alert-count">{{ low_stock_products_count }}</span>
+                </div>
+                {% endif %}
+
+                {% if not impayees and not rupture_products_count and not low_stock_products_count %}
+                <div class="dashboard-empty">Aucune priorite critique pour le moment.</div>
+                {% endif %}
+            </div>
+        </article>
+
+        <article class="owner-panel" aria-label="Activite recente">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Activite recente</h3>
+                        <span class="section-kicker">Dernieres operations visibles pour le suivi quotidien.</span>
+                    </div>
+                </div>
+            </div>
+            {% if recent_activity %}
+            <div class="timeline-list">
+                {% for log in recent_activity %}
+                <div class="timeline-entry">
+                    <span class="timeline-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                    <div class="timeline-copy">
+                        <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                        <span>{{ log.description }}</span>
+                        {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
+                    </div>
+                    <time class="timeline-time">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="dashboard-empty">Aucune activite recente pour le moment.</div>
+            {% endif %}
+        </article>
+    </section>
+
+    <section class="manager-info-card" aria-label="Espace Gestionnaire">
+        <div>
+            <strong>Espace Gestionnaire</strong>
+            <p>Cet espace permet de suivre les operations courantes sans acceder aux fonctions reservees au proprietaire ou a la comptabilite avancee.</p>
         </div>
     </section>
 </div>
