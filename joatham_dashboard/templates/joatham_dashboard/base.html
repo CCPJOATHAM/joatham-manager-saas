@@ -1,855 +1,23 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
-    <style>
-:root {
-    --page-bg: #F6F9FF;
-    --surface: #FFFFFF;
-    --surface-soft: #F8FBFF;
-    --sidebar-bg: #E7F0FF;
-    --text: #0F172A;
-    --text-strong: #0F172A;
-    --muted: #475569;
-    --muted-light: #64748B;
-    --primary: #2563EB;
-    --primary-light: #DCEBFF;
-    --primary-hover: #1D4ED8;
-    --line: #D9E6F7;
-    --line-strong: #BFD4F5;
-    --success: #22C55E;
-    --warning: #F59E0B;
-    --danger: #EF4444;
-    --shadow: 0 16px 42px rgba(15, 23, 42, 0.07);
-    --shadow-md: 0 24px 60px rgba(15, 23, 42, 0.10);
-    --radius: 16px;
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-    min-height: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-body {
-    margin: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 32rem),
-        linear-gradient(180deg, #FFFFFF 0%, var(--page-bg) 42%);
-    color: var(--text);
-}
-
-.app-shell {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 292px minmax(0, 1fr);
-    width: 100%;
-    background: transparent;
-}
-
-.sidebar {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0)),
-        linear-gradient(180deg, #E7F0FF 0%, #D2E5FF 44%, #C3DAFF 100%);
-    border-right: 1px solid #ADC8F3;
-    color: var(--text);
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    min-height: 100vh;
-    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.55);
-}
-
-.brand,
-.company-card,
-.content-card,
-.badge,
-.language-select,
-.language-submit,
-.btn-link {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow);
-}
-
-.brand,
-.company-card {
-    border-radius: 18px;
-    padding: 16px;
-}
-
-.sidebar .brand,
-.sidebar .company-card {
-    background: rgba(255, 255, 255, 0.76);
-    border: 1px solid rgba(147, 197, 253, 0.74);
-    box-shadow: 0 18px 45px rgba(37, 99, 235, 0.12);
-    backdrop-filter: blur(14px);
-}
-
-.sidebar .brand {
-    position: relative;
-    overflow: hidden;
-    padding: 20px 18px 18px;
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 251, 255, 0.94) 52%, rgba(226, 244, 255, 0.90) 100%);
-    border-color: rgba(160, 207, 255, 0.88);
-    box-shadow:
-        0 22px 46px rgba(37, 99, 235, 0.13),
-        inset 0 1px 0 rgba(255, 255, 255, 0.92);
-}
-
-.sidebar .brand::before {
-    content: "";
-    position: absolute;
-    left: 18px;
-    right: 18px;
-    top: 0;
-    height: 3px;
-    border-radius: 0 0 999px 999px;
-    background: linear-gradient(90deg, rgba(37, 99, 235, 0.20), rgba(14, 165, 233, 0.55), rgba(255, 255, 255, 0));
-}
-
-.brand-title {
-    position: relative;
-    font-size: 1.22rem;
-    font-weight: 900;
-    color: #0F172A;
-    letter-spacing: 0.01em;
-    line-height: 1.16;
-}
-
-.brand-subtitle,
-.company-card .muted,
-.topbar .subtitle {
-    color: var(--muted);
-    line-height: 1.5;
-}
-
-.brand-subtitle {
-    position: relative;
-    margin-top: 9px;
-    max-width: 220px;
-    color: #38546D;
-    font-size: 0.84rem;
-    font-weight: 600;
-    line-height: 1.58;
-}
-
-.company-card .label {
-    display: block;
-    font-size: 0.74rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #31527C;
-    margin-bottom: 6px;
-}
-
-.company-card strong {
-    display: block;
-    color: #0F172A;
-    margin-bottom: 6px;
-}
-
-.nav {
-    display: grid;
-    gap: 7px;
-}
-
-.nav a,
-.nav .nav-disabled {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-width: 0;
-    min-height: 46px;
-    padding: 9px 11px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.48);
-    color: #0F172A;
-    text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.44);
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.04);
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-}
-
-.nav a:hover {
-    background: rgba(219, 234, 254, 0.94);
-    color: #0F172A;
-    border-color: #93C5FD;
-    box-shadow: 0 14px 26px rgba(37, 99, 235, 0.12);
-    transform: translateY(-1px);
-}
-
-.nav a.is-active {
-    background: linear-gradient(135deg, #2563EB, #3B82F6);
-    color: #FFFFFF;
-    border-color: #2563EB;
-    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.28);
-}
-
-.nav-main {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-    gap: 12px;
-}
-
-.nav-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
-    border-radius: 10px;
-    background: rgba(37, 99, 235, 0.10);
-    color: #2563EB;
-}
-
-.nav a.is-active .nav-icon {
-    background: rgba(255, 255, 255, 0.18);
-    color: #FFFFFF;
-}
-
-.nav-icon svg {
-    width: 18px;
-    height: 18px;
-}
-
-.nav-label {
-    min-width: 0;
-    color: inherit;
-    font-weight: 800;
-    line-height: 1.3;
-    word-break: normal;
-    overflow-wrap: normal;
-}
-
-.nav-badge-group {
-    display: inline-flex;
-    align-items: center;
-    flex: 0 0 auto;
-    gap: 6px;
-}
-
-.nav .nav-disabled {
-    opacity: 0.62;
-    cursor: not-allowed;
-}
-
-.nav-badge {
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(239, 246, 255, 0.92);
-    color: #1D4ED8;
-    font-size: 0.68rem;
-    font-weight: 800;
-}
-
-.nav a.is-active .nav-badge {
-    background: rgba(255, 255, 255, 0.20);
-    color: #FFFFFF;
-}
-
-.sidebar-footer {
-    margin-top: auto;
-    color: #31527C;
-    font-size: 0.82rem;
-    line-height: 1.5;
-}
-
-.main {
-    min-width: 0;
-    width: 100%;
-    background: transparent;
-}
-
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(0, auto);
-    align-items: start;
-    gap: 28px;
-    padding: 24px 30px 18px;
-    background:
-        radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.72), transparent 24rem),
-        linear-gradient(135deg, #EAF7FF 0%, #BFE9FF 62%, #90D5FF 100%);
-    border-bottom: 1px solid rgba(130, 200, 229, 0.52);
-    box-shadow: 0 18px 42px rgba(14, 116, 144, 0.12);
-    backdrop-filter: blur(18px);
-}
-
-.topbar h1 {
-    margin: 0 0 8px;
-    font-size: clamp(1.65rem, 2.5vw, 2.15rem);
-    color: #0F172A;
-    font-weight: 900;
-    letter-spacing: 0;
-}
-
-.topbar .subtitle {
-    color: #164E63;
-}
-
-.identity-bar,
-.topbar-meta,
-.top-actions,
-.language-switcher {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.identity-bar {
-    justify-content: flex-end;
-    align-items: flex-start;
-}
-
-.topbar-meta,
-.top-actions {
-    justify-content: flex-end;
-}
-
-.logout-form {
-    display: inline-flex;
-    margin: 0;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    border-radius: 12px;
-    padding: 0 13px;
-    background: rgba(255, 255, 255, 0.78);
-    color: #1E293B;
-    font-size: 0.88rem;
-    border: 1px solid rgba(217, 230, 247, 0.96);
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
-}
-
-.profile-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: inherit;
-    text-decoration: none;
-    font-weight: 700;
-}
-
-.profile-link svg {
-    width: 17px;
-    height: 17px;
-}
-
-.language-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-}
-
-.language-select,
-.language-submit,
-.btn-link {
-    min-height: 40px;
-    border-radius: 12px;
-    color: var(--text);
-    font: inherit;
-}
-
-.language-select {
-    padding: 0 36px 0 13px;
-    background: rgba(255, 255, 255, 0.84);
-}
-
-.language-submit,
-.btn-link {
-    padding: 0 15px;
-    font-weight: 800;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.84);
-    color: #0F172A;
-    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-
-.btn-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-}
-
-.language-submit:hover,
-.btn-link:hover {
-    border-color: #BFDBFE;
-    background: #FFFFFF;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
-    transform: translateY(-1px);
-}
-
-.btn-link.primary {
-    background: linear-gradient(135deg, #2563EB, #3B82F6);
-    border-color: var(--primary);
-    color: #FFFFFF;
-    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.20);
-}
-
-.btn-link.danger {
-    background: #FFF7F7;
-    border-color: #FAD4D4;
-    color: #DC2626;
-}
-
-.topbar .badge,
-.topbar .language-select,
-.topbar .language-submit,
-.topbar .btn-link {
-    background: rgba(255, 255, 255, 0.68);
-    border-color: rgba(130, 200, 229, 0.58);
-    color: #0F172A;
-    box-shadow: 0 12px 28px rgba(14, 116, 144, 0.10);
-}
-
-.topbar .language-select {
-    background: rgba(255, 255, 255, 0.76);
-}
-
-.topbar .language-submit:hover,
-.topbar .btn-link:hover {
-    background: rgba(255, 255, 255, 0.92);
-    border-color: #82C8E5;
-    box-shadow: 0 16px 32px rgba(14, 116, 144, 0.15);
-}
-
-.topbar .btn-link.primary {
-    background: linear-gradient(135deg, #2563EB, #3B82F6);
-    border-color: rgba(37, 99, 235, 0.72);
-    color: #FFFFFF;
-    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.22);
-}
-
-.topbar .btn-link.danger {
-    background: rgba(255, 247, 247, 0.78);
-    border-color: rgba(248, 180, 180, 0.72);
-    color: #B91C1C;
-}
-
-.page-content {
-    padding: 28px 30px;
-    background: transparent !important;
-    color: var(--text);
-}
-
-.content-card {
-    border-radius: 22px;
-    padding: 24px;
-    width: 100%;
-    overflow-x: auto;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(217, 230, 247, 0.86);
-    box-shadow: var(--shadow);
-}
-
-.content-card h1,
-.content-card h2,
-.content-card h3,
-.content-card h4 {
-    color: var(--text-strong);
-}
-
-.content-card p,
-.content-card li,
-.content-card label,
-.content-card small {
-    color: var(--muted);
-}
-
-.content-card a {
-    color: var(--primary);
-}
-
-.content-card input:not([type="checkbox"]):not([type="radio"]),
-.content-card select,
-.content-card textarea {
-    min-height: 42px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--surface-soft);
-    color: var(--text);
-    font: inherit;
-    padding: 10px 12px;
-}
-
-.content-card input:focus,
-.content-card select:focus,
-.content-card textarea:focus {
-    border-color: var(--primary);
-    outline: 3px solid rgba(37, 99, 235, 0.12);
-}
-
-.messages {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-
-.message {
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(59, 130, 246, 0.34);
-    background: rgba(37, 99, 235, 0.12);
-    color: #BFDBFE;
-}
-
-.message.error {
-    background: rgba(239, 68, 68, 0.12);
-    color: #FCA5A5;
-    border-color: rgba(239, 68, 68, 0.34);
-}
-
-.message.success {
-    background: rgba(34, 197, 94, 0.12);
-    color: #86EFAC;
-    border-color: rgba(34, 197, 94, 0.34);
-}
-
-.table-scroll {
-    width: 100%;
-    overflow-x: auto;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--surface);
-}
-
-.content-card table {
-    width: max-content !important;
-    min-width: 100%;
-    border-collapse: collapse;
-}
-
-.content-card th,
-.content-card td {
-    white-space: nowrap;
-    border-bottom: 1px solid var(--line);
-    padding: 12px 14px;
-    text-align: left;
-}
-
-.content-card th {
-    background: var(--surface-soft);
-    color: var(--text-strong);
-}
-
-.content-card td {
-    color: var(--text);
-}
-
-.content-card button,
-.content-card input[type="submit"],
-.content-card input[type="button"] {
-    min-height: 42px;
-    padding: 0 16px;
-    border: 1px solid var(--primary);
-    border-radius: 999px;
-    background: var(--primary);
-    color: #ffffff;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* Phase 12: global premium visual layer inspired by the RH module. */
-body {
-    background: #f5f7fb;
-}
-
-.app-shell {
-    grid-template-columns: 272px minmax(0, 1fr);
-    background: #f5f7fb;
-}
-
-.sidebar {
-    position: sticky;
-    top: 0;
-    padding: 18px 16px;
-    background: #ffffff;
-    border-right: 1px solid #e5e7eb;
-    box-shadow: 18px 0 46px rgba(15, 23, 42, 0.04);
-    z-index: 40;
-}
-
-.sidebar .brand,
-.sidebar .company-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: none;
-}
-
-.sidebar .brand {
-    padding: 18px 16px;
-    border: 0;
-}
-
-.sidebar .brand::before {
-    background: linear-gradient(90deg, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0.72), rgba(255, 255, 255, 0));
-}
-
-.brand-title {
-    color: #0ea5e9;
-}
-
-.brand-subtitle,
-.company-card .muted,
-.sidebar-footer {
-    color: #64748b;
-}
-
-.company-card .label {
-    color: #6b7280;
-    letter-spacing: 0;
-}
-
-.nav {
-    gap: 3px;
-}
-
-.nav a,
-.nav .nav-disabled {
-    min-height: 48px;
-    padding: 9px 10px;
-    border: 1px solid transparent;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #5b6472;
-    box-shadow: none;
-}
-
-.nav a:hover {
-    background: #f1f9ff;
-    color: #0284c7;
-    border-color: #cfe9f8;
-    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.10);
-}
-
-.nav a.is-active {
-    position: relative;
-    background: #eaf6ff;
-    color: #0284c7;
-    border-color: transparent;
-    box-shadow: none;
-}
-
-.nav a.is-active::after {
-    content: "";
-    position: absolute;
-    right: -16px;
-    top: 7px;
-    bottom: 7px;
-    width: 4px;
-    border-radius: 999px;
-    background: #0ea5e9;
-}
-
-.nav-icon {
-    border-radius: 9px;
-    background: #eaf6ff;
-    color: #0ea5e9;
-}
-
-.nav a.is-active .nav-icon {
-    background: #ddf2ff;
-    color: #0284c7;
-}
-
-.nav-label {
-    font-weight: 750;
-}
-
-.nav-badge {
-    background: #eaf6ff;
-    color: #0284c7;
-}
-
-.nav a.is-active .nav-badge {
-    background: #ffffff;
-    color: #0284c7;
-}
-
-.nav-section-label {
-    display: block;
-    margin: 2px 8px 8px;
-    color: #6b7280;
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0;
-    text-transform: uppercase;
-}
-
-.topbar {
-    padding: 24px 32px 18px;
-    background: rgba(245, 247, 251, 0.92);
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: none;
-}
-
-.topbar .subtitle {
-    color: #64748b;
-}
-
-.badge,
-.language-select,
-.language-submit,
-.btn-link,
-.topbar .badge,
-.topbar .language-select,
-.topbar .language-submit,
-.topbar .btn-link {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #0f172a;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
-}
-
-.btn-link:hover,
-.language-submit:hover,
-.topbar .btn-link:hover,
-.topbar .language-submit:hover {
-    border-color: #bae6fd;
-    background: #f8fafc;
-    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.10);
-}
-
-.btn-link.primary,
-.topbar .btn-link.primary {
-    border-color: #0ea5e9;
-    background: #0ea5e9;
-    color: #ffffff;
-    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
-}
-
-.page-content {
-    padding: 28px 32px;
-}
-
-.content-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-}
-
-.message {
-    border-color: #bae6fd;
-    border-radius: 12px;
-    background: #f0f9ff;
-    color: #0369a1;
-}
-
-.table-scroll {
-    border-radius: 12px;
-}
-
-.content-card input:not([type="checkbox"]):not([type="radio"]),
-.content-card select,
-.content-card textarea,
-.content-card button,
-.content-card input[type="submit"],
-.content-card input[type="button"] {
-    border-radius: 12px;
-}
-
-.dashboard-layout-premium .brand-title {
-    color: #0ea5e9;
-    font-size: 1.26rem;
-    line-height: 1.26;
-}
-
-.dashboard-layout-premium .company-card {
-    background: #f8fafc;
-}
-
-@media (max-width: 980px) {
-    .app-shell {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        min-height: auto;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-    }
-
-    .topbar {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
-    }
-
-    .identity-bar,
-    .topbar-meta,
-    .top-actions {
-        justify-content: flex-start;
-    }
-
-    .nav {
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    }
-}
-
-@media (max-width: 640px) {
-    .sidebar,
-    .topbar,
-    .page-content {
-        padding: 16px;
-    }
-
-    .top-actions,
-    .topbar-meta,
-    .language-switcher,
-    .logout-form,
-    .btn-link,
-    .language-select,
-    .language-submit {
-        width: 100%;
-    }
-
-    .top-actions {
-        display: grid;
-        grid-template-columns: 1fr;
-    }
-
-    .nav {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+    <link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard.css' %}">
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
     <div class="app-shell dashboard-layout-premium">
         <aside class="sidebar premium-sidebar">
             <div class="brand">
-                <div class="brand-title">JOATHAM<br>Manager</div>
+                <div class="brand-title">JOATHAM Manager</div>
                 <div class="brand-subtitle">{% trans "Interface SaaS claire pour piloter les modules de votre entreprise." %}</div>
             </div>
 
             <div class="company-card">
-                <span class="label">{% trans "Entreprise" %}</span>
-                <strong>
+                <span class="label">
                     {% if entreprise_identity.primary_name %}
                         {{ entreprise_identity.primary_name }}
                     {% elif user_role_key == "super_admin" %}
@@ -857,107 +25,77 @@ body {
                     {% else %}
                         {% trans "Mon entreprise" %}
                     {% endif %}
-                </strong>
+                </span>
                 {% if entreprise_identity.secondary_name %}
                 <div class="muted">{{ entreprise_identity.secondary_name }}</div>
                 {% elif user_role_key == "super_admin" %}
                 <div class="muted">{% trans "Pilotage global SaaS" %}</div>
                 {% endif %}
-                <div class="muted">{{ user_role_label }}</div>
+                {% if user_role_label %}
+                <span class="role-chip">{{ user_role_label }}</span>
+                {% endif %}
                 {% trans "Multi" as multi_currency_label %}
-                <div class="muted">{% trans "Devise" %} : {{ entreprise_identity.currency_code|default:multi_currency_label }}</div>
+                <div class="muted">{% trans "Devise" %}: {{ entreprise_identity.currency_code|default:multi_currency_label }}</div>
             </div>
 
-            <nav class="nav">
+            <nav class="nav" aria-label="{% trans 'Menu principal' %}">
                 <span class="nav-section-label">{% trans "Menu principal" %}</span>
                 {% for item in dashboard_navigation %}
-                {% if item.is_disabled %}
-                <span class="nav-disabled" aria-disabled="true">
-                    <span class="nav-main">
-                        <span class="nav-icon" aria-hidden="true">
-                            {% if item.label == "Dashboard" or item.label == "Pilotage SaaS" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
-                            {% elif item.label == "Messagerie" or item.label == "Demandes SaaS" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
-                            {% elif item.label == "Suggestions" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z"></path></svg>
-                            {% elif item.label == "Organisation" or item.label == "Entreprises" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
-                            {% elif item.label == "Clients" or item.label == "Utilisateurs" or item.label == "Apprenants" or item.label == "Ressources humaines" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            {% elif item.label == "Services" or item.label == "Produits" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h4"></path><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"></path></svg>
-                            {% elif item.label == "Factures" or item.label == "Depenses" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
-                            {% elif item.label == "Comptabilite" or item.label == "Taux de change" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h2"></path><path d="M12 10h2"></path><path d="M16 10h.01"></path><path d="M8 14h2"></path><path d="M12 14h2"></path><path d="M16 14h.01"></path><path d="M8 18h8"></path></svg>
-                            {% elif item.label == "Rapports avances" or item.label == "Audit" or item.label == "Audit / logs" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
-                            {% elif item.label == "Mon abonnement" or item.label == "Abonnements" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
-                            {% elif item.label == "Parametres plateforme" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg>
-                            {% else %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 3"></path></svg>
+                    {% if item.is_disabled %}
+                    <span class="nav-disabled" aria-disabled="true">
+                    {% else %}
+                    <a href="{{ item.url }}" class="{% if item.is_active %}is-active{% endif %}">
+                    {% endif %}
+                        <span class="nav-main">
+                            <span class="nav-icon" aria-hidden="true">
+                                {% if item.label == "Dashboard" or item.label == "Pilotage SaaS" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
+                                {% elif item.label == "Messagerie" or item.label == "Demandes SaaS" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
+                                {% elif item.label == "Suggestions" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z"></path></svg>
+                                {% elif item.label == "Organisation" or item.label == "Entreprises" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
+                                {% elif item.label == "Clients" or item.label == "Utilisateurs" or item.label == "Apprenants" or item.label == "Ressources humaines" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                {% elif item.label == "Services" or item.label == "Produits" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h4"></path><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"></path></svg>
+                                {% elif item.label == "Factures" or item.label == "Depenses" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
+                                {% elif item.label == "Caisse" or item.label == "Paiements" or item.label == "Mon abonnement" or item.label == "Abonnements" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
+                                {% elif item.label == "Comptabilite" or item.label == "Taux de change" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h2"></path><path d="M12 10h2"></path><path d="M16 10h.01"></path><path d="M8 14h2"></path><path d="M12 14h2"></path><path d="M16 14h.01"></path><path d="M8 18h8"></path></svg>
+                                {% elif item.label == "Rapports avances" or item.label == "Audit" or item.label == "Audit / logs" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
+                                {% elif item.label == "Parametres plateforme" %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg>
+                                {% else %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 3"></path></svg>
+                                {% endif %}
+                            </span>
+                            <span class="nav-label">{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</span>
+                        </span>
+                        <span class="nav-badge-group">
+                            {% if item.badge_count %}
+                            <span class="nav-badge">{{ item.badge_count }}</span>
+                            {% endif %}
+                            {% if item.badge %}
+                            <span class="nav-badge">{% trans item.badge %}</span>
                             {% endif %}
                         </span>
-                        <span class="nav-label">{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</span>
+                    {% if item.is_disabled %}
                     </span>
-                    <span class="nav-badge-group">
-                    {% if item.badge_count %}
-                    <span class="nav-badge">{{ item.badge_count }}</span>
+                    {% else %}
+                    </a>
                     {% endif %}
-                    {% if item.badge %}
-                    <span class="nav-badge">{% trans item.badge %}</span>
-                    {% endif %}
-                    </span>
-                </span>
-                {% else %}
-                <a href="{{ item.url }}" class="{% if item.is_active %}is-active{% endif %}">
-                    <span class="nav-main">
-                        <span class="nav-icon" aria-hidden="true">
-                            {% if item.label == "Dashboard" or item.label == "Pilotage SaaS" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
-                            {% elif item.label == "Messagerie" or item.label == "Demandes SaaS" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
-                            {% elif item.label == "Suggestions" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z"></path></svg>
-                            {% elif item.label == "Organisation" or item.label == "Entreprises" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
-                            {% elif item.label == "Clients" or item.label == "Utilisateurs" or item.label == "Apprenants" or item.label == "Ressources humaines" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            {% elif item.label == "Services" or item.label == "Produits" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h4"></path><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"></path></svg>
-                            {% elif item.label == "Factures" or item.label == "Depenses" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
-                            {% elif item.label == "Comptabilite" or item.label == "Taux de change" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h2"></path><path d="M12 10h2"></path><path d="M16 10h.01"></path><path d="M8 14h2"></path><path d="M12 14h2"></path><path d="M16 14h.01"></path><path d="M8 18h8"></path></svg>
-                            {% elif item.label == "Rapports avances" or item.label == "Audit" or item.label == "Audit / logs" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
-                            {% elif item.label == "Mon abonnement" or item.label == "Abonnements" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
-                            {% elif item.label == "Parametres plateforme" %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg>
-                            {% else %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 3"></path></svg>
-                            {% endif %}
-                        </span>
-                        <span class="nav-label">{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</span>
-                    </span>
-                    <span class="nav-badge-group">
-                    {% if item.badge_count %}
-                    <span class="nav-badge">{{ item.badge_count }}</span>
-                    {% endif %}
-                    {% if item.badge %}
-                    <span class="nav-badge">{% trans item.badge %}</span>
-                    {% endif %}
-                    </span>
-                </a>
-                {% endif %}
                 {% endfor %}
             </nav>
 
-            <div class="sidebar-footer">{% trans "Gestion SaaS securisee par JOATHAM Manager." %}</div>
+            <div class="sidebar-footer">
+                <span>© 2026 JOATHAM Manager</span>
+                <span>{% trans "Gestion SaaS securisee par JOATHAM Manager." %}</span>
+            </div>
         </aside>
 
         <main class="main">
@@ -965,21 +103,34 @@ body {
                 <div class="topbar-heading">
                     {% block topbar_heading %}
                     <h1>{% block content_title %}{% trans "Tableau de bord" %}{% endblock %}</h1>
-                    <div class="subtitle">{% block content_subtitle %}{% trans "Vue d'ensemble de votre activite." %}{% endblock %}</div>
+                    <div class="topbar-subtitle">
+                        {% block content_subtitle %}
+                            {% if entreprise_identity.primary_name %}
+                                {{ entreprise_identity.primary_name }}{% if entreprise_identity.secondary_name %} ({{ entreprise_identity.secondary_name }}){% endif %}{% if user_role_label %} / {{ user_role_label }}{% endif %}
+                            {% elif user_role_key == "super_admin" %}
+                                {% trans "Plateforme JOATHAM Manager" %}{% if user_role_label %} / {{ user_role_label }}{% endif %}
+                            {% elif user_role_label %}
+                                {{ user_role_label }}
+                            {% else %}
+                                {% trans "Vue d'ensemble de votre activite." %}
+                            {% endif %}
+                        {% endblock %}
+                    </div>
+                    <div class="topbar-note">{% trans "JOATHAM Manager — Un espace de gestion structuré pour une utilisation SaaS claire selon le rôle" %}</div>
                     {% endblock %}
                 </div>
+
                 <div class="identity-bar">
                     <div class="topbar-meta">
                         {% include "includes/language_selector.html" %}
                         <a href="{% url 'profile' %}" class="badge profile-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M20 21a8 8 0 0 0-16 0"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
+                            <span class="profile-avatar" aria-hidden="true">{{ request.user.email|default:request.user.username|first|upper }}</span>
                             <span>{% trans "Mon profil" %}</span>
                         </a>
                         <span class="badge">{{ request.user.email|default:request.user.username }}</span>
+                        {% if user_role_label %}
                         <span class="badge">{{ user_role_label }}</span>
+                        {% endif %}
                     </div>
                     <div class="top-actions">
                         {% block top_actions %}{% endblock %}
@@ -1004,7 +155,7 @@ body {
                 </div>
                 {% endif %}
 
-                <div class="content-card">
+                <div class="content-card {% block content_card_class %}{% endblock %}">
                     {% block content %}{% endblock %}
                 </div>
             </div>

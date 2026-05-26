@@ -331,7 +331,7 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "premium-sidebar")
         self.assertContains(response, "Menu principal")
         self.assertContains(response, "dashboard-owner-premium")
-        self.assertContains(response, "Pilotage financier")
+        self.assertContains(response, "Actions rapides")
         self.assertNotContains(response, "Modules de gestion")
         self.assertNotContains(response, "Ouvrir le module")
         self.assertNotContains(response, "Nouvelle facture")

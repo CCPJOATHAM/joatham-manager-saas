@@ -2,888 +2,381 @@
 {% load i18n %}
 
 {% block page_title %}{% trans "Dashboard Proprietaire" %} | JOATHAM Manager{% endblock %}
-
-{% block topbar_heading %}
-<div class="dashboard-company-header">
-    <div class="dashboard-company-mark" aria-hidden="true">
-        {% if entreprise_identity.logo_url %}
-        <img src="{{ entreprise_identity.logo_url }}" alt="">
-        {% else %}
-        <span>{{ entreprise_identity.primary_name|default:"J"|first }}</span>
-        {% endif %}
-    </div>
-    <div class="dashboard-company-copy">
-        <span class="dashboard-eyebrow">{% trans "Tableau de bord principal" %}</span>
-        <h1>
-            {% if entreprise_identity.primary_name %}
-                {{ entreprise_identity.primary_name }}
-            {% else %}
-                {% trans "Mon entreprise" %}
-            {% endif %}
-        </h1>
-        <div class="dashboard-company-badges">
-            <span>{{ user_role_label }}</span>
-            {% if entreprise_identity.currency_code %}
-            <span>{% trans "Devise" %} : {{ entreprise_identity.currency_code }}</span>
-            {% endif %}
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block top_actions %}
-{% endblock %}
-
-{% block extra_styles %}
-<style>
-.main {
-    --dashboard-bg: #f5f7fb;
-    --dashboard-card: #ffffff;
-    --dashboard-card-soft: #f8fafc;
-    --dashboard-line: #e5e7eb;
-    --dashboard-line-blue: #bae6fd;
-    --dashboard-heading: #0f172a;
-    --dashboard-text: #1e293b;
-    --dashboard-muted: #64748b;
-    --dashboard-accent: #0ea5e9;
-    --dashboard-accent-dark: #0284c7;
-    --dashboard-accent-soft: #eaf6ff;
-    --dashboard-success: #22c55e;
-    --dashboard-warning: #f59e0b;
-    --dashboard-danger: #ef4444;
-    --dashboard-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-    --dashboard-shadow-strong: 0 22px 54px rgba(14, 165, 233, 0.12);
-    background: var(--dashboard-bg);
-    color: var(--dashboard-text);
-}
-
-.main .topbar {
-    align-items: center;
-    padding: 24px 34px;
-    background: rgba(245, 247, 251, 0.94);
-    border-bottom: 1px solid var(--dashboard-line);
-    box-shadow: none;
-}
-
-.dashboard-company-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-width: 0;
-}
-
-.dashboard-company-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    flex: 0 0 64px;
-    overflow: hidden;
-    border: 1px solid var(--dashboard-line-blue);
-    border-radius: 16px;
-    background: #ffffff;
-    color: var(--dashboard-accent-dark);
-    box-shadow: 0 16px 32px rgba(14, 165, 233, 0.13);
-}
-
-.dashboard-company-mark img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 9px;
-    background: #ffffff;
-}
-
-.dashboard-company-mark span {
-    font-size: 1.8rem;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
-.dashboard-company-copy {
-    min-width: 0;
-}
-
-.dashboard-eyebrow {
-    display: block;
-    margin-bottom: 7px;
-    color: var(--dashboard-accent-dark);
-    font-size: 0.76rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-}
-
-.dashboard-company-copy h1 {
-    margin: 0;
-    color: var(--dashboard-heading);
-    font-size: clamp(1.55rem, 2.1vw, 2.1rem);
-    font-weight: 900;
-    line-height: 1.12;
-    overflow-wrap: anywhere;
-}
-
-.dashboard-company-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 11px;
-}
-
-.dashboard-company-badges span,
-.dashboard-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 0 11px;
-    border: 1px solid var(--dashboard-line-blue);
-    border-radius: 999px;
-    background: #f0f9ff;
-    color: #075985;
-    font-size: 0.78rem;
-    font-weight: 850;
-}
-
-.main .identity-bar {
-    display: grid;
-    justify-items: end;
-    gap: 14px;
-}
-
-.main .topbar-meta,
-.main .language-switcher,
-.main .top-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.main .language-select,
-.main .language-submit,
-.main .btn-link,
-.main .badge {
-    min-height: 44px;
-    border-radius: 12px;
-    border: 1px solid var(--dashboard-line);
-    background: #ffffff;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
-}
-
-.main .btn-link.primary {
-    border-color: var(--dashboard-accent);
-    background: var(--dashboard-accent);
-    color: #ffffff;
-    box-shadow: 0 14px 30px rgba(14, 165, 233, 0.20);
-}
-
-.main .page-content {
-    padding: 0 34px 34px;
-    background: transparent !important;
-}
-
-.main .content-card {
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-}
-
-.dashboard-shell {
-    display: grid;
-    gap: 24px;
-}
-
-.dashboard-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-    gap: 24px;
-    align-items: stretch;
-}
-
-.dashboard-hero-main,
-.dashboard-hero-side,
-.dashboard-stat-card,
-.dashboard-section-card {
-    border: 1px solid var(--dashboard-line);
-    border-radius: 18px;
-    background: var(--dashboard-card);
-    box-shadow: var(--dashboard-shadow);
-}
-
-.dashboard-hero-main {
-    position: relative;
-    overflow: hidden;
-    min-height: 255px;
-    padding: 34px;
-}
-
-.dashboard-hero-main::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: 7px;
-    height: 100%;
-    background: linear-gradient(180deg, var(--dashboard-accent), #38bdf8);
-}
-
-.dashboard-hero-main h2 {
-    max-width: 760px;
-    margin: 0;
-    color: var(--dashboard-heading);
-    font-size: clamp(2.15rem, 4vw, 3.25rem);
-    font-weight: 900;
-    line-height: 1.04;
-}
-
-.dashboard-hero-main h2 span {
-    color: var(--dashboard-accent);
-}
-
-.dashboard-hero-main p {
-    max-width: 720px;
-    margin: 18px 0 0;
-    color: var(--dashboard-muted);
-    font-size: 1.02rem;
-    line-height: 1.75;
-}
-
-.dashboard-hero-side {
-    display: grid;
-    align-content: start;
-    gap: 14px;
-    padding: 24px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
-}
-
-.dashboard-side-title {
-    margin: 0;
-    color: var(--dashboard-heading);
-    font-size: 1.08rem;
-    font-weight: 900;
-}
-
-.dashboard-side-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.dashboard-side-item {
-    min-height: 82px;
-    padding: 14px;
-    border: 1px solid var(--dashboard-line);
-    border-radius: 14px;
-    background: #ffffff;
-}
-
-.dashboard-side-item span,
-.dashboard-stat-label,
-.dashboard-section-kicker {
-    color: var(--dashboard-muted);
-    font-size: 0.84rem;
-}
-
-.dashboard-side-item strong {
-    display: block;
-    margin-top: 8px;
-    color: var(--dashboard-heading);
-    font-size: 1.2rem;
-    font-weight: 900;
-}
-
-.dashboard-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.dashboard-stat-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    min-height: 150px;
-    padding: 24px;
-}
-
-.dashboard-stat-copy {
-    min-width: 0;
-}
-
-.dashboard-stat-label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 700;
-}
-
-.dashboard-stat-value {
-    display: block;
-    color: var(--dashboard-heading);
-    font-size: clamp(1.7rem, 2.4vw, 2.25rem);
-    font-weight: 900;
-    line-height: 1.05;
-    overflow-wrap: anywhere;
-}
-
-.dashboard-stat-note {
-    display: block;
-    margin-top: 10px;
-    color: #047857;
-    font-size: 0.84rem;
-    font-weight: 800;
-}
-
-.dashboard-stat-note.warning {
-    color: #c2410c;
-}
-
-.dashboard-stat-icon,
-.dashboard-section-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    color: #ffffff;
-    background: var(--dashboard-accent);
-}
-
-.dashboard-stat-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 15px;
-    box-shadow: 0 14px 26px rgba(14, 165, 233, 0.24);
-}
-
-.dashboard-stat-icon.success {
-    background: var(--dashboard-success);
-    box-shadow: 0 14px 26px rgba(34, 197, 94, 0.22);
-}
-
-.dashboard-stat-icon.warning {
-    background: var(--dashboard-warning);
-    box-shadow: 0 14px 26px rgba(245, 158, 11, 0.22);
-}
-
-.dashboard-stat-icon.accent {
-    background: #a855f7;
-    box-shadow: 0 14px 26px rgba(126, 34, 206, 0.22);
-}
-
-.dashboard-stat-icon svg,
-.dashboard-section-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.dashboard-section-card {
-    padding: 24px;
-}
-
-.dashboard-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
-}
-
-.dashboard-section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: var(--dashboard-heading);
-    font-size: 1.12rem;
-    font-weight: 900;
-}
-
-.dashboard-section-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-}
-
-.dashboard-section-link {
-    color: var(--dashboard-accent-dark) !important;
-    font-size: 0.88rem;
-    font-weight: 850;
-    text-decoration: none !important;
-}
-
-.dashboard-executive-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.dashboard-lower-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-    gap: 24px;
-}
-
-.dashboard-finance-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.dashboard-finance-item {
-    padding: 16px;
-    border: 1px solid var(--dashboard-line);
-    border-radius: 14px;
-    background: var(--dashboard-card-soft);
-}
-
-.dashboard-finance-item span,
-.dashboard-timeline-copy span,
-.dashboard-alert-copy span {
-    display: block;
-    color: var(--dashboard-muted);
-    font-size: 0.84rem;
-    line-height: 1.45;
-}
-
-.dashboard-finance-item strong {
-    display: block;
-    margin-top: 8px;
-    color: var(--dashboard-heading);
-    font-size: 1.08rem;
-    font-weight: 900;
-}
-
-.dashboard-timeline {
-    display: grid;
-    gap: 16px;
-}
-
-.dashboard-timeline-item {
-    display: grid;
-    grid-template-columns: 12px minmax(0, 1fr) auto;
-    gap: 12px;
-    align-items: start;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eef2f7;
-}
-
-.dashboard-timeline-item:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
-}
-
-.dashboard-dot {
-    width: 8px;
-    height: 8px;
-    margin-top: 7px;
-    border-radius: 999px;
-    background: var(--dashboard-accent);
-}
-
-.dashboard-timeline-copy strong,
-.dashboard-alert-copy strong {
-    display: block;
-    color: var(--dashboard-heading);
-    font-size: 0.92rem;
-    font-weight: 900;
-    line-height: 1.4;
-}
-
-.dashboard-timeline-meta {
-    color: var(--dashboard-muted);
-    font-size: 0.78rem;
-    font-weight: 750;
-    white-space: nowrap;
-}
-
-.dashboard-alert-list {
-    display: grid;
-    gap: 12px;
-}
-
-.dashboard-alert-item {
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    gap: 12px;
-    align-items: center;
-    min-height: 74px;
-    padding: 14px;
-    border: 1px solid var(--dashboard-line);
-    border-radius: 14px;
-    background: #ffffff;
-}
-
-.dashboard-alert-item.danger {
-    border-color: #fecaca;
-    background: #fff7f7;
-}
-
-.dashboard-alert-item.warning {
-    border-color: #fed7aa;
-    background: #fff9f0;
-}
-
-.dashboard-alert-item.info {
-    border-color: var(--dashboard-line-blue);
-    background: #f0f9ff;
-}
-
-.dashboard-alert-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 13px;
-    background: var(--dashboard-accent-soft);
-    color: var(--dashboard-accent-dark);
-}
-
-.dashboard-alert-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.dashboard-alert-count {
-    color: var(--dashboard-heading);
-    font-size: 1.08rem;
-    font-weight: 900;
-}
-
-.dashboard-alert-products {
-    display: grid;
-    gap: 5px;
-    margin-top: 8px;
-}
-
-.dashboard-alert-products small {
-    color: var(--dashboard-muted);
-}
-
-.dashboard-empty {
-    padding: 20px;
-    border: 1px dashed #cbd5e1;
-    border-radius: 14px;
-    background: var(--dashboard-card-soft);
-    color: var(--dashboard-muted);
-    text-align: center;
-    line-height: 1.6;
-}
-
-@media (max-width: 1320px) {
-    .main .topbar {
-        grid-template-columns: 1fr;
-    }
-
-    .main .identity-bar,
-    .main .topbar-meta,
-    .main .language-switcher,
-    .main .top-actions {
-        justify-items: start;
-        justify-content: flex-start;
-    }
-
-    .dashboard-executive-grid,
-    .dashboard-stat-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1120px) {
-    .dashboard-hero,
-    .dashboard-lower-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 760px) {
-    .main .topbar,
-    .main .page-content {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-    .main .identity-bar,
-    .main .topbar-meta,
-    .main .language-switcher,
-    .main .top-actions,
-    .main .language-select,
-    .main .language-submit,
-    .main .btn-link,
-    .main .badge {
-        width: 100%;
-    }
-
-    .main .topbar-meta,
-    .main .language-switcher,
-    .main .top-actions,
-    .dashboard-side-grid,
-    .dashboard-executive-grid,
-    .dashboard-stat-grid,
-    .dashboard-finance-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-company-header,
-    .dashboard-stat-card,
-    .dashboard-section-header,
-    .dashboard-alert-item {
-        align-items: flex-start;
-    }
-
-    .dashboard-stat-card,
-    .dashboard-section-header {
-        flex-direction: column;
-    }
-
-    .dashboard-hero-main,
-    .dashboard-hero-side,
-    .dashboard-section-card {
-        padding: 22px;
-    }
-
-    .dashboard-timeline-item {
-        grid-template-columns: 12px minmax(0, 1fr);
-    }
-
-    .dashboard-timeline-meta {
-        grid-column: 2;
-        white-space: normal;
-    }
-}
-</style>
-{% endblock %}
+{% block content_title %}{% trans "Tableau de bord" %}{% endblock %}
+{% block content_card_class %}owner-content-card{% endblock %}
 
 {% block content %}
-<div class="dashboard-shell dashboard-owner-premium">
-    <section class="dashboard-hero">
-        <div class="dashboard-hero-main">
-            <span class="dashboard-pill">
-                {% if entreprise_identity.primary_name %}
-                    {{ entreprise_identity.primary_name }}
-                {% else %}
-                    {% trans "Mon entreprise" %}
-                {% endif %}
-            </span>
-            <h2>
-                {% trans "Tableau de bord exécutif" %}
-            </h2>
-            <p>{% trans "Vue d’ensemble de l’activité de votre entreprise : finances, portefeuille clients, activités récentes et alertes importantes." %}</p>
-        </div>
-
-        <aside class="dashboard-hero-side" aria-label="{% trans 'Résumé entreprise' %}">
-            <h3 class="dashboard-side-title">{% trans "Résumé de l’entreprise" %}</h3>
-            <div class="dashboard-side-grid">
-                <div class="dashboard-side-item"><span>{% trans "Devise" %}</span><strong>{{ entreprise_identity.currency_code }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Clients" %}</span><strong>{{ nombre_clients }} client{{ nombre_clients|pluralize:"s" }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }} facture{{ nombre_factures|pluralize:"s" }}</strong></div>
-                <div class="dashboard-side-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</strong></div>
+<div class="owner-dashboard dashboard-owner-premium">
+    <section class="owner-hero" aria-label="{% trans 'Tableau de bord executif' %}">
+        <div class="hero-copy">
+            <div class="hero-title-row">
+                <span class="hero-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
+                </span>
+                <h2>{% trans "Tableau de bord exécutif" %}</h2>
             </div>
-            {% if subscription %}
-            <span class="dashboard-pill">{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</span>
-            {% endif %}
+            <p>{% trans "Vue complète de la performance de votre entreprise : finances, clients, activités récentes, stock et priorités de suivi." %}</p>
+            <div class="hero-badge-row">
+                <span class="hero-badge">
+                    {% if entreprise_identity.primary_name %}
+                        {{ entreprise_identity.primary_name }}
+                    {% else %}
+                        {% trans "Mon entreprise" %}
+                    {% endif %}
+                </span>
+                {% if subscription %}
+                <span class="hero-badge">{% trans "Abonnement" %}: {{ subscription.get_statut_display }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <aside class="hero-currency" aria-label="{% trans 'Devise' %}">
+            <span>{% trans "Devise" %}</span>
+            <strong>{{ entreprise_identity.currency_code|default:currency_code }}</strong>
         </aside>
     </section>
 
-    <section class="dashboard-section-card" aria-label="{% trans 'Résumé financier' %}">
-        <div class="dashboard-section-header">
-            <div>
-                <h3 class="dashboard-section-title">
-                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
-                    {% trans "Résumé financier" %}
-                </h3>
-                <span class="dashboard-section-kicker">{% trans "Les indicateurs essentiels pour lire rapidement la situation." %}</span>
-            </div>
-        </div>
-        <div class="dashboard-stat-grid">
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Chiffre d'affaires" %}</span>
-                    <span class="dashboard-stat-value">{{ total_ca }}</span>
-                    <span class="dashboard-stat-note">{% trans "Facturation émise à date" %}</span>
+    <section class="kpi-grid" aria-label="{% trans 'Indicateurs principaux' %}">
+        <article class="kpi-card is-revenue">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">{% trans "Chiffre d'affaires" %}</span>
+                    <strong class="kpi-value">{{ total_ca }}</strong>
+                    <span class="kpi-subtitle">{% trans "Total des ventes et factures enregistrées" %}</span>
                 </div>
-                <span class="dashboard-stat-icon" aria-hidden="true">
+                <span class="kpi-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"></path><path d="M14 7h7v7"></path></svg>
+                </span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{% trans "Donnée calculée depuis les factures de l'entreprise" %}</div>
+        </article>
+
+        <article class="kpi-card is-cash">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">{% trans "Encaissements" %}</span>
+                    <strong class="kpi-value">{{ total_encaisse }}</strong>
+                    <span class="kpi-subtitle">{% trans "Montants perçus via paiements validés" %}</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
+                </span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ payees }} facture{{ payees|pluralize:"s" }} payée{{ payees|pluralize:"s" }}</div>
+        </article>
+
+        <article class="kpi-card is-due">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">{% trans "Reste à encaisser" %}</span>
+                    <strong class="kpi-value">{{ reste_encaisser }}</strong>
+                    <span class="kpi-subtitle">{% trans "Montants encore dus par les clients" %}</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+                </span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ impayees }} facture{{ impayees|pluralize:"s" }} à suivre</div>
+        </article>
+
+        <article class="kpi-card is-clients">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">{% trans "Portefeuille clients" %}</span>
+                    <strong class="kpi-value">{{ nombre_clients }}</strong>
+                    <span class="kpi-subtitle">{% trans "Clients enregistrés dans l'entreprise" %}</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</div>
+        </article>
+    </section>
+
+    <section class="owner-panel" aria-label="{% trans 'Résumé financier' %}">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"></path></svg>
                 </span>
-            </article>
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Encaissements" %}</span>
-                    <span class="dashboard-stat-value">{{ total_encaisse }}</span>
-                    <span class="dashboard-stat-note">{{ payees }} facture{{ payees|pluralize:"s" }} soldée{{ payees|pluralize:"s" }}</span>
+                <div>
+                    <h3>{% trans "Résumé financier" %}</h3>
+                    <span class="section-kicker">{% trans "Lecture rapide des montants réellement calculés par le backend." %}</span>
                 </div>
-                <span class="dashboard-stat-icon success" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg>
+            </div>
+        </div>
+        <div class="financial-grid">
+            <div class="mini-stat is-blue"><span>{% trans "CA total" %}</span><strong>{{ total_ca }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-red"><span>{% trans "Dépenses" %}</span><strong>{{ total_depenses }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-green"><span>{% trans "Bénéfice" %}</span><strong>{{ benefice }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-purple"><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-green"><span>{% trans "Payées" %}</span><strong>{{ payees }}</strong><small>{% trans "Factures" %}</small></div>
+            <div class="mini-stat is-amber"><span>{% trans "Impayées" %}</span><strong>{{ impayees }}</strong><small>{% trans "Factures" %}</small></div>
+        </div>
+    </section>
+
+    <section class="insight-grid">
+        <article class="owner-panel" aria-label="{% trans 'Statut des factures' %}">
+            <div class="section-heading">
+                <div>
+                    <h3>{% trans "Statut des factures" %}</h3>
+                    <span class="section-kicker">{% trans "Répartition des factures payées et impayées." %}</span>
+                </div>
+            </div>
+            <div class="invoice-donut-layout">
+                <div class="donut-chart" data-paid="{{ payees|default:0 }}" data-unpaid="{{ impayees|default:0 }}" data-total="{{ nombre_factures|default:0 }}">
+                    <div class="donut-center">
+                        <strong>{{ nombre_factures }}</strong>
+                        <span>{% trans "Total" %}</span>
+                    </div>
+                </div>
+                <div class="donut-legend">
+                    <div class="donut-legend-item">
+                        <span class="legend-dot" aria-hidden="true"></span>
+                        <div>
+                            <strong>{% trans "Factures payées" %}</strong>
+                            <span>{{ payees }} (<span data-donut-paid-percent>0%</span>)</span>
+                        </div>
+                    </div>
+                    <div class="donut-legend-item">
+                        <span class="legend-dot is-unpaid" aria-hidden="true"></span>
+                        <div>
+                            <strong>{% trans "Factures impayées" %}</strong>
+                            <span>{{ impayees }} (<span data-donut-unpaid-percent>0%</span>)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="owner-panel client-panel" aria-label="{% trans 'Portefeuille clients' %}">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+                    </span>
+                    <div>
+                        <h3>{% trans "Portefeuille clients" %}</h3>
+                        <span class="section-kicker">{% trans "Clients, factures et apprenants actuellement enregistrés." %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="client-summary">
+                <div>
+                    <span class="client-total-label">{% trans "Total clients" %}</span>
+                    <strong class="client-total-value">{{ nombre_clients }}</strong>
+                </div>
+                <div class="client-metrics">
+                    <div class="client-metric"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }}</strong></div>
+                    <div class="client-metric"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }}</strong></div>
+                </div>
+            </div>
+            <div class="client-actions">
+                <a href="{% url 'client_list' %}" class="btn-link client-action secondary">{% trans "Voir clients" %}</a>
+                <a href="{% url 'facture_list' %}" class="btn-link client-action primary">{% trans "Voir factures" %}</a>
+            </div>
+        </article>
+    </section>
+
+    <section class="owner-panel" aria-label="{% trans 'Activité récente' %}">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
                 </span>
-            </article>
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Reste à encaisser" %}</span>
-                    <span class="dashboard-stat-value">{{ reste_encaisser }}</span>
-                    <span class="dashboard-stat-note warning">{{ impayees }} facture{{ impayees|pluralize:"s" }} à suivre</span>
+                <div>
+                    <h3>{% trans "Activité récente" %}</h3>
+                    <span class="section-kicker">{% trans "Dernières opérations enregistrées par les modules métier." %}</span>
                 </div>
-                <span class="dashboard-stat-icon warning" aria-hidden="true">
+            </div>
+            <a href="{% url 'activity_log_list' %}" class="section-link">{% trans "Voir tout" %}</a>
+        </div>
+        {% if recent_activity %}
+        <div class="timeline-list">
+            {% for log in recent_activity %}
+            <div class="timeline-entry">
+                <span class="timeline-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                </span>
+                <div class="timeline-copy">
+                    <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                    <span>{{ log.description }}</span>
+                    {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
+                </div>
+                <time class="timeline-time">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="dashboard-empty">{% trans "Aucune activité récente n’est encore disponible. Les prochaines actions sur les modules métier alimenteront automatiquement cette zone." %}</div>
+        {% endif %}
+    </section>
+
+    <section class="owner-panel" aria-label="{% trans 'Alertes et priorités' %}">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
                 </span>
-            </article>
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-copy">
-                    <span class="dashboard-stat-label">{% trans "Portefeuille clients" %}</span>
-                    <span class="dashboard-stat-value">{{ nombre_clients }}</span>
-                    <span class="dashboard-stat-note">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</span>
-                </div>
-                <span class="dashboard-stat-icon accent" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
-                </span>
-            </article>
-        </div>
-    </section>
-
-    <section class="dashboard-lower-grid">
-        <article class="dashboard-section-card">
-            <div class="dashboard-section-header">
                 <div>
-                    <h3 class="dashboard-section-title">
-                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
-                        {% trans "Pilotage financier" %}
-                    </h3>
-                    <span class="dashboard-section-kicker">{% trans "Synthèse rapide des montants suivis." %}</span>
+                    <h3>{% trans "Alertes & priorités" %}</h3>
+                    <span class="section-kicker">{% trans "Alertes stock, factures et abonnement basées sur les données réelles." %}</span>
                 </div>
-            </div>
-            <div class="dashboard-finance-grid">
-                <div class="dashboard-finance-item"><span>{% trans "Dépenses" %}</span><strong>{{ total_depenses }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Bénéfice" %}</span><strong>{{ benefice }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures du mois" %}</span><strong>{{ total_mois }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures du jour" %}</span><strong>{{ total_jour }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Dépenses du jour" %}</span><strong>{{ depense_jour }}</strong></div>
-            </div>
-        </article>
-
-        <article class="dashboard-section-card">
-            <div class="dashboard-section-header">
-                <div>
-                    <h3 class="dashboard-section-title">
-                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg></span>
-                        {% trans "Portefeuille clients" %}
-                    </h3>
-                    <span class="dashboard-section-kicker">{% trans "Lecture rapide de la base clients et des créances." %}</span>
-                </div>
-            </div>
-            <div class="dashboard-finance-grid">
-                <div class="dashboard-finance-item"><span>{% trans "Clients actifs" %}</span><strong>{{ nombre_clients }} client{{ nombre_clients|pluralize:"s" }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures" %}</span><strong>{{ nombre_factures }} facture{{ nombre_factures|pluralize:"s" }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures à relancer" %}</span><strong>{{ impayees }} facture{{ impayees|pluralize:"s" }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Créances clients" %}</span><strong>{{ reste_encaisser }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Factures soldées" %}</span><strong>{{ payees }} facture{{ payees|pluralize:"s" }}</strong></div>
-                <div class="dashboard-finance-item"><span>{% trans "Apprenants" %}</span><strong>{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }}</strong></div>
-            </div>
-        </article>
-
-        <article class="dashboard-section-card">
-            <div class="dashboard-section-header">
-                <div>
-                    <h3 class="dashboard-section-title">
-                        <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
-                        {% trans "Activité récente" %}
-                    </h3>
-                    <span class="dashboard-section-kicker">{% trans "Dernières opérations relevées" %}</span>
-                </div>
-                <a href="{% url 'activity_log_list' %}" class="dashboard-section-link">{% trans "Voir tout" %}</a>
-            </div>
-            {% if recent_activity %}
-            <div class="dashboard-timeline">
-                {% for log in recent_activity %}
-                <div class="dashboard-timeline-item">
-                    <span class="dashboard-dot" aria-hidden="true"></span>
-                    <div class="dashboard-timeline-copy">
-                        <strong>{{ log.module|title }} - {{ log.action }}</strong>
-                        <span>{{ log.description }}</span>
-                        {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
-                    </div>
-                    <time class="dashboard-timeline-meta">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="dashboard-empty">{% trans "Aucune activité récente n’est encore disponible. Les prochaines actions sur les modules métier alimenteront automatiquement cette zone." %}</div>
-            {% endif %}
-        </article>
-    </section>
-
-    <section class="dashboard-section-card">
-        <div class="dashboard-section-header">
-            <div>
-                <h3 class="dashboard-section-title">
-                    <span class="dashboard-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
-                    {% trans "Alertes & notifications" %}
-                </h3>
-                <span class="dashboard-section-kicker">{% trans "Alertes stock et abonnement" %}</span>
             </div>
         </div>
-        <div class="dashboard-alert-list">
+        <div class="alert-list">
             {% if impayees %}
-            <div class="dashboard-alert-item warning">
-                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
-                <div class="dashboard-alert-copy">
+            <div class="alert-card is-danger">
+                <span class="alert-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg>
+                </span>
+                <div class="alert-copy">
                     <strong>{% trans "Factures impayées" %}</strong>
-                    <span>{% trans "Des factures restent à encaisser et doivent être suivies." %}</span>
+                    <span>{{ impayees }} {% trans "facture(s) en attente de paiement." %}</span>
                 </div>
-                <span class="dashboard-alert-count">{{ impayees }}</span>
+                <span class="alert-count">{{ impayees }}</span>
             </div>
             {% endif %}
 
             {% if rupture_products_count %}
-            <div class="dashboard-alert-item danger">
-                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
-                <div class="dashboard-alert-copy">
+            <div class="alert-card is-danger">
+                <span class="alert-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                </span>
+                <div class="alert-copy">
                     <strong>{% trans "Produits en rupture" %}</strong>
                     <span>{% trans "Quantité en stock inférieure ou égale à 0." %}</span>
-                    <div class="dashboard-alert-products">
+                    <div class="alert-products">
                         {% for product in rupture_products %}
-                        <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }}</small>
+                        <small>{{ product.nom }} - {% trans "Stock actuel" %}: {{ product.quantite_stock }}</small>
                         {% endfor %}
                     </div>
                 </div>
-                <span class="dashboard-alert-count">{{ rupture_products_count }}</span>
+                <span class="alert-count">{{ rupture_products_count }}</span>
             </div>
             {% endif %}
 
             {% if low_stock_products_count %}
-            <div class="dashboard-alert-item warning">
-                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
-                <div class="dashboard-alert-copy">
-                    <strong>{% trans "Produits en stock faible" %}</strong>
-                    <span>{% trans "Stock positif mais inférieur ou égal au seuil d’alerte." %}</span>
-                    <div class="dashboard-alert-products">
+            <div class="alert-card is-warning">
+                <span class="alert-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                </span>
+                <div class="alert-copy">
+                    <strong>{% trans "Stock faible" %}</strong>
+                    <span>{% trans "Produits dont le stock est positif mais inférieur ou égal au seuil d’alerte." %}</span>
+                    <div class="alert-products">
                         {% for product in low_stock_products %}
-                        <small>{{ product.nom }} - {% trans "Stock actuel" %} : {{ product.quantite_stock }} | {% trans "Seuil" %} : {{ product.seuil_alerte }}</small>
+                        <small>{{ product.nom }} - {% trans "Stock actuel" %}: {{ product.quantite_stock }} | {% trans "Seuil" %}: {{ product.seuil_alerte }}</small>
                         {% endfor %}
                     </div>
                 </div>
-                <span class="dashboard-alert-count">{{ low_stock_products_count }}</span>
+                <span class="alert-count">{{ low_stock_products_count }}</span>
             </div>
             {% endif %}
 
-            {% if subscription %}
-            <div class="dashboard-alert-item info">
-                <span class="dashboard-alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
-                <div class="dashboard-alert-copy">
-                    <strong>{% trans "Abonnement" %} : {{ subscription.get_statut_display }}</strong>
-                    <span>{% trans "Plan actuel" %} : {{ subscription.plan.nom }} | {% trans "Fin" %} : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+            {% if subscription and subscription.statut != "actif" %}
+            <div class="alert-card is-info">
+                <span class="alert-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                </span>
+                <div class="alert-copy">
+                    <strong>{% trans "Abonnement" %}: {{ subscription.get_statut_display }}</strong>
+                    <span>{% trans "Plan actuel" %}: {{ subscription.plan.nom }} | {% trans "Fin" %}: {{ subscription.date_fin|date:"d/m/Y" }}</span>
                 </div>
-                <span class="dashboard-alert-count">OK</span>
+                <span class="mini-badge">{% trans "Info" %}</span>
+            </div>
+            {% elif not subscription %}
+            <div class="alert-card is-info">
+                <span class="alert-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                </span>
+                <div class="alert-copy">
+                    <strong>{% trans "Abonnement" %}</strong>
+                    <span>{% trans "Aucun abonnement courant n’est disponible dans le contexte du dashboard." %}</span>
+                </div>
+                <span class="mini-badge">{% trans "Info" %}</span>
             </div>
             {% endif %}
 
-            {% if not impayees and not rupture_products_count and not low_stock_products_count and not subscription %}
+            {% if not impayees and not rupture_products_count and not low_stock_products_count and subscription and subscription.statut == "actif" %}
             <div class="dashboard-empty">{% trans "Aucune alerte pour le moment. Les principaux indicateurs sont stables." %}</div>
             {% endif %}
         </div>
     </section>
+
+    <section class="owner-panel" aria-label="{% trans 'Actions rapides' %}">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
+                </span>
+                <div>
+                    <h3>{% trans "Actions rapides" %}</h3>
+                    <span class="section-kicker">{% trans "Accès directs aux actions les plus fréquentes." %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="{% url 'add_facture' %}" class="quick-action is-blue">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <strong>{% trans "Créer une facture" %}</strong>
+            </a>
+            <a href="{% url 'add_client' %}" class="quick-action is-magenta">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg></span>
+                <strong>{% trans "Ajouter un client" %}</strong>
+            </a>
+            <a href="{% url 'depenses' %}" class="quick-action is-green">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
+                <strong>{% trans "Enregistrer une dépense" %}</strong>
+            </a>
+            {# Advanced reports are plan-dependent; keep this action non-clickable in phase 1. #}
+            <span class="quick-action is-orange" aria-disabled="true">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg></span>
+                <strong>{% trans "Voir les rapports" %}</strong>
+            </span>
+            <a href="{% url 'caisse_list' %}" class="quick-action is-red">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg></span>
+                <strong>{% trans "Ouvrir la caisse" %}</strong>
+            </a>
+            <a href="{% url 'product_list' %}" class="quick-action is-purple">
+                <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-9 5-9-5"></path><path d="m21 12-9 5-9-5"></path><path d="m12 3 9 5-9 5-9-5 9-5Z"></path></svg></span>
+                <strong>{% trans "Gérer les produits" %}</strong>
+            </a>
+        </div>
+    </section>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const donut = document.querySelector(".donut-chart");
+    if (!donut) {
+        return;
+    }
+
+    const paid = Number.parseInt(donut.dataset.paid || "0", 10) || 0;
+    const unpaid = Number.parseInt(donut.dataset.unpaid || "0", 10) || 0;
+    const denominator = paid + unpaid;
+    const paidPercent = denominator > 0 ? Math.round((paid / denominator) * 1000) / 10 : 0;
+    const unpaidPercent = denominator > 0 ? Math.round((unpaid / denominator) * 1000) / 10 : 0;
+    const paidAngle = denominator > 0 ? (paid / denominator) * 360 : 0;
+
+    donut.style.setProperty("--paid-angle", String(paidAngle) + "deg");
+    donut.classList.toggle("is-empty", denominator === 0);
+
+    const paidTarget = document.querySelector("[data-donut-paid-percent]");
+    const unpaidTarget = document.querySelector("[data-donut-unpaid-percent]");
+    if (paidTarget) {
+        paidTarget.textContent = `${paidPercent}%`;
+    }
+    if (unpaidTarget) {
+        unpaidTarget.textContent = `${unpaidPercent}%`;
+    }
+})();
+</script>
 {% endblock %}
