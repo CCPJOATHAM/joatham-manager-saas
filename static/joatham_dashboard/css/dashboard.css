@@ -427,7 +427,8 @@ a {
 }
 
 .content-card.owner-content-card,
-.content-card.manager-content-card {
+.content-card.manager-content-card,
+.content-card.accountant-content-card {
     padding: 0;
     overflow: visible;
     border: 0;
@@ -536,13 +537,15 @@ a {
 }
 
 .owner-dashboard,
-.manager-dashboard {
+.manager-dashboard,
+.accountant-dashboard {
     display: grid;
     gap: 24px;
 }
 
 .owner-hero,
-.manager-hero {
+.manager-hero,
+.accountant-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 122px;
     gap: 20px;
@@ -562,7 +565,14 @@ a {
     box-shadow: 0 24px 58px rgba(15, 118, 110, 0.18);
 }
 
-.manager-hero-focus {
+.accountant-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
+    background: linear-gradient(135deg, #0f766e 0%, #0284c7 52%, #4f46e5 100%);
+    box-shadow: 0 24px 58px rgba(2, 132, 199, 0.18);
+}
+
+.manager-hero-focus,
+.accountant-hero-focus {
     display: grid;
     place-items: center;
     min-height: 118px;
@@ -574,23 +584,28 @@ a {
 }
 
 .manager-hero-focus span,
-.manager-hero-focus small {
+.manager-hero-focus small,
+.accountant-hero-focus span,
+.accountant-hero-focus small {
     color: rgba(255, 255, 255, 0.8);
 }
 
-.manager-hero-focus strong {
+.manager-hero-focus strong,
+.accountant-hero-focus strong {
     color: #ffffff;
     font-size: 2.4rem;
     font-weight: 950;
     line-height: 1;
 }
 
-.manager-hero-focus small {
+.manager-hero-focus small,
+.accountant-hero-focus small {
     font-size: 0.84rem;
 }
 
 .owner-hero h2,
-.manager-hero h2 {
+.manager-hero h2,
+.accountant-hero h2 {
     margin: 0;
     color: #ffffff;
     font-size: clamp(1.9rem, 3vw, 2.7rem);
@@ -599,7 +614,8 @@ a {
 }
 
 .owner-hero p,
-.manager-hero p {
+.manager-hero p,
+.accountant-hero p {
     max-width: 720px;
     margin: 12px 0 0;
     color: rgba(255, 255, 255, 0.9);
@@ -802,6 +818,13 @@ a {
     --kpi-bg: #fdf2f8;
     --kpi-line: #fbcfe8;
     --kpi-shadow: rgba(219, 39, 119, 0.2);
+}
+
+.kpi-card.is-profit {
+    --kpi-accent: #16a34a;
+    --kpi-bg: #f0fdf4;
+    --kpi-line: #bbf7d0;
+    --kpi-shadow: rgba(22, 163, 74, 0.2);
 }
 
 .owner-panel {
@@ -1260,6 +1283,69 @@ a {
     align-items: start;
 }
 
+.accountant-two-column {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.accounting-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountant-status-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.accountant-status-card {
+    display: grid;
+    gap: 8px;
+    min-height: 110px;
+    padding: 18px;
+    border: 1px solid var(--status-line, var(--jm-line));
+    border-radius: var(--jm-radius);
+    background: var(--status-bg, var(--jm-surface));
+}
+
+.accountant-status-card span {
+    color: var(--status-accent, var(--jm-primary));
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.accountant-status-card strong {
+    color: var(--status-accent, var(--jm-heading));
+    font-size: 1.85rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.accountant-status-card small {
+    color: var(--jm-muted);
+    font-size: 0.84rem;
+}
+
+.accountant-status-card.is-paid {
+    --status-accent: var(--jm-green);
+    --status-bg: #f0fdf4;
+    --status-line: #bbf7d0;
+}
+
+.accountant-status-card.is-unpaid {
+    --status-accent: var(--jm-amber);
+    --status-bg: #fffbeb;
+    --status-line: #fde68a;
+}
+
+.accountant-status-card.is-total {
+    --status-accent: var(--jm-primary);
+    --status-bg: #eff9ff;
+    --status-line: #bae6fd;
+}
+
 .manager-info-card {
     display: flex;
     align-items: center;
@@ -1376,7 +1462,8 @@ a {
     }
 
     .insight-grid,
-    .manager-two-column {
+    .manager-two-column,
+    .accountant-two-column {
         grid-template-columns: 1fr;
     }
 }
@@ -1413,6 +1500,7 @@ a {
 
     .owner-hero,
     .manager-hero,
+    .accountant-hero,
     .client-summary,
     .invoice-donut-layout {
         grid-template-columns: 1fr;
@@ -1454,6 +1542,7 @@ a {
 
     .owner-hero,
     .manager-hero,
+    .accountant-hero,
     .owner-panel,
     .kpi-card {
         padding: 20px;

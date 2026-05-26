@@ -1,293 +1,291 @@
 {% extends "joatham_dashboard/base.html" %}
 
 {% block page_title %}Dashboard Comptable | JOATHAM Manager{% endblock %}
-{% block content_title %}Dashboard comptable{% endblock %}
-{% block content_subtitle %}Une vue plus financiere et plus controle pour suivre les flux, les montants dus et les priorites comptables du moment.{% endblock %}
+{% block content_title %}Contrôle financier{% endblock %}
+{% block content_subtitle %}Espace comptable / contrôle financier{% endblock %}
+{% block content_card_class %}accountant-content-card{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'facture_list' %}" class="btn-link">Factures</a>
+<a href="{% url 'payment_list' %}" class="btn-link">Paiements</a>
+<a href="{% url 'depenses' %}" class="btn-link">Depenses</a>
 <a href="{% url 'compta_dashboard' %}" class="btn-link primary">Comptabilite</a>
 {% endblock %}
 
 {% block content %}
-<style>
-    .hero {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
-
-    .hero h2 {
-        margin: 0;
-        font-size: 1.65rem;
-        letter-spacing: -0.03em;
-    }
-
-    .hero p {
-        margin: 8px 0 0;
-        color: #64748b;
-        max-width: 760px;
-        line-height: 1.6;
-    }
-
-    .hero-pills {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .hero-pill {
-        display: inline-flex;
-        align-items: center;
-        min-height: 36px;
-        padding: 0 14px;
-        border-radius: 999px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        font-size: 0.84rem;
-        font-weight: 700;
-    }
-
-    .premium-kpis {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-    }
-
-    .premium-card {
-        display: grid;
-        grid-template-columns: 48px minmax(0, 1fr);
-        gap: 14px;
-        align-items: center;
-        padding: 18px;
-        border-radius: 22px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-        border: 1px solid #dde7f0;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
-    }
-
-    .premium-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #eef6ff;
-        color: #2563eb;
-    }
-
-    .premium-icon svg {
-        width: 22px;
-        height: 22px;
-    }
-
-    .premium-label {
-        color: #64748b;
-        font-size: 0.84rem;
-        line-height: 1.35;
-    }
-
-    .premium-value {
-        display: block;
-        margin-top: 3px;
-        color: #10233f;
-        font-size: 1.08rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-    }
-
-    .premium-meta {
-        display: block;
-        margin-top: 3px;
-        color: #64748b;
-        font-size: 0.8rem;
-    }
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
-        align-items: start;
-    }
-
-    .section-card {
-        background: #fff;
-        border: 1px solid #dde7f0;
-        border-radius: 24px;
-        padding: 22px;
-        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
-    }
-
-    .section-card h3 {
-        margin: 0 0 8px;
-        font-size: 1.08rem;
-    }
-
-    .section-subtitle {
-        margin: 0 0 16px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-
-    .list-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        padding: 16px;
-    }
-
-    .list-card ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 10px;
-    }
-
-    .list-card li {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .list-card li:last-child {
-        border-bottom: 0;
-        padding-bottom: 0;
-    }
-
-    @media (max-width: 1180px) {
-        .premium-kpis {
-            grid-template-columns: repeat(2, minmax(180px, 1fr));
-        }
-
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 760px) {
-        .premium-kpis {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="hero">
-    <div>
-        <h2>Vue de controle financier</h2>
-        <p>Retrouvez les indicateurs les plus utiles pour suivre les montants emis, encaisses, dus et le niveau global de pilotage comptable.</p>
-    </div>
-    <div class="hero-pills">
-        <span class="hero-pill">Devise : {{ entreprise_identity.currency_code }}</span>
-        <span class="hero-pill">Factures : {{ nombre_factures }}</span>
-        <span class="hero-pill">Clients : {{ nombre_clients }}</span>
-    </div>
-</div>
-
-<div class="premium-kpis">
-    <div class="premium-card">
-        <div class="premium-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2v20"></path>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7"></path>
-            </svg>
+<div class="accountant-dashboard">
+    <section class="accountant-hero" aria-label="Contrôle financier">
+        <div class="hero-copy">
+            <div class="hero-title-row">
+                <span class="hero-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
+                </span>
+                <h2>Contrôle financier</h2>
+            </div>
+            <p>Suivi des encaissements, dettes clients, depenses, TVA et benefice estime.</p>
+            <div class="hero-badge-row">
+                {% if user_role_label %}
+                <span class="hero-badge">{{ user_role_label }}</span>
+                {% endif %}
+                {% if subscription %}
+                <span class="hero-badge">Abonnement : {{ subscription.get_statut_display }}</span>
+                {% endif %}
+                {% if entreprise_identity.currency_code %}
+                <span class="hero-badge">Devise : {{ entreprise_identity.currency_code }}</span>
+                {% endif %}
+            </div>
         </div>
-        <div>
-            <span class="premium-label">Chiffre d'affaires</span>
-            <span class="premium-value">{{ total_ca }}</span>
-            <span class="premium-meta">Montants factures cumules</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#eefcf6; color:#047857;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 7 9 18l-5-5"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Montants encaisses</span>
-            <span class="premium-value">{{ total_encaisse }}</span>
-            <span class="premium-meta">{{ payees }} facture{{ payees|pluralize:"s" }} payee{{ payees|pluralize:"s" }}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#fff7ed; color:#c2410c;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 8v5"></path>
-                <path d="M12 16h.01"></path>
-                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Montants dus</span>
-            <span class="premium-value">{{ reste_encaisser }}</span>
-            <span class="premium-meta">{{ impayees }} facture{{ impayees|pluralize:"s" }} impayee{{ impayees|pluralize:"s" }}</span>
-        </div>
-    </div>
-    <div class="premium-card">
-        <div class="premium-icon" style="background:#eef6ff; color:#1d4ed8;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 3v18h18"></path>
-                <path d="M19 9 13 15 10 12 6 16"></path>
-            </svg>
-        </div>
-        <div>
-            <span class="premium-label">Benefice estime</span>
-            <span class="premium-value">{{ benefice }}</span>
-            <span class="premium-meta">Apres depenses connues</span>
-        </div>
-    </div>
-</div>
+        <aside class="accountant-hero-focus" aria-label="Factures à contrôler">
+            <span>À contrôler</span>
+            <strong>{{ impayees }}</strong>
+            <small>facture{{ impayees|pluralize:"s" }} impayee{{ impayees|pluralize:"s" }}</small>
+        </aside>
+    </section>
 
-<div class="dashboard-grid">
-    <section class="section-card">
-        <h3>Controle financier</h3>
-        <p class="section-subtitle">Les points de lecture les plus utiles pour analyser rapidement la situation financiere.</p>
-        <div class="list-card">
-            <ul>
-                <li><span>TVA cumulee</span><strong>{{ total_tva }}</strong></li>
-                <li><span>Depenses cumulees</span><strong>{{ total_depenses }}</strong></li>
-                <li><span>Encaisse ce mois</span><strong>{{ total_mois }}</strong></li>
-                <li><span>Mouvement du jour</span><strong>{{ total_jour }}</strong></li>
-            </ul>
+    <section class="kpi-grid" aria-label="KPI financiers principaux">
+        <article class="kpi-card is-revenue">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Chiffre d'affaires</span>
+                    <strong class="kpi-value">{{ total_ca }}</strong>
+                    <span class="kpi-subtitle">Total des ventes et factures enregistrees.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">Donnee calculee depuis les factures de l'entreprise.</div>
+        </article>
+
+        <article class="kpi-card is-cash">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Montants encaisses</span>
+                    <strong class="kpi-value">{{ total_encaisse }}</strong>
+                    <span class="kpi-subtitle">Paiements et montants percus.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ payees }} facture{{ payees|pluralize:"s" }} payee{{ payees|pluralize:"s" }}.</div>
+        </article>
+
+        <article class="kpi-card is-due">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Montants dus</span>
+                    <strong class="kpi-value">{{ reste_encaisser }}</strong>
+                    <span class="kpi-subtitle">Reste a encaisser aupres des clients.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">{{ impayees }} facture{{ impayees|pluralize:"s" }} impayee{{ impayees|pluralize:"s" }}.</div>
+        </article>
+
+        <article class="kpi-card is-profit">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-label">Benefice estime</span>
+                    <strong class="kpi-value">{{ benefice }}</strong>
+                    <span class="kpi-subtitle">Chiffre d'affaires moins depenses connues.</span>
+                </div>
+                <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M19 9 13 15 10 12 6 16"></path></svg></span>
+            </div>
+            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="kpi-note">Estimation basee sur les donnees disponibles.</div>
+        </article>
+    </section>
+
+    <section class="owner-panel" aria-label="Bloc contrôle financier">
+        <div class="section-heading">
+            <div class="section-title-row">
+                <span class="section-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h2"></path><path d="M12 10h2"></path><path d="M16 10h.01"></path><path d="M8 14h2"></path><path d="M12 14h2"></path><path d="M16 14h.01"></path><path d="M8 18h8"></path></svg>
+                </span>
+                <div>
+                    <h3>Contrôle financier</h3>
+                    <span class="section-kicker">Les montants utiles pour verifier depenses, TVA, paiements et factures en attente.</span>
+                </div>
+            </div>
+        </div>
+        <div class="financial-grid">
+            <div class="mini-stat is-red"><span>Depenses</span><strong>{{ total_depenses }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-purple"><span>TVA</span><strong>{{ total_tva }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-green"><span>Factures payees</span><strong>{{ payees }}</strong><small>Factures</small></div>
+            <div class="mini-stat is-amber"><span>Factures impayees</span><strong>{{ impayees }}</strong><small>Factures</small></div>
+            <div class="mini-stat is-blue"><span>Ventes du mois</span><strong>{{ total_mois }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-red"><span>Depenses du mois</span><strong>{{ depense_mois }}</strong><small>{{ currency_code }}</small></div>
         </div>
     </section>
 
-    <section class="section-card">
-        <h3>Acces metier</h3>
-        <p class="section-subtitle">Acces rapides utiles pour poursuivre vos controles et vos traitements comptables.</p>
-        <div class="list-card">
-            <ul>
-                <li><span>Factures et paiements</span><strong><a href="{% url 'facture_list' %}" style="text-decoration:none; color:#0f766e;">Ouvrir</a></strong></li>
-                <li><span>Rapports comptables</span><strong><a href="{% url 'compta_dashboard' %}" style="text-decoration:none; color:#0f766e;">Consulter</a></strong></li>
-                <li><span>Nombre de clients lies</span><strong>{{ nombre_clients }}</strong></li>
-                <li><span>Portefeuille de factures</span><strong>{{ nombre_factures }}</strong></li>
-            </ul>
-        </div>
+    <section class="accountant-two-column">
+        <article class="owner-panel" aria-label="Accès métier comptable">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Accès métier comptable</h3>
+                        <span class="section-kicker">Raccourcis de controle vers les modules financiers existants.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-actions-grid accounting-access-grid">
+                <a href="{% url 'facture_list' %}" class="quick-action is-blue">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
+                    <strong>Voir les factures</strong>
+                </a>
+                <a href="{% url 'depenses' %}" class="quick-action is-red">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
+                    <strong>Voir les dépenses</strong>
+                </a>
+                <a href="{% url 'compta_dashboard' %}" class="quick-action is-green">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h8"></path><path d="M8 14h8"></path><path d="M8 18h8"></path></svg></span>
+                    <strong>Voir la comptabilité</strong>
+                </a>
+                <a href="{% url 'compte_resultat' %}" class="quick-action is-orange">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg></span>
+                    <strong>Voir les rapports</strong>
+                </a>
+                <a href="{% url 'payment_list' %}" class="quick-action is-purple">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg></span>
+                    <strong>Voir les paiements</strong>
+                </a>
+                <a href="{% url 'activity_log_list' %}" class="quick-action is-magenta">
+                    <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11 12 14 22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span>
+                    <strong>Voir l'activité</strong>
+                </a>
+            </div>
+        </article>
+
+        <article class="owner-panel" aria-label="Statut des factures">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Statut des factures</h3>
+                        <span class="section-kicker">Lecture simple des factures payees, impayees et du volume total.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="accountant-status-grid">
+                <div class="accountant-status-card is-paid">
+                    <span>Payees</span>
+                    <strong>{{ payees }}</strong>
+                    <small>Factures reglees</small>
+                </div>
+                <div class="accountant-status-card is-unpaid">
+                    <span>Impayees</span>
+                    <strong>{{ impayees }}</strong>
+                    <small>Factures a suivre</small>
+                </div>
+                <div class="accountant-status-card is-total">
+                    <span>Total factures</span>
+                    <strong>{{ nombre_factures }}</strong>
+                    <small>Portefeuille facture</small>
+                </div>
+            </div>
+        </article>
     </section>
 
-    <section class="section-card">
-        <h3>Origine recente des flux</h3>
-        <p class="section-subtitle">Controle simple des operations selon leur auteur pour distinguer rapidement ce qui a ete saisi par le proprietaire ou par un gestionnaire.</p>
-        <div class="list-card">
-            <ul>
+    <section class="accountant-two-column">
+        <article class="owner-panel" aria-label="Flux récents">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Flux récents</h3>
+                        <span class="section-kicker">Dernieres operations utiles au controle comptable.</span>
+                    </div>
+                </div>
+            </div>
+            {% if flow_activity %}
+            <div class="timeline-list">
                 {% for log in flow_activity %}
-                <li>
-                    <span>{{ log.module|title }} - {{ log.action }}{% if log.utilisateur %} | {{ log.utilisateur.username }} ({{ log.utilisateur.get_role_display }}){% endif %}</span>
-                    <strong>{{ log.date_creation|date:"d/m H:i" }}</strong>
-                </li>
-                {% empty %}
-                <li><span>Aucun flux recent avec auteur disponible.</span><strong>-</strong></li>
+                <div class="timeline-entry">
+                    <span class="timeline-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                    <div class="timeline-copy">
+                        <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                        <span>{{ log.description }}</span>
+                        {% if log.utilisateur %}<span>{{ log.utilisateur.username }} / {{ log.utilisateur.get_role_display }}</span>{% endif %}
+                    </div>
+                    <time class="timeline-time">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
+            {% elif recent_activity %}
+            <div class="timeline-list">
+                {% for log in recent_activity %}
+                <div class="timeline-entry">
+                    <span class="timeline-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                    <div class="timeline-copy">
+                        <strong>{{ log.module|title }} - {{ log.action }}</strong>
+                        <span>{{ log.description }}</span>
+                        {% if log.utilisateur %}<span>{{ log.utilisateur.username }} / {{ log.utilisateur.get_role_display }}</span>{% endif %}
+                    </div>
+                    <time class="timeline-time">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="dashboard-empty">Aucun flux récent pour le moment.</div>
+            {% endif %}
+        </article>
+
+        <article class="owner-panel" aria-label="Points à contrôler">
+            <div class="section-heading">
+                <div class="section-title-row">
+                    <span class="section-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                    </span>
+                    <div>
+                        <h3>Points à contrôler</h3>
+                        <span class="section-kicker">Alertes basees uniquement sur les donnees disponibles.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-list">
+                {% if impayees %}
+                <div class="alert-card is-danger">
+                    <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
+                    <div class="alert-copy">
+                        <strong>Factures impayees</strong>
+                        <span>{{ impayees }} facture{{ impayees|pluralize:"s" }} en attente. Montant du : {{ reste_encaisser }}.</span>
+                    </div>
+                    <span class="alert-count">{{ impayees }}</span>
+                </div>
+                {% endif %}
+
+                {% if subscription and subscription.statut != "actif" %}
+                <div class="alert-card is-info">
+                    <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>
+                    <div class="alert-copy">
+                        <strong>Abonnement : {{ subscription.get_statut_display }}</strong>
+                        <span>Plan actuel : {{ subscription.plan.nom }} | Fin : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                    </div>
+                    <span class="mini-badge">Info</span>
+                </div>
+                {% endif %}
+
+                {% if not impayees and not subscription %}
+                <div class="dashboard-empty">Aucun point critique à contrôler pour le moment.</div>
+                {% endif %}
+                {% if not impayees and subscription and subscription.statut == "actif" %}
+                <div class="dashboard-empty">Aucun point critique à contrôler pour le moment.</div>
+                {% endif %}
+            </div>
+        </article>
+    </section>
+
+    <section class="manager-info-card" aria-label="Espace Comptable">
+        <div>
+            <strong>Espace Comptable</strong>
+            <p>Cet espace permet de suivre les indicateurs financiers, les factures, les depenses et les flux recents afin de securiser la gestion comptable de l'entreprise.</p>
         </div>
     </section>
 </div>

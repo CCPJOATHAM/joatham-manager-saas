@@ -361,10 +361,13 @@ class DashboardAccessTests(TestCase):
         self.assertNotContains(response, reverse("company_settings"))
         self.assertNotContains(response, reverse("user_list"))
         self.assertNotContains(response, reverse("subscription_overview"))
-        self.assertNotContains(response, reverse("activity_log_list"))
-        self.assertContains(response, "Vue de controle financier")
+        self.assertContains(response, reverse("activity_log_list"))
+        self.assertContains(response, "Contrôle financier")
         self.assertContains(response, "Montants dus")
-        self.assertContains(response, "Origine recente des flux")
+        self.assertContains(response, "Accès métier comptable")
+        self.assertContains(response, "Flux récents")
+        self.assertContains(response, "Points à contrôler")
+        self.assertContains(response, "Espace Comptable")
         self.assertContains(response, self.gestionnaire.username)
 
     def test_accounting_navigation_shows_premium_badge_for_free_plan(self):
