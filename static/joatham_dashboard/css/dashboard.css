@@ -1666,30 +1666,6 @@ a {
     background: #fbfdff;
 }
 
-.super-admin-table th:nth-child(1),
-.super-admin-table td:nth-child(1) {
-    width: 22%;
-}
-
-.super-admin-table th:nth-child(2),
-.super-admin-table td:nth-child(2) {
-    width: 21%;
-}
-
-.super-admin-table th:nth-child(3),
-.super-admin-table td:nth-child(3),
-.super-admin-table th:nth-child(5),
-.super-admin-table td:nth-child(5) {
-    width: 9%;
-}
-
-.super-admin-table th:nth-child(4),
-.super-admin-table td:nth-child(4),
-.super-admin-table th:nth-child(6),
-.super-admin-table td:nth-child(6) {
-    width: 14%;
-}
-
 .super-admin-table th:last-child,
 .super-admin-table td:last-child {
     position: sticky;
@@ -2149,7 +2125,6 @@ a {
 }
 
 @media (max-width: 1320px) {
-    .kpi-grid,
     .quick-actions-grid,
     .manager-pill-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2174,11 +2149,6 @@ a {
         justify-self: stretch;
         justify-items: start;
         justify-content: flex-start;
-    }
-
-    .super-admin-dashboard .kpi-grid,
-    .super-admin-dashboard .quick-actions-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .super-admin-table {
@@ -2240,11 +2210,6 @@ a {
 }
 
 @media (max-width: 992px) {
-    .super-admin-dashboard .kpi-grid,
-    .super-admin-dashboard .quick-actions-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .super-admin-row-actions,
     .super-admin-payment-actions {
         min-width: 0;
