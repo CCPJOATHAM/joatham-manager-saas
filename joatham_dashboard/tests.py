@@ -326,7 +326,7 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, "Imprimante A4")
         self.assertContains(response, "Routeur fibre")
         self.assertContains(response, reverse("product_list"))
-        self.assertContains(response, "Gestion SaaS securisee par JOATHAM Manager")
+        self.assertContains(response, "Gestion SaaS sécurisée par JOATHAM Manager")
         self.assertContains(response, "dashboard-layout-premium")
         self.assertContains(response, "premium-sidebar")
         self.assertContains(response, "Menu principal")
