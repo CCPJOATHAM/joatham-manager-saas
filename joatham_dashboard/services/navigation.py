@@ -1,7 +1,11 @@
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from core.services.product_policy import PREMIUM_DENIED_REASONS, get_module_access_state
+from core.services.product_policy import (
+    PREMIUM_DENIED_REASONS,
+    get_module_access_state,
+    is_module_explicitly_missing_from_plan,
+)
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import (
     get_default_dashboard_name,
@@ -108,6 +112,7 @@ NAV_ITEMS = [
         "roles": ["proprietaire", "comptable"],
         "prefixes": ["/rapports-avances/"],
         "disabled_when_locked": True,
+        "hide_when_missing_from_plan": True,
     },
     {
         "label": _("Organisation"),
@@ -249,6 +254,10 @@ def _get_item_state(user, item):
     if module_name:
         try:
             state = _get_module_state(user, module_name)
+            subscription = state.get("subscription")
+            plan = getattr(subscription, "plan", None)
+            if item.get("hide_when_missing_from_plan") and is_module_explicitly_missing_from_plan(plan, module_name):
+                return {"visible": False}
             if state.get("allowed"):
                 return {"visible": True}
             if state.get("reason") == "module_not_in_plan":

@@ -1,24 +1,28 @@
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 from core.services.currency import format_amount_for_entreprise, get_currency_code
-from core.services.product_policy import PREMIUM_DENIED_REASONS, get_module_access_state
 from core.services.subscription import get_current_subscription, refresh_subscription_status
-from joatham_users.permissions import user_has_permission
 
 from ..selectors.dashboard import get_dashboard_kpis_by_entreprise
+from .navigation import NAV_ITEMS, _get_item_state
 
 
 def build_advanced_reports_quick_action(entreprise, user=None):
-    if not user_has_permission(user, "reports.advanced_view"):
+    reports_item = next((item for item in NAV_ITEMS if item.get("url_name") == "advanced_reports"), None)
+    if not reports_item:
         return {"is_visible": False, "is_available": False, "url": "", "badge": ""}
 
-    state = get_module_access_state(entreprise, "advanced_reports")
-    if state.get("allowed"):
-        return {"is_visible": True, "is_available": True, "url": reverse("advanced_reports"), "badge": ""}
+    item_state = _get_item_state(user, reports_item)
+    if not item_state.get("visible"):
+        return {"is_visible": False, "is_available": False, "url": "", "badge": ""}
 
-    badge = _("Premium") if state.get("reason") in PREMIUM_DENIED_REASONS else _("Abonnement requis")
-    return {"is_visible": True, "is_available": False, "url": "", "badge": badge}
+    is_disabled = bool(reports_item.get("disabled") or item_state.get("disabled"))
+    return {
+        "is_visible": True,
+        "is_available": not is_disabled,
+        "url": "" if is_disabled else reverse("advanced_reports"),
+        "badge": item_state.get("badge") or reports_item.get("badge") or "",
+    }
 
 
 def build_dashboard_context(entreprise, user=None):

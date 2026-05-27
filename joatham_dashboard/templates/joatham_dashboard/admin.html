@@ -333,12 +333,12 @@
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg></span>
                 <strong>{% trans "Enregistrer une dépense" %}</strong>
             </a>
-            {% if advanced_reports_quick_action.is_available %}
+            {% if advanced_reports_quick_action.is_visible and advanced_reports_quick_action.is_available %}
             <a href="{{ advanced_reports_quick_action.url }}" class="quick-action is-orange">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg></span>
                 <strong>{% trans "Voir les rapports" %}</strong>
             </a>
-            {% else %}
+            {% elif advanced_reports_quick_action.is_visible %}
             <span class="quick-action is-orange" aria-disabled="true">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg></span>
                 <strong>{% trans "Voir les rapports" %}</strong>

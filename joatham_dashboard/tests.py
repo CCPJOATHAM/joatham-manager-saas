@@ -451,6 +451,8 @@ class DashboardAccessTests(TestCase):
         self.assertNotIn("Factures", labels)
         self.assertNotIn("Comptabilite", labels)
         self.assertNotIn("Ressources humaines", labels)
+        self.assertNotIn("Rapports avances", labels)
+        self.assertNotContains(response, "Voir les rapports")
 
         blocked = self.client.get(reverse("compta_dashboard"))
         self.assertRedirects(

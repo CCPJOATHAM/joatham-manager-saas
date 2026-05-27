@@ -188,6 +188,14 @@ def get_plan_module_aliases(module_name):
     )
 
 
+def is_module_explicitly_missing_from_plan(plan, module_name):
+    included_modules = set(getattr(plan, "modules_inclus", None) or [])
+    if not included_modules:
+        return False
+    accepted_plan_modules = get_plan_module_aliases(module_name)
+    return included_modules.isdisjoint(accepted_plan_modules)
+
+
 def get_module_access_state(entreprise, module_name, *, as_of=None):
     canonical_module = get_canonical_module_name(module_name)
     level = get_module_access_level(canonical_module)
@@ -225,6 +233,14 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                     "subscription": state["subscription"],
                     "locked": True,
                 }
+            if is_module_explicitly_missing_from_plan(plan, canonical_module):
+                return {
+                    "allowed": False,
+                    "reason": "module_not_in_plan",
+                    "level": level,
+                    "subscription": state["subscription"],
+                    "locked": True,
+                }
             return {
                 "allowed": True,
                 "reason": None,
@@ -233,9 +249,7 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                 "locked": False,
             }
 
-        included_modules = set(getattr(plan, "modules_inclus", None) or [])
-        accepted_plan_modules = get_plan_module_aliases(canonical_module)
-        if included_modules and included_modules.isdisjoint(accepted_plan_modules):
+        if is_module_explicitly_missing_from_plan(plan, canonical_module):
             return {
                 "allowed": False,
                 "reason": "module_not_in_plan",
