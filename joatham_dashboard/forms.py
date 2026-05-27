@@ -30,6 +30,13 @@ class SignupForm(forms.Form):
         self.fields["devise"].choices = get_currency_choices()
         self.fields["pays"].initial = "RDC"
         self.fields["devise"].initial = get_default_currency_for_country("RDC")
+        self.fields["password"].widget.attrs.update(
+            {
+                "autocomplete": "new-password",
+                "aria-describedby": "signup-password-rules",
+            }
+        )
+        self.fields["password_confirm"].widget.attrs.update({"autocomplete": "new-password"})
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()

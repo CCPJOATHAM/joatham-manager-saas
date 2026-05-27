@@ -424,11 +424,84 @@ class DashboardAccessTests(TestCase):
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class OnboardingSignupTests(TestCase):
+    def _signup_payload(self, **overrides):
+        password = overrides.pop("password", "Motdepasse123!")
+        password_confirm = overrides.pop("password_confirm", password)
+        data = {
+            "company_name": "Entreprise Test",
+            "raison_sociale": "Entreprise Test SARL",
+            "owner_full_name": "Alice Test",
+            "email": "signup-test@example.com",
+            "telephone": "+243900000010",
+            "pays": "RDC",
+            "devise": "CDF",
+            "password": password,
+            "password_confirm": password_confirm,
+        }
+        data.update(overrides)
+        return data
+
     def test_signup_page_is_available(self):
         response = self.client.get(reverse("signup"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Inscription entreprise")
         self.assertContains(response, "Creer mon entreprise")
+
+    def test_signup_page_displays_dynamic_password_requirements(self):
+        response = self.client.get(reverse("signup"))
+
+        self.assertContains(response, "Conditions du mot de passe")
+        self.assertContains(response, "Au moins 10 caracteres")
+        self.assertContains(response, "Au moins une lettre majuscule")
+        self.assertContains(response, "Au moins une lettre minuscule")
+        self.assertContains(response, "Au moins un chiffre")
+        self.assertContains(response, "Au moins un caractere special, par exemple @")
+        self.assertContains(response, "Les deux mots de passe doivent etre identiques")
+        self.assertContains(response, 'id="signup-password-rules"')
+        self.assertContains(response, 'data-password-rule="special"')
+        self.assertContains(response, "updatePasswordChecklist")
+
+    def test_signup_rejects_passwords_missing_required_complexity(self):
+        cases = [
+            ("without_uppercase", "motdepasse123!", "au moins une lettre majuscule"),
+            ("without_lowercase", "MOTDEPASSE123!", "au moins une lettre minuscule"),
+            ("without_digit", "Motdepasse!!", "au moins un chiffre"),
+            ("without_special", "Motdepasse123", "au moins un caractere special"),
+        ]
+
+        for key, password, expected_error in cases:
+            with self.subTest(key=key):
+                email = f"{key}@example.com"
+                response = self.client.post(reverse("signup"), self._signup_payload(email=email, password=password))
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, expected_error)
+                self.assertFalse(User.objects.filter(email=email).exists())
+
+    def test_signup_rejects_password_shorter_than_minimum_length(self):
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(email="short-password@example.com", password="Mo1!abcd"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "trop court")
+        self.assertContains(response, "10")
+        self.assertFalse(User.objects.filter(email="short-password@example.com").exists())
+
+    def test_signup_rejects_password_confirmation_mismatch(self):
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="password-mismatch@example.com",
+                password="Motdepasse123!",
+                password_confirm="Motdepasse123@",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "La confirmation du mot de passe ne correspond pas.")
+        self.assertFalse(User.objects.filter(email="password-mismatch@example.com").exists())
 
     def test_authenticated_user_is_redirected_from_signup(self):
         entreprise = create_entreprise("Entreprise Connectee")

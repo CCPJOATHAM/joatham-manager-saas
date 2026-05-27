@@ -308,6 +308,7 @@ def signup_view(request):
             "app_name": "JOATHAM Manager",
             "country_currency_map": build_country_currency_map(),
             "currency_choices": get_currency_choices(),
+            "password_min_length": getattr(settings, "PASSWORD_MIN_LENGTH", 10),
         },
     )
 
