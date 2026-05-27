@@ -62,6 +62,11 @@
         <span class="detail-value">{{ target_user.get_role_display }}</span>
     </div>
     <div class="detail-card">
+        <span class="detail-label">{% trans "Poste RH et rôle d'accès" %}</span>
+        <span class="detail-value">{% trans "Le poste RH décrit la fonction réelle. Le rôle d'accès définit les droits dans JOATHAM Manager." %}</span>
+        <span class="detail-label">{% trans "Un Responsable RH peut être un poste RH sans être un rôle système séparé." %}</span>
+    </div>
+    <div class="detail-card">
         <span class="detail-label">{% trans "Statut" %}</span>
         <span class="detail-value">{% if target_user.is_active %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</span>
     </div>
