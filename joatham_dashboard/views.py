@@ -317,21 +317,21 @@ def signup_view(request):
 @module_access_required("dashboard")
 def admin_dashboard(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    return render(request, "joatham_dashboard/admin.html", build_dashboard_context(entreprise))
+    return render(request, "joatham_dashboard/admin.html", build_dashboard_context(entreprise, request.user))
 
 
 @permission_required("dashboard.management")
 @module_access_required("dashboard")
 def gestion_dashboard(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    return render(request, "joatham_dashboard/gestion.html", build_dashboard_context(entreprise))
+    return render(request, "joatham_dashboard/gestion.html", build_dashboard_context(entreprise, request.user))
 
 
 @permission_required("dashboard.accounting")
 @module_access_required("dashboard")
 def comptable_dashboard(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    return render(request, "joatham_dashboard/comptable.html", build_dashboard_context(entreprise))
+    return render(request, "joatham_dashboard/comptable.html", build_dashboard_context(entreprise, request.user))
 
 
 def home(request):

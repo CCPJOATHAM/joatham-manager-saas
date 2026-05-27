@@ -340,6 +340,43 @@ class DashboardAccessTests(TestCase):
         self.assertNotContains(response, "Satisfaction 4.6/5")
         self.assertNotContains(response, "Facture generee automatiquement par JOATHAM Manager")
 
+    def test_owner_quick_reports_action_is_disabled_when_advanced_reports_locked(self):
+        self.client.force_login(self.proprietaire)
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertContains(response, "Voir les rapports")
+        self.assertContains(response, 'class="quick-action is-orange" aria-disabled="true"')
+        self.assertContains(response, "Premium")
+        self.assertNotContains(response, f'href="{reverse("advanced_reports")}" class="quick-action is-orange"')
+
+    def test_owner_quick_reports_action_links_when_advanced_reports_accessible(self):
+        premium_entreprise = create_entreprise("Entreprise Premium Rapports Dashboard")
+        premium_owner = create_user("owner-premium-reports-dashboard", "proprietaire", premium_entreprise)
+        premium_plan = Abonnement.objects.create(
+            nom="Premium Rapports Dashboard",
+            code="premium",
+            prix=99,
+            duree_jours=30,
+            actif=True,
+        )
+        activate_subscription_for_entreprise(
+            entreprise=premium_entreprise,
+            plan=premium_plan,
+            utilisateur=premium_owner,
+        )
+
+        self.client.force_login(premium_owner)
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertContains(response, f'href="{reverse("advanced_reports")}" class="quick-action is-orange"')
+        self.assertNotContains(response, 'class="quick-action is-orange" aria-disabled="true"')
+
+    def test_accountant_reports_quick_action_keeps_existing_accounting_route(self):
+        self.client.force_login(self.comptable)
+        response = self.client.get(reverse("comptable_dashboard"))
+
+        self.assertContains(response, f'href="{reverse("compte_resultat")}" class="quick-action is-orange"')
+
     def test_dashboard_selector_detects_stock_alerts_with_company_isolation(self):
         kpis = get_dashboard_kpis_by_entreprise(self.entreprise)
         self.assertEqual(kpis["rupture_products_count"], 1)

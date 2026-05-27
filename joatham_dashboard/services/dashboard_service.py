@@ -1,14 +1,32 @@
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
 from core.services.currency import format_amount_for_entreprise, get_currency_code
+from core.services.product_policy import PREMIUM_DENIED_REASONS, get_module_access_state
 from core.services.subscription import get_current_subscription, refresh_subscription_status
+from joatham_users.permissions import user_has_permission
 
 from ..selectors.dashboard import get_dashboard_kpis_by_entreprise
 
 
-def build_dashboard_context(entreprise):
+def build_advanced_reports_quick_action(entreprise, user=None):
+    if not user_has_permission(user, "reports.advanced_view"):
+        return {"is_visible": False, "is_available": False, "url": "", "badge": ""}
+
+    state = get_module_access_state(entreprise, "advanced_reports")
+    if state.get("allowed"):
+        return {"is_visible": True, "is_available": True, "url": reverse("advanced_reports"), "badge": ""}
+
+    badge = _("Premium") if state.get("reason") in PREMIUM_DENIED_REASONS else _("Abonnement requis")
+    return {"is_visible": True, "is_available": False, "url": "", "badge": badge}
+
+
+def build_dashboard_context(entreprise, user=None):
     kpis = get_dashboard_kpis_by_entreprise(entreprise)
     subscription = refresh_subscription_status(entreprise) or get_current_subscription(entreprise)
     return {
         "currency_code": get_currency_code(entreprise),
+        "advanced_reports_quick_action": build_advanced_reports_quick_action(entreprise, user),
         "total_ca": format_amount_for_entreprise(kpis["total_ca"], entreprise),
         "total_depenses": format_amount_for_entreprise(kpis["total_depenses"], entreprise),
         "benefice": format_amount_for_entreprise(kpis["benefice"], entreprise),
