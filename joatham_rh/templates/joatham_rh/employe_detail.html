@@ -52,30 +52,30 @@
             <h3>{% trans "Compte utilisateur lie" %}</h3>
             <p>{% trans "Le compte utilisateur permet la connexion a JOATHAM Manager. Le role d'acces reste gere dans le module Utilisateurs." %}</p>
         </div>
-        {% if employe.user %}
+        {% if linked_user %}
         <span class="rh-badge success">{% trans "Lie" %}</span>
         {% else %}
         <span class="rh-badge">{% trans "Non lie" %}</span>
         {% endif %}
     </div>
-    {% if employe.user %}
+    {% if linked_user %}
     <div class="rh-detail-grid">
         <div class="rh-kpi-card">
             <span class="rh-kpi-label">{% trans "Compte" %}</span>
-            <span class="rh-kpi-value">{{ employe.user.get_full_name|default:employe.user.username }}</span>
+            <span class="rh-kpi-value">{% firstof linked_user.get_full_name linked_user.username %}</span>
         </div>
         <div class="rh-kpi-card">
             <span class="rh-kpi-label">{% trans "Email" %}</span>
-            <span class="rh-kpi-value">{{ employe.user.email|default:employe.user.username }}</span>
+            <span class="rh-kpi-value">{% firstof linked_user.email linked_user.username %}</span>
         </div>
         <div class="rh-kpi-card">
             <span class="rh-kpi-label">{% trans "Role d'acces" %}</span>
-            <span class="rh-kpi-value">{{ employe.user.get_role_display }}</span>
+            <span class="rh-kpi-value">{{ linked_user.get_role_display }}</span>
         </div>
         <div class="rh-kpi-card">
             <span class="rh-kpi-label">{% trans "Statut du compte" %}</span>
             <span class="rh-kpi-value">
-                {% if employe.user.is_active %}
+                {% if linked_user.is_active %}
                 <span class="rh-badge success">{% trans "Actif" %}</span>
                 {% else %}
                 <span class="rh-badge warning">{% trans "Compte inactif" %}</span>

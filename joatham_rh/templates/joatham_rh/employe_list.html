@@ -68,8 +68,8 @@
                     <td>{{ row.instance.nom }} {{ row.instance.prenom }}</td>
                     <td class="rh-muted">{{ row.instance.poste.nom|default:"-" }}</td>
                     <td>
-                        {% if row.instance.user %}
-                            {% if row.instance.user.is_active %}
+                        {% if row.linked_user %}
+                            {% if row.linked_user.is_active %}
                             <span class="rh-badge success">{% trans "Lie" %}</span>
                             {% else %}
                             <span class="rh-badge warning">{% trans "Compte inactif" %}</span>

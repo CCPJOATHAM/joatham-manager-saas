@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +11,7 @@ from core.services.product_policy import module_access_required
 from core.services.quotas import PlanQuotaExceeded, get_plan_quota_limit
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
+from joatham_rh.models import Employe
 from joatham_users.models import EntrepriseInvitation
 from joatham_users.permissions import get_default_dashboard_name, permission_required
 
@@ -57,11 +57,11 @@ STATUS_FILTER_CHOICES = [
 ]
 
 
-def _build_user_rows(users):
+def _build_user_rows(users, linked_employes_by_user_id=None):
+    linked_employes_by_user_id = linked_employes_by_user_id or {}
     rows = []
     for managed_user in users:
         full_name = f"{managed_user.first_name} {managed_user.last_name}".strip() or managed_user.username
-        linked_employe = _get_linked_employe(managed_user)
         rows.append(
             {
                 "instance": managed_user,
@@ -72,17 +72,33 @@ def _build_user_rows(users):
                 "email_verified": managed_user.email_verified,
                 "created_display": managed_user.date_joined,
                 "last_login_display": managed_user.last_login,
-                "linked_employe": linked_employe,
+                "linked_employe": linked_employes_by_user_id.get(managed_user.id),
             }
         )
     return rows
 
 
-def _get_linked_employe(user):
-    try:
-        return user.rh_employe
-    except ObjectDoesNotExist:
+def _get_linked_employes_by_user_id(users, entreprise):
+    user_ids = [managed_user.id for managed_user in users if managed_user.id]
+    if not user_ids:
+        return {}
+
+    return {
+        employe.user_id: employe
+        for employe in Employe.objects.filter(
+            entreprise=entreprise,
+            user_id__in=user_ids,
+        ).select_related("poste")
+    }
+
+
+def _get_linked_employe(user, entreprise):
+    if not getattr(user, "id", None):
         return None
+    return Employe.objects.filter(
+        entreprise=entreprise,
+        user_id=user.id,
+    ).select_related("poste").first()
 
 
 def _build_invitation_rows(invitations):
@@ -149,7 +165,8 @@ def user_list(request):
         search=search_query or None,
     )
     invitations = get_active_company_invitations(entreprise)
-    user_rows = _build_user_rows(users)
+    users = list(users)
+    user_rows = _build_user_rows(users, _get_linked_employes_by_user_id(users, entreprise))
     invitation_rows = _build_invitation_rows(invitations)
     all_users = list(get_users_by_entreprise(entreprise))
     user_metrics = get_company_user_metrics(entreprise, users=all_users, invitations=invitations)
@@ -331,7 +348,7 @@ def user_detail(request, user_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
     full_name = f"{target_user.first_name} {target_user.last_name}".strip() or target_user.username
-    linked_employe = _get_linked_employe(target_user)
+    linked_employe = _get_linked_employe(target_user, entreprise)
     return render(
         request,
         "joatham_users/user_detail.html",

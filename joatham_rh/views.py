@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils.dateparse import parse_date
@@ -32,6 +33,9 @@ from .services.rh import (
     update_employe,
 )
 from .services.exports import build_csv_response, format_date, format_datetime, format_time
+
+
+User = get_user_model()
 
 
 def _build_rh_ui_permissions(user):
@@ -138,16 +142,35 @@ def _query_string(request):
     return request.GET.urlencode()
 
 
+def _get_linked_users_by_id(employes, entreprise):
+    user_ids = [employe.user_id for employe in employes if employe.user_id]
+    if not user_ids:
+        return {}
+
+    return {
+        linked_user.id: linked_user
+        for linked_user in User.objects.filter(entreprise=entreprise, id__in=user_ids)
+    }
+
+
+def _get_linked_user_for_employe(employe, entreprise):
+    if not getattr(employe, "user_id", None):
+        return None
+    return User.objects.filter(entreprise=entreprise, id=employe.user_id).first()
+
+
 @permission_required("rh.view")
 @module_access_required("rh")
 def employe_list(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     filters = _get_employe_filters(request)
-    employes = get_employes_by_entreprise(entreprise, **filters)
+    employes = list(get_employes_by_entreprise(entreprise, **filters))
+    linked_users_by_id = _get_linked_users_by_id(employes, entreprise)
     rows = [
         {
             "instance": employe,
             "status_label": _build_status_label(employe.statut),
+            "linked_user": linked_users_by_id.get(employe.user_id),
         }
         for employe in employes
     ]
@@ -177,6 +200,7 @@ def employe_detail(request, employe_id):
         "joatham_rh/employe_detail.html",
         {
             "employe": employe,
+            "linked_user": _get_linked_user_for_employe(employe, entreprise),
             "status_label": _build_status_label(employe.statut),
             "presences": [
                 {

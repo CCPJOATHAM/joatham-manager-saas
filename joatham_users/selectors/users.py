@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 def get_users_by_entreprise(entreprise, *, role=None, status=None, search=None):
-    queryset = User.objects.filter(entreprise=entreprise).select_related("rh_employe", "rh_employe__poste")
+    queryset = User.objects.filter(entreprise=entreprise)
 
     if role:
         queryset = queryset.filter(role=role)
