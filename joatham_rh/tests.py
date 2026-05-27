@@ -63,6 +63,7 @@ class RhFoundationTests(TestCase):
         )
         self.owner_a = create_user("owner-rh-a", "proprietaire", self.entreprise_a)
         self.manager_a = create_user("manager-rh-a", "gestionnaire", self.entreprise_a)
+        self.comptable_a = create_user("comptable-rh-a", "comptable", self.entreprise_a)
         self.owner_b = create_user("owner-rh-b", "proprietaire", self.entreprise_b)
         self.premium_plan = Abonnement.objects.create(
             nom="Premium RH",
@@ -497,11 +498,17 @@ class RhFoundationTests(TestCase):
 
     def test_rh_access_allowed_if_module_included(self):
         self.client.force_login(self.owner_a)
-        response = self.client.get(reverse("rh_employe_list"))
+        owner_response = self.client.get(reverse("rh_employe_list"))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Employes")
-        self.assertContains(response, "Poste RH")
+        self.client.force_login(self.manager_a)
+        manager_response = self.client.get(reverse("rh_employe_list"))
+
+        self.assertEqual(owner_response.status_code, 200)
+        self.assertContains(owner_response, "Employes")
+        self.assertContains(owner_response, "Poste RH")
+        self.assertEqual(manager_response.status_code, 200)
+        self.assertContains(manager_response, "Employes")
+        self.assertContains(manager_response, "Poste RH")
 
     def test_owner_form_can_link_user_account(self):
         user = create_user("form-link-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
@@ -623,6 +630,14 @@ class RhFoundationTests(TestCase):
         premium_response = self.client.get(reverse("admin_dashboard"))
         premium_labels = [item["label"] for item in premium_response.context["dashboard_navigation"]]
 
+        self.client.force_login(self.manager_a)
+        manager_response = self.client.get(reverse("gestion_dashboard"))
+        manager_labels = [item["label"] for item in manager_response.context["dashboard_navigation"]]
+
+        self.client.force_login(self.comptable_a)
+        comptable_response = self.client.get(reverse("comptable_dashboard"))
+        comptable_labels = [item["label"] for item in comptable_response.context["dashboard_navigation"]]
+
         entreprise = create_entreprise("Entreprise Starter Nav RH")
         owner = create_user("owner-rh-starter-nav", "proprietaire", entreprise)
         starter_plan = Abonnement.objects.create(
@@ -640,7 +655,61 @@ class RhFoundationTests(TestCase):
         starter_labels = [item["label"] for item in starter_response.context["dashboard_navigation"]]
 
         self.assertIn("Ressources humaines", premium_labels)
+        self.assertIn("Ressources humaines", manager_labels)
+        self.assertNotIn("Ressources humaines", comptable_labels)
         self.assertNotIn("Ressources humaines", starter_labels)
+
+    def test_accountant_cannot_access_rh_direct_urls(self):
+        employe = self._create_employe(matricule="RH-CPT001")
+        conge = create_conge(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_conge=DemandeConge.TypeConge.ANNUEL,
+            date_debut=date(2026, 5, 4),
+            date_fin=date(2026, 5, 8),
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.comptable_a)
+
+        protected_urls = [
+            reverse("rh_employe_list"),
+            reverse("rh_employe_detail", args=[employe.id]),
+            reverse("rh_employe_create"),
+            reverse("rh_employe_update", args=[employe.id]),
+            reverse("rh_employe_print", args=[employe.id]),
+            reverse("rh_employe_list_print"),
+            reverse("rh_poste_list"),
+            reverse("rh_poste_create"),
+            reverse("rh_presence_list"),
+            reverse("rh_presence_create"),
+            reverse("rh_conge_list"),
+            reverse("rh_conge_create"),
+            reverse("rh_document_list"),
+            reverse("rh_document_create"),
+            reverse("rh_reports"),
+            reverse("rh_employe_export_csv"),
+            reverse("rh_presence_export_csv"),
+            reverse("rh_conge_export_csv"),
+            reverse("rh_document_export_csv"),
+            reverse("rh_reports_export_csv"),
+            reverse("rh_reports_print"),
+        ]
+
+        for url in protected_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 403)
+
+        protected_post_urls = [
+            reverse("rh_conge_approve", args=[conge.id]),
+            reverse("rh_conge_refuse", args=[conge.id]),
+        ]
+
+        for url in protected_post_urls:
+            with self.subTest(url=url):
+                response = self.client.post(url)
+                self.assertEqual(response.status_code, 403)
 
     def test_create_conge_valid(self):
         employe = self._create_employe(matricule="RH-C001")

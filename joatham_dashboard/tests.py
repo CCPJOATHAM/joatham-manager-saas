@@ -361,6 +361,7 @@ class DashboardAccessTests(TestCase):
         self.assertNotContains(response, reverse("company_settings"))
         self.assertNotContains(response, reverse("user_list"))
         self.assertNotContains(response, reverse("subscription_overview"))
+        self.assertNotContains(response, "Ressources humaines")
         self.assertContains(response, reverse("activity_log_list"))
         self.assertContains(response, "Contrôle financier")
         self.assertContains(response, "Montants dus")
