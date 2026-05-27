@@ -49,7 +49,7 @@ def _build_rh_ui_permissions(user):
 
 
 def _can_link_user_account(user):
-    return getattr(user, "normalized_role", None) == "proprietaire"
+    return user_has_permission(user, "rh.link_user")
 
 
 def _build_status_label(status):

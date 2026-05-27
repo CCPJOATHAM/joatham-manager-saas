@@ -15,6 +15,7 @@ from core.services.subscription import (
 )
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement, User
+from joatham_users.permissions import user_has_permission
 
 from .models import DemandeConge, DocumentRH, Employe, Presence
 from .selectors.rh import (
@@ -158,6 +159,18 @@ class RhFoundationTests(TestCase):
         self.assertTrue(can_access_module(self.owner_a, "hr"))
         self.assertTrue(can_access_module(self.owner_a, "ressources_humaines"))
         self.assertTrue(can_access_module(self.owner_a, "human_resources"))
+
+    def test_rh_permission_matrix_excludes_accountant_and_limits_link_user(self):
+        common_permissions = ["rh.view", "rh.manage", "rh.presence", "rh.documents", "rh.reports"]
+        for permission_code in common_permissions:
+            with self.subTest(permission_code=permission_code):
+                self.assertTrue(user_has_permission(self.owner_a, permission_code))
+                self.assertTrue(user_has_permission(self.manager_a, permission_code))
+                self.assertFalse(user_has_permission(self.comptable_a, permission_code))
+
+        self.assertTrue(user_has_permission(self.owner_a, "rh.link_user"))
+        self.assertFalse(user_has_permission(self.manager_a, "rh.link_user"))
+        self.assertFalse(user_has_permission(self.comptable_a, "rh.link_user"))
 
     def test_create_poste(self):
         poste = self._create_poste(nom="Caissier")
@@ -515,6 +528,9 @@ class RhFoundationTests(TestCase):
         poste = self._create_poste(nom="Formateur")
 
         self.client.force_login(self.owner_a)
+        form_response = self.client.get(reverse("rh_employe_create"))
+        self.assertContains(form_response, "Compte utilisateur lie")
+
         response = self.client.post(
             reverse("rh_employe_create"),
             {
@@ -539,6 +555,43 @@ class RhFoundationTests(TestCase):
         self.assertRedirects(response, reverse("rh_employe_detail", args=[employe.id]))
         self.assertEqual(employe.user, user)
 
+    def test_owner_can_unlink_user_account(self):
+        linked_user = create_user("owner-unlink-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F001B",
+            nom="Lien",
+            prenom="Retire",
+            date_embauche=date(2026, 1, 10),
+            user=linked_user,
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.post(
+            reverse("rh_employe_update", args=[employe.id]),
+            {
+                "matricule": employe.matricule,
+                "nom": employe.nom,
+                "prenom": employe.prenom,
+                "sexe": "",
+                "telephone": "",
+                "email": "",
+                "adresse": "",
+                "user": "",
+                "poste": "",
+                "type_contrat": employe.type_contrat,
+                "date_embauche": "2026-01-10",
+                "salaire_base": "",
+                "statut": employe.statut,
+                "actif": "on",
+            },
+        )
+
+        self.assertRedirects(response, reverse("rh_employe_detail", args=[employe.id]))
+        employe.refresh_from_db()
+        self.assertIsNone(employe.user)
+
     def test_manager_update_cannot_change_user_link(self):
         linked_user = create_user("manager-link-kept", User.Role.GESTIONNAIRE, self.entreprise_a)
         malicious_user = create_user("manager-link-malicious", User.Role.COMPTABLE, self.entreprise_a)
@@ -553,6 +606,9 @@ class RhFoundationTests(TestCase):
         )
 
         self.client.force_login(self.manager_a)
+        form_response = self.client.get(reverse("rh_employe_update", args=[employe.id]))
+        self.assertNotContains(form_response, "Compte utilisateur lie")
+
         response = self.client.post(
             reverse("rh_employe_update", args=[employe.id]),
             {
@@ -574,6 +630,40 @@ class RhFoundationTests(TestCase):
         )
 
         self.assertRedirects(response, reverse("rh_employe_detail", args=[employe.id]))
+        employe.refresh_from_db()
+        self.assertEqual(employe.user, linked_user)
+
+    def test_manager_cannot_link_or_unlink_user_account_in_service(self):
+        linked_user = create_user("manager-service-linked", User.Role.GESTIONNAIRE, self.entreprise_a)
+        other_user = create_user("manager-service-other", User.Role.COMPTABLE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F002B",
+            nom="Service",
+            prenom="Protege",
+            date_embauche=date(2026, 1, 10),
+            user=linked_user,
+            utilisateur=self.owner_a,
+        )
+
+        base_kwargs = {
+            "entreprise": self.entreprise_a,
+            "employe": employe,
+            "matricule": employe.matricule,
+            "nom": employe.nom,
+            "prenom": employe.prenom,
+            "date_embauche": employe.date_embauche,
+            "type_contrat": employe.type_contrat,
+            "statut": employe.statut,
+            "utilisateur": self.manager_a,
+        }
+
+        with self.assertRaisesMessage(RhOperationError, "Seul le proprietaire peut modifier la liaison"):
+            update_employe(**base_kwargs, user=other_user)
+
+        with self.assertRaisesMessage(RhOperationError, "Seul le proprietaire peut modifier la liaison"):
+            update_employe(**base_kwargs, user=None)
+
         employe.refresh_from_db()
         self.assertEqual(employe.user, linked_user)
 
@@ -710,6 +800,34 @@ class RhFoundationTests(TestCase):
             with self.subTest(url=url):
                 response = self.client.post(url)
                 self.assertEqual(response.status_code, 403)
+
+    def test_owner_and_manager_keep_fine_grained_rh_access(self):
+        employe = self._create_employe(matricule="RH-FINE001")
+        create_document_rh(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            type_document=DocumentRH.TypeDocument.CONTRAT,
+            titre="Contrat permissions fines",
+            utilisateur=self.owner_a,
+        )
+
+        urls = [
+            reverse("rh_employe_list"),
+            reverse("rh_employe_detail", args=[employe.id]),
+            reverse("rh_poste_list"),
+            reverse("rh_presence_create"),
+            reverse("rh_document_list"),
+            reverse("rh_document_create"),
+            reverse("rh_reports"),
+            reverse("rh_employe_export_csv"),
+        ]
+
+        for allowed_user in [self.owner_a, self.manager_a]:
+            self.client.force_login(allowed_user)
+            for url in urls:
+                with self.subTest(user=allowed_user.username, url=url):
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, 200)
 
     def test_create_conge_valid(self):
         employe = self._create_employe(matricule="RH-C001")

@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from core.audit import record_audit_event
+from joatham_users.permissions import user_has_permission
 
 from ..models import DemandeConge, DocumentRH, Employe, Poste, Presence
 
@@ -86,7 +87,7 @@ def _record_blocked_user_link(*, entreprise, employe, user, utilisateur, action,
 
 
 def _ensure_user_link_can_be_managed(*, entreprise, employe, user, utilisateur):
-    if getattr(utilisateur, "normalized_role", None) == User.Role.PROPRIETAIRE:
+    if user_has_permission(utilisateur, "rh.link_user"):
         return
 
     message = "Seul le proprietaire peut modifier la liaison avec un compte utilisateur."

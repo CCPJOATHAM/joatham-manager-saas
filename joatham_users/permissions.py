@@ -62,6 +62,7 @@ PERMISSIONS = {
     "rh.presence": {ROLE_PROPRIETAIRE, ROLE_GESTIONNAIRE},
     "rh.documents": {ROLE_PROPRIETAIRE, ROLE_GESTIONNAIRE},
     "rh.reports": {ROLE_PROPRIETAIRE, ROLE_GESTIONNAIRE},
+    "rh.link_user": {ROLE_PROPRIETAIRE},
     "subscription.view": {ROLE_PROPRIETAIRE},
     "company.manage": {ROLE_PROPRIETAIRE},
     "audit.view": {ROLE_PROPRIETAIRE, ROLE_COMPTABLE},
