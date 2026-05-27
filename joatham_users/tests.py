@@ -42,7 +42,16 @@ from .services.invitations import (
     REMINDER_SENT,
     REMINDER_SKIPPED,
     build_company_invitation_source,
+    create_company_invitation,
     send_invitation_reminder,
+)
+from .services.user_management import (
+    LAST_ACTIVE_OWNER_MESSAGE,
+    SELF_ACCESS_MESSAGE,
+    create_company_user,
+    delete_company_user,
+    remove_company_user_access,
+    toggle_company_user_active,
 )
 
 
@@ -579,6 +588,15 @@ class UserManagementTests(TestCase):
             utilisateur=self.owner_free,
         )
 
+    def assert_blocked_user_action_audited(self, target_user, reason):
+        audit = ActivityLog.objects.filter(
+            entreprise=target_user.entreprise,
+            action="utilisateur_action_bloquee",
+            objet_id=target_user.id,
+        ).first()
+        self.assertIsNotNone(audit)
+        self.assertEqual(audit.metadata.get("reason"), reason)
+
     def test_owner_can_access_user_list(self):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("user_list"))
@@ -650,6 +668,20 @@ class UserManagementTests(TestCase):
         self.assertEqual(created_user.role, User.Role.GESTIONNAIRE)
         self.assertEqual(created_user.telephone, "+243900000099")
 
+    def test_owner_cannot_create_super_admin_user(self):
+        with self.assertRaisesMessage(ValueError, "Le proprietaire peut creer uniquement un gestionnaire ou un comptable."):
+            create_company_user(
+                entreprise=self.entreprise,
+                owner_user=self.owner,
+                full_name="Admin Global",
+                email="blocked.superadmin@example.com",
+                telephone="",
+                role=User.Role.SUPER_ADMIN,
+                password="Motdepasse123!",
+            )
+
+        self.assertFalse(User.objects.filter(email="blocked.superadmin@example.com").exists())
+
     def test_owner_can_invite_gestionnaire(self):
         self.client.force_login(self.owner)
         response = self.client.post(
@@ -689,6 +721,18 @@ class UserManagementTests(TestCase):
         self.assertRedirects(response, reverse("user_list"))
         invitation = EntrepriseInvitation.objects.get(email="claude.comptable@example.com")
         self.assertIn(f"{COMPANY_INVITATION_SOURCE_PREFIX}:{self.entreprise.id}:{User.Role.COMPTABLE}", invitation.source)
+
+    def test_owner_cannot_invite_super_admin(self):
+        with self.assertRaisesMessage(ValueError, "Vous pouvez inviter uniquement un gestionnaire ou un comptable."):
+            create_company_invitation(
+                entreprise=self.entreprise,
+                owner_user=self.owner,
+                full_name="Invite Super Admin",
+                email="invite.superadmin@example.com",
+                role=User.Role.SUPER_ADMIN,
+            )
+
+        self.assertFalse(EntrepriseInvitation.objects.filter(email="invite.superadmin@example.com").exists())
 
     def test_invitation_is_blocked_when_quota_is_exceeded(self):
         quota_entreprise = create_entreprise("Entreprise Quota Users")
@@ -782,6 +826,38 @@ class UserManagementTests(TestCase):
         self.assertTrue(invitation.is_used)
         self.assertTrue(ActivityLog.objects.filter(action="invitation_annulee", objet_id=invitation.id).exists())
 
+    def test_sensitive_user_actions_require_post(self):
+        managed_user = User.objects.create_user(
+            username="post-only@example.com",
+            email="post-only@example.com",
+            password="Initial123!",
+            role=User.Role.GESTIONNAIRE,
+            entreprise=self.entreprise,
+        )
+        invitation = EntrepriseInvitation.objects.create(
+            email="post-only.invite@example.com",
+            full_name="Post Only Invite",
+            source=build_company_invitation_source(self.entreprise, User.Role.GESTIONNAIRE),
+        )
+
+        self.client.force_login(self.owner)
+        protected_urls = [
+            reverse("user_toggle_active", args=[managed_user.id]),
+            reverse("user_remove_access", args=[managed_user.id]),
+            reverse("user_delete", args=[managed_user.id]),
+            reverse("user_invitation_resend", args=[invitation.id]),
+            reverse("user_invitation_cancel", args=[invitation.id]),
+        ]
+        for url in protected_urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 405)
+
+        managed_user.refresh_from_db()
+        invitation.refresh_from_db()
+        self.assertTrue(managed_user.is_active)
+        self.assertFalse(invitation.is_used)
+
     def test_invited_user_can_accept_company_invitation(self):
         invitation = EntrepriseInvitation.objects.create(
             email="accept.invite@example.com",
@@ -861,6 +937,25 @@ class UserManagementTests(TestCase):
         self.assertEqual(managed_user.role, User.Role.GESTIONNAIRE)
         self.assertEqual(managed_user.telephone, "+243222")
 
+    def test_owner_cannot_update_own_access_from_user_management(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("user_update", args=[self.owner.id]),
+            {
+                "full_name": "Owner Users",
+                "email": self.owner.email or "owner-users@example.com",
+                "telephone": "",
+                "role": User.Role.COMPTABLE,
+                "password": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.owner.refresh_from_db()
+        self.assertEqual(self.owner.role, User.Role.PROPRIETAIRE)
+        self.assertContains(response, SELF_ACCESS_MESSAGE)
+        self.assert_blocked_user_action_audited(self.owner, "self_action")
+
     def test_non_owner_cannot_change_company_user_role(self):
         self.client.force_login(self.gestionnaire)
         response = self.client.post(
@@ -896,11 +991,13 @@ class UserManagementTests(TestCase):
             role=User.Role.COMPTABLE,
             entreprise=self.entreprise,
         )
+        UserActiveSession.objects.create(user=managed_user, session_key="toggle-session")
         self.client.force_login(self.owner)
         response = self.client.post(reverse("user_toggle_active", args=[managed_user.id]))
         self.assertRedirects(response, reverse("user_list"))
         managed_user.refresh_from_db()
         self.assertFalse(managed_user.is_active)
+        self.assertFalse(UserActiveSession.objects.filter(user=managed_user).exists())
         self.assertTrue(
             ActivityLog.objects.filter(
                 entreprise=self.entreprise,
@@ -911,10 +1008,29 @@ class UserManagementTests(TestCase):
 
     def test_owner_cannot_deactivate_owner_account_from_company_management(self):
         self.client.force_login(self.owner)
-        response = self.client.post(reverse("user_toggle_active", args=[self.owner.id]))
+        response = self.client.post(reverse("user_toggle_active", args=[self.owner.id]), follow=True)
         self.assertRedirects(response, reverse("user_list"))
         self.owner.refresh_from_db()
         self.assertTrue(self.owner.is_active)
+        self.assertContains(response, SELF_ACCESS_MESSAGE)
+        self.assert_blocked_user_action_audited(self.owner, "self_action")
+
+    def test_last_active_owner_cannot_be_deactivated(self):
+        second_owner = User.objects.create_user(
+            username="inactive-owner@example.com",
+            email="inactive-owner@example.com",
+            password="Initial123!",
+            role=User.Role.PROPRIETAIRE,
+            entreprise=self.entreprise,
+            is_active=False,
+        )
+
+        with self.assertRaisesMessage(ValueError, LAST_ACTIVE_OWNER_MESSAGE):
+            toggle_company_user_active(target_user=self.owner, owner_user=second_owner)
+
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assert_blocked_user_action_audited(self.owner, "last_active_owner")
 
     def test_owner_can_remove_secondary_user_access(self):
         managed_user = User.objects.create_user(
@@ -924,12 +1040,41 @@ class UserManagementTests(TestCase):
             role=User.Role.COMPTABLE,
             entreprise=self.entreprise,
         )
+        UserActiveSession.objects.create(user=managed_user, session_key="remove-access-session")
         self.client.force_login(self.owner)
         response = self.client.post(reverse("user_remove_access", args=[managed_user.id]))
         self.assertRedirects(response, reverse("user_list"))
         managed_user.refresh_from_db()
         self.assertFalse(managed_user.is_active)
+        self.assertFalse(UserActiveSession.objects.filter(user=managed_user).exists())
         self.assertTrue(ActivityLog.objects.filter(action="utilisateur_acces_retire", objet_id=managed_user.id).exists())
+
+    def test_owner_cannot_remove_own_access(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("user_remove_access", args=[self.owner.id]), follow=True)
+
+        self.assertRedirects(response, reverse("user_list"))
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assertContains(response, SELF_ACCESS_MESSAGE)
+        self.assert_blocked_user_action_audited(self.owner, "self_action")
+
+    def test_last_active_owner_cannot_lose_access(self):
+        second_owner = User.objects.create_user(
+            username="inactive-owner-remove@example.com",
+            email="inactive-owner-remove@example.com",
+            password="Initial123!",
+            role=User.Role.PROPRIETAIRE,
+            entreprise=self.entreprise,
+            is_active=False,
+        )
+
+        with self.assertRaisesMessage(ValueError, LAST_ACTIVE_OWNER_MESSAGE):
+            remove_company_user_access(target_user=self.owner, owner_user=second_owner)
+
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assert_blocked_user_action_audited(self.owner, "last_active_owner")
 
     def test_owner_can_delete_secondary_user(self):
         managed_user = User.objects.create_user(
@@ -992,7 +1137,26 @@ class UserManagementTests(TestCase):
         self.owner.refresh_from_db()
         self.assertTrue(self.owner.is_active)
         self.assertTrue(User.objects.filter(id=self.owner.id).exists())
-        self.assertContains(response, "Le compte proprietaire ne peut pas etre modifie depuis cette interface.")
+        self.assertContains(response, SELF_ACCESS_MESSAGE)
+        self.assert_blocked_user_action_audited(self.owner, "self_action")
+
+    def test_last_active_owner_cannot_be_deleted(self):
+        second_owner = User.objects.create_user(
+            username="inactive-owner-delete@example.com",
+            email="inactive-owner-delete@example.com",
+            password="Initial123!",
+            role=User.Role.PROPRIETAIRE,
+            entreprise=self.entreprise,
+            is_active=False,
+        )
+
+        with self.assertRaisesMessage(ValueError, LAST_ACTIVE_OWNER_MESSAGE):
+            delete_company_user(target_user=self.owner, owner_user=second_owner)
+
+        self.owner.refresh_from_db()
+        self.assertTrue(self.owner.is_active)
+        self.assertTrue(User.objects.filter(id=self.owner.id).exists())
+        self.assert_blocked_user_action_audited(self.owner, "last_active_owner")
 
     def test_multi_entreprise_isolation_prevents_cross_company_access(self):
         self.client.force_login(self.owner)
@@ -1001,6 +1165,22 @@ class UserManagementTests(TestCase):
 
         response = self.client.get(reverse("user_detail", args=[self.external_user.id]))
         self.assertEqual(response.status_code, 404)
+
+    def test_cross_company_mutating_actions_are_refused(self):
+        self.client.force_login(self.owner)
+        protected_urls = [
+            reverse("user_toggle_active", args=[self.external_user.id]),
+            reverse("user_remove_access", args=[self.external_user.id]),
+            reverse("user_delete", args=[self.external_user.id]),
+        ]
+
+        for url in protected_urls:
+            with self.subTest(url=url):
+                response = self.client.post(url)
+                self.assertEqual(response.status_code, 404)
+
+        self.external_user.refresh_from_db()
+        self.assertTrue(self.external_user.is_active)
 
     def test_owner_can_update_company_settings_with_tva_and_referentiel(self):
         self.client.force_login(self.owner)

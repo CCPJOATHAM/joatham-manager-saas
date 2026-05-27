@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from core.services.language import persist_language_preference
 from core.services.product_policy import module_access_required
@@ -282,35 +283,35 @@ def user_update(request, user_id):
 
 @permission_required("users.manage")
 @module_access_required("users")
+@require_POST
 def user_toggle_active(request, user_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
-    if request.method == "POST":
-        try:
-            toggle_company_user_active(target_user=target_user, owner_user=request.user)
-        except ValueError as exc:
-            messages.error(request, str(exc))
-        else:
-            status_label = _("active") if target_user.is_active else _("desactive")
-            messages.success(request, _("Utilisateur %(status)s avec succes.") % {"status": status_label})
+    try:
+        toggle_company_user_active(target_user=target_user, owner_user=request.user)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        status_label = _("active") if target_user.is_active else _("desactive")
+        messages.success(request, _("Utilisateur %(status)s avec succes.") % {"status": status_label})
     return redirect("user_list")
 
 
 @permission_required("users.remove")
 @module_access_required("users")
+@require_POST
 def user_delete(request, user_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
-    if request.method == "POST":
-        try:
-            delete_result = delete_company_user(target_user=target_user, owner_user=request.user)
-        except ValueError as exc:
-            messages.error(request, str(exc))
+    try:
+        delete_result = delete_company_user(target_user=target_user, owner_user=request.user)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        if delete_result == USER_DELETE_DEACTIVATED_FOR_HISTORY:
+            messages.warning(request, FLASH_MESSAGES["user_deactivated_history"])
         else:
-            if delete_result == USER_DELETE_DEACTIVATED_FOR_HISTORY:
-                messages.warning(request, FLASH_MESSAGES["user_deactivated_history"])
-            else:
-                messages.success(request, FLASH_MESSAGES["user_deleted"])
+            messages.success(request, FLASH_MESSAGES["user_deleted"])
     return redirect("user_list")
 
 
@@ -332,46 +333,46 @@ def user_detail(request, user_id):
 
 @permission_required("users.remove")
 @module_access_required("users")
+@require_POST
 def user_remove_access(request, user_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
-    if request.method == "POST":
-        try:
-            remove_company_user_access(target_user=target_user, owner_user=request.user)
-        except ValueError as exc:
-            messages.error(request, str(exc))
-        else:
-            messages.success(request, _("Acces retire avec succes."))
+    try:
+        remove_company_user_access(target_user=target_user, owner_user=request.user)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("Acces retire avec succes."))
     return redirect("user_list")
 
 
 @permission_required("users.invite")
 @module_access_required("users")
+@require_POST
 def user_invitation_resend(request, invitation_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     invitation = _get_invitation_or_404(entreprise, invitation_id)
-    if request.method == "POST":
-        try:
-            resend_company_invitation(invitation=invitation, entreprise=entreprise, owner_user=request.user)
-        except (InvitationEmailError, ValueError) as exc:
-            messages.error(request, str(exc))
-        else:
-            messages.success(request, _("Invitation renvoyee avec succes."))
+    try:
+        resend_company_invitation(invitation=invitation, entreprise=entreprise, owner_user=request.user)
+    except (InvitationEmailError, ValueError) as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("Invitation renvoyee avec succes."))
     return redirect("user_list")
 
 
 @permission_required("users.invite")
 @module_access_required("users")
+@require_POST
 def user_invitation_cancel(request, invitation_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     invitation = _get_invitation_or_404(entreprise, invitation_id)
-    if request.method == "POST":
-        try:
-            cancel_company_invitation(invitation=invitation, entreprise=entreprise, owner_user=request.user)
-        except ValueError as exc:
-            messages.error(request, str(exc))
-        else:
-            messages.success(request, _("Invitation annulee avec succes."))
+    try:
+        cancel_company_invitation(invitation=invitation, entreprise=entreprise, owner_user=request.user)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("Invitation annulee avec succes."))
     return redirect("user_list")
 
 

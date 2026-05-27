@@ -15,6 +15,9 @@ User = get_user_model()
 USER_DELETE_DELETED = "deleted"
 USER_DELETE_DEACTIVATED_FOR_HISTORY = "deactivated_for_history"
 IGNORED_DELETE_HISTORY_ACCESSORS = {"active_session"}
+SELF_ACCESS_MESSAGE = "Vous ne pouvez pas modifier votre propre accès depuis cette interface."
+LAST_ACTIVE_OWNER_MESSAGE = "Impossible de retirer l'accès au dernier propriétaire actif de l'entreprise."
+OWNER_PROTECTED_MESSAGE = "Le compte propriétaire ne peut pas être modifié depuis cette interface."
 
 
 ALLOWED_MANAGED_ROLES = {
@@ -50,14 +53,74 @@ def _ensure_email_available(email, *, exclude_user_id=None):
     return normalized_email
 
 
-def _ensure_secondary_user(target_user):
+def _record_blocked_user_action(*, target_user, owner_user, operation, reason, message):
+    record_audit_event(
+        entreprise=target_user.entreprise,
+        utilisateur=owner_user,
+        action="utilisateur_action_bloquee",
+        module="users",
+        objet_type="User",
+        objet_id=target_user.id,
+        description=message,
+        metadata={
+            "operation": operation,
+            "reason": reason,
+            "target_user_id": target_user.id,
+            "target_email": target_user.email or target_user.username,
+        },
+    )
+
+
+def _raise_blocked_action(*, target_user, owner_user, operation, reason, message):
+    _record_blocked_user_action(
+        target_user=target_user,
+        owner_user=owner_user,
+        operation=operation,
+        reason=reason,
+        message=message,
+    )
+    raise ValueError(message)
+
+
+def _ensure_secondary_user(target_user, owner_user, operation):
     if target_user.normalized_role == User.Role.PROPRIETAIRE:
-        raise ValueError("Le compte proprietaire ne peut pas etre modifie depuis cette interface.")
+        _raise_blocked_action(
+            target_user=target_user,
+            owner_user=owner_user,
+            operation=operation,
+            reason="owner_protected",
+            message=OWNER_PROTECTED_MESSAGE,
+        )
 
 
-def _ensure_not_self(target_user, owner_user, action_label):
+def _ensure_not_self(target_user, owner_user, operation):
     if target_user.id == owner_user.id:
-        raise ValueError(f"Vous ne pouvez pas {action_label} votre propre compte.")
+        _raise_blocked_action(
+            target_user=target_user,
+            owner_user=owner_user,
+            operation=operation,
+            reason="self_action",
+            message=SELF_ACCESS_MESSAGE,
+        )
+
+
+def _ensure_not_last_active_owner(target_user, owner_user, operation):
+    if target_user.normalized_role != User.Role.PROPRIETAIRE or not target_user.is_active:
+        return
+
+    active_owner_count = User.objects.filter(
+        entreprise=target_user.entreprise,
+        role=User.Role.PROPRIETAIRE,
+        is_active=True,
+    ).count()
+    if active_owner_count <= 1:
+        _raise_blocked_action(
+            target_user=target_user,
+            owner_user=owner_user,
+            operation=operation,
+            reason="last_active_owner",
+            message=LAST_ACTIVE_OWNER_MESSAGE,
+        )
 
 
 def _has_related_history(target_user):
@@ -139,111 +202,117 @@ def create_company_user(*, entreprise, owner_user, full_name, email, telephone, 
     return user
 
 
-@transaction.atomic
 def update_company_user(*, target_user, owner_user, full_name, email, telephone, role, password=""):
-    _ensure_secondary_user(target_user)
+    _ensure_not_self(target_user, owner_user, "update_role")
+    _ensure_secondary_user(target_user, owner_user, "update_role")
     _ensure_manageable_role(role)
     normalized_email = _ensure_email_available(email, exclude_user_id=target_user.id)
     first_name, last_name = _split_full_name(full_name)
 
-    target_user.first_name = first_name
-    target_user.last_name = last_name
-    target_user.email = normalized_email
-    target_user.username = normalized_email
-    target_user.telephone = (telephone or "").strip()
-    target_user.role = role
-    if password:
-        target_user.set_password(password)
-    target_user.save()
+    with transaction.atomic():
+        target_user.first_name = first_name
+        target_user.last_name = last_name
+        target_user.email = normalized_email
+        target_user.username = normalized_email
+        target_user.telephone = (telephone or "").strip()
+        target_user.role = role
+        if password:
+            target_user.set_password(password)
+        target_user.save()
 
-    record_audit_event(
-        entreprise=target_user.entreprise,
-        utilisateur=owner_user,
-        action="utilisateur_modifie",
-        module="users",
-        objet_type="User",
-        objet_id=target_user.id,
-        description=f"Utilisateur {normalized_email} modifie.",
-        metadata={"role": role, "email": normalized_email},
-    )
+        record_audit_event(
+            entreprise=target_user.entreprise,
+            utilisateur=owner_user,
+            action="utilisateur_modifie",
+            module="users",
+            objet_type="User",
+            objet_id=target_user.id,
+            description=f"Utilisateur {normalized_email} modifie.",
+            metadata={"role": role, "email": normalized_email},
+        )
     return target_user
 
 
-@transaction.atomic
 def toggle_company_user_active(*, target_user, owner_user):
-    _ensure_secondary_user(target_user)
     if target_user.is_active:
-        _ensure_not_self(target_user, owner_user, "desactiver")
+        _ensure_not_self(target_user, owner_user, "toggle_active")
+        _ensure_not_last_active_owner(target_user, owner_user, "toggle_active")
+    _ensure_secondary_user(target_user, owner_user, "toggle_active")
 
-    target_user.is_active = not target_user.is_active
-    target_user.save(update_fields=["is_active"])
-    record_audit_event(
-        entreprise=target_user.entreprise,
-        utilisateur=owner_user,
-        action="utilisateur_statut_modifie",
-        module="users",
-        objet_type="User",
-        objet_id=target_user.id,
-        description=f"Statut utilisateur mis a jour pour {target_user.email or target_user.username}.",
-        metadata={"is_active": target_user.is_active},
-    )
+    with transaction.atomic():
+        target_user.is_active = not target_user.is_active
+        target_user.save(update_fields=["is_active"])
+        if not target_user.is_active:
+            release_active_session(target_user)
+        record_audit_event(
+            entreprise=target_user.entreprise,
+            utilisateur=owner_user,
+            action="utilisateur_statut_modifie",
+            module="users",
+            objet_type="User",
+            objet_id=target_user.id,
+            description=f"Statut utilisateur mis a jour pour {target_user.email or target_user.username}.",
+            metadata={"is_active": target_user.is_active},
+        )
     return target_user
 
 
-@transaction.atomic
 def delete_company_user(*, target_user, owner_user):
-    _ensure_secondary_user(target_user)
-    _ensure_not_self(target_user, owner_user, "supprimer")
+    _ensure_not_self(target_user, owner_user, "delete")
+    _ensure_not_last_active_owner(target_user, owner_user, "delete")
+    _ensure_secondary_user(target_user, owner_user, "delete")
 
     user_id = target_user.id
     email = target_user.email or target_user.username
     entreprise = target_user.entreprise
 
-    if _has_related_history(target_user):
-        return _deactivate_user_for_history(
-            target_user=target_user,
-            owner_user=owner_user,
-            reason="related_history",
-        )
+    with transaction.atomic():
+        if _has_related_history(target_user):
+            return _deactivate_user_for_history(
+                target_user=target_user,
+                owner_user=owner_user,
+                reason="related_history",
+            )
 
-    try:
-        with transaction.atomic():
+        try:
             target_user.delete()
-    except (ProtectedError, IntegrityError):
-        return _deactivate_user_for_history(
-            target_user=target_user,
-            owner_user=owner_user,
-            reason="protected_relation",
-        )
+        except (ProtectedError, IntegrityError):
+            return _deactivate_user_for_history(
+                target_user=target_user,
+                owner_user=owner_user,
+                reason="protected_relation",
+            )
 
-    record_audit_event(
-        entreprise=entreprise,
-        utilisateur=owner_user,
-        action="utilisateur_supprime",
-        module="users",
-        objet_type="User",
-        objet_id=user_id,
-        description=f"Utilisateur {email} supprime.",
-        metadata={"email": email},
-    )
+        record_audit_event(
+            entreprise=entreprise,
+            utilisateur=owner_user,
+            action="utilisateur_supprime",
+            module="users",
+            objet_type="User",
+            objet_id=user_id,
+            description=f"Utilisateur {email} supprime.",
+            metadata={"email": email},
+        )
     return USER_DELETE_DELETED
 
 
-@transaction.atomic
 def remove_company_user_access(*, target_user, owner_user):
-    _ensure_secondary_user(target_user)
-    _ensure_not_self(target_user, owner_user, "retirer")
+    _ensure_not_self(target_user, owner_user, "remove_access")
+    _ensure_not_last_active_owner(target_user, owner_user, "remove_access")
+    _ensure_secondary_user(target_user, owner_user, "remove_access")
 
-    target_user.is_active = False
-    target_user.save(update_fields=["is_active"])
-    record_audit_event(
-        entreprise=target_user.entreprise,
-        utilisateur=owner_user,
-        action="utilisateur_acces_retire",
-        module="users",
-        objet_type="User",
-        objet_id=target_user.id,
-        description=f"Acces retire pour {target_user.email or target_user.username}.",
-        metadata={"email": target_user.email or target_user.username},
-    )
+    with transaction.atomic():
+        target_user.is_active = False
+        target_user.save(update_fields=["is_active"])
+        release_active_session(target_user)
+        record_audit_event(
+            entreprise=target_user.entreprise,
+            utilisateur=owner_user,
+            action="utilisateur_acces_retire",
+            module="users",
+            objet_type="User",
+            objet_id=target_user.id,
+            description=f"Acces retire pour {target_user.email or target_user.username}.",
+            metadata={"email": target_user.email or target_user.username},
+        )
     return target_user
