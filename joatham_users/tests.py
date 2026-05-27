@@ -1,7 +1,7 @@
 import html
 import tempfile
 from io import StringIO
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -34,6 +34,7 @@ from core.services.subscription import (
 from core.services.product_policy import ACCESS_ACTIVE_ONLY, ACCESS_INCLUDED_PLAN, can_access_module, get_module_access_level
 from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_caisse.models import Caisse, SessionCaisse
+from joatham_rh.models import Employe
 
 from .models import Abonnement, AbonnementEntreprise, EntrepriseInvitation, User, UserActiveSession
 from .services.invitations import (
@@ -1165,6 +1166,47 @@ class UserManagementTests(TestCase):
 
         response = self.client.get(reverse("user_detail", args=[self.external_user.id]))
         self.assertEqual(response.status_code, 404)
+
+    def test_user_detail_displays_linked_rh_employee(self):
+        Employe.objects.create(
+            entreprise=self.entreprise,
+            user=self.gestionnaire,
+            matricule="RH-U001",
+            nom="Employe",
+            prenom="Lie",
+            date_embauche=date(2026, 1, 10),
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("user_detail", args=[self.gestionnaire.id]))
+
+        self.assertContains(response, "Employe RH lie")
+        self.assertContains(response, "Employe Lie")
+        self.assertContains(response, "RH-U001")
+
+    def test_user_detail_displays_no_linked_rh_employee_state(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("user_detail", args=[self.comptable.id]))
+
+        self.assertContains(response, "Employe RH lie")
+        self.assertContains(response, "Aucune fiche employe RH liee.")
+
+    def test_user_list_displays_rh_employee_link_badge(self):
+        Employe.objects.create(
+            entreprise=self.entreprise,
+            user=self.gestionnaire,
+            matricule="RH-U002",
+            nom="Badge",
+            prenom="Lie",
+            date_embauche=date(2026, 1, 10),
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("user_list"))
+
+        self.assertContains(response, "Employe RH")
+        self.assertContains(response, "Lie")
+        self.assertContains(response, "Non lie")
 
     def test_cross_company_mutating_actions_are_refused(self):
         self.client.force_login(self.owner)

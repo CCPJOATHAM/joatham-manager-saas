@@ -408,6 +408,7 @@
                     <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Email" %}</th>
+                    <th>{% trans "Employe RH" %}</th>
                     <th>{% trans "Cree le" %}</th>
                     <th>{% trans "Derniere connexion" %}</th>
                     <th>{% trans "Actions" %}</th>
@@ -441,7 +442,14 @@
                         {% if managed_user.email_verified %}
                         <span class="badge badge-verified">{% trans "Email verifie" %}</span>
                         {% else %}
-                        <span class="badge badge-unverified">{% trans "Email non verifie" %}</span>
+                            <span class="badge badge-unverified">{% trans "Email non verifie" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if managed_user.linked_employe %}
+                        <span class="badge badge-active">{% trans "Lie" %}</span>
+                        {% else %}
+                        <span class="badge badge-inactive">{% trans "Non lie" %}</span>
                         {% endif %}
                     </td>
                     <td class="muted">{{ managed_user.created_display|date:"d/m/Y H:i" }}</td>

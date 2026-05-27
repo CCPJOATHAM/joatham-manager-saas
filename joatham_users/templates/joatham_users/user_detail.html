@@ -81,5 +81,16 @@
         <span class="detail-label">{% trans "Telephone" %}</span>
         <span class="detail-value">{{ target_user.telephone|default:"-" }}</span>
     </div>
+    <div class="detail-card">
+        <span class="detail-label">{% trans "Employe RH lie" %}</span>
+        {% if linked_employe %}
+        <span class="detail-value">
+            <a href="{% url 'rh_employe_detail' linked_employe.id %}">{{ linked_employe.nom }} {{ linked_employe.prenom }}</a>
+        </span>
+        <span class="detail-label">{{ linked_employe.matricule }}{% if linked_employe.poste %} - {{ linked_employe.poste.nom }}{% endif %}</span>
+        {% else %}
+        <span class="detail-value">{% trans "Aucune fiche employe RH liee." %}</span>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

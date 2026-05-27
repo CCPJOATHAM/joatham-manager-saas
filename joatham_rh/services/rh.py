@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -7,6 +8,10 @@ from django.utils.dateparse import parse_date
 from core.audit import record_audit_event
 
 from ..models import DemandeConge, DocumentRH, Employe, Poste, Presence
+
+
+User = get_user_model()
+USER_LINK_UNCHANGED = object()
 
 
 class RhOperationError(ValueError):
@@ -62,6 +67,111 @@ def _ensure_same_entreprise(instance, entreprise, message):
     return instance
 
 
+def _record_blocked_user_link(*, entreprise, employe, user, utilisateur, action, description, reason):
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action=action,
+        module="rh",
+        objet_type="Employe",
+        objet_id=getattr(employe, "id", None),
+        description=description,
+        metadata={
+            "employe_id": getattr(employe, "id", None),
+            "user_id": getattr(user, "id", None),
+            "user_email": getattr(user, "email", "") or getattr(user, "username", ""),
+            "reason": reason,
+        },
+    )
+
+
+def _ensure_user_link_can_be_managed(*, entreprise, employe, user, utilisateur):
+    if getattr(utilisateur, "normalized_role", None) == User.Role.PROPRIETAIRE:
+        return
+
+    message = "Seul le proprietaire peut modifier la liaison avec un compte utilisateur."
+    _record_blocked_user_link(
+        entreprise=entreprise,
+        employe=employe,
+        user=user,
+        utilisateur=utilisateur,
+        action="tentative_liaison_non_autorisee_bloquee",
+        description=message,
+        reason="unauthorized_actor",
+    )
+    raise RhOperationError(message)
+
+
+def _record_user_link_change(*, entreprise, employe, previous_user_id, current_user, utilisateur):
+    current_user_id = getattr(current_user, "id", None)
+    if previous_user_id == current_user_id:
+        return
+
+    if previous_user_id and current_user_id:
+        action = "employe_user_liaison_modifiee"
+        description = f"Liaison compte utilisateur modifiee pour l'employe {employe.matricule}."
+    elif current_user_id:
+        action = "employe_user_lie"
+        description = f"Compte utilisateur lie a l'employe {employe.matricule}."
+    else:
+        action = "employe_user_delie"
+        description = f"Compte utilisateur delie de l'employe {employe.matricule}."
+
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action=action,
+        module="rh",
+        objet_type="Employe",
+        objet_id=employe.id,
+        description=description,
+        metadata={
+            "employe_id": employe.id,
+            "previous_user_id": previous_user_id,
+            "current_user_id": current_user_id,
+        },
+    )
+
+
+def validate_employe_user_link(employe, user, entreprise, *, utilisateur=None):
+    if user is None:
+        return None
+
+    if getattr(user, "normalized_role", None) == User.Role.SUPER_ADMIN:
+        message = "Un super admin ne peut pas etre lie a un employe d'entreprise."
+        _record_blocked_user_link(
+            entreprise=entreprise,
+            employe=employe,
+            user=user,
+            utilisateur=utilisateur,
+            action="tentative_liaison_super_admin_bloquee",
+            description=message,
+            reason="super_admin",
+        )
+        raise RhOperationError(message)
+
+    if getattr(user, "entreprise_id", None) != getattr(entreprise, "id", None):
+        message = "Le compte utilisateur selectionne appartient a une autre entreprise."
+        _record_blocked_user_link(
+            entreprise=entreprise,
+            employe=employe,
+            user=user,
+            utilisateur=utilisateur,
+            action="tentative_liaison_cross_tenant_bloquee",
+            description=message,
+            reason="cross_tenant",
+        )
+        raise RhOperationError(message)
+
+    linked_employes = Employe.objects.filter(user=user)
+    if employe.pk:
+        linked_employes = linked_employes.exclude(pk=employe.pk)
+    if linked_employes.exists():
+        raise RhOperationError("Ce compte utilisateur est deja lie a un autre employe RH.")
+
+    return user
+
+
 @transaction.atomic
 def create_poste(*, entreprise, nom, description="", actif=True, utilisateur=None):
     poste = Poste(
@@ -88,7 +198,6 @@ def create_poste(*, entreprise, nom, description="", actif=True, utilisateur=Non
     return poste
 
 
-@transaction.atomic
 def create_employe(
     *,
     entreprise,
@@ -105,11 +214,13 @@ def create_employe(
     salaire_base=None,
     statut=Employe.Statut.ACTIF,
     actif=True,
+    user=None,
     utilisateur=None,
 ):
     _ensure_same_entreprise(poste, entreprise, "Le poste selectionne appartient a une autre entreprise.")
     employe = Employe(
         entreprise=entreprise,
+        user=user,
         matricule=_clean_required(matricule, "Le matricule est obligatoire."),
         nom=_clean_required(nom, "Le nom est obligatoire."),
         prenom=_clean_required(prenom, "Le prenom est obligatoire."),
@@ -126,26 +237,41 @@ def create_employe(
     )
     if employe.sexe:
         _validate_choice(employe.sexe, Employe.Sexe.choices, "Le sexe selectionne est invalide.")
+    if user is not None:
+        _ensure_user_link_can_be_managed(
+            entreprise=entreprise,
+            employe=employe,
+            user=user,
+            utilisateur=utilisateur,
+        )
+        validate_employe_user_link(employe, user, entreprise, utilisateur=utilisateur)
 
     try:
-        employe.save()
+        with transaction.atomic():
+            employe.save()
+            record_audit_event(
+                entreprise=entreprise,
+                utilisateur=utilisateur,
+                action="rh_employe_created",
+                module="rh",
+                objet_type="Employe",
+                objet_id=employe.id,
+                description=f"Employe RH cree : {employe.matricule}.",
+                metadata={"employe_id": employe.id, "matricule": employe.matricule},
+            )
+            if user:
+                _record_user_link_change(
+                    entreprise=entreprise,
+                    employe=employe,
+                    previous_user_id=None,
+                    current_user=user,
+                    utilisateur=utilisateur,
+                )
     except IntegrityError as exc:
         raise RhOperationError("Un employe avec ce matricule existe deja pour cette entreprise.") from exc
-
-    record_audit_event(
-        entreprise=entreprise,
-        utilisateur=utilisateur,
-        action="rh_employe_created",
-        module="rh",
-        objet_type="Employe",
-        objet_id=employe.id,
-        description=f"Employe RH cree : {employe.matricule}.",
-        metadata={"employe_id": employe.id, "matricule": employe.matricule},
-    )
     return employe
 
 
-@transaction.atomic
 def update_employe(
     *,
     entreprise,
@@ -163,10 +289,22 @@ def update_employe(
     salaire_base=None,
     statut=Employe.Statut.ACTIF,
     actif=True,
+    user=USER_LINK_UNCHANGED,
     utilisateur=None,
 ):
     _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
     _ensure_same_entreprise(poste, entreprise, "Le poste selectionne appartient a une autre entreprise.")
+    previous_user_id = employe.user_id
+    user_link_changed = user is not USER_LINK_UNCHANGED
+    if user_link_changed:
+        _ensure_user_link_can_be_managed(
+            entreprise=entreprise,
+            employe=employe,
+            user=user,
+            utilisateur=utilisateur,
+        )
+        validate_employe_user_link(employe, user, entreprise, utilisateur=utilisateur)
+        employe.user = user
     employe.matricule = _clean_required(matricule, "Le matricule est obligatoire.")
     employe.nom = _clean_required(nom, "Le nom est obligatoire.")
     employe.prenom = _clean_required(prenom, "Le prenom est obligatoire.")
@@ -184,20 +322,28 @@ def update_employe(
     employe.actif = bool(actif)
 
     try:
-        employe.save()
+        with transaction.atomic():
+            employe.save()
+            if user_link_changed:
+                _record_user_link_change(
+                    entreprise=entreprise,
+                    employe=employe,
+                    previous_user_id=previous_user_id,
+                    current_user=employe.user,
+                    utilisateur=utilisateur,
+                )
+            record_audit_event(
+                entreprise=entreprise,
+                utilisateur=utilisateur,
+                action="rh_employe_updated",
+                module="rh",
+                objet_type="Employe",
+                objet_id=employe.id,
+                description=f"Employe RH modifie : {employe.matricule}.",
+                metadata={"employe_id": employe.id, "matricule": employe.matricule},
+            )
     except IntegrityError as exc:
         raise RhOperationError("Un employe avec ce matricule existe deja pour cette entreprise.") from exc
-
-    record_audit_event(
-        entreprise=entreprise,
-        utilisateur=utilisateur,
-        action="rh_employe_updated",
-        module="rh",
-        objet_type="Employe",
-        objet_id=employe.id,
-        description=f"Employe RH modifie : {employe.matricule}.",
-        metadata={"employe_id": employe.id, "matricule": employe.matricule},
-    )
     return employe
 
 

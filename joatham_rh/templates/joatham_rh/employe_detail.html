@@ -49,6 +49,48 @@
 <div class="rh-card">
     <div class="rh-header">
         <div>
+            <h3>{% trans "Compte utilisateur lie" %}</h3>
+            <p>{% trans "Le compte utilisateur permet la connexion a JOATHAM Manager. Le role d'acces reste gere dans le module Utilisateurs." %}</p>
+        </div>
+        {% if employe.user %}
+        <span class="rh-badge success">{% trans "Lie" %}</span>
+        {% else %}
+        <span class="rh-badge">{% trans "Non lie" %}</span>
+        {% endif %}
+    </div>
+    {% if employe.user %}
+    <div class="rh-detail-grid">
+        <div class="rh-kpi-card">
+            <span class="rh-kpi-label">{% trans "Compte" %}</span>
+            <span class="rh-kpi-value">{{ employe.user.get_full_name|default:employe.user.username }}</span>
+        </div>
+        <div class="rh-kpi-card">
+            <span class="rh-kpi-label">{% trans "Email" %}</span>
+            <span class="rh-kpi-value">{{ employe.user.email|default:employe.user.username }}</span>
+        </div>
+        <div class="rh-kpi-card">
+            <span class="rh-kpi-label">{% trans "Role d'acces" %}</span>
+            <span class="rh-kpi-value">{{ employe.user.get_role_display }}</span>
+        </div>
+        <div class="rh-kpi-card">
+            <span class="rh-kpi-label">{% trans "Statut du compte" %}</span>
+            <span class="rh-kpi-value">
+                {% if employe.user.is_active %}
+                <span class="rh-badge success">{% trans "Actif" %}</span>
+                {% else %}
+                <span class="rh-badge warning">{% trans "Compte inactif" %}</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    {% else %}
+    <p class="rh-muted">{% trans "Aucun compte utilisateur lie." %}</p>
+    {% endif %}
+</div>
+
+<div class="rh-card">
+    <div class="rh-header">
+        <div>
             <h3>{% trans "Presences recentes" %}</h3>
             <p>{% trans "Les vingt derniers pointages simples de cet employe." %}</p>
         </div>

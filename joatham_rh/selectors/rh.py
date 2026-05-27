@@ -21,7 +21,7 @@ def get_poste_by_entreprise(entreprise, poste_id):
 
 def get_employes_by_entreprise(entreprise, *, active_only=False, statut=None, poste_id=None, search=None):
     queryset = (
-        scope_queryset_to_entreprise(Employe.objects.select_related("poste"), entreprise)
+        scope_queryset_to_entreprise(Employe.objects.select_related("poste", "user"), entreprise)
         .order_by("nom", "prenom", "id")
     )
     if active_only:
@@ -41,7 +41,7 @@ def get_employes_by_entreprise(entreprise, *, active_only=False, statut=None, po
 
 def get_employe_by_entreprise(entreprise, employe_id):
     return get_object_for_entreprise(
-        Employe.objects.select_related("poste"),
+        Employe.objects.select_related("poste", "user"),
         entreprise,
         id=employe_id,
     )

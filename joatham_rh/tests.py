@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.html import strip_tags
 
+from core.models import ActivityLog
 from core.services.product_policy import can_access_module
 from core.services.subscription import (
     PREMIUM_PLAN_CODE,
@@ -13,7 +14,7 @@ from core.services.subscription import (
     get_default_paid_plans,
 )
 from joatham_billing.tests.factories import create_entreprise, create_user
-from joatham_users.models import Abonnement
+from joatham_users.models import Abonnement, User
 
 from .models import DemandeConge, DocumentRH, Employe, Presence
 from .selectors.rh import (
@@ -30,6 +31,7 @@ from .services.rh import (
     create_employe,
     create_poste,
     record_presence,
+    update_employe,
 )
 
 
@@ -170,6 +172,198 @@ class RhFoundationTests(TestCase):
         self.assertEqual(employe.matricule, "RH-001")
         self.assertEqual(employe.salaire_base, Decimal("150.00"))
         self.assertEqual(employe.statut, Employe.Statut.ACTIF)
+        self.assertIsNone(employe.user)
+
+    def test_user_can_exist_without_rh_employee(self):
+        user = create_user("standalone-user-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+
+        with self.assertRaises(Employe.DoesNotExist):
+            user.rh_employe
+
+    def test_create_employe_with_same_company_user_link(self):
+        user = create_user("linked-user-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        poste = self._create_poste(nom="Caissier")
+
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-L001",
+            nom="Liaison",
+            prenom="Compte",
+            poste=poste,
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        user.refresh_from_db()
+        self.assertEqual(employe.user, user)
+        self.assertEqual(user.rh_employe, employe)
+        self.assertTrue(ActivityLog.objects.filter(action="employe_user_lie", objet_id=employe.id).exists())
+
+    def test_create_employe_rejects_cross_tenant_user_link(self):
+        poste = self._create_poste(nom="Assistant")
+
+        with self.assertRaisesMessage(RhOperationError, "Le compte utilisateur selectionne appartient a une autre entreprise."):
+            create_employe(
+                entreprise=self.entreprise_a,
+                matricule="RH-L002",
+                nom="Cross",
+                prenom="Tenant",
+                poste=poste,
+                date_embauche=date(2026, 1, 10),
+                user=self.owner_b,
+                utilisateur=self.owner_a,
+            )
+
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise_a,
+                action="tentative_liaison_cross_tenant_bloquee",
+            ).exists()
+        )
+
+    def test_create_employe_rejects_super_admin_user_link(self):
+        super_admin = create_user("super-admin-rh-link", User.Role.SUPER_ADMIN, None)
+        poste = self._create_poste(nom="Supervision")
+
+        with self.assertRaisesMessage(RhOperationError, "Un super admin ne peut pas etre lie a un employe d'entreprise."):
+            create_employe(
+                entreprise=self.entreprise_a,
+                matricule="RH-L003",
+                nom="Super",
+                prenom="Admin",
+                poste=poste,
+                date_embauche=date(2026, 1, 10),
+                user=super_admin,
+                utilisateur=self.owner_a,
+            )
+
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise_a,
+                action="tentative_liaison_super_admin_bloquee",
+            ).exists()
+        )
+
+    def test_create_employe_rejects_user_already_linked_to_another_employee(self):
+        user = create_user("already-linked-rh", User.Role.COMPTABLE, self.entreprise_a)
+        self._create_employe(matricule="RH-L004", nom="Premier")
+
+        Employe.objects.filter(matricule="RH-L004").update(user=user)
+        poste = self._create_poste(nom="Controle")
+
+        with self.assertRaisesMessage(RhOperationError, "Ce compte utilisateur est deja lie a un autre employe RH."):
+            create_employe(
+                entreprise=self.entreprise_a,
+                matricule="RH-L005",
+                nom="Second",
+                prenom="Lien",
+                poste=poste,
+                date_embauche=date(2026, 1, 10),
+                user=user,
+                utilisateur=self.owner_a,
+            )
+
+    def test_manager_cannot_link_user_account_in_service(self):
+        user = create_user("manager-service-link-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+
+        with self.assertRaisesMessage(RhOperationError, "Seul le proprietaire peut modifier la liaison avec un compte utilisateur."):
+            create_employe(
+                entreprise=self.entreprise_a,
+                matricule="RH-L009",
+                nom="Manager",
+                prenom="Lien",
+                date_embauche=date(2026, 1, 10),
+                user=user,
+                utilisateur=self.manager_a,
+            )
+
+        self.assertFalse(Employe.objects.filter(matricule="RH-L009").exists())
+
+    def test_remove_user_link_keeps_employee_and_user(self):
+        user = create_user("unlink-user-rh", User.Role.COMPTABLE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-L006",
+            nom="Delier",
+            prenom="Compte",
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        updated = update_employe(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            matricule=employe.matricule,
+            nom=employe.nom,
+            prenom=employe.prenom,
+            date_embauche=employe.date_embauche,
+            poste=employe.poste,
+            type_contrat=employe.type_contrat,
+            salaire_base=employe.salaire_base,
+            statut=employe.statut,
+            actif=employe.actif,
+            user=None,
+            utilisateur=self.owner_a,
+        )
+
+        self.assertIsNone(updated.user)
+        self.assertTrue(Employe.objects.filter(id=employe.id).exists())
+        self.assertTrue(User.objects.filter(id=user.id).exists())
+        self.assertTrue(ActivityLog.objects.filter(action="employe_user_delie", objet_id=employe.id).exists())
+
+    def test_inactive_user_can_remain_linked_to_employee(self):
+        user = create_user("inactive-linked-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-L007",
+            nom="Compte",
+            prenom="Inactif",
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+
+        employe.refresh_from_db()
+        self.assertEqual(employe.user, user)
+
+    def test_changing_poste_does_not_change_access_role(self):
+        user = create_user("role-stable-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        poste_initial = self._create_poste(nom="Agent")
+        poste_nouveau = self._create_poste(nom="Comptable interne")
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-L008",
+            nom="Role",
+            prenom="Stable",
+            poste=poste_initial,
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        update_employe(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            matricule=employe.matricule,
+            nom=employe.nom,
+            prenom=employe.prenom,
+            date_embauche=employe.date_embauche,
+            poste=poste_nouveau,
+            type_contrat=employe.type_contrat,
+            salaire_base=employe.salaire_base,
+            statut=employe.statut,
+            actif=employe.actif,
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        user.refresh_from_db()
+        self.assertEqual(user.role, User.Role.GESTIONNAIRE)
 
     def test_create_employe_requires_name(self):
         poste = self._create_poste()
@@ -308,6 +502,121 @@ class RhFoundationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Employes")
         self.assertContains(response, "Poste RH")
+
+    def test_owner_form_can_link_user_account(self):
+        user = create_user("form-link-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        poste = self._create_poste(nom="Formateur")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.post(
+            reverse("rh_employe_create"),
+            {
+                "matricule": "RH-F001",
+                "nom": "Form",
+                "prenom": "Link",
+                "sexe": "",
+                "telephone": "",
+                "email": "",
+                "adresse": "",
+                "user": str(user.id),
+                "poste": str(poste.id),
+                "type_contrat": Employe.TypeContrat.CDI,
+                "date_embauche": "2026-01-10",
+                "salaire_base": "150.00",
+                "statut": Employe.Statut.ACTIF,
+                "actif": "on",
+            },
+        )
+
+        employe = Employe.objects.get(matricule="RH-F001")
+        self.assertRedirects(response, reverse("rh_employe_detail", args=[employe.id]))
+        self.assertEqual(employe.user, user)
+
+    def test_manager_update_cannot_change_user_link(self):
+        linked_user = create_user("manager-link-kept", User.Role.GESTIONNAIRE, self.entreprise_a)
+        malicious_user = create_user("manager-link-malicious", User.Role.COMPTABLE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F002",
+            nom="Lien",
+            prenom="Protege",
+            date_embauche=date(2026, 1, 10),
+            user=linked_user,
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.manager_a)
+        response = self.client.post(
+            reverse("rh_employe_update", args=[employe.id]),
+            {
+                "matricule": employe.matricule,
+                "nom": "Lien",
+                "prenom": "Protege",
+                "sexe": "",
+                "telephone": "",
+                "email": "",
+                "adresse": "",
+                "user": str(malicious_user.id),
+                "poste": "",
+                "type_contrat": employe.type_contrat,
+                "date_embauche": "2026-01-10",
+                "salaire_base": "",
+                "statut": employe.statut,
+                "actif": "on",
+            },
+        )
+
+        self.assertRedirects(response, reverse("rh_employe_detail", args=[employe.id]))
+        employe.refresh_from_db()
+        self.assertEqual(employe.user, linked_user)
+
+    def test_employee_detail_displays_linked_user_account(self):
+        user = create_user("detail-link-rh", User.Role.COMPTABLE, self.entreprise_a)
+        employe = create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F003",
+            nom="Detail",
+            prenom="Compte",
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_detail", args=[employe.id]))
+
+        self.assertContains(response, "Compte utilisateur lie")
+        self.assertContains(response, user.username)
+        self.assertContains(response, "Comptable")
+
+    def test_employee_detail_displays_no_linked_user_state(self):
+        employe = self._create_employe(matricule="RH-F004", nom="SansCompte")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_detail", args=[employe.id]))
+
+        self.assertContains(response, "Compte utilisateur lie")
+        self.assertContains(response, "Aucun compte utilisateur lie.")
+
+    def test_employee_list_displays_user_link_badges(self):
+        user = create_user("list-link-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
+        create_employe(
+            entreprise=self.entreprise_a,
+            matricule="RH-F005",
+            nom="Liste",
+            prenom="Lie",
+            date_embauche=date(2026, 1, 10),
+            user=user,
+            utilisateur=self.owner_a,
+        )
+        self._create_employe(matricule="RH-F006", nom="ListeSansCompte")
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_list"))
+
+        self.assertContains(response, "Compte utilisateur")
+        self.assertContains(response, "Lie")
+        self.assertContains(response, "Non lie")
 
     def test_navigation_shows_rh_only_with_access(self):
         self.client.force_login(self.owner_a)

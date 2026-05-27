@@ -55,6 +55,7 @@
                     <th>{% trans "Matricule" %}</th>
                     <th>{% trans "Nom" %}</th>
                     <th>{% trans "Poste RH" %}</th>
+                    <th>{% trans "Compte utilisateur" %}</th>
                     <th>{% trans "Contrat" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Actions" %}</th>
@@ -66,6 +67,17 @@
                     <td><strong>{{ row.instance.matricule }}</strong></td>
                     <td>{{ row.instance.nom }} {{ row.instance.prenom }}</td>
                     <td class="rh-muted">{{ row.instance.poste.nom|default:"-" }}</td>
+                    <td>
+                        {% if row.instance.user %}
+                            {% if row.instance.user.is_active %}
+                            <span class="rh-badge success">{% trans "Lie" %}</span>
+                            {% else %}
+                            <span class="rh-badge warning">{% trans "Compte inactif" %}</span>
+                            {% endif %}
+                        {% else %}
+                        <span class="rh-badge">{% trans "Non lie" %}</span>
+                        {% endif %}
+                    </td>
                     <td>{{ row.instance.get_type_contrat_display }}</td>
                     <td>
                         <span class="rh-badge {% if row.instance.statut == 'actif' %}success{% elif row.instance.statut == 'suspendu' %}warning{% else %}danger{% endif %}">

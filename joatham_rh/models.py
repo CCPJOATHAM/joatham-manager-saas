@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Q
@@ -57,6 +58,14 @@ class Employe(models.Model):
         "joatham_users.Entreprise",
         on_delete=models.CASCADE,
         related_name="rh_employes",
+    )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rh_employe",
+        verbose_name="Compte utilisateur lie",
     )
     matricule = models.CharField(max_length=50)
     nom = models.CharField(max_length=120)

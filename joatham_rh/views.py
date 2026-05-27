@@ -40,7 +40,12 @@ def _build_rh_ui_permissions(user):
         "can_record_presence_ui": user_has_permission(user, "rh.presence"),
         "can_manage_documents_ui": user_has_permission(user, "rh.documents"),
         "can_view_reports_ui": user_has_permission(user, "rh.reports"),
+        "can_link_user_account_ui": _can_link_user_account(user),
     }
+
+
+def _can_link_user_account(user):
+    return getattr(user, "normalized_role", None) == "proprietaire"
 
 
 def _build_status_label(status):
@@ -189,7 +194,8 @@ def employe_detail(request, employe_id):
 @module_access_required("rh")
 def employe_create(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    form = EmployeForm(request.POST or None, entreprise=entreprise)
+    can_link_user_account = _can_link_user_account(request.user)
+    form = EmployeForm(request.POST or None, entreprise=entreprise, can_link_user=can_link_user_account)
     if request.method == "POST" and form.is_valid():
         try:
             employe = create_employe(
@@ -221,7 +227,13 @@ def employe_create(request):
 def employe_update(request, employe_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     employe = get_employe_by_entreprise(entreprise, employe_id)
-    form = EmployeForm(request.POST or None, instance=employe, entreprise=entreprise)
+    can_link_user_account = _can_link_user_account(request.user)
+    form = EmployeForm(
+        request.POST or None,
+        instance=employe,
+        entreprise=entreprise,
+        can_link_user=can_link_user_account,
+    )
     if request.method == "POST" and form.is_valid():
         try:
             employe = update_employe(

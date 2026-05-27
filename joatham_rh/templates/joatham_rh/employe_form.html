@@ -20,6 +20,7 @@
         <div class="rh-field {% if field.name == 'adresse' %}full{% endif %}">
             {{ field.label_tag }}
             {{ field }}
+            {% if field.help_text %}<p class="rh-muted">{{ field.help_text }}</p>{% endif %}
             {{ field.errors }}
         </div>
         {% endfor %}

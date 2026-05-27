@@ -1,7 +1,11 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from .models import DemandeConge, DocumentRH, Employe, Poste, Presence
+
+
+User = get_user_model()
 
 
 class PosteForm(forms.ModelForm):
@@ -34,6 +38,7 @@ class EmployeForm(forms.ModelForm):
             "telephone",
             "email",
             "adresse",
+            "user",
             "poste",
             "type_contrat",
             "date_embauche",
@@ -49,6 +54,7 @@ class EmployeForm(forms.ModelForm):
             "telephone": _("Telephone"),
             "email": _("Email"),
             "adresse": _("Adresse"),
+            "user": _("Compte utilisateur lie"),
             "poste": _("Poste RH"),
             "type_contrat": _("Type de contrat"),
             "date_embauche": _("Date d'embauche"),
@@ -61,8 +67,27 @@ class EmployeForm(forms.ModelForm):
             "adresse": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, entreprise=None, **kwargs):
+    def __init__(self, *args, entreprise=None, can_link_user=False, **kwargs):
         super().__init__(*args, **kwargs)
+        if can_link_user:
+            linked_user_ids = Employe.objects.filter(user__isnull=False)
+            if self.instance and self.instance.pk:
+                linked_user_ids = linked_user_ids.exclude(pk=self.instance.pk)
+            linked_user_ids = linked_user_ids.values_list("user_id", flat=True)
+            self.fields["user"].queryset = (
+                User.objects.filter(entreprise=entreprise)
+                .exclude(role=User.Role.SUPER_ADMIN)
+                .exclude(id__in=linked_user_ids)
+                .order_by("first_name", "last_name", "email", "username")
+            )
+            self.fields["user"].required = False
+            self.fields["user"].help_text = _(
+                "Optionnel. Le compte utilisateur permet a cet employe de se connecter a JOATHAM Manager. "
+                "Le role d'acces reste gere dans le module Utilisateurs."
+            )
+            self.fields["user"].empty_label = _("Aucun compte utilisateur lie")
+        else:
+            self.fields.pop("user")
         self.fields["poste"].queryset = Poste.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "id")
         self.fields["poste"].required = False
         self.fields["salaire_base"].min_value = 0

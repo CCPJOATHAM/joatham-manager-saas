@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -60,6 +61,7 @@ def _build_user_rows(users):
     rows = []
     for managed_user in users:
         full_name = f"{managed_user.first_name} {managed_user.last_name}".strip() or managed_user.username
+        linked_employe = _get_linked_employe(managed_user)
         rows.append(
             {
                 "instance": managed_user,
@@ -70,9 +72,17 @@ def _build_user_rows(users):
                 "email_verified": managed_user.email_verified,
                 "created_display": managed_user.date_joined,
                 "last_login_display": managed_user.last_login,
+                "linked_employe": linked_employe,
             }
         )
     return rows
+
+
+def _get_linked_employe(user):
+    try:
+        return user.rh_employe
+    except ObjectDoesNotExist:
+        return None
 
 
 def _build_invitation_rows(invitations):
@@ -321,12 +331,14 @@ def user_detail(request, user_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     target_user = get_object_or_404(get_users_by_entreprise(entreprise), id=user_id)
     full_name = f"{target_user.first_name} {target_user.last_name}".strip() or target_user.username
+    linked_employe = _get_linked_employe(target_user)
     return render(
         request,
         "joatham_users/user_detail.html",
         {
             "target_user": target_user,
             "full_name": full_name,
+            "linked_employe": linked_employe,
         },
     )
 
