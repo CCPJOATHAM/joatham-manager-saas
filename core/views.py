@@ -84,6 +84,26 @@ def _safe_related_count(instance, related_name):
     return manager.count()
 
 
+def _subscription_activation_mode(subscription, payment):
+    if subscription is None:
+        return ""
+    if subscription.plan and is_free_plan(subscription.plan):
+        return "Plan gratuit"
+    if payment is None:
+        return "Accord commercial"
+    if payment.methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE:
+        if payment.statut == PaiementAbonnement.Statut.VALIDE:
+            return "Paiement automatique confirmé"
+        return "Paiement automatique en attente de confirmation"
+    if payment.source_taux == "demande_plan":
+        if payment.statut == PaiementAbonnement.Statut.APPROUVEE:
+            return "Abonnement activé manuellement par super admin"
+        return "Demande de plan traitée par super admin"
+    if payment.statut == PaiementAbonnement.Statut.VALIDE:
+        return "Paiement manuel validé par super admin"
+    return "Demande manuelle en attente de validation"
+
+
 def _handle_super_admin_subscription_action(request, *, redirect_name):
     action = (request.POST.get("action") or "").strip()
     entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
@@ -181,6 +201,14 @@ def activity_log_list(request):
 def subscription_overview(request):
     entreprise = get_user_entreprise_or_raise(request.user)
     subscription = refresh_subscription_status(entreprise)
+    current_subscription = subscription or get_current_subscription(entreprise)
+    payments_queryset = get_subscription_payments_by_entreprise(entreprise)
+    activation_payment = payments_queryset.filter(
+        statut__in=[
+            PaiementAbonnement.Statut.VALIDE,
+            PaiementAbonnement.Statut.APPROUVEE,
+        ]
+    ).first()
     plans = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
     for plan in plans:
         plan.company_price = get_plan_price_for_company(plan, entreprise)
@@ -202,11 +230,12 @@ def subscription_overview(request):
     context = {
         "entreprise": entreprise,
         "currency_code": get_currency_code(entreprise),
-        "subscription": subscription or get_current_subscription(entreprise),
-        "is_current_free_plan": bool(subscription and is_free_plan(subscription.plan)),
-        "current_plan_features": get_plan_feature_summary(subscription.plan) if subscription else [],
-        "current_plan_quota_profile": get_plan_quota_profile(subscription.plan) if subscription else {},
-        "paiements": get_subscription_payments_by_entreprise(entreprise)[:8],
+        "subscription": current_subscription,
+        "activation_mode": _subscription_activation_mode(current_subscription, activation_payment),
+        "is_current_free_plan": bool(current_subscription and is_free_plan(current_subscription.plan)),
+        "current_plan_features": get_plan_feature_summary(current_subscription.plan) if current_subscription else [],
+        "current_plan_quota_profile": get_plan_quota_profile(current_subscription.plan) if current_subscription else {},
+        "paiements": payments_queryset[:8],
         "featured_plan": featured_plan,
         "pricing_options": pricing_options,
         "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",

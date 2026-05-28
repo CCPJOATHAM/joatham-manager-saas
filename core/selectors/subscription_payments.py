@@ -16,6 +16,7 @@ SUBSCRIPTION_PAYMENT_LIST_FIELDS = (
     "date_creation",
     "date_validation",
     "source_taux",
+    "methode_paiement",
     "valide_par",
 )
 

@@ -1336,6 +1336,11 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(self.entreprise.date_expiration, subscription.date_fin)
         self.assertEqual(paiement.montant_usd, Decimal("30"))
 
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("subscription_overview"))
+        self.assertContains(response, "Mode d'activation")
+        self.assertContains(response, "Paiement manuel validé par super admin")
+
     def test_super_admin_refusal_does_not_activate_subscription(self):
         paiement = create_subscription_payment_request(
             entreprise=self.entreprise,
@@ -1446,6 +1451,28 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "en cours de verification")
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
+    def test_payment_return_without_auto_payment_explains_manual_subscription(self):
+        paiement = create_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            reference_paiement="BANK-MANUAL-RETURN",
+            utilisateur=self.owner,
+        )
+        validate_subscription_payment(paiement=paiement, super_admin=self.super_admin)
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("subscription_payment_return"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cette page est réservée au retour d'un paiement automatique")
+        self.assertContains(response, "Si votre abonnement a été validé manuellement par le super admin")
+        self.assertContains(response, "Voir mon abonnement")
+        self.assertContains(response, reverse("subscription_overview"))
+        self.assertContains(response, "Voir les plans")
+        self.assertContains(response, reverse("subscription_plan_list"))
+        self.assertNotContains(response, "abonnement invalide")
+
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_valid_webhook_activates_subscription(self):
         paiement = create_automatic_subscription_payment_request(
@@ -1477,6 +1504,10 @@ class SubscriptionPaymentTests(TestCase):
                 objet_id=AbonnementEntreprise.objects.get(entreprise=self.entreprise).id,
             ).exists()
         )
+
+        self.client.force_login(self.owner)
+        overview = self.client.get(reverse("subscription_overview"))
+        self.assertContains(overview, "Paiement automatique confirmé")
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_webhook_wrong_amount_is_rejected(self):

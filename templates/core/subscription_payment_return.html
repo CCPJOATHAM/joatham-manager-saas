@@ -22,7 +22,12 @@
             <p>Votre paiement est en cours de verification. Vous pouvez revenir plus tard sur cette page.</p>
         {% endif %}
     {% else %}
-        <p>Aucun paiement automatique correspondant n'a ete trouve pour cette entreprise.</p>
+        <p>Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise.</p>
+        <p>Si votre abonnement a été validé manuellement par le super admin, consultez votre page Mon abonnement.</p>
     {% endif %}
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+        <a class="btn-link primary" href="{% url 'subscription_overview' %}">Voir mon abonnement</a>
+        <a class="btn-link" href="{% url 'subscription_plan_list' %}">Voir les plans</a>
+    </div>
 </section>
 {% endblock %}

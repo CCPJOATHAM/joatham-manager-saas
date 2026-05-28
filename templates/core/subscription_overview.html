@@ -203,6 +203,7 @@
             <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
             <div class="detail-row"><span>Plan gratuit</span><strong>{% if is_current_free_plan %}Oui{% else %}Non{% endif %}</strong></div>
             <div class="detail-row"><span>Accès courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
+            <div class="detail-row"><span>Mode d'activation</span><strong>{{ activation_mode }}</strong></div>
             <div class="detail-row"><span>Renouvellement</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
         </div>
         <h2 style="margin-top:22px;">Modules et limites</h2>
@@ -269,6 +270,31 @@
             <article class="history-item">
                 <strong>{{ paiement.plan.nom }} - {{ paiement.get_statut_display }}</strong>
                 <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
+                {% if paiement.methode_paiement == "automatique" %}
+                    {% if paiement.statut == "valide" %}
+                    <span>Type : Paiement automatique confirmé</span>
+                    {% elif paiement.statut == "echoue" %}
+                    <span>Type : Paiement automatique échoué</span>
+                    {% else %}
+                    <span>Type : Paiement automatique en attente</span>
+                    {% endif %}
+                {% elif paiement.source_taux == "demande_plan" %}
+                    {% if paiement.statut == "approuvee" %}
+                    <span>Type : Abonnement activé manuellement par super admin</span>
+                    {% elif paiement.statut == "refuse" %}
+                    <span>Type : Demande de plan refusée par super admin</span>
+                    {% else %}
+                    <span>Type : Demande de plan en attente de validation super admin</span>
+                    {% endif %}
+                {% else %}
+                    {% if paiement.statut == "valide" %}
+                    <span>Type : Paiement manuel validé par super admin</span>
+                    {% elif paiement.statut == "refuse" %}
+                    <span>Type : Demande manuelle refusée par super admin</span>
+                    {% else %}
+                    <span>Type : Demande manuelle en attente de validation</span>
+                    {% endif %}
+                {% endif %}
                 <span>Période : {{ paiement.get_duree_display }}</span>
                 <span>Montant de référence : {{ paiement.montant_usd|default:paiement.montant }} USD</span>
                 <span>Montant estimatif local : {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:currency_code }}</span>
