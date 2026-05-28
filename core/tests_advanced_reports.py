@@ -101,11 +101,10 @@ class AdvancedReportsAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(mock_render_pdf.call_args[0][1], "core/advanced_reports_pdf.html")
 
-    def test_navigation_locks_advanced_reports_for_pro_and_links_premium(self):
+    def test_navigation_hides_advanced_reports_for_pro_and_links_premium(self):
         self.client.force_login(self.pro_owner)
         pro_response = self.client.get(reverse("admin_dashboard"))
-        self.assertContains(pro_response, "Rapports avances")
-        self.assertContains(pro_response, "Premium")
+        self.assertNotContains(pro_response, "Rapports avances")
         self.assertNotContains(pro_response, reverse("advanced_reports"))
 
         self.client.force_login(self.premium_owner)

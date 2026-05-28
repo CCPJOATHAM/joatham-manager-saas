@@ -1,5 +1,6 @@
 from decimal import Decimal
 from io import StringIO
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -7,7 +8,14 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.models import PaiementAbonnement
-from core.services.product_policy import can_access_module, get_module_access_level, get_module_access_state
+from core.services.product_policy import (
+    ACCESS_INCLUDED_PLAN,
+    MODULE_ACCESS_POLICY,
+    PREMIUM_BUSINESS_MODULE_DENYLIST,
+    can_access_module,
+    get_module_access_level,
+    get_module_access_state,
+)
 from core.services.quotas import (
     FREE_PLAN_CLIENT_LIMIT,
     FREE_PLAN_EXPENSE_MONTHLY_LIMIT,
@@ -84,6 +92,42 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(Decimal(str(paid_plans["premium"]["prix"])), Decimal("20"))
         self.assertEqual(paid_plans["premium"]["prix_annuel"], Decimal("240.00"))
 
+    def test_official_plan_module_matrix_matches_commercial_strategy(self):
+        free_plan = get_or_create_free_plan()
+        paid_plans = {plan["code"]: plan for plan in get_default_paid_plans()}
+
+        self.assertEqual(
+            set(free_plan.modules_inclus),
+            {"dashboard", "clients", "services", "billing", "factures", "subscription", "abonnements"},
+        )
+        self.assertTrue({"expenses", "depenses", "products", "produits"}.issubset(set(paid_plans["starter"]["modules_inclus"])))
+        self.assertFalse({"caisse", "rh", "advanced_reports"} & set(paid_plans["starter"]["modules_inclus"]))
+        self.assertFalse(paid_plans["starter"]["acces_comptabilite"])
+        self.assertTrue(
+            {
+                "caisse",
+                "caisse_reports",
+                "caisse_exports",
+                "caisse_validation",
+                "stock",
+                "stock_reports",
+                "stock_exports",
+                "inventory",
+                "payments",
+                "payment_validation",
+                "payments_reports",
+                "payments_exports",
+                "accounting",
+                "accounting_reports",
+                "accounting_exports",
+                "apprenants",
+                "users",
+                "audit",
+            }.issubset(set(paid_plans["pro"]["modules_inclus"]))
+        )
+        self.assertFalse({"rh", "advanced_reports"} & set(paid_plans["pro"]["modules_inclus"]))
+        self.assertTrue(paid_plans["pro"]["acces_comptabilite"])
+
     def test_official_plan_payment_requests_use_current_monthly_prices(self):
         starter = self.starter_company.abonnement_entreprise.plan
         pro = self.pro_company.abonnement_entreprise.plan
@@ -106,20 +150,33 @@ class SubscriptionPlanMatrixTests(TestCase):
     def test_free_plan_blocks_advanced_modules(self):
         self.assertTrue(can_access_module(self.free_owner, "dashboard"))
         self.assertTrue(can_access_module(self.free_owner, "billing"))
+        self.assertFalse(can_access_module(self.free_owner, "expenses"))
+        self.assertFalse(can_access_module(self.free_owner, "products"))
+        self.assertFalse(can_access_module(self.free_owner, "caisse"))
         self.assertFalse(can_access_module(self.free_owner, "stock"))
         self.assertFalse(can_access_module(self.free_owner, "stock_reports"))
         self.assertFalse(can_access_module(self.free_owner, "inventory"))
         self.assertFalse(can_access_module(self.free_owner, "stock_exports"))
         self.assertFalse(can_access_module(self.free_owner, "caisse_reports"))
+        self.assertFalse(can_access_module(self.free_owner, "payments"))
         self.assertFalse(can_access_module(self.free_owner, "accounting"))
+        self.assertFalse(can_access_module(self.free_owner, "rh"))
+        self.assertFalse(can_access_module(self.free_owner, "advanced_reports"))
 
-    def test_starter_allows_simple_cashbox_but_blocks_physical_inventory(self):
-        self.assertTrue(can_access_module(self.starter_owner, "caisse"))
+    def test_starter_allows_simple_operations_but_blocks_advanced_modules(self):
+        self.assertTrue(can_access_module(self.starter_owner, "expenses"))
+        self.assertTrue(can_access_module(self.starter_owner, "products"))
+        self.assertFalse(can_access_module(self.starter_owner, "caisse"))
         self.assertFalse(can_access_module(self.starter_owner, "inventory"))
+        self.assertFalse(can_access_module(self.starter_owner, "payments"))
+        self.assertFalse(can_access_module(self.starter_owner, "accounting"))
+        self.assertFalse(can_access_module(self.starter_owner, "rh"))
+        self.assertFalse(can_access_module(self.starter_owner, "advanced_reports"))
         state = get_module_access_state(self.starter_company, "inventory")
         self.assertEqual(state["reason"], "module_not_in_plan")
 
-    def test_pro_allows_stock_inventory_cashbox_exports_and_users(self):
+    def test_pro_allows_operational_modules_but_blocks_rh_and_advanced_reports(self):
+        self.assertTrue(can_access_module(self.pro_owner, "caisse"))
         self.assertTrue(can_access_module(self.pro_owner, "stock"))
         self.assertTrue(can_access_module(self.pro_owner, "stock_reports"))
         self.assertTrue(can_access_module(self.pro_owner, "stock_exports"))
@@ -128,25 +185,37 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertTrue(can_access_module(self.pro_owner, "caisse_exports"))
         self.assertTrue(can_access_module(self.pro_owner, "caisse_integrations"))
         self.assertTrue(can_access_module(self.pro_owner, "caisse_validation"))
+        self.assertTrue(can_access_module(self.pro_owner, "payments"))
+        self.assertTrue(can_access_module(self.pro_owner, "payment_validation"))
+        self.assertTrue(can_access_module(self.pro_owner, "payments_reports"))
+        self.assertTrue(can_access_module(self.pro_owner, "payments_exports"))
+        self.assertTrue(can_access_module(self.pro_owner, "accounting"))
+        self.assertTrue(can_access_module(self.pro_owner, "accounting_reports"))
+        self.assertTrue(can_access_module(self.pro_owner, "accounting_exports"))
+        self.assertTrue(can_access_module(self.pro_owner, "apprenants"))
         self.assertTrue(can_access_module(self.pro_owner, "users"))
-        self.assertFalse(can_access_module(self.pro_owner, "accounting"))
+        self.assertTrue(can_access_module(self.pro_owner, "audit"))
+        self.assertFalse(can_access_module(self.pro_owner, "mobile_money"))
+        self.assertFalse(can_access_module(self.pro_owner, "rh"))
+        self.assertFalse(can_access_module(self.pro_owner, "advanced_reports"))
+        self.assertFalse(can_access_module(self.pro_owner, "advanced_reports_exports"))
+        self.assertFalse(can_access_module(self.pro_owner, "audit_advanced"))
+        self.assertFalse(can_access_module(self.pro_owner, "messages"))
 
     def test_premium_allows_every_current_advanced_module(self):
-        for module_name in (
-            "stock",
-            "stock_reports",
-            "stock_exports",
-            "inventory",
-            "caisse_integrations",
-            "accounting_reports",
-            "accounting_exports",
-            "accounting",
-            "audit",
-            "audit_advanced",
-            "messages",
-        ):
+        for module_name in MODULE_ACCESS_POLICY:
             with self.subTest(module_name=module_name):
-                self.assertTrue(can_access_module(self.premium_owner, module_name))
+                if module_name in PREMIUM_BUSINESS_MODULE_DENYLIST:
+                    self.assertFalse(can_access_module(self.premium_owner, module_name))
+                else:
+                    self.assertTrue(can_access_module(self.premium_owner, module_name))
+
+    def test_premium_business_allows_future_declared_modules_by_default(self):
+        patched_policy = {**MODULE_ACCESS_POLICY, "future_module": ACCESS_INCLUDED_PLAN}
+
+        with patch("core.services.product_policy.MODULE_ACCESS_POLICY", patched_policy):
+            self.assertTrue(can_access_module(self.premium_owner, "future_module"))
+            self.assertFalse(can_access_module(self.pro_owner, "future_module"))
 
     def test_premium_module_aliases_share_the_same_access_decision(self):
         for english_name, french_name in (
@@ -165,7 +234,7 @@ class SubscriptionPlanMatrixTests(TestCase):
                 self.assertTrue(can_access_module(self.premium_owner, french_name))
 
     def test_starter_plan_does_not_gain_premium_alias_access(self):
-        for module_name in ("accounting", "comptabilite", "payments", "paiements", "inventory", "inventaire"):
+        for module_name in ("accounting", "comptabilite", "payments", "paiements", "caisse", "inventory", "inventaire"):
             with self.subTest(module=module_name):
                 self.assertFalse(can_access_module(self.starter_owner, module_name))
 
@@ -290,9 +359,20 @@ class SaasPlanSeedTests(TestCase):
         self.assertEqual(starter.prix_annuel, Decimal("120.00"))
         self.assertEqual(Decimal(str(pro.prix)), Decimal("15"))
         self.assertEqual(pro.prix_annuel, Decimal("180.00"))
+        self.assertTrue(pro.acces_comptabilite)
         self.assertEqual(premium.nom, "Premium Business")
         self.assertEqual(Decimal(str(premium.prix)), Decimal("20"))
         self.assertEqual(premium.prix_annuel, Decimal("240.00"))
+        self.assertNotIn("caisse", free.modules_inclus)
+        self.assertNotIn("products", free.modules_inclus)
+        self.assertIn("products", starter.modules_inclus)
+        self.assertNotIn("caisse", starter.modules_inclus)
+        self.assertIn("caisse", pro.modules_inclus)
+        self.assertIn("payments", pro.modules_inclus)
+        self.assertIn("accounting", pro.modules_inclus)
+        self.assertNotIn("rh", pro.modules_inclus)
+        self.assertIn("rh", premium.modules_inclus)
+        self.assertIn("advanced_reports", premium.modules_inclus)
 
     def test_seed_keeps_only_official_commercial_plans_active(self):
         legacy_trial = Abonnement.objects.create(

@@ -475,10 +475,15 @@ class ProductPolicyTests(TestCase):
 
     def test_free_plan_can_access_only_included_modules(self):
         self.assertTrue(can_access_module(self.owner_free, "clients"))
-        self.assertTrue(can_access_module(self.owner_free, "expenses"))
         self.assertTrue(can_access_module(self.owner_free, "billing"))
+        self.assertFalse(can_access_module(self.owner_free, "expenses"))
+        self.assertFalse(can_access_module(self.owner_free, "products"))
+        self.assertFalse(can_access_module(self.owner_free, "caisse"))
+        self.assertFalse(can_access_module(self.owner_free, "payments"))
         self.assertFalse(can_access_module(self.owner_free, "apprenants"))
         self.assertFalse(can_access_module(self.owner_free, "accounting"))
+        self.assertFalse(can_access_module(self.owner_free, "rh"))
+        self.assertFalse(can_access_module(self.owner_free, "advanced_reports"))
 
     def test_legacy_trial_keeps_compatible_access(self):
         self.assertTrue(can_access_module(self.owner_legacy_trial, "clients"))
@@ -503,10 +508,10 @@ class ProductPolicyTests(TestCase):
         response = self.client.get(reverse("client_list"))
         self.assertEqual(response.status_code, 200)
 
-    def test_depenses_view_is_allowed_with_free_plan(self):
+    def test_depenses_view_is_refused_with_free_plan(self):
         self.client.force_login(self.owner_free)
         response = self.client.get(reverse("depenses"))
-        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse("abonnement_expire") + "?module=expenses&reason=module_not_in_plan")
 
     def test_billing_view_is_allowed_with_free_plan(self):
         self.client.force_login(self.owner_free)
@@ -530,10 +535,16 @@ class ProductPolicyTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_free_plan_locks_premium_modules(self):
+        self.assertFalse(can_access_module(self.owner_free, "expenses"))
+        self.assertFalse(can_access_module(self.owner_free, "products"))
+        self.assertFalse(can_access_module(self.owner_free, "caisse"))
         self.assertFalse(can_access_module(self.owner_free, "inventory"))
         self.assertFalse(can_access_module(self.owner_free, "stock_reports"))
         self.assertFalse(can_access_module(self.owner_free, "stock_exports"))
+        self.assertFalse(can_access_module(self.owner_free, "payments"))
         self.assertFalse(can_access_module(self.owner_free, "accounting"))
+        self.assertFalse(can_access_module(self.owner_free, "advanced_reports"))
+        self.assertFalse(can_access_module(self.owner_free, "rh"))
         self.assertFalse(can_access_module(self.owner_free, "audit"))
         self.assertFalse(can_access_module(self.owner_free, "messages"))
         self.assertFalse(can_access_module(self.owner_free, "users"))

@@ -153,10 +153,17 @@ MODULE_CANONICAL_NAMES = {
 
 EXPORT_MODULES = {"stock_exports", "caisse_exports", "accounting_exports", "payments_exports", "advanced_reports_exports"}
 ACCOUNTING_MODULES = {"accounting", "accounting_reports", "accounting_exports"}
-PAYMENTS_PREMIUM_MODULES = {"payments", "mobile_money", "payment_validation", "payments_reports", "payments_exports"}
+PAYMENTS_PREMIUM_ONLY_MODULES = {"mobile_money"}
 ADVANCED_REPORTS_PREMIUM_MODULES = {"advanced_reports", "advanced_reports_exports", "business_dashboard"}
 RH_PREMIUM_MODULES = {"rh"}
-PREMIUM_CODE_ONLY_MODULES = PAYMENTS_PREMIUM_MODULES | ADVANCED_REPORTS_PREMIUM_MODULES | RH_PREMIUM_MODULES
+PREMIUM_CODE_ONLY_MODULES = PAYMENTS_PREMIUM_ONLY_MODULES | ADVANCED_REPORTS_PREMIUM_MODULES | RH_PREMIUM_MODULES
+PREMIUM_BUSINESS_MODULE_DENYLIST = {
+    "superadmin",
+    "super_admin",
+    "platform_settings",
+    "internal_only",
+    "maintenance_admin",
+}
 PREMIUM_DENIED_REASONS = {
     "premium_required",
     "feature_not_declared",
@@ -196,6 +203,15 @@ def is_module_explicitly_missing_from_plan(plan, module_name):
     return included_modules.isdisjoint(accepted_plan_modules)
 
 
+def premium_business_allows_module(plan, module_name):
+    canonical_module = get_canonical_module_name(module_name)
+    return (
+        normalize_plan_code(plan) == PREMIUM_PLAN_CODE
+        and canonical_module in MODULE_ACCESS_POLICY
+        and canonical_module not in PREMIUM_BUSINESS_MODULE_DENYLIST
+    )
+
+
 def get_module_access_state(entreprise, module_name, *, as_of=None):
     canonical_module = get_canonical_module_name(module_name)
     level = get_module_access_level(canonical_module)
@@ -216,6 +232,14 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
     )
     if state["allowed"]:
         plan = getattr(state["subscription"], "plan", None)
+        if premium_business_allows_module(plan, canonical_module):
+            return {
+                "allowed": True,
+                "reason": None,
+                "level": level,
+                "subscription": state["subscription"],
+                "locked": False,
+            }
         if level == ACCESS_PREMIUM and is_free_plan(plan):
             return {
                 "allowed": False,
