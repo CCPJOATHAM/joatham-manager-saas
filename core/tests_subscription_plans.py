@@ -320,6 +320,66 @@ class SaasPlanSeedTests(TestCase):
         self.assertContains(response, "Premium Business")
         self.assertContains(response, "20.00 USD")
 
+    def test_subscription_plan_list_uses_commercial_labels_and_coherent_limits(self):
+        entreprise = create_entreprise("Entreprise Plans UX")
+        entreprise.devise = "USD"
+        entreprise.save(update_fields=["devise"])
+        owner = create_user("owner-plans-ux", "proprietaire", entreprise)
+        call_command("seed_saas_plans", stdout=StringIO())
+        activate_free_plan_for_entreprise(entreprise=entreprise, utilisateur=owner)
+
+        self.client.force_login(owner)
+        response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(response.status_code, 200)
+        cards = {card["plan"].code: card for card in response.context["plan_cards"]}
+        free_card = cards["free"]
+        starter_card = cards["starter"]
+        pro_card = cards["pro"]
+        premium_card = cards["premium"]
+
+        self.assertContains(response, "Plan découverte pour tester JOATHAM Manager")
+        self.assertContains(response, "Gestion simple pour une petite activité")
+        self.assertContains(response, "Gestion avancée avec caisse")
+        self.assertContains(response, "Accès complet à JOATHAM Manager")
+        self.assertNotContains(response, "caisse simple")
+        for card in cards.values():
+            self.assertFalse(any("non inclus" in feature.lower() for feature in card["features"]))
+
+        self.assertNotIn("Produits", free_card["included_modules"])
+        self.assertNotIn("Dépenses", free_card["included_modules"])
+        self.assertNotIn("Caisse", free_card["included_modules"])
+        self.assertIn("Produits", free_card["non_included"])
+        self.assertIn("Dépenses", free_card["non_included"])
+        self.assertIn("Caisse", free_card["non_included"])
+        self.assertIn("Ressources humaines", free_card["non_included"])
+        self.assertNotIn("Produits", [row["label"] for row in free_card["limits"]])
+        self.assertNotIn("Dépenses / mois", [row["label"] for row in free_card["limits"]])
+        self.assertNotIn("Caisses actives", [row["label"] for row in free_card["limits"]])
+
+        self.assertIn("Produits", starter_card["included_modules"])
+        self.assertIn("Dépenses", starter_card["included_modules"])
+        self.assertNotIn("Caisse", starter_card["included_modules"])
+        self.assertIn("Caisse avancée", starter_card["non_included"])
+        self.assertIn("Ressources humaines", starter_card["non_included"])
+        self.assertIn("Rapports avancés", starter_card["non_included"])
+
+        pro_limit_values = {row["label"]: row["value"] for row in pro_card["limits"]}
+        self.assertIn("Comptabilité", pro_card["included_modules"])
+        self.assertEqual(pro_limit_values["Comptabilité"], "Incluse")
+        self.assertIn("Ressources humaines complètes", pro_card["non_included"])
+        self.assertIn("Rapports avancés", pro_card["non_included"])
+
+        self.assertIn("Ressources humaines", premium_card["included_modules"])
+        self.assertIn("Rapports avancés", premium_card["included_modules"])
+        self.assertEqual(premium_card["non_included"], [])
+        self.assertEqual(premium_card["included_modules"].count("Facturation"), 1)
+        self.assertEqual(premium_card["included_modules"].count("Dépenses"), 1)
+        self.assertEqual(premium_card["included_modules"].count("Produits"), 1)
+        self.assertNotContains(response, "advanced_reports")
+        self.assertNotContains(response, "payments_exports")
+        self.assertNotContains(response, "accounting_exports")
+
     def test_seed_updates_official_plan_prices(self):
         Abonnement.objects.create(
             nom="Starter",

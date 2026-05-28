@@ -103,6 +103,12 @@
         font-weight: 800;
     }
 
+    .module-pill.is-muted {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
     .limits {
         display: grid;
         gap: 9px;
@@ -166,7 +172,7 @@
     <article class="plan-card">
         <div class="plan-head">
             <h2>{{ plan.nom }}</h2>
-            <p>{{ plan.description|default:"Plan JOATHAM Manager pour accompagner la gestion de votre organisation." }}</p>
+            <p>{{ plan_card.description }}</p>
         </div>
 
         <div class="price">
@@ -199,11 +205,22 @@
         </div>
         {% endif %}
 
+        {% if plan_card.non_included %}
+        <div>
+            <div class="section-label">Non inclus</div>
+            <div class="module-list">
+                {% for item in plan_card.non_included %}
+                <span class="module-pill is-muted">{{ item }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <div>
             <div class="section-label">Modules inclus</div>
-            {% if plan.modules_inclus %}
+            {% if plan_card.included_modules %}
             <div class="module-list">
-                {% for module in plan.modules_inclus %}
+                {% for module in plan_card.included_modules %}
                 <span class="module-pill">{{ module }}</span>
                 {% endfor %}
             </div>
@@ -216,15 +233,9 @@
 
         <div class="limits">
             <div class="section-label">Limites</div>
-            <div class="limit-row"><span>Utilisateurs</span><strong>{{ plan.max_utilisateurs|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Factures / mois</span><strong>{{ plan.max_factures_mois|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Clients</span><strong>{{ plan.max_clients|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Produits</span><strong>{{ plan_card.quota_profile.max_produits|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Depenses / mois</span><strong>{{ plan_card.quota_profile.max_depenses_mois|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Caisses actives</span><strong>{{ plan_card.quota_profile.max_caisses|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Apprenants</span><strong>{{ plan.max_apprenants|default_if_none:"Illimite" }}</strong></div>
-            <div class="limit-row"><span>Exports</span><strong>{% if plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
-            <div class="limit-row"><span>Comptabilite</span><strong>{% if plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
+            {% for limit in plan_card.limits %}
+            <div class="limit-row"><span>{{ limit.label }}</span><strong>{{ limit.value }}</strong></div>
+            {% endfor %}
         </div>
 
         <form method="post" class="plan-actions">

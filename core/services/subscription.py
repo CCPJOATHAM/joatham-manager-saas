@@ -186,33 +186,100 @@ DEFAULT_PAID_PLANS = [
 ]
 PLAN_FEATURE_SUMMARY = {
     FREE_PLAN_CODE: [
-        "Acces decouverte avec dashboard simple",
-        "Clients, services et factures limites",
-        "Produits, depenses, caisse, RH et comptabilite non inclus",
-        "Stock avance, inventaire, rapports avances et exports avances non inclus",
+        "Accès découverte avec tableau de bord simple",
+        "Clients, services et factures limités",
     ],
     STARTER_PLAN_CODE: [
         "Facturation plus confortable",
-        "Clients, produits et depenses pour une petite equipe",
+        "Clients, produits et dépenses pour une petite équipe",
         "Services et gestion commerciale simple",
-        "Caisse, inventaire, RH et rapports avances non inclus",
     ],
     PRO_PLAN_CODE: [
         "Tout Starter",
-        "Caisse, stock avance, mouvements et inventaire physique",
-        "Paiements, comptabilite, apprenants et audit simple",
-        "Utilisateurs multiples, rapports metier et exports Excel/PDF",
+        "Caisse, stock avancé, mouvements et inventaire",
+        "Paiements, comptabilité, apprenants et audit simple",
+        "Utilisateurs multiples, rapports métier et exports Excel/PDF",
     ],
     PREMIUM_PLAN_CODE: [
         "Tout Pro",
-        "Tous les modules actuels et nouveaux modules declaratifs",
-        "Ressources humaines completes, documents, presences et liaison compte utilisateur",
-        "Rapports avances globaux, audit avance et messagerie",
+        "Tous les modules actuels",
+        "Tous les nouveaux modules déclarés",
+        "Ressources humaines complètes",
+        "Rapports avancés globaux et audit avancé",
         "Paiements complets, Mobile Money, banque, validation, rapports et exports",
         "Utilisateurs, clients, produits et factures sans limite applicative",
         "Support prioritaire et options futures",
     ],
 }
+PLAN_EXCLUSION_SUMMARY = {
+    FREE_PLAN_CODE: [
+        "Produits",
+        "Dépenses",
+        "Caisse",
+        "Stock & inventaire",
+        "Paiements",
+        "Comptabilité",
+        "Apprenants",
+        "Ressources humaines",
+        "Rapports avancés",
+        "Audit complet",
+        "Utilisateurs avancés",
+    ],
+    STARTER_PLAN_CODE: [
+        "Caisse avancée",
+        "Stock & inventaire avancés",
+        "Paiements avancés",
+        "Comptabilité avancée",
+        "Apprenants",
+        "Ressources humaines",
+        "Rapports avancés",
+        "Audit complet",
+    ],
+    PRO_PLAN_CODE: [
+        "Ressources humaines complètes",
+        "Rapports avancés",
+        "Audit avancé",
+        "Messagerie",
+        "Mobile Money",
+    ],
+    PREMIUM_PLAN_CODE: [],
+}
+PLAN_COMMERCIAL_DESCRIPTIONS = {
+    FREE_PLAN_CODE: "Plan découverte pour tester JOATHAM Manager avec les modules essentiels et des limites fortes.",
+    STARTER_PLAN_CODE: "Gestion simple pour une petite activité : facturation, clients, services, produits et dépenses.",
+    PRO_PLAN_CODE: "Gestion avancée avec caisse, stock, inventaire, paiements, comptabilité, apprenants et exports.",
+    PREMIUM_PLAN_CODE: "Accès complet à JOATHAM Manager : tous les modules actuels, nouveautés, RH, rapports avancés et support prioritaire.",
+}
+PLAN_MODULE_DISPLAY_GROUPS = [
+    ("dashboard", "Tableau de bord", {"dashboard"}),
+    ("clients", "Clients", {"clients"}),
+    ("services", "Services", {"services"}),
+    ("billing", "Facturation", {"billing", "factures"}),
+    ("subscription", "Abonnement", {"subscription", "abonnements"}),
+    ("suggestions", "Suggestions / support", {"suggestions", "support"}),
+    ("expenses", "Dépenses", {"expenses", "depenses"}),
+    ("products", "Produits", {"products", "produits"}),
+    ("caisse", "Caisse", {"caisse", "caisse_reports", "caisse_exports", "caisse_integrations", "caisse_validation"}),
+    ("stock_inventory", "Stock & inventaire", {"stock", "stock_reports", "stock_exports", "inventory", "inventaire"}),
+    (
+        "payments",
+        "Paiements",
+        {"payments", "paiements", "payment_validation", "payments_reports", "payments_exports", "mobile_money"},
+    ),
+    ("accounting", "Comptabilité", {"accounting", "comptabilite", "accounting_reports", "accounting_exports"}),
+    ("apprenants", "Apprenants", {"apprenants"}),
+    ("users", "Utilisateurs", {"users", "utilisateurs"}),
+    ("audit", "Audit", {"audit", "audit_advanced"}),
+    ("advanced_reports", "Rapports avancés", {"advanced_reports", "advanced_reports_exports", "business_dashboard"}),
+    ("messages", "Messagerie", {"messages"}),
+    ("rh", "Ressources humaines", {"rh", "hr", "ressources_humaines", "human_resources"}),
+]
+PLAN_MODULE_DISPLAY_ALIAS_TO_GROUP = {
+    alias: group_key
+    for group_key, _label, aliases in PLAN_MODULE_DISPLAY_GROUPS
+    for alias in aliases
+}
+PLAN_MODULE_DISPLAY_LABELS = {group_key: label for group_key, label, _aliases in PLAN_MODULE_DISPLAY_GROUPS}
 SUBSCRIPTION_PAYMENT_DURATIONS = {
     PaiementAbonnement.Duree.MENSUEL: {"label": "Mensuel", "days": 30, "multiplier": Decimal("1")},
     PaiementAbonnement.Duree.TRIMESTRIEL: {"label": "Trimestriel", "days": 90, "multiplier": Decimal("3")},
@@ -260,6 +327,81 @@ def get_plan_quota_profile(plan):
 
 def get_plan_feature_summary(plan):
     return PLAN_FEATURE_SUMMARY.get(normalize_plan_code(plan), [])
+
+
+def get_plan_commercial_description(plan):
+    return PLAN_COMMERCIAL_DESCRIPTIONS.get(
+        normalize_plan_code(plan),
+        getattr(plan, "description", "") or "Plan JOATHAM Manager pour accompagner la gestion de votre organisation.",
+    )
+
+
+def get_plan_exclusion_summary(plan):
+    return PLAN_EXCLUSION_SUMMARY.get(normalize_plan_code(plan), [])
+
+
+def get_official_plan_module_codes(plan):
+    plan_code = normalize_plan_code(plan)
+    if plan_code == FREE_PLAN_CODE:
+        return FREE_PLAN_MODULES
+    if plan_code == STARTER_PLAN_CODE:
+        return STARTER_PLAN_MODULES
+    if plan_code == PRO_PLAN_CODE:
+        return PRO_PLAN_MODULES
+    if plan_code == PREMIUM_PLAN_CODE:
+        return PREMIUM_PLAN_MODULES
+    return list(getattr(plan, "modules_inclus", None) or [])
+
+
+def get_plan_display_module_groups(plan):
+    group_keys = []
+    seen = set()
+    for module_code in get_official_plan_module_codes(plan):
+        group_key = PLAN_MODULE_DISPLAY_ALIAS_TO_GROUP.get(module_code)
+        if not group_key or group_key in seen:
+            continue
+        seen.add(group_key)
+        group_keys.append(group_key)
+    return group_keys
+
+
+def get_plan_display_modules(plan):
+    return [PLAN_MODULE_DISPLAY_LABELS[group_key] for group_key in get_plan_display_module_groups(plan)]
+
+
+def _format_plan_limit(value):
+    return "Illimité" if value is None else str(value)
+
+
+def _format_included_plan_limit(value):
+    if value is None:
+        return "Illimité"
+    if value == 0:
+        return "Inclus"
+    return str(value)
+
+
+def get_plan_limit_summary(plan):
+    group_keys = set(get_plan_display_module_groups(plan))
+    quota_profile = get_plan_quota_profile(plan)
+    rows = [
+        {"label": "Utilisateurs", "value": _format_plan_limit(getattr(plan, "max_utilisateurs", None))},
+        {"label": "Factures / mois", "value": _format_plan_limit(getattr(plan, "max_factures_mois", None))},
+        {"label": "Clients", "value": _format_plan_limit(getattr(plan, "max_clients", None))},
+    ]
+    if "products" in group_keys:
+        rows.append({"label": "Produits", "value": _format_plan_limit(quota_profile.get("max_produits"))})
+    if "expenses" in group_keys:
+        rows.append({"label": "Dépenses / mois", "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))})
+    if "caisse" in group_keys:
+        rows.append({"label": "Caisses actives", "value": _format_plan_limit(quota_profile.get("max_caisses"))})
+    if "apprenants" in group_keys:
+        rows.append({"label": "Apprenants", "value": _format_included_plan_limit(getattr(plan, "max_apprenants", None))})
+    if getattr(plan, "acces_exports", False):
+        rows.append({"label": "Exports", "value": "Inclus"})
+    if "accounting" in group_keys and getattr(plan, "acces_comptabilite", False):
+        rows.append({"label": "Comptabilité", "value": "Incluse"})
+    return rows
 
 
 def get_default_paid_plans():
