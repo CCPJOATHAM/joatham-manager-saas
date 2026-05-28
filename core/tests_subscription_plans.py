@@ -3,8 +3,10 @@ from io import StringIO
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
+from core.models import PaiementAbonnement
 from core.services.product_policy import can_access_module, get_module_access_level, get_module_access_state
 from core.services.quotas import (
     FREE_PLAN_CLIENT_LIMIT,
@@ -21,9 +23,11 @@ from core.services.subscription import (
     OFFICIAL_COMMERCIAL_PLAN_CODES,
     activate_free_plan_for_entreprise,
     activate_subscription_for_entreprise,
+    create_subscription_payment_request,
     get_commercial_plans_queryset,
     get_default_paid_plans,
     get_or_create_free_plan,
+    get_subscription_price_usd,
 )
 from joatham_billing.models import Facture
 from joatham_billing.tests.factories import create_entreprise, create_user
@@ -65,6 +69,39 @@ class SubscriptionPlanMatrixTests(TestCase):
             plan=create_default_plan("premium"),
             utilisateur=self.premium_owner,
         )
+
+    def test_official_plan_prices_match_current_pricing_grid(self):
+        free_plan = get_or_create_free_plan()
+        paid_plans = {plan["code"]: plan for plan in get_default_paid_plans()}
+
+        self.assertEqual(Decimal(str(free_plan.prix)), Decimal("0"))
+        self.assertEqual(free_plan.devise, "USD")
+        self.assertEqual(Decimal(str(paid_plans["starter"]["prix"])), Decimal("10"))
+        self.assertEqual(paid_plans["starter"]["prix_annuel"], Decimal("120.00"))
+        self.assertEqual(Decimal(str(paid_plans["pro"]["prix"])), Decimal("15"))
+        self.assertEqual(paid_plans["pro"]["prix_annuel"], Decimal("180.00"))
+        self.assertEqual(paid_plans["premium"]["nom"], "Premium Business")
+        self.assertEqual(Decimal(str(paid_plans["premium"]["prix"])), Decimal("20"))
+        self.assertEqual(paid_plans["premium"]["prix_annuel"], Decimal("240.00"))
+
+    def test_official_plan_payment_requests_use_current_monthly_prices(self):
+        starter = self.starter_company.abonnement_entreprise.plan
+        pro = self.pro_company.abonnement_entreprise.plan
+        premium = self.premium_company.abonnement_entreprise.plan
+
+        self.assertEqual(get_subscription_price_usd(plan=starter, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("10"))
+        self.assertEqual(get_subscription_price_usd(plan=pro, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("15"))
+        self.assertEqual(get_subscription_price_usd(plan=premium, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("20"))
+
+        payment = create_subscription_payment_request(
+            entreprise=self.starter_company,
+            plan=starter,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            reference_paiement="PRICE-STARTER-10",
+            utilisateur=self.starter_owner,
+        )
+
+        self.assertEqual(payment.montant_usd, Decimal("10.00"))
 
     def test_free_plan_blocks_advanced_modules(self):
         self.assertTrue(can_access_module(self.free_owner, "dashboard"))
@@ -193,6 +230,70 @@ class SubscriptionQuotaMatrixTests(TestCase):
 
 
 class SaasPlanSeedTests(TestCase):
+    def test_subscription_plan_list_displays_current_official_prices(self):
+        entreprise = create_entreprise("Entreprise Plans Prix")
+        entreprise.devise = "USD"
+        entreprise.save(update_fields=["devise"])
+        owner = create_user("owner-plans-prices", "proprietaire", entreprise)
+        call_command("seed_saas_plans", stdout=StringIO())
+        activate_free_plan_for_entreprise(entreprise=entreprise, utilisateur=owner)
+
+        self.client.force_login(owner)
+        response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gratuit")
+        self.assertContains(response, "0 USD")
+        self.assertContains(response, "Starter")
+        self.assertContains(response, "10.00 USD")
+        self.assertContains(response, "Pro")
+        self.assertContains(response, "15.00 USD")
+        self.assertContains(response, "Premium Business")
+        self.assertContains(response, "20.00 USD")
+
+    def test_seed_updates_official_plan_prices(self):
+        Abonnement.objects.create(
+            nom="Starter",
+            code="starter",
+            prix=19,
+            prix_annuel=Decimal("190.00"),
+            duree_jours=30,
+            actif=True,
+        )
+        Abonnement.objects.create(
+            nom="Pro",
+            code="pro",
+            prix=49,
+            prix_annuel=Decimal("490.00"),
+            duree_jours=30,
+            actif=True,
+        )
+        Abonnement.objects.create(
+            nom="Premium / Business",
+            code="premium",
+            prix=99,
+            prix_annuel=Decimal("990.00"),
+            duree_jours=30,
+            actif=True,
+        )
+
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        free = Abonnement.objects.get(code="free")
+        starter = Abonnement.objects.get(code="starter")
+        pro = Abonnement.objects.get(code="pro")
+        premium = Abonnement.objects.get(code="premium")
+
+        self.assertEqual(Decimal(str(free.prix)), Decimal("0"))
+        self.assertEqual(free.devise, "USD")
+        self.assertEqual(Decimal(str(starter.prix)), Decimal("10"))
+        self.assertEqual(starter.prix_annuel, Decimal("120.00"))
+        self.assertEqual(Decimal(str(pro.prix)), Decimal("15"))
+        self.assertEqual(pro.prix_annuel, Decimal("180.00"))
+        self.assertEqual(premium.nom, "Premium Business")
+        self.assertEqual(Decimal(str(premium.prix)), Decimal("20"))
+        self.assertEqual(premium.prix_annuel, Decimal("240.00"))
+
     def test_seed_keeps_only_official_commercial_plans_active(self):
         legacy_trial = Abonnement.objects.create(
             nom="Plan d'essai",
