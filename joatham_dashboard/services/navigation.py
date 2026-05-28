@@ -6,6 +6,7 @@ from core.services.product_policy import (
     get_module_access_state,
     is_module_explicitly_missing_from_plan,
 )
+from core.services.subscription import PREMIUM_PLAN_CODE, normalize_plan_code
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import (
     get_default_dashboard_name,
@@ -256,7 +257,12 @@ def _get_item_state(user, item):
             state = _get_module_state(user, module_name)
             subscription = state.get("subscription")
             plan = getattr(subscription, "plan", None)
-            if item.get("hide_when_missing_from_plan") and is_module_explicitly_missing_from_plan(plan, module_name):
+            is_non_premium_plan = normalize_plan_code(plan) != PREMIUM_PLAN_CODE
+            if (
+                item.get("hide_when_missing_from_plan")
+                and is_non_premium_plan
+                and is_module_explicitly_missing_from_plan(plan, module_name)
+            ):
                 return {"visible": False}
             if state.get("allowed"):
                 return {"visible": True}

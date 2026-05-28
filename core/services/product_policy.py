@@ -233,14 +233,6 @@ def get_module_access_state(entreprise, module_name, *, as_of=None):
                     "subscription": state["subscription"],
                     "locked": True,
                 }
-            if is_module_explicitly_missing_from_plan(plan, canonical_module):
-                return {
-                    "allowed": False,
-                    "reason": "module_not_in_plan",
-                    "level": level,
-                    "subscription": state["subscription"],
-                    "locked": True,
-                }
             return {
                 "allowed": True,
                 "reason": None,

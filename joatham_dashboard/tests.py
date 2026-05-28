@@ -371,6 +371,39 @@ class DashboardAccessTests(TestCase):
         self.assertContains(response, f'href="{reverse("advanced_reports")}" class="quick-action is-orange"')
         self.assertNotContains(response, 'class="quick-action is-orange" aria-disabled="true"')
 
+    def test_premium_navigation_keeps_rh_and_reports_for_legacy_module_list(self):
+        premium_entreprise = create_entreprise("Entreprise Premium Navigation Legacy")
+        premium_owner = create_user("owner-premium-nav-legacy", "proprietaire", premium_entreprise)
+        premium_manager = create_user("manager-premium-nav-legacy", "gestionnaire", premium_entreprise)
+        premium_plan = Abonnement.objects.create(
+            nom="Premium Navigation Legacy",
+            code="premium",
+            prix=99,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["dashboard"],
+        )
+        activate_subscription_for_entreprise(
+            entreprise=premium_entreprise,
+            plan=premium_plan,
+            utilisateur=premium_owner,
+        )
+
+        self.client.force_login(premium_owner)
+        owner_response = self.client.get(reverse("admin_dashboard"))
+        owner_labels = [item["label"] for item in owner_response.context["dashboard_navigation"]]
+
+        self.assertIn("Rapports avances", owner_labels)
+        self.assertIn("Ressources humaines", owner_labels)
+        self.assertContains(owner_response, f'href="{reverse("advanced_reports")}" class="quick-action is-orange"')
+
+        self.client.force_login(premium_manager)
+        manager_response = self.client.get(reverse("gestion_dashboard"))
+        manager_labels = [item["label"] for item in manager_response.context["dashboard_navigation"]]
+
+        self.assertIn("Ressources humaines", manager_labels)
+        self.assertNotIn("Rapports avances", manager_labels)
+
     def test_accountant_reports_quick_action_keeps_existing_accounting_route(self):
         self.client.force_login(self.comptable)
         response = self.client.get(reverse("comptable_dashboard"))
