@@ -1,0 +1,28 @@
+{% extends "joatham_dashboard/base.html" %}
+
+{% block page_title %}Retour paiement abonnement | JOATHAM Manager{% endblock %}
+{% block content_title %}Retour paiement abonnement{% endblock %}
+{% block content_subtitle %}Cette page affiche l'etat connu du paiement. L'abonnement est active uniquement apres confirmation securisee du webhook.{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'subscription_overview' %}" class="btn-link">Retour a mon abonnement</a>
+{% endblock %}
+
+{% block content %}
+<section class="content-card">
+    {% if paiement %}
+        <p><strong>Reference :</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
+        <p><strong>Plan :</strong> {{ paiement.plan.nom }}</p>
+        <p><strong>Statut :</strong> {{ paiement.get_statut_display }}</p>
+        {% if paiement.statut == "valide" %}
+            <p>Votre paiement est confirme. L'abonnement a ete active automatiquement.</p>
+        {% elif paiement.statut == "echoue" %}
+            <p>Le paiement n'a pas ete confirme. {{ paiement.failure_reason }}</p>
+        {% else %}
+            <p>Votre paiement est en cours de verification. Vous pouvez revenir plus tard sur cette page.</p>
+        {% endif %}
+    {% else %}
+        <p>Aucun paiement automatique correspondant n'a ete trouve pour cette entreprise.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -3,7 +3,10 @@ from django.utils import timezone
 from django.contrib import messages
 from django.db import models
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from urllib.parse import quote
 
 from core.audit import record_audit_event
@@ -38,6 +41,8 @@ from core.services.subscription import (
 from core.services.currency import get_currency_code
 from core.services.exchange_rates import ExchangeRateUnavailable, get_exchange_rate, get_plan_price_for_company
 from core.services.product_policy import module_access_required
+from core.services.payment_providers import PaymentProviderError, PaymentProviderVerificationError
+from core.services.subscription_payments import handle_subscription_payment_webhook
 from core.services.super_admin import (
     activate_company_subscription,
     deactivate_company_for_super_admin,
@@ -239,6 +244,51 @@ def subscription_payment_create(request):
         "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",
     }
     return render(request, "core/subscription_payment_form.html", context)
+
+
+@permission_required("subscription.view")
+def subscription_payment_return(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    reference = (request.GET.get("reference") or "").strip()
+    paiement = None
+    if reference:
+        paiement = (
+            PaiementAbonnement.objects.filter(
+                entreprise=entreprise,
+                external_reference=reference,
+            )
+            .select_related("plan")
+            .first()
+        )
+    return render(
+        request,
+        "core/subscription_payment_return.html",
+        {
+            "entreprise": entreprise,
+            "paiement": paiement,
+            "reference": reference,
+        },
+    )
+
+
+@csrf_exempt
+@require_POST
+def subscription_payment_webhook(request, provider):
+    try:
+        result = handle_subscription_payment_webhook(provider, request)
+    except PaymentProviderVerificationError as exc:
+        return JsonResponse({"status": "rejected", "detail": str(exc)}, status=400)
+    except PaymentProviderError as exc:
+        return JsonResponse({"status": "error", "detail": str(exc)}, status=400)
+
+    return JsonResponse(
+        {
+            "status": result.status,
+            "message": result.message,
+            "activated": result.activated,
+            "duplicate": result.duplicate,
+        }
+    )
 
 
 @permission_required("subscription.view")

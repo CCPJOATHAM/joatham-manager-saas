@@ -1,10 +1,11 @@
 ﻿from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from datetime import date, timedelta
 from decimal import Decimal
+import json
 from unittest.mock import Mock, patch
 
 import requests
@@ -39,6 +40,7 @@ from .services.subscription import (
     refuse_subscription_payment,
     validate_subscription_payment,
 )
+from .services.subscription_payments import create_automatic_subscription_payment_request
 from .services.product_policy import get_module_access_state as get_product_module_access_state
 from .services.currency import get_currency_code
 from .services.exchange_rates import convert_amount, get_plan_price_for_company
@@ -1372,3 +1374,296 @@ class SubscriptionPaymentTests(TestCase):
         paiement_refuse.refresh_from_db()
         self.assertEqual(paiement_refuse.statut, PaiementAbonnement.Statut.REFUSE)
         self.assertEqual(paiement_refuse.notes_validation, "Reference invalide")
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_automatic_subscription_payment_request_is_pending(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertEqual(paiement.methode_paiement, PaiementAbonnement.Methode.AUTOMATIQUE)
+        self.assertEqual(paiement.provider, "test")
+        self.assertTrue(paiement.external_reference.startswith("SUB-"))
+        self.assertEqual(paiement.amount_expected, Decimal("10.00"))
+        self.assertIn(paiement.external_reference, paiement.checkout_url)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_automatic_payment_external_reference_is_unique(self):
+        first = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+        second = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_pro,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        self.assertNotEqual(first.external_reference, second.external_reference)
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_payment_return_never_activates_subscription(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "en cours de verification")
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_valid_webhook_activates_subscription(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-paid-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-paid-1",
+        )
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.VALIDE)
+        self.assertEqual(paiement.provider_transaction_id, "tx-paid-1")
+        self.assertEqual(paiement.amount_paid, Decimal("10.00"))
+        self.assertTrue(AbonnementEntreprise.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                entreprise=self.entreprise,
+                action="subscription_auto_activated",
+                objet_id=AbonnementEntreprise.objects.get(entreprise=self.entreprise).id,
+            ).exists()
+        )
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_webhook_wrong_amount_is_rejected(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-amount-1",
+            amount="9.00",
+            currency="USD",
+            provider_transaction_id="tx-amount-1",
+        )
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertIn("Montant", paiement.failure_reason)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_webhook_wrong_currency_is_rejected(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-currency-1",
+            amount="10.00",
+            currency="CDF",
+            provider_transaction_id="tx-currency-1",
+        )
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertIn("Devise", paiement.failure_reason)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_webhook_unknown_transaction_is_rejected(self):
+        response = self.client.post(
+            reverse("subscription_payment_webhook", kwargs={"provider": "test"}),
+            data=json.dumps(
+                {
+                    "external_reference": "SUB-UNKNOWN",
+                    "event_id": "evt-unknown-1",
+                    "status": "paid",
+                    "amount": "10.00",
+                    "currency": "USD",
+                    "provider_transaction_id": "tx-unknown-1",
+                }
+            ),
+            content_type="application/json",
+            HTTP_X_JOATHAM_TEST_SIGNATURE="test-secret",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_duplicate_webhook_is_idempotent(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        first_response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-duplicate-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-duplicate-1",
+        )
+        first_subscription = AbonnementEntreprise.objects.get(entreprise=self.entreprise)
+        first_date_fin = first_subscription.date_fin
+        second_response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-duplicate-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-duplicate-1",
+        )
+        first_subscription.refresh_from_db()
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(first_subscription.date_fin, first_date_fin)
+        self.assertTrue(ActivityLog.objects.filter(action="subscription_payment_webhook_duplicate").exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_failed_webhook_does_not_activate_subscription(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-failed-1",
+            status="failed",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-failed-1",
+        )
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_provider_transaction_id_duplicate_does_not_double_activate(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+        self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-tx-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-shared",
+        )
+        other_entreprise = create_entreprise("Entreprise Transaction Doublon")
+        other_owner = create_user("owner-transaction-doublon", "proprietaire", other_entreprise)
+        other_payment = create_automatic_subscription_payment_request(
+            entreprise=other_entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=other_owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            other_payment,
+            event_id="evt-tx-2",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-shared",
+        )
+        other_payment.refresh_from_db()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(other_payment.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=other_entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_super_admin_dashboard_shows_automatic_pending_payment(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        self.client.force_login(self.super_admin)
+        response = self.client.get(reverse("super_admin_dashboard"))
+
+        self.assertContains(response, "Paiements en attente")
+        self.assertContains(response, paiement.external_reference)
+
+    def _post_test_payment_webhook(
+        self,
+        paiement,
+        *,
+        event_id,
+        amount,
+        currency,
+        provider_transaction_id,
+        status="paid",
+    ):
+        return self.client.post(
+            reverse("subscription_payment_webhook", kwargs={"provider": "test"}),
+            data=json.dumps(
+                {
+                    "external_reference": paiement.external_reference,
+                    "event_id": event_id,
+                    "status": status,
+                    "amount": amount,
+                    "currency": currency,
+                    "provider_transaction_id": provider_transaction_id,
+                }
+            ),
+            content_type="application/json",
+            HTTP_X_JOATHAM_TEST_SIGNATURE="test-secret",
+        )

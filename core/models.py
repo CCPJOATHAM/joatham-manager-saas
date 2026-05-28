@@ -48,13 +48,17 @@ class PaiementAbonnement(models.Model):
 
     class Statut(models.TextChoices):
         EN_ATTENTE = "en_attente", _("En attente")
+        EN_COURS = "en_cours", _("En cours")
         APPROUVEE = "approuvee", _("Approuvee")
         VALIDE = "valide", _("Valide")
         REFUSE = "refuse", _("Refuse")
         ANNULE = "annule", _("Annule")
+        ECHOUE = "echoue", _("Echoue")
+        EXPIRE = "expire", _("Expire")
 
     class Methode(models.TextChoices):
         MANUEL = "manuel", _("Manuel")
+        AUTOMATIQUE = "automatique", _("Automatique")
         MOBILE_MONEY = "mobile_money", "Mobile Money"
         CARTE = "carte", _("Carte")
         VIREMENT = "virement", _("Virement")
@@ -81,6 +85,20 @@ class PaiementAbonnement(models.Model):
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE)
     methode_paiement = models.CharField(max_length=30, choices=Methode.choices, default=Methode.MANUEL)
     provider_reference = models.CharField(max_length=120, blank=True, default="")
+    provider = models.CharField(max_length=50, blank=True, default="manual", db_index=True)
+    provider_checkout_id = models.CharField(max_length=180, blank=True, default="")
+    provider_transaction_id = models.CharField(max_length=180, null=True, blank=True, unique=True)
+    external_reference = models.CharField(max_length=80, null=True, blank=True, unique=True, db_index=True)
+    provider_status = models.CharField(max_length=50, blank=True, default="")
+    checkout_url = models.URLField(max_length=500, blank=True, default="")
+    amount_expected = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    paid_currency = models.CharField(max_length=10, blank=True, default="")
+    raw_provider_payload = models.JSONField(default=dict, blank=True)
+    last_webhook_event_id = models.CharField(max_length=180, blank=True, default="", db_index=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    failure_reason = models.TextField(blank=True, default="")
     periode_debut = models.DateField(null=True, blank=True)
     periode_fin = models.DateField(null=True, blank=True)
     date_paiement = models.DateTimeField(null=True, blank=True)
@@ -97,12 +115,20 @@ class PaiementAbonnement(models.Model):
         blank=True,
         related_name="paiements_abonnement_valides",
     )
+    created_by = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="paiements_abonnement_crees",
+    )
 
     class Meta:
         ordering = ["-date_creation", "-id"]
         indexes = [
             models.Index(fields=["entreprise", "statut", "date_creation"]),
             models.Index(fields=["statut", "date_creation"]),
+            models.Index(fields=["provider", "statut", "date_creation"]),
         ]
 
     def __str__(self):

@@ -656,6 +656,8 @@ def create_subscription_payment_request(
         telephone_paiement=(telephone_paiement or "").strip(),
         reference_paiement=(reference_paiement or "").strip(),
         preuve_paiement=preuve_paiement,
+        provider="manual",
+        created_by=utilisateur,
     )
     record_audit_event(
         entreprise=entreprise,
@@ -714,6 +716,8 @@ def create_subscription_plan_request(*, entreprise, plan, utilisateur=None):
         methode_paiement=PaiementAbonnement.Methode.MANUEL,
         reference_paiement=f"Demande plan {plan.nom}"[:120],
         notes_validation="Demande de plan creee depuis l'espace entreprise.",
+        provider="manual",
+        created_by=utilisateur,
     )
     record_audit_event(
         entreprise=entreprise,
@@ -1012,6 +1016,8 @@ def register_manual_subscription_payment(
         valide_par=super_admin,
         reference_paiement=(reference_paiement or "Paiement manuel").strip(),
         notes_validation="Paiement manuel enregistre par super admin.",
+        provider="manual",
+        created_by=super_admin,
     )
 
     record_audit_event(
