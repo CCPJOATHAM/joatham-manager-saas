@@ -281,13 +281,15 @@ def subscription_payment_webhook(request, provider):
     except PaymentProviderError as exc:
         return JsonResponse({"status": "error", "detail": str(exc)}, status=400)
 
+    http_status = 400 if result.rejected else 200
     return JsonResponse(
         {
             "status": result.status,
             "message": result.message,
             "activated": result.activated,
             "duplicate": result.duplicate,
-        }
+        },
+        status=http_status,
     )
 
 

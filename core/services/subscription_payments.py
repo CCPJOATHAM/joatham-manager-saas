@@ -30,6 +30,7 @@ class SubscriptionPaymentWebhookResult:
     message: str
     activated: bool = False
     duplicate: bool = False
+    rejected: bool = False
 
 
 def generate_external_reference():
@@ -219,7 +220,12 @@ def handle_subscription_payment_webhook(provider, request):
                     "currency": verified_payment.currency,
                 },
             )
-            raise PaymentProviderVerificationError(rejection_reason)
+            return SubscriptionPaymentWebhookResult(
+                paiement=paiement,
+                status=paiement.statut,
+                message=rejection_reason,
+                rejected=True,
+            )
 
         duration_days = get_subscription_payment_duration_days(paiement.duree)
         subscription = activate_subscription_for_entreprise(

@@ -1278,6 +1278,21 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("120"))
 
     def test_subscription_payment_estimate_uses_usd_reference_and_local_snapshot(self):
+        from django.utils import timezone
+
+        settings = PlatformSettings.get_solo()
+        settings.devise_plateforme = "USD"
+        settings.save(update_fields=["devise_plateforme"])
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2300.00"),
+            source_provider="test_cached_rate",
+            date_taux=timezone.now(),
+        )
+
         estimate = build_subscription_payment_estimate(
             entreprise=self.entreprise,
             plan=self.plan_basic,
@@ -1286,7 +1301,9 @@ class SubscriptionPaymentTests(TestCase):
 
         self.assertEqual(estimate["amount_usd"], Decimal("10.00"))
         self.assertEqual(estimate["currency_code"], self.entreprise.devise)
-        self.assertGreater(estimate["estimated_amount"], Decimal("0.00"))
+        self.assertEqual(estimate["estimated_amount"], Decimal("23000.00"))
+        self.assertEqual(estimate["exchange_rate"], Decimal("2300.00"))
+        self.assertEqual(estimate["exchange_source"], "test_cached_rate")
 
     def test_payment_form_displays_whatsapp_and_price_previews(self):
         self.client.force_login(self.owner)

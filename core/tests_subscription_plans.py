@@ -314,11 +314,11 @@ class SaasPlanSeedTests(TestCase):
         self.assertContains(response, "Gratuit")
         self.assertContains(response, "0 USD")
         self.assertContains(response, "Starter")
-        self.assertContains(response, "10.00 USD")
+        self.assertContains(response, "10,00 USD")
         self.assertContains(response, "Pro")
-        self.assertContains(response, "15.00 USD")
+        self.assertContains(response, "15,00 USD")
         self.assertContains(response, "Premium Business")
-        self.assertContains(response, "20.00 USD")
+        self.assertContains(response, "20,00 USD")
 
     def test_subscription_plan_list_uses_commercial_labels_and_coherent_limits(self):
         entreprise = create_entreprise("Entreprise Plans UX")
