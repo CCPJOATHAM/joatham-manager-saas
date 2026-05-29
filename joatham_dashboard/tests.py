@@ -53,6 +53,16 @@ class PublicHomeTests(TestCase):
         self.assertEqual(login_response.status_code, 200)
         self.assertContains(login_response, "JOATHAM Manager")
 
+    def test_public_robots_txt_allows_crawling(self):
+        response = self.client.get("/robots.txt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/plain"))
+        content = response.content.decode("utf-8")
+        self.assertEqual(content, "User-agent: *\nAllow: /")
+        self.assertIn("User-agent: *", content)
+        self.assertIn("Allow: /", content)
+
 
 class DashboardAccessTests(TestCase):
     def setUp(self):

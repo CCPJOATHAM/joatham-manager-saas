@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView, PasswordResetCompleteView
 from django.contrib.auth import authenticate, get_user_model
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -49,6 +49,10 @@ def _clear_pending_session_conflict(request):
 
 def public_home(request):
     return render(request, "joatham_dashboard/public_home.html", {"app_name": "JOATHAM Manager"})
+
+
+def public_robots_txt(request):
+    return HttpResponse("User-agent: *\nAllow: /", content_type="text/plain")
 
 
 class SecurePasswordResetRequestView(PasswordResetView):
