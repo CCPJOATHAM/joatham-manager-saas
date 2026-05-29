@@ -1315,6 +1315,34 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "Contacter via WhatsApp")
         self.assertContains(response, "243970258117")
 
+    def test_subscription_overview_shows_actions_without_auto_payment_provider(self):
+        create_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            reference_paiement="MOMO-PENDING-ACTION",
+            utilisateur=self.owner,
+        )
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("subscription_overview"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Voir les plans")
+        self.assertContains(response, "Demandes / paiements en cours : 1")
+        self.assertContains(response, "Paiement automatique bientôt disponible")
+        self.assertNotContains(response, "Payer automatiquement")
+
+    def test_subscription_plan_list_keeps_manual_request_and_hides_active_auto_payment(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Demander ce plan")
+        self.assertContains(response, "Paiement automatique bientôt disponible")
+        self.assertNotContains(response, "Payer automatiquement")
+
     def test_super_admin_validation_activates_subscription(self):
         paiement = create_subscription_payment_request(
             entreprise=self.entreprise,

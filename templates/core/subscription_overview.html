@@ -173,6 +173,22 @@
         color: #10233f;
     }
 
+    .btn-action.disabled {
+        background: #eef2f7;
+        color: #64748b;
+        cursor: not-allowed;
+    }
+
+    .subscription-alert {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #dde7f0;
+        color: #475569;
+        font-weight: 700;
+    }
+
     @media (max-width: 980px) {
         .subscription-grid {
             grid-template-columns: 1fr;
@@ -318,9 +334,14 @@
             Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué.
         {% endif %}
     </p>
+    {% if pending_payments_count %}
+    <div class="subscription-alert">
+        Demandes / paiements en cours : {{ pending_payments_count }}
+    </div>
+    {% endif %}
 
     <div class="subscription-actions">
-        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Choisir un plan</a>
+        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Voir les plans</a>
         {% if subscription %}
             {% if subscription.statut == "essai" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Choisir un plan superieur</a>
@@ -336,6 +357,11 @@
         {% endif %}
 
         <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">J'ai effectué le paiement</a>
+        {% if automatic_payment_provider_configured %}
+        <span class="btn-action disabled" aria-disabled="true">Payer automatiquement</span>
+        {% else %}
+        <span class="btn-action disabled" aria-disabled="true">Paiement automatique bientôt disponible</span>
+        {% endif %}
         <a class="btn-action secondary" href="{{ whatsapp_link }}" target="_blank" rel="noopener">Contacter via WhatsApp</a>
     </div>
 </section>

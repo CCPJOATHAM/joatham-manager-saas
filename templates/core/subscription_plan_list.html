@@ -128,7 +128,13 @@
     }
 
     .plan-actions {
+        display: grid;
+        gap: 10px;
         align-self: end;
+    }
+
+    .plan-actions form {
+        margin: 0;
     }
 
     .btn-request {
@@ -146,6 +152,20 @@
         background: #e2e8f0;
         color: #64748b;
         cursor: not-allowed;
+    }
+
+    .auto-payment-note {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px solid #dde7f0;
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 800;
+        text-align: center;
+        padding: 0 12px;
     }
 
     .empty-state {
@@ -238,13 +258,22 @@
             {% endfor %}
         </div>
 
-        <form method="post" class="plan-actions">
+        <div class="plan-actions">
+        <form method="post">
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ plan.id }}">
             <button type="submit" class="btn-request" {% if plan_card.is_free or plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
                 {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyee{% else %}Demander ce plan{% endif %}
             </button>
         </form>
+        {% if not plan_card.is_free %}
+            {% if automatic_payment_provider_configured %}
+            <div class="auto-payment-note">Payer automatiquement</div>
+            {% else %}
+            <div class="auto-payment-note">Paiement automatique bientôt disponible</div>
+            {% endif %}
+        {% endif %}
+        </div>
     </article>
     {% endwith %}
     {% endfor %}

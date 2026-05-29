@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.contrib import messages
@@ -104,6 +105,11 @@ def _subscription_activation_mode(subscription, payment):
     return "Demande manuelle en attente de validation"
 
 
+def _automatic_payment_provider_configured():
+    provider_code = (getattr(settings, "JOATHAM_AUTOMATIC_PAYMENT_PROVIDER", "") or "").strip().lower()
+    return bool(provider_code and provider_code != "test")
+
+
 def _handle_super_admin_subscription_action(request, *, redirect_name):
     action = (request.POST.get("action") or "").strip()
     entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
@@ -203,6 +209,7 @@ def subscription_overview(request):
     subscription = refresh_subscription_status(entreprise)
     current_subscription = subscription or get_current_subscription(entreprise)
     payments_queryset = get_subscription_payments_by_entreprise(entreprise)
+    pending_payments_count = payments_queryset.filter(statut=PaiementAbonnement.Statut.EN_ATTENTE).count()
     activation_payment = payments_queryset.filter(
         statut__in=[
             PaiementAbonnement.Statut.VALIDE,
@@ -236,6 +243,8 @@ def subscription_overview(request):
         "current_plan_features": get_plan_feature_summary(current_subscription.plan) if current_subscription else [],
         "current_plan_quota_profile": get_plan_quota_profile(current_subscription.plan) if current_subscription else {},
         "paiements": payments_queryset[:8],
+        "pending_payments_count": pending_payments_count,
+        "automatic_payment_provider_configured": _automatic_payment_provider_configured(),
         "featured_plan": featured_plan,
         "pricing_options": pricing_options,
         "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",
@@ -373,6 +382,7 @@ def subscription_plan_list(request):
             "plans": plans,
             "plan_cards": plan_cards,
             "pending_plan_ids": pending_plan_ids,
+            "automatic_payment_provider_configured": _automatic_payment_provider_configured(),
             "whatsapp_link": f"https://wa.me/{DEFAULT_WHATSAPP_NUMBER}?text={quote(DEFAULT_WHATSAPP_MESSAGE)}",
         },
     )
