@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from urllib.parse import quote
 
 from core.audit import record_audit_event
@@ -357,8 +357,10 @@ def subscription_payment_automatic_start(request, plan_id):
 
 
 @csrf_exempt
-@require_POST
+@require_http_methods(["GET", "POST"])
 def subscription_payment_webhook(request, provider):
+    if request.method == "GET":
+        return JsonResponse({"status": "ready", "provider": provider})
     try:
         result = handle_subscription_payment_webhook(provider, request)
     except PaymentProviderVerificationError as exc:
