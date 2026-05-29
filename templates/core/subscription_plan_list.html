@@ -268,7 +268,13 @@
         </form>
         {% if not plan_card.is_free %}
             {% if automatic_payment_provider_configured %}
-            <div class="auto-payment-note">Payer automatiquement</div>
+            <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="duree" value="mensuel">
+                <button type="submit" class="btn-request" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                    Payer automatiquement
+                </button>
+            </form>
             {% else %}
             <div class="auto-payment-note">Paiement automatique bientôt disponible</div>
             {% endif %}

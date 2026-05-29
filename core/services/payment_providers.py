@@ -49,6 +49,9 @@ class BasePaymentProvider:
         raise NotImplementedError
 
 
+INTERNAL_PROVIDER_CODES = {"", "manual", "test"}
+
+
 class TestPaymentProvider(BasePaymentProvider):
     provider_code = "test"
 
@@ -140,3 +143,40 @@ def get_payment_provider(provider_code):
     if normalized == TestPaymentProvider.provider_code:
         return TestPaymentProvider()
     raise PaymentProviderError("Provider de paiement non supporte.")
+
+
+def get_requested_payment_provider_code():
+    configured = (
+        getattr(settings, "JOATHAM_PAYMENT_PROVIDER", "")
+        or getattr(settings, "JOATHAM_AUTOMATIC_PAYMENT_PROVIDER", "")
+        or ""
+    )
+    return configured.strip().lower()
+
+
+def get_automatic_payment_provider_code(*, allow_test=False):
+    if not getattr(settings, "JOATHAM_AUTO_PAYMENT_ENABLED", False):
+        return ""
+    provider_code = get_requested_payment_provider_code()
+    if provider_code == "test":
+        if (
+            allow_test
+            and getattr(settings, "DEBUG", False)
+            and getattr(settings, "JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER", False)
+        ):
+            return provider_code
+        return ""
+    if provider_code in INTERNAL_PROVIDER_CODES:
+        return ""
+    return provider_code
+
+
+def is_real_automatic_payment_provider_configured():
+    provider_code = get_automatic_payment_provider_code()
+    if not provider_code:
+        return False
+    try:
+        get_payment_provider(provider_code)
+    except PaymentProviderError:
+        return False
+    return provider_code not in INTERNAL_PROVIDER_CODES

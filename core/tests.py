@@ -1343,6 +1343,44 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "Paiement automatique bientôt disponible")
         self.assertNotContains(response, "Payer automatiquement")
 
+    def test_automatic_payment_start_is_rejected_without_configured_provider(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]))
+
+        self.assertRedirects(response, reverse("subscription_plan_list"))
+        self.assertFalse(
+            PaiementAbonnement.objects.filter(
+                entreprise=self.entreprise,
+                methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+            ).exists()
+        )
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        DEBUG=True,
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="test",
+        JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True,
+        JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret",
+    )
+    def test_automatic_payment_start_uses_test_provider_only_when_enabled_in_debug(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]))
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], paiement.checkout_url)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertEqual(paiement.provider, "test")
+        self.assertIn(paiement.external_reference, paiement.checkout_url)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
     def test_super_admin_validation_activates_subscription(self):
         paiement = create_subscription_payment_request(
             entreprise=self.entreprise,

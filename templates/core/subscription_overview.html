@@ -358,7 +358,7 @@
 
         <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">J'ai effectué le paiement</a>
         {% if automatic_payment_provider_configured %}
-        <span class="btn-action disabled" aria-disabled="true">Payer automatiquement</span>
+        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Payer automatiquement</a>
         {% else %}
         <span class="btn-action disabled" aria-disabled="true">Paiement automatique bientôt disponible</span>
         {% endif %}

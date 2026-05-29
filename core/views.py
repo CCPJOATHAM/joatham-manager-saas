@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.contrib import messages
@@ -42,8 +41,16 @@ from core.services.subscription import (
 from core.services.currency import get_currency_code
 from core.services.exchange_rates import ExchangeRateUnavailable, get_exchange_rate, get_plan_price_for_company
 from core.services.product_policy import module_access_required
-from core.services.payment_providers import PaymentProviderError, PaymentProviderVerificationError
-from core.services.subscription_payments import handle_subscription_payment_webhook
+from core.services.payment_providers import (
+    PaymentProviderError,
+    PaymentProviderVerificationError,
+    get_automatic_payment_provider_code,
+    is_real_automatic_payment_provider_configured,
+)
+from core.services.subscription_payments import (
+    create_automatic_subscription_payment_request,
+    handle_subscription_payment_webhook,
+)
 from core.services.super_admin import (
     activate_company_subscription,
     deactivate_company_for_super_admin,
@@ -106,8 +113,7 @@ def _subscription_activation_mode(subscription, payment):
 
 
 def _automatic_payment_provider_configured():
-    provider_code = (getattr(settings, "JOATHAM_AUTOMATIC_PAYMENT_PROVIDER", "") or "").strip().lower()
-    return bool(provider_code and provider_code != "test")
+    return is_real_automatic_payment_provider_configured()
 
 
 def _handle_super_admin_subscription_action(request, *, redirect_name):
@@ -307,6 +313,47 @@ def subscription_payment_return(request):
             "reference": reference,
         },
     )
+
+
+@permission_required("subscription.view")
+@require_POST
+def subscription_payment_automatic_start(request, plan_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    provider_code = get_automatic_payment_provider_code(allow_test=True)
+    if not provider_code:
+        messages.error(request, "Paiement automatique bientôt disponible. Utilisez la demande manuelle pour le moment.")
+        return redirect("subscription_plan_list")
+
+    plan = get_commercial_plans_queryset(include_free=False, paid_only=True).filter(pk=plan_id).first()
+    if plan is None:
+        messages.error(request, "Plan indisponible pour le paiement automatique.")
+        return redirect("subscription_plan_list")
+
+    current_subscription = refresh_subscription_status(entreprise) or get_current_subscription(entreprise)
+    if current_subscription and current_subscription.actif and current_subscription.plan_id == plan.id:
+        messages.info(request, "Votre entreprise utilise déjà ce plan.")
+        return redirect("subscription_plan_list")
+
+    duree = request.POST.get("duree") or PaiementAbonnement.Duree.MENSUEL
+    if duree not in get_subscription_payment_duration_options():
+        messages.error(request, "Durée d'abonnement invalide.")
+        return redirect("subscription_plan_list")
+
+    try:
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=entreprise,
+            plan=plan,
+            duree=duree,
+            provider=provider_code,
+            utilisateur=request.user,
+        )
+    except (PaymentProviderError, ValueError) as exc:
+        messages.error(request, str(exc))
+        return redirect("subscription_plan_list")
+
+    if paiement.checkout_url:
+        return redirect(paiement.checkout_url)
+    return redirect("subscription_payment_return")
 
 
 @csrf_exempt
