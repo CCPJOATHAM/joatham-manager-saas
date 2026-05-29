@@ -7,13 +7,14 @@ from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
 from core import reports_views
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
-from joatham_dashboard.views import public_home, public_robots_txt
+from joatham_dashboard.views import public_home, public_robots_txt, public_sitemap_xml
 from joatham_messages.views import public_question_create, public_question_success, public_question_thanks, send_public_question_invitation, super_admin_messages, super_admin_public_question_reply, update_lead_status
 from joatham_users.views import profile_view
 
 urlpatterns = [
     path('', public_home, name='public_home'),
     path('robots.txt', public_robots_txt, name='robots_txt'),
+    path('sitemap.xml', public_sitemap_xml, name='sitemap_xml'),
     path('health/', health_check, name='health_check'),
     path('health/db/', database_health_check, name='database_health_check'),
     path('i18n/setlang/', set_language_preference, name='set_language'),

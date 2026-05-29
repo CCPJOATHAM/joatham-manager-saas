@@ -59,9 +59,24 @@ class PublicHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response["Content-Type"].startswith("text/plain"))
         content = response.content.decode("utf-8")
-        self.assertEqual(content, "User-agent: *\nAllow: /")
+        self.assertEqual(content, "User-agent: *\nAllow: /\n\nSitemap: https://joatham.com/sitemap.xml")
         self.assertIn("User-agent: *", content)
         self.assertIn("Allow: /", content)
+        self.assertIn("Sitemap: https://joatham.com/sitemap.xml", content)
+
+    def test_public_sitemap_xml_contains_public_home_only(self):
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("application/xml"))
+        content = response.content.decode("utf-8")
+        self.assertIn("https://joatham.com/", content)
+        self.assertNotIn("/dashboard/", content)
+        self.assertNotIn("/factures/", content)
+        self.assertNotIn("/clients/", content)
+        self.assertNotIn("/rh/", content)
+        self.assertNotIn("/compta/", content)
+        self.assertNotIn("/utilisateurs/", content)
 
 
 class DashboardAccessTests(TestCase):

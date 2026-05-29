@@ -52,7 +52,18 @@ def public_home(request):
 
 
 def public_robots_txt(request):
-    return HttpResponse("User-agent: *\nAllow: /", content_type="text/plain")
+    content = "User-agent: *\nAllow: /\n\nSitemap: https://joatham.com/sitemap.xml"
+    return HttpResponse(content, content_type="text/plain")
+
+
+def public_sitemap_xml(request):
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://joatham.com/</loc>
+  </url>
+</urlset>"""
+    return HttpResponse(content, content_type="application/xml")
 
 
 class SecurePasswordResetRequestView(PasswordResetView):
