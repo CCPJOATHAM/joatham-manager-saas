@@ -53,6 +53,25 @@ class PublicHomeTests(TestCase):
         self.assertEqual(login_response.status_code, 200)
         self.assertContains(login_response, "JOATHAM Manager")
 
+    def test_public_home_contains_seo_tags_for_joatham_com(self):
+        response = self.client.get("/")
+        content = response.content.decode("utf-8").lower()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "JOATHAM Manager — Plateforme SaaS de gestion pour PME")
+        self.assertContains(
+            response,
+            "JOATHAM Manager est une plateforme web de gestion pour PME, commerces, cybercafés et centres de formation : facturation, clients, dépenses, produits, comptabilité, apprenants et rapports.",
+        )
+        self.assertContains(response, '<meta name="robots" content="index,follow">')
+        self.assertContains(response, '<link rel="canonical" href="https://joatham.com/">')
+        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager — Plateforme SaaS de gestion pour PME">')
+        self.assertContains(response, '<meta property="og:url" content="https://joatham.com/">')
+        self.assertContains(response, '<meta property="og:type" content="website">')
+        self.assertContains(response, '<meta name="twitter:card" content="summary">')
+        self.assertNotIn("noindex", content)
+        self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
+
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")
 
