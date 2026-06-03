@@ -138,11 +138,22 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         self.notify_url = _payment_setting("JOATHAM_PAYMENT_CALLBACK_URL")
         self.return_url = _payment_setting("JOATHAM_PAYMENT_RETURN_URL")
         self.channels = _payment_setting("JOATHAM_PAYMENT_CHANNELS", "CINETPAY_CHANNELS", default="MOBILE_MONEY") or "MOBILE_MONEY"
-        self.currency = (_payment_setting("CINETPAY_CURRENCY", "JOATHAM_PAYMENT_CURRENCY") or "USD").upper()
+        self.currency = _payment_setting("CINETPAY_CURRENCY", "JOATHAM_PAYMENT_CURRENCY").upper()
         self.timeout = getattr(settings, "JOATHAM_PAYMENT_HTTP_TIMEOUT", 20)
 
+    def missing_configuration(self):
+        required_settings = {
+            "CINETPAY_SITE_ID": self.site_id,
+            "CINETPAY_APIKEY": self.apikey,
+            "CINETPAY_SECRET_KEY": self.secret_key,
+            "CINETPAY_CURRENCY": self.currency,
+            "JOATHAM_PAYMENT_CALLBACK_URL": self.notify_url,
+            "JOATHAM_PAYMENT_RETURN_URL": self.return_url,
+        }
+        return [name for name, value in required_settings.items() if not value]
+
     def is_configured(self):
-        return all([self.site_id, self.apikey, self.secret_key, self.notify_url, self.return_url])
+        return not self.missing_configuration()
 
     def _ensure_configured(self):
         if not self.is_configured():
@@ -285,7 +296,7 @@ def _parse_provider_datetime(value):
 
 def _normalize_cinetpay_status(status):
     normalized = (status or "").strip().upper()
-    if normalized == "ACCEPTED":
+    if normalized in {"ACCEPTED", "SUCCESS", "SUCCES"}:
         return "paid"
     if normalized in {"REFUSED", "CANCELLED", "CANCELED", "TRANSACTION_CANCEL"}:
         return "failed"
