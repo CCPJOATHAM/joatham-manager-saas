@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement
-from core.services.exchange_rates import get_platform_currency
+from core.services.exchange_rates import ExchangeRateUnavailable, convert_amount, get_platform_currency
 from core.services.payment_providers import (
     PaymentProviderError,
     PaymentProviderVerificationError,
@@ -50,8 +50,14 @@ def create_automatic_subscription_payment_request(
         raise ValueError("Plan indisponible.")
 
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
-    external_reference = _build_unique_external_reference()
     amount_usd = estimate["amount_usd"].quantize(Decimal("0.01"))
+    external_reference = _build_unique_external_reference()
+    provider_client = get_payment_provider((provider or "").strip().lower())
+    expected_amount, expected_currency = _get_provider_expected_amount_and_currency(
+        provider_client=provider_client,
+        amount_usd=amount_usd,
+        estimate=estimate,
+    )
     paiement = PaiementAbonnement.objects.create(
         entreprise=entreprise,
         plan=plan,
@@ -69,12 +75,11 @@ def create_automatic_subscription_payment_request(
         provider_status="pending",
         external_reference=external_reference,
         reference_paiement=external_reference,
-        amount_expected=amount_usd,
-        paid_currency=get_platform_currency(),
+        amount_expected=expected_amount,
+        paid_currency=expected_currency,
         created_by=utilisateur,
     )
 
-    provider_client = get_payment_provider(paiement.provider)
     checkout = provider_client.create_payment(paiement)
     paiement.provider_checkout_id = checkout.provider_checkout_id
     paiement.checkout_url = checkout.checkout_url
@@ -93,7 +98,8 @@ def create_automatic_subscription_payment_request(
             "provider": paiement.provider,
             "external_reference": paiement.external_reference,
             "amount_expected": str(paiement.amount_expected),
-            "currency": get_platform_currency(),
+            "currency": paiement.paid_currency,
+            "amount_usd": str(paiement.montant_usd),
             "duree": duree,
         },
     )
@@ -138,6 +144,9 @@ def handle_subscription_payment_webhook(provider, request):
                 },
             )
             raise PaymentProviderVerificationError("Paiement abonnement introuvable.")
+
+        expected_amount = (paiement.amount_expected or paiement.montant_usd or paiement.montant).quantize(Decimal("0.01"))
+        expected_currency = (paiement.paid_currency or get_platform_currency()).upper()
 
         if _is_duplicate_webhook(paiement, verified_payment):
             paiement.raw_provider_payload = verified_payment.raw_payload
@@ -197,7 +206,12 @@ def handle_subscription_payment_webhook(provider, request):
                 message="Paiement en cours.",
             )
 
-        rejection_reason = _get_confirmation_rejection_reason(paiement, verified_payment)
+        rejection_reason = _get_confirmation_rejection_reason(
+            paiement,
+            verified_payment,
+            expected_amount=expected_amount,
+            expected_currency=expected_currency,
+        )
         if rejection_reason:
             _mark_automatic_payment_failed_locked(
                 paiement=paiement,
@@ -319,6 +333,24 @@ def _build_unique_external_reference():
     raise PaymentProviderError("Impossible de generer une reference paiement unique.")
 
 
+def _get_provider_expected_amount_and_currency(*, provider_client, amount_usd, estimate):
+    platform_currency = get_platform_currency().upper()
+    provider_currency = (getattr(provider_client, "currency", "") or platform_currency).upper()
+    if not provider_currency or provider_currency == platform_currency:
+        return amount_usd, platform_currency
+
+    estimate_currency = (estimate.get("currency_code") or "").upper()
+    estimated_amount = estimate.get("estimated_amount")
+    if estimate_currency == provider_currency and estimated_amount is not None:
+        return Decimal(str(estimated_amount)).quantize(Decimal("0.01")), provider_currency
+
+    try:
+        conversion = convert_amount(amount_usd, platform_currency, provider_currency)
+    except ExchangeRateUnavailable as exc:
+        raise PaymentProviderError(f"Conversion {platform_currency}->{provider_currency} indisponible pour CinetPay.") from exc
+    return conversion.amount.quantize(Decimal("0.01")), provider_currency
+
+
 def _store_webhook_snapshot(paiement, verified_payment):
     paiement.raw_provider_payload = verified_payment.raw_payload
     paiement.provider_status = verified_payment.provider_status
@@ -353,11 +385,9 @@ def _is_duplicate_webhook(paiement, verified_payment):
     return False
 
 
-def _get_confirmation_rejection_reason(paiement, verified_payment):
-    expected_amount = (paiement.amount_expected or paiement.montant_usd or paiement.montant).quantize(Decimal("0.01"))
+def _get_confirmation_rejection_reason(paiement, verified_payment, *, expected_amount, expected_currency):
     if verified_payment.amount != expected_amount:
         return "Montant paye different du montant attendu."
-    expected_currency = get_platform_currency().upper()
     if verified_payment.currency != expected_currency:
         return "Devise payee differente de la devise attendue."
     if not verified_payment.provider_transaction_id:

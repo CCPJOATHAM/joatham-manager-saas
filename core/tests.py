@@ -1431,6 +1431,7 @@ class SubscriptionPaymentTests(TestCase):
         CINETPAY_SITE_ID="site-123",
         CINETPAY_APIKEY="api-key",
         CINETPAY_SECRET_KEY="secret-key",
+        CINETPAY_CURRENCY="USD",
         JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
         JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
     )
@@ -1450,6 +1451,26 @@ class SubscriptionPaymentTests(TestCase):
         CINETPAY_SITE_ID="site-123",
         CINETPAY_APIKEY="api-key",
         CINETPAY_SECRET_KEY="secret-key",
+        CINETPAY_CURRENCY="",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+    )
+    def test_cinetpay_missing_currency_keeps_auto_payment_unavailable(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("subscription_plan_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Paiement automatique bientôt disponible")
+        self.assertNotContains(response, "Payer automatiquement")
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        CINETPAY_API_PASSWORD="api-password-not-used-by-checkout-v2",
         JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
         JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
         CINETPAY_CURRENCY="USD",
@@ -1487,8 +1508,61 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(payload["notify_url"], "https://app.example.com/abonnement/webhooks/cinetpay/")
         self.assertIn(paiement.external_reference, payload["return_url"])
         self.assertEqual(payload["channels"], "MOBILE_MONEY")
+        self.assertNotIn("password", payload)
+        self.assertNotIn("api_password", payload)
         self.assertEqual(paiement.checkout_url, "https://checkout.cinetpay.com/payment/payment-token-1")
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="CDF",
+        CINETPAY_CHANNELS="MOBILE_MONEY",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_cdf_currency_uses_converted_expected_amount(self, post_mock):
+        from django.utils import timezone
+
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2300.00"),
+            source_provider="test_cached_rate",
+            date_taux=timezone.now(),
+        )
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+        post_mock.return_value = self._cinetpay_http_response(
+            {
+                "code": "201",
+                "message": "CREATED",
+                "data": {
+                    "payment_token": "payment-token-cdf",
+                    "payment_url": "https://checkout.cinetpay.com/payment/payment-token-cdf",
+                },
+                "api_response_id": "api-init-cdf",
+            }
+        )
+        self.client.force_login(self.owner)
+
+        response = self.client.post(reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]))
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise,
+            methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        )
+        payload = post_mock.call_args.kwargs["json"]
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(payload["currency"], "CDF")
+        self.assertEqual(payload["amount"], 23000)
+        self.assertEqual(paiement.amount_expected, Decimal("23000.00"))
+        self.assertEqual(paiement.montant_usd, Decimal("10.00"))
+        self.assertEqual(paiement.paid_currency, "CDF")
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,
@@ -1559,6 +1633,44 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.VALIDE)
         self.assertEqual(paiement.provider_transaction_id, "op-paid-1")
+        self.assertTrue(AbonnementEntreprise.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="CDF",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_cdf_accepted_webhook_activates_subscription_after_verification(self, post_mock):
+        from django.utils import timezone
+
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2300.00"),
+            source_provider="test_cached_rate",
+            date_taux=timezone.now(),
+        )
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+        paiement = self._create_cinetpay_payment()
+        post_mock.return_value = self._cinetpay_http_response(
+            self._cinetpay_check_response("ACCEPTED", amount="23000", currency="CDF", operator_id="op-cdf-paid-1")
+        )
+
+        response = self._post_cinetpay_webhook(paiement)
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.VALIDE)
+        self.assertEqual(paiement.provider_transaction_id, "op-cdf-paid-1")
+        self.assertEqual(paiement.amount_paid, Decimal("23000.00"))
+        self.assertEqual(paiement.paid_currency, "CDF")
         self.assertTrue(AbonnementEntreprise.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
 
     @override_settings(
