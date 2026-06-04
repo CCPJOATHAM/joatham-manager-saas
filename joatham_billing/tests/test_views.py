@@ -2,12 +2,14 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.urls import reverse
 
 from core.services.subscription import activate_subscription_for_entreprise
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
 from joatham_billing.models import Facture, PaiementFacture, Service
+from joatham_billing.views import _build_facture_context
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement
 
@@ -58,6 +60,11 @@ class BillingViewsPremiumTests(TestCase):
             solde_initial=Decimal("100.00"),
         )
         self.client.force_login(self.user)
+
+    def render_a4_facture_html(self, facture):
+        context = _build_facture_context(facture, mode=None)
+        html = render_to_string("joatham_billing/facture_pdf.html", context)
+        return html, context
 
     def test_facture_list_displays_premium_sections(self):
         response = self.client.get(reverse("facture_list"))
@@ -129,6 +136,52 @@ class BillingViewsPremiumTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_facture_a4_pdf_displays_unpaid_payment_summary(self):
+        html, context = self.render_a4_facture_html(self.facture)
+
+        self.assertEqual(self.facture.total_paye, Decimal("0"))
+        self.assertEqual(self.facture.reste_a_payer, self.facture.total_net)
+        self.assertIn("TOTAL NET", html)
+        self.assertIn("Montant paye", html)
+        self.assertIn("Reste a payer", html)
+        self.assertIn(context["summary"]["total_paye"], html)
+        self.assertIn(context["summary"]["reste_a_payer"], html)
+
+    def test_facture_a4_pdf_displays_partial_payment_summary(self):
+        PaiementFacture.objects.create(
+            facture=self.facture,
+            montant=Decimal("25.00"),
+            mode=PaiementFacture.ModePaiement.ESPECES,
+            reference="PART-001",
+        )
+        self.facture.refresh_from_db()
+
+        html, context = self.render_a4_facture_html(self.facture)
+
+        self.assertEqual(self.facture.total_paye, Decimal("25.00"))
+        self.assertEqual(self.facture.reste_a_payer, self.facture.total_net - Decimal("25.00"))
+        self.assertIn("Montant paye", html)
+        self.assertIn("Reste a payer", html)
+        self.assertIn(context["summary"]["total_paye"], html)
+        self.assertIn(context["summary"]["reste_a_payer"], html)
+
+    def test_facture_a4_pdf_displays_paid_payment_summary(self):
+        PaiementFacture.objects.create(
+            facture=self.facture,
+            montant=self.facture.total_net,
+            mode=PaiementFacture.ModePaiement.ESPECES,
+            reference="FULL-001",
+        )
+        self.facture.refresh_from_db()
+
+        html, context = self.render_a4_facture_html(self.facture)
+
+        self.assertEqual(self.facture.reste_a_payer, Decimal("0"))
+        self.assertIn("Montant paye", html)
+        self.assertIn("Reste a payer", html)
+        self.assertIn(context["summary"]["total_paye"], html)
+        self.assertIn(context["summary"]["reste_a_payer"], html)
 
     def test_facture_pos_pdf_renders_successfully(self):
         response = self.client.get(reverse("facture_pdf", args=[self.facture.id]) + "?format=pos")
