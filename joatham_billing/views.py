@@ -126,6 +126,7 @@ def _build_facture_qr_data_uri(facture, legal_information):
 
 def _build_facture_context(facture, mode):
     lignes = []
+    paiements = []
     total_ht = Decimal("0")
     currency_wording = get_currency_wording(get_currency_code(facture.entreprise))
 
@@ -147,8 +148,21 @@ def _build_facture_context(facture, mode):
     total_net = facture.total_net
 
     generation_time = timezone.localtime(timezone.now())
+    invoice_datetime = timezone.localtime(facture.date)
     legal_information = _build_legal_information(facture.entreprise)
     client_name = facture.client_display
+
+    for paiement in facture.paiements.all():
+        if paiement.statut != PaiementFacture.StatutPaiement.VALIDE:
+            continue
+        paiements.append(
+            {
+                "date_display": timezone.localtime(paiement.date_paiement).strftime("%d/%m/%Y %H:%M"),
+                "amount_display": format_amount_for_entreprise(paiement.montant, facture.entreprise),
+                "mode_display": paiement.get_mode_display(),
+                "reference": paiement.reference,
+            }
+        )
 
     line_count = len(lignes)
     compact_layout = mode != "print" and line_count <= 8
@@ -167,21 +181,28 @@ def _build_facture_context(facture, mode):
     return {
         "facture": facture,
         "client_name": client_name,
+        "invoice_datetime": invoice_datetime.strftime("%d/%m/%Y %H:%M"),
         "tva_display": format_tva_percentage(facture.tva),
         "copies": copies,
         "compact_layout": compact_layout,
         "lignes": lignes,
+        "paiements": paiements,
+        "latest_payment_mode": paiements[0]["mode_display"] if paiements else _("Non renseigne"),
         "legal_information": legal_information,
         "qr_code_data_uri": _build_facture_qr_data_uri(facture, legal_information),
         "summary": {
             "total_ht": format_amount_for_entreprise(total_ht, facture.entreprise),
             "tva_label": f"TVA ({format_tva_percentage(facture.tva)}%)",
             "total_tva": format_amount_for_entreprise(total_tva, facture.entreprise),
+            "has_tva": total_tva > Decimal("0"),
             "remise": format_amount_for_entreprise(total_ht * Decimal(str(facture.remise or 0)) / Decimal('100'), facture.entreprise),
             "rabais": format_amount_for_entreprise(total_ht * Decimal(str(facture.rabais or 0)) / Decimal('100'), facture.entreprise),
             "ristourne": format_amount_for_entreprise(total_ht * Decimal(str(facture.ristourne or 0)) / Decimal('100'), facture.entreprise),
             "total_reduction": format_amount_for_entreprise(total_reduction, facture.entreprise),
+            "has_reduction": total_reduction > Decimal("0"),
             "total_net": format_amount_for_entreprise(total_net, facture.entreprise),
+            "total_paye": format_amount_for_entreprise(facture.total_paye, facture.entreprise),
+            "reste_a_payer": format_amount_for_entreprise(facture.reste_a_payer, facture.entreprise),
             "amount_in_words": nombre_en_lettres(total_net, currency_wording),
         },
         "footer_datetime": generation_time.strftime(f"{legal_information['city']}, le %d/%m/%Y %H:%M:%S"),
@@ -223,15 +244,19 @@ def facture_pdf(request, id):
     entreprise = get_user_entreprise_or_raise(request.user)
     facture = get_facture_by_entreprise(entreprise, id)
     mode = request.GET.get("mode")
+    invoice_format = (request.GET.get("format") or "a4").lower()
+    is_pos_format = invoice_format == "pos"
     context = _build_facture_context(facture, mode)
     disposition = "attachment" if mode == "download" else "inline"
+    template_name = "joatham_billing/facture_pos_pdf.html" if is_pos_format else "joatham_billing/facture_pdf.html"
+    filename_prefix = "ticket" if is_pos_format else "facture"
 
     try:
         response = render_pdf_response(
             request,
-            "joatham_billing/facture_pdf.html",
+            template_name,
             context,
-            filename=f"facture_{facture.numero}.pdf",
+            filename=f"{filename_prefix}_{facture.numero}.pdf",
             disposition=disposition,
         )
         facture.log_action(

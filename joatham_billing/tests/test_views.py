@@ -1,11 +1,13 @@
 from decimal import Decimal
+from unittest.mock import patch
 
+from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
 from core.services.subscription import activate_subscription_for_entreprise
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
-from joatham_billing.models import Facture, Service
+from joatham_billing.models import Facture, PaiementFacture, Service
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement
 
@@ -65,6 +67,8 @@ class BillingViewsPremiumTests(TestCase):
         self.assertContains(response, "Montant facture")
         self.assertContains(response, "Montant encaisse")
         self.assertContains(response, "Reste a encaisser")
+        self.assertContains(response, "Imprimer A4")
+        self.assertContains(response, "Imprimer POS")
         self.assertContains(response, self.facture.numero)
 
     def test_facture_detail_displays_redesigned_sections(self):
@@ -74,6 +78,8 @@ class BillingViewsPremiumTests(TestCase):
         self.assertContains(response, "Prestations facturees")
         self.assertContains(response, "Enregistrer un paiement")
         self.assertContains(response, "Historique")
+        self.assertContains(response, "Imprimer A4")
+        self.assertContains(response, "Imprimer POS")
         self.assertContains(response, self.facture.numero)
 
     def test_facture_detail_exposes_optional_caisse_field_for_payment(self):
@@ -123,6 +129,46 @@ class BillingViewsPremiumTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_facture_pos_pdf_renders_successfully(self):
+        response = self.client.get(reverse("facture_pdf", args=[self.facture.id]) + "?format=pos")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_facture_pdf_default_uses_a4_template(self):
+        with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
+            render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
+
+            response = self.client.get(reverse("facture_pdf", args=[self.facture.id]))
+
+        self.assertEqual(response.status_code, 200)
+        render_pdf_response.assert_called_once()
+        self.assertEqual(render_pdf_response.call_args.args[1], "joatham_billing/facture_pdf.html")
+        self.assertEqual(render_pdf_response.call_args.kwargs["filename"], f"facture_{self.facture.numero}.pdf")
+
+    def test_facture_pdf_pos_uses_ticket_template_and_payment_totals(self):
+        PaiementFacture.objects.create(
+            facture=self.facture,
+            montant=Decimal("25.00"),
+            mode=PaiementFacture.ModePaiement.MOBILE_MONEY,
+            reference="MM-001",
+        )
+
+        with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
+            render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
+
+            response = self.client.get(reverse("facture_pdf", args=[self.facture.id]) + "?format=pos")
+
+        self.assertEqual(response.status_code, 200)
+        render_pdf_response.assert_called_once()
+        template_name = render_pdf_response.call_args.args[1]
+        context = render_pdf_response.call_args.args[2]
+        self.assertEqual(template_name, "joatham_billing/facture_pos_pdf.html")
+        self.assertEqual(render_pdf_response.call_args.kwargs["filename"], f"ticket_{self.facture.numero}.pdf")
+        self.assertEqual(context["latest_payment_mode"], "Mobile Money")
+        self.assertIn("25", context["summary"]["total_paye"])
+        self.assertIn("91", context["summary"]["reste_a_payer"])
 
     def test_add_facture_form_exposes_service_selector_with_price_metadata(self):
         response = self.client.get(reverse("add_facture"))
@@ -260,6 +306,8 @@ class BillingViewsPremiumTests(TestCase):
             reverse("change_facture_status", args=[self.facture.id]),
             reverse("add_paiement_facture", args=[self.facture.id]),
             reverse("payer_facture", args=[self.facture.id]),
+            reverse("facture_pdf", args=[self.facture.id]),
+            reverse("facture_pdf", args=[self.facture.id]) + "?format=pos",
         ]
 
         for url in blocked_urls:

@@ -1,0 +1,246 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}Ticket {{ facture.numero }}{% endblock %}
+
+{% block pdf_styles %}
+        @page {
+            size: 80mm 297mm;
+            margin: 4mm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 8px;
+            color: #111827;
+            margin: 0;
+            padding: 0;
+            -pdf-keep-in-frame-mode: shrink;
+        }
+
+        .pdf-page {
+            width: 72mm;
+        }
+
+        .ticket {
+            width: 100%;
+        }
+
+        .ticket-header,
+        .ticket-footer {
+            text-align: center;
+        }
+
+        .company-name {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .company-line,
+        .meta-line,
+        .footer-line {
+            font-size: 7px;
+            line-height: 1.35;
+            color: #374151;
+        }
+
+        .ticket-title {
+            margin-top: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .separator {
+            border-top: 1px dashed #6b7280;
+            height: 1px;
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: none;
+            padding: 2px 0;
+            vertical-align: top;
+        }
+
+        th {
+            border-bottom: 1px solid #d1d5db;
+            color: #111827;
+            font-size: 7px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .item-name {
+            font-weight: bold;
+            line-height: 1.25;
+        }
+
+        .qty-col {
+            width: 12%;
+            text-align: center;
+        }
+
+        .price-col,
+        .total-col {
+            width: 25%;
+            text-align: right;
+        }
+
+        .summary-table td {
+            padding: 2px 0;
+        }
+
+        .summary-label {
+            font-weight: bold;
+        }
+
+        .summary-value {
+            text-align: right;
+        }
+
+        .grand-total td {
+            border-top: 1px solid #111827;
+            border-bottom: 1px solid #111827;
+            padding: 4px 0;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .payment-table td {
+            font-size: 7px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+{% endblock %}
+
+{% block pdf_content %}
+<div class="ticket">
+    <div class="ticket-header">
+        <div class="company-name">{{ legal_information.primary_name }}</div>
+        {% if legal_information.secondary_name %}
+            <div class="company-line">{{ legal_information.secondary_name }}</div>
+        {% endif %}
+        {% if legal_information.address %}
+            <div class="company-line">{{ legal_information.address }}</div>
+        {% endif %}
+        {% if legal_information.city or legal_information.country %}
+            <div class="company-line">{{ legal_information.city }}{% if legal_information.city and legal_information.country %} - {% endif %}{{ legal_information.country }}</div>
+        {% endif %}
+        {% if legal_information.phone %}
+            <div class="company-line">Tel : {{ legal_information.phone }}</div>
+        {% endif %}
+        {% if legal_information.rccm %}
+            <div class="company-line">RCCM : {{ legal_information.rccm }}</div>
+        {% endif %}
+        {% if legal_information.impot %}
+            <div class="company-line">NIF / No impot : {{ legal_information.impot }}</div>
+        {% endif %}
+        {% if legal_information.id_nat %}
+            <div class="company-line">ID NAT : {{ legal_information.id_nat }}</div>
+        {% endif %}
+        <div class="ticket-title">Ticket de caisse</div>
+    </div>
+
+    <div class="separator">&nbsp;</div>
+
+    <div class="meta-line"><strong>Facture :</strong> {{ facture.numero }}</div>
+    <div class="meta-line"><strong>Date :</strong> {{ invoice_datetime }}</div>
+    <div class="meta-line"><strong>Client :</strong> {{ client_name|default:"Client non renseigne" }}</div>
+
+    <div class="separator">&nbsp;</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Article / service</th>
+                <th class="qty-col">Qté</th>
+                <th class="price-col">PU</th>
+                <th class="total-col">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in lignes %}
+            <tr>
+                <td><div class="item-name">{{ ligne.designation }}</div></td>
+                <td class="qty-col">{{ ligne.quantite }}</td>
+                <td class="price-col">{{ ligne.prix_unitaire }}</td>
+                <td class="total-col">{{ ligne.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="separator">&nbsp;</div>
+
+    <table class="summary-table">
+        <tr>
+            <td class="summary-label">Sous-total</td>
+            <td class="summary-value">{{ summary.total_ht }}</td>
+        </tr>
+        {% if summary.has_reduction %}
+        <tr>
+            <td class="summary-label">Remise / reduction</td>
+            <td class="summary-value">- {{ summary.total_reduction }}</td>
+        </tr>
+        {% endif %}
+        {% if summary.has_tva %}
+        <tr>
+            <td class="summary-label">{{ summary.tva_label }}</td>
+            <td class="summary-value">{{ summary.total_tva }}</td>
+        </tr>
+        {% endif %}
+        <tr class="grand-total">
+            <td>Total a payer</td>
+            <td class="summary-value">{{ summary.total_net }}</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Montant paye</td>
+            <td class="summary-value">{{ summary.total_paye }}</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Reste a payer</td>
+            <td class="summary-value">{{ summary.reste_a_payer }}</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Mode paiement</td>
+            <td class="summary-value">{{ latest_payment_mode }}</td>
+        </tr>
+    </table>
+
+    {% if paiements %}
+    <div class="separator">&nbsp;</div>
+    <table class="payment-table">
+        <tbody>
+            {% for paiement in paiements %}
+            <tr>
+                <td>{{ paiement.date_display }}</td>
+                <td>{{ paiement.mode_display }}</td>
+                <td class="text-right">{{ paiement.amount_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="separator">&nbsp;</div>
+
+    <div class="ticket-footer">
+        <div class="footer-line">Merci pour votre confiance</div>
+        <div class="footer-line">Genere par JOATHAM Manager</div>
+    </div>
+</div>
+{% endblock %}

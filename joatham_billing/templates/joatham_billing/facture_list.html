@@ -694,8 +694,9 @@
                                     {% if can_manage_factures_ui and row.instance.statut == "brouillon" %}
                                         <a href="{% url 'edit_facture' row.instance.id %}" class="btn btn-add">Modifier</a>
                                     {% endif %}
-                                    <a href="{% url 'facture_pdf' row.instance.id %}" target="_blank" class="btn btn-print">PDF</a>
-                                    <a href="{% url 'facture_pdf' row.instance.id %}?mode=download" class="btn btn-download">Telecharger</a>
+                                    <a href="{% url 'facture_pdf' row.instance.id %}" target="_blank" class="btn btn-print">Imprimer A4</a>
+                                    <a href="{% url 'facture_pdf' row.instance.id %}?format=pos" target="_blank" class="btn btn-add">Imprimer POS</a>
+                                    <a href="{% url 'facture_pdf' row.instance.id %}?mode=download" class="btn btn-download">Telecharger A4</a>
                                     {% if can_record_payments_ui and row.can_pay %}
                                         <a href="{% url 'payer_facture' row.instance.id %}" class="btn btn-paid" onclick="return confirm('Confirmer l\\'enregistrement du paiement complet ?');">Payer</a>
                                     {% endif %}
