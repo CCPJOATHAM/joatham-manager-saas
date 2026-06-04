@@ -387,8 +387,9 @@
         {% if can_manage_factures_ui and facture.statut == "brouillon" %}
         <a href="{% url 'edit_facture' facture.id %}" class="btn btn-add">Modifier</a>
         {% endif %}
-        <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">Voir PDF</a>
-        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">Telecharger PDF</a>
+        <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">Imprimer A4</a>
+        <a href="{% url 'facture_pdf' facture.id %}?format=pos" target="_blank" class="btn btn-add">Imprimer POS</a>
+        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">Telecharger A4</a>
     </div>
 </div>
 

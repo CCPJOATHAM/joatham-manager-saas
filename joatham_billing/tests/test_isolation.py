@@ -78,6 +78,12 @@ class BillingIsolationTests(TestCase):
         self.assertContains(response, self.client_a.nom)
         self.assertNotContains(response, self.client_b.nom)
 
+    def test_facture_pos_pdf_rejects_cross_tenant_access(self):
+        self.client.force_login(self.user_a)
+        response = self.client.get(reverse("facture_pdf", args=[self.facture_b.id]) + "?format=pos")
+
+        self.assertEqual(response.status_code, 404)
+
     def test_add_facture_rejects_cross_tenant_product(self):
         self.client.force_login(self.user_a)
         response = self.client.post(
