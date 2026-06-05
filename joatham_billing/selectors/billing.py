@@ -3,7 +3,7 @@ from django.db.models import Prefetch, Q
 from core.services.tenancy import get_object_for_entreprise, scope_queryset_to_entreprise
 from joatham_clients.selectors.clients import get_clients_by_entreprise
 
-from ..models import Facture, FactureHistorique, PaiementFacture, Service
+from ..models import Facture, FactureHistorique, LigneProforma, PaiementFacture, Proforma, Service
 
 
 def get_facture_queryset():
@@ -45,6 +45,38 @@ def get_factures_by_entreprise(entreprise, *, client_id=None, statut=None, searc
 
 def get_facture_by_entreprise(entreprise, facture_id):
     return get_object_for_entreprise(get_facture_queryset(), entreprise, id=facture_id)
+
+
+def get_proforma_queryset():
+    return Proforma.objects.select_related("client", "entreprise", "facture_convertie", "created_by").prefetch_related(
+        Prefetch("lignes", queryset=LigneProforma.objects.select_related("produit", "service"))
+    )
+
+
+def get_proformas_by_entreprise(entreprise, *, statut=None, search=None, date_debut=None, date_fin=None):
+    queryset = scope_queryset_to_entreprise(get_proforma_queryset(), entreprise)
+
+    if statut in dict(Proforma.Statut.choices):
+        queryset = queryset.filter(statut=statut)
+
+    if search:
+        queryset = queryset.filter(
+            Q(client_nom__icontains=search)
+            | Q(client__nom__icontains=search)
+            | Q(numero__icontains=search)
+        )
+
+    if date_debut:
+        queryset = queryset.filter(date__date__gte=date_debut)
+
+    if date_fin:
+        queryset = queryset.filter(date__date__lte=date_fin)
+
+    return queryset.order_by("-date", "-id")
+
+
+def get_proforma_by_entreprise(entreprise, proforma_id):
+    return get_object_for_entreprise(get_proforma_queryset(), entreprise, id=proforma_id)
 
 
 def get_services_by_entreprise(entreprise):
