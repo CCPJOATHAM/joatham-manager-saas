@@ -214,7 +214,7 @@ class ProformaWorkflowTests(TestCase):
             ).exists()
         )
 
-    def test_convert_proforma_lock_query_does_not_join_nullable_converted_facture(self):
+    def test_convert_proforma_lock_query_does_not_use_nullable_select_related(self):
         proforma = self._create_proforma()
 
         with CaptureQueriesContext(connection) as captured_queries:
@@ -227,8 +227,7 @@ class ProformaWorkflowTests(TestCase):
         ]
 
         self.assertTrue(proforma_selects)
-        self.assertNotIn('join "joatham_billing_facture"', proforma_selects[0])
-        self.assertNotIn("join `joatham_billing_facture`", proforma_selects[0])
+        self.assertNotIn(" join ", proforma_selects[0])
 
     def test_convert_proforma_with_occasional_client_creates_real_facture(self):
         proforma = create_proforma(
