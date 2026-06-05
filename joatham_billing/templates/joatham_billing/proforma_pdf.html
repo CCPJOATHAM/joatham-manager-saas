@@ -1,0 +1,166 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ proforma.numero }}{% endblock %}
+
+{% block pdf_styles %}
+        .header-note {
+            margin: 0 0 10px;
+            padding: 8px 10px;
+            background: #f8fbff;
+            border: 1px solid #d9e6fb;
+            color: #334155;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        .client-box {
+            margin: 10px 0 14px;
+            padding: 10px 12px;
+            border: 1px solid #d8e1ea;
+            background: #fbfdff;
+        }
+
+        .summary-table {
+            margin-top: 12px;
+            width: 46%;
+            margin-left: auto;
+        }
+
+        .summary-table td {
+            padding: 7px 9px;
+        }
+
+        .summary-table .total-row td {
+            background: #10233f;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .notes-box {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border: 1px solid #d8e1ea;
+            background: #ffffff;
+            line-height: 1.45;
+        }
+
+        .legal-mention {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border: 1px solid #fde68a;
+            background: #fffbeb;
+            color: #713f12;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+{% endblock %}
+
+{% block pdf_content %}
+<div class="pdf-header">
+    <table class="pdf-header-table">
+        <tr>
+            <td style="width: 78px;">
+                {% if legal_information.logo_data_uri %}
+                    <img src="{{ legal_information.logo_data_uri }}" class="pdf-company-logo" alt="Logo">
+                {% endif %}
+            </td>
+            <td class="pdf-company-block">
+                <h1 class="pdf-company-name">{{ legal_information.primary_name }}</h1>
+                {% if legal_information.secondary_name %}<p class="pdf-company-secondary">{{ legal_information.secondary_name }}</p>{% endif %}
+                {% if legal_information.address %}<p class="pdf-company-line">{{ legal_information.address }}</p>{% endif %}
+                {% if legal_information.phone %}<p class="pdf-company-line">Tel : {{ legal_information.phone }}</p>{% endif %}
+                {% if legal_information.email %}<p class="pdf-company-line">Email : {{ legal_information.email }}</p>{% endif %}
+                {% if legal_information.rccm %}<p class="pdf-company-line">RCCM : {{ legal_information.rccm }}</p>{% endif %}
+                {% if legal_information.impot %}<p class="pdf-company-line">NIF : {{ legal_information.impot }}</p>{% endif %}
+                {% if legal_information.id_nat %}<p class="pdf-company-line">ID NAT : {{ legal_information.id_nat }}</p>{% endif %}
+            </td>
+            <td class="pdf-meta-block">
+                <p class="pdf-meta-title">Facture proforma</p>
+                <p class="pdf-meta-line"><strong>{{ proforma.numero }}</strong></p>
+                <p class="pdf-meta-line">Date : {{ proforma.date|date:"d/m/Y H:i" }}</p>
+                {% if proforma.date_validite %}
+                    <p class="pdf-meta-line">Validite : {{ proforma.date_validite|date:"d/m/Y" }}</p>
+                {% endif %}
+                <p class="pdf-meta-line">Statut : {{ proforma.get_statut_display }}</p>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="separator"></div>
+<h2 class="document-title">FACTURE PROFORMA</h2>
+<p class="header-note">Ce document presente une offre commerciale provisoire avant emission d'une facture definitive.</p>
+
+<div class="client-box">
+    <strong>Client :</strong> {{ client_name }}
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 8%;">#</th>
+            <th>Designation</th>
+            <th style="width: 14%;" class="text-center">Quantite</th>
+            <th style="width: 18%;" class="text-right">Prix unitaire</th>
+            <th style="width: 18%;" class="text-right">Total ligne</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ligne in lignes %}
+            <tr>
+                <td class="text-center">{{ ligne.index }}</td>
+                <td>{{ ligne.designation }}</td>
+                <td class="text-center">{{ ligne.quantite }}</td>
+                <td class="text-right">{{ ligne.prix_unitaire }}</td>
+                <td class="text-right">{{ ligne.total }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="summary-table">
+    <tr>
+        <td>Total HT</td>
+        <td class="text-right">{{ summary.total_ht }}</td>
+    </tr>
+    <tr>
+        <td>{{ summary.tva_label }}</td>
+        <td class="text-right">{{ summary.total_tva }}</td>
+    </tr>
+    <tr>
+        <td>Reductions</td>
+        <td class="text-right">{{ summary.total_reduction }}</td>
+    </tr>
+    <tr class="total-row">
+        <td>Total net</td>
+        <td class="text-right">{{ summary.total_net }}</td>
+    </tr>
+</table>
+
+{% if proforma.notes or proforma.conditions %}
+    <div class="notes-box">
+        {% if proforma.notes %}
+            <strong>Notes</strong><br>
+            {{ proforma.notes|linebreaksbr }}<br><br>
+        {% endif %}
+        {% if proforma.conditions %}
+            <strong>Conditions</strong><br>
+            {{ proforma.conditions|linebreaksbr }}
+        {% endif %}
+    </div>
+{% endif %}
+
+<div class="legal-mention">
+    Ce document est une facture proforma et ne constitue pas une facture definitive.<br>
+    Aucun paiement n'est enregistre sur une facture proforma.
+</div>
+
+<div class="pdf-footer">
+    <table class="pdf-footer-table">
+        <tr>
+            <td>Genere par JOATHAM Manager</td>
+            <td class="text-right">{{ footer_datetime }}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

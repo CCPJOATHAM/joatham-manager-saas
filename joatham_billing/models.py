@@ -20,6 +20,18 @@ class FactureSequence(models.Model):
         return f"Sequence {self.entreprise.nom} ({self.dernier_numero})"
 
 
+class ProformaSequence(models.Model):
+    entreprise = models.OneToOneField(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="proforma_sequence",
+    )
+    dernier_numero = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"Sequence proforma {self.entreprise.nom} ({self.dernier_numero})"
+
+
 class Facture(models.Model):
     class Statut(models.TextChoices):
         BROUILLON = "brouillon", _("Brouillon")
@@ -190,6 +202,149 @@ class Facture(models.Model):
         if not self.numero:
             self.assign_numero()
         super().save(*args, **kwargs)
+
+
+class Proforma(models.Model):
+    class Statut(models.TextChoices):
+        BROUILLON = "brouillon", _("Brouillon")
+        ENVOYEE = "envoyee", _("Envoyee")
+        ACCEPTEE = "acceptee", _("Acceptee")
+        ANNULEE = "annulee", _("Annulee")
+        CONVERTIE = "convertie", _("Convertie")
+
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="proformas",
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
+    client_nom = models.CharField(max_length=100, blank=True, null=True)
+    numero = models.CharField(max_length=24, editable=False)
+    numero_sequence = models.PositiveIntegerField(editable=False)
+    tva = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    remise = models.FloatField(default=0)
+    rabais = models.FloatField(default=0)
+    ristourne = models.FloatField(default=0)
+    montant = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.BROUILLON)
+    date = models.DateTimeField(auto_now_add=True)
+    date_validite = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True, default="")
+    conditions = models.TextField(blank=True, default="")
+    facture_convertie = models.OneToOneField(
+        "Facture",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="proforma_source",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="proformas_creees",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["entreprise", "numero"],
+                name="uniq_proforma_numero_par_entreprise",
+            ),
+            models.UniqueConstraint(
+                fields=["entreprise", "numero_sequence"],
+                name="uniq_proforma_sequence_par_entreprise",
+            ),
+        ]
+
+    def __str__(self):
+        return self.numero or f"Proforma {self.pk}"
+
+    @property
+    def client_display(self):
+        return self.client.nom if self.client else (self.client_nom or _("Client non renseigne"))
+
+    @property
+    def total_ht(self):
+        if self.pk:
+            lignes = self._prefetched_objects_cache.get("lignes") if hasattr(self, "_prefetched_objects_cache") else None
+            if lignes is None:
+                lignes = self.lignes.all()
+            return sum((ligne.montant for ligne in lignes), Decimal("0"))
+        return Decimal(self.montant or 0)
+
+    @property
+    def total_tva(self):
+        return self.total_ht * Decimal(self.tva or 0) / Decimal("100")
+
+    @property
+    def total_reduction(self):
+        total_ht = self.total_ht
+        remise = total_ht * Decimal(str(self.remise or 0)) / Decimal("100")
+        rabais = total_ht * Decimal(str(self.rabais or 0)) / Decimal("100")
+        ristourne = total_ht * Decimal(str(self.ristourne or 0)) / Decimal("100")
+        return remise + rabais + ristourne
+
+    @property
+    def total_net(self):
+        return self.total_ht + self.total_tva - self.total_reduction
+
+    def assign_numero(self):
+        if self.numero and self.numero_sequence:
+            return
+
+        with transaction.atomic():
+            sequence, _ = ProformaSequence.objects.select_for_update().get_or_create(
+                entreprise=self.entreprise
+            )
+            sequence.dernier_numero += 1
+            sequence.save(update_fields=["dernier_numero"])
+
+            self.numero_sequence = sequence.dernier_numero
+            number_format = getattr(settings, "JOATHAM_PROFORMA_NUMBER_FORMAT", "standard")
+            if number_format == "yearly":
+                year = timezone.now().year
+                self.numero = f"PF-{year}-{sequence.dernier_numero:04d}"
+            else:
+                self.numero = f"PF-{sequence.dernier_numero:04d}"
+
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            self.assign_numero()
+        super().save(*args, **kwargs)
+
+
+class LigneProforma(models.Model):
+    proforma = models.ForeignKey("Proforma", on_delete=models.CASCADE, related_name="lignes")
+    produit = models.ForeignKey(
+        "joatham_products.Produit",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="lignes_proforma",
+    )
+    service = models.ForeignKey(
+        "Service",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="lignes_proforma",
+    )
+    designation = models.CharField(max_length=200)
+    quantite = models.IntegerField(default=1)
+    prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
+    tva = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+    @property
+    def montant(self):
+        return Decimal(self.quantite) * Decimal(self.prix_unitaire)
+
+    def __str__(self):
+        return f"{self.designation} x{self.quantite}"
 
 
 class LigneFacture(models.Model):

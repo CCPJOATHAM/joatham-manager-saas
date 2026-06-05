@@ -7,8 +7,12 @@
 
 {% block top_actions %}
 <a href="{% url 'facture_list' %}" class="btn-link">{% trans "Liste des factures" %}</a>
+<a href="{% url 'proforma_list' %}" class="btn-link">{% trans "Proformas" %}</a>
 {% if can_manage_factures_ui and "/factures/add/" != request.path %}
 <a href="{% url 'add_facture' %}" class="btn-link primary">{% trans "Nouvelle facture" %}</a>
+{% endif %}
+{% if can_manage_factures_ui and "/factures/proformas/ajouter/" != request.path %}
+<a href="{% url 'add_proforma' %}" class="btn-link primary">{% trans "Nouvelle proforma" %}</a>
 {% endif %}
 {% endblock %}
 

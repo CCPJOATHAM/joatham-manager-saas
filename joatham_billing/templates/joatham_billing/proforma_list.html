@@ -1,0 +1,273 @@
+{% extends "joatham_billing/base.html" %}
+
+{% block content %}
+<style>
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 8px 0 0;
+        color: #64748b;
+        max-width: 760px;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 20px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid #dde7f0;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .field label {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .field input,
+    .field select {
+        min-height: 40px;
+        border: 1px solid #d7dee7;
+        border-radius: 10px;
+        padding: 0 12px;
+        background: #fff;
+    }
+
+    .table-shell {
+        background: #fff;
+        border: 1px solid #dde7f0;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .proformas-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .proformas-table th,
+    .proformas-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef2f7;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .proformas-table th {
+        background: #f8fafc;
+        color: #475569;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        font-size: 0.86rem;
+    }
+
+    .document-number {
+        color: #10233f;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .amount-pill,
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0 11px;
+        border-radius: 999px;
+        font-weight: 800;
+        border: 1px solid transparent;
+    }
+
+    .amount-pill {
+        background: #eef6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .status-brouillon { background: #eef2f7; border-color: #d7dee7; color: #52606d; }
+    .status-envoyee { background: #e0f2fe; border-color: #bae6fd; color: #075985; }
+    .status-acceptee { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+    .status-annulee { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+    .status-convertie { background: #ede9fe; border-color: #ddd6fe; color: #5b21b6; }
+
+    .actions-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .actions-group form {
+        margin: 0;
+    }
+
+    .actions-group .btn,
+    .filters .btn {
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        font-size: 0.84rem;
+        cursor: pointer;
+    }
+
+    .actions-group .btn-print,
+    .filters .btn-print {
+        background: #fff;
+        border: 1px solid #d7dee7;
+        color: #10233f;
+    }
+
+    .actions-group .btn-add,
+    .hero-actions .btn-add,
+    .filters .btn-add {
+        background: #eef6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .empty-state {
+        padding: 48px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    @media (max-width: 920px) {
+        .filters {
+            grid-template-columns: 1fr;
+        }
+
+        .table-shell {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<section class="hero">
+    <div>
+        <h2>Factures proforma</h2>
+        <p>Documents commerciaux provisoires avant validation definitive. Une proforma ne cree aucun paiement, ne modifie pas le stock et n'entre pas dans le chiffre d'affaires.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{% url 'facture_list' %}" class="btn btn-print">Factures definitives</a>
+        {% if can_manage_factures_ui %}
+            <a href="{% url 'add_proforma' %}" class="btn btn-add">Nouvelle proforma</a>
+        {% endif %}
+    </div>
+</section>
+
+<form method="get" class="filters">
+    <div class="field">
+        <label for="search">Recherche</label>
+        <input type="search" name="search" id="search" value="{{ request.GET.search }}" placeholder="Numero ou client">
+    </div>
+    <div class="field">
+        <label for="statut">Statut</label>
+        <select name="statut" id="statut">
+            <option value="">Tous les statuts</option>
+            {% for value, label in statut_choices %}
+                <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label for="date_debut">Du</label>
+        <input type="date" name="date_debut" id="date_debut" value="{{ request.GET.date_debut }}">
+    </div>
+    <div class="field">
+        <label for="date_fin">Au</label>
+        <input type="date" name="date_fin" id="date_fin" value="{{ request.GET.date_fin }}">
+    </div>
+    <button type="submit" class="btn btn-add">Filtrer</button>
+</form>
+
+<div class="table-shell">
+    {% if proformas %}
+        <table class="proformas-table">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Validite</th>
+                    <th>Total net</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in proformas %}
+                    <tr>
+                        <td><a href="{% url 'proforma_detail' row.instance.id %}" class="document-number">{{ row.instance.numero }}</a></td>
+                        <td>{{ row.client_name }}</td>
+                        <td>{{ row.date_display }}</td>
+                        <td>{{ row.validity_display }}</td>
+                        <td><span class="amount-pill">{{ row.total_net_display }}</span></td>
+                        <td><span class="status-chip status-{{ row.instance.statut }}">{{ row.instance.get_statut_display }}</span></td>
+                        <td>
+                            <div class="actions-group">
+                                <a href="{% url 'proforma_detail' row.instance.id %}" class="btn btn-print">Voir</a>
+                                <a href="{% url 'proforma_pdf' row.instance.id %}" class="btn btn-print" target="_blank" rel="noopener">PDF</a>
+                                {% if can_manage_factures_ui and row.can_edit %}
+                                    <a href="{% url 'edit_proforma' row.instance.id %}" class="btn btn-add">Modifier</a>
+                                {% endif %}
+                                {% if can_manage_factures_ui and row.can_convert %}
+                                    <form method="post" action="{% url 'convert_proforma' row.instance.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-add">Convertir</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <h3>Aucune proforma</h3>
+            <p>Creer une proforma pour presenter une offre commerciale avant emission d'une facture definitive.</p>
+            {% if can_manage_factures_ui %}
+                <a href="{% url 'add_proforma' %}" class="btn btn-add">Nouvelle proforma</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% if page_obj.has_other_pages %}
+    <div style="margin-top: 16px; color: #64748b;">
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </div>
+{% endif %}
+{% endblock %}

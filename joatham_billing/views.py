@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
@@ -23,7 +24,7 @@ from core.ui_text import FLASH_MESSAGES
 from joatham_caisse.selectors.caisse import get_caisses_by_entreprise
 from joatham_users.permissions import user_has_permission
 from .exceptions import FacturationError
-from .models import Facture, FactureHistorique, PaiementFacture
+from .models import Facture, FactureHistorique, PaiementFacture, Proforma
 from .pdf import PdfRenderError, render_pdf_response
 from .permissions import can_manage_factures, can_record_payment, can_view_factures
 from .selectors.billing import (
@@ -31,6 +32,8 @@ from .selectors.billing import (
     get_facture_by_entreprise,
     get_paiements_by_facture_for_entreprise,
     get_factures_by_entreprise,
+    get_proforma_by_entreprise,
+    get_proformas_by_entreprise,
     get_services_by_entreprise,
 )
 from joatham_products.selectors.products import get_products_by_entreprise
@@ -40,6 +43,13 @@ from .services.facturation import (
     register_payment,
     change_facture_status,
     update_facture,
+)
+from .services.proforma import (
+    assert_proforma_editable,
+    cancel_proforma,
+    convert_proforma_to_facture,
+    create_proforma,
+    update_proforma,
 )
 
 logger = logging.getLogger(__name__)
@@ -209,6 +219,105 @@ def _build_facture_context(facture, mode):
     }
 
 
+def _extract_document_lines_from_post(post_data):
+    return [
+        {
+            "designation": designation,
+            "quantite": quantite,
+            "prix": prix,
+            "service_id": service_id,
+            "product_id": product_id,
+        }
+        for designation, quantite, prix, service_id, product_id in zip_longest(
+            post_data.getlist("designation[]"),
+            post_data.getlist("quantite[]"),
+            post_data.getlist("prix[]"),
+            post_data.getlist("service_id[]"),
+            post_data.getlist("product_id[]"),
+            fillvalue="",
+        )
+    ]
+
+
+def _build_proforma_line_rows(proforma, entreprise):
+    line_rows = []
+    for ligne in proforma.lignes.all():
+        if ligne.produit_id:
+            line_source = {
+                "label": _("Produit"),
+                "class": "source-product",
+                "name": getattr(ligne.produit, "nom", ""),
+            }
+        elif ligne.service_id:
+            line_source = {
+                "label": _("Service"),
+                "class": "source-service",
+                "name": getattr(ligne.service, "nom", ""),
+            }
+        else:
+            line_source = {
+                "label": _("Saisie libre"),
+                "class": "source-free",
+                "name": "",
+            }
+        line_rows.append(
+            {
+                "instance": ligne,
+                "source": line_source,
+                "unit_price_display": format_amount_for_entreprise(ligne.prix_unitaire, entreprise),
+                "total_display": format_amount_for_entreprise(ligne.montant, entreprise),
+            }
+        )
+    return line_rows
+
+
+def _build_proforma_summary(proforma):
+    return {
+        "total_ht": format_amount_for_entreprise(proforma.total_ht, proforma.entreprise),
+        "tva_label": f"TVA ({format_tva_percentage(proforma.tva)}%)",
+        "total_tva": format_amount_for_entreprise(proforma.total_tva, proforma.entreprise),
+        "total_reduction": format_amount_for_entreprise(proforma.total_reduction, proforma.entreprise),
+        "total_net": format_amount_for_entreprise(proforma.total_net, proforma.entreprise),
+    }
+
+
+def _build_proforma_context(proforma):
+    legal_information = _build_legal_information(proforma.entreprise)
+    generation_time = timezone.localtime(timezone.now())
+    return {
+        "proforma": proforma,
+        "client_name": proforma.client_display,
+        "legal_information": legal_information,
+        "lignes": [
+            {
+                "index": index,
+                "designation": ligne.designation,
+                "quantite": ligne.quantite,
+                "prix_unitaire": format_amount_for_entreprise(ligne.prix_unitaire, proforma.entreprise),
+                "total": format_amount_for_entreprise(ligne.montant, proforma.entreprise),
+            }
+            for index, ligne in enumerate(proforma.lignes.all(), start=1)
+        ],
+        "summary": _build_proforma_summary(proforma),
+        "footer_datetime": generation_time.strftime(f"{legal_information['city']}, le %d/%m/%Y %H:%M:%S"),
+    }
+
+
+def _build_proforma_form_context(*, request, entreprise, proforma=None, page_title, submit_label):
+    context = {
+        "proforma": proforma,
+        "clients": get_clients_for_billing_by_entreprise(entreprise),
+        "services": get_services_by_entreprise(entreprise),
+        "products": get_products_by_entreprise(entreprise).filter(actif=True),
+        "default_tva": getattr(proforma, "tva", None) if proforma else entreprise.taux_tva_defaut,
+        "currency_code": get_currency_code(entreprise),
+        "page_title": page_title,
+        "submit_label": submit_label,
+        **_get_billing_ui_permissions(request.user),
+    }
+    return context
+
+
 def _aggregate_facture_kpis(factures):
     total_emis = Decimal("0")
     total_encaisse = Decimal("0")
@@ -342,6 +451,218 @@ def facture_list(request):
             **_get_billing_ui_permissions(request.user),
         },
     )
+
+
+@login_required
+@module_access_required("billing")
+def proforma_list(request):
+    can_view_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proformas = get_proformas_by_entreprise(
+        entreprise,
+        statut=request.GET.get("statut"),
+        search=request.GET.get("search"),
+        date_debut=parse_date(request.GET.get("date_debut") or ""),
+        date_fin=parse_date(request.GET.get("date_fin") or ""),
+    )
+    paginator = Paginator(proformas, getattr(settings, "JOATHAM_BILLING_PAGE_SIZE", 20))
+    page_obj = paginator.get_page(request.GET.get("page"))
+    rows = []
+    for proforma in page_obj.object_list:
+        rows.append(
+            {
+                "instance": proforma,
+                "client_name": proforma.client_display,
+                "date_display": timezone.localtime(proforma.date).strftime("%d/%m/%Y %H:%M"),
+                "validity_display": proforma.date_validite.strftime("%d/%m/%Y") if proforma.date_validite else "-",
+                "total_net_display": format_amount_for_entreprise(proforma.total_net, entreprise),
+                "can_edit": proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE},
+                "can_convert": proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE} and not proforma.facture_convertie_id,
+            }
+        )
+
+    return render(
+        request,
+        "joatham_billing/proforma_list.html",
+        {
+            "proformas": rows,
+            "page_obj": page_obj,
+            "statut_choices": Proforma.Statut.choices,
+            "currency_code": get_currency_code(entreprise),
+            **_get_billing_ui_permissions(request.user),
+        },
+    )
+
+
+@login_required
+@module_access_required("billing")
+def add_proforma(request):
+    can_manage_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+
+    if request.method == "POST":
+        try:
+            proforma = create_proforma(
+                entreprise=entreprise,
+                user=request.user,
+                client_id=request.POST.get("client") or None,
+                client_nom=request.POST.get("client_nom", ""),
+                tva=request.POST.get("tva") or 0,
+                remise=request.POST.get("remise") or 0,
+                rabais=request.POST.get("rabais") or 0,
+                ristourne=request.POST.get("ristourne") or 0,
+                date_validite=parse_date(request.POST.get("date_validite") or ""),
+                notes=request.POST.get("notes", ""),
+                conditions=request.POST.get("conditions", ""),
+                lignes=_extract_document_lines_from_post(request.POST),
+            )
+            messages.success(request, _("Proforma creee avec succes."))
+            return redirect("proforma_detail", id=proforma.id)
+        except FacturationError as exc:
+            messages.error(request, str(exc))
+        except Exception:
+            logger.exception("Erreur inattendue creation proforma", extra={"entreprise_id": entreprise.id})
+            messages.error(request, _("Une erreur inattendue est survenue lors de la creation de la proforma."))
+
+    return render(
+        request,
+        "joatham_billing/proforma_form.html",
+        _build_proforma_form_context(
+            request=request,
+            entreprise=entreprise,
+            page_title=_("Nouvelle facture proforma"),
+            submit_label=_("Creer la proforma"),
+        ),
+    )
+
+
+@login_required
+@module_access_required("billing")
+def edit_proforma(request, id):
+    can_manage_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proforma = get_proforma_by_entreprise(entreprise, id)
+
+    try:
+        assert_proforma_editable(proforma)
+    except FacturationError as exc:
+        messages.error(request, str(exc))
+        return redirect("proforma_detail", id=proforma.id)
+
+    if request.method == "POST":
+        try:
+            update_proforma(
+                proforma=proforma,
+                user=request.user,
+                client_id=request.POST.get("client") or None,
+                client_nom=request.POST.get("client_nom", ""),
+                tva=request.POST.get("tva") or 0,
+                remise=request.POST.get("remise") or 0,
+                rabais=request.POST.get("rabais") or 0,
+                ristourne=request.POST.get("ristourne") or 0,
+                date_validite=parse_date(request.POST.get("date_validite") or ""),
+                notes=request.POST.get("notes", ""),
+                conditions=request.POST.get("conditions", ""),
+                lignes=_extract_document_lines_from_post(request.POST),
+            )
+            messages.success(request, _("Proforma mise a jour avec succes."))
+            return redirect("proforma_detail", id=proforma.id)
+        except FacturationError as exc:
+            messages.error(request, str(exc))
+        except Exception:
+            logger.exception("Erreur inattendue modification proforma", extra={"proforma_id": proforma.id})
+            messages.error(request, _("Une erreur inattendue est survenue lors de la modification de la proforma."))
+
+    return render(
+        request,
+        "joatham_billing/proforma_form.html",
+        _build_proforma_form_context(
+            request=request,
+            entreprise=entreprise,
+            proforma=proforma,
+            page_title=_("Modifier la facture proforma"),
+            submit_label=_("Enregistrer les modifications"),
+        ),
+    )
+
+
+@login_required
+@module_access_required("billing")
+def proforma_detail(request, id):
+    can_view_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proforma = get_proforma_by_entreprise(entreprise, id)
+    line_rows = _build_proforma_line_rows(proforma, entreprise)
+    can_manage = user_has_permission(request.user, "billing.manage")
+    context = {
+        "proforma": proforma,
+        "line_rows": line_rows,
+        "statut_choices": Proforma.Statut.choices,
+        "currency_code": get_currency_code(entreprise),
+        "total_ht": format_amount_for_entreprise(proforma.total_ht, entreprise),
+        "total_tva": format_amount_for_entreprise(proforma.total_tva, entreprise),
+        "total_reduction": format_amount_for_entreprise(proforma.total_reduction, entreprise),
+        "total_net": format_amount_for_entreprise(proforma.total_net, entreprise),
+        "line_count": len(line_rows),
+        "can_edit_proforma": can_manage and proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE},
+        "can_convert_proforma": can_manage
+        and proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE}
+        and not proforma.facture_convertie_id,
+        **_get_billing_ui_permissions(request.user),
+    }
+    return render(request, "joatham_billing/proforma_detail.html", context)
+
+
+@login_required
+@module_access_required("billing")
+def proforma_pdf(request, id):
+    can_view_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proforma = get_proforma_by_entreprise(entreprise, id)
+    disposition = "attachment" if request.GET.get("mode") == "download" else "inline"
+
+    try:
+        return render_pdf_response(
+            request,
+            "joatham_billing/proforma_pdf.html",
+            _build_proforma_context(proforma),
+            filename=f"proforma_{proforma.numero}.pdf",
+            disposition=disposition,
+        )
+    except PdfRenderError:
+        logger.exception("Erreur generation PDF proforma", extra={"proforma_id": proforma.id, "entreprise_id": proforma.entreprise_id})
+        return HttpResponse(_("Erreur lors de la generation du PDF proforma."), status=500)
+
+
+@login_required
+@module_access_required("billing")
+@require_POST
+def cancel_proforma_view(request, id):
+    can_manage_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proforma = get_proforma_by_entreprise(entreprise, id)
+    try:
+        cancel_proforma(proforma=proforma, user=request.user)
+        messages.success(request, _("Proforma annulee avec succes."))
+    except FacturationError as exc:
+        messages.error(request, str(exc))
+    return redirect("proforma_detail", id=proforma.id)
+
+
+@login_required
+@module_access_required("billing")
+@require_POST
+def convert_proforma_view(request, id):
+    can_manage_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    proforma = get_proforma_by_entreprise(entreprise, id)
+    try:
+        facture = convert_proforma_to_facture(proforma=proforma, user=request.user)
+        messages.success(request, _("Proforma convertie en facture definitive."))
+        return redirect("facture_detail", id=facture.id)
+    except FacturationError as exc:
+        messages.error(request, str(exc))
+    return redirect("proforma_detail", id=proforma.id)
 
 
 @login_required
