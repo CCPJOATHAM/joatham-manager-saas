@@ -1,8 +1,10 @@
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.db import connection
 from django.http import Http404, HttpResponse
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from core.services.subscription import activate_subscription_for_entreprise
@@ -211,6 +213,22 @@ class ProformaWorkflowTests(TestCase):
                 source_id=facture.id,
             ).exists()
         )
+
+    def test_convert_proforma_lock_query_does_not_join_nullable_converted_facture(self):
+        proforma = self._create_proforma()
+
+        with CaptureQueriesContext(connection) as captured_queries:
+            convert_proforma_to_facture(proforma=proforma, user=self.owner)
+
+        proforma_selects = [
+            query["sql"].lower()
+            for query in captured_queries
+            if " from " in query["sql"].lower() and "joatham_billing_proforma" in query["sql"].lower()
+        ]
+
+        self.assertTrue(proforma_selects)
+        self.assertNotIn('join "joatham_billing_facture"', proforma_selects[0])
+        self.assertNotIn("join `joatham_billing_facture`", proforma_selects[0])
 
     def test_convert_proforma_with_occasional_client_creates_real_facture(self):
         proforma = create_proforma(
