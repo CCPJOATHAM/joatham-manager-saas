@@ -318,6 +318,53 @@ class Proforma(models.Model):
         super().save(*args, **kwargs)
 
 
+class EntreprisePrintSettings(models.Model):
+    class POSWidth(models.TextChoices):
+        WIDTH_80 = "80", "80 mm"
+        WIDTH_58 = "58", "58 mm"
+
+    class InvoiceFormat(models.TextChoices):
+        A4 = "a4", _("A4")
+        POS = "pos", _("POS / ticket")
+
+    entreprise = models.OneToOneField(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="print_settings",
+    )
+    pos_width = models.CharField(max_length=2, choices=POSWidth.choices, default=POSWidth.WIDTH_80)
+    pos_show_logo = models.BooleanField(default=True)
+    pos_show_company_name = models.BooleanField(default=True)
+    pos_show_address = models.BooleanField(default=True)
+    pos_show_phone = models.BooleanField(default=True)
+    pos_show_email = models.BooleanField(default=True)
+    pos_show_tax_info = models.BooleanField(default=True)
+    pos_show_generated_by = models.BooleanField(default=True)
+    default_invoice_format = models.CharField(max_length=3, choices=InvoiceFormat.choices, default=InvoiceFormat.A4)
+    pos_footer_message = models.CharField(max_length=180, default="Merci pour votre confiance", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Parametres impression entreprise")
+        verbose_name_plural = _("Parametres impression entreprise")
+
+    def __str__(self):
+        return f"Parametres impression - {self.entreprise}"
+
+    @property
+    def pos_page_width_css(self):
+        return "58mm" if self.pos_width == self.POSWidth.WIDTH_58 else "80mm"
+
+    @property
+    def pos_content_width_css(self):
+        return "50mm" if self.pos_width == self.POSWidth.WIDTH_58 else "72mm"
+
+    @property
+    def pos_margin_css(self):
+        return "4mm"
+
+
 class LigneProforma(models.Model):
     proforma = models.ForeignKey("Proforma", on_delete=models.CASCADE, related_name="lignes")
     produit = models.ForeignKey(

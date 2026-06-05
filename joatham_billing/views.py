@@ -24,6 +24,7 @@ from core.ui_text import FLASH_MESSAGES
 from joatham_caisse.selectors.caisse import get_caisses_by_entreprise
 from joatham_users.permissions import user_has_permission
 from .exceptions import FacturationError
+from .forms_services import EntreprisePrintSettingsForm
 from .models import Facture, FactureHistorique, PaiementFacture, Proforma
 from .pdf import PdfRenderError, render_pdf_response
 from .permissions import can_manage_factures, can_record_payment, can_view_factures
@@ -51,6 +52,7 @@ from .services.proforma import (
     create_proforma,
     update_proforma,
 )
+from .services.print_settings import get_or_create_print_settings
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +136,7 @@ def _build_facture_qr_data_uri(facture, legal_information):
     return f"data:image/png;base64,{encoded}"
 
 
-def _build_facture_context(facture, mode):
+def _build_facture_context(facture, mode, print_settings=None):
     lignes = []
     paiements = []
     total_ht = Decimal("0")
@@ -160,6 +162,7 @@ def _build_facture_context(facture, mode):
     generation_time = timezone.localtime(timezone.now())
     invoice_datetime = timezone.localtime(facture.date)
     legal_information = _build_legal_information(facture.entreprise)
+    print_settings = print_settings or get_or_create_print_settings(facture.entreprise)
     client_name = facture.client_display
 
     for paiement in facture.paiements.all():
@@ -199,6 +202,13 @@ def _build_facture_context(facture, mode):
         "paiements": paiements,
         "latest_payment_mode": paiements[0]["mode_display"] if paiements else _("Non renseigne"),
         "legal_information": legal_information,
+        "print_settings": print_settings,
+        "pos_ticket": {
+            "page_width": print_settings.pos_page_width_css,
+            "content_width": print_settings.pos_content_width_css,
+            "margin": print_settings.pos_margin_css,
+            "footer_message": print_settings.pos_footer_message or "Merci pour votre confiance",
+        },
         "qr_code_data_uri": _build_facture_qr_data_uri(facture, legal_information),
         "summary": {
             "total_ht": format_amount_for_entreprise(total_ht, facture.entreprise),
@@ -353,9 +363,10 @@ def facture_pdf(request, id):
     entreprise = get_user_entreprise_or_raise(request.user)
     facture = get_facture_by_entreprise(entreprise, id)
     mode = request.GET.get("mode")
-    invoice_format = (request.GET.get("format") or "a4").lower()
+    print_settings = get_or_create_print_settings(entreprise)
+    invoice_format = (request.GET.get("format") or print_settings.default_invoice_format or "a4").lower()
     is_pos_format = invoice_format == "pos"
-    context = _build_facture_context(facture, mode)
+    context = _build_facture_context(facture, mode, print_settings=print_settings)
     disposition = "attachment" if mode == "download" else "inline"
     template_name = "joatham_billing/facture_pos_pdf.html" if is_pos_format else "joatham_billing/facture_pdf.html"
     filename_prefix = "ticket" if is_pos_format else "facture"
@@ -377,6 +388,31 @@ def facture_pdf(request, id):
     except PdfRenderError:
         logger.exception("Erreur generation PDF", extra={"facture_id": facture.id, "entreprise_id": facture.entreprise_id})
         return HttpResponse(_("Erreur lors de la generation du PDF."), status=500)
+
+
+@login_required
+@module_access_required("billing")
+def print_settings_view(request):
+    can_manage_factures(request.user)
+    entreprise = get_user_entreprise_or_raise(request.user)
+    print_settings = get_or_create_print_settings(entreprise)
+    form = EntreprisePrintSettingsForm(request.POST or None, instance=print_settings)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Parametres d'impression mis a jour."))
+        return redirect("print_settings")
+
+    return render(
+        request,
+        "joatham_billing/print_settings.html",
+        {
+            "form": form,
+            "print_settings": print_settings,
+            "entreprise": entreprise,
+            **_get_billing_ui_permissions(request.user),
+        },
+    )
 
 
 @login_required

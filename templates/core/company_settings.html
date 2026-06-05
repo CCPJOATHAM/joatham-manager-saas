@@ -32,7 +32,10 @@
                 {% trans "Espace interne de votre entreprise pour les coordonnées, la facturation et les références légales." %}
             </p>
         </div>
-        <a href="{% url 'admin_dashboard' %}">{% trans "Retour au dashboard" %}</a>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="{% url 'print_settings' %}">{% trans "Parametres impression" %}</a>
+            <a href="{% url 'admin_dashboard' %}">{% trans "Retour au dashboard" %}</a>
+        </div>
     </div>
 
     {% if messages %}

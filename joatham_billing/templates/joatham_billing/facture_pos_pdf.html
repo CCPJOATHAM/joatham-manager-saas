@@ -4,8 +4,8 @@
 
 {% block pdf_styles %}
         @page {
-            size: 80mm 297mm;
-            margin: 4mm;
+            size: {{ pos_ticket.page_width }} 297mm;
+            margin: {{ pos_ticket.margin }};
         }
 
         body {
@@ -18,7 +18,7 @@
         }
 
         .pdf-page {
-            width: 72mm;
+            width: {{ pos_ticket.content_width }};
         }
 
         .ticket {
@@ -35,6 +35,12 @@
             font-weight: bold;
             text-transform: uppercase;
             line-height: 1.2;
+        }
+
+        .ticket-logo {
+            max-width: 34mm;
+            max-height: 18mm;
+            margin-bottom: 3mm;
         }
 
         .company-line,
@@ -130,26 +136,36 @@
 {% block pdf_content %}
 <div class="ticket">
     <div class="ticket-header">
+        {% if print_settings.pos_show_logo and legal_information.logo_data_uri %}
+            <img src="{{ legal_information.logo_data_uri }}" alt="Logo" class="ticket-logo">
+        {% endif %}
+        {% if print_settings.pos_show_company_name %}
         <div class="company-name">{{ legal_information.primary_name }}</div>
-        {% if legal_information.secondary_name %}
+        {% endif %}
+        {% if print_settings.pos_show_company_name and legal_information.secondary_name %}
             <div class="company-line">{{ legal_information.secondary_name }}</div>
         {% endif %}
-        {% if legal_information.address %}
+        {% if print_settings.pos_show_address and legal_information.address %}
             <div class="company-line">{{ legal_information.address }}</div>
         {% endif %}
+        {% if print_settings.pos_show_address %}
         {% if legal_information.city or legal_information.country %}
             <div class="company-line">{{ legal_information.city }}{% if legal_information.city and legal_information.country %} - {% endif %}{{ legal_information.country }}</div>
         {% endif %}
-        {% if legal_information.phone %}
+        {% endif %}
+        {% if print_settings.pos_show_phone and legal_information.phone %}
             <div class="company-line">Tel : {{ legal_information.phone }}</div>
         {% endif %}
-        {% if legal_information.rccm %}
+        {% if print_settings.pos_show_email and legal_information.email %}
+            <div class="company-line">Email : {{ legal_information.email }}</div>
+        {% endif %}
+        {% if print_settings.pos_show_tax_info and legal_information.rccm %}
             <div class="company-line">RCCM : {{ legal_information.rccm }}</div>
         {% endif %}
-        {% if legal_information.impot %}
+        {% if print_settings.pos_show_tax_info and legal_information.impot %}
             <div class="company-line">NIF / No impot : {{ legal_information.impot }}</div>
         {% endif %}
-        {% if legal_information.id_nat %}
+        {% if print_settings.pos_show_tax_info and legal_information.id_nat %}
             <div class="company-line">ID NAT : {{ legal_information.id_nat }}</div>
         {% endif %}
         <div class="ticket-title">Ticket de caisse</div>
@@ -239,8 +255,10 @@
     <div class="separator">&nbsp;</div>
 
     <div class="ticket-footer">
-        <div class="footer-line">Merci pour votre confiance</div>
+        <div class="footer-line">{{ pos_ticket.footer_message }}</div>
+        {% if print_settings.pos_show_generated_by %}
         <div class="footer-line">Genere par JOATHAM Manager</div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

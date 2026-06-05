@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from core.services.subscription import activate_subscription_for_entreprise
 from joatham_caisse.models import Caisse, MouvementCaisse, SessionCaisse
-from joatham_billing.models import Facture, PaiementFacture, Service
+from joatham_billing.models import EntreprisePrintSettings, Facture, PaiementFacture, Service
 from joatham_billing.views import _build_facture_context
 from joatham_products.models import Produit
 from joatham_users.models import Abonnement
@@ -189,6 +189,20 @@ class BillingViewsPremiumTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
 
+    def test_pos_print_settings_are_created_automatically(self):
+        self.assertFalse(EntreprisePrintSettings.objects.filter(entreprise=self.entreprise).exists())
+
+        with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
+            render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
+            response = self.client.get(reverse("facture_pdf", args=[self.facture.id]) + "?format=pos")
+
+        self.assertEqual(response.status_code, 200)
+        print_settings = EntreprisePrintSettings.objects.get(entreprise=self.entreprise)
+        context = render_pdf_response.call_args.args[2]
+        self.assertEqual(print_settings.pos_width, EntreprisePrintSettings.POSWidth.WIDTH_80)
+        self.assertEqual(context["pos_ticket"]["page_width"], "80mm")
+        self.assertEqual(context["pos_ticket"]["content_width"], "72mm")
+
     def test_facture_pdf_default_uses_a4_template(self):
         with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
             render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
@@ -199,6 +213,35 @@ class BillingViewsPremiumTests(TestCase):
         render_pdf_response.assert_called_once()
         self.assertEqual(render_pdf_response.call_args.args[1], "joatham_billing/facture_pdf.html")
         self.assertEqual(render_pdf_response.call_args.kwargs["filename"], f"facture_{self.facture.numero}.pdf")
+
+    def test_facture_pdf_uses_company_default_pos_when_configured(self):
+        EntreprisePrintSettings.objects.create(
+            entreprise=self.entreprise,
+            default_invoice_format=EntreprisePrintSettings.InvoiceFormat.POS,
+        )
+
+        with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
+            render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
+            response = self.client.get(reverse("facture_pdf", args=[self.facture.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(render_pdf_response.call_args.args[1], "joatham_billing/facture_pos_pdf.html")
+        self.assertEqual(render_pdf_response.call_args.kwargs["filename"], f"ticket_{self.facture.numero}.pdf")
+
+    def test_facture_pos_pdf_uses_58mm_when_configured(self):
+        EntreprisePrintSettings.objects.create(
+            entreprise=self.entreprise,
+            pos_width=EntreprisePrintSettings.POSWidth.WIDTH_58,
+        )
+
+        with patch("joatham_billing.views.render_pdf_response") as render_pdf_response:
+            render_pdf_response.return_value = HttpResponse(b"PDF", content_type="application/pdf")
+            response = self.client.get(reverse("facture_pdf", args=[self.facture.id]) + "?format=pos")
+
+        self.assertEqual(response.status_code, 200)
+        context = render_pdf_response.call_args.args[2]
+        self.assertEqual(context["pos_ticket"]["page_width"], "58mm")
+        self.assertEqual(context["pos_ticket"]["content_width"], "50mm")
 
     def test_facture_pdf_pos_uses_ticket_template_and_payment_totals(self):
         PaiementFacture.objects.create(
@@ -222,6 +265,87 @@ class BillingViewsPremiumTests(TestCase):
         self.assertEqual(context["latest_payment_mode"], "Mobile Money")
         self.assertIn("25", context["summary"]["total_paye"])
         self.assertIn("91", context["summary"]["reste_a_payer"])
+
+    def test_facture_pos_template_hides_logo_tax_info_and_generated_by(self):
+        self.entreprise.rccm = "RCCM-001"
+        self.entreprise.numero_impot = "NIF-001"
+        self.entreprise.id_nat = "IDNAT-001"
+        self.entreprise.save(update_fields=["rccm", "numero_impot", "id_nat"])
+        print_settings = EntreprisePrintSettings.objects.create(
+            entreprise=self.entreprise,
+            pos_show_logo=False,
+            pos_show_tax_info=False,
+            pos_show_generated_by=False,
+        )
+        context = _build_facture_context(self.facture, mode=None, print_settings=print_settings)
+        context["legal_information"]["logo_data_uri"] = "data:image/png;base64,abc"
+
+        html = render_to_string("joatham_billing/facture_pos_pdf.html", context)
+
+        self.assertNotIn('class="ticket-logo"', html)
+        self.assertNotIn("RCCM-001", html)
+        self.assertNotIn("NIF-001", html)
+        self.assertNotIn("IDNAT-001", html)
+        self.assertNotIn("Genere par JOATHAM Manager", html)
+
+    def test_facture_pos_template_displays_custom_footer(self):
+        print_settings = EntreprisePrintSettings.objects.create(
+            entreprise=self.entreprise,
+            pos_footer_message="A bientot chez nous",
+        )
+        context = _build_facture_context(self.facture, mode=None, print_settings=print_settings)
+
+        html = render_to_string("joatham_billing/facture_pos_pdf.html", context)
+
+        self.assertIn("A bientot chez nous", html)
+
+    def test_print_settings_view_allows_owner_and_manager_but_blocks_comptable(self):
+        manager = create_user("manager-print", "gestionnaire", self.entreprise)
+        comptable = create_user("comptable-print", "comptable", self.entreprise)
+
+        owner_response = self.client.get(reverse("print_settings"))
+        self.assertEqual(owner_response.status_code, 200)
+        self.assertContains(owner_response, "Parametres impression")
+
+        self.client.force_login(manager)
+        manager_response = self.client.get(reverse("print_settings"))
+        self.assertEqual(manager_response.status_code, 200)
+
+        self.client.force_login(comptable)
+        comptable_response = self.client.get(reverse("print_settings"))
+        self.assertEqual(comptable_response.status_code, 403)
+
+    def test_print_settings_are_scoped_to_current_entreprise(self):
+        other_entreprise = create_entreprise("Entreprise Impression B")
+        other_settings = EntreprisePrintSettings.objects.create(
+            entreprise=other_entreprise,
+            pos_width=EntreprisePrintSettings.POSWidth.WIDTH_80,
+            pos_footer_message="Message autre entreprise",
+        )
+
+        response = self.client.post(
+            reverse("print_settings"),
+            {
+                "pos_width": EntreprisePrintSettings.POSWidth.WIDTH_58,
+                "default_invoice_format": EntreprisePrintSettings.InvoiceFormat.A4,
+                "pos_show_logo": "on",
+                "pos_show_company_name": "on",
+                "pos_show_address": "on",
+                "pos_show_phone": "on",
+                "pos_show_email": "on",
+                "pos_show_tax_info": "on",
+                "pos_show_generated_by": "on",
+                "pos_footer_message": "Message entreprise A",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        current_settings = EntreprisePrintSettings.objects.get(entreprise=self.entreprise)
+        other_settings.refresh_from_db()
+        self.assertEqual(current_settings.pos_width, EntreprisePrintSettings.POSWidth.WIDTH_58)
+        self.assertEqual(current_settings.pos_footer_message, "Message entreprise A")
+        self.assertEqual(other_settings.pos_width, EntreprisePrintSettings.POSWidth.WIDTH_80)
+        self.assertEqual(other_settings.pos_footer_message, "Message autre entreprise")
 
     def test_add_facture_form_exposes_service_selector_with_price_metadata(self):
         response = self.client.get(reverse("add_facture"))
@@ -361,6 +485,7 @@ class BillingViewsPremiumTests(TestCase):
             reverse("payer_facture", args=[self.facture.id]),
             reverse("facture_pdf", args=[self.facture.id]),
             reverse("facture_pdf", args=[self.facture.id]) + "?format=pos",
+            reverse("print_settings"),
         ]
 
         for url in blocked_urls:
