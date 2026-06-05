@@ -225,7 +225,7 @@ def convert_proforma_to_facture(*, proforma, user):
     if not user_has_permission(user, "billing.manage"):
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent convertir une proforma.")
 
-    proforma = Proforma.objects.select_for_update().select_related("entreprise", "client").get(id=proforma.id)
+    proforma = Proforma.objects.select_for_update().get(id=proforma.id)
     assert_proforma_convertible(proforma)
     client_id, client_nom = _normalize_proforma_client_inputs(client_id=proforma.client_id, client_nom=proforma.client_nom)
 
