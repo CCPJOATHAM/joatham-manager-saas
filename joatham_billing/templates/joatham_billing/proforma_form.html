@@ -32,6 +32,21 @@
     resize: vertical;
 }
 
+.editor-grid input:disabled,
+.editor-grid select:disabled {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.field-help {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
 .line-table {
     width: 100%;
     border-collapse: collapse;
@@ -141,10 +156,12 @@
                         <option value="{{ client.id }}" {% if proforma.client_id == client.id %}selected{% endif %}>{{ client.nom }}</option>
                     {% endfor %}
                 </select>
+                <span class="field-help">Choisissez un client enregistre ou saisissez un client occasionnel.</span>
             </div>
             <div>
                 <label for="client_nom">Client occasionnel</label>
                 <input type="text" name="client_nom" id="client_nom" value="{{ proforma.client_nom|default:'' }}">
+                <span class="field-help">Ce champ est utilise uniquement si aucun client enregistre n'est selectionne.</span>
             </div>
             <div>
                 <label for="date_validite">Date de validite</label>
@@ -307,6 +324,29 @@
 
 <script>
 const currencyCode = "{{ currency_code|default:'CDF'|escapejs }}";
+const registeredClientSelect = document.getElementById("client");
+const occasionalClientInput = document.getElementById("client_nom");
+
+function syncClientFields(changedField) {
+    if (!registeredClientSelect || !occasionalClientInput) return;
+
+    if (changedField === "registered" && registeredClientSelect.value) {
+        occasionalClientInput.value = "";
+    }
+    if (changedField === "occasional" && occasionalClientInput.value.trim()) {
+        registeredClientSelect.value = "";
+    }
+
+    occasionalClientInput.disabled = Boolean(registeredClientSelect.value);
+    registeredClientSelect.disabled = Boolean(occasionalClientInput.value.trim());
+}
+
+if (registeredClientSelect) {
+    registeredClientSelect.addEventListener("change", () => syncClientFields("registered"));
+}
+if (occasionalClientInput) {
+    occasionalClientInput.addEventListener("input", () => syncClientFields("occasional"));
+}
 
 function formatMoney(value) {
     return new Intl.NumberFormat("fr-FR", {
@@ -439,5 +479,6 @@ document.querySelectorAll("#table_proforma tr").forEach((row, index) => {
     document.getElementById(id).addEventListener("input", calculer);
 });
 calculer();
+syncClientFields();
 </script>
 {% endblock %}

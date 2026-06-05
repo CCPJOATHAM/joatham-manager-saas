@@ -90,6 +90,55 @@ class ProformaWorkflowTests(TestCase):
         self.assertEqual(proforma.total_net, Decimal("24.00"))
         self.assertEqual(Facture.objects.filter(entreprise=self.entreprise).count(), 0)
 
+    def test_create_proforma_with_registered_client_only_is_valid(self):
+        proforma = create_proforma(
+            entreprise=self.entreprise,
+            user=self.owner,
+            client_id=self.client_billing.id,
+            client_nom="",
+            tva=0,
+            lignes=self._lines(),
+        )
+
+        self.assertEqual(proforma.client_id, self.client_billing.id)
+        self.assertEqual(proforma.client_nom, "")
+
+    def test_create_proforma_with_occasional_client_only_is_valid(self):
+        proforma = create_proforma(
+            entreprise=self.entreprise,
+            user=self.owner,
+            client_id=None,
+            client_nom="Client comptoir",
+            tva=0,
+            lignes=self._lines(),
+        )
+
+        self.assertIsNone(proforma.client_id)
+        self.assertEqual(proforma.client_nom, "Client comptoir")
+        self.assertEqual(proforma.client_display, "Client comptoir")
+
+    def test_create_proforma_rejects_registered_and_occasional_clients(self):
+        with self.assertRaises(WorkflowFacturationError):
+            create_proforma(
+                entreprise=self.entreprise,
+                user=self.owner,
+                client_id=self.client_billing.id,
+                client_nom="Client comptoir",
+                tva=0,
+                lignes=self._lines(),
+            )
+
+    def test_create_proforma_requires_one_client(self):
+        with self.assertRaises(WorkflowFacturationError):
+            create_proforma(
+                entreprise=self.entreprise,
+                user=self.owner,
+                client_id=None,
+                client_nom="",
+                tva=0,
+                lignes=self._lines(),
+            )
+
     def test_create_proforma_does_not_decrement_stock(self):
         proforma = self._create_proforma()
 
@@ -162,6 +211,30 @@ class ProformaWorkflowTests(TestCase):
                 source_id=facture.id,
             ).exists()
         )
+
+    def test_convert_proforma_with_occasional_client_creates_real_facture(self):
+        proforma = create_proforma(
+            entreprise=self.entreprise,
+            user=self.owner,
+            client_id=None,
+            client_nom="Client comptoir",
+            tva=0,
+            remise=0,
+            rabais=0,
+            ristourne=0,
+            lignes=self._lines(),
+        )
+
+        facture = convert_proforma_to_facture(proforma=proforma, user=self.owner)
+
+        proforma.refresh_from_db()
+        self.product.refresh_from_db()
+        self.assertEqual(proforma.facture_convertie_id, facture.id)
+        self.assertIsNone(facture.client_id)
+        self.assertEqual(facture.client_nom, "Client comptoir")
+        self.assertEqual(facture.total_net, proforma.total_net)
+        self.assertEqual(self.product.quantite_stock, 8)
+        self.assertEqual(PaiementFacture.objects.filter(facture=facture).count(), 0)
 
     def test_convert_proforma_does_not_create_payment_and_blocks_second_conversion(self):
         proforma = self._create_proforma()
@@ -264,6 +337,7 @@ class ProformaWorkflowTests(TestCase):
         self.assertContains(list_response, proforma.numero)
         self.assertEqual(add_response.status_code, 200)
         self.assertContains(add_response, "Nouvelle facture proforma")
+        self.assertContains(add_response, "syncClientFields")
         self.assertEqual(edit_response.status_code, 200)
         self.assertContains(edit_response, "Modifier la facture proforma")
 
@@ -291,6 +365,31 @@ class ProformaWorkflowTests(TestCase):
         self.assertEqual(Proforma.objects.filter(entreprise=self.entreprise).count(), 1)
         self.assertEqual(Facture.objects.filter(entreprise=self.entreprise).count(), 0)
 
+    def test_post_create_proforma_with_both_clients_is_rejected_cleanly(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("add_proforma"),
+            {
+                "client": str(self.client_billing.id),
+                "client_nom": "Client comptoir",
+                "tva": "0",
+                "remise": "0",
+                "rabais": "0",
+                "ristourne": "0",
+                "product_id[]": [str(self.product.id)],
+                "service_id[]": [""],
+                "designation[]": [""],
+                "quantite[]": ["2"],
+                "prix[]": [""],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Choisissez un client enregistre ou saisissez un client occasionnel")
+        self.assertEqual(Proforma.objects.filter(entreprise=self.entreprise).count(), 0)
+        self.assertEqual(Facture.objects.filter(entreprise=self.entreprise).count(), 0)
+
     def test_post_convert_proforma_from_view(self):
         proforma = self._create_proforma()
         self.client.force_login(self.owner)
@@ -303,3 +402,30 @@ class ProformaWorkflowTests(TestCase):
         proforma.refresh_from_db()
         self.assertEqual(proforma.facture_convertie_id, facture.id)
         self.assertEqual(PaiementFacture.objects.filter(facture=facture).count(), 0)
+
+    def test_post_convert_proforma_handles_unexpected_invoice_error_without_500(self):
+        proforma = self._create_proforma()
+        self.client.force_login(self.owner)
+
+        with patch("joatham_billing.services.proforma.create_facture", side_effect=RuntimeError("boom")):
+            response = self.client.post(reverse("convert_proforma", args=[proforma.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("proforma_detail", args=[proforma.id]))
+        proforma.refresh_from_db()
+        self.assertIsNone(proforma.facture_convertie_id)
+        self.assertEqual(proforma.statut, Proforma.Statut.BROUILLON)
+        self.assertEqual(Facture.objects.filter(entreprise=self.entreprise).count(), 0)
+
+    def test_post_convert_proforma_view_handles_unexpected_service_error_without_500(self):
+        proforma = self._create_proforma()
+        self.client.force_login(self.owner)
+
+        with patch("joatham_billing.views.convert_proforma_to_facture", side_effect=RuntimeError("boom")):
+            response = self.client.post(reverse("convert_proforma", args=[proforma.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("proforma_detail", args=[proforma.id]))
+        proforma.refresh_from_db()
+        self.assertIsNone(proforma.facture_convertie_id)
+        self.assertEqual(proforma.statut, Proforma.Statut.BROUILLON)
