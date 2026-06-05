@@ -128,7 +128,7 @@ class PaiementAbonnement(models.Model):
         indexes = [
             models.Index(fields=["entreprise", "statut", "date_creation"]),
             models.Index(fields=["statut", "date_creation"]),
-            models.Index(fields=["provider", "statut", "date_creation"]),
+            models.Index(fields=["provider", "statut", "date_creation"], name="core_paieme_provider_77a7_idx"),
         ]
 
     def __str__(self):
