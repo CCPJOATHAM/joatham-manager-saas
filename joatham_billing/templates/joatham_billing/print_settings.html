@@ -1,0 +1,126 @@
+{% extends "joatham_billing/base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Parametres impression" %} | JOATHAM Manager{% endblock %}
+{% block content_title %}{% trans "Parametres impression" %}{% endblock %}
+{% block content_subtitle %}{% trans "Configurez le format POS des tickets et le format par defaut des factures." %}{% endblock %}
+
+{% block content %}
+<style>
+    .settings-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .field-full {
+        grid-column: 1 / -1;
+    }
+
+    .checkbox-field {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .field label {
+        color: #334155;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px 12px;
+        width: 100%;
+    }
+
+    .help-text {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 0 0 18px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+        background: #475569;
+    }
+
+    @media (max-width: 760px) {
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .field-full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="settings-card">
+    <p class="help-text">
+        {% trans "Ces reglages s'appliquent aux tickets POS. Le format A4 conserve son comportement habituel." %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="settings-grid">
+            <div class="field">
+                <label for="{{ form.pos_width.id_for_label }}">{{ form.pos_width.label }}</label>
+                {{ form.pos_width }}
+            </div>
+            <div class="field">
+                <label for="{{ form.default_invoice_format.id_for_label }}">{{ form.default_invoice_format.label }}</label>
+                {{ form.default_invoice_format }}
+            </div>
+
+            <div class="field checkbox-field">{{ form.pos_show_logo }} <label for="{{ form.pos_show_logo.id_for_label }}">{{ form.pos_show_logo.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_company_name }} <label for="{{ form.pos_show_company_name.id_for_label }}">{{ form.pos_show_company_name.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_address }} <label for="{{ form.pos_show_address.id_for_label }}">{{ form.pos_show_address.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_phone }} <label for="{{ form.pos_show_phone.id_for_label }}">{{ form.pos_show_phone.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_email }} <label for="{{ form.pos_show_email.id_for_label }}">{{ form.pos_show_email.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_tax_info }} <label for="{{ form.pos_show_tax_info.id_for_label }}">{{ form.pos_show_tax_info.label }}</label></div>
+            <div class="field checkbox-field">{{ form.pos_show_generated_by }} <label for="{{ form.pos_show_generated_by.id_for_label }}">{{ form.pos_show_generated_by.label }}</label></div>
+
+            <div class="field field-full">
+                <label for="{{ form.pos_footer_message.id_for_label }}">{{ form.pos_footer_message.label }}</label>
+                {{ form.pos_footer_message }}
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="help-text" style="color:#b91c1c; margin-top:16px;">
+            {% trans "Verifiez les champs du formulaire avant d'enregistrer." %}
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <button type="submit" class="btn btn-add">{% trans "Enregistrer" %}</button>
+            <a href="{% url 'facture_list' %}" class="btn btn-secondary">{% trans "Retour aux factures" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
