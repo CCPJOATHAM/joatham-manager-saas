@@ -50,6 +50,18 @@ def _sync_proforma_lines(*, proforma, lignes):
     return lignes_valides
 
 
+def _normalize_proforma_client_inputs(*, client_id=None, client_nom=""):
+    normalized_client_id = str(client_id).strip() if client_id not in {None, ""} else None
+    normalized_client_nom = (client_nom or "").strip()
+
+    if normalized_client_id and normalized_client_nom:
+        raise WorkflowFacturationError("Choisissez un client enregistre ou saisissez un client occasionnel, mais pas les deux.")
+    if not normalized_client_id and not normalized_client_nom:
+        raise WorkflowFacturationError("Une proforma doit etre rattachee a un client enregistre ou a un client occasionnel.")
+
+    return normalized_client_id, normalized_client_nom
+
+
 @transaction.atomic
 def create_proforma(
     *,
@@ -69,6 +81,7 @@ def create_proforma(
     if not user_has_permission(user, "billing.manage"):
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent creer une proforma.")
 
+    client_id, client_nom = _normalize_proforma_client_inputs(client_id=client_id, client_nom=client_nom)
     client = None
     if client_id:
         client = get_object_or_404(Client, id=client_id, entreprise=entreprise)
@@ -123,6 +136,7 @@ def update_proforma(
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent modifier une proforma.")
 
     assert_proforma_editable(proforma)
+    client_id, client_nom = _normalize_proforma_client_inputs(client_id=client_id, client_nom=client_nom)
     client = None
     if client_id:
         client = get_object_or_404(Client, id=client_id, entreprise=proforma.entreprise)
@@ -211,20 +225,32 @@ def convert_proforma_to_facture(*, proforma, user):
     if not user_has_permission(user, "billing.manage"):
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent convertir une proforma.")
 
-    proforma = Proforma.objects.select_for_update().select_related("entreprise", "client", "facture_convertie").get(id=proforma.id)
+    proforma = Proforma.objects.select_for_update().select_related("entreprise", "client").get(id=proforma.id)
     assert_proforma_convertible(proforma)
+    client_id, client_nom = _normalize_proforma_client_inputs(client_id=proforma.client_id, client_nom=proforma.client_nom)
 
-    facture = create_facture(
-        entreprise=proforma.entreprise,
-        user=user,
-        client_id=proforma.client_id,
-        client_nom=proforma.client_nom or "",
-        tva=proforma.tva,
-        remise=proforma.remise,
-        rabais=proforma.rabais,
-        ristourne=proforma.ristourne,
-        lignes=_build_facture_lines_from_proforma(proforma),
-    )
+    try:
+        facture = create_facture(
+            entreprise=proforma.entreprise,
+            user=user,
+            client_id=client_id,
+            client_nom=client_nom,
+            tva=proforma.tva,
+            remise=proforma.remise,
+            rabais=proforma.rabais,
+            ristourne=proforma.ristourne,
+            lignes=_build_facture_lines_from_proforma(proforma),
+        )
+    except (PermissionFacturationError, WorkflowFacturationError):
+        raise
+    except Exception as exc:
+        logger.exception(
+            "Erreur inattendue conversion proforma",
+            extra={"entreprise_id": proforma.entreprise_id, "proforma_id": proforma.id, "user_id": user.id},
+        )
+        raise WorkflowFacturationError(
+            "La conversion en facture definitive a echoue. Verifiez le client, les lignes, le stock et la configuration comptable."
+        ) from exc
 
     proforma.facture_convertie = facture
     proforma.statut = Proforma.Statut.CONVERTIE

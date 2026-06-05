@@ -662,6 +662,9 @@ def convert_proforma_view(request, id):
         return redirect("facture_detail", id=facture.id)
     except FacturationError as exc:
         messages.error(request, str(exc))
+    except Exception:
+        logger.exception("Erreur inattendue conversion proforma", extra={"proforma_id": proforma.id, "entreprise_id": entreprise.id})
+        messages.error(request, _("Une erreur inattendue est survenue lors de la conversion de la proforma."))
     return redirect("proforma_detail", id=proforma.id)
 
 
