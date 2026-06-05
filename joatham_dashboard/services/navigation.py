@@ -171,6 +171,14 @@ NAV_ITEMS = [
         "permission": "billing.view",
         "module": "billing",
         "prefixes": ["/factures/"],
+        "exclude_prefixes": ["/factures/proformas/"],
+    },
+    {
+        "label": _("Proformas"),
+        "url_name": "proforma_list",
+        "permission": "billing.view",
+        "module": "billing",
+        "prefixes": ["/factures/proformas/"],
     },
     {
         "label": "Comptabilite",
@@ -322,12 +330,18 @@ def build_navigation_for_request(request):
                 url = f"{url}#{item['url_fragment']}"
         exact_paths = item.get("exact_paths", [])
         prefixes = item.get("prefixes", [])
+        exclude_prefixes = item.get("exclude_prefixes", [])
         badge_count = _get_badge_count(user, item.get("badge_counter"))
+        is_active = (
+            not is_disabled
+            and not any(current_path.startswith(prefix) for prefix in exclude_prefixes)
+            and (current_path in exact_paths or any(current_path.startswith(prefix) for prefix in prefixes))
+        )
         items.append(
             {
                 "label": item["label"],
                 "url": url,
-                "is_active": not is_disabled and (current_path in exact_paths or any(current_path.startswith(prefix) for prefix in prefixes)),
+                "is_active": is_active,
                 "badge": item_state.get("badge") or item.get("badge"),
                 "badge_count": badge_count,
                 "is_disabled": is_disabled,
