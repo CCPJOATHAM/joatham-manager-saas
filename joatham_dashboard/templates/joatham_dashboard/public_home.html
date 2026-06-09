@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
@@ -1553,6 +1553,371 @@
                 flex-direction: column;
             }
         }
+
+        .hero-shell {
+            padding-top: var(--header-height);
+        }
+
+        .hero,
+        .modules,
+        .platform-preview,
+        .method,
+        .contact {
+            padding: 68px 20px;
+        }
+
+        .hero {
+            padding-top: 54px;
+            padding-bottom: 58px;
+        }
+
+        main {
+            padding-top: 0;
+        }
+
+        main > section,
+        #modules,
+        #methode,
+        #contact {
+            scroll-margin-top: calc(var(--header-height) + 22px);
+        }
+
+        .hero-layout {
+            grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+            gap: 42px;
+        }
+
+        .hero-copy {
+            max-width: 620px;
+        }
+
+        .hero-lead {
+            max-width: 590px;
+            color: rgba(255, 255, 255, 0.80);
+        }
+
+        .trust-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            max-width: 100%;
+            margin-top: 30px;
+        }
+
+        .trust-item {
+            min-height: 118px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.045);
+        }
+
+        .hero-preview-card {
+            justify-self: end;
+            width: min(100%, 620px);
+            max-height: 430px;
+            aspect-ratio: 1120 / 680;
+            overflow: hidden;
+        }
+
+        .hero-preview-card img,
+        .platform-image-card img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-preview-card::after {
+            opacity: 0.72;
+        }
+
+        .section-heading {
+            margin-bottom: 24px;
+        }
+
+        .section-heading h2,
+        .contact-panel h2 {
+            max-width: 780px;
+            font-size: clamp(2rem, 3.4vw, 3.05rem);
+            line-height: 1.05;
+        }
+
+        .module-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .feature-card,
+        .method-card {
+            display: grid;
+            align-content: start;
+            min-height: 196px;
+            padding: 24px;
+        }
+
+        .feature-card .module-icon {
+            margin-bottom: 16px;
+        }
+
+        .platform-preview {
+            position: relative;
+            color: #fff;
+            isolation: isolate;
+        }
+
+        .platform-preview::before {
+            position: absolute;
+            right: -120px;
+            top: 20%;
+            z-index: -1;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.46), transparent 70%);
+            filter: blur(100px);
+            content: "";
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .platform-image-card {
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.045);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.30);
+        }
+
+        .platform-media {
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(8, 17, 31, 0.74);
+        }
+
+        .platform-card-body {
+            padding: 18px;
+        }
+
+        .platform-card-body h3 {
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-size: 1.02rem;
+        }
+
+        .platform-card-body p {
+            margin-bottom: 0;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .method {
+            padding-top: 60px;
+        }
+
+        .method-card {
+            min-height: 218px;
+        }
+
+        .method-number {
+            margin-bottom: 18px;
+        }
+
+        .contact {
+            padding-bottom: 62px;
+        }
+
+        .contact-panel {
+            align-items: center;
+            padding: 30px;
+        }
+
+        @media (max-width: 1120px) {
+            .hero-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-preview-card {
+                justify-self: stretch;
+                width: 100%;
+                max-height: 520px;
+            }
+
+            .trust-row,
+            .platform-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 900px) {
+            .module-grid,
+            .method-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .contact-panel {
+                align-items: start;
+            }
+        }
+
+        @media (max-width: 680px) {
+            :root {
+                --header-height: 150px;
+            }
+
+            .hero-shell {
+                padding-top: var(--header-height);
+            }
+
+            .hero,
+            .modules,
+            .platform-preview,
+            .method,
+            .contact {
+                padding: 48px 0;
+            }
+
+            .hero {
+                padding-top: 34px;
+                padding-bottom: 44px;
+            }
+
+            h1 {
+                font-size: clamp(3rem, 15vw, 3.65rem);
+            }
+
+            .trust-row,
+            .module-grid,
+            .platform-grid,
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .trust-item {
+                min-height: auto;
+            }
+
+            .hero-preview-card {
+                max-height: none;
+            }
+
+            .platform-card-body,
+            .feature-card,
+            .method-card {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .header-actions,
+            .hero-actions,
+            .contact-actions {
+                gap: 8px;
+            }
+
+            .brand-mark {
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        .site-header.navbar {
+            z-index: 10000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background:
+                linear-gradient(180deg, rgba(8, 17, 31, 0.98), rgba(8, 17, 31, 0.94));
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(18px);
+        }
+
+        .site-header.navbar .header-inner {
+            background: rgba(7, 19, 31, 0.96);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.10),
+                0 18px 44px rgba(0, 0, 0, 0.28);
+        }
+
+        main > section,
+        #modules,
+        #methode,
+        #contact {
+            scroll-margin-top: calc(var(--header-height) + 56px);
+        }
+
+        @media (max-width: 680px) {
+            main > section,
+            #modules,
+            #methode,
+            #contact {
+                scroll-margin-top: calc(var(--header-height) + 34px);
+            }
+        }
+
+        :root {
+            --header-height: 104px;
+            --header-clearance: 88px;
+            --section-top-offset: 96px;
+        }
+
+        html {
+            scroll-padding-top: calc(var(--header-height) + var(--header-clearance));
+        }
+
+        .hero-shell {
+            overflow: visible;
+            isolation: auto;
+            z-index: auto;
+        }
+
+        .site-header.navbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            min-height: var(--header-height);
+            z-index: 10000;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            padding-top: 24px;
+        }
+
+        main > section,
+        .modules,
+        .platform-preview,
+        .method,
+        .contact,
+        #modules,
+        #methode,
+        #contact {
+            scroll-margin-top: calc(var(--header-height) + var(--header-clearance));
+        }
+
+        .modules,
+        .platform-preview,
+        .method,
+        .contact {
+            padding-top: var(--section-top-offset);
+        }
+
+        @media (max-width: 680px) {
+            :root {
+                --header-height: 150px;
+                --header-clearance: 56px;
+                --section-top-offset: 76px;
+            }
+
+            main {
+                padding-top: 18px;
+            }
+        }
     </style>
     <script type="application/ld+json">
         {
@@ -1614,7 +1979,7 @@
                         <span class="eyebrow">{% trans "Plateforme SaaS de gestion en RDC" %}</span>
                         <h1 id="titre-accueil">JOATHAM Manager</h1>
                         <p class="hero-lead">
-                            {% trans "Un espace web moderne pour organiser vos clients, factures, dépenses, comptabilité et apprenants avec une expérience claire, rapide et professionnelle." %}
+                            {% trans "Un espace web moderne pour organiser vos clients, factures, dépenses, comptabilité, caisse, stock, ressources humaines et apprenants avec une expérience claire, rapide et professionnelle." %}
                         </p>
                         <div class="hero-actions">
                             <a class="button primary btn-primary" href="{% url 'signup' %}">{% trans "Créer un compte" %}</a>
@@ -1644,96 +2009,16 @@
                         </div>
                     </div>
 
-                    <section class="product-view glass section-glow" aria-label="{% trans 'Aperçu de l’interface JOATHAM Manager' %}">
-                        <div class="product-bar">
-                            <div class="window-dots" aria-hidden="true">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                            <div class="product-title">{% trans "Vue de pilotage JOATHAM Manager" %}</div>
-                        </div>
-
-                        <div class="product-grid">
-                            <aside class="product-sidebar" aria-label="{% trans 'Modules disponibles' %}">
-                                <div class="sidebar-label">{% trans "Modules" %}</div>
-                                <div class="module-list">
-                                    <div class="module-item active"><span class="module-icon">F</span>{% trans "Facturation" %}</div>
-                                    <div class="module-item"><span class="module-icon">C</span>{% trans "Clients" %}</div>
-                                    <div class="module-item"><span class="module-icon">D</span>{% trans "Dépenses" %}</div>
-                                    <div class="module-item"><span class="module-icon">P</span>{% trans "Produits" %}</div>
-                                    <div class="module-item"><span class="module-icon">A</span>{% trans "Apprenants" %}</div>
-                                </div>
-                            </aside>
-
-                            <div class="product-content">
-                                <div class="status-strip">
-                                    <div class="status-panel glass card">
-                                        <span>{% trans "Organisation" %}</span>
-                                        <strong>{% trans "Flux de travail centralisés" %}</strong>
-                                    </div>
-                                    <div class="status-panel glass card">
-                                        <span>{% trans "Suivi" %}</span>
-                                        <strong>{% trans "Actions visibles par module" %}</strong>
-                                    </div>
-                                    <div class="status-panel glass card">
-                                        <span>{% trans "Pilotage" %}</span>
-                                        <strong>{% trans "Décisions mieux préparées" %}</strong>
-                                    </div>
-                                </div>
-
-                                <div class="screen-layout">
-                                    <section class="workflow-panel glass card" aria-labelledby="titre-flux">
-                                        <div class="panel-header">
-                                            <strong id="titre-flux">{% trans "Travail en cours" %}</strong>
-                                            <span class="tag">{% trans "Vue claire" %}</span>
-                                        </div>
-                                        <div class="workflow-rows">
-                                            <div class="workflow-row">
-                                                <strong>{% trans "Factures" %}</strong>
-                                                <span>{% trans "Créez vos documents et suivez leur cycle sans afficher de données sensibles publiquement." %}</span>
-                                            </div>
-                                            <div class="workflow-row">
-                                                <strong>{% trans "Clients" %}</strong>
-                                                <span>{% trans "Gardez les contacts et historiques utiles dans une base propre." %}</span>
-                                            </div>
-                                            <div class="workflow-row">
-                                                <strong>{% trans "Dépenses" %}</strong>
-                                                <span>{% trans "Classez les charges et préparez une lecture fiable de l’activité." %}</span>
-                                            </div>
-                                        </div>
-                                    </section>
-
-                                    <aside class="insight-panel glass card">
-                                        <h2>{% trans "Un tableau de bord plus net" %}</h2>
-                                        <ul class="insight-list">
-                                            <li>
-                                                <span class="check" aria-hidden="true">✓</span>
-                                                <span>
-                                                    <strong>{% trans "Information regroupée" %}</strong>
-                                                    <span>{% trans "Les équipes travaillent avec les mêmes repères." %}</span>
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="check" aria-hidden="true">✓</span>
-                                                <span>
-                                                    <strong>{% trans "Parcours simple" %}</strong>
-                                                    <span>{% trans "Les actions essentielles restent proches et faciles à retrouver." %}</span>
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="check" aria-hidden="true">✓</span>
-                                                <span>
-                                                    <strong>{% trans "Gestion structurée" %}</strong>
-                                                    <span>{% trans "Chaque module garde son rôle, sans mélanger les responsabilités." %}</span>
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </aside>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <figure class="product-view hero-preview-card glass section-glow" aria-label="{% trans 'Aperçu de l’interface JOATHAM Manager' %}">
+                        <img
+                            src="{% static 'img/home/home-hero-dashboard.png' %}"
+                            width="1120"
+                            height="680"
+                            alt="{% trans 'Aperçu du tableau de bord JOATHAM Manager' %}"
+                            decoding="async"
+                            fetchpriority="high"
+                        >
+                    </figure>
                 </div>
             </section>
         </div>
@@ -1754,6 +2039,11 @@
                     <p>{% trans "Préparez vos factures, suivez leur état et gardez une lecture claire des documents commerciaux." %}</p>
                 </article>
                 <article class="feature-card glass card">
+                    <span class="module-icon">K</span>
+                    <h3>{% trans "Caisse" %}</h3>
+                    <p>{% trans "Suivez les entrées, sorties et sessions de caisse avec une lecture simple des mouvements." %}</p>
+                </article>
+                <article class="feature-card glass card">
                     <span class="module-icon">C</span>
                     <h3>{% trans "Clients" %}</h3>
                     <p>{% trans "Centralisez les informations utiles pour mieux suivre les relations et les demandes." %}</p>
@@ -1764,14 +2054,107 @@
                     <p>{% trans "Classez les charges, gardez une trace propre et préparez vos décisions avec plus de sérénité." %}</p>
                 </article>
                 <article class="feature-card glass card">
-                    <span class="module-icon">A</span>
-                    <h3>{% trans "Apprenants" %}</h3>
-                    <p>{% trans "Suivez les inscriptions, profils et activités liées aux services de formation." %}</p>
+                    <span class="module-icon">S</span>
+                    <h3>{% trans "Produits & Stock" %}</h3>
+                    <p>{% trans "Gardez une vue fiable sur vos produits, mouvements, alertes et inventaires." %}</p>
                 </article>
                 <article class="feature-card glass card">
                     <span class="module-icon">O</span>
                     <h3>{% trans "Comptabilité" %}</h3>
                     <p>{% trans "Organisez les données de gestion nécessaires au suivi financier interne." %}</p>
+                </article>
+                <article class="feature-card glass card">
+                    <span class="module-icon">R</span>
+                    <h3>{% trans "Ressources Humaines" %}</h3>
+                    <p>{% trans "Structurez les employés, présences, congés et documents RH au même endroit." %}</p>
+                </article>
+                <article class="feature-card glass card">
+                    <span class="module-icon">A</span>
+                    <h3>{% trans "Apprenants / Formations" %}</h3>
+                    <p>{% trans "Suivez les inscriptions, profils et activités liées aux services de formation." %}</p>
+                </article>
+                <article class="feature-card glass card">
+                    <span class="module-icon">P</span>
+                    <h3>{% trans "Rapports" %}</h3>
+                    <p>{% trans "Consultez les indicateurs clés pour mieux comparer, décider et préparer vos suivis." %}</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="platform-preview page-section container section-glow" aria-labelledby="titre-plateforme">
+            <div class="section-heading">
+                <span class="section-kicker">{% trans "Images de la plateforme" %}</span>
+                <h2 id="titre-plateforme">{% trans "Une plateforme claire pour piloter votre activité" %}</h2>
+                <p>{% trans "Visualisez rapidement vos opérations, suivez vos documents, contrôlez vos finances et gardez une vue d’ensemble sur votre entreprise." %}</p>
+            </div>
+
+            <div class="platform-grid">
+                <article class="platform-image-card glass">
+                    <div class="platform-media">
+                        <img
+                            src="{% static 'img/home/home-billing-preview.png' %}"
+                            width="900"
+                            height="560"
+                            alt="{% trans 'Aperçu du module de facturation JOATHAM Manager' %}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <div class="platform-card-body">
+                        <h3>{% trans "Facturation" %}</h3>
+                        <p>{% trans "Des documents propres, suivis par état, prêts pour les opérations commerciales." %}</p>
+                    </div>
+                </article>
+
+                <article class="platform-image-card glass">
+                    <div class="platform-media">
+                        <img
+                            src="{% static 'img/home/home-cash-preview.png' %}"
+                            width="900"
+                            height="560"
+                            alt="{% trans 'Aperçu du module de caisse JOATHAM Manager' %}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <div class="platform-card-body">
+                        <h3>{% trans "Caisse" %}</h3>
+                        <p>{% trans "Une lecture nette des sessions et mouvements pour garder le contrôle." %}</p>
+                    </div>
+                </article>
+
+                <article class="platform-image-card glass">
+                    <div class="platform-media">
+                        <img
+                            src="{% static 'img/home/home-stock-preview.png' %}"
+                            width="900"
+                            height="560"
+                            alt="{% trans 'Aperçu du module produits et stock JOATHAM Manager' %}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <div class="platform-card-body">
+                        <h3>{% trans "Stock" %}</h3>
+                        <p>{% trans "Produits, mouvements et inventaires restent visibles dans une interface claire." %}</p>
+                    </div>
+                </article>
+
+                <article class="platform-image-card glass">
+                    <div class="platform-media">
+                        <img
+                            src="{% static 'img/home/home-rh-preview.png' %}"
+                            width="900"
+                            height="560"
+                            alt="{% trans 'Aperçu du module ressources humaines JOATHAM Manager' %}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                    <div class="platform-card-body">
+                        <h3>{% trans "Ressources humaines" %}</h3>
+                        <p>{% trans "Présences, congés et documents sont organisés pour les suivis quotidiens." %}</p>
+                    </div>
                 </article>
             </div>
         </section>
@@ -1793,7 +2176,7 @@
                     <article class="method-card glass card">
                         <span class="method-number">02</span>
                         <h3>{% trans "Structurer les modules" %}</h3>
-                        <p>{% trans "Organisez clients, factures, dépenses, comptabilité et apprenants selon vos besoins." %}</p>
+                        <p>{% trans "Organisez clients, factures, caisse, stock, RH, comptabilité et apprenants selon vos besoins." %}</p>
                     </article>
                     <article class="method-card glass card">
                         <span class="method-number">03</span>
