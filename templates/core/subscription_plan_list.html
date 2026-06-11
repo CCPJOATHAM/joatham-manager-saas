@@ -1,12 +1,14 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Choisir un plan | JOATHAM Manager{% endblock %}
-{% block content_title %}Choisir un plan{% endblock %}
-{% block content_subtitle %}Comparez les offres disponibles et envoyez une demande de souscription pour validation manuelle.{% endblock %}
+{% block page_title %}Packs SaaS | JOATHAM Manager{% endblock %}
+{% block content_title %}Packs SaaS{% endblock %}
+{% block content_subtitle %}Comparez les offres JOATHAM Manager et choisissez le niveau adapte a votre organisation.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'subscription_overview' %}" class="btn-link">Mon abonnement</a>
 {% endblock %}
+
+{% block content_card_class %}subscription-plans-shell{% endblock %}
 
 {% block content %}
 <style>
@@ -175,21 +177,52 @@
         background: #fff;
         color: #64748b;
     }
+
+    .subscription-plans-shell{background:#f8fafc;border-color:#dbe7f3;box-shadow:none}.plans-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px;padding:0;border:0;background:transparent;box-shadow:none}.plans-hero-copy,.plans-status-panel,.compare-panel{border:1px solid #dbe7f3;border-radius:8px;background:#fff;box-shadow:0 12px 28px rgba(15,23,42,.06)}.plans-hero-copy{padding:24px;background:linear-gradient(135deg,#104a87,#146db3);color:#fff}.plans-hero-copy strong,.plans-hero-copy p{color:#fff}.plans-hero-copy p{color:#dbeafe}.plans-status-panel{display:grid;gap:14px;padding:18px}.status-label,.section-label{letter-spacing:0}.status-label{color:#64748b;font-size:.82rem;font-weight:800}.status-value{color:#10233f;font-size:1.15rem;font-weight:900}.status-pill{display:inline-flex;align-items:center;width:max-content;min-height:28px;padding:0 10px;border-radius:999px;background:#e8f3ff;color:#0f4f8a;font-weight:800;font-size:.82rem}.status-pill.is-warning{background:#fff7ed;color:#b45309}.plans-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.plan-card{position:relative;grid-template-rows:auto auto auto 1fr auto;border-radius:8px;border-color:#dbe7f3}.plan-card.is-popular{border-color:#1d6fb8;box-shadow:0 18px 38px rgba(29,111,184,.16)}.plan-badge{position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;background:#0f4f8a;color:#fff;font-size:.78rem;font-weight:900}.plan-head{padding-right:90px}.price,.btn-request,.auto-payment-note,.empty-state,.compare-item{border-radius:8px}.btn-request{background:#0f4f8a}.btn-request.payment{background:#0f766e}.module-pill{background:#e8f3ff;color:#0f4f8a}.compare-panel{padding:18px}.compare-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}.compare-header h2{margin:0;color:#10233f;font-size:1.15rem}.compare-header span{color:#64748b;font-weight:700}.compare-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.compare-item{min-width:0;border:1px solid #e2e8f0;background:#f8fafc;padding:14px}.compare-item strong,.compare-item span{display:block}.compare-item strong{color:#10233f;font-size:1rem}.compare-item span{margin-top:5px;color:#64748b;line-height:1.45}@media(max-width:1180px){.plans-grid,.compare-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:860px){.plans-hero,.plans-grid,.compare-grid{grid-template-columns:1fr}.plan-head{padding-right:0}.plan-badge{position:static;width:max-content;margin-bottom:-6px}.compare-header{align-items:flex-start;flex-direction:column}}
 </style>
 
 <section class="plans-hero">
-    <strong>{{ entreprise.nom }}</strong>
-    <p>
-        La souscription reste manuelle pour le moment. Votre demande sera visible par le super admin,
-        puis validée après confirmation du paiement ou accord commercial.
-    </p>
+    <div class="plans-hero-copy">
+        <strong>JOATHAM Manager SaaS</strong>
+        <p>
+            Les packs actifs sont repris depuis la configuration existante de la plateforme.
+            Les montants restent exprimes dans la devise officielle du plan, avec une estimation locale quand elle est disponible.
+        </p>
+    </div>
+    <aside class="plans-status-panel" aria-label="Situation abonnement">
+        <div>
+            <div class="status-label">Organisation</div>
+            <div class="status-value">{{ entreprise.nom }}</div>
+        </div>
+        <div>
+            <div class="status-label">Abonnement actuel</div>
+            {% if subscription %}
+            <div class="status-value">{{ subscription.plan.nom }}</div>
+            <span class="status-pill">{{ subscription.get_statut_display }}</span>
+            {% else %}
+            <div class="status-value">Aucun plan actif</div>
+            <span class="status-pill is-warning">Action requise</span>
+            {% endif %}
+        </div>
+        <div>
+            <div class="status-label">Paiement en ligne</div>
+            {% if automatic_payment_provider_configured %}
+            <div class="status-value">Disponible</div>
+            <span class="status-pill">CinetPay configure</span>
+            {% else %}
+            <div class="status-value">Non configure</div>
+            <span class="status-pill is-warning">Validation manuelle</span>
+            {% endif %}
+        </div>
+    </aside>
 </section>
 
 {% if plan_cards %}
 <div class="plans-grid">
     {% for plan_card in plan_cards %}
     {% with plan=plan_card.plan price_info=plan_card.price_info %}
-    <article class="plan-card">
+    <article class="plan-card {% if plan.code == 'pro' %}is-popular{% endif %}">
+        {% if plan.code == "pro" %}<span class="plan-badge">Populaire</span>{% endif %}
         <div class="plan-head">
             <h2>{{ plan.nom }}</h2>
             <p>{{ plan_card.description }}</p>
@@ -201,14 +234,14 @@
             <span>plan gratuit</span>
             {% else %}
             <strong>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:"USD" }}</strong>
-            <span>prix officiel par mois</span>
+            <span>Prix mensuel</span>
             {% endif %}
             {% if plan.prix_annuel %}
             <span>{{ plan.prix_annuel }} {{ plan.devise|default:"USD" }} par an</span>
             {% endif %}
             {% if not plan_card.is_free and not price_info.unavailable %}
-            <span>Equivalent estime : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
-            <span>Taux utilise : 1 {{ price_info.official_currency }} = {{ price_info.rate }} {{ price_info.company_currency }}</span>
+            <span>Estimation locale : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
+            <span>Taux : 1 {{ price_info.official_currency }} = {{ price_info.rate }} {{ price_info.company_currency }}</span>
             {% elif not plan_card.is_free and price_info.unavailable %}
             <span>Conversion temporairement indisponible pour {{ price_info.company_currency }}</span>
             {% endif %}
@@ -216,7 +249,7 @@
 
         {% if plan_card.features %}
         <div>
-            <div class="section-label">Avantages</div>
+            <div class="section-label">Avantages principaux</div>
             <div class="limits">
                 {% for feature in plan_card.features %}
                 <div class="limit-row"><span>{{ feature }}</span><strong>Inclus</strong></div>
@@ -246,7 +279,7 @@
             </div>
             {% else %}
             <div class="module-list">
-                <span class="module-pill">Tous les modules autorisés</span>
+                <span class="module-pill">Modules autorises</span>
             </div>
             {% endif %}
         </div>
@@ -263,7 +296,7 @@
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ plan.id }}">
             <button type="submit" class="btn-request" {% if plan_card.is_free or plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyee{% else %}Demander ce plan{% endif %}
+                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyee{% else %}Choisir ce pack{% endif %}
             </button>
         </form>
         {% if not plan_card.is_free %}
@@ -271,12 +304,12 @@
             <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="duree" value="mensuel">
-                <button type="submit" class="btn-request" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                    Payer automatiquement
+                <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                    Payer avec CinetPay
                 </button>
             </form>
             {% else %}
-            <div class="auto-payment-note">Paiement automatique bientôt disponible</div>
+            <div class="auto-payment-note">Paiement CinetPay non configure</div>
             {% endif %}
         {% endif %}
         </div>
@@ -284,9 +317,29 @@
     {% endwith %}
     {% endfor %}
 </div>
+
+<section class="compare-panel" aria-label="Comparaison rapide">
+    <div class="compare-header">
+        <h2>Comparaison rapide</h2>
+        <span>Prix, utilisateurs et volume de factures par plan.</span>
+    </div>
+    <div class="compare-grid">
+        {% for plan_card in plan_cards %}
+        {% with plan=plan_card.plan price_info=plan_card.price_info %}
+        <div class="compare-item">
+            <strong>{{ plan.nom }}</strong>
+            <span>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} / mois</span>
+            <span>Utilisateurs : {{ plan.max_utilisateurs|default_if_none:"Illimite" }}</span>
+            <span>Factures / mois : {{ plan.max_factures_mois|default_if_none:"Illimite" }}</span>
+            <span>Clients : {{ plan.max_clients|default_if_none:"Illimite" }}</span>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+</section>
 {% else %}
 <div class="empty-state">
-    Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour préparer votre abonnement.
+    Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour preparer votre abonnement.
 </div>
 {% endif %}
 {% endblock %}
