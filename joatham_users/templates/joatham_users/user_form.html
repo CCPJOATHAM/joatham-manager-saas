@@ -212,7 +212,7 @@
 <div class="hero">
     <div>
         <h2>{{ page_title }}</h2>
-        <p>{% if form_mode == "create" %}{% trans "Ajoutez un nouveau compte a votre entreprise en definissant simplement son rôle d'accès, ses coordonnees et son acces initial." %}{% else %}{% trans "Mettez a jour les informations du compte selectionne sans toucher aux regles de securite et d'isolation deja en place." %}{% endif %}</p>
+        <p>{% if form_mode == "create" %}{% trans "Ajoutez un nouveau compte à votre entreprise en définissant simplement son rôle d'accès, ses coordonnées et son accès initial." %}{% else %}{% trans "Mettez à jour les informations du compte sélectionné sans toucher aux règles de sécurité et d'isolation déjà en place." %}{% endif %}</p>
     </div>
     <div class="hero-badges">
         <span class="hero-badge">{% trans "Rôles d'accès gérés : Gestionnaire / Comptable" %}</span>
@@ -263,7 +263,7 @@
                 </div>
 
                 <div class="field">
-                    <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
+                    <label for="{{ form.telephone.id_for_label }}">{% trans "Téléphone" %}</label>
                     {{ form.telephone }}
                     {{ form.telephone.errors }}
                 </div>
@@ -288,9 +288,9 @@
             <div class="form-footer">
                 <div class="footer-note">
                     {% if form_mode == "create" %}
-                    {% trans "Le nouveau compte sera automatiquement rattache a votre entreprise actuelle." %}
+                    {% trans "Le nouveau compte sera automatiquement rattaché à votre entreprise actuelle." %}
                     {% else %}
-                    {% trans "Les modifications restent limitees a l'utilisateur de votre entreprise selectionne." %}
+                    {% trans "Les modifications restent limitées à l'utilisateur de votre entreprise sélectionné." %}
                     {% endif %}
                 </div>
                 <button type="submit" class="submit-btn">{{ submit_label }}</button>

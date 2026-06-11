@@ -24,7 +24,7 @@
     <div class="meta">
         <div><strong>{% trans "Entreprise :" %}</strong> {{ entreprise.nom }}</div>
         <div><strong>{% trans "Date generation :" %}</strong> {{ date_generation }}</div>
-        <div><strong>{% trans "Periode :" %}</strong> {% if selected_date_debut or selected_date_fin %}{{ selected_date_debut|default:"-" }} - {{ selected_date_fin|default:"-" }}{% else %}{% trans "Toutes les dates" %}{% endif %}</div>
+        <div><strong>{% trans "Période :" %}</strong> {% if selected_date_debut or selected_date_fin %}{{ selected_date_debut|default:"-" }} - {{ selected_date_fin|default:"-" }}{% else %}{% trans "Toutes les dates" %}{% endif %}</div>
         {% if selected_product_name %}<div><strong>{% trans "Produit filtre :" %}</strong> {{ selected_product_name }}</div>{% endif %}
     </div>
 
@@ -39,12 +39,12 @@
             <td>{% trans "Mouvements" %}: {{ report.total_mouvements }}</td>
             <td>{% trans "Entrees" %}: {{ report.total_entrees }}</td>
             <td>{% trans "Sorties" %}: {{ report.total_sorties }}</td>
-            <td>{% trans "Inventaires valides" %}: {{ report.inventaires_valides }}</td>
+            <td>{% trans "Inventaires validés" %}: {{ report.inventaires_valides }}</td>
         </tr>
         <tr>
             <td>{% trans "Ajustements +" %}: {{ report.total_ajustements_positifs }}</td>
             <td>{% trans "Ajustements -" %}: {{ report.total_ajustements_negatifs }}</td>
-            <td>{% trans "Inventaires avec ecarts" %}: {{ report.inventaires_avec_ecarts }}</td>
+            <td>{% trans "Inventaires avec écarts" %}: {{ report.inventaires_avec_ecarts }}</td>
             <td></td>
         </tr>
     </table>
@@ -99,7 +99,7 @@
             <tbody>
                 <tr><td>{% trans "Brouillons" %}</td><td>{{ inventory_summary.draft_count }}</td><td>{% trans "En cours" %}</td><td>{{ inventory_summary.in_progress_count }}</td></tr>
                 <tr><td>{% trans "Clotures" %}</td><td>{{ inventory_summary.closed_count }}</td><td>{% trans "Valides" %}</td><td>{{ inventory_summary.validated_count }}</td></tr>
-                <tr><td>{% trans "Annules" %}</td><td>{{ inventory_summary.cancelled_count }}</td><td>{% trans "Inventaires avec ecarts" %}</td><td>{{ inventory_summary.inventories_with_differences }}</td></tr>
+                <tr><td>{% trans "Annulés" %}</td><td>{{ inventory_summary.cancelled_count }}</td><td>{% trans "Inventaires avec écarts" %}</td><td>{{ inventory_summary.inventories_with_differences }}</td></tr>
                 <tr><td>{% trans "Ecarts positifs" %}</td><td>{{ inventory_summary.positive_differences }}</td><td>{% trans "Ecarts negatifs" %}</td><td>{{ inventory_summary.negative_differences }}</td></tr>
             </tbody>
         </table>

@@ -8,8 +8,8 @@
     <div class="summary">
         <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
         <p><strong>Formation:</strong> {{ inscription.formation }}</p>
-        <p><strong>Montant prevu:</strong> {{ inscription.montant_prevu }}</p>
-        <p><strong>Montant paye:</strong> {{ inscription.montant_paye }}</p>
+        <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu }}</p>
+        <p><strong>Montant payé:</strong> {{ inscription.montant_paye }}</p>
         <p><strong>Solde actuel:</strong> {{ inscription.solde }}</p>
     </div>
 
@@ -52,7 +52,7 @@
             {% for paiement in paiements %}
                 <li>{{ paiement.date_paiement }} - {{ paiement.montant }} - {{ paiement.get_mode_paiement_display }}</li>
             {% empty %}
-                <li>Aucun paiement enregistre.</li>
+                <li>Aucun paiement enregistré.</li>
             {% endfor %}
         </ul>
     </div>

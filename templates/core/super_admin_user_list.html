@@ -225,13 +225,13 @@
                         <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="user_id" value="{{ listed_user.id }}">
-                            <button type="submit" name="action" value="deactivate_user" class="btn-small danger">Desactiver</button>
+                            <button type="submit" name="action" value="deactivate_user" class="btn-small danger">Désactiver</button>
                         </form>
                         {% else %}
                         <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="user_id" value="{{ listed_user.id }}">
-                            <button type="submit" name="action" value="reactivate_user" class="btn-small primary">Reactiver</button>
+                            <button type="submit" name="action" value="reactivate_user" class="btn-small primary">Réactiver</button>
                         </form>
                         {% endif %}
                     </div>

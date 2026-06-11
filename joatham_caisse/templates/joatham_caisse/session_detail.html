@@ -2,7 +2,7 @@
 
 {% block page_title %}Session {{ session.caisse.nom }}{% endblock %}
 {% block content_title %}Session {{ session.caisse.nom }}{% endblock %}
-{% block content_subtitle %}Suivi detaille des mouvements, des soldes et des decisions de controle pour cette session de caisse.{% endblock %}
+{% block content_subtitle %}Suivi détaillé des mouvements, des soldes et des décisions de contrôle pour cette session de caisse.{% endblock %}
 
 {% block content %}
 <style>
@@ -269,7 +269,7 @@
       <span class="stat-value amount-negative">{{ movement_totals.total_sorties }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Solde theorique</span>
+      <span class="stat-label">Solde théorique</span>
       <span class="stat-value">{{ session.solde_theorique }}</span>
     </div>
     <div class="stat-card">
@@ -286,8 +286,8 @@
   {% if can_validate_session or can_reject_session %}
   <div class="panel">
     <div class="panel-header">
-      <h3>Decision de controle</h3>
-      <p>Validez ou rejetez la session fermee avec un commentaire explicatif.</p>
+      <h3>Décision de contrôle</h3>
+      <p>Validez ou rejetez la session fermée avec un commentaire explicatif.</p>
     </div>
     <div style="padding:18px;">
       <div class="decision-grid">
@@ -295,7 +295,7 @@
         <form method="post" action="{% url 'caisse_validate_session' session.id %}" class="decision-card">
           {% csrf_token %}
           <h4>Valider la session</h4>
-          <p>Confirmez la cloture et conservez une trace du controle effectue.</p>
+          <p>Confirmez la clôture et conservez une trace du contrôle effectué.</p>
           {{ decision_form.commentaire }}
           <div style="margin-top:14px;">
             <button type="submit" class="btn primary">Valider la session</button>
@@ -306,7 +306,7 @@
         <form method="post" action="{% url 'caisse_reject_session' session.id %}" class="decision-card">
           {% csrf_token %}
           <h4>Rejeter la session</h4>
-          <p>Signalez un point de controle ou un ecart necessitant un traitement.</p>
+          <p>Signalez un point de contrôle ou un écart nécessitant un traitement.</p>
           {{ decision_form.commentaire }}
           <div style="margin-top:14px;">
             <button type="submit" class="btn danger">Rejeter la session</button>
@@ -322,7 +322,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>Mouvements</h3>
-      <p>Historique des operations rattachees a cette session.</p>
+      <p>Historique des opérations rattachées à cette session.</p>
     </div>
     <div class="table-wrap">
       <table class="table">

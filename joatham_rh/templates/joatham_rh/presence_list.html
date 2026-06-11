@@ -1,7 +1,7 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Consultez les presences simples enregistrees par entreprise." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Consultez les présences simples enregistrées par entreprise." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
@@ -33,7 +33,7 @@
         <input type="date" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
     </div>
     <div class="rh-field">
-        <label for="employe">{% trans "Employe" %}</label>
+        <label for="employe">{% trans "Employé" %}</label>
         <select id="employe" name="employe">
             <option value="">{% trans "Tous" %}</option>
             {% for employe in employes_filter %}
@@ -61,7 +61,7 @@
             <thead>
                 <tr>
                     <th>{% trans "Date" %}</th>
-                    <th>{% trans "Employe" %}</th>
+                    <th>{% trans "Employé" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Arrivee" %}</th>
                     <th>{% trans "Depart" %}</th>
@@ -86,7 +86,7 @@
 {% else %}
 <div class="rh-table-shell">
     <div class="rh-empty">
-        <h3>{% trans "Aucune presence enregistree" %}</h3>
+        <h3>{% trans "Aucune présence enregistrée" %}</h3>
         <p>{% trans "Enregistrez les presences quotidiennes lorsque vous etes pret." %}</p>
         {% if can_record_presence_ui %}
         <a href="{% url 'rh_presence_create' %}" class="btn-link primary">{% trans "Ajouter une presence" %}</a>

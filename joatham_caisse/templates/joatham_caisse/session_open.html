@@ -2,7 +2,7 @@
 
 {% block page_title %}Ouvrir une session{% endblock %}
 {% block content_title %}Ouvrir une session{% endblock %}
-{% block content_subtitle %}Demarrez une nouvelle session de caisse pour suivre les mouvements et le solde theorique de la journee.{% endblock %}
+{% block content_subtitle %}Démarrez une nouvelle session de caisse pour suivre les mouvements et le solde théorique de la journée.{% endblock %}
 
 {% block content %}
 <style>
@@ -99,7 +99,7 @@
 
 <div class="context-card">
   <h2>{{ caisse.nom }}</h2>
-  <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}. L'ouverture initialise la session active et servira de base au calcul du solde theorique.</p>
+  <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}. L'ouverture initialise la session active et servira de base au calcul du solde théorique.</p>
 </div>
 
 <div class="cash-form-shell">
@@ -115,7 +115,7 @@
       <div class="field">
         <label for="{{ form.commentaire_ouverture.id_for_label }}">Commentaire d'ouverture</label>
         {{ form.commentaire_ouverture }}
-        <div class="helper">Ajoutez un contexte utile : equipe presente, point de depart, remarque operationnelle.</div>
+        <div class="helper">Ajoutez un contexte utile : équipe présente, point de départ, remarque opérationnelle.</div>
         {{ form.commentaire_ouverture.errors }}
       </div>
     </div>

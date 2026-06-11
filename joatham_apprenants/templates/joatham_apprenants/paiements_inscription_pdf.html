@@ -25,8 +25,8 @@
 <div class="meta-box">
     <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
     <p><strong>Formation:</strong> {{ inscription.formation }}</p>
-    <p><strong>Montant prevu:</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
-    <p><strong>Montant paye:</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
+    <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
+    <p><strong>Montant payé:</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
     <p><strong>Solde:</strong> {{ inscription.solde|floatformat:2 }}</p>
 </div>
 
@@ -53,7 +53,7 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">Aucun paiement enregistre.</td>
+                <td colspan="6">Aucun paiement enregistré.</td>
             </tr>
         {% endfor %}
     </tbody>

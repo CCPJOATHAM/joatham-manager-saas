@@ -33,7 +33,7 @@
             <thead>
                 <tr>
                     <th>Nom</th>
-                    <th>Telephone</th>
+                    <th>Téléphone</th>
                     <th>Email</th>
                     <th>Date inscription</th>
                     <th>Actif</th>
@@ -51,7 +51,7 @@
             {% empty %}
                 <tr>
                     <td colspan="5" class="empty">
-                        Aucun apprenant enregistre pour le moment.
+                        Aucun apprenant enregistré pour le moment.
                         {% if can_add_apprenants_ui %}
                         <a href="{% url 'apprenant_create' %}" style="margin-left:8px;">Ajouter un apprenant</a>
                         {% endif %}
@@ -70,8 +70,8 @@
                     <th>Apprenant</th>
                     <th>Formation</th>
                     <th>Statut</th>
-                <th>Montant prevu</th>
-                <th>Montant paye</th>
+                <th>Montant prévu</th>
+                <th>Montant payé</th>
                 <th>Solde</th>
                 <th>Actions</th>
                 </tr>
@@ -95,7 +95,7 @@
             {% empty %}
                 <tr>
                     <td colspan="7" class="empty">
-                        Aucune inscription enregistree pour le moment.
+                        Aucune inscription enregistrée pour le moment.
                         {% if can_manage_apprenants_ui %}
                         <a href="{% url 'inscription_create' %}" style="margin-left:8px;">Nouvelle inscription</a>
                         {% endif %}

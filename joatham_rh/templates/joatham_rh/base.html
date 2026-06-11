@@ -3,13 +3,13 @@
 
 {% block page_title %}{% trans "Ressources humaines" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% block rh_title %}{% trans "Ressources humaines" %}{% endblock %}{% endblock %}
-{% block content_subtitle %}{% block rh_subtitle %}{% trans "Employes, postes RH et presences de votre entreprise." %}{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block rh_subtitle %}{% trans "Employés, postes RH et présences de votre entreprise." %}{% endblock %}{% endblock %}
 
 {% block top_actions %}
 {% if can_view_reports_ui %}
 <a href="{% url 'rh_reports' %}" class="btn-link">{% trans "Tableau de bord" %}</a>
 {% endif %}
-<a href="{% url 'rh_employe_list' %}" class="btn-link">{% trans "Employes" %}</a>
+<a href="{% url 'rh_employe_list' %}" class="btn-link">{% trans "Employés" %}</a>
 {% if can_manage_rh_ui %}
 <a href="{% url 'rh_employe_create' %}" class="btn-link primary">{% trans "Ajouter" %}</a>
 {% endif %}
@@ -832,7 +832,7 @@
     <div class="rh-nav-heading">
         <span class="rh-nav-kicker">{% trans "Module" %}</span>
         <strong>{% trans "Ressources Humaines" %}</strong>
-        <small>{% trans "Pilotage simple des equipes, presences, conges et documents." %}</small>
+        <small>{% trans "Pilotage simple des équipes, présences, congés et documents." %}</small>
     </div>
     <div class="rh-nav-links">
         {% if can_view_reports_ui %}
@@ -843,7 +843,7 @@
         {% endif %}
         <a href="{% url 'rh_employe_list' %}" class="{% if request.resolver_match.url_name == 'rh_employe_list' or request.resolver_match.url_name == 'rh_employe_detail' or request.resolver_match.url_name == 'rh_employe_create' or request.resolver_match.url_name == 'rh_employe_update' %}is-active{% endif %}">
             <span class="rh-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg></span>
-            {% trans "Employes" %}
+            {% trans "Employés" %}
         </a>
         <a href="{% url 'rh_poste_list' %}" class="{% if request.resolver_match.url_name == 'rh_poste_list' or request.resolver_match.url_name == 'rh_poste_create' %}is-active{% endif %}">
             <span class="rh-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg></span>
@@ -851,11 +851,11 @@
         </a>
         <a href="{% url 'rh_presence_list' %}" class="{% if request.resolver_match.url_name == 'rh_presence_list' or request.resolver_match.url_name == 'rh_presence_create' %}is-active{% endif %}">
             <span class="rh-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
-            {% trans "Presences" %}
+            {% trans "Présences" %}
         </a>
         <a href="{% url 'rh_conge_list' %}" class="{% if request.resolver_match.url_name == 'rh_conge_list' or request.resolver_match.url_name == 'rh_conge_create' %}is-active{% endif %}">
             <span class="rh-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path></svg></span>
-            {% trans "Conges" %}
+            {% trans "Congés" %}
         </a>
         {% if can_manage_documents_ui %}
         <a href="{% url 'rh_document_list' %}" class="{% if request.resolver_match.url_name == 'rh_document_list' or request.resolver_match.url_name == 'rh_document_create' %}is-active{% endif %}">

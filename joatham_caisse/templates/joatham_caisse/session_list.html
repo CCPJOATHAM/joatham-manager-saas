@@ -2,7 +2,7 @@
 
 {% block page_title %}Sessions caisse{% endblock %}
 {% block content_title %}Sessions caisse{% endblock %}
-{% block content_subtitle %}Consultez et filtrez les sessions de caisse par caisse, statut, periode, responsable d'ouverture et presence d'ecart.{% endblock %}
+{% block content_subtitle %}Consultez et filtrez les sessions de caisse par caisse, statut, période, responsable d'ouverture et présence d'écart.{% endblock %}
 
 {% block content %}
 <style>
@@ -62,7 +62,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>Filtres sessions</h3>
-      <p>Affinez la liste pour retrouver rapidement les sessions a controler ou a analyser.</p>
+      <p>Affinez la liste pour retrouver rapidement les sessions à contrôler ou à analyser.</p>
     </div>
     <div class="panel-body">
       <form method="get">
@@ -104,7 +104,7 @@
           </div>
           <div class="checkbox-row">
             <input type="checkbox" name="avec_ecart" id="id_avec_ecart" value="1" {% if filters.avec_ecart %}checked{% endif %}>
-            <label for="id_avec_ecart">Sessions avec ecart uniquement</label>
+            <label for="id_avec_ecart">Sessions avec écart uniquement</label>
           </div>
         </div>
         <div class="actions">
@@ -120,16 +120,16 @@
   </div>
 
   <div class="kpis">
-    <div class="kpi"><span class="kpi-label">Sessions trouvees</span><span class="kpi-value">{{ session_counts.total }}</span></div>
+    <div class="kpi"><span class="kpi-label">Sessions trouvées</span><span class="kpi-value">{{ session_counts.total }}</span></div>
     <div class="kpi"><span class="kpi-label">Ouvertes</span><span class="kpi-value">{{ session_counts.open }}</span></div>
-    <div class="kpi"><span class="kpi-label">Avec ecart</span><span class="kpi-value">{{ session_counts.with_ecart }}</span></div>
-    <div class="kpi"><span class="kpi-label">Derniere mise a jour</span><span class="kpi-value">{% if sessions %}{{ sessions.0.date_modification|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
+    <div class="kpi"><span class="kpi-label">Avec écart</span><span class="kpi-value">{{ session_counts.with_ecart }}</span></div>
+    <div class="kpi"><span class="kpi-label">Dernière mise à jour</span><span class="kpi-value">{% if sessions %}{{ sessions.0.date_modification|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Sessions filtrees</h3>
-      <p>Consultez les soldes, les ecarts et accedez a la fiche detail de chaque session.</p>
+      <h3>Sessions filtrées</h3>
+      <p>Consultez les soldes, les écarts et accédez à la fiche détail de chaque session.</p>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -140,8 +140,8 @@
             <th>Responsable</th>
             <th>Statut</th>
             <th>Solde initial</th>
-            <th>Solde theorique</th>
-            <th>Ecart</th>
+            <th>Solde théorique</th>
+            <th>Écart</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -162,7 +162,7 @@
             <td><a href="{% url 'caisse_session_detail' session.id %}" class="ghost">Voir</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="8" class="empty-state">Aucune session ne correspond aux filtres selectionnes.</td></tr>
+          <tr><td colspan="8" class="empty-state">Aucune session ne correspond aux filtres sélectionnés.</td></tr>
           {% endfor %}
         </tbody>
       </table>

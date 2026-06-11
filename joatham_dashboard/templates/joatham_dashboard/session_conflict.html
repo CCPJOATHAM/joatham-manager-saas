@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% trans "Session deja active" %} | {{ app_name }}</title>
+    <title>{% trans "Session déjà active" %} | {{ app_name }}</title>
     <style>
         :root {
             --bg: #f3f6fb;
@@ -113,9 +113,9 @@
 <body>
     <main class="card">
         <span class="eyebrow">{% trans "Verification de session" %}</span>
-        <h1>{% trans "Session deja active" %}</h1>
-        <p>{% trans "Votre compte est deja connecte sur un autre navigateur ou appareil." %}</p>
-        <p>{% trans "Pour des raisons de securite, un seul acces est autorise a la fois." %}</p>
+        <h1>{% trans "Session déjà active" %}</h1>
+        <p>{% trans "Votre compte est déjà connecté sur un autre navigateur ou appareil." %}</p>
+        <p>{% trans "Pour des raisons de sécurité, un seul acces est autorise a la fois." %}</p>
 
         <form method="post">
             {% csrf_token %}

@@ -2,7 +2,7 @@
 
 {% block page_title %}Fermer une session{% endblock %}
 {% block content_title %}Fermer une session{% endblock %}
-{% block content_subtitle %}Confirmez le solde reel constate pour cloturer proprement la session et calculer l'ecart final.{% endblock %}
+{% block content_subtitle %}Confirmez le solde réel constaté pour clôturer proprement la session et calculer l'écart final.{% endblock %}
 
 {% block content %}
 <style>
@@ -126,7 +126,7 @@
 <section class="close-layout">
   <div class="context-card">
     <h2>Cloture de la session {{ session.caisse.nom }}</h2>
-    <p>Renseignez le solde reel observe en fin de session. Le systeme comparera ce montant au solde theorique pour calculer l'ecart.</p>
+    <p>Renseignez le solde réel observé en fin de session. Le système comparera ce montant au solde théorique pour calculer l'écart.</p>
     <div class="stat-grid">
       <div class="stat">
         <span class="stat-label">Ouverture</span>
@@ -137,7 +137,7 @@
         <strong>{{ session.solde_initial }}</strong>
       </div>
       <div class="stat">
-        <span class="stat-label">Solde theorique actuel</span>
+        <span class="stat-label">Solde théorique actuel</span>
         <strong>{{ session.solde_theorique }}</strong>
       </div>
     </div>
@@ -147,15 +147,15 @@
     <form method="post">
       {% csrf_token %}
       <div class="field">
-        <label for="{{ form.solde_reel.id_for_label }}">Solde reel constate</label>
+        <label for="{{ form.solde_reel.id_for_label }}">Solde réel constaté</label>
         {{ form.solde_reel }}
-        <div class="helper">Saisissez le montant reel constate en caisse au moment de la fermeture.</div>
+        <div class="helper">Saisissez le montant réel constaté en caisse au moment de la fermeture.</div>
         {{ form.solde_reel.errors }}
       </div>
       <div class="field">
         <label for="{{ form.commentaire_fermeture.id_for_label }}">Commentaire de fermeture</label>
         {{ form.commentaire_fermeture }}
-        <div class="helper">Ajoutez toute information utile pour la validation ou le controle ulterieur.</div>
+        <div class="helper">Ajoutez toute information utile pour la validation ou le contrôle ultérieur.</div>
         {{ form.commentaire_fermeture.errors }}
       </div>
       <div class="actions">

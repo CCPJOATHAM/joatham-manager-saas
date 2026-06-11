@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Rapports avances{% endblock %}
-{% block content_title %}Rapports avances{% endblock %}
+{% block page_title %}Rapports avancés{% endblock %}
+{% block content_title %}Rapports avancés{% endblock %}
 {% block content_subtitle %}Vue decisionnelle globale de la performance de l'entreprise.{% endblock %}
 
 {% block top_actions %}
@@ -193,7 +193,7 @@
 <div class="reports-shell">
     <form method="get" class="reports-filters">
         <div class="filter-field">
-            <label for="period">Periode</label>
+            <label for="period">Période</label>
             <select id="period" name="period">
                 {% for value,label in period_choices %}
                 <option value="{{ value }}" {% if filters.period == value %}selected{% endif %}>{{ label }}</option>
@@ -403,11 +403,11 @@
         </article>
 
         <article class="report-panel">
-            <h3>Depenses</h3>
+            <h3>Dépenses</h3>
             <div class="mini-grid">
                 <div class="mini-tile"><span class="mini-label">Total</span><strong class="mini-value">{{ report.expenses.total_display }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">Nombre</span><strong class="mini-value">{{ report.expenses.count }}</strong></div>
-                <div class="mini-tile"><span class="mini-label">Comptabilite</span><strong class="mini-value">{{ report.accounting.result_label }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">Comptabilité</span><strong class="mini-value">{{ report.accounting.result_label }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">Resultat compta</span><strong class="mini-value">{{ report.accounting.result_display }}</strong></div>
             </div>
             <div class="bar-list" style="margin-top:14px;">
@@ -418,7 +418,7 @@
                     <strong>{{ row.total_display }}</strong>
                 </div>
                 {% empty %}
-                <p class="row-muted">Aucune depense dans cette periode.</p>
+                <p class="row-muted">Aucune dépense dans cette période.</p>
                 {% endfor %}
             </div>
         </article>

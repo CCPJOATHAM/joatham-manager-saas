@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block products_title %}{{ session.name }}{% endblock %}
-{% block products_subtitle %}{% trans "Suivez l'avancement du comptage et validez les ecarts avant generation des ajustements de stock." %}{% endblock %}
+{% block products_subtitle %}{% trans "Suivez l'avancement du comptage et validez les écarts avant génération des ajustements de stock." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -58,14 +58,14 @@
     <div class="kpi-card"><span class="kpi-label">{% trans "Non comptes" %}</span><span class="kpi-value">{{ summary.uncounted_lines }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Ecarts positifs" %}</span><span class="kpi-value">{{ summary.positive_differences }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Ecarts negatifs" %}</span><span class="kpi-value">{{ summary.negative_differences }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Sans ecart" %}</span><span class="kpi-value">{{ summary.balanced_lines }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Sans écart" %}</span><span class="kpi-value">{{ summary.balanced_lines }}</span></div>
 </div>
 
 <div class="section-card">
     <div class="section-header">
         <div>
             <h3 class="section-title">{% trans "Lignes d'inventaire" %}</h3>
-            <p class="section-subtitle">{% trans "Comparez le stock theorique, le stock compte et l'ecart produit par produit." %}</p>
+            <p class="section-subtitle">{% trans "Comparez le stock théorique, le stock compté et l'écart produit par produit." %}</p>
         </div>
     </div>
     <div class="table-shell">
@@ -74,7 +74,7 @@
                 <thead>
                     <tr>
                         <th>{% trans "Produit" %}</th>
-                        <th>{% trans "Stock theorique" %}</th>
+                        <th>{% trans "Stock théorique" %}</th>
                         <th>{% trans "Quantite comptee" %}</th>
                         <th>{% trans "Ecart" %}</th>
                         <th>{% trans "Commentaire" %}</th>

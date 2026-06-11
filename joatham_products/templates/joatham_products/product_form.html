@@ -56,7 +56,7 @@
         {% if is_create_mode %}
         {% trans "Le stock initial saisi ici sera trace automatiquement comme mouvement de stock afin de garder un historique fiable des variations." %}
         {% else %}
-        {% trans "Le stock ne se modifie plus directement depuis cette fiche. Utilisez les operations stock dediees pour conserver un historique complet." %}
+        {% trans "Le stock ne se modifie plus directement depuis cette fiche. Utilisez les opérations stock dédiées pour conserver un historique complet." %}
         {% endif %}
     </div>
     {% if not is_create_mode and product %}
@@ -117,7 +117,7 @@
                 <label for="{{ form.quantite_stock.id_for_label }}">{% trans "Stock initial" %}</label>
                 {{ form.quantite_stock }}
                 {{ form.quantite_stock.errors }}
-                <small class="helper-text">{% trans "Ce stock initial sera enregistre comme mouvement de stock." %}</small>
+                <small class="helper-text">{% trans "Ce stock initial sera enregistré comme mouvement de stock." %}</small>
             </div>
             {% endif %}
             <div class="field">

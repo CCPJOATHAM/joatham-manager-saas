@@ -2,7 +2,7 @@
 
 {% block page_title %}Entreprises | JOATHAM Manager{% endblock %}
 {% block content_title %}Gestion entreprises{% endblock %}
-{% block content_subtitle %}Administration des entreprises clientes, avec desactivation logique et conservation des donnees.{% endblock %}
+{% block content_subtitle %}Administration des entreprises clientes, avec désactivation logique et conservation des données.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
@@ -148,7 +148,7 @@
         <select id="id_status" name="status">
             <option value="" {% if selected_status == "" %}selected{% endif %}>Toutes</option>
             <option value="active" {% if selected_status == "active" %}selected{% endif %}>Actives</option>
-            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Desactivees</option>
+            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Désactivées</option>
         </select>
     </div>
     <div class="actions">
@@ -195,7 +195,7 @@
                     {% if entreprise.is_active %}
                     <span class="status-badge status-active">Active</span>
                     {% else %}
-                    <span class="status-badge status-inactive">Desactivee</span>
+                    <span class="status-badge status-inactive">Désactivée</span>
                     {% endif %}
                 </td>
                 <td>
@@ -223,9 +223,9 @@
                         <a href="#entreprise-{{ entreprise.id }}" class="btn-small">Voir</a>
                         {% if entreprise.is_active %}
                         {% url 'super_admin_company_deactivate' entreprise.pk as deactivate_url %}
-                        <a href="{{ deactivate_url }}" class="btn-small danger">Desactiver</a>
+                        <a href="{{ deactivate_url }}" class="btn-small danger">Désactiver</a>
                         {% else %}
-                        <span class="muted">Desactivee</span>
+                        <span class="muted">Désactivée</span>
                         {% endif %}
                     </div>
                 </td>

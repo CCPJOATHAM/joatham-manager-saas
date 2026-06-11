@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block products_title %}{{ page_title }}{% endblock %}
-{% block products_subtitle %}{% trans "Creez une session d'inventaire pour figer votre stock theorique avant comptage physique." %}{% endblock %}
+{% block products_subtitle %}{% trans "Créez une session d'inventaire pour figer votre stock théorique avant comptage physique." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -16,13 +16,13 @@
     <div class="section-header">
         <div>
             <h2 class="section-title">{{ page_title }}</h2>
-            <p class="section-subtitle">{% trans "Preparez une campagne de comptage avant de confronter les quantites reelles au stock theorique." %}</p>
+            <p class="section-subtitle">{% trans "Préparez une campagne de comptage avant de confronter les quantités réelles au stock théorique." %}</p>
         </div>
     </div>
 
     <div class="helper-card" style="margin-bottom:20px;">
         <strong style="display:block; margin-bottom:6px;">{% trans "Ce qui se passe a la creation" %}</strong>
-        <span class="helper-text">{% trans "Le stock theorique des produits actifs sera fige a la creation de cette session. Les ajustements ne seront appliques qu'apres validation finale." %}</span>
+        <span class="helper-text">{% trans "Le stock théorique des produits actifs sera figé à la création de cette session. Les ajustements ne seront appliqués qu'après validation finale." %}</span>
     </div>
 
     <form method="post">

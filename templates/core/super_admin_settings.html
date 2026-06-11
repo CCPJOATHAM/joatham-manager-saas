@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 
-{% block page_title %}Parametres plateforme | JOATHAM Manager{% endblock %}
-{% block content_title %}Parametres plateforme{% endblock %}
+{% block page_title %}Paramètres plateforme | JOATHAM Manager{% endblock %}
+{% block content_title %}Paramètres plateforme{% endblock %}
 {% block content_subtitle %}Configuration centrale de JOATHAM Manager et du mode maintenance.{% endblock %}
 
 {% block top_actions %}
@@ -133,7 +133,7 @@
         <div class="field">
             <label for="{{ form.email_systeme.id_for_label }}">{{ form.email_systeme.label }}</label>
             {{ form.email_systeme }}
-            <span class="muted">Cet email est un parametre applicatif et ne modifie pas la configuration SMTP existante.</span>
+            <span class="muted">Cet email est un paramètre applicatif et ne modifie pas la configuration SMTP existante.</span>
             {{ form.email_systeme.errors }}
         </div>
 
@@ -211,7 +211,7 @@
 
         <h2 class="section-title">Maintenance par module</h2>
         <div class="field">
-            <span class="muted">Cochez uniquement les modules a rendre temporairement indisponibles. Le super_admin et les IPs autorisees gardent l'acces.</span>
+            <span class="muted">Cochez uniquement les modules à rendre temporairement indisponibles. Le super_admin et les IPs autorisées gardent l'accès.</span>
             <div class="module-grid">
                 {% for checkbox in form.maintenance_modules %}
                     <label class="module-check" for="{{ checkbox.id_for_label }}">

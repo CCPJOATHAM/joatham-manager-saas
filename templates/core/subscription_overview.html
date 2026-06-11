@@ -240,13 +240,13 @@
         </div>
         {% endif %}
         <div class="details" style="margin-top:14px;">
-            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Produits</span><strong>{{ current_plan_quota_profile.max_produits|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Depenses / mois</span><strong>{{ current_plan_quota_profile.max_depenses_mois|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Caisses actives</span><strong>{{ current_plan_quota_profile.max_caisses|default_if_none:"Illimite" }}</strong></div>
-            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default_if_none:"Illimite" }}</strong></div>
+            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Produits</span><strong>{{ current_plan_quota_profile.max_produits|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Dépenses / mois</span><strong>{{ current_plan_quota_profile.max_depenses_mois|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Caisses actives</span><strong>{{ current_plan_quota_profile.max_caisses|default_if_none:"Illimité" }}</strong></div>
+            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default_if_none:"Illimité" }}</strong></div>
             <div class="detail-row"><span>Comptabilité</span><strong>{% if subscription.plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
             <div class="detail-row"><span>Exports</span><strong>{% if subscription.plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
         </div>
@@ -344,7 +344,7 @@
         <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Voir les plans</a>
         {% if subscription %}
             {% if subscription.statut == "essai" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Choisir un plan superieur</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Choisir un plan supérieur</a>
             {% elif subscription.statut == "expire" or subscription.statut == "suspendu" %}
             <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver l'abonnement</a>
             {% elif subscription.statut == "actif" %}

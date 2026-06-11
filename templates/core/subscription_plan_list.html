@@ -208,9 +208,9 @@
             <div class="status-label">Paiement en ligne</div>
             {% if automatic_payment_provider_configured %}
             <div class="status-value">Disponible</div>
-            <span class="status-pill">CinetPay configure</span>
+            <span class="status-pill">CinetPay configuré</span>
             {% else %}
-            <div class="status-value">Non configure</div>
+            <div class="status-value">Non configuré</div>
             <span class="status-pill is-warning">Validation manuelle</span>
             {% endif %}
         </div>
@@ -296,7 +296,7 @@
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ plan.id }}">
             <button type="submit" class="btn-request" {% if plan_card.is_free or plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyee{% else %}Choisir ce pack{% endif %}
+                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyée{% else %}Choisir ce pack{% endif %}
             </button>
         </form>
         {% if not plan_card.is_free %}
@@ -309,7 +309,7 @@
                 </button>
             </form>
             {% else %}
-            <div class="auto-payment-note">Paiement CinetPay non configure</div>
+            <div class="auto-payment-note">Paiement CinetPay non configuré</div>
             {% endif %}
         {% endif %}
         </div>

@@ -332,9 +332,9 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Depenses du mois</span>
+                <span class="label">Dépenses du mois</span>
                 <strong>{{ month_total_display }}</strong>
-                <span class="trend {{ evolution_direction }}">Evolution : {{ evolution_display }}</span>
+                <span class="trend {{ evolution_direction }}">Évolution : {{ evolution_display }}</span>
             </div>
         </div>
         <div class="stat-badge">
@@ -345,7 +345,7 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Depenses du jour</span>
+                <span class="label">Dépenses du jour</span>
                 <strong>{{ today_total_display }}</strong>
             </div>
         </div>
@@ -357,9 +357,9 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Moyenne par depense</span>
+                <span class="label">Moyenne par dépense</span>
                 <strong>{{ average_total_display }}</strong>
-                <span class="label">{{ global_depense_count }} depense{% if global_depense_count > 1 %}s{% endif %}</span>
+                <span class="label">{{ global_depense_count }} dépense{% if global_depense_count > 1 %}s{% endif %}</span>
             </div>
         </div>
     </div>
@@ -368,8 +368,8 @@
 <div class="page-grid" {% if not can_manage_expenses_ui %}style="grid-template-columns: 1fr;"{% endif %}>
     {% if can_manage_expenses_ui %}
     <section class="panel">
-        <h3>Ajouter une depense</h3>
-        <p class="panel-subtitle">Enregistrez rapidement une nouvelle sortie financiere pour garder votre suivi a jour.</p>
+        <h3>Ajouter une dépense</h3>
+        <p class="panel-subtitle">Enregistrez rapidement une nouvelle sortie financière pour garder votre suivi à jour.</p>
         <form method="post" class="expense-form">
             {% csrf_token %}
             <div class="field">
@@ -387,7 +387,7 @@
             </div>
             {% endif %}
             <div class="panel-actions">
-                <button type="submit">Ajouter la depense</button>
+                <button type="submit">Ajouter la dépense</button>
             </div>
         </form>
     </section>
@@ -395,10 +395,10 @@
 
     <section class="panel">
         <h3>Filtres et export</h3>
-        <p class="panel-subtitle">Affinez la liste par periode ou recherche texte, puis exportez le resultat en PDF.</p>
+        <p class="panel-subtitle">Affinez la liste par période ou recherche texte, puis exportez le résultat en PDF.</p>
         <form method="get" class="filters-form">
             <div class="field">
-                <label for="id_date_debut">Date debut</label>
+                <label for="id_date_debut">Date début</label>
                 <input id="id_date_debut" type="date" name="date_debut" value="{{ date_debut }}">
             </div>
             <div class="field">
@@ -411,7 +411,7 @@
             </div>
             <div class="panel-actions">
                 <button type="submit">Appliquer les filtres</button>
-                <a href="{% url 'depenses' %}">Reinitialiser</a>
+                <a href="{% url 'depenses' %}">Réinitialiser</a>
                 <a href="{% url 'depenses_pdf' %}?date_debut={{ date_debut|urlencode }}&date_fin={{ date_fin|urlencode }}&q={{ search|urlencode }}">Exporter le PDF</a>
             </div>
         </form>
@@ -442,10 +442,10 @@
 {% else %}
 <div class="table-shell" style="margin-top: 20px;">
     <div class="empty-state">
-        <h3>Aucune depense enregistree pour le moment</h3>
-        <p>Ajoutez votre premiere depense pour commencer a suivre les sorties financieres de l'entreprise et generer vos rapports PDF.</p>
+        <h3>Aucune dépense enregistrée pour le moment</h3>
+        <p>Ajoutez votre première dépense pour commencer à suivre les sorties financières de l'entreprise et générer vos rapports PDF.</p>
         {% if can_manage_expenses_ui %}
-        <a href="{% url 'depenses' %}" class="btn-link primary">Ajouter une depense</a>
+        <a href="{% url 'depenses' %}" class="btn-link primary">Ajouter une dépense</a>
         {% endif %}
         <div class="helper">Vous pourrez ensuite filtrer, suivre le total mensuel et exporter un document PDF professionnel.</div>
     </div>

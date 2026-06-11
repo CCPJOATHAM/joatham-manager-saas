@@ -83,11 +83,11 @@
         <span class="detail-value">{{ target_user.date_joined|date:"d/m/Y H:i" }}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Telephone" %}</span>
+        <span class="detail-label">{% trans "Téléphone" %}</span>
         <span class="detail-value">{{ target_user.telephone|default:"-" }}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Employe RH lie" %}</span>
+        <span class="detail-label">{% trans "Employé RH lié" %}</span>
         {% if linked_employe %}
         <span class="detail-value">
             <a href="{% url 'rh_employe_detail' linked_employe.id %}">{{ linked_employe.nom }} {{ linked_employe.prenom }}</a>

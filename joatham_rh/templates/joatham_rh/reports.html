@@ -19,9 +19,9 @@
 <div class="rh-detail-grid">
     <div class="rh-kpi-card">
         <div class="rh-kpi-main">
-            <span class="rh-kpi-label">{% trans "Total Employes" %}</span>
+            <span class="rh-kpi-label">{% trans "Total employés" %}</span>
             <span class="rh-kpi-value">{{ report.total_employes }}</span>
-            <span class="rh-kpi-note">{% trans "Dossiers enregistres" %}</span>
+            <span class="rh-kpi-note">{% trans "Dossiers enregistrés" %}</span>
         </div>
         <span class="rh-kpi-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.8"></path><path d="M16 3.2a4 4 0 0 1 0 7.6"></path></svg>
@@ -29,7 +29,7 @@
     </div>
     <div class="rh-kpi-card">
         <div class="rh-kpi-main">
-            <span class="rh-kpi-label">{% trans "Employes Actifs" %}</span>
+            <span class="rh-kpi-label">{% trans "Employés actifs" %}</span>
             <span class="rh-kpi-value">{{ report.employes_actifs }}</span>
             <span class="rh-kpi-note">{% trans "Statut actif" %}</span>
         </div>
@@ -71,7 +71,7 @@
                 <div class="rh-activity-left">
                     <span class="rh-activity-dot success" aria-hidden="true"></span>
                     <div>
-                        <strong>{% trans "Nouvel employe enregistre" %}</strong>
+                        <strong>{% trans "Nouvel employé enregistré" %}</strong>
                         <span>{{ employe.nom }} {{ employe.prenom }} - {{ employe.matricule }}</span>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
 <div class="rh-card rh-spaced-card">
     <h3 class="rh-section-title">
         <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 8.8 8.5 2 9.4l5 4.8L5.8 21 12 17.7 18.2 21 17 14.2l5-4.8-6.8-.9Z"></path></svg></span>
-        {% trans "Employes recents" %}
+        {% trans "Employés récents" %}
     </h3>
     {% if report.recent_employes %}
     <div class="rh-person-list">
@@ -149,7 +149,7 @@
     <div class="rh-mini-card">
         <span class="rh-kpi-label">{% trans "Presences du mois" %}</span>
         <strong>{{ report.presences_mois }}</strong>
-        <p class="rh-muted">{% trans "Total des presences enregistrees sur la periode." %}</p>
+        <p class="rh-muted">{% trans "Total des présences enregistrées sur la période." %}</p>
     </div>
     <div class="rh-mini-card success">
         <span class="rh-kpi-label">{% trans "Documents RH" %}</span>
@@ -177,7 +177,7 @@
                     <thead>
                         <tr>
                             <th>{% trans "Poste RH" %}</th>
-                            <th>{% trans "Employes" %}</th>
+                            <th>{% trans "Employés" %}</th>
                         </tr>
                     </thead>
                     <tbody>

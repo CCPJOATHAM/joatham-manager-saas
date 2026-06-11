@@ -34,8 +34,8 @@
         <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
         <p><strong>Formation:</strong> {{ inscription.formation }}</p>
         <p><strong>Statut:</strong> {{ inscription.get_statut_display }}</p>
-        <p><strong>Montant prevu:</strong> {{ inscription.montant_prevu }}</p>
-        <p><strong>Montant paye:</strong> {{ inscription.montant_paye }}</p>
+        <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu }}</p>
+        <p><strong>Montant payé:</strong> {{ inscription.montant_paye }}</p>
         <p><strong>Solde:</strong> {{ inscription.solde }}</p>
         <p>
             <strong>Facture liee:</strong>
@@ -105,7 +105,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">Aucun paiement enregistre.</td>
+                    <td colspan="6">Aucun paiement enregistré.</td>
                 </tr>
             {% endfor %}
             </tbody>

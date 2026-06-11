@@ -2,7 +2,7 @@
 
 {% block page_title %}Retour paiement abonnement | JOATHAM Manager{% endblock %}
 {% block content_title %}Retour paiement abonnement{% endblock %}
-{% block content_subtitle %}Cette page affiche l'etat connu du paiement. L'abonnement est active uniquement apres confirmation securisee du webhook.{% endblock %}
+{% block content_subtitle %}Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook.{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'subscription_overview' %}" class="btn-link">Retour a mon abonnement</a>
@@ -15,7 +15,7 @@
         <p><strong>Plan :</strong> {{ paiement.plan.nom }}</p>
         <p><strong>Statut :</strong> {{ paiement.get_statut_display }}</p>
         {% if paiement.statut == "valide" %}
-            <p>Votre paiement est confirme. L'abonnement a ete active automatiquement.</p>
+            <p>Votre paiement est confirmé. L'abonnement a été activé automatiquement.</p>
         {% elif paiement.statut == "echoue" %}
             <p>Le paiement n'a pas ete confirme. {{ paiement.failure_reason }}</p>
         {% else %}

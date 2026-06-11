@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block page_title %}{% trans "Activation invitation" %} | JOATHAM Manager{% endblock %}
-{% block content_title %}{% trans "Activation de votre acces" %}{% endblock %}
+{% block content_title %}{% trans "Activation de votre accès" %}{% endblock %}
 {% block content_subtitle %}{% trans "Finalisez votre compte JOATHAM Manager pour rejoindre l'entreprise qui vous a invite." %}{% endblock %}
 
 {% block content %}
@@ -71,7 +71,7 @@
 <div class="activation-card">
     {% if invitation_is_invalid %}
     <h2>{% trans "Invitation non valide" %}</h2>
-    <p>{% trans "Cette invitation a deja ete utilisee, annulee ou expiree. Demandez une nouvelle invitation au proprietaire de l'entreprise." %}</p>
+    <p>{% trans "Cette invitation a déjà été utilisée, annulée ou expirée. Demandez une nouvelle invitation au propriétaire de l'entreprise." %}</p>
     {% else %}
     <h2>{% trans "Bienvenue sur JOATHAM Manager" %}</h2>
     <p>
@@ -91,7 +91,7 @@
             {{ form.password_confirm }}
             {{ form.password_confirm.errors }}
         </div>
-        <button type="submit" class="submit-btn">{% trans "Activer mon acces" %}</button>
+        <button type="submit" class="submit-btn">{% trans "Activer mon accès" %}</button>
     </form>
     {% endif %}
 </div>

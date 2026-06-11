@@ -3,7 +3,7 @@
 
 {% block page_title %}{% trans "Inviter un utilisateur" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Inviter un utilisateur" %}{% endblock %}
-{% block content_subtitle %}{% trans "Envoyez une invitation rattachee a votre entreprise avec un rôle d'accès gestionnaire ou comptable." %}{% endblock %}
+{% block content_subtitle %}{% trans "Envoyez une invitation rattachée à votre entreprise avec un rôle d'accès gestionnaire ou comptable." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour aux utilisateurs" %}</a>
@@ -139,12 +139,12 @@
 <div class="invite-grid">
     <div class="panel">
         <h3>{% trans "Regles appliquees" %}</h3>
-        <p>{% trans "L'invitation est limitee a votre entreprise et respecte automatiquement le quota utilisateur de votre abonnement." %}</p>
+        <p>{% trans "L'invitation est limitée à votre entreprise et respecte automatiquement le quota utilisateur de votre abonnement." %}</p>
         <ul>
             <li>{% trans "Rôles d'accès autorisés : gestionnaire et comptable." %}</li>
             <li>{% trans "Le rôle d'accès définit les modules et actions autorisés dans JOATHAM Manager." %}</li>
-            <li>{% trans "Aucun autre proprietaire ne peut etre invite depuis cet ecran." %}</li>
-            <li>{% trans "Les doublons et invitations actives identiques sont bloques." %}</li>
+            <li>{% trans "Aucun autre propriétaire ne peut être invité depuis cet écran." %}</li>
+            <li>{% trans "Les doublons et invitations actives identiques sont bloqués." %}</li>
         </ul>
     </div>
 
@@ -172,7 +172,7 @@
                 </div>
             </div>
             <div class="form-footer">
-                <div class="footer-note">{% trans "Le lien d'activation permettra a la personne invitee de definir son mot de passe avant d'acceder a JOATHAM Manager." %}</div>
+                <div class="footer-note">{% trans "Le lien d'activation permettra à la personne invitée de définir son mot de passe avant d'accéder à JOATHAM Manager." %}</div>
                 <button type="submit" class="submit-btn">{% trans "Envoyer l'invitation" %}</button>
             </div>
         </form>

@@ -3,7 +3,7 @@
 
 {% block page_title %}{% trans "Mon profil" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Mon profil" %}{% endblock %}
-{% block content_subtitle %}{% trans "Consultez vos informations personnelles et mettez a jour les elements modifiables de votre compte." %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez vos informations personnelles et mettez à jour les éléments modifiables de votre compte." %}{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -399,7 +399,7 @@
                     <strong>{{ profile_user.email|default:profile_user.username }}</strong>
                 </div>
                 <div class="profile-detail">
-                    <span>{% trans "Telephone" %}</span>
+                    <span>{% trans "Téléphone" %}</span>
                     <strong>{{ profile_user.telephone|default:"-" }}</strong>
                 </div>
                 <div class="profile-detail">
@@ -422,9 +422,9 @@
         <div class="profile-form-header">
             <div>
                 <h2>{% trans "Modifier mes informations" %}</h2>
-                <p>{% trans "Cette premiere version limite volontairement les changements aux informations personnelles autorisees." %}</p>
+                <p>{% trans "Cette première version limite volontairement les changements aux informations personnelles autorisées." %}</p>
             </div>
-            <span class="locked-badge">{% trans "Compte securise" %}</span>
+            <span class="locked-badge">{% trans "Compte sécurisé" %}</span>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="profile-form">
@@ -436,7 +436,7 @@
                     {{ form.full_name.errors }}
                 </div>
                 <div class="profile-field">
-                    <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
+                    <label for="{{ form.telephone.id_for_label }}">{% trans "Téléphone" %}</label>
                     {{ form.telephone }}
                     {{ form.telephone.errors }}
                 </div>
@@ -465,12 +465,12 @@
                         </label>
                     </div>
                     {{ form.profile_photo.errors }}
-                    <small>{% trans "Formats image standards recommandes. Votre photo reste rattachee uniquement a votre compte." %}</small>
+                    <small>{% trans "Formats image standards recommandés. Votre photo reste rattachée uniquement à votre compte." %}</small>
                 </div>
             </div>
 
             <div class="profile-lock-note">
-                {% trans "Email, rôle d'accès et entreprise sont affiches pour controle, mais restent non modifiables par l'utilisateur dans cette version." %}
+                {% trans "Email, rôle d'accès et entreprise sont affichés pour contrôle, mais restent non modifiables par l'utilisateur dans cette version." %}
             </div>
 
             <div class="profile-actions">

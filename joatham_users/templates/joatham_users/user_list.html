@@ -3,7 +3,7 @@
 
 {% block page_title %}{% trans "Utilisateurs" %} | JOATHAM Manager{% endblock %}
 {% block content_title %}{% trans "Utilisateurs" %}{% endblock %}
-{% block content_subtitle %}{% trans "Pilotez les acces de votre entreprise avec des rôles d'accès clairs, des invitations controlees et une isolation stricte par entreprise." %}{% endblock %}
+{% block content_subtitle %}{% trans "Pilotez les accès de votre entreprise avec des rôles d'accès clairs, des invitations contrôlées et une isolation stricte par entreprise." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
@@ -381,7 +381,7 @@
         </div>
         <div class="filter-field">
             <label for="search-filter">{% trans "Recherche" %}</label>
-            <input id="search-filter" type="search" name="q" value="{{ search_query }}" placeholder="{% trans 'Nom, email ou telephone' %}">
+            <input id="search-filter" type="search" name="q" value="{{ search_query }}" placeholder="{% trans 'Nom, email ou téléphone' %}">
         </div>
         <button class="filter-submit" type="submit">{% trans "Filtrer" %}</button>
     </div>
@@ -391,7 +391,7 @@
     <div class="table-toolbar">
         <div>
             <h3>{% trans "Utilisateurs de l'entreprise" %}</h3>
-            <p>{% trans "Chaque ligne est limitee a l'entreprise connectee. Les comptes proprietaires restent proteges contre les actions sensibles." %}</p>
+            <p>{% trans "Chaque ligne est limitée à l'entreprise connectée. Les comptes propriétaires restent protégés contre les actions sensibles." %}</p>
         </div>
         <div class="table-actions">
             <span class="badge badge-active">{{ active_users }} {% trans "actif" %}{{ active_users|pluralize:"s" }}</span>
@@ -408,9 +408,9 @@
                     <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Email" %}</th>
-                    <th>{% trans "Employe RH" %}</th>
-                    <th>{% trans "Cree le" %}</th>
-                    <th>{% trans "Derniere connexion" %}</th>
+                    <th>{% trans "Employé RH" %}</th>
+                    <th>{% trans "Créé le" %}</th>
+                    <th>{% trans "Dernière connexion" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
@@ -447,9 +447,9 @@
                     </td>
                     <td>
                         {% if managed_user.linked_employe %}
-                        <span class="badge badge-active">{% trans "Lie" %}</span>
+                        <span class="badge badge-active">{% trans "Lié" %}</span>
                         {% else %}
-                        <span class="badge badge-inactive">{% trans "Non lie" %}</span>
+                        <span class="badge badge-inactive">{% trans "Non lié" %}</span>
                         {% endif %}
                     </td>
                     <td class="muted">{{ managed_user.created_display|date:"d/m/Y H:i" }}</td>
@@ -465,7 +465,7 @@
                                     {% if managed_user.instance.is_active %}{% trans "Désactiver" %}{% else %}{% trans "Réactiver" %}{% endif %}
                                 </button>
                             </form>
-                            {% trans "Retirer l'acces de cet utilisateur ?" as remove_confirm_label %}
+                            {% trans "Retirer l'accès de cet utilisateur ?" as remove_confirm_label %}
                             <form method="post" action="{% url 'user_remove_access' managed_user.instance.id %}" class="action-form" onsubmit="return confirm('{{ remove_confirm_label|escapejs }}');">
                                 {% csrf_token %}
                                 <button type="submit" class="danger">{% trans "Retirer l'accès" %}</button>
@@ -476,7 +476,7 @@
                                 <button type="submit" class="danger">{% trans "Supprimer" %}</button>
                             </form>
                             {% else %}
-                            <span class="owner-note">{% trans "Compte proprietaire principal" %}</span>
+                            <span class="owner-note">{% trans "Compte propriétaire principal" %}</span>
                             {% endif %}
                         </div>
                     </td>
@@ -496,7 +496,7 @@
     <div class="table-toolbar">
         <div>
             <h3>{% trans "Invitations en attente" %}</h3>
-            <p>{% trans "Les invitations restent rattachees a votre entreprise et comptent dans le quota tant qu'elles sont actives." %}</p>
+            <p>{% trans "Les invitations restent rattachées à votre entreprise et comptent dans le quota tant qu'elles sont actives." %}</p>
         </div>
         <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
     </div>
@@ -509,7 +509,7 @@
                     <th>{% trans "Invite" %}</th>
                     <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
-                    <th>{% trans "Creee le" %}</th>
+                    <th>{% trans "Créée le" %}</th>
                     <th>{% trans "Expiration" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>

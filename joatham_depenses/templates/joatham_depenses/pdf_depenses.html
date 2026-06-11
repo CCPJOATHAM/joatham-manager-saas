@@ -138,7 +138,7 @@
                                     {% if entreprise_identity.country %}{{ entreprise_identity.country }}{% endif %}
                                 </p>
                                 {% if entreprise_identity.phone %}
-                                <p class="pdf-company-line">Telephone : {{ entreprise_identity.phone }}</p>
+                                <p class="pdf-company-line">Téléphone : {{ entreprise_identity.phone }}</p>
                                 {% endif %}
                                 {% if entreprise_identity.email %}
                                 <p class="pdf-company-line">Email : {{ entreprise_identity.email }}</p>
@@ -205,7 +205,7 @@
             </tr>
             {% empty %}
             <tr class="empty-row">
-                <td colspan="3">Aucune depense enregistree pour cette edition.</td>
+                <td colspan="3">Aucune dépense enregistrée pour cette édition.</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -335,24 +335,24 @@
     <main class="shell">
         <section class="brand-panel">
             <div class="brand-kicker">{% trans "Parcours SaaS" %}</div>
-            <h1>{% trans "Creez votre entreprise et commencez gratuitement avec JOATHAM Manager." %}</h1>
+            <h1>{% trans "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager." %}</h1>
             <p>
                 {% blocktrans trimmed %}
-                En quelques informations, vous obtenez votre espace proprietaire, votre entreprise,
+                En quelques informations, vous obtenez votre espace propriétaire, votre entreprise,
                 une devise par defaut selon votre pays et un demarrage propre sur le socle SaaS.
                 {% endblocktrans %}
             </p>
 
             <div class="steps">
-                <div>{% trans "1. Creez votre entreprise et votre compte proprietaire" %}</div>
+                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
                 <div>{% trans "2. Le pays suggere automatiquement la devise par defaut" %}</div>
-                <div>{% trans "3. Le plan gratuit est active et vous accedez directement a votre tableau de bord" %}</div>
+                <div>{% trans "3. Le plan gratuit est activé et vous accédez directement à votre tableau de bord" %}</div>
             </div>
         </section>
 
         <section class="form-panel">
             <h2>{% trans "Inscription entreprise" %}</h2>
-            <p class="subtitle">{% trans "Si vous avez deja un compte, connectez-vous directement. Les doublons d'e-mail sont bloques proprement." %}</p>
+            <p class="subtitle">{% trans "Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloques proprement." %}</p>
 
             {% if form.non_field_errors %}
             <div class="error-box">
@@ -378,7 +378,7 @@
                     </div>
 
                     <div class="field full">
-                        <label for="{{ form.owner_full_name.id_for_label }}">{% trans "Nom complet du proprietaire" %}</label>
+                        <label for="{{ form.owner_full_name.id_for_label }}">{% trans "Nom complet du propriétaire" %}</label>
                         {{ form.owner_full_name }}
                         {% for error in form.owner_full_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
@@ -390,7 +390,7 @@
                     </div>
 
                     <div class="field">
-                        <label for="{{ form.telephone.id_for_label }}">{% trans "Telephone" %}</label>
+                        <label for="{{ form.telephone.id_for_label }}">{% trans "Téléphone" %}</label>
                         {{ form.telephone }}
                         {% for error in form.telephone.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
                     </div>
@@ -448,7 +448,7 @@
                                 <span>{% trans "Les deux mots de passe doivent etre identiques" %}</span>
                             </li>
                         </ul>
-                        <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation securisee reste appliquee cote serveur." %}</p>
+                        <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation sécurisée reste appliquee côté serveur." %}</p>
                     </div>
                 </div>
 
@@ -456,7 +456,7 @@
             </form>
 
             <p class="helper">
-                {% trans "Vous avez deja un compte ?" %} <a href="{% url 'login' %}">{% trans "Se connecter" %}</a>
+                {% trans "Vous avez déjà un compte ?" %} <a href="{% url 'login' %}">{% trans "Se connecter" %}</a>
                 <br>
                 <a href="{% url 'public_question_create' %}">{% trans "Poser une question avant inscription" %}</a>
             </p>

@@ -189,7 +189,7 @@
 <form method="get" class="toolbar">
     <div>
         <label for="id_q">Rechercher une entreprise</label>
-        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email proprietaire">
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email propriétaire">
     </div>
     <div>
         <label for="id_statut">Statut abonnement</label>
@@ -307,7 +307,7 @@
                             <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                             <div class="action-row">
                                 <input type="number" name="trial_days" value="7" min="1" step="1">
-                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger acces historique</button>
+                                <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger accès historique</button>
                             </div>
                         </form>
                         {% endif %}
