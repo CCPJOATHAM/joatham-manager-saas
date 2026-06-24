@@ -1221,7 +1221,8 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(self.inscription.trop_percu, Decimal("1.00"))
 
     def test_inscription_detail_shows_receipt_and_quittance_actions(self):
-        PaiementInscription.objects.create(
+        receipt_payment = self.inscription.paiements.order_by("id").first()
+        clearance_payment = PaiementInscription.objects.create(
             entreprise=self.entreprise,
             inscription=self.inscription,
             montant=Decimal("50.00"),
@@ -1234,6 +1235,14 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Télécharger le reçu")
         self.assertContains(response, "Télécharger la quittance")
+        self.assertContains(
+            response,
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, receipt_payment.id]),
+        )
+        self.assertContains(
+            response,
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, clearance_payment.id]),
+        )
 
     def test_partial_payment_document_returns_receipt_pdf(self):
         paiement = self.inscription.paiements.order_by("id").first()
@@ -1320,6 +1329,19 @@ class ApprenantsViewsTests(TestCase):
         response = self.client.get(reverse("paiement_inscription_create", args=[self.inscription.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Enregistrer un paiement")
+
+    def test_paiement_form_shows_document_action_for_existing_payment(self):
+        paiement = self.inscription.paiements.order_by("id").first()
+        self.client.force_login(self.gestionnaire)
+
+        response = self.client.get(reverse("paiement_inscription_create", args=[self.inscription.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Télécharger le reçu")
+        self.assertContains(
+            response,
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, paiement.id]),
+        )
 
     def test_dashboard_filters_by_formation(self):
         self.client.force_login(self.gestionnaire)

@@ -306,7 +306,10 @@ def inscription_update_montant_prevu(request, inscription_id):
 def paiement_inscription_create(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
-    paiements = get_paiements_by_inscription(entreprise, inscription)
+    paiements = enrich_paiements_with_document_data(
+        inscription,
+        get_paiements_by_inscription(entreprise, inscription),
+    )
     context = {
         "entreprise": entreprise,
         "inscription": inscription,
