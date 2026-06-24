@@ -27,5 +27,6 @@ urlpatterns = [
     path("inscriptions/<int:inscription_id>/facture/unlink/", views.inscription_unlink_facture, name="inscription_unlink_facture"),
     path("inscriptions/<int:inscription_id>/paiements/export/pdf/", views.inscription_paiements_pdf, name="inscription_paiements_pdf"),
     path("inscriptions/<int:inscription_id>/paiements/export/excel/", views.inscription_paiements_excel, name="inscription_paiements_excel"),
+    path("inscriptions/<int:inscription_id>/paiements/<int:paiement_id>/document/pdf/", views.paiement_inscription_document_pdf, name="paiement_inscription_document_pdf"),
     path("inscriptions/<int:inscription_id>/paiements/add/", views.paiement_inscription_create, name="paiement_inscription_create"),
 ]

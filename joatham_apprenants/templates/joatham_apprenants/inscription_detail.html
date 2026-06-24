@@ -107,6 +107,7 @@
                     <th>Reference</th>
                     <th>Utilisateur</th>
                     <th>Observations</th>
+                    <th>Document</th>
                 </tr>
             </thead>
             <tbody>
@@ -118,10 +119,11 @@
                     <td>{{ paiement.reference|default:"-" }}</td>
                     <td>{{ paiement.utilisateur|default:"-" }}</td>
                     <td>{{ paiement.observations|default:"-" }}</td>
+                    <td><a href="{% url 'paiement_inscription_document_pdf' inscription.id paiement.id %}">{{ paiement.document_action_label }}</a></td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">Aucun paiement enregistré.</td>
+                    <td colspan="7">Aucun paiement enregistré.</td>
                 </tr>
             {% endfor %}
             </tbody>

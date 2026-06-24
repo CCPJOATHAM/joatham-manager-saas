@@ -1,0 +1,129 @@
+{% extends "pdf/base_pdf.html" %}
+
+{% block pdf_title %}{{ document.document_title }} - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_styles %}
+.document-title {
+    margin: 18px 0 16px;
+    font-size: 18px;
+}
+.summary-table td {
+    vertical-align: top;
+}
+.notice {
+    margin: 16px 0;
+    padding: 10px 12px;
+    border: 1px solid #d8e1ea;
+    background: #f8fafc;
+    color: #10233f;
+    font-weight: bold;
+}
+.signature-box {
+    margin-top: 34px;
+    width: 42%;
+    margin-left: auto;
+    text-align: center;
+}
+.signature-line {
+    border-top: 1px solid #10233f;
+    padding-top: 8px;
+    min-height: 38px;
+}
+{% endblock %}
+
+{% block pdf_content %}
+<div class="pdf-header">
+    <table class="pdf-header-table">
+        <tr>
+            <td>
+                <p class="pdf-company-name">{{ entreprise.raison_sociale|default:entreprise.nom }}</p>
+                <p class="pdf-company-secondary">{{ entreprise.nom }}</p>
+                <p class="pdf-company-line">{{ entreprise.ville }}, {{ entreprise.pays }}</p>
+                <p class="pdf-company-line">{{ entreprise.email }} | {{ entreprise.telephone }}</p>
+            </td>
+            <td class="pdf-meta-block">
+                <p class="pdf-meta-title">{{ document.document_title }}</p>
+                <p class="pdf-meta-line">Paiement #{{ paiement.id }}</p>
+                <p class="pdf-meta-line">Édité le {{ date_generation }}</p>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="separator"></div>
+
+<div class="document-title">{{ document.document_title }}</div>
+
+<table class="summary-table">
+    <tbody>
+        <tr>
+            <th>Apprenant</th>
+            <td>{{ inscription.apprenant }}</td>
+            <th>Formation suivie</th>
+            <td>{{ inscription.formation }}</td>
+        </tr>
+        <tr>
+            <th>Montant prévu</th>
+            <td class="text-right">{{ inscription.montant_prevu|floatformat:2 }}</td>
+            <th>Mode de paiement</th>
+            <td>{{ paiement.get_mode_paiement_display }}</td>
+        </tr>
+        <tr>
+            <th>Date du paiement</th>
+            <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+            <th>Référence du paiement</th>
+            <td>{{ paiement.reference|default:"-" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{% if document.document_type == "quittance" %}
+    <div class="notice">L’apprenant a soldé la totalité de ses frais de formation.</div>
+    <table>
+        <tbody>
+            <tr>
+                <th>Montant total payé</th>
+                <td class="text-right">{{ document.montant_paye_cumule|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <th>Solde</th>
+                <td class="text-right">0.00</td>
+            </tr>
+            <tr>
+                <th>Date de clôture du paiement</th>
+                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+            </tr>
+            {% if document.trop_percu > 0 %}
+                <tr>
+                    <th>Trop-perçu</th>
+                    <td class="text-right">{{ document.trop_percu|floatformat:2 }}</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% else %}
+    <table>
+        <tbody>
+            <tr>
+                <th>Montant payé lors de cette opération</th>
+                <td class="text-right">{{ paiement.montant|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <th>Montant payé cumulé</th>
+                <td class="text-right">{{ document.montant_paye_cumule|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <th>Solde restant</th>
+                <td class="text-right">{{ document.solde_restant|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<div class="signature-box">
+    <div class="signature-line">Signature / cachet de l’entreprise</div>
+</div>
+
+<div class="pdf-footer">
+    Document généré le {{ date_footer }}
+</div>
+{% endblock %}

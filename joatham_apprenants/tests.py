@@ -21,6 +21,7 @@ from .selectors.apprenants import (
     get_formations_by_entreprise,
     get_inscription_by_entreprise,
     get_inscriptions_by_entreprise,
+    get_paiement_documents_by_id,
     get_paiements_by_inscription,
 )
 from .selectors.dashboard import get_apprenants_dashboard_data
@@ -72,6 +73,56 @@ class ApprenantsSelectorsTests(TestCase):
 
     def test_paiement_selector_is_scoped_to_entreprise(self):
         self.assertEqual(list(get_paiements_by_inscription(self.entreprise_a, self.inscription_a)), [self.paiement_a])
+
+    def test_payment_documents_follow_cumulative_balance(self):
+        apprenant = Apprenant.objects.create(entreprise=self.entreprise_a, nom="Tranche", prenom="Test")
+        formation = Formation.objects.create(entreprise=self.entreprise_a, nom="Formation Tranches", prix=Decimal("150.00"))
+        inscription = InscriptionFormation.objects.create(
+            entreprise=self.entreprise_a,
+            apprenant=apprenant,
+            formation=formation,
+            montant_prevu=Decimal("150.00"),
+        )
+        premier_paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise_a,
+            inscription=inscription,
+            montant=Decimal("50.00"),
+        )
+        dernier_paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise_a,
+            inscription=inscription,
+            montant=Decimal("100.00"),
+        )
+
+        documents = get_paiement_documents_by_id(inscription)
+
+        self.assertEqual(documents[premier_paiement.id]["document_type"], "recu")
+        self.assertEqual(documents[premier_paiement.id]["montant_paye_cumule"], Decimal("50.00"))
+        self.assertEqual(documents[premier_paiement.id]["solde_restant"], Decimal("100.00"))
+        self.assertEqual(documents[dernier_paiement.id]["document_type"], "quittance")
+        self.assertEqual(documents[dernier_paiement.id]["montant_paye_cumule"], Decimal("150.00"))
+        self.assertEqual(documents[dernier_paiement.id]["solde_restant"], Decimal("0.00"))
+
+    def test_overpaid_payment_document_tracks_overpayment(self):
+        apprenant = Apprenant.objects.create(entreprise=self.entreprise_a, nom="Over", prenom="Paid")
+        formation = Formation.objects.create(entreprise=self.entreprise_a, nom="Formation Over", prix=Decimal("150.00"))
+        inscription = InscriptionFormation.objects.create(
+            entreprise=self.entreprise_a,
+            apprenant=apprenant,
+            formation=formation,
+            montant_prevu=Decimal("150.00"),
+        )
+        paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise_a,
+            inscription=inscription,
+            montant=Decimal("175.00"),
+        )
+
+        document = get_paiement_documents_by_id(inscription)[paiement.id]
+
+        self.assertEqual(document["document_type"], "quittance")
+        self.assertEqual(document["solde_restant"], Decimal("0.00"))
+        self.assertEqual(document["trop_percu"], Decimal("25.00"))
 
 
 class ApprenantsServicesTests(TestCase):
@@ -1168,6 +1219,67 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(self.inscription.montant_paye, Decimal("76.00"))
         self.assertEqual(self.inscription.solde, Decimal("0.00"))
         self.assertEqual(self.inscription.trop_percu, Decimal("1.00"))
+
+    def test_inscription_detail_shows_receipt_and_quittance_actions(self):
+        PaiementInscription.objects.create(
+            entreprise=self.entreprise,
+            inscription=self.inscription,
+            montant=Decimal("50.00"),
+            utilisateur=self.gestionnaire,
+        )
+        self.client.force_login(self.gestionnaire)
+
+        response = self.client.get(reverse("inscription_detail", args=[self.inscription.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Télécharger le reçu")
+        self.assertContains(response, "Télécharger la quittance")
+
+    def test_partial_payment_document_returns_receipt_pdf(self):
+        paiement = self.inscription.paiements.order_by("id").first()
+        self.client.force_login(self.gestionnaire)
+
+        response = self.client.get(
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, paiement.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("recu.pdf", response["Content-Disposition"])
+        self.assertNotIn("quittance.pdf", response["Content-Disposition"])
+
+    def test_settling_payment_document_returns_quittance_pdf(self):
+        paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise,
+            inscription=self.inscription,
+            montant=Decimal("50.00"),
+            utilisateur=self.gestionnaire,
+        )
+        self.client.force_login(self.gestionnaire)
+
+        response = self.client.get(
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, paiement.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("quittance.pdf", response["Content-Disposition"])
+
+    def test_overpaid_payment_document_returns_quittance_pdf(self):
+        paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise,
+            inscription=self.inscription,
+            montant=Decimal("51.00"),
+            utilisateur=self.gestionnaire,
+        )
+        self.client.force_login(self.gestionnaire)
+
+        response = self.client.get(
+            reverse("paiement_inscription_document_pdf", args=[self.inscription.id, paiement.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("quittance.pdf", response["Content-Disposition"])
 
     def test_paiement_view_refuses_unknown_payment_mode(self):
         self.client.force_login(self.gestionnaire)

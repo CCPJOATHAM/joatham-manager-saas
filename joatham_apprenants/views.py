@@ -2,6 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 
@@ -15,12 +16,15 @@ from joatham_users.permissions import permission_required, user_has_permission
 
 from .models import InscriptionFormation, PaiementInscription
 from .selectors.apprenants import (
+    enrich_paiements_with_document_data,
     get_apprenants_by_entreprise,
     get_filtered_inscriptions_by_entreprise,
     get_formation_by_entreprise,
     get_formations_by_entreprise,
     get_inscription_by_entreprise,
     get_inscriptions_by_entreprise,
+    get_paiement_by_inscription,
+    get_paiement_document_data,
     get_paiements_by_inscription,
 )
 from .selectors.dashboard import get_apprenants_dashboard_data
@@ -237,7 +241,10 @@ def inscription_create(request):
 def inscription_detail(request, inscription_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     inscription = get_inscription_by_entreprise(entreprise, inscription_id)
-    paiements = get_paiements_by_inscription(entreprise, inscription)
+    paiements = enrich_paiements_with_document_data(
+        inscription,
+        get_paiements_by_inscription(entreprise, inscription),
+    )
     billing_history = get_inscription_billing_history(inscription)
     factures_candidates = (
         get_factures_by_entreprise(entreprise)
@@ -332,6 +339,30 @@ def paiement_inscription_create(request, inscription_id):
 
     return render(request, "joatham_apprenants/paiement_form.html", context)
 
+
+@permission_required("apprenants.view")
+@module_access_required("apprenants")
+def paiement_inscription_document_pdf(request, inscription_id, paiement_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    inscription = get_inscription_by_entreprise(entreprise, inscription_id)
+    paiement = get_paiement_by_inscription(entreprise, inscription, paiement_id)
+    document = get_paiement_document_data(inscription, paiement)
+    if document is None:
+        raise Http404("Document de paiement introuvable.")
+
+    context = {
+        "inscription": inscription,
+        "paiement": paiement,
+        "document": document,
+        **build_report_metadata(entreprise=entreprise, title=_(document["document_title"])),
+    }
+    return render_pdf_response(
+        request,
+        "joatham_apprenants/paiement_inscription_document_pdf.html",
+        context,
+        filename=f"inscription-{inscription.id}-paiement-{paiement.id}-{document['document_type']}.pdf",
+        disposition="attachment",
+    )
 
 @permission_required("apprenants.manage")
 @module_access_required("apprenants")
