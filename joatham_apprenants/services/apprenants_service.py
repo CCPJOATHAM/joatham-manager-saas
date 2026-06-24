@@ -2,12 +2,17 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
 
 from core.audit import record_audit_event
 from core.services.tenancy import ensure_same_entreprise, get_object_for_entreprise
 
-from ..models import Apprenant, Formation, InscriptionFormation, PaiementInscription
+from ..models import (
+    Apprenant,
+    Formation,
+    InscriptionFormation,
+    PaiementInscription,
+    recalculate_inscription_financial_totals,
+)
 
 
 def _parse_amount(value, error_message):
@@ -177,8 +182,6 @@ def inscrire_apprenant_a_formation(
         raise ValidationError("Le montant total de l'inscription ne peut pas etre negatif.")
     if montant_paye_value < Decimal("0.00"):
         raise ValidationError("Le montant initial paye ne peut pas etre negatif.")
-    if montant_paye_value > montant_prevu_value:
-        raise ValidationError("Le montant initial paye ne peut pas etre superieur au montant total.")
 
     inscription_data = {
         "entreprise": entreprise,
@@ -186,7 +189,7 @@ def inscrire_apprenant_a_formation(
         "formation": formation,
         "statut": statut,
         "montant_prevu": montant_prevu_value,
-        "montant_paye": montant_paye_value,
+        "montant_paye": Decimal("0.00"),
     }
     if date_inscription is not None:
         inscription_data["date_inscription"] = date_inscription
@@ -203,6 +206,7 @@ def inscrire_apprenant_a_formation(
                 observations="Paiement initial enregistre lors de l'inscription.",
                 utilisateur=utilisateur,
             )
+            recalculate_inscription_totals(inscription)
 
     record_audit_event(
         entreprise=entreprise,
@@ -224,13 +228,49 @@ def inscrire_apprenant_a_formation(
 
 
 def recalculate_inscription_totals(inscription, *, baseline_montant_paye=Decimal("0.00")):
-    montant_paye = (
-        inscription.paiements.aggregate(total=Sum("montant"))["total"]
-        or Decimal("0.00")
+    return recalculate_inscription_financial_totals(inscription)
+
+
+@transaction.atomic
+def update_inscription_montant_prevu(
+    *,
+    entreprise,
+    inscription_id,
+    montant_prevu,
+    utilisateur=None,
+):
+    inscription = get_object_for_entreprise(
+        InscriptionFormation.objects.select_for_update(),
+        entreprise,
+        id=inscription_id,
     )
-    inscription.montant_paye = Decimal(str(montant_paye)) + Decimal(str(baseline_montant_paye or 0))
-    inscription.solde = Decimal(str(inscription.montant_prevu or 0)) - inscription.montant_paye
-    inscription.save(update_fields=["montant_paye", "solde"])
+    ensure_same_entreprise(inscription, entreprise)
+    montant_prevu_value = _parse_amount(
+        montant_prevu,
+        "Le montant total de l'inscription est invalide.",
+    )
+    if montant_prevu_value < Decimal("0.00"):
+        raise ValidationError("Le montant total de l'inscription ne peut pas etre negatif.")
+
+    previous_amount = inscription.montant_prevu
+    inscription.montant_prevu = montant_prevu_value
+    inscription.save(update_fields=["montant_prevu"])
+    recalculate_inscription_totals(inscription)
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="inscription_montant_prevu_modifie",
+        module="apprenants",
+        objet_type="InscriptionFormation",
+        objet_id=inscription.id,
+        description=f"Montant prévu modifié pour l'inscription {inscription.id}.",
+        metadata={
+            "ancien_montant_prevu": str(previous_amount),
+            "nouveau_montant_prevu": str(inscription.montant_prevu),
+            "montant_paye": str(inscription.montant_paye),
+            "solde": str(inscription.solde),
+        },
+    )
     return inscription
 
 
@@ -252,18 +292,10 @@ def create_paiement_inscription(
         id=inscription_id,
     )
     ensure_same_entreprise(inscription, entreprise)
-    paiements_existants = inscription.paiements.aggregate(total=Sum("montant"))["total"] or Decimal("0.00")
-    baseline_montant_paye = Decimal(str(inscription.montant_paye or 0)) - Decimal(str(paiements_existants))
-    if baseline_montant_paye < Decimal("0.00"):
-        baseline_montant_paye = Decimal("0.00")
 
     montant_value = _parse_amount(montant or 0, "Le montant du paiement est invalide.")
     if montant_value <= Decimal("0.00"):
         raise ValidationError("Le montant du paiement doit etre strictement positif.")
-
-    solde_restant = Decimal(str(inscription.montant_prevu or 0)) - baseline_montant_paye - Decimal(str(paiements_existants))
-    if montant_value > solde_restant:
-        raise ValidationError("Le paiement ne peut pas etre superieur au solde restant.")
     mode_paiement = _validate_payment_mode(mode_paiement)
 
     paiement_data = {
@@ -280,7 +312,7 @@ def create_paiement_inscription(
 
     paiement = PaiementInscription.objects.create(**paiement_data)
     inscription.refresh_from_db()
-    recalculate_inscription_totals(inscription, baseline_montant_paye=baseline_montant_paye)
+    recalculate_inscription_totals(inscription)
 
     record_audit_event(
         entreprise=entreprise,

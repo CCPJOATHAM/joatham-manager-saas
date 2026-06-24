@@ -73,6 +73,8 @@
                 <th>Montant prévu</th>
                 <th>Montant payé</th>
                 <th>Solde</th>
+                <th>Statut de paiement</th>
+                <th>Trop-perçu</th>
                 <th>Actions</th>
                 </tr>
             </thead>
@@ -85,6 +87,14 @@
                     <td>{{ inscription.montant_prevu }}</td>
                     <td>{{ inscription.montant_paye }}</td>
                     <td>{{ inscription.solde }}</td>
+                    <td>{{ inscription.statut_paiement_label }}</td>
+                    <td>
+                        {% if inscription.trop_percu > 0 %}
+                            {{ inscription.trop_percu }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{% url 'inscription_detail' inscription.id %}">Voir</a>
                         {% if can_record_apprenant_payments_ui %}
@@ -94,7 +104,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7" class="empty">
+                    <td colspan="9" class="empty">
                         Aucune inscription enregistrée pour le moment.
                         {% if can_manage_apprenants_ui %}
                         <a href="{% url 'inscription_create' %}" style="margin-left:8px;">Nouvelle inscription</a>

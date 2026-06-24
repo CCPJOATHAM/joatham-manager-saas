@@ -47,7 +47,10 @@
             <th>Apprenant</th>
             <th>Formation</th>
             <th>Statut</th>
+            <th class="text-right">Montant payé</th>
             <th class="text-right">Solde</th>
+            <th>Statut paiement</th>
+            <th class="text-right">Trop-perçu</th>
         </tr>
     </thead>
     <tbody>
@@ -56,11 +59,14 @@
                 <td>{{ inscription.apprenant }}</td>
                 <td>{{ inscription.formation }}</td>
                 <td>{{ inscription.get_statut_display }}</td>
+                <td class="text-right">{{ inscription.montant_paye|floatformat:2 }}</td>
                 <td class="text-right">{{ inscription.solde|floatformat:2 }}</td>
+                <td>{{ inscription.statut_paiement_label }}</td>
+                <td class="text-right">{{ inscription.trop_percu|floatformat:2 }}</td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="4">Aucune inscription a afficher.</td>
+                <td colspan="7">Aucune inscription a afficher.</td>
             </tr>
         {% endfor %}
     </tbody>

@@ -21,6 +21,7 @@ urlpatterns = [
     path("inscriptions/export/pdf/", views.inscriptions_pdf, name="inscriptions_pdf"),
     path("inscriptions/export/excel/", views.inscriptions_excel, name="inscriptions_excel"),
     path("inscriptions/<int:inscription_id>/", views.inscription_detail, name="inscription_detail"),
+    path("inscriptions/<int:inscription_id>/montant-prevu/", views.inscription_update_montant_prevu, name="inscription_update_montant_prevu"),
     path("inscriptions/<int:inscription_id>/facture/generate/", views.inscription_generate_facture, name="inscription_generate_facture"),
     path("inscriptions/<int:inscription_id>/facture/link/", views.inscription_link_existing_facture, name="inscription_link_existing_facture"),
     path("inscriptions/<int:inscription_id>/facture/unlink/", views.inscription_unlink_facture, name="inscription_unlink_facture"),

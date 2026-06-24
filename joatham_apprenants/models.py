@@ -1,6 +1,9 @@
 from decimal import Decimal
 
 from django.db import models
+from django.db.models import Sum
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -54,9 +57,9 @@ class InscriptionFormation(models.Model):
         ANNULEE = "annulee", _("Annulee")
 
     class StatutPaiement(models.TextChoices):
-        IMPAYE = "impaye", _("Impaye")
+        IMPAYE = "impaye", _("Non payé")
         PARTIEL = "partiel", _("Partiel")
-        PAYE = "paye", _("Paye")
+        PAYE = "paye", _("Payé")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -96,19 +99,35 @@ class InscriptionFormation(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        self.solde = Decimal(self.montant_prevu or 0) - Decimal(self.montant_paye or 0)
+        self.solde = max(
+            Decimal(self.montant_prevu or 0) - Decimal(self.montant_paye or 0),
+            Decimal("0.00"),
+        )
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and {"montant_prevu", "montant_paye"} & set(update_fields):
+            kwargs["update_fields"] = set(update_fields) | {"solde"}
         super().save(*args, **kwargs)
 
     @property
     def statut_paiement(self):
         montant_prevu = Decimal(self.montant_prevu or 0)
         montant_paye = Decimal(self.montant_paye or 0)
-        solde = Decimal(self.solde or 0)
-        if montant_prevu <= Decimal("0.00") or solde <= Decimal("0.00"):
-            return self.StatutPaiement.PAYE
         if montant_paye <= Decimal("0.00"):
             return self.StatutPaiement.IMPAYE
-        return self.StatutPaiement.PARTIEL
+        if montant_paye < montant_prevu:
+            return self.StatutPaiement.PARTIEL
+        return self.StatutPaiement.PAYE
+
+    @property
+    def statut_paiement_label(self):
+        return self.StatutPaiement(self.statut_paiement).label
+
+    @property
+    def trop_percu(self):
+        return max(
+            Decimal(self.montant_paye or 0) - Decimal(self.montant_prevu or 0),
+            Decimal("0.00"),
+        )
 
     def __str__(self):
         return f"{self.apprenant} - {self.formation}"
@@ -155,3 +174,32 @@ class PaiementInscription(models.Model):
 
     def __str__(self):
         return f"Paiement {self.inscription_id} - {self.montant}"
+
+
+def recalculate_inscription_financial_totals(inscription):
+    total_paye = (
+        inscription.paiements.aggregate(total=Sum("montant"))["total"]
+        or Decimal("0.00")
+    )
+    solde = max(
+        Decimal(inscription.montant_prevu or 0) - Decimal(total_paye),
+        Decimal("0.00"),
+    )
+    InscriptionFormation.objects.filter(id=inscription.id).update(
+        montant_paye=total_paye,
+        solde=solde,
+    )
+    inscription.montant_paye = total_paye
+    inscription.solde = solde
+    return inscription
+
+
+@receiver(post_save, sender=PaiementInscription)
+@receiver(post_delete, sender=PaiementInscription)
+def sync_inscription_financial_totals(sender, instance, **kwargs):
+    if instance.inscription_id:
+        try:
+            inscription = instance.inscription
+        except InscriptionFormation.DoesNotExist:
+            return
+        recalculate_inscription_financial_totals(inscription)

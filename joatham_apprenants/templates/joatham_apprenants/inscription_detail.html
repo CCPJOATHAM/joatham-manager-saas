@@ -37,6 +37,22 @@
         <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu }}</p>
         <p><strong>Montant payé:</strong> {{ inscription.montant_paye }}</p>
         <p><strong>Solde:</strong> {{ inscription.solde }}</p>
+        <p><strong>Statut de paiement:</strong> {{ inscription.statut_paiement_label }}</p>
+        {% if inscription.trop_percu > 0 %}
+            <p><strong>Trop-perçu:</strong> {{ inscription.trop_percu }}</p>
+        {% endif %}
+        {% if can_manage_apprenants_ui %}
+            <form method="post" action="{% url 'inscription_update_montant_prevu' inscription.id %}" style="margin:12px 0; display:flex; gap:8px; align-items:end; flex-wrap:wrap;">
+                {% csrf_token %}
+                <div>
+                    <label for="montant_prevu"><strong>Montant prévu de la formation</strong></label><br>
+                    <input id="montant_prevu" name="montant_prevu" value="{{ inscription.montant_prevu }}" style="padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+                </div>
+                <button type="submit" style="padding:9px 12px; border:none; background:#0f766e; color:#fff; border-radius:6px; cursor:pointer;">
+                    Mettre à jour
+                </button>
+            </form>
+        {% endif %}
         <p>
             <strong>Facture liee:</strong>
             {% if inscription.facture %}

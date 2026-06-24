@@ -30,6 +30,7 @@ from .services.apprenants_service import (
     create_paiement_inscription,
     inscrire_apprenant_a_formation,
     toggle_formation_active,
+    update_inscription_montant_prevu,
     update_formation,
 )
 from .services.billing_integration import (
@@ -208,12 +209,10 @@ def inscription_create(request):
 
     if request.method == "POST":
         montant_prevu_raw = request.POST.get("montant_prevu", "")
-        montant_paye_raw = request.POST.get("montant_paye", "")
         try:
             montant_prevu = Decimal(montant_prevu_raw) if montant_prevu_raw else None
-            montant_paye = Decimal(montant_paye_raw) if montant_paye_raw else Decimal("0.00")
         except InvalidOperation:
-            context["error"] = _("Les montants saisis sont invalides.")
+            context["error"] = _("Le montant prévu saisi est invalide.")
             return render(request, "joatham_apprenants/inscription_form.html", context, status=400)
 
         try:
@@ -223,7 +222,6 @@ def inscription_create(request):
                 formation_id=request.POST.get("formation"),
                 statut=request.POST.get("statut") or InscriptionFormation.Statut.EN_COURS,
                 montant_prevu=montant_prevu,
-                montant_paye=montant_paye,
                 utilisateur=request.user,
             )
         except ValidationError as exc:
@@ -273,6 +271,27 @@ def inscription_detail(request, inscription_id):
             **_get_apprenants_ui_permissions(request.user),
         },
     )
+
+
+@permission_required("apprenants.manage")
+@module_access_required("apprenants")
+def inscription_update_montant_prevu(request, inscription_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    inscription = get_inscription_by_entreprise(entreprise, inscription_id)
+
+    if request.method == "POST":
+        try:
+            update_inscription_montant_prevu(
+                entreprise=entreprise,
+                inscription_id=inscription.id,
+                montant_prevu=request.POST.get("montant_prevu", ""),
+                utilisateur=request.user,
+            )
+            messages.success(request, _("Le montant prévu de la formation a été mis à jour."))
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0] if hasattr(exc, "messages") else str(exc))
+
+    return redirect("inscription_detail", inscription_id=inscription.id)
 
 
 @permission_required("apprenants.payments")
@@ -494,13 +513,25 @@ def inscriptions_excel(request):
             inscription.montant_prevu,
             inscription.montant_paye,
             inscription.solde,
+            inscription.statut_paiement_label,
+            inscription.trop_percu,
         ]
         for inscription in inscriptions
     ]
     return build_xlsx_response(
         filename="inscriptions.xlsx",
         sheet_name="Inscriptions",
-        headers=[_("Apprenant"), _("Formation"), _("Date inscription"), _("Statut"), _("Montant prevu"), _("Montant paye"), _("Solde")],
+        headers=[
+            _("Apprenant"),
+            _("Formation"),
+            _("Date inscription"),
+            _("Statut"),
+            _("Montant prévu"),
+            _("Montant payé"),
+            _("Solde"),
+            _("Statut de paiement"),
+            _("Trop-perçu"),
+        ],
         rows=rows,
     )
 

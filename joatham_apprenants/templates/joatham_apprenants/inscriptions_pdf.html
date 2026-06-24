@@ -36,6 +36,8 @@
             <th class="text-right">Montant prévu</th>
             <th class="text-right">Montant payé</th>
             <th class="text-right">Solde</th>
+            <th>Statut paiement</th>
+            <th class="text-right">Trop-perçu</th>
         </tr>
     </thead>
     <tbody>
@@ -48,10 +50,12 @@
                 <td class="text-right">{{ inscription.montant_prevu|floatformat:2 }}</td>
                 <td class="text-right">{{ inscription.montant_paye|floatformat:2 }}</td>
                 <td class="text-right">{{ inscription.solde|floatformat:2 }}</td>
+                <td>{{ inscription.statut_paiement_label }}</td>
+                <td class="text-right">{{ inscription.trop_percu|floatformat:2 }}</td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="7">Aucune inscription enregistrée.</td>
+                <td colspan="9">Aucune inscription enregistrée.</td>
             </tr>
         {% endfor %}
     </tbody>

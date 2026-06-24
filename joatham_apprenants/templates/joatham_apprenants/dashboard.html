@@ -97,9 +97,11 @@
                     <th>Apprenant</th>
                     <th>Formation</th>
                     <th>Statut</th>
-                    <th>Montant prevu</th>
-                    <th>Montant paye</th>
+                    <th>Montant prévu</th>
+                    <th>Montant payé</th>
                     <th>Solde</th>
+                    <th>Statut paiement</th>
+                    <th>Trop-perçu</th>
                 </tr>
             </thead>
             <tbody>
@@ -112,10 +114,18 @@
                     <td>{{ inscription.montant_prevu }}</td>
                     <td>{{ inscription.montant_paye }}</td>
                     <td>{{ inscription.solde }}</td>
+                    <td>{{ inscription.statut_paiement_label }}</td>
+                    <td>
+                        {% if inscription.trop_percu > 0 %}
+                            {{ inscription.trop_percu }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7">Aucune inscription a afficher.</td>
+                    <td colspan="9">Aucune inscription a afficher.</td>
                 </tr>
             {% endfor %}
             </tbody>

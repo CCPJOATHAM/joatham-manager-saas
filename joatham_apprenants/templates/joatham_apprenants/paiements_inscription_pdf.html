@@ -28,6 +28,10 @@
     <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
     <p><strong>Montant payé:</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
     <p><strong>Solde:</strong> {{ inscription.solde|floatformat:2 }}</p>
+    <p><strong>Statut de paiement:</strong> {{ inscription.statut_paiement_label }}</p>
+    {% if inscription.trop_percu > 0 %}
+        <p><strong>Trop-perçu:</strong> {{ inscription.trop_percu|floatformat:2 }}</p>
+    {% endif %}
 </div>
 
 <table>
