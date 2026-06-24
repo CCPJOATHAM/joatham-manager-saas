@@ -3,127 +3,291 @@
 {% block pdf_title %}{{ document.document_title }} - {{ entreprise.nom }}{% endblock %}
 
 {% block pdf_styles %}
-.document-title {
-    margin: 18px 0 16px;
-    font-size: 18px;
+@page {
+    size: A4;
+    margin: 10mm 10mm 12mm 10mm;
 }
-.summary-table td {
+
+
+.document-copy {
+    font-size: 8.5px;
+    padding: 6px 8px 8px;
+    border: 1px solid #cfd8e3;
+    background: #ffffff;
+}
+
+.copy-separator {
+    margin: 10px 0;
+    border-top: 1px dashed #94a3b8;
+    color: #64748b;
+    font-size: 7px;
+    text-align: center;
+    padding-top: 4px;
+}
+
+.document-header-table,
+.identity-table,
+.details-table,
+.signature-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.document-header-table td,
+.identity-table td,
+.signature-table td {
+    border: none;
+    padding: 0;
     vertical-align: top;
 }
-.notice {
-    margin: 16px 0;
-    padding: 10px 12px;
+
+.brand-cell {
+    width: 48%;
+}
+
+.logo-cell {
+    width: 48px;
+    padding-right: 7px;
+}
+
+.document-logo {
+    width: 42px;
+    height: 42px;
     border: 1px solid #d8e1ea;
-    background: #f8fafc;
+    padding: 2px;
+}
+
+.company-name {
+    font-size: 12px;
+    font-weight: bold;
+    color: #0f172a;
+    text-transform: uppercase;
+    margin: 0 0 2px;
+    line-height: 1.15;
+}
+
+.company-line {
+    margin: 0 0 1px;
+    color: #64748b;
+    font-size: 7.5px;
+    line-height: 1.2;
+}
+
+.document-meta {
+    text-align: right;
+    width: 34%;
+}
+
+.document-title {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #0f172a;
+    text-transform: uppercase;
+}
+
+.copy-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    background: #e9eef5;
+    color: #10233f;
+    font-size: 7.5px;
+    font-weight: bold;
+}
+
+.qr-cell {
+    width: 68px;
+    text-align: right;
+}
+
+.qr-image {
+    width: 54px;
+    height: 54px;
+}
+
+.qr-caption {
+    margin-top: 1px;
+    color: #64748b;
+    font-size: 6.5px;
+}
+
+.section-title {
+    margin: 8px 0 4px;
+    padding-bottom: 2px;
+    color: #10233f;
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid #d8e1ea;
+}
+
+.identity-table td {
+    width: 50%;
+    padding: 0 6px 0 0;
+}
+
+.label {
+    color: #64748b;
+    font-size: 7px;
+    text-transform: uppercase;
+}
+
+.value {
+    color: #0f172a;
+    font-size: 9px;
+    font-weight: bold;
+    margin-top: 1px;
+}
+
+.details-table th,
+.details-table td {
+    padding: 4px 5px;
+    font-size: 8px;
+}
+
+.details-table th {
+    width: 34%;
+}
+
+.notice {
+    margin: 7px 0;
+    padding: 5px 7px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
     color: #10233f;
     font-weight: bold;
 }
-.signature-box {
-    margin-top: 34px;
-    width: 42%;
-    margin-left: auto;
-    text-align: center;
+
+.signature-table {
+    margin-top: 12px;
 }
+
+.signature-cell {
+    width: 42%;
+    text-align: center;
+    padding-left: 20px;
+}
+
 .signature-line {
     border-top: 1px solid #10233f;
-    padding-top: 8px;
-    min-height: 38px;
+    padding-top: 5px;
+    min-height: 22px;
+    color: #10233f;
+    font-weight: bold;
+}
+
+.generated-line {
+    width: 58%;
+    color: #64748b;
+    font-size: 7px;
+    vertical-align: bottom;
 }
 {% endblock %}
 
 {% block pdf_content %}
-<div class="pdf-header">
-    <table class="pdf-header-table">
+{% for copy_label in document_copies %}
+<div class="document-copy">
+    <table class="document-header-table">
+        <tr>
+            <td class="brand-cell">
+                <table class="document-header-table">
+                    <tr>
+                        {% if logo_data_uri %}
+                        <td class="logo-cell">
+                            <img src="{{ logo_data_uri }}" class="document-logo" alt="Logo entreprise">
+                        </td>
+                        {% endif %}
+                        <td>
+                            <p class="company-name">{{ entreprise.raison_sociale|default:entreprise.nom }}</p>
+                            <p class="company-line">{{ entreprise.nom }}</p>
+                            <p class="company-line">{{ entreprise.ville }}{% if entreprise.ville and entreprise.pays %}, {% endif %}{{ entreprise.pays }}</p>
+                            <p class="company-line">{{ entreprise.email }}{% if entreprise.email and entreprise.telephone %} | {% endif %}{{ entreprise.telephone }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td class="document-meta">
+                <div class="document-title">{{ document.document_title }}</div>
+                <div class="copy-badge">{{ copy_label }}</div>
+                <p class="company-line">Paiement #{{ paiement.id }}</p>
+                <p class="company-line">Édité le {{ date_generation }}</p>
+            </td>
+            <td class="qr-cell">
+                {% if qr_code_data_uri %}
+                    <img src="{{ qr_code_data_uri }}" class="qr-image" alt="QR document">
+                    <div class="qr-caption">Vérification document</div>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-title">Informations apprenant(e)</div>
+    <table class="identity-table">
         <tr>
             <td>
-                <p class="pdf-company-name">{{ entreprise.raison_sociale|default:entreprise.nom }}</p>
-                <p class="pdf-company-secondary">{{ entreprise.nom }}</p>
-                <p class="pdf-company-line">{{ entreprise.ville }}, {{ entreprise.pays }}</p>
-                <p class="pdf-company-line">{{ entreprise.email }} | {{ entreprise.telephone }}</p>
+                <div class="label">Apprenant(e)</div>
+                <div class="value">{{ inscription.apprenant }}</div>
             </td>
-            <td class="pdf-meta-block">
-                <p class="pdf-meta-title">{{ document.document_title }}</p>
-                <p class="pdf-meta-line">Paiement #{{ paiement.id }}</p>
-                <p class="pdf-meta-line">Édité le {{ date_generation }}</p>
+            <td>
+                <div class="label">Formation suivie</div>
+                <div class="value">{{ inscription.formation }}</div>
             </td>
         </tr>
     </table>
-</div>
-<div class="separator"></div>
 
-<div class="document-title">{{ document.document_title }}</div>
+    {% if document.document_type == "quittance" %}
+        <div class="notice">L’apprenant a soldé la totalité de ses frais de formation.</div>
+    {% endif %}
 
-<table class="summary-table">
-    <tbody>
-        <tr>
-            <th>Apprenant</th>
-            <td>{{ inscription.apprenant }}</td>
-            <th>Formation suivie</th>
-            <td>{{ inscription.formation }}</td>
-        </tr>
-        <tr>
-            <th>Montant prévu</th>
-            <td class="text-right">{{ inscription.montant_prevu|floatformat:2 }}</td>
-            <th>Mode de paiement</th>
-            <td>{{ paiement.get_mode_paiement_display }}</td>
-        </tr>
-        <tr>
-            <th>Date du paiement</th>
-            <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
-            <th>Référence du paiement</th>
-            <td>{{ paiement.reference|default:"-" }}</td>
-        </tr>
-    </tbody>
-</table>
-
-{% if document.document_type == "quittance" %}
-    <div class="notice">L’apprenant a soldé la totalité de ses frais de formation.</div>
-    <table>
+    <div class="section-title">Détails du paiement</div>
+    <table class="details-table">
         <tbody>
             <tr>
-                <th>Montant total payé</th>
-                <td class="text-right">{{ document.montant_paye_cumule|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <th>Solde</th>
-                <td class="text-right">0.00</td>
-            </tr>
-            <tr>
-                <th>Date de clôture du paiement</th>
-                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
-            </tr>
-            {% if document.trop_percu > 0 %}
-                <tr>
-                    <th>Trop-perçu</th>
-                    <td class="text-right">{{ document.trop_percu|floatformat:2 }}</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-{% else %}
-    <table>
-        <tbody>
-            <tr>
+                <th>Montant prévu</th>
+                <td class="text-right">{{ document_amounts.montant_prevu }}</td>
                 <th>Montant payé lors de cette opération</th>
-                <td class="text-right">{{ paiement.montant|floatformat:2 }}</td>
+                <td class="text-right">{{ document_amounts.montant_operation }}</td>
             </tr>
             <tr>
                 <th>Montant payé cumulé</th>
-                <td class="text-right">{{ document.montant_paye_cumule|floatformat:2 }}</td>
+                <td class="text-right">{{ document_amounts.montant_paye_cumule }}</td>
+                <th>Solde restant</th>
+                <td class="text-right">{{ document_amounts.solde_restant }}</td>
+            </tr>
+            {% if document.trop_percu > 0 %}
+            <tr>
+                <th>Trop-perçu</th>
+                <td class="text-right">{{ document_amounts.trop_percu }}</td>
+                <th>Statut</th>
+                <td>Quittance avec trop-perçu</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Mode de paiement</th>
+                <td>{{ paiement.get_mode_paiement_display }}</td>
+                <th>Référence du paiement</th>
+                <td>{{ paiement.reference|default:"-" }}</td>
             </tr>
             <tr>
-                <th>Solde restant</th>
-                <td class="text-right">{{ document.solde_restant|floatformat:2 }}</td>
+                <th>Date du paiement</th>
+                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                <th>{% if document.document_type == "quittance" %}Date de clôture du paiement{% else %}Document{% endif %}</th>
+                <td>{% if document.document_type == "quittance" %}{{ paiement.date_paiement|date:"d/m/Y" }}{% else %}Reçu de paiement partiel{% endif %}</td>
             </tr>
         </tbody>
     </table>
+
+    <table class="signature-table">
+        <tr>
+            <td class="generated-line">Document généré le {{ date_footer }} par JOATHAM Manager.</td>
+            <td class="signature-cell">
+                <div class="signature-line">Signature / cachet de l’entreprise</div>
+            </td>
+        </tr>
+    </table>
+</div>
+{% if not forloop.last %}
+<div class="copy-separator">Découper ici - second exemplaire ci-dessous</div>
 {% endif %}
-
-<div class="signature-box">
-    <div class="signature-line">Signature / cachet de l’entreprise</div>
-</div>
-
-<div class="pdf-footer">
-    Document généré le {{ date_footer }}
-</div>
+{% endfor %}
 {% endblock %}

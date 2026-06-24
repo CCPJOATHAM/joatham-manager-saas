@@ -1,5 +1,8 @@
+from base64 import b64encode
 from decimal import Decimal, InvalidOperation
+from io import BytesIO
 
+import qrcode
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import Http404
@@ -7,6 +10,8 @@ from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 
 from core.selectors.audit import get_inscription_billing_history
+from core.services.company_profile import build_logo_data_uri
+from core.services.currency import format_amount_for_entreprise
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_billing.pdf import render_pdf_response
@@ -45,6 +50,9 @@ from .services.billing_integration import (
 from .services.export_service import build_report_metadata, build_xlsx_response
 
 
+PAYMENT_DOCUMENT_COPY_LABELS = ("Copie apprenant(e)", "Copie archive entreprise")
+
+
 def _get_apprenants_ui_permissions(user):
     return {
         "can_manage_apprenants_ui": user_has_permission(user, "apprenants.manage"),
@@ -52,6 +60,45 @@ def _get_apprenants_ui_permissions(user):
         "can_record_apprenant_payments_ui": user_has_permission(user, "apprenants.payments"),
         "can_manage_inscription_billing_ui": user_has_permission(user, "apprenants.manage")
         and user_has_permission(user, "billing.manage"),
+    }
+
+
+def _build_paiement_document_qr(request, entreprise, inscription, paiement, document):
+    document_url = request.build_absolute_uri()
+    payload = "\n".join(
+        [
+            f"Document: {document['document_title']}",
+            f"URL: {document_url}",
+            f"Entreprise: {entreprise.nom}",
+            f"Apprenant: {inscription.apprenant}",
+            f"Formation: {inscription.formation}",
+            f"Paiement: {paiement.id}",
+            f"Reference: {paiement.reference or '-'}",
+            f"Montant operation: {paiement.montant}",
+            f"Date paiement: {paiement.date_paiement:%d/%m/%Y}",
+            "Genere par JOATHAM Manager",
+        ]
+    )
+    qr = qrcode.QRCode(version=1, box_size=3, border=1)
+    qr.add_data(payload)
+    qr.make(fit=True)
+    image = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    encoded = b64encode(buffer.getvalue()).decode("ascii")
+    return {
+        "qr_code_data_uri": f"data:image/png;base64,{encoded}",
+        "qr_code_payload": payload,
+    }
+
+
+def _build_paiement_document_amounts(entreprise, inscription, paiement, document):
+    return {
+        "montant_prevu": format_amount_for_entreprise(inscription.montant_prevu, entreprise),
+        "montant_operation": format_amount_for_entreprise(paiement.montant, entreprise),
+        "montant_paye_cumule": format_amount_for_entreprise(document["montant_paye_cumule"], entreprise),
+        "solde_restant": format_amount_for_entreprise(document["solde_restant"], entreprise),
+        "trop_percu": format_amount_for_entreprise(document["trop_percu"], entreprise),
     }
 
 
@@ -357,6 +404,10 @@ def paiement_inscription_document_pdf(request, inscription_id, paiement_id):
         "inscription": inscription,
         "paiement": paiement,
         "document": document,
+        "document_copies": PAYMENT_DOCUMENT_COPY_LABELS,
+        "document_amounts": _build_paiement_document_amounts(entreprise, inscription, paiement, document),
+        "logo_data_uri": build_logo_data_uri(entreprise),
+        **_build_paiement_document_qr(request, entreprise, inscription, paiement, document),
         **build_report_metadata(entreprise=entreprise, title=_(document["document_title"])),
     }
     return render_pdf_response(

@@ -1,11 +1,13 @@
 from io import BytesIO
+from unittest.mock import patch
 from zipfile import ZipFile
 from datetime import date
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.test import TestCase
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 from core.models import ActivityLog
@@ -22,6 +24,7 @@ from .selectors.apprenants import (
     get_inscription_by_entreprise,
     get_inscriptions_by_entreprise,
     get_paiement_documents_by_id,
+    get_paiement_document_data,
     get_paiements_by_inscription,
 )
 from .selectors.dashboard import get_apprenants_dashboard_data
@@ -1256,6 +1259,92 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(response["Content-Type"], "application/pdf")
         self.assertIn("recu.pdf", response["Content-Disposition"])
         self.assertNotIn("quittance.pdf", response["Content-Disposition"])
+
+    def test_payment_document_pdf_context_includes_logo_qr_and_copy_labels(self):
+        paiement = self.inscription.paiements.order_by("id").first()
+        self.client.force_login(self.gestionnaire)
+
+        with patch("joatham_apprenants.views.build_logo_data_uri", return_value="data:image/png;base64,logo"), patch(
+            "joatham_apprenants.views.render_pdf_response",
+            return_value=HttpResponse("PDF", content_type="application/pdf"),
+        ) as render_pdf:
+            response = self.client.get(
+                reverse("paiement_inscription_document_pdf", args=[self.inscription.id, paiement.id])
+            )
+
+        self.assertEqual(response.status_code, 200)
+        context = render_pdf.call_args.args[2]
+        self.assertEqual(context["document_copies"], ("Copie apprenant(e)", "Copie archive entreprise"))
+        self.assertEqual(context["logo_data_uri"], "data:image/png;base64,logo")
+        self.assertTrue(context["qr_code_data_uri"].startswith("data:image/png;base64,"))
+        self.assertIn("Reçu de paiement", context["qr_code_payload"])
+        self.assertIn(str(self.inscription.apprenant), context["qr_code_payload"])
+
+    def test_receipt_document_template_renders_two_copies_logo_and_qr(self):
+        paiement = self.inscription.paiements.order_by("id").first()
+        document = get_paiement_document_data(self.inscription, paiement)
+
+        html = render_to_string(
+            "joatham_apprenants/paiement_inscription_document_pdf.html",
+            {
+                "entreprise": self.entreprise,
+                "inscription": self.inscription,
+                "paiement": paiement,
+                "document": document,
+                "document_copies": ("Copie apprenant(e)", "Copie archive entreprise"),
+                "document_amounts": {
+                    "montant_prevu": "75,00 USD",
+                    "montant_operation": "25,00 USD",
+                    "montant_paye_cumule": "25,00 USD",
+                    "solde_restant": "50,00 USD",
+                    "trop_percu": "0,00 USD",
+                },
+                "logo_data_uri": "data:image/png;base64,logo",
+                "qr_code_data_uri": "data:image/png;base64,qr",
+                "date_generation": "24/06/2026",
+                "date_footer": "24/06/2026 a 20:00:00",
+            },
+        )
+
+        self.assertIn("Copie apprenant(e)", html)
+        self.assertIn("Copie archive entreprise", html)
+        self.assertIn("Reçu de paiement", html)
+        self.assertIn("data:image/png;base64,logo", html)
+        self.assertIn("data:image/png;base64,qr", html)
+
+    def test_clearance_document_template_renders_quittance_notice(self):
+        paiement = PaiementInscription.objects.create(
+            entreprise=self.entreprise,
+            inscription=self.inscription,
+            montant=Decimal("50.00"),
+            utilisateur=self.gestionnaire,
+        )
+        document = get_paiement_document_data(self.inscription, paiement)
+
+        html = render_to_string(
+            "joatham_apprenants/paiement_inscription_document_pdf.html",
+            {
+                "entreprise": self.entreprise,
+                "inscription": self.inscription,
+                "paiement": paiement,
+                "document": document,
+                "document_copies": ("Copie apprenant(e)", "Copie archive entreprise"),
+                "document_amounts": {
+                    "montant_prevu": "75,00 USD",
+                    "montant_operation": "50,00 USD",
+                    "montant_paye_cumule": "75,00 USD",
+                    "solde_restant": "0,00 USD",
+                    "trop_percu": "0,00 USD",
+                },
+                "logo_data_uri": "data:image/png;base64,logo",
+                "qr_code_data_uri": "data:image/png;base64,qr",
+                "date_generation": "24/06/2026",
+                "date_footer": "24/06/2026 a 20:00:00",
+            },
+        )
+
+        self.assertIn("Quittance de paiement", html)
+        self.assertIn("L’apprenant a soldé la totalité de ses frais de formation.", html)
 
     def test_settling_payment_document_returns_quittance_pdf(self):
         paiement = PaiementInscription.objects.create(
