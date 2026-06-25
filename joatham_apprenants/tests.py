@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponse
 from django.test import TestCase
 from django.template.loader import render_to_string
 from django.urls import reverse
+from pypdf import PdfReader
 
 from core.models import ActivityLog
 from core.selectors.audit import get_inscription_billing_history
@@ -1260,6 +1261,14 @@ class ApprenantsViewsTests(TestCase):
         self.assertIn("recu.pdf", response["Content-Disposition"])
         self.assertNotIn("quittance.pdf", response["Content-Disposition"])
 
+        reader = PdfReader(BytesIO(response.content))
+        self.assertEqual(len(reader.pages), 1)
+        pdf_text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        self.assertIn("Copie apprenant(e)", pdf_text)
+        self.assertIn("Copie archive entreprise", pdf_text)
+        self.assertIn("Découper ici", pdf_text)
+        self.assertIn("Signature et cachet", pdf_text)
+
     def test_payment_document_pdf_context_includes_logo_qr_and_copy_labels(self):
         paiement = self.inscription.paiements.order_by("id").first()
         self.client.force_login(self.gestionnaire)
@@ -1306,9 +1315,14 @@ class ApprenantsViewsTests(TestCase):
             },
         )
 
+        self.assertEqual(html.count('class="payment-copy"'), 2)
         self.assertIn("Copie apprenant(e)", html)
         self.assertIn("Copie archive entreprise", html)
+        self.assertIn("Découper ici", html)
+        self.assertIn("Signature et cachet de l’entreprise", html)
         self.assertIn("Reçu de paiement", html)
+        self.assertIn("Espèces", html)
+        self.assertIn("Document généré le 24/06/2026 à 20:00:00", html)
         self.assertIn("data:image/png;base64,logo", html)
         self.assertIn("data:image/png;base64,qr", html)
 

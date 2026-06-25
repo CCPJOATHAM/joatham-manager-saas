@@ -5,29 +5,28 @@
 {% block pdf_styles %}
 @page {
     size: A4;
-    margin: 8mm 9mm 9mm 9mm;
+    margin: 7mm 8mm 8mm 8mm;
 }
 
 .payment-copy {
-    height: 126mm;
-    padding: 0 10px 10px;
+    margin: 0;
+    padding: 0 7px 7px;
     border: 1px solid #cbd5e1;
-    border-radius: 8px;
     background: #ffffff;
-    font-size: 8px;
+    font-size: 7.6px;
+    line-height: 1.15;
 }
 
 .blue-rule {
-    height: 7px;
-    line-height: 7px;
-    margin: 0 -10px 9px;
+    height: 5px;
+    line-height: 5px;
+    margin: 0 -7px 5px;
     background: #2f80ed;
-    border-radius: 8px 8px 0 0;
 }
 
 .header-table,
 .company-table,
-.field-grid,
+.info-table,
 .signature-table {
     width: 100%;
     border-collapse: collapse;
@@ -35,7 +34,6 @@
 
 .header-table td,
 .company-table td,
-.field-grid td,
 .signature-table td {
     border: none;
     padding: 0;
@@ -43,71 +41,72 @@
 }
 
 .company-zone {
-    width: 53%;
+    width: 54%;
 }
 
 .document-zone {
-    width: 34%;
+    width: 32%;
+    padding-right: 5px;
     text-align: right;
-    padding-right: 7px;
 }
 
 .qr-zone {
-    width: 13%;
+    width: 14%;
     text-align: right;
 }
 
 .logo-cell {
-    width: 62px;
-    padding-right: 10px;
+    width: 45px;
+    padding-right: 7px;
 }
 
 .company-logo {
-    width: 58px;
-    height: 58px;
+    width: 42px;
+    height: 42px;
 }
 
 .company-name {
-    margin: 8px 0 2px;
+    margin: 4px 0 1px;
     color: #18324a;
-    font-size: 17px;
+    font-size: 13px;
     font-weight: bold;
     line-height: 1.05;
     text-transform: uppercase;
 }
 
 .company-secondary {
-    margin: 0 0 4px;
+    margin: 0 0 2px;
     color: #1f2937;
-    font-size: 9px;
+    font-size: 7.6px;
     font-weight: bold;
-    line-height: 1.2;
+    line-height: 1.1;
     text-transform: uppercase;
 }
 
-.company-line {
-    margin: 0 0 2px;
+.company-line,
+.meta-line {
+    margin: 0 0 1px;
     color: #667085;
-    font-size: 8px;
-    line-height: 1.2;
+    font-size: 7px;
+    line-height: 1.1;
 }
 
 .document-title {
-    margin: 8px 0 5px;
+    margin: 3px 0 3px;
     color: #18324a;
-    font-size: 19px;
+    font-size: 15px;
     font-weight: bold;
-    line-height: 1.1;
+    line-height: 1.05;
     text-transform: uppercase;
 }
 
 .copy-badge,
 .status-badge {
     display: inline-block;
-    width: 128px;
-    padding: 4px 8px;
-    border-radius: 12px;
+    width: 112px;
+    padding: 2px 6px;
     text-align: center;
+    font-size: 7.2px;
     font-weight: bold;
 }
 
@@ -118,7 +117,7 @@
 }
 
 .status-badge {
-    margin-top: 5px;
+    margin-top: 3px;
     background: #fff4db;
     color: #9a6700;
     border: 1px solid #ffe4a3;
@@ -130,120 +129,114 @@
     border-color: #bee8cf;
 }
 
-.meta-line {
-    margin: 6px 0 0;
-    color: #667085;
-    font-size: 7.5px;
-}
-
 .qr-image {
-    width: 62px;
-    height: 62px;
+    width: 52px;
+    height: 52px;
 }
 
 .qr-caption {
-    margin-top: 1px;
+    margin-top: 0;
     color: #667085;
-    font-size: 6.5px;
+    font-size: 5.8px;
     text-align: center;
 }
 
 .thin-separator {
     height: 1px;
     line-height: 1px;
-    margin: 9px 0 8px;
+    margin: 4px 0 5px;
     background: #e2e8f0;
 }
 
 .section-title {
-    margin: 0 0 4px;
+    margin: 0 0 3px;
     color: #18324a;
-    font-size: 10px;
+    font-size: 8.6px;
     font-weight: bold;
 }
 
-.field-grid {
-    margin-bottom: 8px;
+.info-table {
+    margin-bottom: 5px;
+    border-collapse: separate;
+    border-spacing: 0 3px;
 }
 
-.field-grid td {
-    width: 50%;
-    padding: 0 6px 6px 0;
+.info-table td {
+    vertical-align: top;
 }
 
-.field-grid td.field-right {
-    padding-right: 0;
-    padding-left: 6px;
-}
-
-.field-box {
-    min-height: 29px;
-    padding: 6px 8px 5px;
+.info-box {
+    width: 49%;
+    padding: 3px 6px;
     border: 1px solid #d9dee6;
-    border-radius: 6px;
     background: #ffffff;
 }
 
-.field-box--highlight {
+.info-gap {
+    width: 2%;
+    border: none;
+    padding: 0;
+}
+
+.info-box--highlight {
     background: #edf4ff;
     border-color: #cfe0f8;
 }
 
-.field-label {
+.info-label {
     color: #667085;
-    font-size: 7.5px;
+    font-size: 6.8px;
+    line-height: 1.0;
+}
+
+.info-value {
+    margin-top: 1px;
+    color: #111827;
+    font-size: 8.6px;
+    font-weight: bold;
     line-height: 1.05;
 }
 
-.field-value {
-    margin-top: 1px;
-    color: #111827;
-    font-size: 10px;
-    font-weight: bold;
-    line-height: 1.1;
-}
-
 .notice {
-    margin: 0 0 7px;
-    padding: 5px 8px;
+    margin: 0 0 4px;
+    padding: 3px 6px;
     border: 1px solid #bfdbfe;
-    border-radius: 6px;
     background: #eff6ff;
     color: #18324a;
+    font-size: 7.4px;
     font-weight: bold;
 }
 
 .signature-table {
-    margin-top: 30px;
+    margin-top: 7px;
 }
 
 .generated-line {
-    width: 60%;
+    width: 62%;
     color: #667085;
-    font-size: 7px;
+    font-size: 6.5px;
     vertical-align: bottom;
 }
 
 .signature-cell {
-    width: 40%;
-    padding-left: 18px;
+    width: 38%;
+    padding-left: 14px;
 }
 
 .signature-box {
-    height: 38px;
-    padding-top: 16px;
+    padding: 11px 5px 10px;
     border: 1px solid #aab3c2;
-    border-radius: 6px;
     text-align: center;
     color: #111827;
+    font-size: 7.4px;
     font-weight: bold;
 }
 
 .copy-separator {
-    margin: 7px 0 8px;
+    margin: 5px 0 5px;
     border-top: 1px dashed #9ca3af;
     color: #7a8494;
-    font-size: 7px;
+    font-size: 6.6px;
     text-align: center;
 }
 {% endblock %}
@@ -274,7 +267,7 @@
             </td>
             <td class="document-zone">
                 <div class="document-title">{{ document.document_title }}</div>
-                <div class="copy-badge">{{ copy_label }}</div>
+                <div class="copy-badge">{{ copy_label }}</div><br>
                 {% if document.document_type == "quittance" %}
                     {% if document.trop_percu > 0 %}
                         <div class="status-badge status-badge--paid">Quittance avec trop-perçu</div>
@@ -284,7 +277,7 @@
                 {% else %}
                     <div class="status-badge">Paiement partiel</div>
                 {% endif %}
-                <p class="meta-line">Paiement N° {{ paiement.reference|default:paiement.id }} &nbsp;|&nbsp; Édité le {{ date_generation }}</p>
+                <p class="meta-line">Paiement N° {{ paiement.reference|default:paiement.id }} | Édité le {{ date_generation }}</p>
             </td>
             <td class="qr-zone">
                 {% if qr_code_data_uri %}
@@ -298,19 +291,16 @@
     <div class="thin-separator">&nbsp;</div>
 
     <div class="section-title">Informations apprenant(e)</div>
-    <table class="field-grid">
+    <table class="info-table">
         <tr>
-            <td>
-                <div class="field-box">
-                    <div class="field-label">Apprenant(e)</div>
-                    <div class="field-value">{{ inscription.apprenant }}</div>
-                </div>
+            <td class="info-box">
+                <div class="info-label">Apprenant(e)</div>
+                <div class="info-value">{{ inscription.apprenant }}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box">
-                    <div class="field-label">Formation suivie</div>
-                    <div class="field-value">{{ inscription.formation }}</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box">
+                <div class="info-label">Formation suivie</div>
+                <div class="info-value">{{ inscription.formation }}</div>
             </td>
         </tr>
     </table>
@@ -319,84 +309,69 @@
     {% if document.document_type == "quittance" %}
         <div class="notice">L’apprenant a soldé la totalité de ses frais de formation.</div>
     {% endif %}
-    <table class="field-grid">
+    <table class="info-table">
         <tr>
-            <td>
-                <div class="field-box">
-                    <div class="field-label">Montant prévu</div>
-                    <div class="field-value">{{ document_amounts.montant_prevu }}</div>
-                </div>
+            <td class="info-box">
+                <div class="info-label">Montant prévu</div>
+                <div class="info-value">{{ document_amounts.montant_prevu }}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box">
-                    <div class="field-label">Montant payé</div>
-                    <div class="field-value">{{ document_amounts.montant_operation }}</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box">
+                <div class="info-label">Montant payé</div>
+                <div class="info-value">{{ document_amounts.montant_operation }}</div>
             </td>
         </tr>
         <tr>
-            <td>
-                <div class="field-box field-box--highlight">
-                    <div class="field-label">Montant payé cumulé</div>
-                    <div class="field-value">{{ document_amounts.montant_paye_cumule }}</div>
-                </div>
+            <td class="info-box info-box--highlight">
+                <div class="info-label">Montant payé cumulé</div>
+                <div class="info-value">{{ document_amounts.montant_paye_cumule }}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box field-box--highlight">
-                    <div class="field-label">Solde restant</div>
-                    <div class="field-value">{{ document_amounts.solde_restant }}</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box info-box--highlight">
+                <div class="info-label">Solde restant</div>
+                <div class="info-value">{{ document_amounts.solde_restant }}</div>
             </td>
         </tr>
         {% if document.trop_percu > 0 %}
         <tr>
-            <td>
-                <div class="field-box field-box--highlight">
-                    <div class="field-label">Trop-perçu</div>
-                    <div class="field-value">{{ document_amounts.trop_percu }}</div>
-                </div>
+            <td class="info-box info-box--highlight">
+                <div class="info-label">Trop-perçu</div>
+                <div class="info-value">{{ document_amounts.trop_percu }}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box">
-                    <div class="field-label">Document</div>
-                    <div class="field-value">Quittance avec trop-perçu</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box">
+                <div class="info-label">Document</div>
+                <div class="info-value">Quittance avec trop-perçu</div>
             </td>
         </tr>
         {% endif %}
         <tr>
-            <td>
-                <div class="field-box">
-                    <div class="field-label">Mode de paiement</div>
-                    <div class="field-value">{{ paiement.get_mode_paiement_display }}</div>
-                </div>
+            <td class="info-box">
+                <div class="info-label">Mode de paiement</div>
+                <div class="info-value">{% if paiement.mode_paiement == "especes" %}Espèces{% else %}{{ paiement.get_mode_paiement_display }}{% endif %}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box">
-                    <div class="field-label">Référence</div>
-                    <div class="field-value">{{ paiement.reference|default:"-" }}</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box">
+                <div class="info-label">Référence</div>
+                <div class="info-value">{{ paiement.reference|default:"-" }}</div>
             </td>
         </tr>
         <tr>
-            <td>
-                <div class="field-box">
-                    <div class="field-label">Date du paiement</div>
-                    <div class="field-value">{{ paiement.date_paiement|date:"d/m/Y" }}</div>
-                </div>
+            <td class="info-box">
+                <div class="info-label">Date du paiement</div>
+                <div class="info-value">{{ paiement.date_paiement|date:"d/m/Y" }}</div>
             </td>
-            <td class="field-right">
-                <div class="field-box">
-                    <div class="field-label">Document</div>
-                    <div class="field-value">{% if document.document_type == "quittance" %}Quittance de paiement{% else %}Reçu de paiement partiel{% endif %}</div>
-                </div>
+            <td class="info-gap">&nbsp;</td>
+            <td class="info-box">
+                <div class="info-label">Document</div>
+                <div class="info-value">{% if document.document_type == "quittance" %}Quittance de paiement{% else %}Reçu de paiement partiel{% endif %}</div>
             </td>
         </tr>
     </table>
 
     <table class="signature-table">
         <tr>
-            <td class="generated-line">Document généré le {{ date_footer }} par JOATHAM Manager.</td>
+            <td class="generated-line">Document généré le {{ date_footer|slice:":10" }} à {{ date_footer|slice:"13:" }} par JOATHAM Manager.</td>
             <td class="signature-cell">
                 <div class="signature-box">Signature et cachet de l’entreprise</div>
             </td>
@@ -404,7 +379,7 @@
     </table>
 </div>
 {% if not forloop.last %}
-<div class="copy-separator">Découper ici - exemplaire archive ci-dessous</div>
+<div class="copy-separator">Découper ici</div>
 {% endif %}
 {% endfor %}
 {% endblock %}
