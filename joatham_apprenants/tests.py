@@ -1377,6 +1377,13 @@ class ApprenantsViewsTests(TestCase):
         self.assertEqual(response["Content-Type"], "application/pdf")
         self.assertIn("quittance.pdf", response["Content-Disposition"])
 
+        reader = PdfReader(BytesIO(response.content))
+        self.assertEqual(len(reader.pages), 1)
+        pdf_text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        self.assertIn("Copie apprenant(e)", pdf_text)
+        self.assertIn("Copie archive entreprise", pdf_text)
+        self.assertIn("Découper ici", pdf_text)
+
     def test_overpaid_payment_document_returns_quittance_pdf(self):
         paiement = PaiementInscription.objects.create(
             entreprise=self.entreprise,
