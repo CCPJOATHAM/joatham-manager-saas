@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import DemandeConge, DocumentRH, Employe, Poste, Presence
+from .models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
 
 
 @admin.register(Poste)
@@ -36,3 +36,17 @@ class DocumentRHAdmin(admin.ModelAdmin):
     list_display = ("titre", "employe", "entreprise", "type_document", "date_document")
     list_filter = ("type_document", "entreprise")
     search_fields = ("titre", "description", "employe__matricule", "employe__nom", "employe__prenom", "entreprise__nom")
+
+
+@admin.register(AvanceSalaire)
+class AvanceSalaireAdmin(admin.ModelAdmin):
+    list_display = ("employe", "entreprise", "date_avance", "montant", "statut", "mode_paiement")
+    list_filter = ("statut", "mode_paiement", "date_avance", "entreprise")
+    search_fields = ("employe__matricule", "employe__nom", "employe__prenom", "reference", "motif")
+
+
+@admin.register(PaiementSalaire)
+class PaiementSalaireAdmin(admin.ModelAdmin):
+    list_display = ("employe", "entreprise", "periode_mois", "periode_annee", "montant_net_a_payer", "montant_paye", "statut")
+    list_filter = ("statut", "periode_annee", "periode_mois", "entreprise")
+    search_fields = ("employe__matricule", "employe__nom", "employe__prenom", "reference", "notes")

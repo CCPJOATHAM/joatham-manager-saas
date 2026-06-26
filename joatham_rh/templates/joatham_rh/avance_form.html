@@ -1,0 +1,11 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+{% block rh_title %}{{ page_title }}{% endblock %}
+{% block rh_subtitle %}{% trans "Enregistrez une avance sur salaire sans intégration caisse ou comptabilité." %}{% endblock %}
+{% block content %}
+<form method="post" class="rh-card">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="rh-form-grid">{% for field in form %}<div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}{% if field.help_text %}<p class="rh-muted">{{ field.help_text }}</p>{% endif %}</div>{% endfor %}</div>
+    <div class="rh-actions"><a href="{% url 'rh_avance_list' %}" class="rh-action-link">{% trans "Annuler" %}</a><button type="submit" class="rh-action-button primary">{{ submit_label }}</button></div>
+</form>
+{% endblock %}

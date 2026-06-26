@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from .models import DemandeConge, DocumentRH, Employe, Poste, Presence
+from .models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
 
 
 User = get_user_model()
@@ -168,3 +168,74 @@ class DocumentRHForm(forms.ModelForm):
         self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
         self.fields["titre"].widget.attrs.update({"placeholder": _("Exemple : Contrat de travail")})
         self.fields["description"].widget.attrs.update({"placeholder": _("Reference ou note interne")})
+
+
+class AvanceSalaireForm(forms.ModelForm):
+    class Meta:
+        model = AvanceSalaire
+        fields = ["employe", "date_avance", "montant", "motif", "statut", "mode_paiement", "reference"]
+        labels = {
+            "employe": _("Employé"),
+            "date_avance": _("Date de l'avance"),
+            "montant": _("Montant"),
+            "motif": _("Motif"),
+            "statut": _("Statut"),
+            "mode_paiement": _("Mode de paiement"),
+            "reference": _("Référence"),
+        }
+        widgets = {
+            "date_avance": forms.DateInput(attrs={"type": "date"}),
+            "motif": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        self.fields["montant"].widget.attrs.update({"min": "0.01", "step": "0.01", "placeholder": "0.00"})
+        self.fields["motif"].widget.attrs.update({"placeholder": _("Motif de l'avance")})
+        self.fields["reference"].widget.attrs.update({"placeholder": _("Référence de paiement")})
+
+
+class PaiementSalaireForm(forms.ModelForm):
+    class Meta:
+        model = PaiementSalaire
+        fields = [
+            "employe",
+            "periode_mois",
+            "periode_annee",
+            "salaire_base",
+            "primes",
+            "retenues",
+            "montant_paye",
+            "date_paiement",
+            "mode_paiement",
+            "reference",
+            "notes",
+        ]
+        labels = {
+            "employe": _("Employé"),
+            "periode_mois": _("Mois"),
+            "periode_annee": _("Année"),
+            "salaire_base": _("Salaire de base"),
+            "primes": _("Primes"),
+            "retenues": _("Retenues"),
+            "montant_paye": _("Montant payé"),
+            "date_paiement": _("Date de paiement"),
+            "mode_paiement": _("Mode de paiement"),
+            "reference": _("Référence"),
+            "notes": _("Notes"),
+        }
+        widgets = {
+            "date_paiement": forms.DateInput(attrs={"type": "date"}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, entreprise=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        for field_name in ["salaire_base", "primes", "retenues", "montant_paye"]:
+            self.fields[field_name].widget.attrs.update({"min": "0", "step": "0.01", "placeholder": "0.00"})
+        self.fields["periode_mois"].widget.attrs.update({"min": "1", "max": "12"})
+        self.fields["periode_annee"].widget.attrs.update({"min": "2000"})
+        self.fields["reference"].widget.attrs.update({"placeholder": _("Référence de paiement")})
+        self.fields["notes"].widget.attrs.update({"placeholder": _("Note interne sur le paiement")})

@@ -127,4 +127,31 @@
     <p class="rh-muted">{% trans "Aucune presence recente pour cet employe." %}</p>
     {% endif %}
 </div>
+
+<div class="rh-card">
+    <div class="rh-header">
+        <div>
+            <h3>{% trans "Avances récentes" %}</h3>
+            <p>{% trans "Les dernières avances sur salaire de cet employé." %}</p>
+        </div>
+        {% if can_manage_rh_ui %}<a href="{% url 'rh_avance_create' %}" class="rh-action-link">{% trans "Nouvelle avance" %}</a>{% endif %}
+    </div>
+    {% if avances_salaire %}
+    <div class="rh-table-shell"><div class="table-scroll"><table class="rh-table"><thead><tr><th>{% trans "Date" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Référence" %}</th></tr></thead><tbody>{% for row in avances_salaire %}<tr><td>{{ row.instance.date_avance }}</td><td>{{ row.instance.montant }}</td><td>{{ row.status_label }}</td><td>{{ row.instance.reference|default:"-" }}</td></tr>{% endfor %}</tbody></table></div></div>
+    {% else %}<p class="rh-muted">{% trans "Aucune avance récente." %}</p>{% endif %}
+</div>
+
+<div class="rh-card">
+    <div class="rh-header">
+        <div>
+            <h3>{% trans "Paiements de salaire récents" %}</h3>
+            <p>{% trans "Les derniers paiements de salaire enregistrés pour cet employé." %}</p>
+        </div>
+        {% if can_manage_rh_ui %}<a href="{% url 'rh_salaire_create' %}" class="rh-action-link">{% trans "Nouveau paiement" %}</a>{% endif %}
+    </div>
+    {% if paiements_salaire %}
+    <div class="rh-table-shell"><div class="table-scroll"><table class="rh-table"><thead><tr><th>{% trans "Période" %}</th><th>{% trans "Net" %}</th><th>{% trans "Payé" %}</th><th>{% trans "Statut" %}</th></tr></thead><tbody>{% for row in paiements_salaire %}<tr><td>{{ row.instance.periode_mois }}/{{ row.instance.periode_annee }}</td><td>{{ row.instance.montant_net_a_payer }}</td><td>{{ row.instance.montant_paye }}</td><td>{{ row.status_label }}</td></tr>{% endfor %}</tbody></table></div></div>
+    {% else %}<p class="rh-muted">{% trans "Aucun paiement de salaire récent." %}</p>{% endif %}
+</div>
+
 {% endblock %}

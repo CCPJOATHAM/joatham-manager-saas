@@ -1,11 +1,12 @@
 from datetime import timedelta
+from decimal import Decimal
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from core.services.tenancy import get_object_for_entreprise, scope_queryset_to_entreprise
 
-from ..models import DemandeConge, DocumentRH, Employe, Poste, Presence
+from ..models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
 
 
 def get_postes_by_entreprise(entreprise, *, active_only=False):
@@ -173,4 +174,102 @@ def get_rh_report_snapshot(entreprise, *, as_of=None):
         ],
         "month_start": month_start,
         "month_end": month_end,
+    }
+
+
+def get_avances_salaire_by_entreprise(entreprise, *, employe_id=None, statut=None, date_debut=None, date_fin=None):
+    queryset = (
+        scope_queryset_to_entreprise(AvanceSalaire.objects.select_related("employe", "cree_par"), entreprise)
+        .order_by("-date_avance", "-created_at", "-id")
+    )
+    if employe_id:
+        queryset = queryset.filter(employe_id=employe_id)
+    if statut:
+        queryset = queryset.filter(statut=statut)
+    if date_debut:
+        queryset = queryset.filter(date_avance__gte=date_debut)
+    if date_fin:
+        queryset = queryset.filter(date_avance__lte=date_fin)
+    return queryset
+
+
+def get_avance_salaire_by_entreprise(entreprise, avance_id):
+    return get_object_for_entreprise(
+        AvanceSalaire.objects.select_related("employe", "cree_par"),
+        entreprise,
+        id=avance_id,
+    )
+
+
+def get_avances_salaire_for_employe(entreprise, employe, *, limit=None):
+    queryset = get_avances_salaire_by_entreprise(entreprise, employe_id=employe.id)
+    return queryset[:limit] if limit else queryset
+
+
+def get_paiements_salaire_by_entreprise(entreprise, *, employe_id=None, statut=None, periode_mois=None, periode_annee=None):
+    queryset = (
+        scope_queryset_to_entreprise(PaiementSalaire.objects.select_related("employe", "cree_par"), entreprise)
+        .order_by("-periode_annee", "-periode_mois", "employe__nom", "-created_at", "-id")
+    )
+    if employe_id:
+        queryset = queryset.filter(employe_id=employe_id)
+    if statut:
+        queryset = queryset.filter(statut=statut)
+    if periode_mois:
+        queryset = queryset.filter(periode_mois=periode_mois)
+    if periode_annee:
+        queryset = queryset.filter(periode_annee=periode_annee)
+    return queryset
+
+
+def get_paiement_salaire_by_entreprise(entreprise, paiement_id):
+    return get_object_for_entreprise(
+        PaiementSalaire.objects.select_related("employe", "cree_par"),
+        entreprise,
+        id=paiement_id,
+    )
+
+
+def get_paiements_salaire_for_employe(entreprise, employe, *, limit=None):
+    queryset = get_paiements_salaire_by_entreprise(entreprise, employe_id=employe.id)
+    return queryset[:limit] if limit else queryset
+
+
+def get_paie_monthly_summary(entreprise, *, periode_mois=None, periode_annee=None):
+    today = timezone.localdate()
+    month = int(periode_mois or today.month)
+    year = int(periode_annee or today.year)
+    paiements = get_paiements_salaire_by_entreprise(entreprise, periode_mois=month, periode_annee=year)
+    avances = get_avances_salaire_by_entreprise(
+        entreprise,
+        statut=AvanceSalaire.Statut.VALIDEE,
+        date_debut=today.replace(year=year, month=month, day=1),
+    )
+    if month == 12:
+        next_month = today.replace(year=year + 1, month=1, day=1)
+    else:
+        next_month = today.replace(year=year, month=month + 1, day=1)
+    month_end = next_month - timedelta(days=1)
+    avances = avances.filter(date_avance__lte=month_end)
+    aggregates = paiements.aggregate(
+        total_net=Sum("montant_net_a_payer"),
+        total_paye=Sum("montant_paye"),
+        total_primes=Sum("primes"),
+        total_retenues=Sum("retenues"),
+    )
+    total_avances = avances.aggregate(total=Sum("montant"))["total"] or Decimal("0.00")
+    total_net = aggregates["total_net"] or Decimal("0.00")
+    total_paye = aggregates["total_paye"] or Decimal("0.00")
+    return {
+        "periode_mois": month,
+        "periode_annee": year,
+        "employes_actifs": scope_queryset_to_entreprise(Employe.objects.all(), entreprise).filter(statut=Employe.Statut.ACTIF, actif=True).count(),
+        "total_salaires_nets": total_net,
+        "total_salaires_payes": total_paye,
+        "total_avances_mois": total_avances,
+        "total_retenues": aggregates["total_retenues"] or Decimal("0.00"),
+        "total_primes": aggregates["total_primes"] or Decimal("0.00"),
+        "reste_a_payer": max(total_net - total_paye, Decimal("0.00")),
+        "paiements_count": paiements.count(),
+        "avances_count": avances.count(),
     }

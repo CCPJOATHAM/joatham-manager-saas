@@ -1,0 +1,9 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+{% block rh_title %}{% trans "Avance sur salaire" %}{% endblock %}
+{% block rh_subtitle %}{% trans "Détail de l'avance enregistrée." %}{% endblock %}
+{% block content %}
+<div class="rh-header"><div><h2>{% trans "Avance sur salaire" %}</h2><p>{{ avance.employe.matricule }} - {{ avance.employe.nom }} {{ avance.employe.prenom }}</p></div><div class="rh-actions"><a href="{% url 'rh_avance_list' %}" class="rh-action-link">{% trans "Retour" %}</a>{% if can_manage_rh_ui and avance.statut != "annulee" %}<form method="post" action="{% url 'rh_avance_cancel' avance.id %}">{% csrf_token %}<button type="submit" class="rh-action-button">{% trans "Annuler l'avance" %}</button></form>{% endif %}</div></div>
+<div class="rh-detail-grid"><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Montant" %}</span><span class="rh-kpi-value">{{ avance.montant }}</span></div><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Date" %}</span><span class="rh-kpi-value">{{ avance.date_avance }}</span></div><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Statut" %}</span><span class="rh-kpi-value">{{ status_label }}</span></div><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Mode" %}</span><span class="rh-kpi-value">{{ avance.get_mode_paiement_display }}</span></div><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Référence" %}</span><span class="rh-kpi-value">{{ avance.reference|default:"-" }}</span></div><div class="rh-kpi-card"><span class="rh-kpi-label">{% trans "Créé par" %}</span><span class="rh-kpi-value">{{ avance.cree_par|default:"-" }}</span></div></div>
+<div class="rh-card"><h3>{% trans "Motif" %}</h3><p>{{ avance.motif|default:"-" }}</p></div>
+{% endblock %}

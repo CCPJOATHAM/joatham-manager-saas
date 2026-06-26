@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
 
 from core.models import ActivityLog
@@ -17,20 +18,28 @@ from joatham_billing.tests.factories import create_entreprise, create_user
 from joatham_users.models import Abonnement, User
 from joatham_users.permissions import user_has_permission
 
-from .models import DemandeConge, DocumentRH, Employe, Presence
+from .models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Presence
 from .selectors.rh import (
+    get_avances_salaire_by_entreprise,
     get_conges_by_entreprise,
     get_documents_by_entreprise,
     get_employes_by_entreprise,
+    get_paie_monthly_summary,
+    get_paiements_salaire_by_entreprise,
     get_rh_report_snapshot,
 )
 from .services.rh import (
     RhOperationError,
     approve_conge,
+    calculer_net_salaire,
+    cancel_avance_salaire,
+    create_avance_salaire,
     create_conge,
     create_document_rh,
     create_employe,
+    create_paiement_salaire,
     create_poste,
+    get_total_avances_salaire_valides_du_mois,
     record_presence,
     update_employe,
 )
@@ -759,6 +768,21 @@ class RhFoundationTests(TestCase):
             date_fin=date(2026, 5, 8),
             utilisateur=self.owner_a,
         )
+        avance = create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 4),
+            montant=Decimal("20.00"),
+            utilisateur=self.owner_a,
+        )
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            montant_paye=Decimal("100.00"),
+            utilisateur=self.owner_a,
+        )
 
         self.client.force_login(self.comptable_a)
 
@@ -773,6 +797,13 @@ class RhFoundationTests(TestCase):
             reverse("rh_poste_create"),
             reverse("rh_presence_list"),
             reverse("rh_presence_create"),
+            reverse("rh_avance_list"),
+            reverse("rh_avance_create"),
+            reverse("rh_avance_detail", args=[avance.id]),
+            reverse("rh_salaire_list"),
+            reverse("rh_salaire_create"),
+            reverse("rh_salaire_detail", args=[paiement.id]),
+            reverse("rh_paie_report"),
             reverse("rh_conge_list"),
             reverse("rh_conge_create"),
             reverse("rh_document_list"),
@@ -792,6 +823,7 @@ class RhFoundationTests(TestCase):
                 self.assertEqual(response.status_code, 403)
 
         protected_post_urls = [
+            reverse("rh_avance_cancel", args=[avance.id]),
             reverse("rh_conge_approve", args=[conge.id]),
             reverse("rh_conge_refuse", args=[conge.id]),
         ]
@@ -816,6 +848,11 @@ class RhFoundationTests(TestCase):
             reverse("rh_employe_detail", args=[employe.id]),
             reverse("rh_poste_list"),
             reverse("rh_presence_create"),
+            reverse("rh_avance_list"),
+            reverse("rh_avance_create"),
+            reverse("rh_salaire_list"),
+            reverse("rh_salaire_create"),
+            reverse("rh_paie_report"),
             reverse("rh_document_list"),
             reverse("rh_document_create"),
             reverse("rh_reports"),
@@ -1064,9 +1101,12 @@ class RhFoundationTests(TestCase):
 
         self.assertContains(response, "Tableau de bord")
         self.assertContains(response, "Postes RH")
-        self.assertContains(response, "Conges")
+        self.assertContains(response, "Cong\u00e9s")
         self.assertContains(response, "Documents")
         self.assertContains(response, "Rapports")
+        self.assertContains(response, "Avances")
+        self.assertContains(response, "Salaires")
+        self.assertContains(response, "Rapport paie")
         self.assertContains(response, "Exports")
         self.assertContains(response, "Impressions")
 
@@ -1112,13 +1152,318 @@ class RhFoundationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Tableau de bord RH")
         self.assertContains(response, "Activite recente")
-        self.assertContains(response, "Employes recents")
+        self.assertContains(response, "Employ\u00e9s r\u00e9cents")
         self.assertContains(response, "RH-UI001")
         self.assertContains(response, "DesignReel")
         self.assertContains(response, "Contrat design premium")
         self.assertContains(response, reverse("rh_reports_export_csv"))
         self.assertContains(response, reverse("rh_reports_print"))
         self._assert_no_figma_dummy_content(response)
+
+
+    def test_create_avance_salaire_valid(self):
+        employe = self._create_employe(matricule="RH-PA001")
+
+        avance = create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 6),
+            montant=Decimal("35.00"),
+            motif="Transport",
+            mode_paiement=AvanceSalaire.ModePaiement.MOBILE_MONEY,
+            reference="AV-001",
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(avance.entreprise, self.entreprise_a)
+        self.assertEqual(avance.employe, employe)
+        self.assertEqual(avance.montant, Decimal("35.00"))
+        self.assertEqual(avance.statut, AvanceSalaire.Statut.VALIDEE)
+        self.assertEqual(avance.cree_par, self.owner_a)
+
+    def test_create_avance_salaire_rejects_non_positive_amount(self):
+        employe = self._create_employe(matricule="RH-PA002")
+
+        with self.assertRaisesMessage(RhOperationError, "strictement positif"):
+            create_avance_salaire(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                date_avance=date(2026, 5, 6),
+                montant=Decimal("0.00"),
+                utilisateur=self.owner_a,
+            )
+
+    def test_create_avance_salaire_rejects_foreign_employee(self):
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-PA003")
+
+        with self.assertRaisesMessage(RhOperationError, "autre entreprise"):
+            create_avance_salaire(
+                entreprise=self.entreprise_a,
+                employe=employe_b,
+                date_avance=date(2026, 5, 6),
+                montant=Decimal("25.00"),
+                utilisateur=self.owner_a,
+            )
+
+    def test_cancelled_avance_is_excluded_from_monthly_salary_deduction(self):
+        employe = self._create_employe(matricule="RH-PA004")
+        avance = create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 6),
+            montant=Decimal("40.00"),
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(
+            get_total_avances_salaire_valides_du_mois(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                periode_mois=5,
+                periode_annee=2026,
+            ),
+            Decimal("40.00"),
+        )
+
+        cancel_avance_salaire(entreprise=self.entreprise_a, avance=avance, utilisateur=self.owner_a)
+
+        avance.refresh_from_db()
+        self.assertEqual(avance.statut, AvanceSalaire.Statut.ANNULEE)
+        self.assertEqual(
+            get_total_avances_salaire_valides_du_mois(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                periode_mois=5,
+                periode_annee=2026,
+            ),
+            Decimal("0.00"),
+        )
+
+    def test_create_paiement_salaire_deducts_valid_monthly_advances(self):
+        employe = self._create_employe(matricule="RH-PS001")
+        create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 2),
+            montant=Decimal("30.00"),
+            utilisateur=self.owner_a,
+        )
+        cancelled = create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 3),
+            montant=Decimal("20.00"),
+            utilisateur=self.owner_a,
+        )
+        cancel_avance_salaire(entreprise=self.entreprise_a, avance=cancelled, utilisateur=self.owner_a)
+        create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 4, 28),
+            montant=Decimal("10.00"),
+            utilisateur=self.owner_a,
+        )
+
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            primes=Decimal("20.00"),
+            retenues=Decimal("5.00"),
+            montant_paye=Decimal("50.00"),
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(paiement.salaire_base, Decimal("150.00"))
+        self.assertEqual(paiement.total_avances_deduites, Decimal("30.00"))
+        self.assertEqual(paiement.montant_net_a_payer, Decimal("135.00"))
+        self.assertEqual(paiement.reste_a_payer, Decimal("85.00"))
+        self.assertEqual(paiement.statut, PaiementSalaire.Statut.PARTIEL)
+
+    def test_calculer_net_salaire_never_returns_negative_amount(self):
+        net = calculer_net_salaire(
+            salaire_base=Decimal("100.00"),
+            primes=Decimal("0.00"),
+            retenues=Decimal("40.00"),
+            total_avances_deduites=Decimal("80.00"),
+        )
+
+        self.assertEqual(net, Decimal("0.00"))
+
+    def test_paiement_salaire_statuses_follow_amount_paid(self):
+        employe = self._create_employe(matricule="RH-PS002")
+
+        unpaid = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("100.00"),
+            montant_paye=Decimal("0.00"),
+            utilisateur=self.owner_a,
+        )
+        partial = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("100.00"),
+            montant_paye=Decimal("50.00"),
+            utilisateur=self.owner_a,
+        )
+        paid = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("100.00"),
+            montant_paye=Decimal("120.00"),
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(unpaid.statut, PaiementSalaire.Statut.NON_PAYE)
+        self.assertEqual(partial.statut, PaiementSalaire.Statut.PARTIEL)
+        self.assertEqual(paid.statut, PaiementSalaire.Statut.PAYE)
+        self.assertEqual(paid.reste_a_payer, Decimal("0.00"))
+
+    def test_payroll_selectors_are_scoped_to_entreprise(self):
+        employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-SC001")
+        employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-SC002")
+        avance_a = create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            date_avance=date(2026, 5, 6),
+            montant=Decimal("25.00"),
+            utilisateur=self.owner_a,
+        )
+        create_avance_salaire(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            date_avance=date(2026, 5, 6),
+            montant=Decimal("45.00"),
+            utilisateur=self.owner_b,
+        )
+        paiement_a = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe_a,
+            periode_mois=5,
+            periode_annee=2026,
+            montant_paye=Decimal("50.00"),
+            utilisateur=self.owner_a,
+        )
+        create_paiement_salaire(
+            entreprise=self.entreprise_b,
+            employe=employe_b,
+            periode_mois=5,
+            periode_annee=2026,
+            montant_paye=Decimal("60.00"),
+            utilisateur=self.owner_b,
+        )
+
+        self.assertEqual(list(get_avances_salaire_by_entreprise(self.entreprise_a)), [avance_a])
+        self.assertEqual(list(get_paiements_salaire_by_entreprise(self.entreprise_a)), [paiement_a])
+
+    def test_monthly_payroll_summary_uses_salary_payments_and_advances(self):
+        employe = self._create_employe(matricule="RH-RP001")
+        create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 5),
+            montant=Decimal("20.00"),
+            utilisateur=self.owner_a,
+        )
+        create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            primes=Decimal("10.00"),
+            retenues=Decimal("5.00"),
+            montant_paye=Decimal("100.00"),
+            utilisateur=self.owner_a,
+        )
+
+        summary = get_paie_monthly_summary(self.entreprise_a, periode_mois=5, periode_annee=2026)
+
+        self.assertEqual(summary["employes_actifs"], 1)
+        self.assertEqual(summary["total_avances_mois"], Decimal("20.00"))
+        self.assertEqual(summary["total_primes"], Decimal("10.00"))
+        self.assertEqual(summary["total_retenues"], Decimal("5.00"))
+        self.assertEqual(summary["total_salaires_nets"], Decimal("135.00"))
+        self.assertEqual(summary["total_salaires_payes"], Decimal("100.00"))
+        self.assertEqual(summary["reste_a_payer"], Decimal("35.00"))
+
+    def test_payroll_views_render_and_create_records(self):
+        employe = self._create_employe(matricule="RH-VP001")
+        self.client.force_login(self.owner_a)
+
+        self.assertEqual(self.client.get(reverse("rh_avance_list")).status_code, 200)
+        response = self.client.post(
+            reverse("rh_avance_create"),
+            {
+                "employe": str(employe.id),
+                "date_avance": "2026-05-06",
+                "montant": "25.00",
+                "motif": "Transport",
+                "statut": AvanceSalaire.Statut.VALIDEE,
+                "mode_paiement": AvanceSalaire.ModePaiement.ESPECES,
+                "reference": "AV-VUE-001",
+            },
+        )
+        avance = AvanceSalaire.objects.get(reference="AV-VUE-001")
+        self.assertRedirects(response, reverse("rh_avance_detail", args=[avance.id]))
+        self.assertContains(self.client.get(reverse("rh_avance_detail", args=[avance.id])), "AV-VUE-001")
+
+        self.assertEqual(self.client.get(reverse("rh_salaire_list")).status_code, 200)
+        response = self.client.post(
+            reverse("rh_salaire_create"),
+            {
+                "employe": str(employe.id),
+                "periode_mois": "5",
+                "periode_annee": "2026",
+                "salaire_base": "150.00",
+                "primes": "10.00",
+                "retenues": "5.00",
+                "montant_paye": "80.00",
+                "date_paiement": "2026-05-31",
+                "mode_paiement": PaiementSalaire.ModePaiement.VIREMENT,
+                "reference": "SAL-VUE-001",
+                "notes": "Paie de mai",
+            },
+        )
+        paiement = PaiementSalaire.objects.get(reference="SAL-VUE-001")
+        self.assertRedirects(response, reverse("rh_salaire_detail", args=[paiement.id]))
+        self.assertContains(self.client.get(reverse("rh_salaire_detail", args=[paiement.id])), "SAL-VUE-001")
+        self.assertEqual(self.client.get(reverse("rh_paie_report"), {"mois": 5, "annee": 2026}).status_code, 200)
+
+    def test_employee_detail_displays_recent_payroll_sections(self):
+        employe = self._create_employe(matricule="RH-DET001")
+        create_avance_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            date_avance=date(2026, 5, 6),
+            montant=Decimal("15.00"),
+            reference="AV-DETAIL",
+            utilisateur=self.owner_a,
+        )
+        create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            montant_paye=Decimal("120.00"),
+            reference="SAL-DETAIL",
+            utilisateur=self.owner_a,
+        )
+
+        self.client.force_login(self.owner_a)
+        response = self.client.get(reverse("rh_employe_detail", args=[employe.id]))
+
+        self.assertContains(response, "Avances")
+        self.assertContains(response, "Paiements de salaire")
+        self.assertContains(response, "AV-DETAIL")
+        self.assertContains(response, "120,00")
 
     def test_employe_export_csv_allowed_with_rh_module(self):
         employe = self._create_employe(matricule="RH-X001", nom="Export")
@@ -1243,11 +1588,12 @@ class RhFoundationTests(TestCase):
         self.assertNotIn("Document Beta", content)
 
     def test_rh_report_export_csv_contains_correct_data(self):
+        today = timezone.localdate()
         employe = self._create_employe(matricule="RH-X010")
         record_presence(
             entreprise=self.entreprise_a,
             employe=employe,
-            date=date(2026, 5, 8),
+            date=today,
             statut=Presence.Statut.PRESENT,
             utilisateur=self.owner_a,
         )

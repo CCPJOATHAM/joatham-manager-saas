@@ -1,0 +1,31 @@
+{% extends "joatham_rh/base.html" %}
+{% load i18n %}
+
+{% block rh_title %}{% trans "Avances sur salaire" %}{% endblock %}
+{% block rh_subtitle %}{% trans "Suivez les avances accordées aux employés et leur statut." %}{% endblock %}
+
+{% block content %}
+<div class="rh-header">
+    <div>
+        <h2>{% trans "Avances sur salaire" %}</h2>
+        <p>{% trans "Les avances validées du mois sont déduites automatiquement lors du paiement de salaire." %}</p>
+    </div>
+    <div class="rh-actions">
+        <span class="rh-count">{{ avance_count }} {% trans "avance(s)" %}</span>
+        {% if can_manage_rh_ui %}<a href="{% url 'rh_avance_create' %}" class="rh-action-link primary">{% trans "Nouvelle avance" %}</a>{% endif %}
+    </div>
+</div>
+<form method="get" class="rh-filter-form">
+    <div><label for="employe">{% trans "Employé" %}</label><select id="employe" name="employe"><option value="">{% trans "Tous" %}</option>{% for employe in employes_filter %}<option value="{{ employe.id }}" {% if filters.employe_id == employe.id|stringformat:'s' %}selected{% endif %}>{{ employe.matricule }} - {{ employe.nom }} {{ employe.prenom }}</option>{% endfor %}</select></div>
+    <div><label for="statut">{% trans "Statut" %}</label><select id="statut" name="statut"><option value="">{% trans "Tous" %}</option>{% for value, label in statut_choices %}<option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div><label for="date_debut">{% trans "Du" %}</label><input type="date" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}"></div>
+    <div><label for="date_fin">{% trans "Au" %}</label><input type="date" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}"></div>
+    <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
+    <a href="{% url 'rh_avance_list' %}" class="rh-action-link">{% trans "Réinitialiser" %}</a>
+</form>
+{% if avances %}
+<div class="rh-table-shell"><div class="table-scroll"><table class="rh-table"><thead><tr><th>{% trans "Date" %}</th><th>{% trans "Employé" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Mode" %}</th><th>{% trans "Référence" %}</th><th>{% trans "Actions" %}</th></tr></thead><tbody>
+{% for row in avances %}<tr><td>{{ row.instance.date_avance }}</td><td>{{ row.instance.employe.matricule }} - {{ row.instance.employe.nom }} {{ row.instance.employe.prenom }}</td><td>{{ row.instance.montant }}</td><td><span class="rh-badge">{{ row.status_label }}</span></td><td>{{ row.instance.get_mode_paiement_display }}</td><td>{{ row.instance.reference|default:"-" }}</td><td><a href="{% url 'rh_avance_detail' row.instance.id %}" class="rh-action-link">{% trans "Voir" %}</a></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% else %}<div class="rh-table-shell"><h3>{% trans "Aucune avance" %}</h3>{% if can_manage_rh_ui %}<a href="{% url 'rh_avance_create' %}" class="btn-link primary">{% trans "Créer une avance" %}</a>{% endif %}</div>{% endif %}
+{% endblock %}

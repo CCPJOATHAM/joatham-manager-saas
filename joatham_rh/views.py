@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
@@ -9,14 +10,21 @@ from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required, user_has_permission
 
-from .forms import DemandeCongeForm, DocumentRHForm, EmployeForm, PosteForm, PresenceForm
-from .models import DemandeConge, DocumentRH, Employe, Presence
+from .forms import AvanceSalaireForm, DemandeCongeForm, DocumentRHForm, EmployeForm, PaiementSalaireForm, PosteForm, PresenceForm
+from .models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Presence
 from .selectors.rh import (
+    get_avance_salaire_by_entreprise,
+    get_avances_salaire_by_entreprise,
+    get_avances_salaire_for_employe,
     get_conge_by_entreprise,
     get_conges_by_entreprise,
     get_documents_by_entreprise,
     get_employe_by_entreprise,
     get_employes_by_entreprise,
+    get_paie_monthly_summary,
+    get_paiement_salaire_by_entreprise,
+    get_paiements_salaire_by_entreprise,
+    get_paiements_salaire_for_employe,
     get_postes_by_entreprise,
     get_presences_by_entreprise,
     get_rh_report_snapshot,
@@ -24,9 +32,12 @@ from .selectors.rh import (
 from .services.rh import (
     RhOperationError,
     approve_conge,
+    cancel_avance_salaire,
+    create_avance_salaire,
     create_conge,
     create_document_rh,
     create_employe,
+    create_paiement_salaire,
     create_poste,
     record_presence,
     refuse_conge,
@@ -57,6 +68,24 @@ def _build_status_label(status):
         Employe.Statut.ACTIF: _("Actif"),
         Employe.Statut.SUSPENDU: _("Suspendu"),
         Employe.Statut.SORTI: _("Sorti"),
+    }.get(status, status)
+
+
+
+
+def _build_avance_status_label(status):
+    return {
+        AvanceSalaire.Statut.EN_ATTENTE: _("En attente"),
+        AvanceSalaire.Statut.VALIDEE: _("Validée"),
+        AvanceSalaire.Statut.ANNULEE: _("Annulée"),
+    }.get(status, status)
+
+
+def _build_salaire_status_label(status):
+    return {
+        PaiementSalaire.Statut.NON_PAYE: _("Non payé"),
+        PaiementSalaire.Statut.PARTIEL: _("Partiel"),
+        PaiementSalaire.Statut.PAYE: _("Payé"),
     }.get(status, status)
 
 
@@ -119,6 +148,29 @@ def _get_presence_filters(request):
         "date_fin": _get_date_filter(request.GET.get("date_fin")),
         "employe_id": _get_int_filter(request.GET.get("employe")),
         "statut": _get_choice(request.GET.get("statut"), Presence.Statut.choices),
+    }
+
+
+
+
+def _get_avance_filters(request):
+    return {
+        "date_debut": _get_date_filter(request.GET.get("date_debut")),
+        "date_fin": _get_date_filter(request.GET.get("date_fin")),
+        "employe_id": _get_int_filter(request.GET.get("employe")),
+        "statut": _get_choice(request.GET.get("statut"), AvanceSalaire.Statut.choices),
+    }
+
+
+def _get_salaire_filters(request):
+    today = timezone.localdate()
+    mois = _get_int_filter(request.GET.get("mois"))
+    annee = _get_int_filter(request.GET.get("annee"))
+    return {
+        "periode_mois": int(mois) if mois else today.month,
+        "periode_annee": int(annee) if annee else today.year,
+        "employe_id": _get_int_filter(request.GET.get("employe")),
+        "statut": _get_choice(request.GET.get("statut"), PaiementSalaire.Statut.choices),
     }
 
 
@@ -195,6 +247,20 @@ def employe_detail(request, employe_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     employe = get_employe_by_entreprise(entreprise, employe_id)
     presences = Presence.objects.filter(entreprise=entreprise, employe=employe).order_by("-date", "-id")[:20]
+    avances = [
+        {
+            "instance": avance,
+            "status_label": _build_avance_status_label(avance.statut),
+        }
+        for avance in get_avances_salaire_for_employe(entreprise, employe, limit=8)
+    ]
+    paiements_salaire = [
+        {
+            "instance": paiement,
+            "status_label": _build_salaire_status_label(paiement.statut),
+        }
+        for paiement in get_paiements_salaire_for_employe(entreprise, employe, limit=8)
+    ]
     return render(
         request,
         "joatham_rh/employe_detail.html",
@@ -209,6 +275,8 @@ def employe_detail(request, employe_id):
                 }
                 for presence in presences
             ],
+            "avances_salaire": avances,
+            "paiements_salaire": paiements_salaire,
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -720,4 +788,180 @@ def rh_reports_export_csv(request):
         filename="joatham-rh-rapport-synthetique.csv",
         headers=["Indicateur", "Valeur"],
         rows=rows,
+    )
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def avance_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_avance_filters(request)
+    avances = [
+        {"instance": avance, "status_label": _build_avance_status_label(avance.statut)}
+        for avance in get_avances_salaire_by_entreprise(entreprise, **filters)
+    ]
+    return render(
+        request,
+        "joatham_rh/avance_list.html",
+        {
+            "avances": avances,
+            "avance_count": len(avances),
+            "filters": filters,
+            "employes_filter": get_employes_by_entreprise(entreprise, active_only=True),
+            "statut_choices": AvanceSalaire.Statut.choices,
+            "query_string": _query_string(request),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.manage")
+@module_access_required("rh")
+def avance_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    form = AvanceSalaireForm(request.POST or None, entreprise=entreprise)
+    if request.method == "POST" and form.is_valid():
+        try:
+            avance = create_avance_salaire(
+                entreprise=entreprise,
+                utilisateur=request.user,
+                **form.cleaned_data,
+            )
+        except RhOperationError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("L'avance sur salaire a été enregistrée avec succès."))
+            return redirect("rh_avance_detail", avance_id=avance.id)
+
+    return render(
+        request,
+        "joatham_rh/avance_form.html",
+        {
+            "form": form,
+            "page_title": _("Nouvelle avance sur salaire"),
+            "submit_label": _("Enregistrer l'avance"),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def avance_detail(request, avance_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    avance = get_avance_salaire_by_entreprise(entreprise, avance_id)
+    return render(
+        request,
+        "joatham_rh/avance_detail.html",
+        {
+            "avance": avance,
+            "status_label": _build_avance_status_label(avance.statut),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@require_POST
+@permission_required("rh.manage")
+@module_access_required("rh")
+def avance_cancel(request, avance_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    avance = get_avance_salaire_by_entreprise(entreprise, avance_id)
+    try:
+        cancel_avance_salaire(entreprise=entreprise, avance=avance, utilisateur=request.user)
+    except RhOperationError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, _("L'avance sur salaire a été annulée."))
+    return redirect("rh_avance_detail", avance_id=avance.id)
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def salaire_list(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_salaire_filters(request)
+    paiements = [
+        {"instance": paiement, "status_label": _build_salaire_status_label(paiement.statut)}
+        for paiement in get_paiements_salaire_by_entreprise(entreprise, **filters)
+    ]
+    return render(
+        request,
+        "joatham_rh/salaire_list.html",
+        {
+            "paiements": paiements,
+            "paiement_count": len(paiements),
+            "filters": filters,
+            "employes_filter": get_employes_by_entreprise(entreprise, active_only=True),
+            "statut_choices": PaiementSalaire.Statut.choices,
+            "query_string": _query_string(request),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.manage")
+@module_access_required("rh")
+def salaire_create(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    initial = {"periode_mois": timezone.localdate().month, "periode_annee": timezone.localdate().year}
+    form = PaiementSalaireForm(request.POST or None, entreprise=entreprise, initial=initial)
+    if request.method == "POST" and form.is_valid():
+        try:
+            paiement = create_paiement_salaire(
+                entreprise=entreprise,
+                utilisateur=request.user,
+                **form.cleaned_data,
+            )
+        except RhOperationError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Le paiement de salaire a été enregistré avec succès."))
+            return redirect("rh_salaire_detail", paiement_id=paiement.id)
+
+    return render(
+        request,
+        "joatham_rh/salaire_form.html",
+        {
+            "form": form,
+            "page_title": _("Nouveau paiement de salaire"),
+            "submit_label": _("Enregistrer le paiement"),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.view")
+@module_access_required("rh")
+def salaire_detail(request, paiement_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    paiement = get_paiement_salaire_by_entreprise(entreprise, paiement_id)
+    return render(
+        request,
+        "joatham_rh/salaire_detail.html",
+        {
+            "paiement": paiement,
+            "status_label": _build_salaire_status_label(paiement.statut),
+            **_build_rh_ui_permissions(request.user),
+        },
+    )
+
+
+@permission_required("rh.reports")
+@module_access_required("rh")
+def paie_report(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    filters = _get_salaire_filters(request)
+    summary = get_paie_monthly_summary(
+        entreprise,
+        periode_mois=filters["periode_mois"],
+        periode_annee=filters["periode_annee"],
+    )
+    return render(
+        request,
+        "joatham_rh/rapport_paie.html",
+        {
+            "summary": summary,
+            "filters": filters,
+            **_build_rh_ui_permissions(request.user),
+        },
     )

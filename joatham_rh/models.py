@@ -1,7 +1,10 @@
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from decimal import Decimal
+
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, Q
+from django.utils import timezone
 
 
 class Poste(models.Model):
@@ -268,3 +271,144 @@ class DocumentRH(models.Model):
 
     def __str__(self):
         return self.titre
+
+class AvanceSalaire(models.Model):
+    class Statut(models.TextChoices):
+        EN_ATTENTE = "en_attente", "En attente"
+        VALIDEE = "validee", "Validée"
+        ANNULEE = "annulee", "Annulée"
+
+    class ModePaiement(models.TextChoices):
+        ESPECES = "especes", "Espèces"
+        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        VIREMENT = "virement", "Virement"
+        AUTRE = "autre", "Autre"
+
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="rh_avances_salaire",
+    )
+    employe = models.ForeignKey(
+        Employe,
+        on_delete=models.CASCADE,
+        related_name="avances_salaire",
+    )
+    date_avance = models.DateField(default=timezone.localdate)
+    montant = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    motif = models.TextField(blank=True, default="")
+    statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.VALIDEE)
+    mode_paiement = models.CharField(max_length=20, choices=ModePaiement.choices, default=ModePaiement.ESPECES)
+    reference = models.CharField(max_length=100, blank=True, default="")
+    cree_par = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rh_avances_salaire_creees",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date_avance", "-created_at", "-id"]
+        constraints = [
+            models.CheckConstraint(condition=Q(montant__gt=0), name="rh_avance_salaire_montant_gt_zero"),
+        ]
+        indexes = [
+            models.Index(fields=["entreprise", "date_avance"], name="rh_avance_ent_date_idx"),
+            models.Index(fields=["entreprise", "statut", "date_avance"], name="rh_avance_ent_statut_dt_idx"),
+            models.Index(fields=["employe", "date_avance"], name="rh_avance_emp_date_idx"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.motif = (self.motif or "").strip()
+        self.reference = (self.reference or "").strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.employe} - {self.montant} - {self.date_avance}"
+
+
+class PaiementSalaire(models.Model):
+    class Statut(models.TextChoices):
+        NON_PAYE = "non_paye", "Non payé"
+        PARTIEL = "partiel", "Partiel"
+        PAYE = "paye", "Payé"
+
+    class ModePaiement(models.TextChoices):
+        ESPECES = "especes", "Espèces"
+        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        VIREMENT = "virement", "Virement"
+        AUTRE = "autre", "Autre"
+
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="rh_paiements_salaire",
+    )
+    employe = models.ForeignKey(
+        Employe,
+        on_delete=models.CASCADE,
+        related_name="paiements_salaire",
+    )
+    periode_mois = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    periode_annee = models.PositiveSmallIntegerField(validators=[MinValueValidator(2000)])
+    salaire_base = models.DecimalField(max_digits=12, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)])
+    total_avances_deduites = models.DecimalField(max_digits=12, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+    primes = models.DecimalField(max_digits=12, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)])
+    retenues = models.DecimalField(max_digits=12, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)])
+    montant_net_a_payer = models.DecimalField(max_digits=12, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+    montant_paye = models.DecimalField(max_digits=12, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)])
+    statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.NON_PAYE)
+    date_paiement = models.DateField(null=True, blank=True)
+    mode_paiement = models.CharField(max_length=20, choices=ModePaiement.choices, default=ModePaiement.ESPECES)
+    reference = models.CharField(max_length=100, blank=True, default="")
+    notes = models.TextField(blank=True, default="")
+    cree_par = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rh_paiements_salaire_crees",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-periode_annee", "-periode_mois", "employe__nom", "-created_at", "-id"]
+        constraints = [
+            models.CheckConstraint(condition=Q(periode_mois__gte=1) & Q(periode_mois__lte=12), name="rh_paie_mois_valid"),
+            models.CheckConstraint(condition=Q(salaire_base__gte=0), name="rh_paie_salaire_base_gte_zero"),
+            models.CheckConstraint(condition=Q(total_avances_deduites__gte=0), name="rh_paie_avances_gte_zero"),
+            models.CheckConstraint(condition=Q(primes__gte=0), name="rh_paie_primes_gte_zero"),
+            models.CheckConstraint(condition=Q(retenues__gte=0), name="rh_paie_retenues_gte_zero"),
+            models.CheckConstraint(condition=Q(montant_net_a_payer__gte=0), name="rh_paie_net_gte_zero"),
+            models.CheckConstraint(condition=Q(montant_paye__gte=0), name="rh_paie_montant_paye_gte_zero"),
+        ]
+        indexes = [
+            models.Index(fields=["entreprise", "periode_annee", "periode_mois"], name="rh_paie_ent_period_idx"),
+            models.Index(fields=["entreprise", "statut"], name="rh_paie_ent_statut_idx"),
+            models.Index(fields=["employe", "periode_annee", "periode_mois"], name="rh_paie_emp_period_idx"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.reference = (self.reference or "").strip()
+        self.notes = (self.notes or "").strip()
+        net = (self.salaire_base or Decimal("0.00")) + (self.primes or Decimal("0.00"))
+        net -= (self.retenues or Decimal("0.00")) + (self.total_avances_deduites or Decimal("0.00"))
+        self.montant_net_a_payer = max(net, Decimal("0.00"))
+        if (self.montant_paye or Decimal("0.00")) <= 0:
+            self.statut = self.Statut.NON_PAYE
+        elif self.montant_paye < self.montant_net_a_payer:
+            self.statut = self.Statut.PARTIEL
+        else:
+            self.statut = self.Statut.PAYE
+        super().save(*args, **kwargs)
+
+    @property
+    def reste_a_payer(self):
+        return max((self.montant_net_a_payer or Decimal("0.00")) - (self.montant_paye or Decimal("0.00")), Decimal("0.00"))
+
+    def __str__(self):
+        return f"{self.employe} - {self.periode_mois:02d}/{self.periode_annee}"

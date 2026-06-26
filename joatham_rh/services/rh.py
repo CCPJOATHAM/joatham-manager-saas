@@ -8,7 +8,7 @@ from django.utils.dateparse import parse_date
 from core.audit import record_audit_event
 from joatham_users.permissions import user_has_permission
 
-from ..models import DemandeConge, DocumentRH, Employe, Poste, Presence
+from ..models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
 
 
 User = get_user_model()
@@ -53,6 +53,47 @@ def _normalize_salary(value):
     if amount < 0:
         raise RhOperationError("Le salaire de base ne peut pas etre negatif.")
     return amount
+
+
+
+
+def _normalize_non_negative_amount(value, message):
+    if value in {None, ""}:
+        return Decimal("0.00")
+    try:
+        amount = Decimal(str(value)).quantize(Decimal("0.01"))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise RhOperationError(message) from exc
+    if amount < 0:
+        raise RhOperationError(message)
+    return amount
+
+
+def _normalize_positive_amount(value, message):
+    amount = _normalize_non_negative_amount(value, message)
+    if amount <= 0:
+        raise RhOperationError(message)
+    return amount
+
+
+def _normalize_period_month(value):
+    try:
+        month = int(value)
+    except (TypeError, ValueError) as exc:
+        raise RhOperationError("Le mois de paie est invalide.") from exc
+    if month < 1 or month > 12:
+        raise RhOperationError("Le mois de paie est invalide.")
+    return month
+
+
+def _normalize_period_year(value):
+    try:
+        year = int(value)
+    except (TypeError, ValueError) as exc:
+        raise RhOperationError("L'annee de paie est invalide.") from exc
+    if year < 2000:
+        raise RhOperationError("L'annee de paie est invalide.")
+    return year
 
 
 def _validate_choice(value, choices, message):
@@ -507,3 +548,159 @@ def create_document_rh(
         metadata={"document_id": document.id, "employe_id": employe.id, "type_document": document.type_document},
     )
     return document
+
+@transaction.atomic
+def create_avance_salaire(
+    *,
+    entreprise,
+    employe,
+    date_avance,
+    montant,
+    motif="",
+    statut=AvanceSalaire.Statut.VALIDEE,
+    mode_paiement=AvanceSalaire.ModePaiement.ESPECES,
+    reference="",
+    utilisateur=None,
+):
+    _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
+    avance = AvanceSalaire.objects.create(
+        entreprise=entreprise,
+        employe=employe,
+        date_avance=_normalize_date(date_avance, "La date de l'avance est obligatoire."),
+        montant=_normalize_positive_amount(montant, "Le montant de l'avance doit etre strictement positif."),
+        motif=(motif or "").strip(),
+        statut=_validate_choice(statut, AvanceSalaire.Statut.choices, "Le statut de l'avance est invalide."),
+        mode_paiement=_validate_choice(mode_paiement, AvanceSalaire.ModePaiement.choices, "Le mode de paiement est invalide."),
+        reference=(reference or "").strip(),
+        cree_par=utilisateur,
+    )
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="rh_avance_salaire_created",
+        module="rh",
+        objet_type="AvanceSalaire",
+        objet_id=avance.id,
+        description=f"Avance sur salaire creee pour {employe.matricule}.",
+        metadata={"avance_id": avance.id, "employe_id": employe.id, "montant": str(avance.montant)},
+    )
+    return avance
+
+
+@transaction.atomic
+def cancel_avance_salaire(*, entreprise, avance, utilisateur=None):
+    _ensure_same_entreprise(avance, entreprise, "L'avance selectionnee appartient a une autre entreprise.")
+    if avance.statut == AvanceSalaire.Statut.ANNULEE:
+        return avance
+    avance.statut = AvanceSalaire.Statut.ANNULEE
+    avance.save(update_fields=["statut", "updated_at"])
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="rh_avance_salaire_cancelled",
+        module="rh",
+        objet_type="AvanceSalaire",
+        objet_id=avance.id,
+        description=f"Avance sur salaire annulee pour {avance.employe.matricule}.",
+        metadata={"avance_id": avance.id, "employe_id": avance.employe_id},
+    )
+    return avance
+
+
+def get_total_avances_salaire_valides_du_mois(*, entreprise, employe, periode_mois, periode_annee):
+    _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
+    month = _normalize_period_month(periode_mois)
+    year = _normalize_period_year(periode_annee)
+    total = Decimal("0.00")
+    for avance in AvanceSalaire.objects.filter(
+        entreprise=entreprise,
+        employe=employe,
+        statut=AvanceSalaire.Statut.VALIDEE,
+        date_avance__month=month,
+        date_avance__year=year,
+    ):
+        total += avance.montant or Decimal("0.00")
+    return total.quantize(Decimal("0.01"))
+
+
+def calculer_net_salaire(*, salaire_base, primes=0, retenues=0, total_avances_deduites=0):
+    salaire_base = _normalize_non_negative_amount(salaire_base, "Le salaire de base est invalide.")
+    primes = _normalize_non_negative_amount(primes, "Le montant des primes est invalide.")
+    retenues = _normalize_non_negative_amount(retenues, "Le montant des retenues est invalide.")
+    total_avances_deduites = _normalize_non_negative_amount(total_avances_deduites, "Le total des avances est invalide.")
+    return max(salaire_base + primes - retenues - total_avances_deduites, Decimal("0.00")).quantize(Decimal("0.01"))
+
+
+@transaction.atomic
+def create_paiement_salaire(
+    *,
+    entreprise,
+    employe,
+    periode_mois,
+    periode_annee,
+    salaire_base=None,
+    primes=0,
+    retenues=0,
+    montant_paye=0,
+    date_paiement=None,
+    mode_paiement=PaiementSalaire.ModePaiement.ESPECES,
+    reference="",
+    notes="",
+    utilisateur=None,
+):
+    _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
+    month = _normalize_period_month(periode_mois)
+    year = _normalize_period_year(periode_annee)
+    base_value = employe.salaire_base if salaire_base in {None, ""} else salaire_base
+    salaire_base_amount = _normalize_non_negative_amount(base_value, "Le salaire de base est invalide.")
+    primes_amount = _normalize_non_negative_amount(primes, "Le montant des primes est invalide.")
+    retenues_amount = _normalize_non_negative_amount(retenues, "Le montant des retenues est invalide.")
+    montant_paye_amount = _normalize_non_negative_amount(montant_paye, "Le montant paye est invalide.")
+    total_avances = get_total_avances_salaire_valides_du_mois(
+        entreprise=entreprise,
+        employe=employe,
+        periode_mois=month,
+        periode_annee=year,
+    )
+    net = calculer_net_salaire(
+        salaire_base=salaire_base_amount,
+        primes=primes_amount,
+        retenues=retenues_amount,
+        total_avances_deduites=total_avances,
+    )
+    paiement = PaiementSalaire.objects.create(
+        entreprise=entreprise,
+        employe=employe,
+        periode_mois=month,
+        periode_annee=year,
+        salaire_base=salaire_base_amount,
+        total_avances_deduites=total_avances,
+        primes=primes_amount,
+        retenues=retenues_amount,
+        montant_net_a_payer=net,
+        montant_paye=montant_paye_amount,
+        date_paiement=_normalize_optional_date(date_paiement),
+        mode_paiement=_validate_choice(mode_paiement, PaiementSalaire.ModePaiement.choices, "Le mode de paiement est invalide."),
+        reference=(reference or "").strip(),
+        notes=(notes or "").strip(),
+        cree_par=utilisateur,
+    )
+    record_audit_event(
+        entreprise=entreprise,
+        utilisateur=utilisateur,
+        action="rh_paiement_salaire_created",
+        module="rh",
+        objet_type="PaiementSalaire",
+        objet_id=paiement.id,
+        description=f"Paiement salaire cree pour {employe.matricule} - {month:02d}/{year}.",
+        metadata={
+            "paiement_id": paiement.id,
+            "employe_id": employe.id,
+            "periode_mois": month,
+            "periode_annee": year,
+            "montant_net_a_payer": str(paiement.montant_net_a_payer),
+            "montant_paye": str(paiement.montant_paye),
+            "statut": paiement.statut,
+        },
+    )
+    return paiement
