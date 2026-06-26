@@ -372,6 +372,27 @@ class PaiementSalaire(models.Model):
         blank=True,
         related_name="rh_paiements_salaire_crees",
     )
+    caisse = models.ForeignKey(
+        "joatham_caisse.Caisse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rh_paiements_salaire",
+    )
+    session_caisse = models.ForeignKey(
+        "joatham_caisse.SessionCaisse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rh_paiements_salaire",
+    )
+    mouvement_caisse = models.OneToOneField(
+        "joatham_caisse.MouvementCaisse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rh_paiement_salaire",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -390,6 +411,7 @@ class PaiementSalaire(models.Model):
             models.Index(fields=["entreprise", "periode_annee", "periode_mois"], name="rh_paie_ent_period_idx"),
             models.Index(fields=["entreprise", "statut"], name="rh_paie_ent_statut_idx"),
             models.Index(fields=["employe", "periode_annee", "periode_mois"], name="rh_paie_emp_period_idx"),
+            models.Index(fields=["caisse", "session_caisse"], name="rh_paie_cash_session_idx"),
         ]
 
     def save(self, *args, **kwargs):

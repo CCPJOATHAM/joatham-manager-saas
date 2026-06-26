@@ -15,6 +15,9 @@ from core.services.subscription import (
     get_default_paid_plans,
 )
 from joatham_billing.tests.factories import create_entreprise, create_user
+from joatham_caisse.models import Caisse, MouvementCaisse
+from joatham_caisse.services.session import open_session
+from joatham_comptabilite.models import EcritureComptable
 from joatham_users.models import Abonnement, User
 from joatham_users.permissions import user_has_permission
 
@@ -38,6 +41,7 @@ from .services.rh import (
     create_document_rh,
     create_employe,
     create_paiement_salaire,
+    create_cash_movement_for_paiement_salaire,
     create_poste,
     get_total_avances_salaire_valides_du_mois,
     record_presence,
@@ -117,6 +121,31 @@ class RhFoundationTests(TestCase):
             statut=Employe.Statut.ACTIF,
             utilisateur=self.owner_a,
         )
+
+    def _enable_cash_integrations_for_tests(self):
+        modules = sorted(set(self.premium_plan.modules_inclus or []) | {"caisse_integrations"})
+        self.premium_plan.modules_inclus = modules
+        self.premium_plan.save(update_fields=["modules_inclus"])
+
+    def _create_caisse_with_open_session(self, entreprise=None, owner=None, code="RH-CASH-001"):
+        entreprise = entreprise or self.entreprise_a
+        owner = owner or self.owner_a
+        if entreprise == self.entreprise_a:
+            self._enable_cash_integrations_for_tests()
+        caisse = Caisse.objects.create(
+            entreprise=entreprise,
+            nom=f"Caisse paie {code}",
+            code=code,
+            devise="CDF",
+            cree_par=owner,
+        )
+        session = open_session(
+            entreprise=entreprise,
+            caisse=caisse,
+            utilisateur=owner,
+            solde_initial=Decimal("500.00"),
+        )
+        return caisse, session
 
     def _assert_print_company_identity(self, response):
         self.assertContains(response, "CYBER CENTRE ET PAPETERIE JOATHAM")
@@ -1327,6 +1356,186 @@ class RhFoundationTests(TestCase):
         self.assertEqual(paid.statut, PaiementSalaire.Statut.PAYE)
         self.assertEqual(paid.reste_a_payer, Decimal("0.00"))
 
+    def test_create_paiement_salaire_without_cashbox_keeps_cash_links_empty(self):
+        employe = self._create_employe(matricule="RH-CASH000")
+
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("100.00"),
+            montant_paye=Decimal("40.00"),
+            utilisateur=self.owner_a,
+        )
+
+        self.assertIsNone(paiement.caisse_id)
+        self.assertIsNone(paiement.session_caisse_id)
+        self.assertIsNone(paiement.mouvement_caisse_id)
+        self.assertFalse(
+            MouvementCaisse.objects.filter(
+                source_app="joatham_rh",
+                source_model="PaiementSalaire",
+                source_id=paiement.id,
+            ).exists()
+        )
+
+    def test_create_paiement_salaire_with_open_cashbox_creates_cash_exit(self):
+        employe = self._create_employe(matricule="RH-CASH001")
+        caisse, session = self._create_caisse_with_open_session(code="RH-CASH-001")
+
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("150.00"),
+            montant_paye=Decimal("120.00"),
+            mode_paiement=PaiementSalaire.ModePaiement.ESPECES,
+            reference="SAL-CASH-001",
+            caisse=caisse,
+            utilisateur=self.owner_a,
+        )
+
+        paiement.refresh_from_db()
+        mouvement = paiement.mouvement_caisse
+        self.assertEqual(paiement.caisse, caisse)
+        self.assertEqual(paiement.session_caisse, session)
+        self.assertEqual(mouvement.entreprise, self.entreprise_a)
+        self.assertEqual(mouvement.caisse, caisse)
+        self.assertEqual(mouvement.session, session)
+        self.assertEqual(mouvement.type_mouvement, MouvementCaisse.TypeMouvement.SORTIE)
+        self.assertEqual(mouvement.statut, MouvementCaisse.Statut.CONFIRME)
+        self.assertEqual(mouvement.montant, Decimal("120.00"))
+        self.assertEqual(mouvement.moyen_paiement, "cash")
+        self.assertEqual(mouvement.reference, "SAL-CASH-001")
+        self.assertEqual(mouvement.source_app, "joatham_rh")
+        self.assertEqual(mouvement.source_model, "PaiementSalaire")
+        self.assertEqual(mouvement.source_id, paiement.id)
+
+    def test_create_paiement_salaire_partial_cashbox_uses_amount_paid_only(self):
+        employe = self._create_employe(matricule="RH-CASH002")
+        caisse, _session = self._create_caisse_with_open_session(code="RH-CASH-002")
+
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("150.00"),
+            montant_paye=Decimal("45.00"),
+            caisse=caisse,
+            utilisateur=self.owner_a,
+        )
+
+        paiement.refresh_from_db()
+        self.assertEqual(paiement.statut, PaiementSalaire.Statut.PARTIEL)
+        self.assertEqual(paiement.mouvement_caisse.montant, Decimal("45.00"))
+
+    def test_create_paiement_salaire_rejects_foreign_cashbox(self):
+        employe = self._create_employe(matricule="RH-CASH003")
+        caisse_b = Caisse.objects.create(
+            entreprise=self.entreprise_b,
+            nom="Caisse autre entreprise",
+            code="RH-CASH-B",
+            devise="CDF",
+            cree_par=self.owner_b,
+        )
+        self._enable_cash_integrations_for_tests()
+
+        with self.assertRaisesMessage(RhOperationError, "autre entreprise"):
+            create_paiement_salaire(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                periode_mois=5,
+                periode_annee=2026,
+                salaire_base=Decimal("150.00"),
+                montant_paye=Decimal("50.00"),
+                caisse=caisse_b,
+                utilisateur=self.owner_a,
+            )
+
+        self.assertFalse(MouvementCaisse.objects.filter(source_app="joatham_rh").exists())
+
+    def test_create_paiement_salaire_rejects_cashbox_without_open_session(self):
+        employe = self._create_employe(matricule="RH-CASH004")
+        self._enable_cash_integrations_for_tests()
+        caisse = Caisse.objects.create(
+            entreprise=self.entreprise_a,
+            nom="Caisse sans session",
+            code="RH-CASH-004",
+            devise="CDF",
+            cree_par=self.owner_a,
+        )
+
+        with self.assertRaisesMessage(RhOperationError, "Aucune session de caisse ouverte"):
+            create_paiement_salaire(
+                entreprise=self.entreprise_a,
+                employe=employe,
+                periode_mois=5,
+                periode_annee=2026,
+                salaire_base=Decimal("150.00"),
+                montant_paye=Decimal("50.00"),
+                caisse=caisse,
+                utilisateur=self.owner_a,
+            )
+
+        self.assertFalse(MouvementCaisse.objects.filter(source_app="joatham_rh").exists())
+
+    def test_create_cash_movement_for_paiement_salaire_is_idempotent(self):
+        employe = self._create_employe(matricule="RH-CASH005")
+        caisse, _session = self._create_caisse_with_open_session(code="RH-CASH-005")
+        paiement = create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("150.00"),
+            montant_paye=Decimal("80.00"),
+            caisse=caisse,
+            utilisateur=self.owner_a,
+        )
+
+        first = create_cash_movement_for_paiement_salaire(
+            paiement=paiement,
+            entreprise=self.entreprise_a,
+            utilisateur=self.owner_a,
+        )
+        second = create_cash_movement_for_paiement_salaire(
+            paiement=paiement,
+            entreprise=self.entreprise_a,
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(first, second)
+        self.assertEqual(
+            MouvementCaisse.objects.filter(
+                source_app="joatham_rh",
+                source_model="PaiementSalaire",
+                source_id=paiement.id,
+            ).count(),
+            1,
+        )
+
+    def test_salary_cashbox_payment_does_not_create_accounting_entry(self):
+        employe = self._create_employe(matricule="RH-CASH006")
+        caisse, _session = self._create_caisse_with_open_session(code="RH-CASH-006")
+        before_count = EcritureComptable.objects.count()
+
+        create_paiement_salaire(
+            entreprise=self.entreprise_a,
+            employe=employe,
+            periode_mois=5,
+            periode_annee=2026,
+            salaire_base=Decimal("150.00"),
+            montant_paye=Decimal("75.00"),
+            caisse=caisse,
+            utilisateur=self.owner_a,
+        )
+
+        self.assertEqual(EcritureComptable.objects.count(), before_count)
+        self.assertFalse(EcritureComptable.objects.filter(source_app="joatham_rh").exists())
+
     def test_payroll_selectors_are_scoped_to_entreprise(self):
         employe_a = self._create_employe(entreprise=self.entreprise_a, matricule="RH-SC001")
         employe_b = self._create_employe(entreprise=self.entreprise_b, matricule="RH-SC002")
@@ -1428,6 +1637,7 @@ class RhFoundationTests(TestCase):
                 "montant_paye": "80.00",
                 "date_paiement": "2026-05-31",
                 "mode_paiement": PaiementSalaire.ModePaiement.VIREMENT,
+                "caisse": "",
                 "reference": "SAL-VUE-001",
                 "notes": "Paie de mai",
             },
@@ -1436,6 +1646,72 @@ class RhFoundationTests(TestCase):
         self.assertRedirects(response, reverse("rh_salaire_detail", args=[paiement.id]))
         self.assertContains(self.client.get(reverse("rh_salaire_detail", args=[paiement.id])), "SAL-VUE-001")
         self.assertEqual(self.client.get(reverse("rh_paie_report"), {"mois": 5, "annee": 2026}).status_code, 200)
+
+    def test_salary_payment_view_with_cashbox_creates_cash_movement_and_labels_pages(self):
+        employe = self._create_employe(matricule="RH-VPCASH")
+        caisse, _session = self._create_caisse_with_open_session(code="RH-CASH-VIEW")
+        self.client.force_login(self.owner_a)
+
+        response = self.client.post(
+            reverse("rh_salaire_create"),
+            {
+                "employe": str(employe.id),
+                "periode_mois": "5",
+                "periode_annee": "2026",
+                "salaire_base": "150.00",
+                "primes": "0.00",
+                "retenues": "0.00",
+                "montant_paye": "90.00",
+                "date_paiement": "2026-05-31",
+                "mode_paiement": PaiementSalaire.ModePaiement.ESPECES,
+                "caisse": str(caisse.id),
+                "reference": "SAL-VUE-CASH",
+                "notes": "Paie avec caisse",
+            },
+        )
+
+        paiement = PaiementSalaire.objects.get(reference="SAL-VUE-CASH")
+        self.assertRedirects(response, reverse("rh_salaire_detail", args=[paiement.id]))
+        self.assertIsNotNone(paiement.mouvement_caisse_id)
+        self.assertContains(self.client.get(reverse("rh_salaire_list"), {"mois": 5, "annee": 2026}), "Avec caisse")
+        detail_response = self.client.get(reverse("rh_salaire_detail", args=[paiement.id]))
+        self.assertContains(detail_response, "Liaison caisse")
+        self.assertContains(detail_response, caisse.nom)
+        self.assertContains(detail_response, "SAL-VUE-CASH")
+
+    def test_salary_payment_view_rejects_cashbox_without_open_session(self):
+        employe = self._create_employe(matricule="RH-VPNOSESSION")
+        self._enable_cash_integrations_for_tests()
+        caisse = Caisse.objects.create(
+            entreprise=self.entreprise_a,
+            nom="Caisse sans session vue",
+            code="RH-CASH-VIEW-NOSESSION",
+            devise="CDF",
+            cree_par=self.owner_a,
+        )
+        self.client.force_login(self.owner_a)
+
+        response = self.client.post(
+            reverse("rh_salaire_create"),
+            {
+                "employe": str(employe.id),
+                "periode_mois": "5",
+                "periode_annee": "2026",
+                "salaire_base": "150.00",
+                "primes": "0.00",
+                "retenues": "0.00",
+                "montant_paye": "90.00",
+                "date_paiement": "2026-05-31",
+                "mode_paiement": PaiementSalaire.ModePaiement.ESPECES,
+                "caisse": str(caisse.id),
+                "reference": "SAL-VUE-NOSESSION",
+                "notes": "Paie sans session",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Aucune session de caisse ouverte pour cette caisse.")
+        self.assertFalse(PaiementSalaire.objects.filter(reference="SAL-VUE-NOSESSION").exists())
 
     def test_employee_detail_displays_recent_payroll_sections(self):
         employe = self._create_employe(matricule="RH-DET001")

@@ -6,6 +6,10 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from core.audit import record_audit_event
+from core.services.product_policy import get_module_access_denied_message, get_module_access_state
+from joatham_caisse.models import Caisse, MouvementCaisse
+from joatham_caisse.selectors.session import get_open_session_for_caisse
+from joatham_caisse.services.mouvements import record_mouvement
 from joatham_users.permissions import user_has_permission
 
 from ..models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
@@ -631,6 +635,90 @@ def calculer_net_salaire(*, salaire_base, primes=0, retenues=0, total_avances_de
     return max(salaire_base + primes - retenues - total_avances_deduites, Decimal("0.00")).quantize(Decimal("0.01"))
 
 
+def _resolve_paiement_salaire_cashbox_context(*, entreprise, caisse, utilisateur=None):
+    if caisse in {None, ""}:
+        return None, None
+    state = get_module_access_state(entreprise, "caisse_integrations")
+    if not state["allowed"]:
+        raise RhOperationError(get_module_access_denied_message("caisse_integrations", state["reason"]))
+    if utilisateur is not None and not user_has_permission(utilisateur, "caisse.add_movement"):
+        raise RhOperationError("Vous n'avez pas les droits pour créer un mouvement de caisse.")
+    if not isinstance(caisse, Caisse):
+        try:
+            caisse = Caisse.objects.get(id=caisse)
+        except (Caisse.DoesNotExist, TypeError, ValueError) as exc:
+            raise RhOperationError("La caisse sélectionnée est introuvable.") from exc
+    _ensure_same_entreprise(caisse, entreprise, "La caisse sélectionnée appartient à une autre entreprise.")
+    if not caisse.est_active:
+        raise RhOperationError("La caisse sélectionnée est inactive.")
+    session = get_open_session_for_caisse(caisse)
+    if session is None:
+        raise RhOperationError("Aucune session de caisse ouverte pour cette caisse.")
+    _ensure_same_entreprise(session, entreprise, "La session de caisse appartient à une autre entreprise.")
+    return caisse, session
+
+
+def _map_salary_payment_method_to_cash_method(mode_paiement):
+    return {
+        PaiementSalaire.ModePaiement.ESPECES: "cash",
+        PaiementSalaire.ModePaiement.MOBILE_MONEY: "mobile_money",
+        PaiementSalaire.ModePaiement.VIREMENT: "bank_transfer",
+        PaiementSalaire.ModePaiement.AUTRE: "other",
+    }.get(mode_paiement or "", "other")
+
+
+def _build_paiement_salaire_cash_reference(paiement):
+    return paiement.reference or f"RH-SAL-{paiement.id}"
+
+
+def _build_paiement_salaire_cash_label(paiement):
+    employee_name = f"{paiement.employe.nom} {paiement.employe.prenom}".strip()
+    return f"Paiement salaire - {employee_name} - {paiement.periode_mois:02d}/{paiement.periode_annee}"
+
+
+def create_cash_movement_for_paiement_salaire(*, paiement, entreprise, utilisateur=None):
+    _ensure_same_entreprise(paiement, entreprise, "Le paiement de salaire appartient à une autre entreprise.")
+    if paiement.mouvement_caisse_id:
+        return paiement.mouvement_caisse
+    if paiement.caisse_id is None or paiement.session_caisse_id is None:
+        raise RhOperationError("Le paiement de salaire doit être rattaché à une caisse et à une session ouverte.")
+    _ensure_same_entreprise(paiement.caisse, entreprise, "La caisse sélectionnée appartient à une autre entreprise.")
+    _ensure_same_entreprise(paiement.session_caisse, entreprise, "La session de caisse appartient à une autre entreprise.")
+
+    existing = MouvementCaisse.objects.filter(
+        entreprise=entreprise,
+        source_app="joatham_rh",
+        source_model="PaiementSalaire",
+        source_id=paiement.id,
+    ).first()
+    if existing is not None:
+        paiement.caisse = existing.caisse
+        paiement.session_caisse = existing.session
+        paiement.mouvement_caisse = existing
+        paiement.save(update_fields=["caisse", "session_caisse", "mouvement_caisse", "updated_at"])
+        return existing
+
+    mouvement = record_mouvement(
+        entreprise=entreprise,
+        caisse=paiement.caisse,
+        session=paiement.session_caisse,
+        type_mouvement=MouvementCaisse.TypeMouvement.SORTIE,
+        montant=paiement.montant_paye,
+        libelle=_build_paiement_salaire_cash_label(paiement),
+        reference=_build_paiement_salaire_cash_reference(paiement),
+        commentaire="Paiement de salaire enregistré depuis le module RH.",
+        source_app="joatham_rh",
+        source_model="PaiementSalaire",
+        source_id=paiement.id,
+        utilisateur=utilisateur,
+        statut=MouvementCaisse.Statut.CONFIRME,
+        moyen_paiement=_map_salary_payment_method_to_cash_method(paiement.mode_paiement),
+    )
+    paiement.mouvement_caisse = mouvement
+    paiement.save(update_fields=["mouvement_caisse", "updated_at"])
+    return mouvement
+
+
 @transaction.atomic
 def create_paiement_salaire(
     *,
@@ -646,6 +734,7 @@ def create_paiement_salaire(
     mode_paiement=PaiementSalaire.ModePaiement.ESPECES,
     reference="",
     notes="",
+    caisse=None,
     utilisateur=None,
 ):
     _ensure_same_entreprise(employe, entreprise, "L'employe selectionne appartient a une autre entreprise.")
@@ -656,6 +745,14 @@ def create_paiement_salaire(
     primes_amount = _normalize_non_negative_amount(primes, "Le montant des primes est invalide.")
     retenues_amount = _normalize_non_negative_amount(retenues, "Le montant des retenues est invalide.")
     montant_paye_amount = _normalize_non_negative_amount(montant_paye, "Le montant paye est invalide.")
+    caisse_obj = None
+    session_caisse = None
+    if montant_paye_amount > 0 and caisse not in {None, ""}:
+        caisse_obj, session_caisse = _resolve_paiement_salaire_cashbox_context(
+            entreprise=entreprise,
+            caisse=caisse,
+            utilisateur=utilisateur,
+        )
     total_avances = get_total_avances_salaire_valides_du_mois(
         entreprise=entreprise,
         employe=employe,
@@ -684,7 +781,16 @@ def create_paiement_salaire(
         reference=(reference or "").strip(),
         notes=(notes or "").strip(),
         cree_par=utilisateur,
+        caisse=caisse_obj,
+        session_caisse=session_caisse,
     )
+    if caisse_obj is not None:
+        create_cash_movement_for_paiement_salaire(
+            paiement=paiement,
+            entreprise=entreprise,
+            utilisateur=utilisateur,
+        )
+        paiement.refresh_from_db(fields=["caisse", "session_caisse", "mouvement_caisse", "updated_at"])
     record_audit_event(
         entreprise=entreprise,
         utilisateur=utilisateur,
@@ -701,6 +807,9 @@ def create_paiement_salaire(
             "montant_net_a_payer": str(paiement.montant_net_a_payer),
             "montant_paye": str(paiement.montant_paye),
             "statut": paiement.statut,
+            "caisse_id": paiement.caisse_id,
+            "session_caisse_id": paiement.session_caisse_id,
+            "mouvement_caisse_id": paiement.mouvement_caisse_id,
         },
     )
     return paiement

@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
+from joatham_caisse.models import Caisse
+
 from .models import AvanceSalaire, DemandeConge, DocumentRH, Employe, PaiementSalaire, Poste, Presence
 
 
@@ -181,6 +183,7 @@ class AvanceSalaireForm(forms.ModelForm):
             "motif": _("Motif"),
             "statut": _("Statut"),
             "mode_paiement": _("Mode de paiement"),
+            "caisse": _("Caisse"),
             "reference": _("Référence"),
         }
         widgets = {
@@ -209,6 +212,7 @@ class PaiementSalaireForm(forms.ModelForm):
             "montant_paye",
             "date_paiement",
             "mode_paiement",
+            "caisse",
             "reference",
             "notes",
         ]
@@ -233,6 +237,10 @@ class PaiementSalaireForm(forms.ModelForm):
     def __init__(self, *args, entreprise=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
+        self.fields["caisse"].queryset = Caisse.objects.filter(entreprise=entreprise, est_active=True).order_by("nom", "id")
+        self.fields["caisse"].required = False
+        self.fields["caisse"].empty_label = _("Sans caisse")
+        self.fields["caisse"].help_text = _("Optionnel. Une session de caisse ouverte est requise pour créer la sortie de caisse.")
         for field_name in ["salaire_base", "primes", "retenues", "montant_paye"]:
             self.fields[field_name].widget.attrs.update({"min": "0", "step": "0.01", "placeholder": "0.00"})
         self.fields["periode_mois"].widget.attrs.update({"min": "1", "max": "12"})

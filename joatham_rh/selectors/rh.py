@@ -208,7 +208,7 @@ def get_avances_salaire_for_employe(entreprise, employe, *, limit=None):
 
 def get_paiements_salaire_by_entreprise(entreprise, *, employe_id=None, statut=None, periode_mois=None, periode_annee=None):
     queryset = (
-        scope_queryset_to_entreprise(PaiementSalaire.objects.select_related("employe", "cree_par"), entreprise)
+        scope_queryset_to_entreprise(PaiementSalaire.objects.select_related("employe", "cree_par", "caisse", "session_caisse", "mouvement_caisse"), entreprise)
         .order_by("-periode_annee", "-periode_mois", "employe__nom", "-created_at", "-id")
     )
     if employe_id:
@@ -224,7 +224,7 @@ def get_paiements_salaire_by_entreprise(entreprise, *, employe_id=None, statut=N
 
 def get_paiement_salaire_by_entreprise(entreprise, paiement_id):
     return get_object_for_entreprise(
-        PaiementSalaire.objects.select_related("employe", "cree_par"),
+        PaiementSalaire.objects.select_related("employe", "cree_par", "caisse", "session_caisse", "mouvement_caisse"),
         entreprise,
         id=paiement_id,
     )
