@@ -117,24 +117,28 @@ PLAN_QUOTA_PROFILES = {
         "max_depenses_mois": 20,
         "max_caisses": 0,
         "max_proformas_mois": 0,
+        "max_apprenants": 0,
     },
     STARTER_PLAN_CODE: {
         "max_produits": 300,
         "max_depenses_mois": 100,
         "max_caisses": 0,
         "max_proformas_mois": 30,
+        "max_apprenants": 0,
     },
     PRO_PLAN_CODE: {
         "max_produits": 3000,
         "max_depenses_mois": 1000,
         "max_caisses": 1,
         "max_proformas_mois": 300,
+        "max_apprenants": 500,
     },
     PREMIUM_PLAN_CODE: {
         "max_produits": None,
         "max_depenses_mois": None,
         "max_caisses": None,
         "max_proformas_mois": None,
+        "max_apprenants": None,
     },
 }
 UNLIMITED_QUOTA_PROFILE = {
@@ -403,6 +407,11 @@ def _format_plan_limit(value):
 def get_plan_limit_summary(plan):
     group_keys = set(get_plan_display_module_groups(plan))
     quota_profile = get_plan_quota_profile(plan)
+    apprenant_limit = (
+        quota_profile["max_apprenants"]
+        if "max_apprenants" in quota_profile
+        else getattr(plan, "max_apprenants", None)
+    )
     rows = [
         {"label": "Utilisateurs", "value": _format_plan_limit(getattr(plan, "max_utilisateurs", None))},
         {"label": "Factures / mois", "value": _format_plan_limit(getattr(plan, "max_factures_mois", None))},
@@ -411,7 +420,7 @@ def get_plan_limit_summary(plan):
         {"label": "Dépenses / mois", "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))},
         {"label": "Proformas / mois", "value": _format_plan_limit(quota_profile.get("max_proformas_mois"))},
         {"label": "Caisses actives", "value": _format_plan_limit(quota_profile.get("max_caisses"))},
-        {"label": "Apprenants", "value": _format_plan_limit(getattr(plan, "max_apprenants", None))},
+        {"label": "Apprenants", "value": _format_plan_limit(apprenant_limit)},
     ]
     if getattr(plan, "acces_exports", False):
         rows.append({"label": "Exports", "value": "Inclus"})

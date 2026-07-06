@@ -106,13 +106,13 @@ def get_plan_quota_limit(entreprise, quota_name, *, plan_field=None):
     plan = get_current_plan_for_quota(entreprise)
     if plan is None:
         return None
+    profile = get_plan_quota_profile(plan)
+    if quota_name in profile:
+        return profile[quota_name]
     if plan_field:
         field_value = getattr(plan, plan_field, None)
         if field_value is not None:
             return field_value
-    profile = get_plan_quota_profile(plan)
-    if quota_name in profile:
-        return profile[quota_name]
     if is_entreprise_on_free_plan(entreprise):
         return {
             "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
