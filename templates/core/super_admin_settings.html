@@ -19,6 +19,75 @@
         box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
     }
 
+    .diagnostic-panel {
+        margin-bottom: 16px;
+    }
+
+    .diagnostic-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .diagnostic-item {
+        display: grid;
+        gap: 5px;
+        padding: 12px;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .diagnostic-item span,
+    .diagnostic-list span {
+        color: #64748b;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .diagnostic-item strong {
+        color: #10233f;
+    }
+
+    .diagnostic-list {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .diagnostic-list ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+    }
+
+    .diagnostic-warning {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #fed7aa;
+        background: #fff7ed;
+        color: #9a3412;
+        font-weight: 700;
+    }
+
+    .diagnostic-ok {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #bbf7d0;
+        background: #f0fdf4;
+        color: #166534;
+        font-weight: 700;
+    }
+
+    .diagnostic-url {
+        overflow-wrap: anywhere;
+        color: #475569;
+        font-size: 0.84rem;
+    }
+
     .settings-form {
         display: grid;
         gap: 16px;
@@ -118,6 +187,92 @@
         color: #be123c;
     }
 </style>
+
+{% if cinetpay_diagnostic %}
+<section class="settings-panel diagnostic-panel">
+    <h2 class="section-title">Diagnostic CinetPay</h2>
+    <p class="muted">Statut technique sans affichage de secrets. Les cles et tokens ne sont jamais exposes ici.</p>
+
+    <div class="diagnostic-grid">
+        <div class="diagnostic-item">
+            <span>Paiement automatique</span>
+            <strong>{% if cinetpay_diagnostic.enabled %}Actif{% else %}Inactif{% endif %}</strong>
+        </div>
+        <div class="diagnostic-item">
+            <span>Provider</span>
+            <strong>{{ cinetpay_diagnostic.provider|default:"-" }}</strong>
+        </div>
+        <div class="diagnostic-item">
+            <span>Provider CinetPay</span>
+            <strong>{% if cinetpay_diagnostic.provider_is_cinetpay %}Oui{% else %}Non{% endif %}</strong>
+        </div>
+        <div class="diagnostic-item">
+            <span>Configuration</span>
+            <strong>{% if cinetpay_diagnostic.configured %}Complete{% else %}Incomplete{% endif %}</strong>
+        </div>
+        <div class="diagnostic-item">
+            <span>Mode sandbox</span>
+            <strong>{% if cinetpay_diagnostic.sandbox_flag %}Actif{% else %}Inactif{% endif %}</strong>
+        </div>
+        <div class="diagnostic-item">
+            <span>Source URL paiement</span>
+            <strong>{{ cinetpay_diagnostic.payment_url_source }}</strong>
+            <small class="diagnostic-url">{{ cinetpay_diagnostic.payment_url }}</small>
+        </div>
+        <div class="diagnostic-item">
+            <span>Source URL verification</span>
+            <strong>{{ cinetpay_diagnostic.check_url_source }}</strong>
+            <small class="diagnostic-url">{{ cinetpay_diagnostic.check_url }}</small>
+        </div>
+    </div>
+
+    {% if cinetpay_diagnostic.missing_required_settings %}
+        <div class="diagnostic-warning">
+            Configuration CinetPay incomplete :
+            {% for setting_name in cinetpay_diagnostic.missing_required_settings %}
+                <code>{{ setting_name }}</code>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="diagnostic-ok">Toutes les variables requises CinetPay sont detectees.</div>
+    {% endif %}
+
+    {% if cinetpay_diagnostic.warnings %}
+        <div class="diagnostic-list">
+            <span>Alertes</span>
+            <ul>
+                {% for warning in cinetpay_diagnostic.warnings %}
+                    <li>{{ warning }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="diagnostic-list">
+        <span>Variables requises presentes</span>
+        <ul>
+            {% for setting_name in cinetpay_diagnostic.present_required_settings %}
+                <li><code>{{ setting_name }}</code> : present</li>
+            {% empty %}
+                <li>Aucune variable requise detectee.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="diagnostic-list">
+        <span>Variables optionnelles</span>
+        <ul>
+            {% for item in cinetpay_diagnostic.optional_settings %}
+                <li>
+                    <code>{{ item.name }}</code> :
+                    {% if item.present %}present{% else %}absent{% endif %}
+                    {% if item.source %}({{ item.source }}){% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}
 
 <section class="settings-panel">
     <form method="post" class="settings-form">
