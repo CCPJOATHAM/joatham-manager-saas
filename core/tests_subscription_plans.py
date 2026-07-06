@@ -30,6 +30,7 @@ from core.services.quotas import (
     assert_invoice_quota_available,
     assert_product_quota_available,
     assert_proforma_quota_available,
+    get_plan_quota_limit,
 )
 from core.services.subscription import (
     OFFICIAL_COMMERCIAL_PLAN_CODES,
@@ -39,6 +40,7 @@ from core.services.subscription import (
     get_commercial_plans_queryset,
     get_default_paid_plans,
     get_or_create_free_plan,
+    get_plan_limit_summary,
     get_plan_quota_profile,
     get_subscription_price_usd,
 )
@@ -111,6 +113,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(get_plan_quota_profile(free_plan)["max_depenses_mois"], 20)
         self.assertEqual(get_plan_quota_profile(free_plan)["max_caisses"], 0)
         self.assertEqual(get_plan_quota_profile(free_plan)["max_proformas_mois"], FREE_PLAN_PROFORMA_MONTHLY_LIMIT)
+        self.assertEqual(get_plan_quota_profile(free_plan)["max_apprenants"], 0)
 
         self.assertEqual(starter.max_utilisateurs, 3)
         self.assertEqual(starter.max_clients, 300)
@@ -120,6 +123,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(get_plan_quota_profile(starter)["max_depenses_mois"], 100)
         self.assertEqual(get_plan_quota_profile(starter)["max_caisses"], 0)
         self.assertEqual(get_plan_quota_profile(starter)["max_proformas_mois"], 30)
+        self.assertEqual(get_plan_quota_profile(starter)["max_apprenants"], 0)
 
         self.assertEqual(pro.max_utilisateurs, 10)
         self.assertEqual(pro.max_clients, 3000)
@@ -129,6 +133,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(get_plan_quota_profile(pro)["max_depenses_mois"], 1000)
         self.assertEqual(get_plan_quota_profile(pro)["max_caisses"], 1)
         self.assertEqual(get_plan_quota_profile(pro)["max_proformas_mois"], 300)
+        self.assertEqual(get_plan_quota_profile(pro)["max_apprenants"], 500)
 
         self.assertIsNone(premium.max_utilisateurs)
         self.assertIsNone(premium.max_clients)
@@ -138,6 +143,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertIsNone(get_plan_quota_profile(premium)["max_depenses_mois"])
         self.assertIsNone(get_plan_quota_profile(premium)["max_caisses"])
         self.assertIsNone(get_plan_quota_profile(premium)["max_proformas_mois"])
+        self.assertIsNone(get_plan_quota_profile(premium)["max_apprenants"])
 
     def test_official_plan_module_matrix_matches_commercial_strategy(self):
         free_plan = get_or_create_free_plan()
@@ -401,6 +407,28 @@ class SubscriptionQuotaMatrixTests(TestCase):
 
         with self.assertRaises(PlanQuotaExceeded):
             assert_apprenant_quota_available(self.entreprise)
+
+    def test_pro_plan_learner_quota_uses_official_matrix_when_stored_plan_is_stale(self):
+        pro_company = create_entreprise("Quotas Pro stale learners")
+        pro_owner = create_user("owner-quota-pro-stale-learners", "proprietaire", pro_company)
+        pro_plan = create_default_plan("pro")
+        pro_plan.max_apprenants = 0
+        pro_plan.save(update_fields=["max_apprenants"])
+        activate_subscription_for_entreprise(
+            entreprise=pro_company,
+            plan=pro_plan,
+            utilisateur=pro_owner,
+        )
+
+        limit_values = {row["label"]: row["value"] for row in get_plan_limit_summary(pro_plan)}
+
+        self.assertEqual(limit_values["Apprenants"], "500")
+        self.assertEqual(get_plan_quota_limit(pro_company, "max_apprenants", plan_field="max_apprenants"), 500)
+        with patch("core.services.quotas.get_apprenant_count", return_value=499):
+            assert_apprenant_quota_available(pro_company)
+        with patch("core.services.quotas.get_apprenant_count", return_value=500):
+            with self.assertRaises(PlanQuotaExceeded):
+                assert_apprenant_quota_available(pro_company)
 
 
 class SaasPlanSeedTests(TestCase):
