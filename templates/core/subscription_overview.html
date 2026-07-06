@@ -210,7 +210,7 @@
         {% if subscription %}
         <div class="details">
             <div class="detail-row"><span>Organisation</span><strong>{{ entreprise.nom }}</strong></div>
-            <div class="detail-row"><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></div>
+            <div class="detail-row"><span>Plan actuel</span><strong>{{ current_plan_display_name }}</strong></div>
             <div class="detail-row">
                 <span>Statut</span>
                 <span class="status-pill status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
@@ -223,9 +223,9 @@
             <div class="detail-row"><span>Renouvellement</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
         </div>
         <h2 style="margin-top:22px;">Modules et limites</h2>
-        {% if subscription.plan.modules_inclus %}
+        {% if current_plan_modules %}
         <div class="module-list">
-            {% for module in subscription.plan.modules_inclus %}
+            {% for module in current_plan_modules %}
             <span class="module-pill">{{ module }}</span>
             {% endfor %}
         </div>
@@ -239,17 +239,21 @@
             {% endfor %}
         </div>
         {% endif %}
+        {% if current_plan_limits %}
         <div class="details" style="margin-top:14px;">
-            <div class="detail-row"><span>Utilisateurs</span><strong>{{ subscription.plan.max_utilisateurs|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Factures / mois</span><strong>{{ subscription.plan.max_factures_mois|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Clients</span><strong>{{ subscription.plan.max_clients|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Produits</span><strong>{{ current_plan_quota_profile.max_produits|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Dépenses / mois</span><strong>{{ current_plan_quota_profile.max_depenses_mois|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Caisses actives</span><strong>{{ current_plan_quota_profile.max_caisses|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Apprenants</span><strong>{{ subscription.plan.max_apprenants|default_if_none:"Illimité" }}</strong></div>
-            <div class="detail-row"><span>Comptabilité</span><strong>{% if subscription.plan.acces_comptabilite %}Incluse{% else %}Non incluse{% endif %}</strong></div>
-            <div class="detail-row"><span>Exports</span><strong>{% if subscription.plan.acces_exports %}Inclus{% else %}Non inclus{% endif %}</strong></div>
+            {% for limit in current_plan_limits %}
+            <div class="detail-row"><span>{{ limit.label }}</span><strong>{{ limit.value }}</strong></div>
+            {% endfor %}
         </div>
+        {% endif %}
+        {% if subscription_usage %}
+        <h2 style="margin-top:22px;">Consommation actuelle</h2>
+        <div class="details" style="margin-top:14px;">
+            {% for usage in subscription_usage %}
+            <div class="detail-row"><span>{{ usage.label }}</span><strong>{{ usage.value }}</strong></div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% else %}
         <div class="empty-state">
             Aucun abonnement n'est encore configuré pour votre organisation.
@@ -258,7 +262,7 @@
     </section>
 
     <section class="sub-card">
-        <h2>JOATHAM Pro</h2>
+        <h2>Changer de plan</h2>
         {% if featured_plan and pricing_options %}
         <div class="pricing-grid">
             {% for option in pricing_options %}
@@ -284,7 +288,7 @@
         <div class="history-list">
             {% for paiement in paiements %}
             <article class="history-item">
-                <strong>{{ paiement.plan.nom }} - {{ paiement.get_statut_display }}</strong>
+                <strong>{{ paiement.plan_display_name }} - {{ paiement.get_statut_display }}</strong>
                 <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
                 {% if paiement.methode_paiement == "automatique" %}
                     {% if paiement.statut == "valide" %}

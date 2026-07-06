@@ -12,7 +12,7 @@ def create_default_plan(code):
 
 
 class CashboxSubscriptionAccessTests(TestCase):
-    def test_starter_can_open_cashbox_module_but_not_cash_reports(self):
+    def test_starter_cannot_open_cashbox_module_or_cash_reports(self):
         entreprise = create_entreprise("Starter Caisse")
         owner = create_user("owner-starter-caisse", "proprietaire", entreprise)
         activate_subscription_for_entreprise(
@@ -25,7 +25,10 @@ class CashboxSubscriptionAccessTests(TestCase):
         cashbox_response = self.client.get(reverse("caisse_list"))
         reports_response = self.client.get(reverse("caisse_reports"))
 
-        self.assertEqual(cashbox_response.status_code, 200)
+        self.assertRedirects(
+            cashbox_response,
+            reverse("abonnement_expire") + "?module=caisse&reason=module_not_in_plan",
+        )
         self.assertRedirects(
             reports_response,
             reverse("abonnement_expire") + "?module=caisse_reports&reason=module_not_in_plan",

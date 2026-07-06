@@ -18,7 +18,8 @@ from joatham_users.models import Entreprise
 PREMIUM_REQUIRED_MESSAGE = "Cette fonctionnalite n'est pas incluse dans votre plan actuel."
 FREE_PLAN_PRODUCT_LIMIT = 30
 FREE_PLAN_EXPENSE_MONTHLY_LIMIT = 20
-FREE_PLAN_CASHBOX_LIMIT = 1
+FREE_PLAN_CASHBOX_LIMIT = 0
+FREE_PLAN_PROFORMA_MONTHLY_LIMIT = 0
 
 
 class PlanQuotaExceeded(ValueError):
@@ -73,6 +74,23 @@ def get_active_cashbox_count(entreprise):
     return Caisse.objects.filter(entreprise=entreprise, est_active=True).count()
 
 
+def get_monthly_proforma_count(entreprise, *, as_of=None):
+    from joatham_billing.models import Proforma
+
+    month_start, month_end = _month_bounds(as_of=as_of)
+    return Proforma.objects.filter(
+        entreprise=entreprise,
+        date__date__gte=month_start,
+        date__date__lt=month_end,
+    ).count()
+
+
+def get_apprenant_count(entreprise):
+    from joatham_apprenants.models import Apprenant
+
+    return Apprenant.objects.filter(entreprise=entreprise).count()
+
+
 def get_client_count(entreprise):
     from joatham_clients.models import Client
 
@@ -102,6 +120,8 @@ def get_plan_quota_limit(entreprise, quota_name, *, plan_field=None):
             "max_produits": FREE_PLAN_PRODUCT_LIMIT,
             "max_depenses_mois": FREE_PLAN_EXPENSE_MONTHLY_LIMIT,
             "max_caisses": FREE_PLAN_CASHBOX_LIMIT,
+            "max_proformas_mois": FREE_PLAN_PROFORMA_MONTHLY_LIMIT,
+            "max_apprenants": 0,
             "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         }.get(quota_name)
     return None
@@ -187,6 +207,32 @@ def assert_cashbox_quota_available(entreprise):
     if cashbox_count >= limit:
         raise PlanQuotaExceeded(
             f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} caisse(s) active(s)."
+        )
+
+
+def assert_proforma_quota_available(entreprise, *, as_of=None):
+    limit = get_plan_quota_limit(entreprise, "max_proformas_mois")
+    if limit is None:
+        return
+
+    _lock_entreprise_for_quota(entreprise)
+    proforma_count = get_monthly_proforma_count(entreprise, as_of=as_of)
+    if proforma_count >= limit:
+        raise PlanQuotaExceeded(
+            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} proformas par mois."
+        )
+
+
+def assert_apprenant_quota_available(entreprise):
+    limit = get_plan_quota_limit(entreprise, "max_apprenants", plan_field="max_apprenants")
+    if limit is None:
+        return
+
+    _lock_entreprise_for_quota(entreprise)
+    apprenant_count = get_apprenant_count(entreprise)
+    if apprenant_count >= limit:
+        raise PlanQuotaExceeded(
+            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} apprenant(s)."
         )
 
 

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 from core.audit import record_audit_event
+from core.services.quotas import assert_proforma_quota_available
 from joatham_clients.models import Client
 from joatham_users.permissions import user_has_permission
 
@@ -81,6 +82,7 @@ def create_proforma(
     if not user_has_permission(user, "billing.manage"):
         raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent creer une proforma.")
 
+    assert_proforma_quota_available(entreprise)
     client_id, client_nom = _normalize_proforma_client_inputs(client_id=client_id, client_nom=client_nom)
     client = None
     if client_id:

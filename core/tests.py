@@ -880,8 +880,8 @@ class SuperAdminDashboardTests(TestCase):
         response = self.client.get(reverse("subscription_plan_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Equivalent estime")
-        self.assertContains(response, "Taux utilise")
+        self.assertContains(response, "Estimation locale")
+        self.assertContains(response, "Taux :")
         self.assertNotContains(response, "Conversion temporairement indisponible")
 
     def test_subscription_interfaces_do_not_offer_legacy_trial_plan(self):
@@ -1342,9 +1342,9 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_plan_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Demander ce plan")
-        self.assertContains(response, "Paiement automatique bientôt disponible")
-        self.assertNotContains(response, "Payer automatiquement")
+        self.assertContains(response, "Choisir ce pack")
+        self.assertContains(response, "Paiement CinetPay non configuré")
+        self.assertNotContains(response, "Payer avec CinetPay")
 
     def test_automatic_payment_start_is_rejected_without_configured_provider(self):
         self.client.force_login(self.owner)
@@ -1399,8 +1399,8 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_plan_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Paiement automatique bientôt disponible")
-        self.assertNotContains(response, "Payer automatiquement")
+        self.assertContains(response, "Paiement CinetPay non configuré")
+        self.assertNotContains(response, "Payer avec CinetPay")
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,
@@ -1441,9 +1441,9 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_plan_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Demander ce plan")
-        self.assertContains(response, "Payer automatiquement")
-        self.assertNotContains(response, "Paiement automatique bientôt disponible")
+        self.assertContains(response, "Choisir ce pack")
+        self.assertContains(response, "Payer avec CinetPay")
+        self.assertNotContains(response, "Paiement CinetPay non configuré")
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,
@@ -1461,8 +1461,8 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_plan_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Paiement automatique bientôt disponible")
-        self.assertNotContains(response, "Payer automatiquement")
+        self.assertContains(response, "Paiement CinetPay non configuré")
+        self.assertNotContains(response, "Payer avec CinetPay")
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,

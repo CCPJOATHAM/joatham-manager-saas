@@ -22,9 +22,11 @@ class ProductSubscriptionAccessTests(TestCase):
         )
         self.client.force_login(owner)
 
-        response = self.client.get(reverse("inventory_list"))
+        stock_response = self.client.get(reverse("stock_movement_list"))
+        inventory_response = self.client.get(reverse("inventory_list"))
 
-        self.assertRedirects(response, reverse("abonnement_expire") + "?module=inventory&reason=module_not_in_plan")
+        self.assertEqual(stock_response.status_code, 200)
+        self.assertRedirects(inventory_response, reverse("abonnement_expire") + "?module=inventory&reason=module_not_in_plan")
 
     def test_pro_can_access_stock_reports(self):
         entreprise = create_entreprise("Pro Stock")

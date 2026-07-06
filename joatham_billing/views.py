@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -18,7 +19,13 @@ from django.utils.translation import gettext_lazy as _
 
 from core.services.company_profile import build_entreprise_identity, build_logo_data_uri
 from core.services.currency import format_amount_for_entreprise, get_currency_code, get_currency_wording
-from core.services.product_policy import can_access_module, module_access_required
+from core.services.quotas import PlanQuotaExceeded
+from core.services.product_policy import (
+    can_access_module,
+    get_module_access_denied_message,
+    get_module_access_state,
+    module_access_required,
+)
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
 from joatham_caisse.selectors.caisse import get_caisses_by_entreprise
@@ -62,6 +69,15 @@ def _get_billing_ui_permissions(user):
         "can_manage_factures_ui": user_has_permission(user, "billing.manage"),
         "can_record_payments_ui": user_has_permission(user, "billing.payments"),
     }
+
+
+def _redirect_if_module_denied(request, module_name):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    state = get_module_access_state(entreprise, module_name)
+    if state["allowed"]:
+        return None
+    messages.error(request, get_module_access_denied_message(module_name, state["reason"]))
+    return redirect(f"{reverse('abonnement_expire')}?module={module_name}&reason={state['reason']}")
 
 
 def nombre_en_lettres(n, currency_wording):
@@ -366,6 +382,10 @@ def facture_pdf(request, id):
     print_settings = get_or_create_print_settings(entreprise)
     invoice_format = (request.GET.get("format") or print_settings.default_invoice_format or "a4").lower()
     is_pos_format = invoice_format == "pos"
+    if is_pos_format:
+        denied_response = _redirect_if_module_denied(request, "billing_pos")
+        if denied_response is not None:
+            return denied_response
     context = _build_facture_context(facture, mode, print_settings=print_settings)
     disposition = "attachment" if mode == "download" else "inline"
     template_name = "joatham_billing/facture_pos_pdf.html" if is_pos_format else "joatham_billing/facture_pdf.html"
@@ -490,7 +510,7 @@ def facture_list(request):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 def proforma_list(request):
     can_view_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -504,6 +524,7 @@ def proforma_list(request):
     paginator = Paginator(proformas, getattr(settings, "JOATHAM_BILLING_PAGE_SIZE", 20))
     page_obj = paginator.get_page(request.GET.get("page"))
     rows = []
+    can_convert_proformas = can_access_module(request.user, "proforma_conversion")
     for proforma in page_obj.object_list:
         rows.append(
             {
@@ -513,7 +534,9 @@ def proforma_list(request):
                 "validity_display": proforma.date_validite.strftime("%d/%m/%Y") if proforma.date_validite else "-",
                 "total_net_display": format_amount_for_entreprise(proforma.total_net, entreprise),
                 "can_edit": proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE},
-                "can_convert": proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE} and not proforma.facture_convertie_id,
+                "can_convert": can_convert_proformas
+                and proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE}
+                and not proforma.facture_convertie_id,
             }
         )
 
@@ -531,7 +554,7 @@ def proforma_list(request):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 def add_proforma(request):
     can_manage_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -554,7 +577,7 @@ def add_proforma(request):
             )
             messages.success(request, _("Proforma creee avec succes."))
             return redirect("proforma_detail", id=proforma.id)
-        except FacturationError as exc:
+        except (FacturationError, PlanQuotaExceeded) as exc:
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue creation proforma", extra={"entreprise_id": entreprise.id})
@@ -573,7 +596,7 @@ def add_proforma(request):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 def edit_proforma(request, id):
     can_manage_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -623,13 +646,14 @@ def edit_proforma(request, id):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 def proforma_detail(request, id):
     can_view_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
     proforma = get_proforma_by_entreprise(entreprise, id)
     line_rows = _build_proforma_line_rows(proforma, entreprise)
     can_manage = user_has_permission(request.user, "billing.manage")
+    can_convert_proformas = can_access_module(request.user, "proforma_conversion")
     context = {
         "proforma": proforma,
         "line_rows": line_rows,
@@ -642,6 +666,7 @@ def proforma_detail(request, id):
         "line_count": len(line_rows),
         "can_edit_proforma": can_manage and proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE},
         "can_convert_proforma": can_manage
+        and can_convert_proformas
         and proforma.statut not in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE}
         and not proforma.facture_convertie_id,
         **_get_billing_ui_permissions(request.user),
@@ -650,7 +675,7 @@ def proforma_detail(request, id):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 def proforma_pdf(request, id):
     can_view_factures(request.user)
     entreprise = get_user_entreprise_or_raise(request.user)
@@ -671,7 +696,7 @@ def proforma_pdf(request, id):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proformas")
 @require_POST
 def cancel_proforma_view(request, id):
     can_manage_factures(request.user)
@@ -686,7 +711,7 @@ def cancel_proforma_view(request, id):
 
 
 @login_required
-@module_access_required("billing")
+@module_access_required("proforma_conversion")
 @require_POST
 def convert_proforma_view(request, id):
     can_manage_factures(request.user)

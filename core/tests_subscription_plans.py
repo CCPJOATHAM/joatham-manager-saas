@@ -21,11 +21,15 @@ from core.services.quotas import (
     FREE_PLAN_EXPENSE_MONTHLY_LIMIT,
     FREE_PLAN_INVOICE_LIMIT,
     FREE_PLAN_PRODUCT_LIMIT,
+    FREE_PLAN_PROFORMA_MONTHLY_LIMIT,
     PlanQuotaExceeded,
+    assert_apprenant_quota_available,
+    assert_cashbox_quota_available,
     assert_client_quota_available,
     assert_expense_quota_available,
     assert_invoice_quota_available,
     assert_product_quota_available,
+    assert_proforma_quota_available,
 )
 from core.services.subscription import (
     OFFICIAL_COMMERCIAL_PLAN_CODES,
@@ -35,6 +39,7 @@ from core.services.subscription import (
     get_commercial_plans_queryset,
     get_default_paid_plans,
     get_or_create_free_plan,
+    get_plan_quota_profile,
     get_subscription_price_usd,
 )
 from joatham_billing.models import Facture
@@ -92,15 +97,69 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(Decimal(str(paid_plans["premium"]["prix"])), Decimal("20"))
         self.assertEqual(paid_plans["premium"]["prix_annuel"], Decimal("240.00"))
 
+    def test_official_plan_quotas_match_commercial_matrix(self):
+        free_plan = get_or_create_free_plan()
+        starter = self.starter_company.abonnement_entreprise.plan
+        pro = self.pro_company.abonnement_entreprise.plan
+        premium = self.premium_company.abonnement_entreprise.plan
+
+        self.assertEqual(free_plan.max_utilisateurs, 1)
+        self.assertEqual(free_plan.max_clients, 50)
+        self.assertEqual(free_plan.max_factures_mois, 20)
+        self.assertEqual(free_plan.max_apprenants, 0)
+        self.assertEqual(get_plan_quota_profile(free_plan)["max_produits"], 30)
+        self.assertEqual(get_plan_quota_profile(free_plan)["max_depenses_mois"], 20)
+        self.assertEqual(get_plan_quota_profile(free_plan)["max_caisses"], 0)
+        self.assertEqual(get_plan_quota_profile(free_plan)["max_proformas_mois"], FREE_PLAN_PROFORMA_MONTHLY_LIMIT)
+
+        self.assertEqual(starter.max_utilisateurs, 3)
+        self.assertEqual(starter.max_clients, 300)
+        self.assertEqual(starter.max_factures_mois, 100)
+        self.assertEqual(starter.max_apprenants, 0)
+        self.assertEqual(get_plan_quota_profile(starter)["max_produits"], 300)
+        self.assertEqual(get_plan_quota_profile(starter)["max_depenses_mois"], 100)
+        self.assertEqual(get_plan_quota_profile(starter)["max_caisses"], 0)
+        self.assertEqual(get_plan_quota_profile(starter)["max_proformas_mois"], 30)
+
+        self.assertEqual(pro.max_utilisateurs, 10)
+        self.assertEqual(pro.max_clients, 3000)
+        self.assertEqual(pro.max_factures_mois, 1000)
+        self.assertEqual(pro.max_apprenants, 500)
+        self.assertEqual(get_plan_quota_profile(pro)["max_produits"], 3000)
+        self.assertEqual(get_plan_quota_profile(pro)["max_depenses_mois"], 1000)
+        self.assertEqual(get_plan_quota_profile(pro)["max_caisses"], 1)
+        self.assertEqual(get_plan_quota_profile(pro)["max_proformas_mois"], 300)
+
+        self.assertIsNone(premium.max_utilisateurs)
+        self.assertIsNone(premium.max_clients)
+        self.assertIsNone(premium.max_factures_mois)
+        self.assertIsNone(premium.max_apprenants)
+        self.assertIsNone(get_plan_quota_profile(premium)["max_produits"])
+        self.assertIsNone(get_plan_quota_profile(premium)["max_depenses_mois"])
+        self.assertIsNone(get_plan_quota_profile(premium)["max_caisses"])
+        self.assertIsNone(get_plan_quota_profile(premium)["max_proformas_mois"])
+
     def test_official_plan_module_matrix_matches_commercial_strategy(self):
         free_plan = get_or_create_free_plan()
         paid_plans = {plan["code"]: plan for plan in get_default_paid_plans()}
 
         self.assertEqual(
             set(free_plan.modules_inclus),
-            {"dashboard", "clients", "services", "billing", "factures", "subscription", "abonnements"},
+            {
+                "dashboard",
+                "clients",
+                "services",
+                "billing",
+                "factures",
+                "products",
+                "produits",
+                "expenses",
+                "depenses",
+                "subscription",
+                "abonnements",
+            },
         )
-        self.assertTrue({"expenses", "depenses", "products", "produits"}.issubset(set(paid_plans["starter"]["modules_inclus"])))
+        self.assertTrue({"expenses", "depenses", "products", "produits", "stock", "billing_pos", "pos_simple", "proformas"}.issubset(set(paid_plans["starter"]["modules_inclus"])))
         self.assertFalse({"caisse", "rh", "advanced_reports"} & set(paid_plans["starter"]["modules_inclus"]))
         self.assertFalse(paid_plans["starter"]["acces_comptabilite"])
         self.assertTrue(
@@ -150,8 +209,11 @@ class SubscriptionPlanMatrixTests(TestCase):
     def test_free_plan_blocks_advanced_modules(self):
         self.assertTrue(can_access_module(self.free_owner, "dashboard"))
         self.assertTrue(can_access_module(self.free_owner, "billing"))
-        self.assertFalse(can_access_module(self.free_owner, "expenses"))
-        self.assertFalse(can_access_module(self.free_owner, "products"))
+        self.assertTrue(can_access_module(self.free_owner, "expenses"))
+        self.assertTrue(can_access_module(self.free_owner, "products"))
+        self.assertFalse(can_access_module(self.free_owner, "billing_pos"))
+        self.assertFalse(can_access_module(self.free_owner, "proformas"))
+        self.assertFalse(can_access_module(self.free_owner, "proforma_conversion"))
         self.assertFalse(can_access_module(self.free_owner, "caisse"))
         self.assertFalse(can_access_module(self.free_owner, "stock"))
         self.assertFalse(can_access_module(self.free_owner, "stock_reports"))
@@ -161,11 +223,40 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertFalse(can_access_module(self.free_owner, "payments"))
         self.assertFalse(can_access_module(self.free_owner, "accounting"))
         self.assertFalse(can_access_module(self.free_owner, "rh"))
+        self.assertFalse(can_access_module(self.free_owner, "apprenants"))
         self.assertFalse(can_access_module(self.free_owner, "advanced_reports"))
+
+    def test_free_plan_direct_urls_block_pos_and_proformas(self):
+        facture = Facture.objects.create(
+            entreprise=self.free_company,
+            client_nom="Client comptoir",
+            montant=Decimal("10.00"),
+            tva=Decimal("0.00"),
+        )
+        self.client.force_login(self.free_owner)
+
+        pos_response = self.client.get(reverse("facture_pdf", args=[facture.id]) + "?format=pos")
+        proformas_response = self.client.get(reverse("proforma_list"))
+
+        self.assertEqual(pos_response.status_code, 302)
+        self.assertEqual(
+            pos_response["Location"],
+            reverse("abonnement_expire") + "?module=billing_pos&reason=module_not_in_plan",
+        )
+        self.assertEqual(proformas_response.status_code, 302)
+        self.assertEqual(
+            proformas_response["Location"],
+            reverse("abonnement_expire") + "?module=proformas&reason=module_not_in_plan",
+        )
 
     def test_starter_allows_simple_operations_but_blocks_advanced_modules(self):
         self.assertTrue(can_access_module(self.starter_owner, "expenses"))
         self.assertTrue(can_access_module(self.starter_owner, "products"))
+        self.assertTrue(can_access_module(self.starter_owner, "stock"))
+        self.assertTrue(can_access_module(self.starter_owner, "billing_pos"))
+        self.assertTrue(can_access_module(self.starter_owner, "proformas"))
+        self.assertFalse(can_access_module(self.starter_owner, "proforma_conversion"))
+        self.assertFalse(can_access_module(self.starter_owner, "stock_reports"))
         self.assertFalse(can_access_module(self.starter_owner, "caisse"))
         self.assertFalse(can_access_module(self.starter_owner, "inventory"))
         self.assertFalse(can_access_module(self.starter_owner, "payments"))
@@ -192,6 +283,9 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertTrue(can_access_module(self.pro_owner, "accounting"))
         self.assertTrue(can_access_module(self.pro_owner, "accounting_reports"))
         self.assertTrue(can_access_module(self.pro_owner, "accounting_exports"))
+        self.assertTrue(can_access_module(self.pro_owner, "billing_pos"))
+        self.assertTrue(can_access_module(self.pro_owner, "proformas"))
+        self.assertTrue(can_access_module(self.pro_owner, "proforma_conversion"))
         self.assertTrue(can_access_module(self.pro_owner, "apprenants"))
         self.assertTrue(can_access_module(self.pro_owner, "users"))
         self.assertTrue(can_access_module(self.pro_owner, "audit"))
@@ -227,6 +321,7 @@ class SubscriptionPlanMatrixTests(TestCase):
             ("users", "utilisateurs"),
             ("subscription", "abonnements"),
             ("expenses", "depenses"),
+            ("billing_pos", "pos_simple"),
         ):
             with self.subTest(module=english_name):
                 self.assertEqual(get_module_access_level(english_name), get_module_access_level(french_name))
@@ -234,7 +329,7 @@ class SubscriptionPlanMatrixTests(TestCase):
                 self.assertTrue(can_access_module(self.premium_owner, french_name))
 
     def test_starter_plan_does_not_gain_premium_alias_access(self):
-        for module_name in ("accounting", "comptabilite", "payments", "paiements", "caisse", "inventory", "inventaire"):
+        for module_name in ("accounting", "comptabilite", "payments", "paiements", "caisse", "inventory", "inventaire", "proforma_conversion"):
             with self.subTest(module=module_name):
                 self.assertFalse(can_access_module(self.starter_owner, module_name))
 
@@ -244,6 +339,7 @@ class SubscriptionPlanMatrixTests(TestCase):
             ("products", "produits"),
             ("subscription", "abonnements"),
             ("expenses", "depenses"),
+            ("billing_pos", "pos_simple"),
         ):
             with self.subTest(module=english_name):
                 self.assertTrue(can_access_module(self.starter_owner, english_name))
@@ -297,6 +393,15 @@ class SubscriptionQuotaMatrixTests(TestCase):
         with self.assertRaises(PlanQuotaExceeded):
             assert_expense_quota_available(self.entreprise, as_of=timezone.localdate())
 
+        with self.assertRaises(PlanQuotaExceeded):
+            assert_cashbox_quota_available(self.entreprise)
+
+        with self.assertRaises(PlanQuotaExceeded):
+            assert_proforma_quota_available(self.entreprise, as_of=timezone.localdate())
+
+        with self.assertRaises(PlanQuotaExceeded):
+            assert_apprenant_quota_available(self.entreprise)
+
 
 class SaasPlanSeedTests(TestCase):
     def test_subscription_plan_list_displays_current_official_prices(self):
@@ -338,37 +443,55 @@ class SaasPlanSeedTests(TestCase):
         pro_card = cards["pro"]
         premium_card = cards["premium"]
 
-        self.assertContains(response, "Plan découverte pour tester JOATHAM Manager")
-        self.assertContains(response, "Gestion simple pour une petite activité")
-        self.assertContains(response, "Gestion avancée avec caisse")
-        self.assertContains(response, "Accès complet à JOATHAM Manager")
-        self.assertNotContains(response, "caisse simple")
+        self.assertEqual(premium_card["display_name"], "Premium Business")
+        self.assertContains(response, "Plan decouverte permanent")
+        self.assertContains(response, "Gestion professionnelle pour petite activite")
+        self.assertContains(response, "Gestion complete pour PME")
+        self.assertContains(response, "Premium Business : acces complet")
         for card in cards.values():
             self.assertFalse(any("non inclus" in feature.lower() for feature in card["features"]))
 
-        self.assertNotIn("Produits", free_card["included_modules"])
-        self.assertNotIn("Dépenses", free_card["included_modules"])
+        free_limit_values = {row["label"]: row["value"] for row in free_card["limits"]}
+        self.assertIn("Produits", free_card["included_modules"])
+        self.assertIn("Dépenses", free_card["included_modules"])
+        self.assertNotIn("POS simple", free_card["included_modules"])
         self.assertNotIn("Caisse", free_card["included_modules"])
-        self.assertIn("Produits", free_card["non_included"])
-        self.assertIn("Dépenses", free_card["non_included"])
+        self.assertIn("POS", free_card["non_included"])
+        self.assertIn("Proformas", free_card["non_included"])
         self.assertIn("Caisse", free_card["non_included"])
         self.assertIn("Ressources humaines", free_card["non_included"])
-        self.assertNotIn("Produits", [row["label"] for row in free_card["limits"]])
-        self.assertNotIn("Dépenses / mois", [row["label"] for row in free_card["limits"]])
-        self.assertNotIn("Caisses actives", [row["label"] for row in free_card["limits"]])
+        self.assertEqual(free_limit_values["Produits / services"], "30")
+        self.assertEqual(free_limit_values["Dépenses / mois"], "20")
+        self.assertEqual(free_limit_values["Proformas / mois"], "0")
+        self.assertEqual(free_limit_values["Caisses actives"], "0")
+        self.assertEqual(free_limit_values["Apprenants"], "0")
 
-        self.assertIn("Produits", starter_card["included_modules"])
-        self.assertIn("Dépenses", starter_card["included_modules"])
+        starter_limit_values = {row["label"]: row["value"] for row in starter_card["limits"]}
+        self.assertIn("POS simple", starter_card["included_modules"])
+        self.assertIn("Proformas", starter_card["included_modules"])
+        self.assertIn("Stock simple", starter_card["included_modules"])
         self.assertNotIn("Caisse", starter_card["included_modules"])
-        self.assertIn("Caisse avancée", starter_card["non_included"])
-        self.assertIn("Ressources humaines", starter_card["non_included"])
-        self.assertIn("Rapports avancés", starter_card["non_included"])
+        self.assertNotIn("Inventaire", starter_card["included_modules"])
+        self.assertIn("Caisse complete", starter_card["non_included"])
+        self.assertIn("Inventaire physique", starter_card["non_included"])
+        self.assertIn("Rapports avances", starter_card["non_included"])
+        self.assertEqual(starter_limit_values["Produits / services"], "300")
+        self.assertEqual(starter_limit_values["Dépenses / mois"], "100")
+        self.assertEqual(starter_limit_values["Proformas / mois"], "30")
+        self.assertEqual(starter_limit_values["Caisses actives"], "0")
+        self.assertNotIn("Exports", starter_limit_values)
 
         pro_limit_values = {row["label"]: row["value"] for row in pro_card["limits"]}
+        self.assertIn("Caisse", pro_card["included_modules"])
+        self.assertIn("Apprenants", pro_card["included_modules"])
+        self.assertIn("Conversion proforma", pro_card["included_modules"])
         self.assertIn("Comptabilité", pro_card["included_modules"])
+        self.assertEqual(pro_limit_values["Caisses actives"], "1")
+        self.assertEqual(pro_limit_values["Apprenants"], "500")
+        self.assertEqual(pro_limit_values["Exports"], "Inclus")
         self.assertEqual(pro_limit_values["Comptabilité"], "Incluse")
-        self.assertIn("Ressources humaines complètes", pro_card["non_included"])
-        self.assertIn("Rapports avancés", pro_card["non_included"])
+        self.assertIn("Ressources humaines completes", pro_card["non_included"])
+        self.assertIn("Rapports Premium Business avances", pro_card["non_included"])
 
         self.assertIn("Ressources humaines", premium_card["included_modules"])
         self.assertIn("Rapports avancés", premium_card["included_modules"])
@@ -424,10 +547,15 @@ class SaasPlanSeedTests(TestCase):
         self.assertEqual(Decimal(str(premium.prix)), Decimal("20"))
         self.assertEqual(premium.prix_annuel, Decimal("240.00"))
         self.assertNotIn("caisse", free.modules_inclus)
-        self.assertNotIn("products", free.modules_inclus)
-        self.assertIn("products", starter.modules_inclus)
+        self.assertIn("products", free.modules_inclus)
+        self.assertIn("expenses", free.modules_inclus)
+        self.assertIn("stock", starter.modules_inclus)
+        self.assertIn("billing_pos", starter.modules_inclus)
+        self.assertIn("proformas", starter.modules_inclus)
+        self.assertFalse(starter.acces_exports)
         self.assertNotIn("caisse", starter.modules_inclus)
         self.assertIn("caisse", pro.modules_inclus)
+        self.assertIn("proforma_conversion", pro.modules_inclus)
         self.assertIn("payments", pro.modules_inclus)
         self.assertIn("accounting", pro.modules_inclus)
         self.assertNotIn("rh", pro.modules_inclus)

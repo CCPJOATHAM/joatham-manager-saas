@@ -197,7 +197,7 @@
         <div>
             <div class="status-label">Abonnement actuel</div>
             {% if subscription %}
-            <div class="status-value">{{ subscription.plan.nom }}</div>
+            <div class="status-value">{{ subscription_plan_display_name }}</div>
             <span class="status-pill">{{ subscription.get_statut_display }}</span>
             {% else %}
             <div class="status-value">Aucun plan actif</div>
@@ -224,7 +224,7 @@
     <article class="plan-card {% if plan.code == 'pro' %}is-popular{% endif %}">
         {% if plan.code == "pro" %}<span class="plan-badge">Populaire</span>{% endif %}
         <div class="plan-head">
-            <h2>{{ plan.nom }}</h2>
+            <h2>{{ plan_card.display_name }}</h2>
             <p>{{ plan_card.description }}</p>
         </div>
 
@@ -327,7 +327,7 @@
         {% for plan_card in plan_cards %}
         {% with plan=plan_card.plan price_info=plan_card.price_info %}
         <div class="compare-item">
-            <strong>{{ plan.nom }}</strong>
+            <strong>{{ plan_card.display_name }}</strong>
             <span>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} / mois</span>
             <span>Utilisateurs : {{ plan.max_utilisateurs|default_if_none:"Illimite" }}</span>
             <span>Factures / mois : {{ plan.max_factures_mois|default_if_none:"Illimite" }}</span>

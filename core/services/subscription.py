@@ -52,14 +52,18 @@ FREE_PLAN_MODULES = [
     "services",
     "billing",
     "factures",
+    "products",
+    "produits",
+    "expenses",
+    "depenses",
     "subscription",
     "abonnements",
 ]
 STARTER_PLAN_MODULES = FREE_PLAN_MODULES + [
-    "expenses",
-    "depenses",
-    "products",
-    "produits",
+    "stock",
+    "billing_pos",
+    "pos_simple",
+    "proformas",
 ]
 PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
     "caisse",
@@ -67,7 +71,6 @@ PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
     "caisse_exports",
     "caisse_integrations",
     "caisse_validation",
-    "stock",
     "stock_reports",
     "stock_exports",
     "inventory",
@@ -82,6 +85,7 @@ PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
     "accounting_reports",
     "accounting_exports",
     "apprenants",
+    "proforma_conversion",
     "users",
     "utilisateurs",
     "audit",
@@ -111,28 +115,33 @@ PLAN_QUOTA_PROFILES = {
     FREE_PLAN_CODE: {
         "max_produits": 30,
         "max_depenses_mois": 20,
-        "max_caisses": 1,
+        "max_caisses": 0,
+        "max_proformas_mois": 0,
     },
     STARTER_PLAN_CODE: {
         "max_produits": 300,
         "max_depenses_mois": 100,
-        "max_caisses": 1,
+        "max_caisses": 0,
+        "max_proformas_mois": 30,
     },
     PRO_PLAN_CODE: {
         "max_produits": 3000,
         "max_depenses_mois": 1000,
-        "max_caisses": 5,
+        "max_caisses": 1,
+        "max_proformas_mois": 300,
     },
     PREMIUM_PLAN_CODE: {
         "max_produits": None,
         "max_depenses_mois": None,
         "max_caisses": None,
+        "max_proformas_mois": None,
     },
 }
 UNLIMITED_QUOTA_PROFILE = {
     "max_produits": None,
     "max_depenses_mois": None,
     "max_caisses": None,
+    "max_proformas_mois": None,
 }
 DEFAULT_PAID_PLANS = [
     {
@@ -142,14 +151,14 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("120.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Facturation, clients, produits et depenses simples pour une petite activite.",
+        "description": "Facturation professionnelle, POS simple, proformas, stock simple et depenses pour une petite activite.",
         "modules_inclus": STARTER_PLAN_MODULES,
         "max_utilisateurs": 3,
         "max_factures_mois": 100,
         "max_clients": 300,
         "max_apprenants": 0,
         "acces_comptabilite": False,
-        "acces_exports": True,
+        "acces_exports": False,
     },
     {
         "code": PRO_PLAN_CODE,
@@ -158,12 +167,12 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("180.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Gestion complete avec caisse avancee, stock, inventaire, rapports et exports.",
+        "description": "Gestion complete avec caisse, apprenants, stock complet, proformas avancees, rapports et exports.",
         "modules_inclus": PRO_PLAN_MODULES,
         "max_utilisateurs": 10,
         "max_factures_mois": 1000,
         "max_clients": 3000,
-        "max_apprenants": 0,
+        "max_apprenants": 500,
         "acces_comptabilite": True,
         "acces_exports": True,
     },
@@ -174,7 +183,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("240.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Tous les modules actuels, comptabilite avancee, audit, rapports financiers et capacites etendues.",
+        "description": "Acces complet avec RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire.",
         "modules_inclus": PREMIUM_PLAN_MODULES,
         "max_utilisateurs": None,
         "max_factures_mois": None,
@@ -186,81 +195,95 @@ DEFAULT_PAID_PLANS = [
 ]
 PLAN_FEATURE_SUMMARY = {
     FREE_PLAN_CODE: [
-        "Accès découverte avec tableau de bord simple",
-        "Clients, services et factures limités",
+        "Tableau de bord simple, clients et factures A4 simples",
+        "Produits, services et depenses simples avec quotas limites",
+        "Rapports basiques et support basique",
     ],
     STARTER_PLAN_CODE: [
-        "Facturation plus confortable",
-        "Clients, produits et dépenses pour une petite équipe",
-        "Services et gestion commerciale simple",
+        "Tout Gratuit avec volumes plus confortables",
+        "Factures A4 professionnelles et POS simple",
+        "Proformas simples, stock simple et personnalisation de base",
+        "Jusqu'a 3 utilisateurs et support standard",
     ],
     PRO_PLAN_CODE: [
         "Tout Starter",
-        "Caisse, stock avancé, mouvements et inventaire",
-        "Paiements, comptabilité, apprenants et audit simple",
-        "Utilisateurs multiples, rapports métier et exports Excel/PDF",
+        "POS complet, proformas avancees et conversion en facture",
+        "Caisse, stock complet, apprenants, recus et quittances",
+        "Rapports detailles, roles, permissions et exports PDF/Excel",
     ],
     PREMIUM_PLAN_CODE: [
         "Tout Pro",
-        "Tous les modules actuels",
-        "Tous les nouveaux modules déclarés",
-        "Ressources humaines complètes",
-        "Rapports avancés globaux et audit avancé",
-        "Paiements complets, Mobile Money, banque, validation, rapports et exports",
-        "Utilisateurs, clients, produits et factures sans limite applicative",
-        "Support prioritaire et options futures",
+        "Acces complet a tous les modules declares",
+        "RH, comptabilite avancee, rapports avances et audit avance",
+        "Validations internes, documents personnalises et plusieurs caisses",
+        "Support prioritaire et accompagnement a la configuration",
     ],
 }
 PLAN_EXCLUSION_SUMMARY = {
     FREE_PLAN_CODE: [
-        "Produits",
-        "Dépenses",
+        "POS",
+        "Proformas",
+        "Conversion proforma",
         "Caisse",
         "Stock & inventaire",
         "Paiements",
-        "Comptabilité",
+        "Export Excel",
         "Apprenants",
         "Ressources humaines",
-        "Rapports avancés",
-        "Audit complet",
-        "Utilisateurs avancés",
+        "Comptabilite avancee",
+        "Rapports avances",
+        "Audit avance",
+        "Utilisateurs multiples",
     ],
     STARTER_PLAN_CODE: [
-        "Caisse avancée",
-        "Stock & inventaire avancés",
-        "Paiements avancés",
-        "Comptabilité avancée",
+        "Caisse complete",
+        "Inventaire physique",
+        "Conversion proforma",
+        "Export Excel avance",
         "Apprenants",
         "Ressources humaines",
-        "Rapports avancés",
-        "Audit complet",
+        "Comptabilite avancee",
+        "Rapports avances",
+        "Audit avance",
     ],
     PRO_PLAN_CODE: [
-        "Ressources humaines complètes",
-        "Rapports avancés",
-        "Audit avancé",
+        "Ressources humaines completes",
+        "Rapports Premium Business avances",
+        "Audit avance complet",
+        "Validations internes avancees",
         "Messagerie",
         "Mobile Money",
     ],
     PREMIUM_PLAN_CODE: [],
 }
 PLAN_COMMERCIAL_DESCRIPTIONS = {
-    FREE_PLAN_CODE: "Plan découverte pour tester JOATHAM Manager avec les modules essentiels et des limites fortes.",
-    STARTER_PLAN_CODE: "Gestion simple pour une petite activité : facturation, clients, services, produits et dépenses.",
-    PRO_PLAN_CODE: "Gestion avancée avec caisse, stock, inventaire, paiements, comptabilité, apprenants et exports.",
-    PREMIUM_PLAN_CODE: "Accès complet à JOATHAM Manager : tous les modules actuels, nouveautés, RH, rapports avancés et support prioritaire.",
+    FREE_PLAN_CODE: "Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
+    STARTER_PLAN_CODE: "Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses.",
+    PRO_PLAN_CODE: "Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports.",
+    PREMIUM_PLAN_CODE: "Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire.",
+}
+PLAN_COMMERCIAL_NAMES = {
+    FREE_PLAN_CODE: "Gratuit",
+    STARTER_PLAN_CODE: "Starter",
+    PRO_PLAN_CODE: "Pro",
+    PREMIUM_PLAN_CODE: "Premium Business",
 }
 PLAN_MODULE_DISPLAY_GROUPS = [
     ("dashboard", "Tableau de bord", {"dashboard"}),
     ("clients", "Clients", {"clients"}),
     ("services", "Services", {"services"}),
     ("billing", "Facturation", {"billing", "factures"}),
+    ("billing_pos", "POS simple", {"billing_pos", "pos_simple"}),
+    ("proformas", "Proformas", {"proformas"}),
+    ("proforma_conversion", "Conversion proforma", {"proforma_conversion"}),
     ("subscription", "Abonnement", {"subscription", "abonnements"}),
     ("suggestions", "Suggestions / support", {"suggestions", "support"}),
     ("expenses", "Dépenses", {"expenses", "depenses"}),
     ("products", "Produits", {"products", "produits"}),
     ("caisse", "Caisse", {"caisse", "caisse_reports", "caisse_exports", "caisse_integrations", "caisse_validation"}),
-    ("stock_inventory", "Stock & inventaire", {"stock", "stock_reports", "stock_exports", "inventory", "inventaire"}),
+    ("stock", "Stock simple", {"stock"}),
+    ("stock_reports", "Rapports stock", {"stock_reports", "stock_exports"}),
+    ("inventory", "Inventaire", {"inventory", "inventaire"}),
     (
         "payments",
         "Paiements",
@@ -336,6 +359,10 @@ def get_plan_commercial_description(plan):
     )
 
 
+def get_plan_commercial_name(plan):
+    return PLAN_COMMERCIAL_NAMES.get(normalize_plan_code(plan), getattr(plan, "nom", "") or "Plan JOATHAM")
+
+
 def get_plan_exclusion_summary(plan):
     return PLAN_EXCLUSION_SUMMARY.get(normalize_plan_code(plan), [])
 
@@ -373,14 +400,6 @@ def _format_plan_limit(value):
     return "Illimité" if value is None else str(value)
 
 
-def _format_included_plan_limit(value):
-    if value is None:
-        return "Illimité"
-    if value == 0:
-        return "Inclus"
-    return str(value)
-
-
 def get_plan_limit_summary(plan):
     group_keys = set(get_plan_display_module_groups(plan))
     quota_profile = get_plan_quota_profile(plan)
@@ -388,15 +407,12 @@ def get_plan_limit_summary(plan):
         {"label": "Utilisateurs", "value": _format_plan_limit(getattr(plan, "max_utilisateurs", None))},
         {"label": "Factures / mois", "value": _format_plan_limit(getattr(plan, "max_factures_mois", None))},
         {"label": "Clients", "value": _format_plan_limit(getattr(plan, "max_clients", None))},
+        {"label": "Produits / services", "value": _format_plan_limit(quota_profile.get("max_produits"))},
+        {"label": "Dépenses / mois", "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))},
+        {"label": "Proformas / mois", "value": _format_plan_limit(quota_profile.get("max_proformas_mois"))},
+        {"label": "Caisses actives", "value": _format_plan_limit(quota_profile.get("max_caisses"))},
+        {"label": "Apprenants", "value": _format_plan_limit(getattr(plan, "max_apprenants", None))},
     ]
-    if "products" in group_keys:
-        rows.append({"label": "Produits", "value": _format_plan_limit(quota_profile.get("max_produits"))})
-    if "expenses" in group_keys:
-        rows.append({"label": "Dépenses / mois", "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))})
-    if "caisse" in group_keys:
-        rows.append({"label": "Caisses actives", "value": _format_plan_limit(quota_profile.get("max_caisses"))})
-    if "apprenants" in group_keys:
-        rows.append({"label": "Apprenants", "value": _format_included_plan_limit(getattr(plan, "max_apprenants", None))})
     if getattr(plan, "acces_exports", False):
         rows.append({"label": "Exports", "value": "Inclus"})
     if "accounting" in group_keys and getattr(plan, "acces_comptabilite", False):
@@ -456,7 +472,7 @@ def get_or_create_free_plan():
         "devise": get_platform_currency(),
         "duree_jours": FREE_PLAN_DURATION_DAYS,
         "actif": True,
-        "description": "Plan gratuit actif pour demarrer JOATHAM Manager avec des limites fortes.",
+        "description": "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
