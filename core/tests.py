@@ -42,7 +42,7 @@ from .services.subscription import (
     refuse_subscription_payment,
     validate_subscription_payment,
 )
-from .services.payment_providers import CINETPAY_NOTIFICATION_HMAC_FIELDS
+from .services.payment_providers import CINETPAY_NOTIFICATION_HMAC_FIELDS, get_automatic_payment_configuration_diagnostic
 from .services.subscription_payments import create_automatic_subscription_payment_request
 from .services.product_policy import get_module_access_state as get_product_module_access_state
 from .services.currency import get_currency_code
@@ -1253,6 +1253,30 @@ class SubscriptionPaymentTests(TestCase):
             email="superadmin-payment@example.com",
         )
 
+    def _complete_cinetpay_settings(self, **overrides):
+        config = {
+            "JOATHAM_AUTO_PAYMENT_ENABLED": True,
+            "JOATHAM_PAYMENT_PROVIDER": "cinetpay",
+            "JOATHAM_PAYMENT_PUBLIC_KEY": "",
+            "JOATHAM_PAYMENT_SECRET_KEY": "",
+            "JOATHAM_PAYMENT_WEBHOOK_SECRET": "",
+            "JOATHAM_PAYMENT_CURRENCY": "",
+            "JOATHAM_PAYMENT_CALLBACK_URL": "https://app.example.com/abonnement/webhooks/cinetpay/",
+            "JOATHAM_PAYMENT_RETURN_URL": "https://app.example.com/abonnement/paiement/retour/",
+            "JOATHAM_PAYMENT_CHANNELS": "",
+            "JOATHAM_PAYMENT_SANDBOX": True,
+            "JOATHAM_PAYMENT_HTTP_TIMEOUT": 20.0,
+            "CINETPAY_SITE_ID": "site-123",
+            "CINETPAY_APIKEY": "api-key",
+            "CINETPAY_SECRET_KEY": "secret-key",
+            "CINETPAY_CURRENCY": "USD",
+            "CINETPAY_CHANNELS": "MOBILE_MONEY",
+            "CINETPAY_PAYMENT_URL": "https://api-checkout.cinetpay.com/v2/payment",
+            "CINETPAY_PAYMENT_CHECK_URL": "https://api-checkout.cinetpay.com/v2/payment/check",
+        }
+        config.update(overrides)
+        return config
+
     def test_owner_can_create_subscription_payment_request_without_activation(self):
         self.client.force_login(self.owner)
         response = self.client.post(
@@ -1463,6 +1487,89 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Paiement CinetPay non configuré")
         self.assertNotContains(response, "Payer avec CinetPay")
+
+    def test_cinetpay_diagnostic_reports_disabled_auto_payment(self):
+        with override_settings(**self._complete_cinetpay_settings(JOATHAM_AUTO_PAYMENT_ENABLED=False)):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertFalse(diagnostic["enabled"])
+        self.assertEqual(diagnostic["provider"], "cinetpay")
+        self.assertTrue(diagnostic["provider_is_cinetpay"])
+        self.assertFalse(diagnostic["configured"])
+        self.assertEqual(diagnostic["missing_required_settings"], [])
+        self.assertIn("Paiement automatique desactive.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_reports_non_cinetpay_provider(self):
+        with override_settings(**self._complete_cinetpay_settings(JOATHAM_PAYMENT_PROVIDER="manual")):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertTrue(diagnostic["enabled"])
+        self.assertEqual(diagnostic["provider"], "manual")
+        self.assertFalse(diagnostic["provider_is_cinetpay"])
+        self.assertFalse(diagnostic["configured"])
+        self.assertIn("Provider actif different de CinetPay.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_reports_missing_required_settings(self):
+        missing_cases = (
+            ("CINETPAY_SITE_ID", {"CINETPAY_SITE_ID": "", "JOATHAM_PAYMENT_PUBLIC_KEY": ""}),
+            ("CINETPAY_APIKEY", {"CINETPAY_APIKEY": "", "JOATHAM_PAYMENT_SECRET_KEY": ""}),
+            ("CINETPAY_SECRET_KEY", {"CINETPAY_SECRET_KEY": "", "JOATHAM_PAYMENT_WEBHOOK_SECRET": ""}),
+            ("CINETPAY_CURRENCY", {"CINETPAY_CURRENCY": "", "JOATHAM_PAYMENT_CURRENCY": ""}),
+            ("JOATHAM_PAYMENT_CALLBACK_URL", {"JOATHAM_PAYMENT_CALLBACK_URL": ""}),
+            ("JOATHAM_PAYMENT_RETURN_URL", {"JOATHAM_PAYMENT_RETURN_URL": ""}),
+        )
+
+        for missing_setting, overrides in missing_cases:
+            with self.subTest(missing_setting=missing_setting):
+                with override_settings(**self._complete_cinetpay_settings(**overrides)):
+                    diagnostic = get_automatic_payment_configuration_diagnostic()
+
+                self.assertFalse(diagnostic["configured"])
+                self.assertIn(missing_setting, diagnostic["missing_required_settings"])
+                self.assertNotIn(missing_setting, diagnostic["present_required_settings"])
+                self.assertIn("Configuration CinetPay incomplete.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_reports_complete_configuration_without_secret_values(self):
+        with override_settings(**self._complete_cinetpay_settings()):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertTrue(diagnostic["enabled"])
+        self.assertEqual(diagnostic["provider"], "cinetpay")
+        self.assertTrue(diagnostic["provider_is_cinetpay"])
+        self.assertTrue(diagnostic["configured"])
+        self.assertEqual(diagnostic["missing_required_settings"], [])
+        self.assertIn("CINETPAY_SITE_ID", diagnostic["present_required_settings"])
+        self.assertIn("CINETPAY_APIKEY", diagnostic["present_required_settings"])
+        self.assertIn("CINETPAY_SECRET_KEY", diagnostic["present_required_settings"])
+        self.assertEqual(diagnostic["payment_url_source"], "default")
+        self.assertEqual(diagnostic["check_url_source"], "default")
+        self.assertTrue(diagnostic["sandbox_flag"])
+
+        diagnostic_text = repr(diagnostic)
+        for hidden_value in (
+            "site-123",
+            "api-key",
+            "secret-key",
+            "https://app.example.com/abonnement/webhooks/cinetpay/",
+            "https://app.example.com/abonnement/paiement/retour/",
+        ):
+            self.assertNotIn(hidden_value, diagnostic_text)
+
+    def test_super_admin_settings_shows_safe_cinetpay_diagnostic(self):
+        self.client.force_login(self.super_admin)
+
+        with override_settings(**self._complete_cinetpay_settings(CINETPAY_APIKEY="", JOATHAM_PAYMENT_SECRET_KEY="")):
+            response = self.client.get(reverse("super_admin_settings"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Diagnostic CinetPay")
+        self.assertContains(response, "CINETPAY_APIKEY")
+        self.assertContains(response, "Configuration CinetPay incomplete")
+        self.assertNotContains(response, "site-123")
+        self.assertNotContains(response, "api-key")
+        self.assertNotContains(response, "secret-key")
+        self.assertNotContains(response, "https://app.example.com/abonnement/webhooks/cinetpay/")
+        self.assertNotContains(response, "https://app.example.com/abonnement/paiement/retour/")
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,

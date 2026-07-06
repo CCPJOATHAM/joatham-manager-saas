@@ -54,6 +54,7 @@ from core.services.product_policy import module_access_required
 from core.services.payment_providers import (
     PaymentProviderError,
     PaymentProviderVerificationError,
+    get_automatic_payment_configuration_diagnostic,
     get_automatic_payment_provider_code,
     is_real_automatic_payment_provider_configured,
 )
@@ -810,6 +811,7 @@ def super_admin_settings(request):
         {
             "form": form,
             "platform_settings": settings,
+            "cinetpay_diagnostic": get_automatic_payment_configuration_diagnostic(),
         },
     )
 

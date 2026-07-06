@@ -54,6 +54,8 @@ class BasePaymentProvider:
 
 INTERNAL_PROVIDER_CODES = {"", "manual", "test"}
 CINETPAY_PROVIDER_CODE = "cinetpay"
+CINETPAY_DEFAULT_PAYMENT_URL = "https://api-checkout.cinetpay.com/v2/payment"
+CINETPAY_DEFAULT_PAYMENT_CHECK_URL = "https://api-checkout.cinetpay.com/v2/payment/check"
 CINETPAY_NOTIFICATION_HMAC_FIELDS = (
     "cpm_site_id",
     "cpm_trans_id",
@@ -133,8 +135,8 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         self.site_id = _payment_setting("CINETPAY_SITE_ID", "JOATHAM_PAYMENT_PUBLIC_KEY")
         self.apikey = _payment_setting("CINETPAY_APIKEY", "JOATHAM_PAYMENT_SECRET_KEY")
         self.secret_key = _payment_setting("CINETPAY_SECRET_KEY", "JOATHAM_PAYMENT_WEBHOOK_SECRET")
-        self.payment_url = _payment_setting("CINETPAY_PAYMENT_URL", default="https://api-checkout.cinetpay.com/v2/payment")
-        self.check_url = _payment_setting("CINETPAY_PAYMENT_CHECK_URL", default="https://api-checkout.cinetpay.com/v2/payment/check")
+        self.payment_url = _payment_setting("CINETPAY_PAYMENT_URL", default=CINETPAY_DEFAULT_PAYMENT_URL)
+        self.check_url = _payment_setting("CINETPAY_PAYMENT_CHECK_URL", default=CINETPAY_DEFAULT_PAYMENT_CHECK_URL)
         self.notify_url = _payment_setting("JOATHAM_PAYMENT_CALLBACK_URL")
         self.return_url = _payment_setting("JOATHAM_PAYMENT_RETURN_URL")
         self.channels = _payment_setting("JOATHAM_PAYMENT_CHANNELS", "CINETPAY_CHANNELS", default="MOBILE_MONEY") or "MOBILE_MONEY"
@@ -313,6 +315,21 @@ def _payment_setting(*names, default=""):
     return str(default or "").strip()
 
 
+def _payment_setting_presence(*names, default=""):
+    for name in names:
+        value = getattr(settings, name, None)
+        if value not in (None, ""):
+            return True, name
+    if default not in (None, ""):
+        return True, "default"
+    return False, ""
+
+
+def _payment_url_source(name, default):
+    value = _payment_setting(name, default=default)
+    return value, "default" if value == default else name
+
+
 def _request_payload(request):
     if request.POST:
         return {key: request.POST.get(key, "") for key in request.POST.keys()}
@@ -404,3 +421,71 @@ def is_real_automatic_payment_provider_configured():
     except PaymentProviderError:
         return False
     return provider_code not in INTERNAL_PROVIDER_CODES
+
+
+def get_automatic_payment_configuration_diagnostic():
+    provider = get_requested_payment_provider_code()
+    enabled = bool(getattr(settings, "JOATHAM_AUTO_PAYMENT_ENABLED", False))
+    provider_is_cinetpay = provider == CINETPAY_PROVIDER_CODE
+    required_setting_groups = (
+        ("CINETPAY_SITE_ID", ("CINETPAY_SITE_ID", "JOATHAM_PAYMENT_PUBLIC_KEY")),
+        ("CINETPAY_APIKEY", ("CINETPAY_APIKEY", "JOATHAM_PAYMENT_SECRET_KEY")),
+        ("CINETPAY_SECRET_KEY", ("CINETPAY_SECRET_KEY", "JOATHAM_PAYMENT_WEBHOOK_SECRET")),
+        ("CINETPAY_CURRENCY", ("CINETPAY_CURRENCY", "JOATHAM_PAYMENT_CURRENCY")),
+        ("JOATHAM_PAYMENT_CALLBACK_URL", ("JOATHAM_PAYMENT_CALLBACK_URL",)),
+        ("JOATHAM_PAYMENT_RETURN_URL", ("JOATHAM_PAYMENT_RETURN_URL",)),
+    )
+    present_required_settings = []
+    missing_required_settings = []
+    for display_name, setting_names in required_setting_groups:
+        present, _source = _payment_setting_presence(*setting_names)
+        if present:
+            present_required_settings.append(display_name)
+        else:
+            missing_required_settings.append(display_name)
+
+    payment_url, payment_url_source = _payment_url_source("CINETPAY_PAYMENT_URL", CINETPAY_DEFAULT_PAYMENT_URL)
+    check_url, check_url_source = _payment_url_source(
+        "CINETPAY_PAYMENT_CHECK_URL",
+        CINETPAY_DEFAULT_PAYMENT_CHECK_URL,
+    )
+    sandbox_flag = bool(getattr(settings, "JOATHAM_PAYMENT_SANDBOX", False))
+    configured = enabled and provider_is_cinetpay and not missing_required_settings
+
+    optional_setting_groups = (
+        ("CINETPAY_CHANNELS", ("CINETPAY_CHANNELS", "JOATHAM_PAYMENT_CHANNELS"), "MOBILE_MONEY"),
+        ("CINETPAY_PAYMENT_URL", ("CINETPAY_PAYMENT_URL",), CINETPAY_DEFAULT_PAYMENT_URL),
+        ("CINETPAY_PAYMENT_CHECK_URL", ("CINETPAY_PAYMENT_CHECK_URL",), CINETPAY_DEFAULT_PAYMENT_CHECK_URL),
+        ("JOATHAM_PAYMENT_HTTP_TIMEOUT", ("JOATHAM_PAYMENT_HTTP_TIMEOUT",), ""),
+        ("JOATHAM_PAYMENT_SANDBOX", ("JOATHAM_PAYMENT_SANDBOX",), ""),
+    )
+    optional_settings = []
+    for display_name, setting_names, default in optional_setting_groups:
+        present, source = _payment_setting_presence(*setting_names, default=default)
+        optional_settings.append({"name": display_name, "present": present, "source": source})
+
+    warnings = []
+    if not enabled:
+        warnings.append("Paiement automatique desactive.")
+    if not provider:
+        warnings.append("Provider de paiement non renseigne.")
+    elif not provider_is_cinetpay:
+        warnings.append("Provider actif different de CinetPay.")
+    if provider_is_cinetpay and missing_required_settings:
+        warnings.append("Configuration CinetPay incomplete.")
+
+    return {
+        "enabled": enabled,
+        "provider": provider,
+        "provider_is_cinetpay": provider_is_cinetpay,
+        "configured": configured,
+        "missing_required_settings": missing_required_settings,
+        "present_required_settings": present_required_settings,
+        "optional_settings": optional_settings,
+        "payment_url_source": payment_url_source,
+        "check_url_source": check_url_source,
+        "payment_url": payment_url,
+        "check_url": check_url,
+        "sandbox_flag": sandbox_flag,
+        "warnings": warnings,
+    }
