@@ -177,7 +177,7 @@ NAV_ITEMS = [
         "label": _("Proformas"),
         "url_name": "proforma_list",
         "permission": "billing.view",
-        "module": "billing",
+        "module": "proformas",
         "prefixes": ["/factures/proformas/"],
     },
     {

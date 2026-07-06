@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.audit import record_audit_event
+from core.services.quotas import assert_apprenant_quota_available
 from core.services.tenancy import ensure_same_entreprise, get_object_for_entreprise
 
 from ..models import (
@@ -52,6 +53,8 @@ def create_apprenant(
     observations="",
     utilisateur=None,
 ):
+    assert_apprenant_quota_available(entreprise)
+
     apprenant_data = {
         "entreprise": entreprise,
         "nom": (nom or "").strip(),

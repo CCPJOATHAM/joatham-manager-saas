@@ -62,12 +62,14 @@ def _build_product_ui_permissions(user):
     can_access_stock = can_access_module(user, "stock")
     can_access_inventory = can_access_module(user, "inventory")
     can_access_stock_exports = can_access_module(user, "stock_exports")
+    can_access_stock_reports = can_access_module(user, "stock_reports")
     return {
         "can_manage_products_ui": user_has_permission(user, "products.manage"),
         "can_view_stock_ui": user_has_permission(user, "stock.view") and can_access_stock,
         "can_move_stock_ui": user_has_permission(user, "stock.move") and can_access_stock,
         "can_adjust_stock_ui": user_has_permission(user, "stock.adjust") and can_access_stock,
         "can_inventory_stock_ui": user_has_permission(user, "stock.inventory") and can_access_inventory,
+        "can_view_stock_reports_ui": user_has_permission(user, "stock.view") and can_access_stock_reports,
         "can_export_stock_ui": user_has_permission(user, "stock.export") and can_access_stock_exports,
     }
 

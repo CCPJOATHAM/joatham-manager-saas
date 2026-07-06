@@ -22,6 +22,7 @@ from core.services.subscription import (
     get_commercial_plans_queryset,
     get_current_subscription,
     get_plan_commercial_description,
+    get_plan_commercial_name,
     get_plan_display_modules,
     get_plan_exclusion_summary,
     get_plan_feature_summary,
@@ -39,6 +40,15 @@ from core.services.subscription import (
     validate_subscription_plan_request,
 )
 from core.services.currency import get_currency_code
+from core.services.quotas import (
+    get_active_cashbox_count,
+    get_apprenant_count,
+    get_client_count,
+    get_monthly_expense_count,
+    get_monthly_invoice_count,
+    get_monthly_proforma_count,
+    get_product_count,
+)
 from core.services.exchange_rates import ExchangeRateUnavailable, get_exchange_rate, get_plan_price_for_company
 from core.services.product_policy import module_access_required
 from core.services.payment_providers import (
@@ -114,6 +124,20 @@ def _subscription_activation_mode(subscription, payment):
 
 def _automatic_payment_provider_configured():
     return is_real_automatic_payment_provider_configured()
+
+
+
+def _build_subscription_usage(entreprise):
+    return [
+        {"label": "Utilisateurs", "value": User.objects.filter(entreprise=entreprise).count()},
+        {"label": "Factures / mois", "value": get_monthly_invoice_count(entreprise)},
+        {"label": "Clients", "value": get_client_count(entreprise)},
+        {"label": "Produits", "value": get_product_count(entreprise)},
+        {"label": "Dépenses / mois", "value": get_monthly_expense_count(entreprise)},
+        {"label": "Proformas / mois", "value": get_monthly_proforma_count(entreprise)},
+        {"label": "Caisses actives", "value": get_active_cashbox_count(entreprise)},
+        {"label": "Apprenants", "value": get_apprenant_count(entreprise)},
+    ]
 
 
 def _handle_super_admin_subscription_action(request, *, redirect_name):
@@ -240,15 +264,22 @@ def subscription_overview(request):
                     "exchange_rate": estimate["exchange_rate"],
                 }
             )
+    paiements = list(payments_queryset[:8])
+    for paiement in paiements:
+        paiement.plan_display_name = get_plan_commercial_name(paiement.plan)
     context = {
         "entreprise": entreprise,
         "currency_code": get_currency_code(entreprise),
         "subscription": current_subscription,
         "activation_mode": _subscription_activation_mode(current_subscription, activation_payment),
         "is_current_free_plan": bool(current_subscription and is_free_plan(current_subscription.plan)),
+        "current_plan_display_name": get_plan_commercial_name(current_subscription.plan) if current_subscription else "",
         "current_plan_features": get_plan_feature_summary(current_subscription.plan) if current_subscription else [],
+        "current_plan_modules": get_plan_display_modules(current_subscription.plan) if current_subscription else [],
+        "current_plan_limits": get_plan_limit_summary(current_subscription.plan) if current_subscription else [],
         "current_plan_quota_profile": get_plan_quota_profile(current_subscription.plan) if current_subscription else {},
-        "paiements": payments_queryset[:8],
+        "subscription_usage": _build_subscription_usage(entreprise) if current_subscription else [],
+        "paiements": paiements,
         "pending_payments_count": pending_payments_count,
         "automatic_payment_provider_configured": _automatic_payment_provider_configured(),
         "featured_plan": featured_plan,
@@ -394,6 +425,7 @@ def subscription_plan_list(request):
             {
                 "plan": plan,
                 "price_info": price_info,
+                "display_name": get_plan_commercial_name(plan),
                 "description": get_plan_commercial_description(plan),
                 "features": get_plan_feature_summary(plan),
                 "non_included": get_plan_exclusion_summary(plan),
@@ -417,17 +449,19 @@ def subscription_plan_list(request):
         else:
             try:
                 create_subscription_plan_request(entreprise=entreprise, plan=plan, utilisateur=request.user)
-                messages.success(request, f"Votre demande pour le plan {plan.nom} a ete envoyee au super admin.")
+                messages.success(request, f"Votre demande pour le plan {get_plan_commercial_name(plan)} a ete envoyee au super admin.")
                 return redirect("subscription_plan_list")
             except ValueError as exc:
                 messages.error(request, str(exc))
 
+    current_subscription = subscription or get_current_subscription(entreprise)
     return render(
         request,
         "core/subscription_plan_list.html",
         {
             "entreprise": entreprise,
-            "subscription": subscription or get_current_subscription(entreprise),
+            "subscription": current_subscription,
+            "subscription_plan_display_name": get_plan_commercial_name(current_subscription.plan) if current_subscription else "",
             "plans": plans,
             "plan_cards": plan_cards,
             "pending_plan_ids": pending_plan_ids,
@@ -577,7 +611,7 @@ def super_admin_subscription_list(request):
             entreprise.last_payment_id = pending_plan_request.id
             entreprise.last_payment_status = pending_plan_request.statut
             entreprise.last_payment_source = pending_plan_request.source_taux
-            entreprise.last_payment_plan_name = pending_plan_request.plan.nom
+            entreprise.last_payment_plan_name = get_plan_commercial_name(pending_plan_request.plan)
             entreprise.last_payment_reference = pending_plan_request.reference_paiement
             entreprise.last_payment_created_at = pending_plan_request.date_creation
 

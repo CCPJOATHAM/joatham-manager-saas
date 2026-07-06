@@ -13,6 +13,7 @@ from core.selectors.audit import get_inscription_billing_history
 from core.services.company_profile import build_logo_data_uri
 from core.services.currency import format_amount_for_entreprise
 from core.services.product_policy import module_access_required
+from core.services.quotas import PlanQuotaExceeded
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_billing.pdf import render_pdf_response
 from joatham_billing.exceptions import FacturationError
@@ -147,17 +148,21 @@ def apprenant_create(request):
 
     if request.method == "POST":
         actif = request.POST.get("actif") == "on"
-        create_apprenant(
-            entreprise=entreprise,
-            nom=request.POST.get("nom", ""),
-            prenom=request.POST.get("prenom", ""),
-            telephone=request.POST.get("telephone", ""),
-            email=request.POST.get("email", ""),
-            adresse=request.POST.get("adresse", ""),
-            observations=request.POST.get("observations", ""),
-            actif=actif,
-            utilisateur=request.user,
-        )
+        try:
+            create_apprenant(
+                entreprise=entreprise,
+                nom=request.POST.get("nom", ""),
+                prenom=request.POST.get("prenom", ""),
+                telephone=request.POST.get("telephone", ""),
+                email=request.POST.get("email", ""),
+                adresse=request.POST.get("adresse", ""),
+                observations=request.POST.get("observations", ""),
+                actif=actif,
+                utilisateur=request.user,
+            )
+        except (ValidationError, PlanQuotaExceeded) as exc:
+            context["error"] = str(exc)
+            return render(request, "joatham_apprenants/apprenant_form.html", context, status=400)
         return redirect("apprenant_list")
 
     return render(request, "joatham_apprenants/apprenant_form.html", context)
