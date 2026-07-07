@@ -4,6 +4,7 @@ import hashlib
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Optional
+from urllib.parse import urlsplit, urlunsplit
 
 from django.conf import settings
 from django.utils import timezone
@@ -327,7 +328,48 @@ def _payment_setting_presence(*names, default=""):
 
 def _payment_url_source(name, default):
     value = _payment_setting(name, default=default)
-    return value, "default" if value == default else name
+    return value, "default" if value == default else "custom"
+
+
+def _payment_url_source_label(source):
+    if source == "custom":
+        return "URL personnalisée"
+    return "URL par défaut"
+
+
+def _safe_diagnostic_url(value):
+    url = str(value or "").strip()
+    if not url:
+        return ""
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return ""
+    hostname = parts.hostname or ""
+    netloc = hostname
+    if parts.port:
+        netloc = f"{netloc}:{parts.port}"
+    return urlunsplit((parts.scheme, netloc, parts.path, "", ""))
+
+
+def _url_looks_like_sandbox(url):
+    normalized = str(url or "").strip().lower()
+    return any(marker in normalized for marker in ("sandbox", "test", "preprod"))
+
+
+def _url_looks_like_production(url):
+    normalized = str(url or "").strip().lower()
+    return bool(normalized) and "cinetpay" in normalized and not _url_looks_like_sandbox(normalized)
+
+
+def _payment_environment_label(enabled, provider_is_cinetpay, sandbox_setting):
+    if not enabled and not provider_is_cinetpay:
+        return "Non configuré"
+    if not provider_is_cinetpay:
+        return "Ambigu" if enabled else "Non configuré"
+    if sandbox_setting in (None, ""):
+        return "Ambigu"
+    return "Sandbox" if bool(sandbox_setting) else "Production"
 
 
 def _request_payload(request):
@@ -449,7 +491,11 @@ def get_automatic_payment_configuration_diagnostic():
         "CINETPAY_PAYMENT_CHECK_URL",
         CINETPAY_DEFAULT_PAYMENT_CHECK_URL,
     )
-    sandbox_flag = bool(getattr(settings, "JOATHAM_PAYMENT_SANDBOX", False))
+    sandbox_setting = getattr(settings, "JOATHAM_PAYMENT_SANDBOX", None)
+    sandbox_flag = bool(sandbox_setting)
+    payment_environment = _payment_environment_label(enabled, provider_is_cinetpay, sandbox_setting)
+    payment_url_source_label = _payment_url_source_label(payment_url_source)
+    check_url_source_label = _payment_url_source_label(check_url_source)
     configured = enabled and provider_is_cinetpay and not missing_required_settings
 
     optional_setting_groups = (
@@ -473,6 +519,22 @@ def get_automatic_payment_configuration_diagnostic():
         warnings.append("Provider actif different de CinetPay.")
     if provider_is_cinetpay and missing_required_settings:
         warnings.append("Configuration CinetPay incomplete.")
+    if enabled and payment_environment == "Ambigu":
+        warnings.append("Environnement CinetPay ambigu : vérifiez JOATHAM_PAYMENT_SANDBOX et le provider.")
+    if enabled and provider_is_cinetpay and (payment_url_source == "default" or check_url_source == "default"):
+        warnings.append("URLs CinetPay par défaut utilisées ; confirmez leur environnement avant activation réelle.")
+    custom_urls = (
+        (payment_url, payment_url_source),
+        (check_url, check_url_source),
+    )
+    if provider_is_cinetpay and sandbox_setting not in (None, "") and sandbox_flag and any(
+        source == "custom" and _url_looks_like_production(url) for url, source in custom_urls
+    ):
+        warnings.append("Mode sandbox actif avec URL CinetPay de production personnalisée.")
+    if provider_is_cinetpay and sandbox_setting not in (None, "") and not sandbox_flag and any(
+        source == "custom" and _url_looks_like_sandbox(url) for url, source in custom_urls
+    ):
+        warnings.append("Mode production actif avec URL CinetPay sandbox personnalisée.")
 
     return {
         "enabled": enabled,
@@ -482,10 +544,13 @@ def get_automatic_payment_configuration_diagnostic():
         "missing_required_settings": missing_required_settings,
         "present_required_settings": present_required_settings,
         "optional_settings": optional_settings,
+        "payment_environment": payment_environment,
         "payment_url_source": payment_url_source,
         "check_url_source": check_url_source,
-        "payment_url": payment_url,
-        "check_url": check_url,
+        "payment_url_source_label": payment_url_source_label,
+        "check_url_source_label": check_url_source_label,
+        "payment_url": _safe_diagnostic_url(payment_url),
+        "check_url": _safe_diagnostic_url(check_url),
         "sandbox_flag": sandbox_flag,
         "warnings": warnings,
     }
