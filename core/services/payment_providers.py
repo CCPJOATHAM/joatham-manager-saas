@@ -301,7 +301,9 @@ def _normalize_cinetpay_status(status):
     normalized = (status or "").strip().upper()
     if normalized in {"ACCEPTED", "SUCCESS", "SUCCES"}:
         return "paid"
-    if normalized in {"REFUSED", "CANCELLED", "CANCELED", "TRANSACTION_CANCEL"}:
+    if normalized in {"CANCELLED", "CANCELED", "TRANSACTION_CANCEL"}:
+        return "cancelled"
+    if normalized in {"REFUSED"}:
         return "failed"
     if normalized in {"WAITING_FOR_CUSTOMER", "PENDING", "PROCESSING"}:
         return "processing"
