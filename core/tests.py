@@ -1277,6 +1277,20 @@ class SubscriptionPaymentTests(TestCase):
         config.update(overrides)
         return config
 
+    def _assert_cinetpay_checkout_creation_fails_safely(self, expected_message):
+        with self.assertRaisesMessage(PaymentProviderError, expected_message) as ctx:
+            create_automatic_subscription_payment_request(
+                entreprise=self.entreprise,
+                plan=self.plan_basic,
+                duree=PaiementAbonnement.Duree.MENSUEL,
+                provider="cinetpay",
+                utilisateur=self.owner,
+            )
+        error_text = str(ctx.exception)
+        for hidden_value in ("api-key", "secret-key", "webhook-secret"):
+            self.assertNotIn(hidden_value, error_text)
+        self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise, provider="cinetpay").exists())
+
     def test_owner_can_create_subscription_payment_request_without_activation(self):
         self.client.force_login(self.owner)
         response = self.client.post(
@@ -1757,6 +1771,96 @@ class SubscriptionPaymentTests(TestCase):
         JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
         CINETPAY_CURRENCY="USD",
     )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_checkout_network_error_is_safe_and_rolls_back_payment(self, post_mock):
+        post_mock.side_effect = requests.ConnectionError("api-key secret-key network detail")
+
+        self._assert_cinetpay_checkout_creation_fails_safely("CinetPay est temporairement indisponible.")
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_checkout_error_message_does_not_expose_secret(self, post_mock):
+        post_mock.side_effect = requests.ConnectionError("api-key secret-key network detail")
+        self.client.force_login(self.owner)
+
+        response = self.client.post(reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]), follow=True)
+        content = response.content.decode("utf-8")
+
+        self.assertContains(response, "CinetPay est temporairement indisponible.")
+        self.assertNotIn("api-key", content)
+        self.assertNotIn("secret-key", content)
+        self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise, provider="cinetpay").exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_checkout_timeout_is_safe_and_rolls_back_payment(self, post_mock):
+        post_mock.side_effect = requests.Timeout("secret-key timeout detail")
+
+        self._assert_cinetpay_checkout_creation_fails_safely("CinetPay est temporairement indisponible.")
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_checkout_invalid_json_is_safe_and_rolls_back_payment(self, post_mock):
+        response = Mock()
+        response.status_code = 200
+        response.json.side_effect = ValueError("api-key json detail")
+        post_mock.return_value = response
+
+        self._assert_cinetpay_checkout_creation_fails_safely("Reponse CinetPay invalide.")
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_checkout_without_checkout_url_is_safe_and_rolls_back_payment(self, post_mock):
+        post_mock.return_value = self._cinetpay_http_response({"code": "201", "message": "CREATED", "data": {}})
+
+        self._assert_cinetpay_checkout_creation_fails_safely("CinetPay n'a pas retourne d'URL de paiement.")
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
     def test_cinetpay_webhook_without_transaction_id_is_rejected(self):
         paiement = self._create_cinetpay_payment()
 
@@ -1792,6 +1896,60 @@ class SubscriptionPaymentTests(TestCase):
         paiement.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_payment_check_network_error_is_safe(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        post_mock.side_effect = requests.ConnectionError("api-key secret-key check detail")
+
+        response = self._post_cinetpay_webhook(paiement)
+        paiement.refresh_from_db()
+        payload = json.loads(response.content.decode("utf-8"))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(payload["detail"], "CinetPay est temporairement indisponible.")
+        self.assertNotIn("api-key", response.content.decode("utf-8"))
+        self.assertNotIn("secret-key", response.content.decode("utf-8"))
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_payment_check_invalid_json_is_safe(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        response_mock = Mock()
+        response_mock.status_code = 200
+        response_mock.json.side_effect = ValueError("secret-key check json detail")
+        post_mock.return_value = response_mock
+
+        response = self._post_cinetpay_webhook(paiement)
+        paiement.refresh_from_db()
+        payload = json.loads(response.content.decode("utf-8"))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(payload["detail"], "Reponse CinetPay invalide.")
+        self.assertNotIn("secret-key", response.content.decode("utf-8"))
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
@@ -1911,6 +2069,50 @@ class SubscriptionPaymentTests(TestCase):
         CINETPAY_CURRENCY="USD",
     )
     @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_expired_webhook_marks_payment_expired(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        post_mock.return_value = self._cinetpay_http_response(self._cinetpay_check_response("EXPIRED", operator_id="op-expired-1"))
+
+        response = self._post_cinetpay_webhook(paiement)
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EXPIRE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_cancelled_webhook_marks_payment_cancelled(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        post_mock.return_value = self._cinetpay_http_response(self._cinetpay_check_response("CANCELLED", operator_id="op-cancelled-1"))
+
+        response = self._post_cinetpay_webhook(paiement)
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ANNULE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
     def test_cinetpay_wrong_amount_is_rejected(self, post_mock):
         paiement = self._create_cinetpay_payment()
         post_mock.return_value = self._cinetpay_http_response(self._cinetpay_check_response("ACCEPTED", amount="9", operator_id="op-amount-1"))
@@ -1943,6 +2145,60 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ECHOUE)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_duplicate_webhook_is_idempotent(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        post_mock.return_value = self._cinetpay_http_response(self._cinetpay_check_response("ACCEPTED", operator_id="op-duplicate-1"))
+
+        first_response = self._post_cinetpay_webhook(paiement)
+        subscription = AbonnementEntreprise.objects.get(entreprise=self.entreprise)
+        first_date_fin = subscription.date_fin
+        second_response = self._post_cinetpay_webhook(paiement)
+        subscription.refresh_from_db()
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertTrue(json.loads(second_response.content.decode("utf-8"))["duplicate"])
+        self.assertEqual(subscription.date_fin, first_date_fin)
+        self.assertTrue(ActivityLog.objects.filter(action="subscription_payment_webhook_duplicate", objet_id=paiement.id).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_provider_transaction_id_duplicate_is_rejected(self, post_mock):
+        paiement = self._create_cinetpay_payment()
+        post_mock.return_value = self._cinetpay_http_response(self._cinetpay_check_response("ACCEPTED", operator_id="op-shared-cinetpay"))
+        self._post_cinetpay_webhook(paiement)
+        other_entreprise = create_entreprise("Entreprise CinetPay Doublon")
+        other_owner = create_user("owner-cinetpay-doublon", "proprietaire", other_entreprise)
+        other_payment = self._create_cinetpay_payment(entreprise=other_entreprise, utilisateur=other_owner)
+
+        response = self._post_cinetpay_webhook(other_payment)
+        other_payment.refresh_from_db()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(other_payment.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertIn("Transaction provider", other_payment.failure_reason)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=other_entreprise).exists())
 
     def test_super_admin_validation_activates_subscription(self):
         paiement = create_subscription_payment_request(
@@ -2078,6 +2334,51 @@ class SubscriptionPaymentTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "en cours de verification")
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    def test_cinetpay_payment_return_never_activates_subscription(self):
+        paiement = self._create_cinetpay_payment()
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
+        paiement.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+    )
+    def test_cinetpay_payment_return_is_tenant_scoped(self):
+        paiement = self._create_cinetpay_payment()
+        other_entreprise = create_entreprise("Entreprise Retour CinetPay")
+        other_owner = create_user("owner-retour-cinetpay", "proprietaire", other_entreprise)
+
+        self.client.force_login(other_owner)
+        response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, paiement.external_reference)
+        self.assertNotContains(response, paiement.plan.nom)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=other_entreprise).exists())
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     def test_payment_return_without_auto_payment_explains_manual_subscription(self):
@@ -2319,7 +2620,7 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "Paiements en attente")
         self.assertContains(response, paiement.external_reference)
 
-    def _create_cinetpay_payment(self):
+    def _create_cinetpay_payment(self, *, entreprise=None, utilisateur=None, plan=None):
         with patch("core.services.payment_providers.requests.post") as post_mock:
             post_mock.return_value = self._cinetpay_http_response(
                 {
@@ -2333,11 +2634,11 @@ class SubscriptionPaymentTests(TestCase):
                 }
             )
             return create_automatic_subscription_payment_request(
-                entreprise=self.entreprise,
-                plan=self.plan_basic,
+                entreprise=entreprise or self.entreprise,
+                plan=plan or self.plan_basic,
                 duree=PaiementAbonnement.Duree.MENSUEL,
                 provider="cinetpay",
-                utilisateur=self.owner,
+                utilisateur=utilisateur or self.owner,
             )
 
     def _cinetpay_notification_payload(self, paiement):
