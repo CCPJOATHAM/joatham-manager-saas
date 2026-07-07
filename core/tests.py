@@ -42,7 +42,11 @@ from .services.subscription import (
     refuse_subscription_payment,
     validate_subscription_payment,
 )
-from .services.payment_providers import CINETPAY_NOTIFICATION_HMAC_FIELDS, get_automatic_payment_configuration_diagnostic
+from .services.payment_providers import (
+    CINETPAY_NOTIFICATION_HMAC_FIELDS,
+    PaymentProviderError,
+    get_automatic_payment_configuration_diagnostic,
+)
 from .services.subscription_payments import create_automatic_subscription_payment_request
 from .services.product_policy import get_module_access_state as get_product_module_access_state
 from .services.currency import get_currency_code
@@ -2374,12 +2378,20 @@ class SubscriptionPaymentTests(TestCase):
 
         self.client.force_login(other_owner)
         response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
+        paiement.refresh_from_db()
+        content = response.content.decode("utf-8")
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, paiement.external_reference)
-        self.assertNotContains(response, paiement.plan.nom)
+        self.assertContains(response, "Aucun paiement automatique récent n'a été trouvé pour votre entreprise")
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=other_entreprise).exists())
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+        self.assertNotIn(paiement.checkout_url, content)
+        self.assertNotIn(paiement.provider_transaction_id or "provider-transaction-not-set", content)
+        self.assertNotContains(response, "Statut :")
+        self.assertNotContains(response, "Plan :")
+        self.assertNotContains(response, paiement.plan.nom)
+        self.assertNotContains(response, str(paiement.amount_expected))
 
     def test_payment_return_without_auto_payment_explains_manual_subscription(self):
         paiement = create_subscription_payment_request(
