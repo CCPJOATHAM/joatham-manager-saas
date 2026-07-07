@@ -1541,9 +1541,13 @@ class SubscriptionPaymentTests(TestCase):
         self.assertIn("CINETPAY_SITE_ID", diagnostic["present_required_settings"])
         self.assertIn("CINETPAY_APIKEY", diagnostic["present_required_settings"])
         self.assertIn("CINETPAY_SECRET_KEY", diagnostic["present_required_settings"])
+        self.assertEqual(diagnostic["payment_environment"], "Sandbox")
         self.assertEqual(diagnostic["payment_url_source"], "default")
         self.assertEqual(diagnostic["check_url_source"], "default")
+        self.assertEqual(diagnostic["payment_url_source_label"], "URL par défaut")
+        self.assertEqual(diagnostic["check_url_source_label"], "URL par défaut")
         self.assertTrue(diagnostic["sandbox_flag"])
+        self.assertIn("URLs CinetPay par défaut utilisées ; confirmez leur environnement avant activation réelle.", diagnostic["warnings"])
 
         diagnostic_text = repr(diagnostic)
         for hidden_value in (
@@ -1555,6 +1559,75 @@ class SubscriptionPaymentTests(TestCase):
         ):
             self.assertNotIn(hidden_value, diagnostic_text)
 
+    def test_cinetpay_diagnostic_reports_production_environment(self):
+        with override_settings(**self._complete_cinetpay_settings(JOATHAM_PAYMENT_SANDBOX=False)):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_environment"], "Production")
+        self.assertFalse(diagnostic["sandbox_flag"])
+        self.assertTrue(diagnostic["configured"])
+
+    def test_cinetpay_diagnostic_reports_non_configured_environment(self):
+        with override_settings(**self._complete_cinetpay_settings(JOATHAM_AUTO_PAYMENT_ENABLED=False, JOATHAM_PAYMENT_PROVIDER="")):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_environment"], "Non configuré")
+        self.assertFalse(diagnostic["configured"])
+        self.assertIn("Paiement automatique desactive.", diagnostic["warnings"])
+        self.assertIn("Provider de paiement non renseigne.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_reports_custom_urls_without_query_secret(self):
+        with override_settings(
+            **self._complete_cinetpay_settings(
+                CINETPAY_PAYMENT_URL="https://sandbox.cinetpay.example/v2/payment?apikey=secret-url-token",
+                CINETPAY_PAYMENT_CHECK_URL="https://sandbox.cinetpay.example/v2/payment/check?token=secret-check-token",
+            )
+        ):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_url_source"], "custom")
+        self.assertEqual(diagnostic["check_url_source"], "custom")
+        self.assertEqual(diagnostic["payment_url_source_label"], "URL personnalisée")
+        self.assertEqual(diagnostic["check_url_source_label"], "URL personnalisée")
+        self.assertEqual(diagnostic["payment_url"], "https://sandbox.cinetpay.example/v2/payment")
+        self.assertEqual(diagnostic["check_url"], "https://sandbox.cinetpay.example/v2/payment/check")
+        diagnostic_text = repr(diagnostic)
+        self.assertNotIn("secret-url-token", diagnostic_text)
+        self.assertNotIn("secret-check-token", diagnostic_text)
+
+    def test_cinetpay_diagnostic_warns_when_sandbox_uses_custom_production_url(self):
+        with override_settings(
+            **self._complete_cinetpay_settings(
+                JOATHAM_PAYMENT_SANDBOX=True,
+                CINETPAY_PAYMENT_URL="https://secure.cinetpay.com/v2/payment",
+                CINETPAY_PAYMENT_CHECK_URL="https://secure.cinetpay.com/v2/payment/check",
+            )
+        ):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_environment"], "Sandbox")
+        self.assertIn("Mode sandbox actif avec URL CinetPay de production personnalisée.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_warns_when_production_uses_custom_sandbox_url(self):
+        with override_settings(
+            **self._complete_cinetpay_settings(
+                JOATHAM_PAYMENT_SANDBOX=False,
+                CINETPAY_PAYMENT_URL="https://sandbox.cinetpay.example/v2/payment",
+                CINETPAY_PAYMENT_CHECK_URL="https://sandbox.cinetpay.example/v2/payment/check",
+            )
+        ):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_environment"], "Production")
+        self.assertIn("Mode production actif avec URL CinetPay sandbox personnalisée.", diagnostic["warnings"])
+
+    def test_cinetpay_diagnostic_warns_when_environment_is_ambiguous(self):
+        with override_settings(**self._complete_cinetpay_settings(JOATHAM_PAYMENT_SANDBOX=None)):
+            diagnostic = get_automatic_payment_configuration_diagnostic()
+
+        self.assertEqual(diagnostic["payment_environment"], "Ambigu")
+        self.assertIn("Environnement CinetPay ambigu : vérifiez JOATHAM_PAYMENT_SANDBOX et le provider.", diagnostic["warnings"])
+
     def test_super_admin_settings_shows_safe_cinetpay_diagnostic(self):
         self.client.force_login(self.super_admin)
 
@@ -1565,6 +1638,9 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "Diagnostic CinetPay")
         self.assertContains(response, "CINETPAY_APIKEY")
         self.assertContains(response, "Configuration CinetPay incomplete")
+        self.assertContains(response, "Environnement paiement")
+        self.assertContains(response, "URL par défaut")
+        self.assertContains(response, "Alertes de cohérence")
         self.assertNotContains(response, "site-123")
         self.assertNotContains(response, "api-key")
         self.assertNotContains(response, "secret-key")

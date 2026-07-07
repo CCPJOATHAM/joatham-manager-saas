@@ -211,17 +211,18 @@
             <strong>{% if cinetpay_diagnostic.configured %}Complete{% else %}Incomplete{% endif %}</strong>
         </div>
         <div class="diagnostic-item">
-            <span>Mode sandbox</span>
-            <strong>{% if cinetpay_diagnostic.sandbox_flag %}Actif{% else %}Inactif{% endif %}</strong>
+            <span>Environnement paiement</span>
+            <strong>{{ cinetpay_diagnostic.payment_environment }}</strong>
+            <small class="diagnostic-url">Sandbox flag : {% if cinetpay_diagnostic.sandbox_flag %}Actif{% else %}Inactif{% endif %}</small>
         </div>
         <div class="diagnostic-item">
             <span>Source URL paiement</span>
-            <strong>{{ cinetpay_diagnostic.payment_url_source }}</strong>
+            <strong>{{ cinetpay_diagnostic.payment_url_source_label }}</strong>
             <small class="diagnostic-url">{{ cinetpay_diagnostic.payment_url }}</small>
         </div>
         <div class="diagnostic-item">
             <span>Source URL verification</span>
-            <strong>{{ cinetpay_diagnostic.check_url_source }}</strong>
+            <strong>{{ cinetpay_diagnostic.check_url_source_label }}</strong>
             <small class="diagnostic-url">{{ cinetpay_diagnostic.check_url }}</small>
         </div>
     </div>
@@ -239,7 +240,7 @@
 
     {% if cinetpay_diagnostic.warnings %}
         <div class="diagnostic-list">
-            <span>Alertes</span>
+            <span>Alertes de cohérence</span>
             <ul>
                 {% for warning in cinetpay_diagnostic.warnings %}
                     <li>{{ warning }}</li>
