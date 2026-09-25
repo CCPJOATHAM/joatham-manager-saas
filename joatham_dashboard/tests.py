@@ -212,7 +212,7 @@ class DashboardAccessTests(TestCase):
 
         confirmation_page = second_client.get(reverse("login_session_conflict"))
         self.assertEqual(confirmation_page.status_code, 200)
-        self.assertContains(confirmation_page, "Session deja active")
+        self.assertContains(confirmation_page, "Session déjà active")
         self.assertContains(confirmation_page, "Deconnecter l'ancienne session et continuer")
         self.assertContains(confirmation_page, "csrfmiddlewaretoken")
         self.assertTrue(second_client.session.get("pending_login_session_conflict"))
