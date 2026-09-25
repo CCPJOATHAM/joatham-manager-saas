@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from io import StringIO
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
+from django.core.management import call_command
 from django.core.cache import cache
 from django.contrib.sessions.models import Session
 from django.test import Client, TestCase
@@ -45,6 +47,27 @@ class PublicHomeTests(TestCase):
 
         self.assertContains(response, reverse("login"))
 
+    def test_public_home_contains_pricing_section_and_public_plan_names(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="tarifs"')
+        for expected in ("Gratuit", "Starter", "Pro", "Premium Business"):
+            self.assertContains(response, expected)
+        for expected_price in ("0 USD/mois", "10 USD/mois", "15 USD/mois", "20 USD/mois"):
+            self.assertContains(response, expected_price)
+
+    def test_public_home_displays_seeded_commercial_plans_without_authentication(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.get(reverse("public_home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        plan_names = [card["display_name"] for card in response.context["public_plan_cards"]]
+        self.assertEqual(plan_names, ["Gratuit", "Starter", "Pro", "Premium Business"])
+        self.assertContains(response, "Premium Business")
+
     def test_public_home_contains_question_link_and_login_still_works(self):
         response = self.client.get("/")
 
@@ -53,22 +76,22 @@ class PublicHomeTests(TestCase):
         self.assertEqual(login_response.status_code, 200)
         self.assertContains(login_response, "JOATHAM Manager")
 
-    def test_public_home_contains_seo_tags_for_joatham_com(self):
+    def test_public_home_contains_seo_tags_for_app_domain(self):
         response = self.client.get("/")
         content = response.content.decode("utf-8").lower()
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "JOATHAM Manager — Plateforme SaaS de gestion pour PME")
+        self.assertContains(response, "JOATHAM Manager - SaaS de gestion pour entreprises")
         self.assertContains(
             response,
-            "JOATHAM Manager est une plateforme web de gestion pour PME, commerces, cybercafés et centres de formation : facturation, clients, dépenses, produits, comptabilité, apprenants et rapports.",
+            "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises",
         )
         self.assertContains(response, '<meta name="robots" content="index,follow">')
-        self.assertContains(response, '<link rel="canonical" href="https://joatham.com/">')
-        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager — Plateforme SaaS de gestion pour PME">')
-        self.assertContains(response, '<meta property="og:url" content="https://joatham.com/">')
+        self.assertContains(response, '<link rel="canonical" href="https://app.joatham.com/">')
+        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager - SaaS de gestion pour entreprises">')
+        self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/">')
         self.assertContains(response, '<meta property="og:type" content="website">')
-        self.assertContains(response, '<meta name="twitter:card" content="summary">')
+        self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">')
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
 

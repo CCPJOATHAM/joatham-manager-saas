@@ -1,4 +1,6 @@
 import logging
+from decimal import Decimal, InvalidOperation
+from types import SimpleNamespace
 
 from django.conf import settings
 from django.contrib import messages
@@ -11,6 +13,25 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from core.audit import record_audit_event
+from core.services.subscription import (
+    FREE_PLAN_CLIENT_LIMIT,
+    FREE_PLAN_CODE,
+    FREE_PLAN_DURATION_DAYS,
+    FREE_PLAN_INVOICE_LIMIT,
+    FREE_PLAN_MODULES,
+    FREE_PLAN_USER_LIMIT,
+    PRO_PLAN_CODE,
+    get_commercial_plans_queryset,
+    get_default_paid_plans,
+    get_plan_commercial_description,
+    get_plan_commercial_name,
+    get_plan_display_modules,
+    get_plan_exclusion_summary,
+    get_plan_feature_summary,
+    get_plan_limit_summary,
+    get_plan_quota_profile,
+    normalize_plan_code,
+)
 from core.services.product_policy import get_module_label, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
@@ -39,6 +60,7 @@ logger = logging.getLogger(__name__)
 PENDING_CONFLICT_USER_ID = "pending_conflict_user_id"
 PENDING_CONFLICT_FLAG = "pending_login_session_conflict"
 PENDING_CONFLICT_BACKEND = "pending_login_backend"
+PUBLIC_PLAN_ORDER = (FREE_PLAN_CODE, "starter", PRO_PLAN_CODE, "premium")
 
 
 def _clear_pending_session_conflict(request):
@@ -47,8 +69,99 @@ def _clear_pending_session_conflict(request):
     request.session.pop(PENDING_CONFLICT_BACKEND, None)
 
 
+def _format_public_price(value):
+    try:
+        amount = Decimal(str(value if value is not None else "0"))
+    except (InvalidOperation, TypeError, ValueError):
+        amount = Decimal("0")
+
+    if amount == amount.to_integral_value():
+        return str(int(amount))
+    return f"{amount:.2f}".replace(".", ",")
+
+
+def _public_free_plan_payload():
+    return {
+        "code": FREE_PLAN_CODE,
+        "nom": "Gratuit",
+        "prix": 0,
+        "prix_annuel": Decimal("0.00"),
+        "devise": "USD",
+        "duree_jours": FREE_PLAN_DURATION_DAYS,
+        "description": "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
+        "modules_inclus": FREE_PLAN_MODULES,
+        "max_utilisateurs": FREE_PLAN_USER_LIMIT,
+        "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
+        "max_clients": FREE_PLAN_CLIENT_LIMIT,
+        "max_apprenants": 0,
+        "acces_comptabilite": False,
+        "acces_exports": False,
+        "actif": True,
+    }
+
+
+def _public_fallback_plans_by_code():
+    fallback_payloads = [_public_free_plan_payload(), *get_default_paid_plans()]
+    return {
+        normalize_plan_code(payload["code"]): SimpleNamespace(**{**payload, "actif": True})
+        for payload in fallback_payloads
+    }
+
+
+def _load_public_commercial_plans():
+    plans_by_code = {}
+    try:
+        for plan in get_commercial_plans_queryset().order_by("prix", "nom"):
+            code = normalize_plan_code(plan)
+            if code in PUBLIC_PLAN_ORDER and code not in plans_by_code:
+                plans_by_code[code] = plan
+    except Exception:
+        logger.exception("Impossible de charger les plans commerciaux publics depuis la base. Repli sur les plans officiels.")
+
+    fallback_by_code = _public_fallback_plans_by_code()
+    return [plans_by_code.get(code) or fallback_by_code[code] for code in PUBLIC_PLAN_ORDER]
+
+
+def _build_public_plan_cards():
+    cards = []
+    for plan in _load_public_commercial_plans():
+        code = normalize_plan_code(plan)
+        currency = getattr(plan, "devise", "") or "USD"
+        annual_price = getattr(plan, "prix_annuel", None)
+        plan_price = Decimal(str(getattr(plan, "prix", 0) or 0))
+        cards.append(
+            {
+                "plan": plan,
+                "code": code,
+                "display_name": get_plan_commercial_name(plan),
+                "description": get_plan_commercial_description(plan),
+                "features": get_plan_feature_summary(plan),
+                "non_included": get_plan_exclusion_summary(plan),
+                "included_modules": get_plan_display_modules(plan),
+                "limits": get_plan_limit_summary(plan),
+                "quota_profile": get_plan_quota_profile(plan),
+                "is_free": plan_price <= 0,
+                "is_popular": code == PRO_PLAN_CODE,
+                "monthly_price_label": f"{_format_public_price(plan_price)} {currency}/mois",
+                "annual_price_label": (
+                    f"{_format_public_price(annual_price)} {currency}/an"
+                    if annual_price not in (None, "", 0, Decimal("0.00"))
+                    else ""
+                ),
+            }
+        )
+    return cards
+
+
 def public_home(request):
-    return render(request, "joatham_dashboard/public_home.html", {"app_name": "JOATHAM Manager"})
+    return render(
+        request,
+        "joatham_dashboard/public_home.html",
+        {
+            "app_name": "JOATHAM Manager",
+            "public_plan_cards": _build_public_plan_cards(),
+        },
+    )
 
 
 def public_robots_txt(request):
