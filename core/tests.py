@@ -1320,7 +1320,7 @@ class SubscriptionPaymentTests(TestCase):
     def test_subscription_price_rules_match_v1_periods(self):
         self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("10"))
         self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.TRIMESTRIEL), Decimal("30"))
-        self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("120"))
+        self.assertEqual(get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("96.00"))
 
     def test_subscription_payment_estimate_uses_usd_reference_and_local_snapshot(self):
         from django.utils import timezone
@@ -1427,6 +1427,37 @@ class SubscriptionPaymentTests(TestCase):
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(
+        DEBUG=True,
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="test",
+        JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True,
+        JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret",
+    )
+    def test_automatic_payment_start_ignores_tampered_client_amount_for_annual_cycle(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]),
+            {
+                "duree": PaiementAbonnement.Duree.ANNUEL,
+                "amount": "1.00",
+                "montant": "1.00",
+                "price": "1.00",
+            },
+        )
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
+        self.assertEqual(paiement.montant_usd, Decimal("96.00"))
+        self.assertEqual(paiement.amount_expected, Decimal("96.00"))
+        self.assertNotEqual(paiement.montant_usd, Decimal("1.00"))
+
+    @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,
         JOATHAM_PAYMENT_PROVIDER="cinetpay",
         CINETPAY_SITE_ID="",
@@ -1484,7 +1515,11 @@ class SubscriptionPaymentTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Choisir ce pack")
-        self.assertContains(response, "Payer avec CinetPay")
+        self.assertContains(response, "Payer mensuel avec CinetPay")
+        self.assertContains(response, "Payer annuel avec CinetPay")
+        self.assertContains(response, "96.00 USD par an")
+        self.assertContains(response, 'name="duree" value="mensuel"')
+        self.assertContains(response, 'name="duree" value="annuel"')
         self.assertNotContains(response, "Paiement CinetPay non configuré")
 
     @override_settings(
@@ -1713,6 +1748,50 @@ class SubscriptionPaymentTests(TestCase):
         self.assertNotIn("api_password", payload)
         self.assertEqual(paiement.checkout_url, "https://checkout.cinetpay.com/payment/payment-token-1")
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="cinetpay",
+        CINETPAY_SITE_ID="site-123",
+        CINETPAY_APIKEY="api-key",
+        CINETPAY_SECRET_KEY="secret-key",
+        JOATHAM_PAYMENT_CALLBACK_URL="https://app.example.com/abonnement/webhooks/cinetpay/",
+        JOATHAM_PAYMENT_RETURN_URL="https://app.example.com/abonnement/paiement/retour/",
+        CINETPAY_CURRENCY="USD",
+        CINETPAY_CHANNELS="MOBILE_MONEY",
+    )
+    @patch("core.services.payment_providers.requests.post")
+    def test_cinetpay_annual_payment_sends_discounted_amount(self, post_mock):
+        post_mock.return_value = self._cinetpay_http_response(
+            {
+                "code": "201",
+                "message": "CREATED",
+                "data": {
+                    "payment_token": "payment-token-annual",
+                    "payment_url": "https://checkout.cinetpay.com/payment/payment-token-annual",
+                },
+                "api_response_id": "api-init-annual",
+            }
+        )
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]),
+            {"duree": PaiementAbonnement.Duree.ANNUEL, "amount": "1.00"},
+        )
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise,
+            methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        )
+        payload = post_mock.call_args.kwargs["json"]
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(payload["amount"], 96)
+        self.assertEqual(payload["currency"], "USD")
+        self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
+        self.assertEqual(paiement.montant_usd, Decimal("96.00"))
+        self.assertEqual(paiement.amount_expected, Decimal("96.00"))
+        self.assertEqual(response["Location"], paiement.checkout_url)
 
     @override_settings(
         JOATHAM_AUTO_PAYMENT_ENABLED=True,
@@ -2450,6 +2529,31 @@ class SubscriptionPaymentTests(TestCase):
         self.client.force_login(self.owner)
         overview = self.client.get(reverse("subscription_overview"))
         self.assertContains(overview, "Paiement automatique confirmé")
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_valid_annual_webhook_activates_subscription_for_year(self):
+        paiement = create_automatic_subscription_payment_request(
+            entreprise=self.entreprise,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.ANNUEL,
+            provider="test",
+            utilisateur=self.owner,
+        )
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-paid-annual-1",
+            amount="96.00",
+            currency="USD",
+            provider_transaction_id="tx-paid-annual-1",
+        )
+        paiement.refresh_from_db()
+        subscription = AbonnementEntreprise.objects.get(entreprise=self.entreprise)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(paiement.statut, PaiementAbonnement.Statut.VALIDE)
+        self.assertEqual(paiement.amount_paid, Decimal("96.00"))
+        self.assertEqual(subscription.date_fin, date.today() + timedelta(days=365))
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_webhook_wrong_amount_is_rejected(self):

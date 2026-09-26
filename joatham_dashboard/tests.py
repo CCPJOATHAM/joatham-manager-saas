@@ -55,10 +55,19 @@ class PublicHomeTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="tarifs"')
+        self.assertContains(response, "TARIFS JOATHAM MANAGER")
+        self.assertContains(response, "data-pricing-toggle")
+        self.assertContains(response, "Mensuel")
+        self.assertContains(response, "Annuel")
+        self.assertContains(response, "Économisez 20 %")
         for expected in ("Gratuit", "Starter", "Pro", "Premium Business"):
             self.assertContains(response, expected)
         for expected_price in ("0 USD/mois", "10 USD/mois", "15 USD/mois", "20 USD/mois"):
             self.assertContains(response, expected_price)
+        for expected_price in ("0 USD/an", "96 USD/an", "144 USD/an", "192 USD/an"):
+            self.assertContains(response, expected_price)
+        for expected_cta in ("Choisir Starter", "Choisir Pro", "Choisir Premium Business"):
+            self.assertContains(response, expected_cta)
 
     def test_public_home_displays_seeded_commercial_plans_without_authentication(self):
         call_command("seed_saas_plans", stdout=StringIO())
@@ -140,7 +149,8 @@ class PublicHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pilotez votre entreprise avec")
         self.assertContains(response, "Commencer gratuitement")
-        self.assertContains(response, "Des plans clairs pour démarrer et évoluer")
+        self.assertContains(response, "Des plans clairs pour")
+        self.assertContains(response, "démarrer et évoluer")
         self.assertContains(response, "0 USD/mois")
         self.assertNotContains(response, "Run your business with")
 
@@ -165,7 +175,9 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, "Run your business with")
         self.assertContains(response, "simplicity and efficiency")
         self.assertContains(response, "Start for free")
-        self.assertContains(response, "Clear plans to start and grow")
+        self.assertContains(response, "Clear plans to")
+        self.assertContains(response, "start and grow")
+        self.assertContains(response, "96 USD/year")
         self.assertContains(response, "0 USD/month")
         self.assertContains(response, "Free")
         self.assertNotContains(response, "Pilotez votre entreprise avec")
@@ -177,7 +189,9 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, "Gira a sua empresa com")
         self.assertContains(response, "simplicidade e eficiência")
         self.assertContains(response, "Começar gratuitamente")
-        self.assertContains(response, "Planos claros para começar e evoluir")
+        self.assertContains(response, "Planos claros para")
+        self.assertContains(response, "começar e evoluir")
+        self.assertContains(response, "96 USD/ano")
         self.assertContains(response, "0 USD/mês")
         self.assertContains(response, "Gratuito")
         self.assertNotContains(response, "Run your business with")
@@ -189,7 +203,9 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, "Gestione su empresa con")
         self.assertContains(response, "simplicidad y eficiencia")
         self.assertContains(response, "Comenzar gratis")
-        self.assertContains(response, "Planes claros para empezar y crecer")
+        self.assertContains(response, "Planes claros para")
+        self.assertContains(response, "empezar y crecer")
+        self.assertContains(response, "96 USD/año")
         self.assertContains(response, "0 USD/mes")
         self.assertContains(response, "Gratis")
         self.assertNotContains(response, "Run your business with")

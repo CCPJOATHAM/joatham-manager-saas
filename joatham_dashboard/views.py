@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from core.audit import record_audit_event
+from core.models import PaiementAbonnement
 from core.services.subscription import (
     FREE_PLAN_CLIENT_LIMIT,
     FREE_PLAN_CODE,
@@ -30,6 +31,10 @@ from core.services.subscription import (
     get_plan_feature_summary,
     get_plan_limit_summary,
     get_plan_quota_profile,
+    get_subscription_annual_discount_rate,
+    get_subscription_annual_savings_usd,
+    get_subscription_equivalent_monthly_price_usd,
+    get_subscription_price_usd,
     normalize_plan_code,
 )
 from core.services.product_policy import get_module_label, module_access_required
@@ -123,16 +128,59 @@ def _load_public_commercial_plans():
 
 
 def _build_public_plan_cards():
+    plan_styles = {
+        FREE_PLAN_CODE: {
+            "tone": "free",
+            "icon": "JM",
+            "badge": "",
+            "headline": _("Pour découvrir JOATHAM Manager"),
+            "cta_label": _("Commencer gratuitement"),
+        },
+        "starter": {
+            "tone": "starter",
+            "icon": "S",
+            "badge": _("Idéal pour débuter"),
+            "headline": _("Pour les petites activités en croissance"),
+            "cta_label": _("Choisir Starter"),
+        },
+        PRO_PLAN_CODE: {
+            "tone": "pro",
+            "icon": "\u265b",
+            "badge": _("Le plus populaire"),
+            "headline": _("Pour les PME qui veulent aller plus loin"),
+            "cta_label": _("Choisir Pro"),
+        },
+        "premium": {
+            "tone": "premium",
+            "icon": "PB",
+            "badge": _("Accès complet"),
+            "headline": _("Pour les entreprises sans limites"),
+            "cta_label": _("Choisir Premium Business"),
+        },
+    }
+    annual_discount_percent = int(get_subscription_annual_discount_rate() * Decimal("100"))
     cards = []
     for plan in _load_public_commercial_plans():
         code = normalize_plan_code(plan)
         currency = getattr(plan, "devise", "") or "USD"
-        annual_price = getattr(plan, "prix_annuel", None)
-        plan_price = Decimal(str(getattr(plan, "prix", 0) or 0))
+        monthly_price = get_subscription_price_usd(plan=plan, duree=PaiementAbonnement.Duree.MENSUEL)
+        annual_price = get_subscription_price_usd(plan=plan, duree=PaiementAbonnement.Duree.ANNUEL)
+        annual_equivalent = get_subscription_equivalent_monthly_price_usd(
+            plan=plan,
+            duree=PaiementAbonnement.Duree.ANNUEL,
+        )
+        annual_savings = get_subscription_annual_savings_usd(plan=plan)
+        is_free = monthly_price <= 0
+        style = plan_styles.get(code, plan_styles[FREE_PLAN_CODE])
         cards.append(
             {
                 "plan": plan,
                 "code": code,
+                "tone": style["tone"],
+                "icon": style["icon"],
+                "badge": style["badge"],
+                "headline": style["headline"],
+                "cta_label": style["cta_label"],
                 "display_name": get_plan_commercial_name(plan),
                 "description": get_plan_commercial_description(plan),
                 "features": get_plan_feature_summary(plan),
@@ -140,18 +188,27 @@ def _build_public_plan_cards():
                 "included_modules": get_plan_display_modules(plan),
                 "limits": get_plan_limit_summary(plan),
                 "quota_profile": get_plan_quota_profile(plan),
-                "is_free": plan_price <= 0,
+                "is_free": is_free,
                 "is_popular": code == PRO_PLAN_CODE,
-                "monthly_price_label": f"{_format_public_price(plan_price)} {currency}/{_('mois')}",
-                "annual_price_label": (
-                    f"{_format_public_price(annual_price)} {currency}/{_('an')}"
-                    if annual_price not in (None, "", 0, Decimal("0.00"))
-                    else ""
-                ),
+                "annual_discount_percent": annual_discount_percent,
+                "monthly_price_label": f"{_format_public_price(monthly_price)} {currency}/{_('mois')}",
+                "annual_price_label": f"{_format_public_price(annual_price)} {currency}/{_('an')}",
+                "annual_equivalent_label": "" if is_free else _(
+                    "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
+                ) % {
+                    "amount": _format_public_price(annual_equivalent),
+                    "currency": currency,
+                    "period": _("mois"),
+                },
+                "annual_savings_label": "" if is_free or annual_savings <= 0 else _(
+                    "économie annuelle : %(amount)s %(currency)s"
+                ) % {
+                    "amount": _format_public_price(annual_savings),
+                    "currency": currency,
+                },
             }
         )
     return cards
-
 
 def public_home(request):
     return render(

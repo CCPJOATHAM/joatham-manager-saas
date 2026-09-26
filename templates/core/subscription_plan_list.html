@@ -220,7 +220,7 @@
 {% if plan_cards %}
 <div class="plans-grid">
     {% for plan_card in plan_cards %}
-    {% with plan=plan_card.plan price_info=plan_card.price_info %}
+    {% with plan=plan_card.plan price_info=plan_card.price_info monthly_price_info=plan_card.monthly_price_info annual_price_info=plan_card.annual_price_info %}
     <article class="plan-card {% if plan.code == 'pro' %}is-popular{% endif %}">
         {% if plan.code == "pro" %}<span class="plan-badge">Populaire</span>{% endif %}
         <div class="plan-head">
@@ -233,11 +233,11 @@
             <strong>0 {{ plan.devise|default:"USD" }}</strong>
             <span>plan gratuit</span>
             {% else %}
-            <strong>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:"USD" }}</strong>
+            <strong>{{ monthly_price_info.amount_usd|default:price_info.official_amount|default:plan.prix }} {{ monthly_price_info.currency_code|default:price_info.official_currency|default:"USD" }}</strong>
             <span>Prix mensuel</span>
             {% endif %}
-            {% if plan.prix_annuel %}
-            <span>{{ plan.prix_annuel }} {{ plan.devise|default:"USD" }} par an</span>
+            {% if annual_price_info.amount_usd %}
+            <span>{{ annual_price_info.amount_usd }} {{ annual_price_info.currency_code|default:plan.devise|default:"USD" }} par an</span>
             {% endif %}
             {% if not plan_card.is_free and not price_info.unavailable %}
             <span>Estimation locale : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
@@ -303,9 +303,16 @@
             {% if automatic_payment_provider_configured %}
             <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="duree" value="mensuel">
+                <input type="hidden" name="duree" value="{{ plan_card.monthly_duration }}">
                 <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                    Payer avec CinetPay
+                    Payer mensuel avec CinetPay
+                </button>
+            </form>
+            <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="duree" value="{{ plan_card.annual_duration }}">
+                <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                    Payer annuel avec CinetPay
                 </button>
             </form>
             {% else %}

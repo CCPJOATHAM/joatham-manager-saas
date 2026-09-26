@@ -26,6 +26,9 @@ from joatham_users.models import Abonnement, AbonnementEntreprise
 
 DEFAULT_WHATSAPP_NUMBER = "243970258117"
 DEFAULT_WHATSAPP_MESSAGE = "Je veux payer mon abonnement JOATHAM Pro"
+SUBSCRIPTION_PRICE_QUANTUM = Decimal("0.01")
+ANNUAL_SUBSCRIPTION_DISCOUNT_RATE = Decimal("0.20")
+ANNUAL_SUBSCRIPTION_BILLED_MONTHS = Decimal("12")
 FREE_PLAN_CODE = "free"
 STARTER_PLAN_CODE = "starter"
 PRO_PLAN_CODE = "pro"
@@ -153,7 +156,7 @@ DEFAULT_PAID_PLANS = [
         "code": STARTER_PLAN_CODE,
         "nom": "Starter",
         "prix": 10,
-        "prix_annuel": Decimal("120.00"),
+        "prix_annuel": Decimal("96.00"),
         "devise": "USD",
         "duree_jours": 30,
         "description": "Facturation professionnelle, POS simple, proformas, stock simple et depenses pour une petite activite.",
@@ -169,7 +172,7 @@ DEFAULT_PAID_PLANS = [
         "code": PRO_PLAN_CODE,
         "nom": "Pro",
         "prix": 15,
-        "prix_annuel": Decimal("180.00"),
+        "prix_annuel": Decimal("144.00"),
         "devise": "USD",
         "duree_jours": 30,
         "description": "Gestion complete avec caisse, apprenants, stock complet, proformas avancees, rapports et exports.",
@@ -185,7 +188,7 @@ DEFAULT_PAID_PLANS = [
         "code": PREMIUM_PLAN_CODE,
         "nom": "Premium Business",
         "prix": 20,
-        "prix_annuel": Decimal("240.00"),
+        "prix_annuel": Decimal("192.00"),
         "devise": "USD",
         "duree_jours": 30,
         "description": "Acces complet avec RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire.",
@@ -590,15 +593,44 @@ def get_subscription_payment_duration_options():
     return SUBSCRIPTION_PAYMENT_DURATIONS
 
 
+def get_subscription_annual_discount_rate():
+    return ANNUAL_SUBSCRIPTION_DISCOUNT_RATE
+
+
+def get_subscription_monthly_price_usd(*, plan):
+    return Decimal(str(getattr(plan, "prix", 0) or 0)).quantize(SUBSCRIPTION_PRICE_QUANTUM)
+
+
 def get_subscription_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
         raise ValueError("Duree d'abonnement invalide.")
-    return Decimal(str(plan.prix)) * duration["multiplier"]
+    monthly_price = get_subscription_monthly_price_usd(plan=plan)
+    if duree == PaiementAbonnement.Duree.ANNUEL:
+        return (
+            monthly_price
+            * ANNUAL_SUBSCRIPTION_BILLED_MONTHS
+            * (Decimal("1") - ANNUAL_SUBSCRIPTION_DISCOUNT_RATE)
+        ).quantize(SUBSCRIPTION_PRICE_QUANTUM)
+    return (monthly_price * duration["multiplier"]).quantize(SUBSCRIPTION_PRICE_QUANTUM)
 
 
 def calculate_subscription_payment_amount(*, plan, duree):
     return get_subscription_price_usd(plan=plan, duree=duree)
+
+
+def get_subscription_annual_savings_usd(*, plan):
+    full_annual_price = get_subscription_monthly_price_usd(plan=plan) * ANNUAL_SUBSCRIPTION_BILLED_MONTHS
+    discounted_annual_price = get_subscription_price_usd(plan=plan, duree=PaiementAbonnement.Duree.ANNUEL)
+    return (full_annual_price - discounted_annual_price).quantize(SUBSCRIPTION_PRICE_QUANTUM)
+
+
+def get_subscription_equivalent_monthly_price_usd(*, plan, duree):
+    duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
+    if duration is None:
+        raise ValueError("Duree d'abonnement invalide.")
+    divisor = duration["multiplier"] or Decimal("1")
+    return (get_subscription_price_usd(plan=plan, duree=duree) / divisor).quantize(SUBSCRIPTION_PRICE_QUANTUM)
 
 
 def get_subscription_payment_duration_days(duree):

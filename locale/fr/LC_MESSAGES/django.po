@@ -624,3 +624,105 @@ msgstr "Abonnement"
 
 msgid "Audit"
 msgstr "Audit"
+
+msgid "TARIFS JOATHAM MANAGER"
+msgstr "TARIFS JOATHAM MANAGER"
+
+msgid "Des plans clairs pour"
+msgstr "Des plans clairs pour"
+
+msgid "démarrer et évoluer"
+msgstr "démarrer et évoluer"
+
+msgid "Choisissez une formule adaptée à votre rythme, avec une réduction réelle lorsque vous optez pour la facturation annuelle."
+msgstr "Choisissez une formule adaptée à votre rythme, avec une réduction réelle lorsque vous optez pour la facturation annuelle."
+
+msgid "Cycle de facturation"
+msgstr "Cycle de facturation"
+
+msgid "Mensuel"
+msgstr "Mensuel"
+
+msgid "Annuel"
+msgstr "Annuel"
+
+msgid "Économisez 20 %"
+msgstr "Économisez 20 %"
+
+msgid "Pour découvrir JOATHAM Manager"
+msgstr "Pour découvrir JOATHAM Manager"
+
+msgid "Idéal pour débuter"
+msgstr "Idéal pour débuter"
+
+msgid "Pour les petites activités en croissance"
+msgstr "Pour les petites activités en croissance"
+
+msgid "Choisir Starter"
+msgstr "Choisir Starter"
+
+msgid "Le plus populaire"
+msgstr "Le plus populaire"
+
+msgid "Pour les PME qui veulent aller plus loin"
+msgstr "Pour les PME qui veulent aller plus loin"
+
+msgid "Choisir Pro"
+msgstr "Choisir Pro"
+
+msgid "Accès complet"
+msgstr "Accès complet"
+
+msgid "Pour les entreprises sans limites"
+msgstr "Pour les entreprises sans limites"
+
+msgid "Choisir Premium Business"
+msgstr "Choisir Premium Business"
+
+msgid "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
+msgstr "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
+
+msgid "économie annuelle : %(amount)s %(currency)s"
+msgstr "économie annuelle : %(amount)s %(currency)s"
+
+msgid "Facturation mensuelle"
+msgstr "Facturation mensuelle"
+
+msgid "Plan gratuit"
+msgstr "Plan gratuit"
+
+msgid "Avantages principaux"
+msgstr "Avantages principaux"
+
+msgid "Voir les détails"
+msgstr "Voir les détails"
+
+msgid "Limites du plan"
+msgstr "Limites du plan"
+
+msgid "Repères de réassurance"
+msgstr "Repères de réassurance"
+
+msgid "Paiement sécurisé"
+msgstr "Paiement sécurisé"
+
+msgid "Les paiements en ligne passent par le fournisseur configuré."
+msgstr "Les paiements en ligne passent par le fournisseur configuré."
+
+msgid "Activation rapide"
+msgstr "Activation rapide"
+
+msgid "Votre espace reste disponible dès la création du compte."
+msgstr "Votre espace reste disponible dès la création du compte."
+
+msgid "Support technique"
+msgstr "Support technique"
+
+msgid "L’équipe JOATHAM vous accompagne dans l’utilisation."
+msgstr "L’équipe JOATHAM vous accompagne dans l’utilisation."
+
+msgid "Accès partout"
+msgstr "Accès partout"
+
+msgid "JOATHAM Manager est accessible en ligne sur vos appareils."
+msgstr "JOATHAM Manager est accessible en ligne sur vos appareils."
