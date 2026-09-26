@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.models import ActivityLog
+from core.services.language import LANGUAGE_SESSION_KEY
 from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise
 from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
@@ -68,7 +69,7 @@ class PublicHomeTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
-        plan_names = [card["display_name"] for card in response.context["public_plan_cards"]]
+        plan_names = [str(card["display_name"]) for card in response.context["public_plan_cards"]]
         self.assertEqual(plan_names, ["Gratuit", "Starter", "Pro", "Premium Business"])
         self.assertContains(response, "Premium Business")
 
@@ -127,6 +128,73 @@ class PublicHomeTests(TestCase):
         self.assertNotContains(response, "phone-mockup")
         self.assertContains(response, "data-product-carousel")
         self.assertContains(response, "joatham_dashboard/js/public_home.js")
+
+    def _switch_public_language(self, language_code):
+        return self.client.post(
+            reverse("set_language"),
+            {"language": language_code, "next": reverse("public_home")},
+            follow=True,
+        )
+
+    def test_public_home_defaults_to_french_content(self):
+        response = self.client.get(reverse("public_home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pilotez votre entreprise avec")
+        self.assertContains(response, "Commencer gratuitement")
+        self.assertContains(response, "Des plans clairs pour démarrer et évoluer")
+        self.assertContains(response, "0 USD/mois")
+        self.assertNotContains(response, "Run your business with")
+
+    def test_public_language_switch_redirects_and_persists_language(self):
+        response = self.client.post(
+            reverse("set_language"),
+            {"language": "en", "next": reverse("public_home")},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("public_home"))
+        self.assertEqual(self.client.session.get(LANGUAGE_SESSION_KEY), "en")
+
+        response = self.client.get(reverse("public_home"))
+        self.assertContains(response, "Run your business with")
+        self.assertContains(response, "Start for free")
+
+    def test_public_home_translates_to_english(self):
+        response = self._switch_public_language("en")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Run your business with")
+        self.assertContains(response, "simplicity and efficiency")
+        self.assertContains(response, "Start for free")
+        self.assertContains(response, "Clear plans to start and grow")
+        self.assertContains(response, "0 USD/month")
+        self.assertContains(response, "Free")
+        self.assertNotContains(response, "Pilotez votre entreprise avec")
+
+    def test_public_home_translates_to_portuguese(self):
+        response = self._switch_public_language("pt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gira a sua empresa com")
+        self.assertContains(response, "simplicidade e eficiência")
+        self.assertContains(response, "Começar gratuitamente")
+        self.assertContains(response, "Planos claros para começar e evoluir")
+        self.assertContains(response, "0 USD/mês")
+        self.assertContains(response, "Gratuito")
+        self.assertNotContains(response, "Run your business with")
+
+    def test_public_home_translates_to_spanish(self):
+        response = self._switch_public_language("es")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gestione su empresa con")
+        self.assertContains(response, "simplicidad y eficiencia")
+        self.assertContains(response, "Comenzar gratis")
+        self.assertContains(response, "Planes claros para empezar y crecer")
+        self.assertContains(response, "0 USD/mes")
+        self.assertContains(response, "Gratis")
+        self.assertNotContains(response, "Run your business with")
 
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")

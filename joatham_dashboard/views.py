@@ -83,12 +83,12 @@ def _format_public_price(value):
 def _public_free_plan_payload():
     return {
         "code": FREE_PLAN_CODE,
-        "nom": "Gratuit",
+        "nom": _("Gratuit"),
         "prix": 0,
         "prix_annuel": Decimal("0.00"),
         "devise": "USD",
         "duree_jours": FREE_PLAN_DURATION_DAYS,
-        "description": "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
+        "description": _("Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
@@ -142,9 +142,9 @@ def _build_public_plan_cards():
                 "quota_profile": get_plan_quota_profile(plan),
                 "is_free": plan_price <= 0,
                 "is_popular": code == PRO_PLAN_CODE,
-                "monthly_price_label": f"{_format_public_price(plan_price)} {currency}/mois",
+                "monthly_price_label": f"{_format_public_price(plan_price)} {currency}/{_('mois')}",
                 "annual_price_label": (
-                    f"{_format_public_price(annual_price)} {currency}/an"
+                    f"{_format_public_price(annual_price)} {currency}/{_('an')}"
                     if annual_price not in (None, "", 0, Decimal("0.00"))
                     else ""
                 ),

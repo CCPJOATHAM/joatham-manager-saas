@@ -420,3 +420,435 @@ msgstr "O pagamento foi registrado."
 #, python-format
 msgid "Le module %(module)s est momentanement en maintenance."
 msgstr "O módulo %(module)s está temporariamente em manutenção."
+
+msgid "À propos"
+msgstr "Sobre"
+
+msgid "Acces complet a tous les modules declares"
+msgstr "Acesso completo a todos os módulos declarados"
+
+msgid "Accessible en ligne"
+msgstr "Acessível online"
+
+msgid "Accueil"
+msgstr "Início"
+
+msgid "Accueil JOATHAM Manager"
+msgstr "Início JOATHAM Manager"
+
+msgid "Adapté aux besoins des entreprises"
+msgstr "Adaptado às necessidades das empresas"
+
+msgid "Afficher Apprenants"
+msgstr "Mostrar aprendentes"
+
+msgid "Afficher Caisse / POS"
+msgstr "Mostrar Caixa / POS"
+
+msgid "Afficher Comptabilité"
+msgstr "Mostrar contabilidade"
+
+msgid "Afficher Facturation"
+msgstr "Mostrar faturação"
+
+msgid "Afficher Ressources humaines"
+msgstr "Mostrar recursos humanos"
+
+msgid "Afficher Stock & Produits"
+msgstr "Mostrar stock e produtos"
+
+msgid "Afficher Tableau de bord"
+msgstr "Mostrar painel de controlo"
+
+msgid "Aller au contenu"
+msgstr "Ir para o conteúdo"
+
+msgid "an"
+msgstr "ano"
+
+msgid "Aperçu de JOATHAM Manager"
+msgstr "Pré-visualização do JOATHAM Manager"
+
+msgid "Aucune installation locale nécessaire pour démarrer."
+msgstr "Não é necessária instalação local para começar."
+
+msgid "Audit avance"
+msgstr "Auditoria avançada"
+
+msgid "Audit avance complet"
+msgstr "Auditoria avançada completa"
+
+msgid "Caisse"
+msgstr "Caixa"
+
+msgid "Caisse / POS"
+msgstr "Caixa / POS"
+
+msgid "Caisse complete"
+msgstr "Caixa completa"
+
+msgid "Caisse, stock complet, apprenants, recus et quittances"
+msgstr "Caixa, stock completo, aprendentes, recibos e quitações"
+
+msgid "Caisses actives"
+msgstr "Caixas ativas"
+
+msgid "Capture du module apprenants JOATHAM Manager"
+msgstr "Captura do módulo de aprendentes do JOATHAM Manager"
+
+msgid "Capture du module caisse et POS JOATHAM Manager"
+msgstr "Captura do módulo de caixa e POS do JOATHAM Manager"
+
+msgid "Capture du module comptabilité JOATHAM Manager"
+msgstr "Captura do módulo de contabilidade do JOATHAM Manager"
+
+msgid "Capture du module de facturation JOATHAM Manager"
+msgstr "Captura do módulo de faturação do JOATHAM Manager"
+
+msgid "Capture du module ressources humaines JOATHAM Manager"
+msgstr "Captura do módulo de recursos humanos do JOATHAM Manager"
+
+msgid "Capture du module stock et produits JOATHAM Manager"
+msgstr "Captura do módulo de stock e produtos do JOATHAM Manager"
+
+msgid "Capture du tableau de bord JOATHAM Manager"
+msgstr "Captura do painel de controlo do JOATHAM Manager"
+
+msgid "Choisir un écran JOATHAM Manager"
+msgstr "Escolher um ecrã do JOATHAM Manager"
+
+msgid "Commencer gratuitement"
+msgstr "Começar gratuitamente"
+
+msgid "Comptabilité"
+msgstr "Contabilidade"
+
+msgid "Comptabilite avancee"
+msgstr "Contabilidade avançada"
+
+msgid "Contact"
+msgstr "Contacto"
+
+msgid "Contrôles du carrousel produit"
+msgstr "Controlos do carrossel do produto"
+
+msgid "Conversion proforma"
+msgstr "Conversão de pró-forma"
+
+msgid "Créez votre espace et centralisez progressivement les outils essentiels de votre organisation."
+msgstr "Crie o seu espaço e centralize progressivamente as ferramentas essenciais da sua organização."
+
+msgid "Croissance"
+msgstr "Crescimento"
+
+msgid "Découvrir les fonctionnalités"
+msgstr "Descobrir funcionalidades"
+
+msgid "Démonstration des écrans JOATHAM Manager"
+msgstr "Demonstração dos ecrãs do JOATHAM Manager"
+
+msgid "Dépenses"
+msgstr "Despesas"
+
+msgid "Dépenses / mois"
+msgstr "Despesas / mês"
+
+msgid "Des plans clairs pour démarrer et évoluer"
+msgstr "Planos claros para começar e evoluir"
+
+msgid "Écran précédent"
+msgstr "Ecrã anterior"
+
+msgid "Écran suivant"
+msgstr "Ecrã seguinte"
+
+msgid "En-tête du site"
+msgstr "Cabeçalho do site"
+
+msgid "Export Excel"
+msgstr "Exportação Excel"
+
+msgid "Export Excel avance"
+msgstr "Exportação Excel avançada"
+
+msgid "Exports"
+msgstr "Exportações"
+
+msgid "Factures / mois"
+msgstr "Faturas / mês"
+
+msgid "Factures A4 professionnelles et POS simple"
+msgstr "Faturas A4 profissionais e POS simples"
+
+msgid "Fonctionnalités"
+msgstr "Funcionalidades"
+
+msgid "Gestion centralisée"
+msgstr "Gestão centralizada"
+
+msgid "Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports."
+msgstr "Gestão completa para PME: caixa, aprendentes, stock completo, POS completo, conversão de pró-formas, relatórios detalhados e exportações."
+
+msgid "Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses."
+msgstr "Gestão profissional para pequena atividade: faturas A4, POS simples, pró-formas simples, stock simples e despesas."
+
+msgid "Gestion SaaS"
+msgstr "Gestão SaaS"
+
+msgid "Gratuit"
+msgstr "Gratuito"
+
+msgid "Illimité"
+msgstr "Ilimitado"
+
+msgid "Illustration professionnelle dans un espace de travail JOATHAM"
+msgstr "Ilustração profissional num espaço de trabalho JOATHAM"
+
+msgid "Illustration professionnelle de l’utilisation de JOATHAM Manager"
+msgstr "Ilustração profissional da utilização do JOATHAM Manager"
+
+msgid "Inclus"
+msgstr "Incluído"
+
+msgid "Incluse"
+msgstr "Incluída"
+
+msgid "Inventaire"
+msgstr "Inventário"
+
+msgid "Inventaire physique"
+msgstr "Inventário físico"
+
+msgid "JOATHAM Manager"
+msgstr "JOATHAM Manager"
+
+msgid "JOATHAM Manager - SaaS de gestion pour entreprises"
+msgstr "JOATHAM Manager - SaaS de gestão empresarial"
+
+msgid "JOATHAM Manager aide les entreprises à centraliser facturation, caisse, stock, comptabilité, RH, apprenants et suivi de l’activité."
+msgstr "O JOATHAM Manager ajuda as empresas a centralizar faturação, caixa/POS, stock, contabilidade, RH, aprendentes e acompanhamento da atividade."
+
+msgid "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et rapports."
+msgstr "O JOATHAM Manager centraliza as ferramentas essenciais de gestão empresarial: faturação, caixa/POS, stock, contabilidade, recursos humanos, aprendentes e relatórios."
+
+msgid "JOATHAM Manager centralise vos outils essentiels de gestion dans une plateforme claire : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et suivi de l’activité."
+msgstr "O JOATHAM Manager centraliza as suas ferramentas essenciais de gestão numa plataforma clara: faturação, caixa/POS, stock, contabilidade, recursos humanos, aprendentes e acompanhamento da atividade."
+
+msgid "JOATHAM Manager réunit les modules dont une entreprise a besoin pour suivre ses opérations, ses documents, son stock et son équipe."
+msgstr "O JOATHAM Manager reúne os módulos de que uma empresa precisa para acompanhar operações, documentos, stock e equipa."
+
+msgid "Jusqu'a 3 utilisateurs et support standard"
+msgstr "Até 3 utilizadores e suporte standard"
+
+msgid "La plateforme accompagne les équipes qui veulent mieux structurer leurs opérations quotidiennes sans multiplier les outils dispersés."
+msgstr "A plataforma apoia equipas que querem estruturar melhor as operações diárias sem multiplicar ferramentas dispersas."
+
+msgid "Les informations ci-dessous sont reprises depuis la logique officielle des abonnements JOATHAM Manager."
+msgstr "As informações abaixo vêm da lógica oficial de assinaturas do JOATHAM Manager."
+
+msgid "Les plans officiels prévoient une gestion adaptée aux équipes."
+msgstr "Os planos oficiais preveem uma gestão adaptada às equipas."
+
+msgid "Les tarifs sont temporairement indisponibles. Vous pouvez tout de même créer un compte gratuitement."
+msgstr "Os preços estão temporariamente indisponíveis. Ainda assim, pode criar uma conta gratuitamente."
+
+msgid "Matadi, RDC"
+msgstr "Matadi, RDC"
+
+msgid "Messagerie"
+msgstr "Mensagens"
+
+msgid "Mobile Money"
+msgstr "Mobile Money"
+
+msgid "mois"
+msgstr "mês"
+
+msgid "Multi-utilisateur"
+msgstr "Multiutilizador"
+
+msgid "Navigation principale"
+msgstr "Navegação principal"
+
+msgid "Paiements"
+msgstr "Pagamentos"
+
+msgid "Pilotez votre entreprise avec"
+msgstr "Gira a sua empresa com"
+
+msgid "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+msgstr "Plano permanente de descoberta com painel de controlo, clientes, produtos/serviços, faturas A4 simples e despesas limitadas."
+
+msgid "Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+msgstr "Plano permanente de descoberta para começar com painel de controlo, clientes, produtos/serviços, faturas A4 simples e despesas limitadas."
+
+msgid "Plan JOATHAM"
+msgstr "Plano JOATHAM"
+
+msgid "Plan JOATHAM Manager pour accompagner la gestion de votre organisation."
+msgstr "Plano JOATHAM Manager para apoiar a gestão da sua organização."
+
+msgid "Plateforme SaaS de gestion"
+msgstr "Plataforma SaaS de gestão"
+
+msgid "Plateforme SaaS de gestion pour entreprises."
+msgstr "Plataforma SaaS de gestão empresarial."
+
+msgid "Plateforme SaaS pour entreprises"
+msgstr "Plataforma SaaS para empresas"
+
+msgid "Plusieurs outils dans une seule plateforme"
+msgstr "Várias ferramentas numa só plataforma"
+
+msgid "Populaire"
+msgstr "Popular"
+
+msgid "POS"
+msgstr "POS"
+
+msgid "POS complet, proformas avancees et conversion en facture"
+msgstr "POS completo, pró-formas avançadas e conversão em fatura"
+
+msgid "POS simple"
+msgstr "POS simples"
+
+msgid "Poser une question"
+msgstr "Fazer uma pergunta"
+
+msgid "Premium Business"
+msgstr "Premium Business"
+
+msgid "Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."
+msgstr "Premium Business: acesso completo, RH, contabilidade avançada, relatórios avançados, auditoria avançada e acompanhamento prioritário."
+
+msgid "Prêt à simplifier la gestion de votre entreprise ?"
+msgstr "Pronto para simplificar a gestão da sua empresa?"
+
+msgid "Pro"
+msgstr "Pro"
+
+msgid "Produit"
+msgstr "Produto"
+
+msgid "Produits / services"
+msgstr "Produtos / serviços"
+
+msgid "Produits, services et depenses simples avec quotas limites"
+msgstr "Produtos, serviços e despesas simples com quotas limitadas"
+
+msgid "Proformas"
+msgstr "Pró-formas"
+
+msgid "Proformas / mois"
+msgstr "Pró-formas / mês"
+
+msgid "Proformas simples, stock simple et personnalisation de base"
+msgstr "Pró-formas simples, stock simples e personalização básica"
+
+msgid "Rapports avances"
+msgstr "Relatórios avançados"
+
+msgid "Rapports avancés"
+msgstr "Relatórios avançados"
+
+msgid "Rapports basiques et support basique"
+msgstr "Relatórios básicos e suporte básico"
+
+msgid "Rapports detailles, roles, permissions et exports PDF/Excel"
+msgstr "Relatórios detalhados, funções, permissões e exportações PDF/Excel"
+
+msgid "Rapports Premium Business avances"
+msgstr "Relatórios avançados Premium Business"
+
+msgid "Rapports stock"
+msgstr "Relatórios de stock"
+
+msgid "Repères de confiance"
+msgstr "Pontos de confiança"
+
+msgid "Ressources humaines"
+msgstr "Recursos humanos"
+
+msgid "Ressources humaines completes"
+msgstr "Recursos humanos completos"
+
+msgid "Retour en haut"
+msgstr "Voltar ao topo"
+
+msgid "RH, comptabilite avancee, rapports avances et audit avance"
+msgstr "RH, contabilidade avançada, relatórios avançados e auditoria avançada"
+
+msgid "Simple à utiliser"
+msgstr "Simples de utilizar"
+
+msgid "simplicité et efficacité"
+msgstr "simplicidade e eficiência"
+
+msgid "Solution en ligne"
+msgstr "Solução online"
+
+msgid "Starter"
+msgstr "Starter"
+
+msgid "Stock & inventaire"
+msgstr "Stock e inventário"
+
+msgid "Stock & Produits"
+msgstr "Stock e produtos"
+
+msgid "Stock simple"
+msgstr "Stock simples"
+
+msgid "Suggestions / support"
+msgstr "Sugestões / suporte"
+
+msgid "Support JOATHAM"
+msgstr "Suporte JOATHAM"
+
+msgid "Support prioritaire et accompagnement a la configuration"
+msgstr "Suporte prioritário e acompanhamento na configuração"
+
+msgid "Tableau de bord simple, clients et factures A4 simples"
+msgstr "Painel de controlo simples, clientes e faturas A4 simples"
+
+msgid "Tarifs"
+msgstr "Preços"
+
+msgid "Tous droits réservés."
+msgstr "Todos os direitos reservados."
+
+msgid "Tout Gratuit avec volumes plus confortables"
+msgstr "Tudo do Gratuito com volumes mais confortáveis"
+
+msgid "Tout Pro"
+msgstr "Tudo do Pro"
+
+msgid "Tout Starter"
+msgstr "Tudo do Starter"
+
+msgid "Un partenaire fiable pour la croissance de votre entreprise"
+msgstr "Um parceiro fiável para o crescimento da sua empresa"
+
+msgid "Une équipe joignable pour accompagner les entreprises."
+msgstr "Uma equipa disponível para acompanhar as empresas."
+
+msgid "Une plateforme complète pour gérer toute votre activité"
+msgstr "Uma plataforma completa para gerir toda a sua atividade"
+
+msgid "Une plateforme SaaS professionnelle pour centraliser les outils essentiels de gestion de votre entreprise."
+msgstr "Uma plataforma SaaS profissional para centralizar as ferramentas essenciais de gestão da sua empresa."
+
+msgid "Une solution en ligne pour centraliser les outils essentiels de gestion des entreprises."
+msgstr "Uma solução online para centralizar as ferramentas essenciais de gestão das empresas."
+
+msgid "Utilisateurs multiples"
+msgstr "Vários utilizadores"
+
+msgid "Validations internes avancees"
+msgstr "Validações internas avançadas"
+
+msgid "Validations internes, documents personnalises et plusieurs caisses"
+msgstr "Validações internas, documentos personalizados e várias caixas"
+
+msgid "Vos outils de gestion sont regroupés dans une même plateforme."
+msgstr "As suas ferramentas de gestão ficam reunidas numa só plataforma."

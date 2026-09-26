@@ -183,3 +183,444 @@ msgstr "Le paiement a été enregistré."
 #, python-format
 msgid "Le module %(module)s est momentanement en maintenance."
 msgstr "Le module %(module)s est momentanément en maintenance."
+
+msgid "À propos"
+msgstr "À propos"
+
+msgid "Acces complet a tous les modules declares"
+msgstr "Acces complet a tous les modules declares"
+
+msgid "Accessible en ligne"
+msgstr "Accessible en ligne"
+
+msgid "Accueil"
+msgstr "Accueil"
+
+msgid "Accueil JOATHAM Manager"
+msgstr "Accueil JOATHAM Manager"
+
+msgid "Adapté aux besoins des entreprises"
+msgstr "Adapté aux besoins des entreprises"
+
+msgid "Afficher Apprenants"
+msgstr "Afficher Apprenants"
+
+msgid "Afficher Caisse / POS"
+msgstr "Afficher Caisse / POS"
+
+msgid "Afficher Comptabilité"
+msgstr "Afficher Comptabilité"
+
+msgid "Afficher Facturation"
+msgstr "Afficher Facturation"
+
+msgid "Afficher Ressources humaines"
+msgstr "Afficher Ressources humaines"
+
+msgid "Afficher Stock & Produits"
+msgstr "Afficher Stock & Produits"
+
+msgid "Afficher Tableau de bord"
+msgstr "Afficher Tableau de bord"
+
+msgid "Aller au contenu"
+msgstr "Aller au contenu"
+
+msgid "an"
+msgstr "an"
+
+msgid "Aperçu de JOATHAM Manager"
+msgstr "Aperçu de JOATHAM Manager"
+
+msgid "Aucune installation locale nécessaire pour démarrer."
+msgstr "Aucune installation locale nécessaire pour démarrer."
+
+msgid "Audit avance"
+msgstr "Audit avance"
+
+msgid "Audit avance complet"
+msgstr "Audit avance complet"
+
+msgid "Caisse"
+msgstr "Caisse"
+
+msgid "Caisse / POS"
+msgstr "Caisse / POS"
+
+msgid "Caisse complete"
+msgstr "Caisse complete"
+
+msgid "Caisse, stock complet, apprenants, recus et quittances"
+msgstr "Caisse, stock complet, apprenants, recus et quittances"
+
+msgid "Caisses actives"
+msgstr "Caisses actives"
+
+msgid "Capture du module apprenants JOATHAM Manager"
+msgstr "Capture du module apprenants JOATHAM Manager"
+
+msgid "Capture du module caisse et POS JOATHAM Manager"
+msgstr "Capture du module caisse et POS JOATHAM Manager"
+
+msgid "Capture du module comptabilité JOATHAM Manager"
+msgstr "Capture du module comptabilité JOATHAM Manager"
+
+msgid "Capture du module de facturation JOATHAM Manager"
+msgstr "Capture du module de facturation JOATHAM Manager"
+
+msgid "Capture du module ressources humaines JOATHAM Manager"
+msgstr "Capture du module ressources humaines JOATHAM Manager"
+
+msgid "Capture du module stock et produits JOATHAM Manager"
+msgstr "Capture du module stock et produits JOATHAM Manager"
+
+msgid "Capture du tableau de bord JOATHAM Manager"
+msgstr "Capture du tableau de bord JOATHAM Manager"
+
+msgid "Choisir un écran JOATHAM Manager"
+msgstr "Choisir un écran JOATHAM Manager"
+
+msgid "Commencer gratuitement"
+msgstr "Commencer gratuitement"
+
+msgid "Comptabilité"
+msgstr "Comptabilité"
+
+msgid "Comptabilite avancee"
+msgstr "Comptabilite avancee"
+
+msgid "Contact"
+msgstr "Contact"
+
+msgid "Contrôles du carrousel produit"
+msgstr "Contrôles du carrousel produit"
+
+msgid "Conversion proforma"
+msgstr "Conversion proforma"
+
+msgid "Créez votre espace et centralisez progressivement les outils essentiels de votre organisation."
+msgstr "Créez votre espace et centralisez progressivement les outils essentiels de votre organisation."
+
+msgid "Croissance"
+msgstr "Croissance"
+
+msgid "Découvrir les fonctionnalités"
+msgstr "Découvrir les fonctionnalités"
+
+msgid "Démonstration des écrans JOATHAM Manager"
+msgstr "Démonstration des écrans JOATHAM Manager"
+
+msgid "Dépenses"
+msgstr "Dépenses"
+
+msgid "Dépenses / mois"
+msgstr "Dépenses / mois"
+
+msgid "Des plans clairs pour démarrer et évoluer"
+msgstr "Des plans clairs pour démarrer et évoluer"
+
+msgid "Écran précédent"
+msgstr "Écran précédent"
+
+msgid "Écran suivant"
+msgstr "Écran suivant"
+
+msgid "En-tête du site"
+msgstr "En-tête du site"
+
+msgid "Export Excel"
+msgstr "Export Excel"
+
+msgid "Export Excel avance"
+msgstr "Export Excel avance"
+
+msgid "Exports"
+msgstr "Exports"
+
+msgid "Factures / mois"
+msgstr "Factures / mois"
+
+msgid "Factures A4 professionnelles et POS simple"
+msgstr "Factures A4 professionnelles et POS simple"
+
+msgid "Fonctionnalités"
+msgstr "Fonctionnalités"
+
+msgid "Gestion centralisée"
+msgstr "Gestion centralisée"
+
+msgid "Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports."
+msgstr "Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports."
+
+msgid "Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses."
+msgstr "Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses."
+
+msgid "Gestion SaaS"
+msgstr "Gestion SaaS"
+
+msgid "Gratuit"
+msgstr "Gratuit"
+
+msgid "Illimité"
+msgstr "Illimité"
+
+msgid "Illustration professionnelle dans un espace de travail JOATHAM"
+msgstr "Illustration professionnelle dans un espace de travail JOATHAM"
+
+msgid "Illustration professionnelle de l’utilisation de JOATHAM Manager"
+msgstr "Illustration professionnelle de l’utilisation de JOATHAM Manager"
+
+msgid "Inclus"
+msgstr "Inclus"
+
+msgid "Incluse"
+msgstr "Incluse"
+
+msgid "Inventaire"
+msgstr "Inventaire"
+
+msgid "Inventaire physique"
+msgstr "Inventaire physique"
+
+msgid "JOATHAM Manager"
+msgstr "JOATHAM Manager"
+
+msgid "JOATHAM Manager - SaaS de gestion pour entreprises"
+msgstr "JOATHAM Manager - SaaS de gestion pour entreprises"
+
+msgid "JOATHAM Manager aide les entreprises à centraliser facturation, caisse, stock, comptabilité, RH, apprenants et suivi de l’activité."
+msgstr "JOATHAM Manager aide les entreprises à centraliser facturation, caisse, stock, comptabilité, RH, apprenants et suivi de l’activité."
+
+msgid "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et rapports."
+msgstr "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et rapports."
+
+msgid "JOATHAM Manager centralise vos outils essentiels de gestion dans une plateforme claire : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et suivi de l’activité."
+msgstr "JOATHAM Manager centralise vos outils essentiels de gestion dans une plateforme claire : facturation, caisse, stock, comptabilité, ressources humaines, apprenants et suivi de l’activité."
+
+msgid "JOATHAM Manager réunit les modules dont une entreprise a besoin pour suivre ses opérations, ses documents, son stock et son équipe."
+msgstr "JOATHAM Manager réunit les modules dont une entreprise a besoin pour suivre ses opérations, ses documents, son stock et son équipe."
+
+msgid "Jusqu'a 3 utilisateurs et support standard"
+msgstr "Jusqu'a 3 utilisateurs et support standard"
+
+msgid "La plateforme accompagne les équipes qui veulent mieux structurer leurs opérations quotidiennes sans multiplier les outils dispersés."
+msgstr "La plateforme accompagne les équipes qui veulent mieux structurer leurs opérations quotidiennes sans multiplier les outils dispersés."
+
+msgid "Les informations ci-dessous sont reprises depuis la logique officielle des abonnements JOATHAM Manager."
+msgstr "Les informations ci-dessous sont reprises depuis la logique officielle des abonnements JOATHAM Manager."
+
+msgid "Les plans officiels prévoient une gestion adaptée aux équipes."
+msgstr "Les plans officiels prévoient une gestion adaptée aux équipes."
+
+msgid "Les tarifs sont temporairement indisponibles. Vous pouvez tout de même créer un compte gratuitement."
+msgstr "Les tarifs sont temporairement indisponibles. Vous pouvez tout de même créer un compte gratuitement."
+
+msgid "Matadi, RDC"
+msgstr "Matadi, RDC"
+
+msgid "Messagerie"
+msgstr "Messagerie"
+
+msgid "Mobile Money"
+msgstr "Mobile Money"
+
+msgid "mois"
+msgstr "mois"
+
+msgid "Multi-utilisateur"
+msgstr "Multi-utilisateur"
+
+msgid "Navigation principale"
+msgstr "Navigation principale"
+
+msgid "Paiements"
+msgstr "Paiements"
+
+msgid "Pilotez votre entreprise avec"
+msgstr "Pilotez votre entreprise avec"
+
+msgid "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+msgstr "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+
+msgid "Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+msgstr "Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."
+
+msgid "Plan JOATHAM"
+msgstr "Plan JOATHAM"
+
+msgid "Plan JOATHAM Manager pour accompagner la gestion de votre organisation."
+msgstr "Plan JOATHAM Manager pour accompagner la gestion de votre organisation."
+
+msgid "Plateforme SaaS de gestion"
+msgstr "Plateforme SaaS de gestion"
+
+msgid "Plateforme SaaS de gestion pour entreprises."
+msgstr "Plateforme SaaS de gestion pour entreprises."
+
+msgid "Plateforme SaaS pour entreprises"
+msgstr "Plateforme SaaS pour entreprises"
+
+msgid "Plusieurs outils dans une seule plateforme"
+msgstr "Plusieurs outils dans une seule plateforme"
+
+msgid "Populaire"
+msgstr "Populaire"
+
+msgid "POS"
+msgstr "POS"
+
+msgid "POS complet, proformas avancees et conversion en facture"
+msgstr "POS complet, proformas avancees et conversion en facture"
+
+msgid "POS simple"
+msgstr "POS simple"
+
+msgid "Poser une question"
+msgstr "Poser une question"
+
+msgid "Premium Business"
+msgstr "Premium Business"
+
+msgid "Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."
+msgstr "Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."
+
+msgid "Prêt à simplifier la gestion de votre entreprise ?"
+msgstr "Prêt à simplifier la gestion de votre entreprise ?"
+
+msgid "Pro"
+msgstr "Pro"
+
+msgid "Produit"
+msgstr "Produit"
+
+msgid "Produits / services"
+msgstr "Produits / services"
+
+msgid "Produits, services et depenses simples avec quotas limites"
+msgstr "Produits, services et depenses simples avec quotas limites"
+
+msgid "Proformas"
+msgstr "Proformas"
+
+msgid "Proformas / mois"
+msgstr "Proformas / mois"
+
+msgid "Proformas simples, stock simple et personnalisation de base"
+msgstr "Proformas simples, stock simple et personnalisation de base"
+
+msgid "Rapports avances"
+msgstr "Rapports avances"
+
+msgid "Rapports avancés"
+msgstr "Rapports avancés"
+
+msgid "Rapports basiques et support basique"
+msgstr "Rapports basiques et support basique"
+
+msgid "Rapports detailles, roles, permissions et exports PDF/Excel"
+msgstr "Rapports detailles, roles, permissions et exports PDF/Excel"
+
+msgid "Rapports Premium Business avances"
+msgstr "Rapports Premium Business avances"
+
+msgid "Rapports stock"
+msgstr "Rapports stock"
+
+msgid "Repères de confiance"
+msgstr "Repères de confiance"
+
+msgid "Ressources humaines"
+msgstr "Ressources humaines"
+
+msgid "Ressources humaines completes"
+msgstr "Ressources humaines completes"
+
+msgid "Retour en haut"
+msgstr "Retour en haut"
+
+msgid "RH, comptabilite avancee, rapports avances et audit avance"
+msgstr "RH, comptabilite avancee, rapports avances et audit avance"
+
+msgid "Simple à utiliser"
+msgstr "Simple à utiliser"
+
+msgid "simplicité et efficacité"
+msgstr "simplicité et efficacité"
+
+msgid "Solution en ligne"
+msgstr "Solution en ligne"
+
+msgid "Starter"
+msgstr "Starter"
+
+msgid "Stock & inventaire"
+msgstr "Stock & inventaire"
+
+msgid "Stock & Produits"
+msgstr "Stock & Produits"
+
+msgid "Stock simple"
+msgstr "Stock simple"
+
+msgid "Suggestions / support"
+msgstr "Suggestions / support"
+
+msgid "Support JOATHAM"
+msgstr "Support JOATHAM"
+
+msgid "Support prioritaire et accompagnement a la configuration"
+msgstr "Support prioritaire et accompagnement a la configuration"
+
+msgid "Tableau de bord simple, clients et factures A4 simples"
+msgstr "Tableau de bord simple, clients et factures A4 simples"
+
+msgid "Tarifs"
+msgstr "Tarifs"
+
+msgid "Tous droits réservés."
+msgstr "Tous droits réservés."
+
+msgid "Tout Gratuit avec volumes plus confortables"
+msgstr "Tout Gratuit avec volumes plus confortables"
+
+msgid "Tout Pro"
+msgstr "Tout Pro"
+
+msgid "Tout Starter"
+msgstr "Tout Starter"
+
+msgid "Un partenaire fiable pour la croissance de votre entreprise"
+msgstr "Un partenaire fiable pour la croissance de votre entreprise"
+
+msgid "Une équipe joignable pour accompagner les entreprises."
+msgstr "Une équipe joignable pour accompagner les entreprises."
+
+msgid "Une plateforme complète pour gérer toute votre activité"
+msgstr "Une plateforme complète pour gérer toute votre activité"
+
+msgid "Une plateforme SaaS professionnelle pour centraliser les outils essentiels de gestion de votre entreprise."
+msgstr "Une plateforme SaaS professionnelle pour centraliser les outils essentiels de gestion de votre entreprise."
+
+msgid "Une solution en ligne pour centraliser les outils essentiels de gestion des entreprises."
+msgstr "Une solution en ligne pour centraliser les outils essentiels de gestion des entreprises."
+
+msgid "Utilisateurs multiples"
+msgstr "Utilisateurs multiples"
+
+msgid "Validations internes avancees"
+msgstr "Validations internes avancees"
+
+msgid "Validations internes, documents personnalises et plusieurs caisses"
+msgstr "Validations internes, documents personnalises et plusieurs caisses"
+
+msgid "Vos outils de gestion sont regroupés dans une même plateforme."
+msgstr "Vos outils de gestion sont regroupés dans une même plateforme."
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Abonnement"
+msgstr "Abonnement"
+
+msgid "Audit"
+msgstr "Audit"
