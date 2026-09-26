@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from io import StringIO
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
+from django.core.management import call_command
 from django.core.cache import cache
 from django.contrib.sessions.models import Session
 from django.test import Client, TestCase
@@ -11,6 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.models import ActivityLog
+from core.services.language import LANGUAGE_SESSION_KEY
 from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise
 from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
@@ -44,6 +47,29 @@ class PublicHomeTests(TestCase):
         response = self.client.get("/")
 
         self.assertContains(response, reverse("login"))
+        self.assertContains(response, "img/landing/joatham-business-user.png")
+        self.assertContains(response, "img/landing/joatham-founder-workspace.png")
+
+    def test_public_home_contains_pricing_section_and_public_plan_names(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="tarifs"')
+        for expected in ("Gratuit", "Starter", "Pro", "Premium Business"):
+            self.assertContains(response, expected)
+        for expected_price in ("0 USD/mois", "10 USD/mois", "15 USD/mois", "20 USD/mois"):
+            self.assertContains(response, expected_price)
+
+    def test_public_home_displays_seeded_commercial_plans_without_authentication(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.get(reverse("public_home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        plan_names = [str(card["display_name"]) for card in response.context["public_plan_cards"]]
+        self.assertEqual(plan_names, ["Gratuit", "Starter", "Pro", "Premium Business"])
+        self.assertContains(response, "Premium Business")
 
     def test_public_home_contains_question_link_and_login_still_works(self):
         response = self.client.get("/")
@@ -53,24 +79,120 @@ class PublicHomeTests(TestCase):
         self.assertEqual(login_response.status_code, 200)
         self.assertContains(login_response, "JOATHAM Manager")
 
-    def test_public_home_contains_seo_tags_for_joatham_com(self):
+    def test_public_home_contains_seo_tags_for_app_domain(self):
         response = self.client.get("/")
         content = response.content.decode("utf-8").lower()
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "JOATHAM Manager — Plateforme SaaS de gestion pour PME")
+        self.assertContains(response, "JOATHAM Manager - SaaS de gestion pour entreprises")
         self.assertContains(
             response,
-            "JOATHAM Manager est une plateforme web de gestion pour PME, commerces, cybercafés et centres de formation : facturation, clients, dépenses, produits, comptabilité, apprenants et rapports.",
+            "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises",
         )
         self.assertContains(response, '<meta name="robots" content="index,follow">')
-        self.assertContains(response, '<link rel="canonical" href="https://joatham.com/">')
-        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager — Plateforme SaaS de gestion pour PME">')
-        self.assertContains(response, '<meta property="og:url" content="https://joatham.com/">')
+        self.assertContains(response, '<link rel="canonical" href="https://app.joatham.com/">')
+        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager - SaaS de gestion pour entreprises">')
+        self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/">')
         self.assertContains(response, '<meta property="og:type" content="website">')
-        self.assertContains(response, '<meta name="twitter:card" content="summary">')
+        self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">')
+        self.assertContains(response, "https://app.joatham.com/static/img/landing/product/dashboard.png")
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
+
+    def test_public_home_uses_current_product_screenshots(self):
+        response = self.client.get("/")
+
+        current_assets = (
+            "img/landing/product/dashboard.png",
+            "img/landing/product/billing.png",
+            "img/landing/product/cash-pos.png",
+            "img/landing/product/stock-products.png",
+            "img/landing/product/human-resources.png",
+            "img/landing/product/learners.png",
+            "img/landing/product/accounting.png",
+        )
+        legacy_assets = (
+            "img/home/home-hero-dashboard.png",
+            "img/home/home-billing-preview.png",
+            "img/home/home-cash-preview.png",
+            "img/home/home-stock-preview.png",
+            "img/home/home-rh-preview.png",
+        )
+
+        for asset_path in current_assets:
+            self.assertContains(response, asset_path)
+        for asset_path in legacy_assets:
+            self.assertNotContains(response, asset_path)
+        self.assertNotContains(response, "phone-mockup")
+        self.assertContains(response, "data-product-carousel")
+        self.assertContains(response, "joatham_dashboard/js/public_home.js")
+
+    def _switch_public_language(self, language_code):
+        return self.client.post(
+            reverse("set_language"),
+            {"language": language_code, "next": reverse("public_home")},
+            follow=True,
+        )
+
+    def test_public_home_defaults_to_french_content(self):
+        response = self.client.get(reverse("public_home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pilotez votre entreprise avec")
+        self.assertContains(response, "Commencer gratuitement")
+        self.assertContains(response, "Des plans clairs pour démarrer et évoluer")
+        self.assertContains(response, "0 USD/mois")
+        self.assertNotContains(response, "Run your business with")
+
+    def test_public_language_switch_redirects_and_persists_language(self):
+        response = self.client.post(
+            reverse("set_language"),
+            {"language": "en", "next": reverse("public_home")},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("public_home"))
+        self.assertEqual(self.client.session.get(LANGUAGE_SESSION_KEY), "en")
+
+        response = self.client.get(reverse("public_home"))
+        self.assertContains(response, "Run your business with")
+        self.assertContains(response, "Start for free")
+
+    def test_public_home_translates_to_english(self):
+        response = self._switch_public_language("en")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Run your business with")
+        self.assertContains(response, "simplicity and efficiency")
+        self.assertContains(response, "Start for free")
+        self.assertContains(response, "Clear plans to start and grow")
+        self.assertContains(response, "0 USD/month")
+        self.assertContains(response, "Free")
+        self.assertNotContains(response, "Pilotez votre entreprise avec")
+
+    def test_public_home_translates_to_portuguese(self):
+        response = self._switch_public_language("pt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gira a sua empresa com")
+        self.assertContains(response, "simplicidade e eficiência")
+        self.assertContains(response, "Começar gratuitamente")
+        self.assertContains(response, "Planos claros para começar e evoluir")
+        self.assertContains(response, "0 USD/mês")
+        self.assertContains(response, "Gratuito")
+        self.assertNotContains(response, "Run your business with")
+
+    def test_public_home_translates_to_spanish(self):
+        response = self._switch_public_language("es")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gestione su empresa con")
+        self.assertContains(response, "simplicidad y eficiencia")
+        self.assertContains(response, "Comenzar gratis")
+        self.assertContains(response, "Planes claros para empezar y crecer")
+        self.assertContains(response, "0 USD/mes")
+        self.assertContains(response, "Gratis")
+        self.assertNotContains(response, "Run your business with")
 
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")
@@ -189,7 +311,7 @@ class DashboardAccessTests(TestCase):
 
         confirmation_page = second_client.get(reverse("login_session_conflict"))
         self.assertEqual(confirmation_page.status_code, 200)
-        self.assertContains(confirmation_page, "Session deja active")
+        self.assertContains(confirmation_page, "Session déjà active")
         self.assertContains(confirmation_page, "Deconnecter l'ancienne session et continuer")
         self.assertContains(confirmation_page, "csrfmiddlewaretoken")
         self.assertTrue(second_client.session.get("pending_login_session_conflict"))

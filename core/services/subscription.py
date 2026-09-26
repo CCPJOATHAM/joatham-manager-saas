@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement, PlatformSettings
@@ -199,107 +200,107 @@ DEFAULT_PAID_PLANS = [
 ]
 PLAN_FEATURE_SUMMARY = {
     FREE_PLAN_CODE: [
-        "Tableau de bord simple, clients et factures A4 simples",
-        "Produits, services et depenses simples avec quotas limites",
-        "Rapports basiques et support basique",
+        _("Tableau de bord simple, clients et factures A4 simples"),
+        _("Produits, services et depenses simples avec quotas limites"),
+        _("Rapports basiques et support basique"),
     ],
     STARTER_PLAN_CODE: [
-        "Tout Gratuit avec volumes plus confortables",
-        "Factures A4 professionnelles et POS simple",
-        "Proformas simples, stock simple et personnalisation de base",
-        "Jusqu'a 3 utilisateurs et support standard",
+        _("Tout Gratuit avec volumes plus confortables"),
+        _("Factures A4 professionnelles et POS simple"),
+        _("Proformas simples, stock simple et personnalisation de base"),
+        _("Jusqu'a 3 utilisateurs et support standard"),
     ],
     PRO_PLAN_CODE: [
-        "Tout Starter",
-        "POS complet, proformas avancees et conversion en facture",
-        "Caisse, stock complet, apprenants, recus et quittances",
-        "Rapports detailles, roles, permissions et exports PDF/Excel",
+        _("Tout Starter"),
+        _("POS complet, proformas avancees et conversion en facture"),
+        _("Caisse, stock complet, apprenants, recus et quittances"),
+        _("Rapports detailles, roles, permissions et exports PDF/Excel"),
     ],
     PREMIUM_PLAN_CODE: [
-        "Tout Pro",
-        "Acces complet a tous les modules declares",
-        "RH, comptabilite avancee, rapports avances et audit avance",
-        "Validations internes, documents personnalises et plusieurs caisses",
-        "Support prioritaire et accompagnement a la configuration",
+        _("Tout Pro"),
+        _("Acces complet a tous les modules declares"),
+        _("RH, comptabilite avancee, rapports avances et audit avance"),
+        _("Validations internes, documents personnalises et plusieurs caisses"),
+        _("Support prioritaire et accompagnement a la configuration"),
     ],
 }
 PLAN_EXCLUSION_SUMMARY = {
     FREE_PLAN_CODE: [
-        "POS",
-        "Proformas",
-        "Conversion proforma",
-        "Caisse",
-        "Stock & inventaire",
-        "Paiements",
-        "Export Excel",
-        "Apprenants",
-        "Ressources humaines",
-        "Comptabilite avancee",
-        "Rapports avances",
-        "Audit avance",
-        "Utilisateurs multiples",
+        _("POS"),
+        _("Proformas"),
+        _("Conversion proforma"),
+        _("Caisse"),
+        _("Stock & inventaire"),
+        _("Paiements"),
+        _("Export Excel"),
+        _("Apprenants"),
+        _("Ressources humaines"),
+        _("Comptabilite avancee"),
+        _("Rapports avances"),
+        _("Audit avance"),
+        _("Utilisateurs multiples"),
     ],
     STARTER_PLAN_CODE: [
-        "Caisse complete",
-        "Inventaire physique",
-        "Conversion proforma",
-        "Export Excel avance",
-        "Apprenants",
-        "Ressources humaines",
-        "Comptabilite avancee",
-        "Rapports avances",
-        "Audit avance",
+        _("Caisse complete"),
+        _("Inventaire physique"),
+        _("Conversion proforma"),
+        _("Export Excel avance"),
+        _("Apprenants"),
+        _("Ressources humaines"),
+        _("Comptabilite avancee"),
+        _("Rapports avances"),
+        _("Audit avance"),
     ],
     PRO_PLAN_CODE: [
-        "Ressources humaines completes",
-        "Rapports Premium Business avances",
-        "Audit avance complet",
-        "Validations internes avancees",
-        "Messagerie",
-        "Mobile Money",
+        _("Ressources humaines completes"),
+        _("Rapports Premium Business avances"),
+        _("Audit avance complet"),
+        _("Validations internes avancees"),
+        _("Messagerie"),
+        _("Mobile Money"),
     ],
     PREMIUM_PLAN_CODE: [],
 }
 PLAN_COMMERCIAL_DESCRIPTIONS = {
-    FREE_PLAN_CODE: "Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
-    STARTER_PLAN_CODE: "Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses.",
-    PRO_PLAN_CODE: "Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports.",
-    PREMIUM_PLAN_CODE: "Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire.",
+    FREE_PLAN_CODE: _("Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
+    STARTER_PLAN_CODE: _("Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses."),
+    PRO_PLAN_CODE: _("Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports."),
+    PREMIUM_PLAN_CODE: _("Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."),
 }
 PLAN_COMMERCIAL_NAMES = {
-    FREE_PLAN_CODE: "Gratuit",
-    STARTER_PLAN_CODE: "Starter",
-    PRO_PLAN_CODE: "Pro",
-    PREMIUM_PLAN_CODE: "Premium Business",
+    FREE_PLAN_CODE: _("Gratuit"),
+    STARTER_PLAN_CODE: _("Starter"),
+    PRO_PLAN_CODE: _("Pro"),
+    PREMIUM_PLAN_CODE: _("Premium Business"),
 }
 PLAN_MODULE_DISPLAY_GROUPS = [
-    ("dashboard", "Tableau de bord", {"dashboard"}),
-    ("clients", "Clients", {"clients"}),
-    ("services", "Services", {"services"}),
-    ("billing", "Facturation", {"billing", "factures"}),
-    ("billing_pos", "POS simple", {"billing_pos", "pos_simple"}),
-    ("proformas", "Proformas", {"proformas"}),
-    ("proforma_conversion", "Conversion proforma", {"proforma_conversion"}),
-    ("subscription", "Abonnement", {"subscription", "abonnements"}),
-    ("suggestions", "Suggestions / support", {"suggestions", "support"}),
-    ("expenses", "Dépenses", {"expenses", "depenses"}),
-    ("products", "Produits", {"products", "produits"}),
-    ("caisse", "Caisse", {"caisse", "caisse_reports", "caisse_exports", "caisse_integrations", "caisse_validation"}),
-    ("stock", "Stock simple", {"stock"}),
-    ("stock_reports", "Rapports stock", {"stock_reports", "stock_exports"}),
-    ("inventory", "Inventaire", {"inventory", "inventaire"}),
+    ("dashboard", _("Tableau de bord"), {"dashboard"}),
+    ("clients", _("Clients"), {"clients"}),
+    ("services", _("Services"), {"services"}),
+    ("billing", _("Facturation"), {"billing", "factures"}),
+    ("billing_pos", _("POS simple"), {"billing_pos", "pos_simple"}),
+    ("proformas", _("Proformas"), {"proformas"}),
+    ("proforma_conversion", _("Conversion proforma"), {"proforma_conversion"}),
+    ("subscription", _("Abonnement"), {"subscription", "abonnements"}),
+    ("suggestions", _("Suggestions / support"), {"suggestions", "support"}),
+    ("expenses", _("Dépenses"), {"expenses", "depenses"}),
+    ("products", _("Produits"), {"products", "produits"}),
+    ("caisse", _("Caisse"), {"caisse", "caisse_reports", "caisse_exports", "caisse_integrations", "caisse_validation"}),
+    ("stock", _("Stock simple"), {"stock"}),
+    ("stock_reports", _("Rapports stock"), {"stock_reports", "stock_exports"}),
+    ("inventory", _("Inventaire"), {"inventory", "inventaire"}),
     (
         "payments",
-        "Paiements",
+        _("Paiements"),
         {"payments", "paiements", "payment_validation", "payments_reports", "payments_exports", "mobile_money"},
     ),
-    ("accounting", "Comptabilité", {"accounting", "comptabilite", "accounting_reports", "accounting_exports"}),
-    ("apprenants", "Apprenants", {"apprenants"}),
-    ("users", "Utilisateurs", {"users", "utilisateurs"}),
-    ("audit", "Audit", {"audit", "audit_advanced"}),
-    ("advanced_reports", "Rapports avancés", {"advanced_reports", "advanced_reports_exports", "business_dashboard"}),
-    ("messages", "Messagerie", {"messages"}),
-    ("rh", "Ressources humaines", {"rh", "hr", "ressources_humaines", "human_resources"}),
+    ("accounting", _("Comptabilité"), {"accounting", "comptabilite", "accounting_reports", "accounting_exports"}),
+    ("apprenants", _("Apprenants"), {"apprenants"}),
+    ("users", _("Utilisateurs"), {"users", "utilisateurs"}),
+    ("audit", _("Audit"), {"audit", "audit_advanced"}),
+    ("advanced_reports", _("Rapports avancés"), {"advanced_reports", "advanced_reports_exports", "business_dashboard"}),
+    ("messages", _("Messagerie"), {"messages"}),
+    ("rh", _("Ressources humaines"), {"rh", "hr", "ressources_humaines", "human_resources"}),
 ]
 PLAN_MODULE_DISPLAY_ALIAS_TO_GROUP = {
     alias: group_key
@@ -359,12 +360,12 @@ def get_plan_feature_summary(plan):
 def get_plan_commercial_description(plan):
     return PLAN_COMMERCIAL_DESCRIPTIONS.get(
         normalize_plan_code(plan),
-        getattr(plan, "description", "") or "Plan JOATHAM Manager pour accompagner la gestion de votre organisation.",
+        getattr(plan, "description", "") or _("Plan JOATHAM Manager pour accompagner la gestion de votre organisation."),
     )
 
 
 def get_plan_commercial_name(plan):
-    return PLAN_COMMERCIAL_NAMES.get(normalize_plan_code(plan), getattr(plan, "nom", "") or "Plan JOATHAM")
+    return PLAN_COMMERCIAL_NAMES.get(normalize_plan_code(plan), getattr(plan, "nom", "") or _("Plan JOATHAM"))
 
 
 def get_plan_exclusion_summary(plan):
@@ -401,7 +402,7 @@ def get_plan_display_modules(plan):
 
 
 def _format_plan_limit(value):
-    return "Illimité" if value is None else str(value)
+    return _("Illimité") if value is None else str(value)
 
 
 def get_plan_limit_summary(plan):
@@ -413,19 +414,19 @@ def get_plan_limit_summary(plan):
         else getattr(plan, "max_apprenants", None)
     )
     rows = [
-        {"label": "Utilisateurs", "value": _format_plan_limit(getattr(plan, "max_utilisateurs", None))},
-        {"label": "Factures / mois", "value": _format_plan_limit(getattr(plan, "max_factures_mois", None))},
-        {"label": "Clients", "value": _format_plan_limit(getattr(plan, "max_clients", None))},
-        {"label": "Produits / services", "value": _format_plan_limit(quota_profile.get("max_produits"))},
-        {"label": "Dépenses / mois", "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))},
-        {"label": "Proformas / mois", "value": _format_plan_limit(quota_profile.get("max_proformas_mois"))},
-        {"label": "Caisses actives", "value": _format_plan_limit(quota_profile.get("max_caisses"))},
-        {"label": "Apprenants", "value": _format_plan_limit(apprenant_limit)},
+        {"label": _("Utilisateurs"), "value": _format_plan_limit(getattr(plan, "max_utilisateurs", None))},
+        {"label": _("Factures / mois"), "value": _format_plan_limit(getattr(plan, "max_factures_mois", None))},
+        {"label": _("Clients"), "value": _format_plan_limit(getattr(plan, "max_clients", None))},
+        {"label": _("Produits / services"), "value": _format_plan_limit(quota_profile.get("max_produits"))},
+        {"label": _("Dépenses / mois"), "value": _format_plan_limit(quota_profile.get("max_depenses_mois"))},
+        {"label": _("Proformas / mois"), "value": _format_plan_limit(quota_profile.get("max_proformas_mois"))},
+        {"label": _("Caisses actives"), "value": _format_plan_limit(quota_profile.get("max_caisses"))},
+        {"label": _("Apprenants"), "value": _format_plan_limit(apprenant_limit)},
     ]
     if getattr(plan, "acces_exports", False):
-        rows.append({"label": "Exports", "value": "Inclus"})
+        rows.append({"label": _("Exports"), "value": _("Inclus")})
     if "accounting" in group_keys and getattr(plan, "acces_comptabilite", False):
-        rows.append({"label": "Comptabilité", "value": "Incluse"})
+        rows.append({"label": _("Comptabilité"), "value": _("Incluse")})
     return rows
 
 
