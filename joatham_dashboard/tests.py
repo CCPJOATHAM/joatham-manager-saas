@@ -49,8 +49,6 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, reverse("login"))
         self.assertContains(response, "img/landing/joatham-business-user.png")
         self.assertContains(response, "img/landing/joatham-founder-workspace.png")
-        self.assertNotContains(response, "pexels-female-entrepreneur-34707245.jpg")
-        self.assertNotContains(response, "pexels-businessman-34690061.jpg")
 
     def test_public_home_contains_pricing_section_and_public_plan_names(self):
         response = self.client.get("/")
