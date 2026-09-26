@@ -21,6 +21,7 @@
     <meta name="theme-color" content="#0f4f8a">
     <link rel="preload" href="{% static 'img/landing/product/dashboard.png' %}" as="image" fetchpriority="high">
     <link rel="stylesheet" href="{% static 'joatham_dashboard/css/public_home.css' %}">
+    <script src="{% static 'joatham_dashboard/js/public_home.js' %}" defer></script>
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -95,14 +96,8 @@
                 </div>
 
                 <div class="hero-visual" aria-label="{% trans 'Aperçu de JOATHAM Manager' %}">
-                    <figure class="browser-mockup browser-mockup-hero">
-                        <div class="browser-bar" aria-hidden="true">
-                            <span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span>
-                            <span class="browser-address">app.joatham.com</span>
-                        </div>
-                        <div class="browser-screen">
-                            <img src="{% static 'img/landing/product/dashboard.png' %}" width="1344" height="624" alt="{% trans 'Capture du tableau de bord JOATHAM Manager' %}" decoding="async" fetchpriority="high">
-                        </div>
+                    <figure class="hero-product-frame">
+                        <img src="{% static 'img/landing/product/dashboard.png' %}" width="1344" height="624" alt="{% trans 'Capture du tableau de bord JOATHAM Manager' %}" decoding="async" fetchpriority="high">
                     </figure>
                 </div>
             </div>
@@ -137,31 +132,51 @@
                     <p>{% trans "JOATHAM Manager réunit les modules dont une entreprise a besoin pour suivre ses opérations, ses documents, son stock et son équipe." %}</p>
                 </div>
 
-                <div class="module-grid">
-                    <article class="module-card module-card-wide">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/billing.png' %}" width="1020" height="520" alt="{% trans 'Capture du module de facturation JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Facturation" %}</span><p>{% trans "Créez et suivez vos factures avec une présentation claire et professionnelle." %}</p></div>
-                    </article>
-                    <article class="module-card">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/cash-pos.png' %}" width="1076" height="564" alt="{% trans 'Capture du module caisse et POS JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Caisse / POS" %}</span><p>{% trans "Suivez les sessions, mouvements et opérations de caisse." %}</p></div>
-                    </article>
-                    <article class="module-card">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/stock-products.png' %}" width="1114" height="610" alt="{% trans 'Capture du module stock et produits JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Stock & Produits" %}</span><p>{% trans "Gardez une vue structurée sur vos produits, services et mouvements." %}</p></div>
-                    </article>
-                    <article class="module-card">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/accounting.png' %}" width="1064" height="590" alt="{% trans 'Capture du module comptabilité JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Comptabilité" %}</span><p>{% trans "Organisez les données utiles au suivi financier interne de votre entreprise." %}</p></div>
-                    </article>
-                    <article class="module-card">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/human-resources.png' %}" width="1330" height="426" alt="{% trans 'Capture du module ressources humaines JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Ressources humaines" %}</span><p>{% trans "Structurez les présences, congés, employés et documents RH." %}</p></div>
-                    </article>
-                    <article class="module-card">
-                        <div class="module-media"><div class="module-browser-bar" aria-hidden="true"><span class="window-dot dot-red"></span><span class="window-dot dot-yellow"></span><span class="window-dot dot-green"></span></div><div class="module-screen"><img src="{% static 'img/landing/product/learners.png' %}" width="1082" height="566" alt="{% trans 'Capture du module apprenants JOATHAM Manager' %}" loading="lazy" decoding="async"></div></div>
-                        <div class="module-copy"><span>{% trans "Apprenants" %}</span><p>{% trans "Suivez les inscriptions et informations liées aux activités de formation." %}</p></div>
-                    </article>
+                <div class="product-carousel" data-product-carousel aria-roledescription="carousel" aria-label="{% trans 'Démonstration des écrans JOATHAM Manager' %}">
+                    <div class="carousel-stage">
+                        <figure class="carousel-slide is-active" data-carousel-slide aria-hidden="false">
+                            <img src="{% static 'img/landing/product/dashboard.png' %}" width="1344" height="624" alt="{% trans 'Capture du tableau de bord JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Tableau de bord" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/billing.png' %}" width="1020" height="520" alt="{% trans 'Capture du module de facturation JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Facturation" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/cash-pos.png' %}" width="1076" height="564" alt="{% trans 'Capture du module caisse et POS JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Caisse / POS" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/stock-products.png' %}" width="1114" height="610" alt="{% trans 'Capture du module stock et produits JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Stock & Produits" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/human-resources.png' %}" width="1330" height="426" alt="{% trans 'Capture du module ressources humaines JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Ressources humaines" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/learners.png' %}" width="1082" height="566" alt="{% trans 'Capture du module apprenants JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Apprenants" %}</figcaption>
+                        </figure>
+                        <figure class="carousel-slide" data-carousel-slide aria-hidden="true">
+                            <img src="{% static 'img/landing/product/accounting.png' %}" width="1064" height="590" alt="{% trans 'Capture du module comptabilité JOATHAM Manager' %}" loading="lazy" decoding="async">
+                            <figcaption>{% trans "Comptabilité" %}</figcaption>
+                        </figure>
+                    </div>
+                    <div class="carousel-toolbar" aria-label="{% trans 'Contrôles du carrousel produit' %}">
+                        <button class="carousel-arrow" type="button" data-carousel-prev aria-label="{% trans 'Écran précédent' %}">‹</button>
+                        <p class="carousel-title" data-carousel-title aria-live="polite">{% trans "Tableau de bord" %}</p>
+                        <button class="carousel-arrow" type="button" data-carousel-next aria-label="{% trans 'Écran suivant' %}">›</button>
+                    </div>
+                    <div class="carousel-dots" role="tablist" aria-label="{% trans 'Choisir un écran JOATHAM Manager' %}">
+                        <button class="is-active" type="button" data-carousel-dot aria-label="{% trans 'Afficher Tableau de bord' %}" aria-selected="true">{% trans "Tableau de bord" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Facturation' %}" aria-selected="false">{% trans "Facturation" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Caisse / POS' %}" aria-selected="false">{% trans "Caisse / POS" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Stock & Produits' %}" aria-selected="false">{% trans "Stock & Produits" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Ressources humaines' %}" aria-selected="false">{% trans "Ressources humaines" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Apprenants' %}" aria-selected="false">{% trans "Apprenants" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Comptabilité' %}" aria-selected="false">{% trans "Comptabilité" %}</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -169,7 +184,7 @@
         <section id="apropos" class="section-block growth-section">
             <div class="landing-container growth-grid">
                 <figure class="photo-panel">
-                    <img src="{% static 'img/landing/pexels-female-entrepreneur-34707245.jpg' %}" width="1100" height="1375" alt="{% trans 'Photo illustrative d’une entrepreneure dans un bureau moderne' %}" loading="lazy" decoding="async">
+                    <img src="{% static 'img/landing/joatham-business-user.png' %}" width="1536" height="1024" alt="{% trans 'Illustration professionnelle de l’utilisation de JOATHAM Manager' %}" loading="lazy" decoding="async">
                     <figcaption>{% trans "Photo d’illustration" %}</figcaption>
                 </figure>
                 <div class="growth-copy">
@@ -243,7 +258,7 @@
                     <a class="btn btn-light" href="{% url 'signup' %}">{% trans "Commencer gratuitement" %}</a>
                 </div>
                 <figure class="final-photo">
-                    <img src="{% static 'img/landing/pexels-businessman-34690061.jpg' %}" width="1200" height="1798" alt="{% trans 'Photo illustrative d’un professionnel travaillant dans un bureau' %}" loading="lazy" decoding="async">
+                    <img src="{% static 'img/landing/joatham-founder-workspace.png' %}" width="1669" height="942" alt="{% trans 'Illustration professionnelle dans un espace de travail JOATHAM' %}" loading="lazy" decoding="async">
                     <figcaption>{% trans "Photo d’illustration" %}</figcaption>
                 </figure>
             </div>

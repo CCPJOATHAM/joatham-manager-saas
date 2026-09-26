@@ -46,6 +46,10 @@ class PublicHomeTests(TestCase):
         response = self.client.get("/")
 
         self.assertContains(response, reverse("login"))
+        self.assertContains(response, "img/landing/joatham-business-user.png")
+        self.assertContains(response, "img/landing/joatham-founder-workspace.png")
+        self.assertNotContains(response, "pexels-female-entrepreneur-34707245.jpg")
+        self.assertNotContains(response, "pexels-businessman-34690061.jpg")
 
     def test_public_home_contains_pricing_section_and_public_plan_names(self):
         response = self.client.get("/")
@@ -121,6 +125,8 @@ class PublicHomeTests(TestCase):
         for asset_path in legacy_assets:
             self.assertNotContains(response, asset_path)
         self.assertNotContains(response, "phone-mockup")
+        self.assertContains(response, "data-product-carousel")
+        self.assertContains(response, "joatham_dashboard/js/public_home.js")
 
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")
