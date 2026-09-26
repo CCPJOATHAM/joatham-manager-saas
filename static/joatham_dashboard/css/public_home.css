@@ -90,8 +90,9 @@ a {
     top: 0;
     z-index: 50;
     min-height: var(--header-height);
-    border-bottom: 1px solid rgba(219, 231, 243, 0.82);
-    background: rgba(255, 255, 255, 0.93);
+    border-bottom: 1px solid rgba(118, 182, 238, 0.18);
+    background: linear-gradient(180deg, rgba(7, 24, 39, 0.98) 0%, rgba(8, 31, 55, 0.97) 100%);
+    box-shadow: 0 14px 36px rgba(5, 18, 32, 0.18);
     backdrop-filter: blur(14px);
 }
 
@@ -132,6 +133,18 @@ a {
     font-weight: 800;
 }
 
+.site-header .brand {
+    color: #f8fbff;
+}
+
+.site-header .brand span {
+    border-left-color: #42a5f5;
+}
+
+.site-header .brand small {
+    color: rgba(219, 234, 254, 0.72);
+}
+
 .main-nav,
 .header-actions,
 .hero-actions {
@@ -156,6 +169,18 @@ a {
 
 .main-nav a:hover {
     color: var(--blue-700);
+}
+
+.site-header .main-nav a {
+    border-radius: var(--radius);
+    color: rgba(236, 246, 255, 0.86);
+    transition: color 0.18s ease, background 0.18s ease;
+}
+
+.site-header .main-nav a:hover,
+.site-header .main-nav a:focus-visible {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .header-actions {
@@ -207,6 +232,31 @@ a {
     cursor: pointer;
 }
 
+.site-header .language-select,
+.site-header .language-submit {
+    border-color: rgba(185, 213, 240, 0.28);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fbff;
+}
+
+.site-header .language-select option {
+    background: #fff;
+    color: var(--blue-900);
+}
+
+.site-header .language-submit {
+    border-color: rgba(185, 213, 240, 0.22);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(248, 251, 255, 0.88);
+}
+
+.site-header .language-submit:hover,
+.site-header .language-submit:focus-visible {
+    border-color: rgba(185, 213, 240, 0.42);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -240,6 +290,31 @@ a {
     border-color: var(--line);
     background: #fff;
     color: var(--blue-900);
+}
+
+.site-header .btn-ghost {
+    border-color: rgba(185, 213, 240, 0.34);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fbff;
+}
+
+.site-header .btn-ghost:hover,
+.site-header .btn-ghost:focus-visible {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 24px rgba(5, 18, 32, 0.16);
+}
+
+.site-header .btn-primary {
+    background: #238be6;
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(35, 139, 230, 0.32);
+}
+
+.site-header .btn-primary:hover,
+.site-header .btn-primary:focus-visible {
+    background: #42a5f5;
+    box-shadow: 0 14px 32px rgba(66, 165, 245, 0.34);
 }
 
 .btn-outline {
