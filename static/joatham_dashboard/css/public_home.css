@@ -351,11 +351,10 @@ h1 span {
 .hero-visual {
     position: relative;
     min-width: 0;
-    padding: 20px 0 44px;
+    padding: 20px 0;
 }
 
 .browser-mockup,
-.phone-mockup,
 .photo-panel,
 .final-photo {
     margin: 0;
@@ -391,31 +390,14 @@ h1 span {
 .browser-bar span:nth-child(3) { background: #22a06b; }
 
 .browser-mockup img {
+    display: block;
     width: 100%;
-    min-height: 430px;
-    object-fit: cover;
+    aspect-ratio: 1344 / 624;
+    object-fit: contain;
     object-position: left top;
+    background: #f8fbff;
 }
 
-.phone-mockup {
-    position: absolute;
-    right: 22px;
-    bottom: 0;
-    width: min(190px, 34%);
-    overflow: hidden;
-    border: 8px solid var(--blue-900);
-    border-radius: 22px;
-    background: var(--blue-900);
-    box-shadow: 0 22px 48px rgba(16, 35, 63, 0.22);
-}
-
-.phone-mockup img {
-    width: 100%;
-    aspect-ratio: 9 / 16;
-    object-fit: cover;
-    object-position: left top;
-    border-radius: 12px;
-}
 
 .trust-section {
     padding: 24px 0;
@@ -503,9 +485,10 @@ h1 span {
 .module-card img {
     width: 100%;
     aspect-ratio: 16 / 10;
-    object-fit: cover;
+    object-fit: contain;
     object-position: left top;
     border-bottom: 1px solid var(--soft-line);
+    background: #f8fbff;
 }
 
 .module-card div:last-child {
@@ -969,17 +952,6 @@ h1 span {
         grid-column: auto;
     }
 
-    .browser-mockup img {
-        min-height: 300px;
-    }
-
-    .phone-mockup {
-        position: relative;
-        right: auto;
-        bottom: auto;
-        width: min(230px, 70%);
-        margin: -32px auto 0;
-    }
 
     .section-block {
         padding: 68px 0;

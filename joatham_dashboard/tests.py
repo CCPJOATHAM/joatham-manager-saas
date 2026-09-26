@@ -92,8 +92,35 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/">')
         self.assertContains(response, '<meta property="og:type" content="website">')
         self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">')
+        self.assertContains(response, "https://app.joatham.com/static/img/landing/product/dashboard.png")
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
+
+    def test_public_home_uses_current_product_screenshots(self):
+        response = self.client.get("/")
+
+        current_assets = (
+            "img/landing/product/dashboard.png",
+            "img/landing/product/billing.png",
+            "img/landing/product/cash-pos.png",
+            "img/landing/product/stock-products.png",
+            "img/landing/product/human-resources.png",
+            "img/landing/product/learners.png",
+            "img/landing/product/accounting.png",
+        )
+        legacy_assets = (
+            "img/home/home-hero-dashboard.png",
+            "img/home/home-billing-preview.png",
+            "img/home/home-cash-preview.png",
+            "img/home/home-stock-preview.png",
+            "img/home/home-rh-preview.png",
+        )
+
+        for asset_path in current_assets:
+            self.assertContains(response, asset_path)
+        for asset_path in legacy_assets:
+            self.assertNotContains(response, asset_path)
+        self.assertNotContains(response, "phone-mockup")
 
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")

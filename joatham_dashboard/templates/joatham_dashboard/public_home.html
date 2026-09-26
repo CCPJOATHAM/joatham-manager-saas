@@ -14,12 +14,12 @@
     <meta property="og:url" content="https://app.joatham.com/">
     <meta property="og:title" content="JOATHAM Manager - SaaS de gestion pour entreprises">
     <meta property="og:description" content="JOATHAM Manager aide les entreprises à centraliser facturation, caisse, stock, comptabilité, RH, apprenants et suivi de l'activité.">
-    <meta property="og:image" content="https://app.joatham.com/static/img/home/home-hero-dashboard.png">
+    <meta property="og:image" content="https://app.joatham.com/static/img/landing/product/dashboard.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="JOATHAM Manager - SaaS de gestion pour entreprises">
     <meta name="twitter:description" content="Une plateforme SaaS professionnelle pour centraliser les outils essentiels de gestion de votre entreprise.">
     <meta name="theme-color" content="#0f4f8a">
-    <link rel="preload" href="{% static 'img/home/home-hero-dashboard.png' %}" as="image" fetchpriority="high">
+    <link rel="preload" href="{% static 'img/landing/product/dashboard.png' %}" as="image" fetchpriority="high">
     <link rel="stylesheet" href="{% static 'joatham_dashboard/css/public_home.css' %}">
     <script type="application/ld+json">
         {
@@ -97,10 +97,7 @@
                 <div class="hero-visual" aria-label="{% trans 'Aperçu de JOATHAM Manager' %}">
                     <figure class="browser-mockup">
                         <div class="browser-bar" aria-hidden="true"><span></span><span></span><span></span></div>
-                        <img src="{% static 'img/home/home-hero-dashboard.png' %}" width="1120" height="680" alt="{% trans 'Capture du tableau de bord JOATHAM Manager' %}" decoding="async" fetchpriority="high">
-                    </figure>
-                    <figure class="phone-mockup" aria-label="{% trans 'Aperçu mobile de JOATHAM Manager' %}">
-                        <img src="{% static 'img/home/home-hero-dashboard.png' %}" width="420" height="620" alt="{% trans 'Même tableau de bord JOATHAM Manager présenté dans un format mobile' %}" decoding="async">
+                        <img src="{% static 'img/landing/product/dashboard.png' %}" width="1344" height="624" alt="{% trans 'Capture du tableau de bord JOATHAM Manager' %}" decoding="async" fetchpriority="high">
                     </figure>
                 </div>
             </div>
@@ -137,27 +134,27 @@
 
                 <div class="module-grid">
                     <article class="module-card module-card-wide">
-                        <img src="{% static 'img/home/home-billing-preview.png' %}" width="900" height="560" alt="{% trans 'Capture du module de facturation JOATHAM Manager' %}" loading="lazy" decoding="async">
+                        <img src="{% static 'img/landing/product/billing.png' %}" width="1020" height="520" alt="{% trans 'Capture du module de facturation JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Facturation" %}</span><p>{% trans "Créez et suivez vos factures avec une présentation claire et professionnelle." %}</p></div>
                     </article>
                     <article class="module-card">
-                        <img src="{% static 'img/home/home-cash-preview.png' %}" width="900" height="560" alt="{% trans 'Capture du module caisse et POS JOATHAM Manager' %}" loading="lazy" decoding="async">
+                        <img src="{% static 'img/landing/product/cash-pos.png' %}" width="1076" height="564" alt="{% trans 'Capture du module caisse et POS JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Caisse / POS" %}</span><p>{% trans "Suivez les sessions, mouvements et opérations de caisse." %}</p></div>
                     </article>
                     <article class="module-card">
-                        <img src="{% static 'img/home/home-stock-preview.png' %}" width="900" height="560" alt="{% trans 'Capture du module stock et produits JOATHAM Manager' %}" loading="lazy" decoding="async">
+                        <img src="{% static 'img/landing/product/stock-products.png' %}" width="1114" height="610" alt="{% trans 'Capture du module stock et produits JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Stock & Produits" %}</span><p>{% trans "Gardez une vue structurée sur vos produits, services et mouvements." %}</p></div>
                     </article>
-                    <article class="module-card visual-only">
-                        <div class="module-illustration" aria-hidden="true">CO</div>
+                    <article class="module-card">
+                        <img src="{% static 'img/landing/product/accounting.png' %}" width="1064" height="590" alt="{% trans 'Capture du module comptabilité JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Comptabilité" %}</span><p>{% trans "Organisez les données utiles au suivi financier interne de votre entreprise." %}</p></div>
                     </article>
                     <article class="module-card">
-                        <img src="{% static 'img/home/home-rh-preview.png' %}" width="900" height="560" alt="{% trans 'Capture du module ressources humaines JOATHAM Manager' %}" loading="lazy" decoding="async">
+                        <img src="{% static 'img/landing/product/human-resources.png' %}" width="1330" height="426" alt="{% trans 'Capture du module ressources humaines JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Ressources humaines" %}</span><p>{% trans "Structurez les présences, congés, employés et documents RH." %}</p></div>
                     </article>
-                    <article class="module-card visual-only">
-                        <div class="module-illustration" aria-hidden="true">AP</div>
+                    <article class="module-card">
+                        <img src="{% static 'img/landing/product/learners.png' %}" width="1082" height="566" alt="{% trans 'Capture du module apprenants JOATHAM Manager' %}" loading="lazy" decoding="async">
                         <div><span>{% trans "Apprenants" %}</span><p>{% trans "Suivez les inscriptions et informations liées aux activités de formation." %}</p></div>
                     </article>
                 </div>
