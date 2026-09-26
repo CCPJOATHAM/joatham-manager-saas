@@ -361,43 +361,65 @@ h1 span {
 }
 
 .browser-mockup {
+    position: relative;
     overflow: hidden;
-    border: 1px solid #cbdced;
+    padding: 12px;
+    border: 1px solid rgba(203, 220, 237, 0.92);
     border-radius: var(--radius-lg);
-    background: #fff;
-    box-shadow: 0 26px 64px rgba(16, 35, 63, 0.18);
+    background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    box-shadow: 0 30px 70px rgba(16, 35, 63, 0.18), 0 1px 0 rgba(255, 255, 255, 0.92) inset;
+}
+
+.browser-mockup-hero {
+    max-width: min(100%, 940px);
+    margin-left: auto;
 }
 
 .browser-bar {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     min-height: 42px;
-    padding: 0 15px;
-    border-bottom: 1px solid var(--soft-line);
-    background: #f8fafc;
+    padding: 0 2px 12px;
 }
 
-.browser-bar span {
+.window-dot {
+    flex: 0 0 auto;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #94a3b8;
 }
 
-.browser-bar span:nth-child(1) { background: #ef7070; }
-.browser-bar span:nth-child(2) { background: #eab308; }
-.browser-bar span:nth-child(3) { background: #22a06b; }
+.dot-red { background: #ef7070; }
+.dot-yellow { background: #eab308; }
+.dot-green { background: #22a06b; }
 
-.browser-mockup img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1344 / 624;
-    object-fit: contain;
-    object-position: left top;
+.browser-address {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--soft-line);
+    border-radius: 999px;
+    color: #64748b;
+    background: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.browser-screen {
+    overflow: hidden;
+    border: 1px solid var(--soft-line);
+    border-radius: var(--radius);
     background: #f8fbff;
 }
 
+.browser-screen img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
 
 .trust-section {
     padding: 24px 0;
@@ -464,34 +486,68 @@ h1 span {
 
 .module-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
 }
 
 .module-card {
     display: grid;
+    grid-template-rows: auto 1fr;
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: #fff;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 16px 34px rgba(16, 35, 63, 0.09);
 }
 
 .module-card-wide {
-    grid-column: span 2;
+    grid-column: auto;
 }
 
-.module-card img {
+.module-media {
+    padding: 10px;
+    border-bottom: 1px solid var(--soft-line);
+    background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+}
+
+.module-browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 0 9px;
+    border: 1px solid var(--soft-line);
+    border-bottom: 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: #ffffff;
+}
+
+.module-browser-bar .window-dot {
+    width: 7px;
+    height: 7px;
+}
+
+.module-screen {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 280px;
+    overflow: hidden;
+    border: 1px solid var(--soft-line);
+    border-radius: 0 0 var(--radius) var(--radius);
+    background: #ffffff;
+}
+
+.module-screen img {
+    display: block;
     width: 100%;
-    aspect-ratio: 16 / 10;
+    height: auto;
     object-fit: contain;
     object-position: left top;
-    border-bottom: 1px solid var(--soft-line);
-    background: #f8fbff;
 }
 
-.module-card div:last-child {
+.module-copy {
     padding: 18px;
 }
 
@@ -507,27 +563,6 @@ h1 span {
     color: var(--muted);
     font-size: 0.94rem;
 }
-
-.visual-only {
-    align-content: stretch;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-}
-
-.module-illustration {
-    display: grid;
-    min-height: 190px;
-    place-items: center;
-    border-bottom: 1px solid var(--soft-line);
-    color: var(--blue-700);
-    background:
-        linear-gradient(90deg, rgba(219, 231, 243, 0.72) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(219, 231, 243, 0.72) 1px, transparent 1px),
-        #f8fbff;
-    background-size: 28px 28px;
-    font-size: 2.4rem;
-    font-weight: 950;
-}
-
 .growth-section {
     background: var(--surface-soft);
 }
@@ -981,7 +1016,7 @@ h1 span {
     }
 
     .price-card,
-    .module-card div:last-child,
+    .module-copy,
     .trust-grid article {
         padding: 16px;
     }
