@@ -107,23 +107,17 @@ a {
 .brand {
     display: inline-flex;
     align-items: center;
-    gap: 11px;
     min-width: max-content;
     color: var(--blue-900);
     text-decoration: none;
 }
 
-.brand img {
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius);
-    object-fit: cover;
-    box-shadow: 0 8px 18px rgba(15, 79, 138, 0.15);
-}
 
 .brand span {
     display: grid;
     gap: 1px;
+    padding-left: 12px;
+    border-left: 3px solid var(--blue-600);
 }
 
 .brand strong {
@@ -817,8 +811,8 @@ h1 span {
     color: #fff;
 }
 
-.site-footer .brand img {
-    box-shadow: none;
+.site-footer .brand span {
+    border-left-color: rgba(255, 255, 255, 0.65);
 }
 
 .footer-brand p {
