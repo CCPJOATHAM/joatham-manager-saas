@@ -94,6 +94,7 @@ class PaiementAbonnement(models.Model):
     amount_expected = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     amount_paid = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     paid_currency = models.CharField(max_length=10, blank=True, default="")
+    provider_notify_token = models.CharField(max_length=255, null=True, blank=True)
     raw_provider_payload = models.JSONField(default=dict, blank=True)
     last_webhook_event_id = models.CharField(max_length=180, blank=True, default="", db_index=True)
     paid_at = models.DateTimeField(null=True, blank=True)

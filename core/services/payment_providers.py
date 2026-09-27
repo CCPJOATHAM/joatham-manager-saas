@@ -4,7 +4,7 @@ import hashlib
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Optional
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 
 from django.conf import settings
 from django.utils import timezone
@@ -25,6 +25,9 @@ class ProviderPaymentSession:
     provider_checkout_id: str
     checkout_url: str
     provider_status: str = "pending"
+    provider_transaction_id: str = ""
+    notify_token: str = ""
+    raw_payload: Optional[dict] = None
 
 
 @dataclass(frozen=True)
@@ -55,8 +58,11 @@ class BasePaymentProvider:
 
 INTERNAL_PROVIDER_CODES = {"", "manual", "test"}
 CINETPAY_PROVIDER_CODE = "cinetpay"
-CINETPAY_DEFAULT_PAYMENT_URL = "https://api-checkout.cinetpay.com/v2/payment"
-CINETPAY_DEFAULT_PAYMENT_CHECK_URL = "https://api-checkout.cinetpay.com/v2/payment/check"
+CINETPAY_DEFAULT_AUTH_URL = "https://api.cinetpay.net/v1/oauth/login"
+CINETPAY_DEFAULT_PAYMENT_URL = "https://api.cinetpay.net/v1/payment"
+CINETPAY_DEFAULT_PAYMENT_CHECK_URL = "https://api.cinetpay.net/v1/payment/{merchant_transaction_id}"
+CINETPAY_LEGACY_CHECKOUT_V2_PAYMENT_CHECK_URL = "https://api-checkout.cinetpay.com/v2/payment/check"
+CINETPAY_ALLOWED_CHANNELS = {"PUSH", "OTP", "QRCODE"}
 CINETPAY_NOTIFICATION_HMAC_FIELDS = (
     "cpm_site_id",
     "cpm_trans_id",
@@ -134,21 +140,30 @@ class CinetPayPaymentProvider(BasePaymentProvider):
 
     def __init__(self):
         self.site_id = _payment_setting("CINETPAY_SITE_ID", "JOATHAM_PAYMENT_PUBLIC_KEY")
-        self.apikey = _payment_setting("CINETPAY_APIKEY", "JOATHAM_PAYMENT_SECRET_KEY")
+        self.apikey = _payment_setting("CINETPAY_APIKEY", "CINETPAY_API_KEY", "JOATHAM_PAYMENT_SECRET_KEY")
+        self.api_password = _payment_setting("CINETPAY_API_PASSWORD", "JOATHAM_PAYMENT_API_PASSWORD")
         self.secret_key = _payment_setting("CINETPAY_SECRET_KEY", "JOATHAM_PAYMENT_WEBHOOK_SECRET")
+        self.auth_url = _payment_setting("CINETPAY_AUTH_URL", default=CINETPAY_DEFAULT_AUTH_URL)
         self.payment_url = _payment_setting("CINETPAY_PAYMENT_URL", default=CINETPAY_DEFAULT_PAYMENT_URL)
         self.check_url = _payment_setting("CINETPAY_PAYMENT_CHECK_URL", default=CINETPAY_DEFAULT_PAYMENT_CHECK_URL)
+        self.legacy_check_url = _payment_setting(
+            "CINETPAY_CHECKOUT_V2_PAYMENT_CHECK_URL",
+            "CINETPAY_LEGACY_PAYMENT_CHECK_URL",
+            default=CINETPAY_LEGACY_CHECKOUT_V2_PAYMENT_CHECK_URL,
+        )
         self.notify_url = _payment_setting("JOATHAM_PAYMENT_CALLBACK_URL")
         self.return_url = _payment_setting("JOATHAM_PAYMENT_RETURN_URL")
         self.channels = _payment_setting("JOATHAM_PAYMENT_CHANNELS", "CINETPAY_CHANNELS", default="MOBILE_MONEY") or "MOBILE_MONEY"
+        self.channel = _payment_setting("CINETPAY_CHANNEL", default="PUSH").upper()
+        if self.channel not in CINETPAY_ALLOWED_CHANNELS:
+            self.channel = "PUSH"
         self.currency = _payment_setting("CINETPAY_CURRENCY", "JOATHAM_PAYMENT_CURRENCY").upper()
         self.timeout = getattr(settings, "JOATHAM_PAYMENT_HTTP_TIMEOUT", 20)
 
     def missing_configuration(self):
         required_settings = {
-            "CINETPAY_SITE_ID": self.site_id,
             "CINETPAY_APIKEY": self.apikey,
-            "CINETPAY_SECRET_KEY": self.secret_key,
+            "CINETPAY_API_PASSWORD": self.api_password,
             "CINETPAY_CURRENCY": self.currency,
             "JOATHAM_PAYMENT_CALLBACK_URL": self.notify_url,
             "JOATHAM_PAYMENT_RETURN_URL": self.return_url,
@@ -164,39 +179,106 @@ class CinetPayPaymentProvider(BasePaymentProvider):
 
     def create_payment(self, payment_request):
         self._ensure_configured()
+        token = self._authenticate()
         amount = _as_cinetpay_amount(payment_request.amount_expected or payment_request.montant_usd or payment_request.montant)
+        user = getattr(payment_request, "created_by", None)
+        entreprise = payment_request.entreprise
+        success_url = _url_with_query(self.return_url, reference=payment_request.external_reference, status="success")
+        failed_url = _url_with_query(self.return_url, reference=payment_request.external_reference, status="failed")
         payload = {
-            "apikey": self.apikey,
-            "site_id": self.site_id,
-            "transaction_id": payment_request.external_reference,
-            "amount": amount,
             "currency": self.currency,
-            "description": _safe_cinetpay_description(f"Abonnement JOATHAM Manager {payment_request.plan.nom}"),
-            "notify_url": self.notify_url,
-            "return_url": f"{self.return_url}?reference={payment_request.external_reference}",
-            "channels": self.channels,
-            "metadata": payment_request.external_reference,
+            "merchant_transaction_id": payment_request.external_reference,
+            "amount": amount,
             "lang": "fr",
-            "invoice_data": {
-                "Plan": payment_request.plan.nom,
-                "Reference": payment_request.external_reference,
-                "Entreprise": payment_request.entreprise.nom,
+            "designation": _safe_cinetpay_description(f"Abonnement JOATHAM Manager {payment_request.plan.nom}"),
+            "client_email": _client_email(user, entreprise),
+            "client_first_name": _client_first_name(user, entreprise),
+            "client_last_name": _client_last_name(user, entreprise),
+            "success_url": success_url,
+            "failed_url": failed_url,
+            "notify_url": self.notify_url,
+            "channel": self.channel,
+            "direct_pay": False,
+            "metadata": {
+                "reference": payment_request.external_reference,
+                "plan": payment_request.plan.nom,
+                "entreprise": entreprise.nom,
             },
         }
-        response_payload = _post_json(self.payment_url, payload, timeout=self.timeout)
-        data = response_payload.get("data") or {}
-        checkout_url = (data.get("payment_url") or "").strip()
+        phone_number = _client_phone_number(user, entreprise)
+        if phone_number:
+            payload["client_phone_number"] = phone_number
+
+        response_payload = _post_json(
+            self.payment_url,
+            payload,
+            timeout=self.timeout,
+            headers=_bearer_headers(token),
+        )
+        data = _response_data(response_payload)
+        details = data.get("details") if isinstance(data.get("details"), dict) else {}
+        checkout_url = _pick(data, details, response_payload, "payment_url", "paymentUrl").strip()
         if not checkout_url:
             raise PaymentProviderError("CinetPay n'a pas retourne d'URL de paiement.")
         return ProviderPaymentSession(
-            provider_checkout_id=(data.get("payment_token") or response_payload.get("api_response_id") or "").strip(),
+            provider_checkout_id=_pick(data, details, response_payload, "payment_token", "paymentToken").strip(),
             checkout_url=checkout_url,
-            provider_status=(response_payload.get("code") or response_payload.get("message") or "created"),
+            provider_status=_pick(data, details, response_payload, "status", "message", "code") or "created",
+            provider_transaction_id=_pick(data, details, response_payload, "transaction_id", "transactionId").strip(),
+            notify_token=_pick(data, details, response_payload, "notify_token", "notifyToken").strip(),
+            raw_payload=_redact_sensitive_payload(response_payload),
         )
 
     def verify_webhook(self, request):
-        self._ensure_configured()
         payload = _request_payload(request)
+        if "cpm_trans_id" in payload:
+            self._ensure_legacy_webhook_configured()
+            return self._verify_checkout_v2_webhook(request, payload)
+
+        self._ensure_configured()
+        merchant_transaction_id = _pick(payload, "merchant_transaction_id", "merchantTransactionId").strip()
+        if not merchant_transaction_id:
+            raise PaymentProviderVerificationError("Reference CinetPay manquante.")
+        notify_token = _pick(payload, "notify_token", "notifyToken").strip()
+        if not notify_token:
+            raise PaymentProviderVerificationError("Token notification CinetPay manquant.")
+
+        from core.models import PaiementAbonnement
+
+        paiement = (
+            PaiementAbonnement.objects.filter(
+                external_reference=merchant_transaction_id,
+                provider=self.provider_code,
+            )
+            .only("provider_notify_token")
+            .first()
+        )
+        if paiement is None:
+            raise PaymentProviderVerificationError("Paiement abonnement introuvable.")
+        expected_notify_token = (paiement.provider_notify_token or "").strip()
+        if not expected_notify_token:
+            raise PaymentProviderVerificationError("Token notification CinetPay non configure.")
+        if not hmac.compare_digest(notify_token, expected_notify_token):
+            raise PaymentProviderVerificationError("Token notification CinetPay invalide.")
+
+        verified = self.fetch_transaction_status(merchant_transaction_id)
+        if verified.external_reference and verified.external_reference != merchant_transaction_id:
+            raise PaymentProviderVerificationError("Reference CinetPay incoherente.")
+        verified_payload = dict(verified.raw_payload)
+        verified_payload["notification"] = _redact_sensitive_payload(payload)
+        return VerifiedWebhookPayment(
+            external_reference=merchant_transaction_id,
+            event_id=verified.event_id,
+            status=verified.status,
+            amount=verified.amount,
+            currency=verified.currency,
+            provider_transaction_id=verified.provider_transaction_id,
+            provider_status=verified.provider_status,
+            raw_payload=verified_payload,
+            paid_at=verified.paid_at,
+        )
+
+    def _verify_checkout_v2_webhook(self, request, payload):
         transaction_id = (payload.get("cpm_trans_id") or "").strip()
         if not transaction_id:
             raise PaymentProviderVerificationError("Reference CinetPay manquante.")
@@ -204,9 +286,9 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         if posted_site_id and posted_site_id != self.site_id:
             raise PaymentProviderVerificationError("Site CinetPay invalide.")
         self._verify_hmac_token(request, payload)
-        verified = self.fetch_transaction_status(transaction_id)
+        verified = self._fetch_checkout_v2_transaction_status(transaction_id)
         verified_payload = dict(verified.raw_payload)
-        verified_payload["notification"] = payload
+        verified_payload["notification"] = _redact_sensitive_payload(payload)
         return VerifiedWebhookPayment(
             external_reference=verified.external_reference,
             event_id=verified.event_id,
@@ -221,11 +303,40 @@ class CinetPayPaymentProvider(BasePaymentProvider):
 
     def fetch_transaction_status(self, provider_transaction_id):
         self._ensure_configured()
+        merchant_transaction_id = (provider_transaction_id or "").strip()
+        if not merchant_transaction_id:
+            raise PaymentProviderVerificationError("Reference CinetPay manquante.")
+        token = self._authenticate()
+        response_payload = _get_json(
+            _cinetpay_status_url(self.check_url, merchant_transaction_id),
+            timeout=self.timeout,
+            headers=_bearer_headers(token),
+        )
+        data = _response_data(response_payload)
+        details = data.get("details") if isinstance(data.get("details"), dict) else {}
+        status = _normalize_cinetpay_status(_pick(data, details, response_payload, "status", "payment_status", "message"))
+        paid_at = _parse_provider_datetime(_pick(data, details, response_payload, "payment_date", "paid_at", "updated_at"))
+        return VerifiedWebhookPayment(
+            external_reference=(
+                _pick(data, details, response_payload, "merchant_transaction_id", "merchantTransactionId").strip()
+                or merchant_transaction_id
+            ),
+            event_id=_pick(data, details, response_payload, "transaction_id", "transactionId", "event_id").strip(),
+            status=status,
+            amount=_parse_decimal(_pick(data, details, response_payload, "amount")),
+            currency=_pick(data, details, response_payload, "currency").strip().upper(),
+            provider_transaction_id=_pick(data, details, response_payload, "transaction_id", "transactionId").strip(),
+            provider_status=_pick(data, details, response_payload, "status", "payment_status", "message") or status,
+            raw_payload=_redact_sensitive_payload(response_payload),
+            paid_at=paid_at,
+        )
+
+    def _fetch_checkout_v2_transaction_status(self, provider_transaction_id):
         transaction_id = (provider_transaction_id or "").strip()
         if not transaction_id:
             raise PaymentProviderVerificationError("Reference CinetPay manquante.")
         response_payload = _post_json(
-            self.check_url,
+            self.legacy_check_url,
             {
                 "apikey": self.apikey,
                 "site_id": self.site_id,
@@ -253,7 +364,28 @@ class CinetPayPaymentProvider(BasePaymentProvider):
             paid_at=paid_at,
         )
 
+    def _authenticate(self):
+        response_payload = _post_json(
+            self.auth_url,
+            {
+                "api_key": self.apikey,
+                "api_password": self.api_password,
+            },
+            timeout=self.timeout,
+        )
+        data = _response_data(response_payload)
+        token = _pick(data, response_payload, "access_token", "token").strip()
+        if not token:
+            raise PaymentProviderError("Authentification CinetPay invalide.")
+        return token
+
+    def _ensure_legacy_webhook_configured(self):
+        if not self.apikey or not self.site_id or not self.secret_key:
+            raise PaymentProviderVerificationError("Configuration CinetPay Checkout v2 incomplete.")
+
     def _verify_hmac_token(self, request, payload):
+        if not self.secret_key:
+            raise PaymentProviderVerificationError("Secret HMAC CinetPay non configure.")
         received_token = (request.headers.get("x-token") or "").strip()
         if not received_token:
             raise PaymentProviderVerificationError("Token HMAC CinetPay manquant.")
@@ -303,9 +435,11 @@ def _normalize_cinetpay_status(status):
         return "paid"
     if normalized in {"CANCELLED", "CANCELED", "TRANSACTION_CANCEL"}:
         return "cancelled"
-    if normalized in {"REFUSED"}:
+    if normalized in {"FAILED", "FAILURE", "REFUSED", "INSUFFICIENT_BALANCE"}:
         return "failed"
-    if normalized in {"WAITING_FOR_CUSTOMER", "PENDING", "PROCESSING"}:
+    if normalized in {"EXPIRED"}:
+        return "expired"
+    if normalized in {"WAITING_FOR_CUSTOMER", "PENDING", "PROCESSING", "INITIATED"}:
         return "processing"
     return _normalize_provider_status(normalized.lower())
 
@@ -354,6 +488,23 @@ def _safe_diagnostic_url(value):
     return urlunsplit((parts.scheme, netloc, parts.path, "", ""))
 
 
+def _url_with_query(url, **params):
+    parts = urlsplit(str(url or "").strip())
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query.update({key: str(value) for key, value in params.items() if value not in (None, "")})
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+
+
+def _cinetpay_status_url(url_template, merchant_transaction_id):
+    encoded_reference = quote(str(merchant_transaction_id or "").strip(), safe="")
+    template = str(url_template or CINETPAY_DEFAULT_PAYMENT_CHECK_URL).strip()
+    if "{merchant_transaction_id}" in template:
+        return template.format(merchant_transaction_id=encoded_reference)
+    if "{transaction_id}" in template:
+        return template.format(transaction_id=encoded_reference)
+    return f"{template.rstrip('/')}/{encoded_reference}"
+
+
 def _url_looks_like_sandbox(url):
     normalized = str(url or "").strip().lower()
     return any(marker in normalized for marker in ("sandbox", "test", "preprod"))
@@ -396,12 +547,90 @@ def _safe_cinetpay_description(value):
     return "".join(char for char in str(value) if char not in "#/,$_&").strip()[:100]
 
 
-def _post_json(url, payload, *, timeout):
+def _client_email(user, entreprise):
+    return (
+        getattr(user, "email", "")
+        or getattr(entreprise, "email", "")
+        or "client@joatham.com"
+    ).strip()
+
+
+def _client_first_name(user, entreprise):
+    value = (getattr(user, "first_name", "") or getattr(user, "username", "") or getattr(entreprise, "nom", "") or "Client").strip()
+    first = value.split()[0] if value.split() else value
+    return first if len(first) >= 2 else "Client"
+
+
+def _client_last_name(user, entreprise):
+    value = (getattr(user, "last_name", "") or getattr(entreprise, "nom", "") or "JOATHAM").strip()
+    return value if len(value) >= 2 else "JOATHAM"
+
+
+def _client_phone_number(user, entreprise):
+    return (getattr(user, "telephone", "") or getattr(entreprise, "telephone", "") or "").strip()
+
+
+def _response_data(response_payload):
+    data = response_payload.get("data") if isinstance(response_payload, dict) else {}
+    return data if isinstance(data, dict) else {}
+
+
+def _pick(*args):
+    sources = [arg for arg in args if isinstance(arg, dict)]
+    keys = [arg for arg in args if not isinstance(arg, dict)]
+    for source in sources:
+        for key in keys:
+            value = source.get(key)
+            if value not in (None, ""):
+                return str(value)
+    return ""
+
+
+def _bearer_headers(token):
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _redact_sensitive_payload(payload):
+    if isinstance(payload, dict):
+        sensitive_keys = {
+            "api_key",
+            "api_password",
+            "apikey",
+            "password",
+            "access_token",
+            "accessToken",
+            "token",
+            "payment_token",
+            "paymentToken",
+            "notify_token",
+            "notifyToken",
+        }
+        return {
+            key: "***" if key in sensitive_keys else _redact_sensitive_payload(value)
+            for key, value in payload.items()
+        }
+    if isinstance(payload, list):
+        return [_redact_sensitive_payload(item) for item in payload]
+    return payload
+
+
+def _json_headers(headers=None):
+    merged = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "JOATHAM-Manager/1.0",
+    }
+    if headers:
+        merged.update(headers)
+    return merged
+
+
+def _post_json(url, payload, *, timeout, headers=None):
     try:
         response = requests.post(
             url,
             json=payload,
-            headers={"Content-Type": "application/json", "User-Agent": "JOATHAM-Manager/1.0"},
+            headers=_json_headers(headers),
             timeout=timeout,
         )
     except requests.RequestException as exc:
@@ -411,7 +640,25 @@ def _post_json(url, payload, *, timeout):
     except ValueError as exc:
         raise PaymentProviderError("Reponse CinetPay invalide.") from exc
     if response.status_code >= 400:
-        raise PaymentProviderError(response_payload.get("message") or "CinetPay a refuse la requete.")
+        raise PaymentProviderError("CinetPay a refuse la requete.")
+    return response_payload
+
+
+def _get_json(url, *, timeout, headers=None):
+    try:
+        response = requests.get(
+            url,
+            headers=_json_headers(headers),
+            timeout=timeout,
+        )
+    except requests.RequestException as exc:
+        raise PaymentProviderError("CinetPay est temporairement indisponible.") from exc
+    try:
+        response_payload = response.json()
+    except ValueError as exc:
+        raise PaymentProviderError("Reponse CinetPay invalide.") from exc
+    if response.status_code >= 400:
+        raise PaymentProviderError("CinetPay a refuse la requete.")
     return response_payload
 
 
@@ -472,9 +719,8 @@ def get_automatic_payment_configuration_diagnostic():
     enabled = bool(getattr(settings, "JOATHAM_AUTO_PAYMENT_ENABLED", False))
     provider_is_cinetpay = provider == CINETPAY_PROVIDER_CODE
     required_setting_groups = (
-        ("CINETPAY_SITE_ID", ("CINETPAY_SITE_ID", "JOATHAM_PAYMENT_PUBLIC_KEY")),
-        ("CINETPAY_APIKEY", ("CINETPAY_APIKEY", "JOATHAM_PAYMENT_SECRET_KEY")),
-        ("CINETPAY_SECRET_KEY", ("CINETPAY_SECRET_KEY", "JOATHAM_PAYMENT_WEBHOOK_SECRET")),
+        ("CINETPAY_APIKEY", ("CINETPAY_APIKEY", "CINETPAY_API_KEY", "JOATHAM_PAYMENT_SECRET_KEY")),
+        ("CINETPAY_API_PASSWORD", ("CINETPAY_API_PASSWORD", "JOATHAM_PAYMENT_API_PASSWORD")),
         ("CINETPAY_CURRENCY", ("CINETPAY_CURRENCY", "JOATHAM_PAYMENT_CURRENCY")),
         ("JOATHAM_PAYMENT_CALLBACK_URL", ("JOATHAM_PAYMENT_CALLBACK_URL",)),
         ("JOATHAM_PAYMENT_RETURN_URL", ("JOATHAM_PAYMENT_RETURN_URL",)),
@@ -493,17 +739,28 @@ def get_automatic_payment_configuration_diagnostic():
         "CINETPAY_PAYMENT_CHECK_URL",
         CINETPAY_DEFAULT_PAYMENT_CHECK_URL,
     )
+    auth_url, auth_url_source = _payment_url_source("CINETPAY_AUTH_URL", CINETPAY_DEFAULT_AUTH_URL)
     sandbox_setting = getattr(settings, "JOATHAM_PAYMENT_SANDBOX", None)
     sandbox_flag = bool(sandbox_setting)
     payment_environment = _payment_environment_label(enabled, provider_is_cinetpay, sandbox_setting)
     payment_url_source_label = _payment_url_source_label(payment_url_source)
     check_url_source_label = _payment_url_source_label(check_url_source)
+    auth_url_source_label = _payment_url_source_label(auth_url_source)
     configured = enabled and provider_is_cinetpay and not missing_required_settings
 
     optional_setting_groups = (
+        ("CINETPAY_SITE_ID", ("CINETPAY_SITE_ID", "JOATHAM_PAYMENT_PUBLIC_KEY"), ""),
+        ("CINETPAY_SECRET_KEY", ("CINETPAY_SECRET_KEY", "JOATHAM_PAYMENT_WEBHOOK_SECRET"), ""),
         ("CINETPAY_CHANNELS", ("CINETPAY_CHANNELS", "JOATHAM_PAYMENT_CHANNELS"), "MOBILE_MONEY"),
+        ("CINETPAY_CHANNEL", ("CINETPAY_CHANNEL",), "PUSH"),
+        ("CINETPAY_AUTH_URL", ("CINETPAY_AUTH_URL",), CINETPAY_DEFAULT_AUTH_URL),
         ("CINETPAY_PAYMENT_URL", ("CINETPAY_PAYMENT_URL",), CINETPAY_DEFAULT_PAYMENT_URL),
         ("CINETPAY_PAYMENT_CHECK_URL", ("CINETPAY_PAYMENT_CHECK_URL",), CINETPAY_DEFAULT_PAYMENT_CHECK_URL),
+        (
+            "CINETPAY_CHECKOUT_V2_PAYMENT_CHECK_URL",
+            ("CINETPAY_CHECKOUT_V2_PAYMENT_CHECK_URL", "CINETPAY_LEGACY_PAYMENT_CHECK_URL"),
+            CINETPAY_LEGACY_CHECKOUT_V2_PAYMENT_CHECK_URL,
+        ),
         ("JOATHAM_PAYMENT_HTTP_TIMEOUT", ("JOATHAM_PAYMENT_HTTP_TIMEOUT",), ""),
         ("JOATHAM_PAYMENT_SANDBOX", ("JOATHAM_PAYMENT_SANDBOX",), ""),
     )
@@ -523,9 +780,10 @@ def get_automatic_payment_configuration_diagnostic():
         warnings.append("Configuration CinetPay incomplete.")
     if enabled and payment_environment == "Ambigu":
         warnings.append("Environnement CinetPay ambigu : vérifiez JOATHAM_PAYMENT_SANDBOX et le provider.")
-    if enabled and provider_is_cinetpay and (payment_url_source == "default" or check_url_source == "default"):
+    if enabled and provider_is_cinetpay and (auth_url_source == "default" or payment_url_source == "default" or check_url_source == "default"):
         warnings.append("URLs CinetPay par défaut utilisées ; confirmez leur environnement avant activation réelle.")
     custom_urls = (
+        (auth_url, auth_url_source),
         (payment_url, payment_url_source),
         (check_url, check_url_source),
     )
@@ -549,8 +807,11 @@ def get_automatic_payment_configuration_diagnostic():
         "payment_environment": payment_environment,
         "payment_url_source": payment_url_source,
         "check_url_source": check_url_source,
+        "auth_url_source": auth_url_source,
         "payment_url_source_label": payment_url_source_label,
         "check_url_source_label": check_url_source_label,
+        "auth_url_source_label": auth_url_source_label,
+        "auth_url": _safe_diagnostic_url(auth_url),
         "payment_url": _safe_diagnostic_url(payment_url),
         "check_url": _safe_diagnostic_url(check_url),
         "sandbox_flag": sandbox_flag,

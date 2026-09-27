@@ -84,7 +84,17 @@ def create_automatic_subscription_payment_request(
     paiement.provider_checkout_id = checkout.provider_checkout_id
     paiement.checkout_url = checkout.checkout_url
     paiement.provider_status = checkout.provider_status
-    paiement.save(update_fields=["provider_checkout_id", "checkout_url", "provider_status"])
+    update_fields = ["provider_checkout_id", "checkout_url", "provider_status"]
+    if checkout.provider_transaction_id:
+        paiement.provider_transaction_id = checkout.provider_transaction_id
+        update_fields.append("provider_transaction_id")
+    if checkout.notify_token:
+        paiement.provider_notify_token = checkout.notify_token
+        update_fields.append("provider_notify_token")
+    if checkout.raw_payload:
+        paiement.raw_provider_payload = {"checkout": checkout.raw_payload}
+        update_fields.append("raw_provider_payload")
+    paiement.save(update_fields=update_fields)
 
     record_audit_event(
         entreprise=entreprise,
@@ -392,6 +402,8 @@ def _get_confirmation_rejection_reason(paiement, verified_payment, *, expected_a
         return "Devise payee differente de la devise attendue."
     if not verified_payment.provider_transaction_id:
         return "Identifiant transaction provider manquant."
+    if paiement.provider_transaction_id and paiement.provider_transaction_id != verified_payment.provider_transaction_id:
+        return "Identifiant transaction provider incoherent."
     duplicate_transaction = (
         PaiementAbonnement.objects.filter(provider_transaction_id=verified_payment.provider_transaction_id)
         .exclude(pk=paiement.pk)
