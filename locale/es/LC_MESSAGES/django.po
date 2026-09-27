@@ -852,3 +852,105 @@ msgstr "Validaciones internas, documentos personalizados y varias cajas"
 
 msgid "Vos outils de gestion sont regroupés dans une même plateforme."
 msgstr "Sus herramientas de gestión están reunidas en una misma plataforma."
+
+msgid "TARIFS JOATHAM MANAGER"
+msgstr "TARIFAS JOATHAM MANAGER"
+
+msgid "Des plans clairs pour"
+msgstr "Planes claros para"
+
+msgid "démarrer et évoluer"
+msgstr "empezar y crecer"
+
+msgid "Choisissez une formule adaptée à votre rythme, avec une réduction réelle lorsque vous optez pour la facturation annuelle."
+msgstr "Elija una fórmula adaptada a su ritmo, con un descuento real al optar por la facturación anual."
+
+msgid "Cycle de facturation"
+msgstr "Ciclo de facturación"
+
+msgid "Mensuel"
+msgstr "Mensual"
+
+msgid "Annuel"
+msgstr "Anual"
+
+msgid "Économisez 20 %"
+msgstr "Ahorre 20 %"
+
+msgid "Pour découvrir JOATHAM Manager"
+msgstr "Para descubrir JOATHAM Manager"
+
+msgid "Idéal pour débuter"
+msgstr "Ideal para empezar"
+
+msgid "Pour les petites activités en croissance"
+msgstr "Para pequeñas actividades en crecimiento"
+
+msgid "Choisir Starter"
+msgstr "Elegir Starter"
+
+msgid "Le plus populaire"
+msgstr "El más popular"
+
+msgid "Pour les PME qui veulent aller plus loin"
+msgstr "Para pymes que quieren ir más lejos"
+
+msgid "Choisir Pro"
+msgstr "Elegir Pro"
+
+msgid "Accès complet"
+msgstr "Acceso completo"
+
+msgid "Pour les entreprises sans limites"
+msgstr "Para empresas sin límites"
+
+msgid "Choisir Premium Business"
+msgstr "Elegir Premium Business"
+
+msgid "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
+msgstr "equivalente a %(amount)s %(currency)s/%(period)s, facturado anualmente"
+
+msgid "économie annuelle : %(amount)s %(currency)s"
+msgstr "ahorro anual: %(amount)s %(currency)s"
+
+msgid "Facturation mensuelle"
+msgstr "Facturación mensual"
+
+msgid "Plan gratuit"
+msgstr "Plan gratuito"
+
+msgid "Avantages principaux"
+msgstr "Ventajas principales"
+
+msgid "Voir les détails"
+msgstr "Ver detalles"
+
+msgid "Limites du plan"
+msgstr "Límites del plan"
+
+msgid "Repères de réassurance"
+msgstr "Puntos de confianza"
+
+msgid "Paiement sécurisé"
+msgstr "Pago seguro"
+
+msgid "Les paiements en ligne passent par le fournisseur configuré."
+msgstr "Los pagos en línea pasan por el proveedor configurado."
+
+msgid "Activation rapide"
+msgstr "Activación rápida"
+
+msgid "Votre espace reste disponible dès la création du compte."
+msgstr "Su espacio permanece disponible desde la creación de la cuenta."
+
+msgid "Support technique"
+msgstr "Soporte técnico"
+
+msgid "L’équipe JOATHAM vous accompagne dans l’utilisation."
+msgstr "El equipo JOATHAM le acompaña en el uso."
+
+msgid "Accès partout"
+msgstr "Acceso desde cualquier lugar"
+
+msgid "JOATHAM Manager est accessible en ligne sur vos appareils."
+msgstr "JOATHAM Manager está disponible en línea en sus dispositivos."

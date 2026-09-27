@@ -42,6 +42,9 @@ from core.services.subscription import (
     get_or_create_free_plan,
     get_plan_limit_summary,
     get_plan_quota_profile,
+    get_subscription_annual_discount_rate,
+    get_subscription_annual_savings_usd,
+    get_subscription_equivalent_monthly_price_usd,
     get_subscription_price_usd,
 )
 from joatham_billing.models import Facture
@@ -92,12 +95,12 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertEqual(Decimal(str(free_plan.prix)), Decimal("0"))
         self.assertEqual(free_plan.devise, "USD")
         self.assertEqual(Decimal(str(paid_plans["starter"]["prix"])), Decimal("10"))
-        self.assertEqual(paid_plans["starter"]["prix_annuel"], Decimal("120.00"))
+        self.assertEqual(paid_plans["starter"]["prix_annuel"], Decimal("96.00"))
         self.assertEqual(Decimal(str(paid_plans["pro"]["prix"])), Decimal("15"))
-        self.assertEqual(paid_plans["pro"]["prix_annuel"], Decimal("180.00"))
+        self.assertEqual(paid_plans["pro"]["prix_annuel"], Decimal("144.00"))
         self.assertEqual(paid_plans["premium"]["nom"], "Premium Business")
         self.assertEqual(Decimal(str(paid_plans["premium"]["prix"])), Decimal("20"))
-        self.assertEqual(paid_plans["premium"]["prix_annuel"], Decimal("240.00"))
+        self.assertEqual(paid_plans["premium"]["prix_annuel"], Decimal("192.00"))
 
     def test_official_plan_quotas_match_commercial_matrix(self):
         free_plan = get_or_create_free_plan()
@@ -193,24 +196,42 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertFalse({"rh", "advanced_reports"} & set(paid_plans["pro"]["modules_inclus"]))
         self.assertTrue(paid_plans["pro"]["acces_comptabilite"])
 
-    def test_official_plan_payment_requests_use_current_monthly_prices(self):
+    def test_official_plan_payment_requests_use_current_monthly_and_annual_prices(self):
         starter = self.starter_company.abonnement_entreprise.plan
         pro = self.pro_company.abonnement_entreprise.plan
         premium = self.premium_company.abonnement_entreprise.plan
 
-        self.assertEqual(get_subscription_price_usd(plan=starter, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("10"))
-        self.assertEqual(get_subscription_price_usd(plan=pro, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("15"))
-        self.assertEqual(get_subscription_price_usd(plan=premium, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("20"))
+        self.assertEqual(get_subscription_annual_discount_rate(), Decimal("0.20"))
+        self.assertEqual(get_subscription_price_usd(plan=starter, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("10.00"))
+        self.assertEqual(get_subscription_price_usd(plan=pro, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("15.00"))
+        self.assertEqual(get_subscription_price_usd(plan=premium, duree=PaiementAbonnement.Duree.MENSUEL), Decimal("20.00"))
+        self.assertEqual(get_subscription_price_usd(plan=starter, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("96.00"))
+        self.assertEqual(get_subscription_price_usd(plan=pro, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("144.00"))
+        self.assertEqual(get_subscription_price_usd(plan=premium, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("192.00"))
+        self.assertEqual(get_subscription_equivalent_monthly_price_usd(plan=starter, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("8.00"))
+        self.assertEqual(get_subscription_equivalent_monthly_price_usd(plan=pro, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("12.00"))
+        self.assertEqual(get_subscription_equivalent_monthly_price_usd(plan=premium, duree=PaiementAbonnement.Duree.ANNUEL), Decimal("16.00"))
+        self.assertEqual(get_subscription_annual_savings_usd(plan=starter), Decimal("24.00"))
+        self.assertEqual(get_subscription_annual_savings_usd(plan=pro), Decimal("36.00"))
+        self.assertEqual(get_subscription_annual_savings_usd(plan=premium), Decimal("48.00"))
 
-        payment = create_subscription_payment_request(
+        monthly_payment = create_subscription_payment_request(
             entreprise=self.starter_company,
             plan=starter,
             duree=PaiementAbonnement.Duree.MENSUEL,
             reference_paiement="PRICE-STARTER-10",
             utilisateur=self.starter_owner,
         )
+        annual_payment = create_subscription_payment_request(
+            entreprise=self.starter_company,
+            plan=starter,
+            duree=PaiementAbonnement.Duree.ANNUEL,
+            reference_paiement="PRICE-STARTER-96",
+            utilisateur=self.starter_owner,
+        )
 
-        self.assertEqual(payment.montant_usd, Decimal("10.00"))
+        self.assertEqual(monthly_payment.montant_usd, Decimal("10.00"))
+        self.assertEqual(annual_payment.montant_usd, Decimal("96.00"))
 
     def test_free_plan_blocks_advanced_modules(self):
         self.assertTrue(can_access_module(self.free_owner, "dashboard"))
@@ -567,13 +588,13 @@ class SaasPlanSeedTests(TestCase):
         self.assertEqual(Decimal(str(free.prix)), Decimal("0"))
         self.assertEqual(free.devise, "USD")
         self.assertEqual(Decimal(str(starter.prix)), Decimal("10"))
-        self.assertEqual(starter.prix_annuel, Decimal("120.00"))
+        self.assertEqual(starter.prix_annuel, Decimal("96.00"))
         self.assertEqual(Decimal(str(pro.prix)), Decimal("15"))
-        self.assertEqual(pro.prix_annuel, Decimal("180.00"))
+        self.assertEqual(pro.prix_annuel, Decimal("144.00"))
         self.assertTrue(pro.acces_comptabilite)
         self.assertEqual(premium.nom, "Premium Business")
         self.assertEqual(Decimal(str(premium.prix)), Decimal("20"))
-        self.assertEqual(premium.prix_annuel, Decimal("240.00"))
+        self.assertEqual(premium.prix_annuel, Decimal("192.00"))
         self.assertNotIn("caisse", free.modules_inclus)
         self.assertIn("products", free.modules_inclus)
         self.assertIn("expenses", free.modules_inclus)

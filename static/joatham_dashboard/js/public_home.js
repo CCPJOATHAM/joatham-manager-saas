@@ -99,3 +99,35 @@
     setSlide(0);
     startAutoplay();
 }());
+(function () {
+    const section = document.querySelector('[data-pricing-section]');
+    if (!section) return;
+
+    const toggle = section.querySelector('[data-pricing-toggle]');
+    if (!toggle) return;
+
+    const buttons = Array.from(toggle.querySelectorAll('[data-pricing-cycle]'));
+    const prices = Array.from(section.querySelectorAll('[data-cycle-price]'));
+    const notes = Array.from(section.querySelectorAll('[data-cycle-note]'));
+
+    function setBillingCycle(cycle) {
+        section.dataset.billingCycle = cycle;
+        buttons.forEach((button) => {
+            const isActive = button.dataset.pricingCycle === cycle;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+        prices.forEach((price) => {
+            price.hidden = price.dataset.cyclePrice !== cycle;
+        });
+        notes.forEach((note) => {
+            note.hidden = note.dataset.cycleNote !== cycle;
+        });
+    }
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => setBillingCycle(button.dataset.pricingCycle));
+    });
+
+    setBillingCycle('monthly');
+}());

@@ -199,42 +199,80 @@
             </div>
         </section>
 
-        <section id="tarifs" class="section-block pricing-section">
+        <section id="tarifs" class="section-block pricing-section" data-pricing-section data-billing-cycle="monthly">
             <div class="landing-container">
                 <div class="section-heading pricing-heading">
-                    <p class="eyebrow">{% trans "Tarifs" %}</p>
-                    <h2>{% trans "Des plans clairs pour démarrer et évoluer" %}</h2>
-                    <p>{% trans "Les informations ci-dessous sont reprises depuis la logique officielle des abonnements JOATHAM Manager." %}</p>
+                    <p class="eyebrow pricing-eyebrow">{% trans "TARIFS JOATHAM MANAGER" %}</p>
+                    <h2>{% trans "Des plans clairs pour" %} <span>{% trans "démarrer et évoluer" %}</span></h2>
+                    <p>{% trans "Choisissez une formule adaptée à votre rythme, avec une réduction réelle lorsque vous optez pour la facturation annuelle." %}</p>
+                    <div class="billing-toggle" role="group" aria-label="{% trans 'Cycle de facturation' %}" data-pricing-toggle>
+                        <button class="is-active" type="button" data-pricing-cycle="monthly" aria-pressed="true">{% trans "Mensuel" %}</button>
+                        <button type="button" data-pricing-cycle="yearly" aria-pressed="false">{% trans "Annuel" %}</button>
+                        <span>{% trans "Économisez 20 %" %}</span>
+                    </div>
                 </div>
 
                 {% if public_plan_cards %}
                 <div class="pricing-grid">
                     {% for card in public_plan_cards %}
-                    <article class="price-card {% if card.is_popular %}is-featured{% endif %}">
-                        {% if card.is_popular %}<span class="plan-badge">{% trans "Populaire" %}</span>{% endif %}
+                    <article class="price-card price-card-{{ card.tone }} {% if card.is_popular %}is-featured{% endif %}" data-pricing-card>
+                        {% if card.badge %}<span class="plan-badge">{{ card.badge }}</span>{% endif %}
+                        <div class="plan-icon" aria-hidden="true">{{ card.icon }}</div>
                         <div class="price-card-head">
                             <h3>{{ card.display_name }}</h3>
-                            <p>{{ card.description }}</p>
+                            <p>{{ card.headline }}</p>
                         </div>
                         <div class="plan-price">
-                            <strong>{{ card.monthly_price_label }}</strong>
-                            {% if card.annual_price_label %}<span>{{ card.annual_price_label }}</span>{% endif %}
+                            <strong data-cycle-price="monthly">{{ card.monthly_price_label }}</strong>
+                            <strong data-cycle-price="yearly" hidden>{{ card.annual_price_label }}</strong>
+                            <span data-cycle-note="monthly">{% trans "Facturation mensuelle" %}</span>
+                            {% if card.annual_equivalent_label %}
+                            <span data-cycle-note="yearly" hidden>{{ card.annual_equivalent_label }}</span>
+                            {% else %}
+                            <span data-cycle-note="yearly" hidden>{% trans "Plan gratuit" %}</span>
+                            {% endif %}
+                            {% if card.annual_savings_label %}<span class="annual-savings" data-cycle-note="yearly" hidden>{{ card.annual_savings_label }}</span>{% endif %}
                         </div>
                         {% if card.features %}
-                        <ul class="plan-list">
-                            {% for feature in card.features|slice:":4" %}
-                            <li>{{ feature }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                        <div class="plan-limits">
-                            {% for limit in card.limits|slice:":5" %}
-                            <span><em>{{ limit.label }}</em><strong>{{ limit.value }}</strong></span>
-                            {% endfor %}
+                        <div class="plan-feature-block">
+                            <p>{% trans "Avantages principaux" %}</p>
+                            <ul class="plan-list">
+                                {% for feature in card.features|slice:":4" %}
+                                <li>{{ feature }}</li>
+                                {% endfor %}
+                            </ul>
                         </div>
-                        <a class="btn {% if card.is_popular %}btn-primary{% else %}btn-outline{% endif %}" href="{% url 'signup' %}">{% trans "Commencer gratuitement" %}</a>
+                        {% endif %}
+                        <details class="plan-details">
+                            <summary>{% trans "Voir les détails" %}</summary>
+                            <div class="plan-limits" aria-label="{% trans 'Limites du plan' %}">
+                                <p>{% trans "Limites du plan" %}</p>
+                                {% for limit in card.limits|slice:":6" %}
+                                <span><em>{{ limit.label }}</em><strong>{{ limit.value }}</strong></span>
+                                {% endfor %}
+                            </div>
+                        </details>
+                        <a class="btn {% if card.is_popular %}btn-primary{% else %}btn-outline{% endif %}" href="{% url 'signup' %}">{{ card.cta_label }}</a>
                     </article>
                     {% endfor %}
+                </div>
+                <div class="pricing-assurance" aria-label="{% trans 'Repères de réassurance' %}">
+                    <article>
+                        <strong>{% trans "Paiement sécurisé" %}</strong>
+                        <span>{% trans "Les paiements en ligne passent par le fournisseur configuré." %}</span>
+                    </article>
+                    <article>
+                        <strong>{% trans "Activation rapide" %}</strong>
+                        <span>{% trans "Votre espace reste disponible dès la création du compte." %}</span>
+                    </article>
+                    <article>
+                        <strong>{% trans "Support technique" %}</strong>
+                        <span>{% trans "L’équipe JOATHAM vous accompagne dans l’utilisation." %}</span>
+                    </article>
+                    <article>
+                        <strong>{% trans "Accès partout" %}</strong>
+                        <span>{% trans "JOATHAM Manager est accessible en ligne sur vos appareils." %}</span>
+                    </article>
                 </div>
                 {% else %}
                 <div class="pricing-empty">
@@ -244,7 +282,6 @@
                 {% endif %}
             </div>
         </section>
-
         <section class="final-cta" aria-labelledby="final-cta-title">
             <div class="landing-container final-cta-grid">
                 <div>

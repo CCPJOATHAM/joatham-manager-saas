@@ -419,13 +419,20 @@ def subscription_plan_list(request):
     plans = list(get_commercial_plans_queryset().order_by("prix", "nom"))
     plan_order = {"free": 0, "starter": 1, "pro": 2, "premium": 3, "business": 3}
     plans.sort(key=lambda plan: (plan_order.get(normalize_plan_code(plan), 99), plan.prix, plan.nom))
+    pricing_matrix = build_subscription_pricing_matrix(entreprise=entreprise, plans=plans)
     plan_cards = []
     for plan in plans:
         price_info = get_plan_price_for_company(plan, entreprise)
+        monthly_price_info = pricing_matrix.get(f"{plan.id}:{PaiementAbonnement.Duree.MENSUEL}", {})
+        annual_price_info = pricing_matrix.get(f"{plan.id}:{PaiementAbonnement.Duree.ANNUEL}", {})
         plan_cards.append(
             {
                 "plan": plan,
                 "price_info": price_info,
+                "monthly_price_info": monthly_price_info,
+                "annual_price_info": annual_price_info,
+                "monthly_duration": PaiementAbonnement.Duree.MENSUEL,
+                "annual_duration": PaiementAbonnement.Duree.ANNUEL,
                 "display_name": get_plan_commercial_name(plan),
                 "description": get_plan_commercial_description(plan),
                 "features": get_plan_feature_summary(plan),

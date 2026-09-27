@@ -852,3 +852,105 @@ msgstr "Internal approvals, custom documents and multiple cash registers"
 
 msgid "Vos outils de gestion sont regroupés dans une même plateforme."
 msgstr "Your management tools are grouped in one platform."
+
+msgid "TARIFS JOATHAM MANAGER"
+msgstr "JOATHAM MANAGER PRICING"
+
+msgid "Des plans clairs pour"
+msgstr "Clear plans to"
+
+msgid "démarrer et évoluer"
+msgstr "start and grow"
+
+msgid "Choisissez une formule adaptée à votre rythme, avec une réduction réelle lorsque vous optez pour la facturation annuelle."
+msgstr "Choose a plan that matches your pace, with a real discount when you choose annual billing."
+
+msgid "Cycle de facturation"
+msgstr "Billing cycle"
+
+msgid "Mensuel"
+msgstr "Monthly"
+
+msgid "Annuel"
+msgstr "Annual"
+
+msgid "Économisez 20 %"
+msgstr "Save 20%"
+
+msgid "Pour découvrir JOATHAM Manager"
+msgstr "To discover JOATHAM Manager"
+
+msgid "Idéal pour débuter"
+msgstr "Ideal to get started"
+
+msgid "Pour les petites activités en croissance"
+msgstr "For small growing operations"
+
+msgid "Choisir Starter"
+msgstr "Choose Starter"
+
+msgid "Le plus populaire"
+msgstr "Most popular"
+
+msgid "Pour les PME qui veulent aller plus loin"
+msgstr "For SMEs ready to go further"
+
+msgid "Choisir Pro"
+msgstr "Choose Pro"
+
+msgid "Accès complet"
+msgstr "Full access"
+
+msgid "Pour les entreprises sans limites"
+msgstr "For companies without limits"
+
+msgid "Choisir Premium Business"
+msgstr "Choose Premium Business"
+
+msgid "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
+msgstr "equivalent to %(amount)s %(currency)s/%(period)s, billed annually"
+
+msgid "économie annuelle : %(amount)s %(currency)s"
+msgstr "annual savings: %(amount)s %(currency)s"
+
+msgid "Facturation mensuelle"
+msgstr "Monthly billing"
+
+msgid "Plan gratuit"
+msgstr "Free plan"
+
+msgid "Avantages principaux"
+msgstr "Key benefits"
+
+msgid "Voir les détails"
+msgstr "View details"
+
+msgid "Limites du plan"
+msgstr "Plan limits"
+
+msgid "Repères de réassurance"
+msgstr "Trust points"
+
+msgid "Paiement sécurisé"
+msgstr "Secure payment"
+
+msgid "Les paiements en ligne passent par le fournisseur configuré."
+msgstr "Online payments go through the configured provider."
+
+msgid "Activation rapide"
+msgstr "Quick activation"
+
+msgid "Votre espace reste disponible dès la création du compte."
+msgstr "Your workspace remains available as soon as the account is created."
+
+msgid "Support technique"
+msgstr "Technical support"
+
+msgid "L’équipe JOATHAM vous accompagne dans l’utilisation."
+msgstr "The JOATHAM team helps you use the platform."
+
+msgid "Accès partout"
+msgstr "Access anywhere"
+
+msgid "JOATHAM Manager est accessible en ligne sur vos appareils."
+msgstr "JOATHAM Manager is available online on your devices."
