@@ -233,11 +233,11 @@
             <strong>0 {{ plan.devise|default:"USD" }}</strong>
             <span>plan gratuit</span>
             {% else %}
-            <strong>{{ monthly_price_info.amount_usd|default:price_info.official_amount|default:plan.prix }} {{ monthly_price_info.currency_code|default:price_info.official_currency|default:"USD" }}</strong>
+            <strong>{{ monthly_price_info.amount_usd|default:price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }}</strong>
             <span>Prix mensuel</span>
             {% endif %}
             {% if annual_price_info.amount_usd %}
-            <span>{{ annual_price_info.amount_usd }} {{ annual_price_info.currency_code|default:plan.devise|default:"USD" }} par an</span>
+            <span>{{ annual_price_info.amount_usd }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} par an</span>
             {% endif %}
             {% if not plan_card.is_free and not price_info.unavailable %}
             <span>Estimation locale : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
