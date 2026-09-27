@@ -216,11 +216,21 @@ JOATHAM_PAYMENT_CURRENCY = os.getenv("JOATHAM_PAYMENT_CURRENCY", "").strip().upp
 JOATHAM_PAYMENT_HTTP_TIMEOUT = _env_float("JOATHAM_PAYMENT_HTTP_TIMEOUT", 20.0)
 CINETPAY_SITE_ID = os.getenv("CINETPAY_SITE_ID", JOATHAM_PAYMENT_PUBLIC_KEY).strip()
 CINETPAY_APIKEY = os.getenv("CINETPAY_APIKEY", JOATHAM_PAYMENT_SECRET_KEY).strip()
+CINETPAY_API_PASSWORD = os.getenv("CINETPAY_API_PASSWORD", os.getenv("JOATHAM_PAYMENT_API_PASSWORD", "")).strip()
 CINETPAY_SECRET_KEY = os.getenv("CINETPAY_SECRET_KEY", JOATHAM_PAYMENT_WEBHOOK_SECRET).strip()
 CINETPAY_CURRENCY = os.getenv("CINETPAY_CURRENCY", JOATHAM_PAYMENT_CURRENCY).strip().upper()
 CINETPAY_CHANNELS = os.getenv("CINETPAY_CHANNELS", JOATHAM_PAYMENT_CHANNELS or "MOBILE_MONEY").strip().upper()
-CINETPAY_PAYMENT_URL = os.getenv("CINETPAY_PAYMENT_URL", "https://api-checkout.cinetpay.com/v2/payment").strip()
-CINETPAY_PAYMENT_CHECK_URL = os.getenv("CINETPAY_PAYMENT_CHECK_URL", "https://api-checkout.cinetpay.com/v2/payment/check").strip()
+CINETPAY_CHANNEL = os.getenv("CINETPAY_CHANNEL", "PUSH").strip().upper()
+CINETPAY_AUTH_URL = os.getenv("CINETPAY_AUTH_URL", "https://api.cinetpay.net/v1/oauth/login").strip()
+CINETPAY_PAYMENT_URL = os.getenv("CINETPAY_PAYMENT_URL", "https://api.cinetpay.net/v1/payment").strip()
+CINETPAY_PAYMENT_CHECK_URL = os.getenv(
+    "CINETPAY_PAYMENT_CHECK_URL",
+    "https://api.cinetpay.net/v1/payment/{merchant_transaction_id}",
+).strip()
+CINETPAY_CHECKOUT_V2_PAYMENT_CHECK_URL = os.getenv(
+    "CINETPAY_CHECKOUT_V2_PAYMENT_CHECK_URL",
+    "https://api-checkout.cinetpay.com/v2/payment/check",
+).strip()
 HEALTH_CHECK_TOKEN = os.getenv("HEALTH_CHECK_TOKEN", "").strip()
 
 if REST_FRAMEWORK_AVAILABLE:
