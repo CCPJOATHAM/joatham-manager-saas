@@ -1,6 +1,7 @@
 import json
 import hmac
 import hashlib
+import logging
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Optional
@@ -10,6 +11,9 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 import requests
+
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentProviderError(Exception):
@@ -219,6 +223,10 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         details = data.get("details") if isinstance(data.get("details"), dict) else {}
         checkout_url = _pick(data, details, response_payload, "payment_url", "paymentUrl").strip()
         if not checkout_url:
+            logger.warning(
+                "CinetPay payment creation returned no checkout URL: %s",
+                _redact_sensitive_payload(response_payload),
+            )
             raise PaymentProviderError("CinetPay n'a pas retourne d'URL de paiement.")
         return ProviderPaymentSession(
             provider_checkout_id=_pick(data, details, response_payload, "payment_token", "paymentToken").strip(),
