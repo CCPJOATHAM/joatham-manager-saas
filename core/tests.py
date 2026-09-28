@@ -1840,13 +1840,56 @@ class SubscriptionPaymentTests(TestCase):
             post_mock.side_effect = [self._cinetpay_auth_response(), invalid_response]
             self._assert_cinetpay_checkout_creation_fails_safely("Reponse CinetPay invalide.")
 
-    def test_cinetpay_checkout_without_checkout_url_is_safe_and_rolls_back_payment(self):
+    def test_cinetpay_checkout_without_checkout_url_logs_redacted_response_and_rolls_back_payment(self):
+        sensitive_values = {
+            "api_key": "response-api-key",
+            "api_password": "response-api-password",
+            "apikey": "response-apikey",
+            "password": "response-password",
+            "access_token": "response-access-token",
+            "accessToken": "response-access-token-camel",
+            "token": "root-token-without-url",
+            "payment_token": "token-without-url",
+            "paymentToken": "token-without-url-camel",
+            "notify_token": "notify-token-without-url",
+            "notifyToken": "notify-token-without-url-camel",
+        }
+        provider_response = {
+            "status": "CREATED",
+            "api_key": sensitive_values["api_key"],
+            "api_password": sensitive_values["api_password"],
+            "apikey": sensitive_values["apikey"],
+            "password": sensitive_values["password"],
+            "access_token": sensitive_values["access_token"],
+            "token": sensitive_values["token"],
+            "data": {
+                "payment_token": sensitive_values["payment_token"],
+                "notify_token": sensitive_values["notify_token"],
+                "details": {
+                    "accessToken": sensitive_values["accessToken"],
+                    "paymentToken": sensitive_values["paymentToken"],
+                    "notifyToken": sensitive_values["notifyToken"],
+                    "reason": "missing payment url",
+                },
+            },
+        }
+
         with override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post") as post_mock:
             post_mock.side_effect = [
                 self._cinetpay_auth_response(),
-                self._cinetpay_http_response({"status": "CREATED", "data": {"payment_token": "token-without-url"}}),
+                self._cinetpay_http_response(provider_response),
             ]
-            self._assert_cinetpay_checkout_creation_fails_safely("CinetPay n'a pas retourne d'URL de paiement.")
+            with self.assertLogs("core.services.payment_providers", level="WARNING") as captured_logs:
+                self._assert_cinetpay_checkout_creation_fails_safely("CinetPay n'a pas retourne d'URL de paiement.")
+
+        log_output = "\n".join(captured_logs.output)
+        self.assertIn("CinetPay payment creation returned no checkout URL", log_output)
+        self.assertIn("missing payment url", log_output)
+        self.assertIn("'api_key': '***'", log_output)
+        self.assertIn("'payment_token': '***'", log_output)
+        self.assertIn("'notifyToken': '***'", log_output)
+        for sensitive_value in sensitive_values.values():
+            self.assertNotIn(sensitive_value, log_output)
 
     def test_cinetpay_webhook_without_transaction_id_is_rejected(self):
         with override_settings(**self._complete_cinetpay_settings()):
