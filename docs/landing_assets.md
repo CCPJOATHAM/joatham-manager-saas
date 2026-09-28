@@ -4,8 +4,15 @@ Date d'integration : 2026-09-25
 
 ## Images humaines JOATHAM
 
-- `joatham-business-user.png` : image fournie pour illustrer l'utilisation professionnelle de la solution dans la section croissance. La personne visible n'est pas présentée comme cliente, employée ou ambassadrice réelle de JOATHAM Manager.
-- `joatham-founder-workspace.png` : image fournie pour illustrer le CTA final dans un espace de travail. Aucun titre ou rôle spécifique n'est attribué à la personne visible par la landing.
+Source commune : photographies fournies pour l'illustration de JOATHAM Manager avec autorisation d'utilisation communiquée par le propriétaire du projet.
+Préparation : copies WebP optimisées placées dans `static/img/landing/people/`.
+Usage : les personnes visibles sont utilisées comme illustrations et ne constituent pas automatiquement des témoignages clients. Elles ne sont pas présentées comme clientes, employées, partenaires ou ambassadrices de JOATHAM Manager.
+
+- `joatham-woman-meeting-room.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
+- `joatham-woman-office-work.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
+- `joatham-woman-professional.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
+- `joatham-man-office-work.webp` : illustration professionnelle utilisée dans le carrousel du CTA final.
+- `joatham-man-business-user.webp` : illustration professionnelle utilisée dans le carrousel du CTA final.
 
 ## Captures produit JOATHAM Manager
 

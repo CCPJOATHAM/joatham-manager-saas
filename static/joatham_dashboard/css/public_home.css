@@ -405,7 +405,8 @@ h1 span {
 .photo-panel,
 .final-photo,
 .hero-product-frame,
-.carousel-slide {
+.carousel-slide,
+.people-carousel-slide {
     margin: 0;
 }
 
@@ -630,6 +631,30 @@ h1 span {
 
 .photo-panel {
     aspect-ratio: 4 / 3;
+}
+
+.people-carousel {
+    display: grid;
+    isolation: isolate;
+}
+
+.people-carousel-slide {
+    grid-area: 1 / 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 620ms ease;
+}
+
+.people-carousel-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.people-carousel-slide img {
+    display: block;
 }
 
 .growth-copy {
@@ -1147,7 +1172,8 @@ h1 span {
     }
 
     .btn,
-    .carousel-slide {
+    .carousel-slide,
+    .people-carousel-slide {
         transition: none;
     }
 
