@@ -9,7 +9,7 @@ Préparation : copies WebP optimisées placées dans `static/img/landing/people/
 Usage : les personnes visibles sont utilisées comme illustrations et ne constituent pas automatiquement des témoignages clients. Elles ne sont pas présentées comme clientes, employées, partenaires ou ambassadrices de JOATHAM Manager.
 
 - `joatham-woman-meeting-room.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
-- `joatham-woman-office-work.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
+- `joatham_woman-office-work2.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
 - `joatham-woman-professional.webp` : illustration professionnelle utilisée dans le carrousel de la section croissance.
 - `joatham-man-office-work.webp` : illustration professionnelle utilisée dans le carrousel du CTA final.
 - `joatham-man-business-user.webp` : illustration professionnelle utilisée dans le carrousel du CTA final.

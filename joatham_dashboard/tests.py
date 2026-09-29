@@ -140,7 +140,7 @@ class PublicHomeTests(TestCase):
 
         people_assets = (
             "img/landing/people/joatham-woman-meeting-room.webp",
-            "img/landing/people/joatham-woman-office-work.webp",
+            "img/landing/people/joatham_woman-office-work2.webp",
             "img/landing/people/joatham-woman-professional.webp",
             "img/landing/people/joatham-man-office-work.webp",
             "img/landing/people/joatham-man-business-user.webp",
