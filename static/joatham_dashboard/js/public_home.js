@@ -99,6 +99,40 @@
     setSlide(0);
     startAutoplay();
 }());
+
+(function () {
+    const carousels = Array.from(document.querySelectorAll('[data-people-carousel]'));
+    if (!carousels.length) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const peopleIntervalMs = 5000;
+
+    carousels.forEach((carousel) => {
+        const slides = Array.from(carousel.querySelectorAll('[data-people-slide]'));
+        if (!slides.length) return;
+
+        let currentIndex = 0;
+        let intervalId = null;
+
+        function setSlide(index) {
+            currentIndex = (index + slides.length) % slides.length;
+            slides.forEach((slide, slideIndex) => {
+                const isActive = slideIndex === currentIndex;
+                slide.classList.toggle('is-active', isActive);
+                slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            });
+        }
+
+        function startAutoplay() {
+            if (prefersReducedMotion || slides.length <= 1 || intervalId) return;
+            intervalId = window.setInterval(() => setSlide(currentIndex + 1), peopleIntervalMs);
+        }
+
+        setSlide(0);
+        startAutoplay();
+    });
+}());
+
 (function () {
     const section = document.querySelector('[data-pricing-section]');
     if (!section) return;

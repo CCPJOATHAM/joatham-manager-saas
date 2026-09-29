@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from io import StringIO
 from decimal import Decimal
+from pathlib import Path
 from unittest.mock import patch
 
 from django.core import mail
@@ -47,8 +48,6 @@ class PublicHomeTests(TestCase):
         response = self.client.get("/")
 
         self.assertContains(response, reverse("login"))
-        self.assertContains(response, "img/landing/joatham-business-user.png")
-        self.assertContains(response, "img/landing/joatham-founder-workspace.png")
 
     def test_public_home_contains_pricing_section_and_public_plan_names(self):
         response = self.client.get("/")
@@ -135,6 +134,45 @@ class PublicHomeTests(TestCase):
         self.assertNotContains(response, "phone-mockup")
         self.assertContains(response, "data-product-carousel")
         self.assertContains(response, "joatham_dashboard/js/public_home.js")
+
+    def test_public_home_uses_people_carousels(self):
+        response = self.client.get("/")
+
+        people_assets = (
+            "img/landing/people/joatham-woman-meeting-room.webp",
+            "img/landing/people/joatham_woman-office-work2.webp",
+            "img/landing/people/joatham-woman-professional.webp",
+            "img/landing/people/joatham-man-office-work.webp",
+            "img/landing/people/joatham-man-business-user.webp",
+        )
+        legacy_people_assets = (
+            "img/landing/joatham-business-user.png",
+            "img/landing/joatham-founder-workspace.png",
+        )
+        alt_texts = (
+            "Professionnelle dans un espace de travail",
+            "Professionnelle utilisant un ordinateur au bureau",
+            "Portrait professionnel dans un environnement de travail",
+            "Professionnel travaillant sur ordinateur",
+            "Professionnel dans un environnement de bureau",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode("utf-8").count("data-people-carousel"), 2)
+        for asset_path in people_assets:
+            self.assertContains(response, asset_path)
+            self.assertContains(response, 'loading="lazy"')
+            self.assertContains(response, 'decoding="async"')
+        for asset_path in legacy_people_assets:
+            self.assertNotContains(response, asset_path)
+        for alt_text in alt_texts:
+            self.assertContains(response, f'alt="{alt_text}"')
+        self.assertContains(response, "joatham_dashboard/js/public_home.js")
+
+    def test_public_home_people_carousel_interval_is_five_seconds(self):
+        script_path = Path(__file__).resolve().parent.parent / "static" / "joatham_dashboard" / "js" / "public_home.js"
+
+        self.assertIn("const peopleIntervalMs = 5000;", script_path.read_text(encoding="utf-8"))
 
     def _switch_public_language(self, language_code):
         return self.client.post(

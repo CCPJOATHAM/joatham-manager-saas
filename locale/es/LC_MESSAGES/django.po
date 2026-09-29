@@ -954,3 +954,24 @@ msgstr "Acceso desde cualquier lugar"
 
 msgid "JOATHAM Manager est accessible en ligne sur vos appareils."
 msgstr "JOATHAM Manager está disponible en línea en sus dispositivos."
+
+msgid "Illustrations professionnelles de JOATHAM Manager"
+msgstr "Ilustraciones profesionales de JOATHAM Manager"
+
+msgid "Professionnelle dans un espace de travail"
+msgstr "Profesional en un espacio de trabajo"
+
+msgid "Professionnelle utilisant un ordinateur au bureau"
+msgstr "Profesional usando un ordenador en la oficina"
+
+msgid "Portrait professionnel dans un environnement de travail"
+msgstr "Retrato profesional en un entorno de trabajo"
+
+msgid "Illustrations professionnelles dans un espace de travail JOATHAM"
+msgstr "Ilustraciones profesionales en un espacio de trabajo JOATHAM"
+
+msgid "Professionnel travaillant sur ordinateur"
+msgstr "Profesional trabajando en el ordenador"
+
+msgid "Professionnel dans un environnement de bureau"
+msgstr "Profesional en un entorno de oficina"
