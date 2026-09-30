@@ -111,6 +111,16 @@ class PublicHomeTests(TestCase):
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
 
+    def test_public_share_test_uses_dedicated_social_url(self):
+        response = self.client.get(reverse("public_share_test"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<link rel="canonical" href="https://app.joatham.com/share-test/">')
+        self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/share-test/">')
+        self.assertContains(response, '<meta property="og:image" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview.jpg">')
+        self.assertContains(response, '<meta property="og:image:secure_url" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview.jpg">')
+        self.assertContains(response, '<meta name="twitter:image" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview.jpg">')
+
     def test_public_home_uses_current_product_screenshots(self):
         response = self.client.get("/")
 

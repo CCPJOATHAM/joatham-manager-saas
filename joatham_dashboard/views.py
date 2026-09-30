@@ -210,16 +210,30 @@ def _build_public_plan_cards():
         )
     return cards
 
+def _build_public_home_context(**extra_context):
+    context = {
+        "app_name": "JOATHAM Manager",
+        "public_plan_cards": _build_public_plan_cards(),
+    }
+    context.update(extra_context)
+    return context
+
 def public_home(request):
     return render(
         request,
         "joatham_dashboard/public_home.html",
-        {
-            "app_name": "JOATHAM Manager",
-            "public_plan_cards": _build_public_plan_cards(),
-        },
+        _build_public_home_context(),
     )
 
+
+def public_share_test(request):
+    return render(
+        request,
+        "joatham_dashboard/public_home.html",
+        _build_public_home_context(
+            social_page_url="https://app.joatham.com/share-test/",
+        ),
+    )
 
 def public_robots_txt(request):
     content = "User-agent: *\nAllow: /\n\nSitemap: https://joatham.com/sitemap.xml"
