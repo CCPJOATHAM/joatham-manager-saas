@@ -235,6 +235,17 @@ def public_discover(request):
         ),
     )
 
+
+def public_preview_a(request):
+    return render(
+        request,
+        "joatham_dashboard/public_home.html",
+        _build_public_home_context(
+            social_page_url="https://app.joatham.com/preview-a/",
+            social_image_url="https://app.joatham.com/static/img/social/joatham-manager-social-preview.jpg",
+        ),
+    )
+
 def public_robots_txt(request):
     content = "User-agent: *\nAllow: /\n\nSitemap: https://joatham.com/sitemap.xml"
     return HttpResponse(content, content_type="text/plain")
