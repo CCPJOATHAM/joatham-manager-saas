@@ -105,8 +105,9 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, '<meta property="og:image:width" content="1200">')
         self.assertContains(response, '<meta property="og:image:height" content="630">')
         self.assertContains(response, '<meta property="og:image:alt" content="JOATHAM Manager — aperçu de la solution de gestion tout-en-un">')
+        self.assertContains(response, '<meta property="og:image:type" content="image/jpeg">')
         self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">')
-        self.assertContains(response, "https://app.joatham.com/static/img/social/joatham-manager-social-preview.png")
+        self.assertContains(response, "https://app.joatham.com/static/img/social/joatham-manager-social-preview.jpg")
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
 
