@@ -113,6 +113,20 @@ class PublicHomeTests(TestCase):
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
 
+    def test_public_discover_uses_dedicated_social_url(self):
+        response = self.client.get(reverse("public_discover"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertContains(response, "JOATHAM Manager")
+        self.assertContains(response, '<link rel="canonical" href="https://app.joatham.com/decouvrir/">')
+        self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/decouvrir/">')
+        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager — Votre solution de gestion tout-en-un">')
+        self.assertContains(response, "Gérez votre entreprise simplement et efficacement avec JOATHAM Manager")
+        self.assertContains(response, '<meta property="og:image" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview-v3.jpg">')
+        self.assertContains(response, '<meta property="og:image:secure_url" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview-v3.jpg">')
+        self.assertContains(response, '<meta name="twitter:image" content="https://app.joatham.com/static/img/social/joatham-manager-social-preview-v3.jpg">')
+
     def test_public_share_test_route_is_removed(self):
         response = self.client.get("/share-test/")
 
