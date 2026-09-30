@@ -92,18 +92,21 @@ class PublicHomeTests(TestCase):
         content = response.content.decode("utf-8").lower()
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "JOATHAM Manager - SaaS de gestion pour entreprises")
+        self.assertContains(response, "JOATHAM Manager — Votre solution de gestion tout-en-un")
         self.assertContains(
             response,
-            "JOATHAM Manager centralise les outils essentiels de gestion pour les entreprises",
+            "Gérez votre entreprise simplement et efficacement avec JOATHAM Manager",
         )
         self.assertContains(response, '<meta name="robots" content="index,follow">')
         self.assertContains(response, '<link rel="canonical" href="https://app.joatham.com/">')
-        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager - SaaS de gestion pour entreprises">')
+        self.assertContains(response, '<meta property="og:title" content="JOATHAM Manager — Votre solution de gestion tout-en-un">')
         self.assertContains(response, '<meta property="og:url" content="https://app.joatham.com/">')
         self.assertContains(response, '<meta property="og:type" content="website">')
+        self.assertContains(response, '<meta property="og:image:width" content="1200">')
+        self.assertContains(response, '<meta property="og:image:height" content="630">')
+        self.assertContains(response, '<meta property="og:image:alt" content="JOATHAM Manager — aperçu de la solution de gestion tout-en-un">')
         self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">')
-        self.assertContains(response, "https://app.joatham.com/static/img/landing/product/dashboard.png")
+        self.assertContains(response, "https://app.joatham.com/static/img/social/joatham-manager-social-preview.png")
         self.assertNotIn("noindex", content)
         self.assertNotEqual(response.headers.get("X-Robots-Tag"), "noindex")
 
