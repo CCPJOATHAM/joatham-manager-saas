@@ -232,6 +232,7 @@ def public_share_test(request):
         "joatham_dashboard/public_home.html",
         _build_public_home_context(
             social_page_url="https://app.joatham.com/share-test/",
+            social_image_url="https://app.joatham.com/static/img/social/joatham-manager-social-preview-test.jpg",
         ),
     )
 
