@@ -16,6 +16,7 @@ from joatham_users.services.session_security import (
 ALLOWED_UNVERIFIED_URL_NAMES = {
     "home",
     "public_home",
+    "public_share_test",
     "login",
     "login_session_conflict",
     "logout",
