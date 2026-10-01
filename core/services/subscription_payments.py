@@ -165,6 +165,10 @@ def handle_subscription_payment_webhook(provider, request):
                 paiement.last_webhook_event_id = verified_payment.event_id
             paiement.verified_at = timezone.now()
             paiement.save(update_fields=["raw_provider_payload", "provider_status", "last_webhook_event_id", "verified_at"])
+            if paiement.statut in {PaiementAbonnement.Statut.VALIDE, PaiementAbonnement.Statut.APPROUVEE}:
+                from core.services.subscription_intents import mark_subscription_intention_consumed_for_payment
+
+                mark_subscription_intention_consumed_for_payment(paiement)
             record_audit_event(
                 entreprise=paiement.entreprise,
                 utilisateur=None,
@@ -302,6 +306,9 @@ def handle_subscription_payment_webhook(provider, request):
                 "currency": paiement.paid_currency,
             },
         )
+        from core.services.subscription_intents import mark_subscription_intention_consumed_for_payment
+
+        mark_subscription_intention_consumed_for_payment(paiement)
         record_audit_event(
             entreprise=paiement.entreprise,
             utilisateur=None,

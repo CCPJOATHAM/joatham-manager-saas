@@ -364,6 +364,8 @@
 
             <form method="post" novalidate>
                 {% csrf_token %}
+                {% if subscription_plan_param %}<input type="hidden" name="subscription_plan" value="{{ subscription_plan_param }}">{% endif %}
+                {% if subscription_billing_param %}<input type="hidden" name="subscription_billing" value="{{ subscription_billing_param }}">{% endif %}
                 <div class="form-grid">
                     <div class="field">
                         <label for="{{ form.company_name.id_for_label }}">{% trans "Nom de l'entreprise" %}</label>

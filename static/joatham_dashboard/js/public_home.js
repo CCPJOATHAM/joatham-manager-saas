@@ -143,6 +143,7 @@
     const buttons = Array.from(toggle.querySelectorAll('[data-pricing-cycle]'));
     const prices = Array.from(section.querySelectorAll('[data-cycle-price]'));
     const notes = Array.from(section.querySelectorAll('[data-cycle-note]'));
+    const ctas = Array.from(section.querySelectorAll('[data-pricing-cta]'));
 
     function setBillingCycle(cycle) {
         section.dataset.billingCycle = cycle;
@@ -156,6 +157,10 @@
         });
         notes.forEach((note) => {
             note.hidden = note.dataset.cycleNote !== cycle;
+        });
+        ctas.forEach((cta) => {
+            const nextUrl = cycle === 'yearly' ? cta.dataset.signupYearlyUrl : cta.dataset.signupMonthlyUrl;
+            if (nextUrl) cta.setAttribute('href', nextUrl);
         });
     }
 
