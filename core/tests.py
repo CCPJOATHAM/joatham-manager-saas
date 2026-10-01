@@ -18,7 +18,7 @@ from joatham_billing.tests.factories import create_client, create_entreprise, cr
 from joatham_clients.services.clients_service import create_client_for_entreprise
 from joatham_users.models import Abonnement, AbonnementEntreprise, User
 
-from .models import ActivityLog, ExchangeRate, PaiementAbonnement, PlatformSettings
+from .models import ActivityLog, ExchangeRate, IntentionAbonnement, PaiementAbonnement, PlatformSettings
 from .selectors.audit import (
     get_activity_actions_for_entreprise,
     get_activity_logs_by_entreprise,
@@ -47,6 +47,7 @@ from .services.payment_providers import (
     PaymentProviderError,
     get_automatic_payment_configuration_diagnostic,
 )
+from .services.subscription_intents import resume_subscription_intention_payment
 from .services.subscription_payments import create_automatic_subscription_payment_request
 from .services.product_policy import get_module_access_state as get_product_module_access_state
 from .services.currency import get_currency_code
@@ -2319,6 +2320,34 @@ class SubscriptionPaymentTests(TestCase):
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_subscription_intention_resume_starts_single_server_priced_payment(self):
+        self.entreprise.devise = "USD"
+        self.entreprise.save(update_fields=["devise"])
+        intention = IntentionAbonnement.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.ANNUEL,
+            statut=IntentionAbonnement.Statut.EN_ATTENTE,
+            source="landing",
+        )
+
+        first = resume_subscription_intention_payment(intention=intention, provider="test", utilisateur=self.owner)
+        second = resume_subscription_intention_payment(intention=intention, provider="test", utilisateur=self.owner)
+        intention.refresh_from_db()
+
+        self.assertEqual(PaiementAbonnement.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).count(), 1)
+        self.assertEqual(first.paiement, second.paiement)
+        self.assertEqual(intention.paiement, first.paiement)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.PAIEMENT_INITIE)
+        expected_annual_amount = get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL)
+
+        self.assertEqual(first.paiement.duree, PaiementAbonnement.Duree.ANNUEL)
+        self.assertEqual(first.paiement.montant_usd, expected_annual_amount)
+        self.assertEqual(first.paiement.amount_expected, expected_annual_amount)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_automatic_payment_external_reference_is_unique(self):
         first = create_automatic_subscription_payment_request(
             entreprise=self.entreprise,
@@ -2468,6 +2497,35 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(overview, "Paiement automatique confirmé")
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_valid_webhook_consumes_linked_subscription_intention(self):
+        self.entreprise.devise = "USD"
+        self.entreprise.save(update_fields=["devise"])
+        intention = IntentionAbonnement.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            statut=IntentionAbonnement.Statut.EN_ATTENTE,
+            source="landing",
+        )
+        paiement = resume_subscription_intention_payment(intention=intention, provider="test", utilisateur=self.owner).paiement
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-intent-paid-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-intent-paid-1",
+        )
+        intention.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.CONSOMMEE)
+        self.assertEqual(intention.paiement, paiement)
+        self.assertIsNotNone(intention.date_consommation)
+        self.assertTrue(AbonnementEntreprise.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_valid_annual_webhook_activates_subscription_for_year(self):
         paiement = create_automatic_subscription_payment_request(
             entreprise=self.entreprise,
@@ -2595,6 +2653,46 @@ class SubscriptionPaymentTests(TestCase):
         self.assertTrue(ActivityLog.objects.filter(action="subscription_payment_webhook_duplicate").exists())
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_duplicate_webhook_keeps_subscription_intention_consumed_once(self):
+        self.entreprise.devise = "USD"
+        self.entreprise.save(update_fields=["devise"])
+        intention = IntentionAbonnement.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            statut=IntentionAbonnement.Statut.EN_ATTENTE,
+            source="landing",
+        )
+        paiement = resume_subscription_intention_payment(intention=intention, provider="test", utilisateur=self.owner).paiement
+
+        first_response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-intent-duplicate-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-intent-duplicate-1",
+        )
+        subscription = AbonnementEntreprise.objects.get(entreprise=self.entreprise)
+        first_date_fin = subscription.date_fin
+        first_consumption = IntentionAbonnement.objects.get(pk=intention.pk).date_consommation
+        second_response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-intent-duplicate-1",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-intent-duplicate-1",
+        )
+        subscription.refresh_from_db()
+        intention.refresh_from_db()
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(subscription.date_fin, first_date_fin)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.CONSOMMEE)
+        self.assertEqual(intention.date_consommation, first_consumption)
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
     def test_failed_webhook_does_not_activate_subscription(self):
         paiement = create_automatic_subscription_payment_request(
             entreprise=self.entreprise,
@@ -2616,6 +2714,35 @@ class SubscriptionPaymentTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.ECHOUE)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
+    def test_failed_webhook_leaves_subscription_intention_unconsumed(self):
+        self.entreprise.devise = "USD"
+        self.entreprise.save(update_fields=["devise"])
+        intention = IntentionAbonnement.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            statut=IntentionAbonnement.Statut.EN_ATTENTE,
+            source="landing",
+        )
+        paiement = resume_subscription_intention_payment(intention=intention, provider="test", utilisateur=self.owner).paiement
+
+        response = self._post_test_payment_webhook(
+            paiement,
+            event_id="evt-intent-failed-1",
+            status="failed",
+            amount="10.00",
+            currency="USD",
+            provider_transaction_id="tx-intent-failed-1",
+        )
+        intention.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.PAIEMENT_INITIE)
+        self.assertIsNone(intention.date_consommation)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")

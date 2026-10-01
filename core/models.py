@@ -136,6 +136,58 @@ class PaiementAbonnement(models.Model):
         return f"{self.entreprise.nom} - {self.plan.nom} - {self.get_statut_display()}"
 
 
+class IntentionAbonnement(models.Model):
+    class Statut(models.TextChoices):
+        EN_ATTENTE = "en_attente", _("En attente")
+        PAIEMENT_INITIE = "paiement_initie", _("Paiement initie")
+        CONSOMMEE = "consommee", _("Consommee")
+        ANNULEE = "annulee", _("Annulee")
+        EXPIREE = "expiree", _("Expiree")
+
+    entreprise = models.ForeignKey(
+        "joatham_users.Entreprise",
+        on_delete=models.CASCADE,
+        related_name="intentions_abonnement",
+    )
+    utilisateur = models.ForeignKey(
+        "joatham_users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="intentions_abonnement",
+    )
+    plan = models.ForeignKey(
+        "joatham_users.Abonnement",
+        on_delete=models.PROTECT,
+        related_name="intentions_abonnement",
+    )
+    duree = models.CharField(max_length=20, choices=PaiementAbonnement.Duree.choices)
+    statut = models.CharField(max_length=30, choices=Statut.choices, default=Statut.EN_ATTENTE, db_index=True)
+    paiement = models.ForeignKey(
+        PaiementAbonnement,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="intentions_abonnement",
+    )
+    source = models.CharField(max_length=50, blank=True, default="landing")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+    date_expiration = models.DateTimeField(null=True, blank=True)
+    date_consommation = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-date_creation", "-id"]
+        indexes = [
+            models.Index(fields=["entreprise", "statut", "date_creation"]),
+            models.Index(fields=["utilisateur", "statut", "date_creation"]),
+            models.Index(fields=["paiement", "statut"]),
+        ]
+
+    def __str__(self):
+        return f"{self.entreprise.nom} - {self.plan.nom} - {self.get_statut_display()}"
+
+
 class PlatformSettings(models.Model):
     nom_plateforme = models.CharField(max_length=120, default="JOATHAM Manager")
     email_systeme = models.EmailField(default="admin@joatham.com")

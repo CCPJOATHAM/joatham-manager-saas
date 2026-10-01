@@ -13,9 +13,9 @@ from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from core.models import ActivityLog
+from core.models import ActivityLog, IntentionAbonnement, PaiementAbonnement
 from core.services.language import LANGUAGE_SESSION_KEY
-from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise, get_subscription_price_usd
 from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
 from joatham_depenses.models import Depense
@@ -67,6 +67,9 @@ class PublicHomeTests(TestCase):
             self.assertContains(response, expected_price)
         for expected_cta in ("Choisir Starter", "Choisir Pro", "Choisir Premium Business"):
             self.assertContains(response, expected_cta)
+        for code in ("free", "starter", "pro", "premium"):
+            self.assertContains(response, f'{reverse("signup")}?plan={code}&amp;billing=monthly')
+            self.assertContains(response, f'data-signup-yearly-url="{reverse("signup")}?plan={code}&amp;billing=yearly"')
 
     def test_public_home_displays_seeded_commercial_plans_without_authentication(self):
         call_command("seed_saas_plans", stdout=StringIO())
@@ -210,6 +213,17 @@ class PublicHomeTests(TestCase):
         script_path = Path(__file__).resolve().parent.parent / "static" / "joatham_dashboard" / "js" / "public_home.js"
 
         self.assertIn("const peopleIntervalMs = 5000;", script_path.read_text(encoding="utf-8"))
+
+    def test_public_home_pricing_toggle_updates_signup_cycle_only(self):
+        response = self.client.get("/")
+        script_path = Path(__file__).resolve().parent.parent / "static" / "joatham_dashboard" / "js" / "public_home.js"
+        script = script_path.read_text(encoding="utf-8")
+
+        self.assertContains(response, "10 USD/mois")
+        self.assertContains(response, "96 USD/an")
+        self.assertContains(response, "data-pricing-cta")
+        self.assertIn("dataset.signupYearlyUrl", script)
+        self.assertIn("dataset.signupMonthlyUrl", script)
 
     def _switch_public_language(self, language_code):
         return self.client.post(
@@ -783,6 +797,13 @@ class OnboardingSignupTests(TestCase):
         self.assertContains(response, "Inscription entreprise")
         self.assertContains(response, "Creer mon entreprise")
 
+    def test_signup_page_preserves_public_subscription_selection(self):
+        response = self.client.get(reverse("signup"), {"plan": "starter", "billing": "yearly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="subscription_plan" value="starter"')
+        self.assertContains(response, 'name="subscription_billing" value="yearly"')
+
     def test_signup_page_displays_dynamic_password_requirements(self):
         response = self.client.get(reverse("signup"))
 
@@ -881,6 +902,192 @@ class OnboardingSignupTests(TestCase):
         self.assertGreater(subscription.date_fin, timezone.localdate())
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("email-verification/confirm/", mail.outbox[0].body)
+        self.assertFalse(IntentionAbonnement.objects.filter(entreprise=entreprise).exists())
+
+    def test_signup_from_free_plan_does_not_create_paid_subscription_intention(self):
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="free-selection@example.com",
+                subscription_plan="free",
+                subscription_billing="yearly",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="free-selection@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertFalse(IntentionAbonnement.objects.filter(entreprise=user.entreprise).exists())
+
+    def test_signup_from_starter_monthly_keeps_free_active_and_creates_intention(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="starter-monthly@example.com",
+                subscription_plan="starter",
+                subscription_billing="monthly",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="starter-monthly@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+        intention = IntentionAbonnement.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertEqual(intention.plan.code, "starter")
+        self.assertEqual(intention.duree, PaiementAbonnement.Duree.MENSUEL)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.EN_ATTENTE)
+        self.assertIsNone(intention.paiement)
+
+    def test_signup_from_pro_yearly_keeps_free_active_and_creates_annual_intention(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="pro-yearly@example.com",
+                subscription_plan="pro",
+                subscription_billing="yearly",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="pro-yearly@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+        intention = IntentionAbonnement.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertEqual(intention.plan.code, "pro")
+        self.assertEqual(intention.duree, PaiementAbonnement.Duree.ANNUEL)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.EN_ATTENTE)
+
+    def test_signup_from_premium_business_creates_intention_without_paid_activation(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="premium-selection@example.com",
+                subscription_plan="premium",
+                subscription_billing="monthly",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="premium-selection@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+        intention = IntentionAbonnement.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertEqual(intention.plan.code, "premium")
+        self.assertEqual(intention.duree, PaiementAbonnement.Duree.MENSUEL)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.EN_ATTENTE)
+
+    def test_signup_ignores_manipulated_subscription_selection(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="tampered-selection@example.com",
+                subscription_plan="999",
+                subscription_billing="yearly",
+                plan_id=str(Abonnement.objects.get(code="pro").id),
+                amount="1.00",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="tampered-selection@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertFalse(IntentionAbonnement.objects.filter(entreprise=user.entreprise).exists())
+
+    def test_signup_ignores_invalid_paid_billing_cycle(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="invalid-billing@example.com",
+                subscription_plan="starter",
+                subscription_billing="weekly",
+            ),
+        )
+
+        self.assertRedirects(response, reverse("email_verification_sent"))
+        user = User.objects.get(email="invalid-billing@example.com")
+        subscription = AbonnementEntreprise.objects.get(entreprise=user.entreprise)
+
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertFalse(IntentionAbonnement.objects.filter(entreprise=user.entreprise).exists())
+
+    @override_settings(
+        DEBUG=True,
+        JOATHAM_AUTO_PAYMENT_ENABLED=True,
+        JOATHAM_PAYMENT_PROVIDER="test",
+        JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True,
+        JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret",
+    )
+    def test_paid_signup_intention_survives_email_confirmation_and_resumes_payment_after_login(self):
+        call_command("seed_saas_plans", stdout=StringIO())
+
+        response = self.client.post(
+            reverse("signup"),
+            self._signup_payload(
+                email="resume-payment@example.com",
+                devise="USD",
+                subscription_plan="starter",
+                subscription_billing="yearly",
+            ),
+        )
+        self.assertRedirects(response, reverse("email_verification_sent"))
+
+        user = User.objects.get(email="resume-payment@example.com")
+        entreprise = user.entreprise
+        intention = IntentionAbonnement.objects.get(entreprise=entreprise)
+        from django.utils.encoding import force_bytes
+        from django.utils.http import urlsafe_base64_encode
+
+        other_client = Client()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = email_verification_token_generator.make_token(user)
+        confirm_response = other_client.get(reverse("email_verification_confirm", args=[uidb64, token]))
+        self.assertEqual(confirm_response.status_code, 200)
+
+        login_response = other_client.post(
+            reverse("login"),
+            {"username": "resume-payment@example.com", "password": "Motdepasse123!"},
+        )
+        paiement = PaiementAbonnement.objects.get(entreprise=entreprise, plan=intention.plan)
+        intention.refresh_from_db()
+        subscription = AbonnementEntreprise.objects.get(entreprise=entreprise)
+
+        expected_annual_amount = get_subscription_price_usd(plan=intention.plan, duree=PaiementAbonnement.Duree.ANNUEL)
+
+        self.assertEqual(login_response.status_code, 302)
+        self.assertEqual(login_response["Location"], paiement.checkout_url)
+        self.assertEqual(subscription.plan.code, "free")
+        self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
+        self.assertEqual(paiement.montant_usd, expected_annual_amount)
+        self.assertEqual(intention.paiement, paiement)
+        self.assertEqual(intention.statut, IntentionAbonnement.Statut.PAIEMENT_INITIE)
+
+        other_client.post(reverse("logout"))
+        second_login_response = other_client.post(
+            reverse("login"),
+            {"username": "resume-payment@example.com", "password": "Motdepasse123!"},
+        )
+
+        self.assertEqual(second_login_response.status_code, 302)
+        self.assertEqual(second_login_response["Location"], paiement.checkout_url)
+        self.assertEqual(PaiementAbonnement.objects.filter(entreprise=entreprise, plan=intention.plan).count(), 1)
 
     def test_signup_rejects_duplicate_email_and_prompts_login(self):
         entreprise = create_entreprise("Entreprise Existante")

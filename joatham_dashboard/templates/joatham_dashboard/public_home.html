@@ -266,7 +266,7 @@
                                 {% endfor %}
                             </div>
                         </details>
-                        <a class="btn {% if card.is_popular %}btn-primary{% else %}btn-outline{% endif %}" href="{% url 'signup' %}">{{ card.cta_label }}</a>
+                        <a class="btn {% if card.is_popular %}btn-primary{% else %}btn-outline{% endif %}" href="{% url 'signup' %}?plan={{ card.code }}&amp;billing=monthly" data-pricing-cta data-signup-monthly-url="{% url 'signup' %}?plan={{ card.code }}&amp;billing=monthly" data-signup-yearly-url="{% url 'signup' %}?plan={{ card.code }}&amp;billing=yearly">{{ card.cta_label }}</a>
                     </article>
                     {% endfor %}
                 </div>

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView, PasswordResetCompleteView
 from django.contrib.auth import authenticate, get_user_model
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -14,6 +15,7 @@ from django.views.decorators.http import require_POST
 
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement
+from core.services.payment_providers import PaymentProviderError, get_automatic_payment_provider_code
 from core.services.subscription import (
     FREE_PLAN_CLIENT_LIMIT,
     FREE_PLAN_CODE,
@@ -40,6 +42,13 @@ from core.services.subscription import (
 from core.services.product_policy import get_module_label, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
+from core.services.subscription_intents import (
+    SubscriptionIntentStatus,
+    create_subscription_intention_from_public_selection,
+    get_active_subscription_intention_for_user,
+    get_signup_plan_params,
+    resume_subscription_intention_payment,
+)
 from core.services.world import build_country_currency_map, get_currency_choices
 from joatham_dashboard.forms import SecurePasswordResetForm, SignupForm
 from joatham_dashboard.services.password_reset import (
@@ -326,6 +335,58 @@ class SecurePasswordResetCompleteView(PasswordResetCompleteView):
         return context
 
 
+def _get_requested_subscription_signup_params(request):
+    plan_code = (request.POST.get("subscription_plan") or request.GET.get("plan") or "").strip()
+    billing_cycle = (request.POST.get("subscription_billing") or request.GET.get("billing") or "").strip()
+    return get_signup_plan_params(plan_code, billing_cycle)
+
+
+def _resume_subscription_intention_after_login(request, user):
+    intention = get_active_subscription_intention_for_user(user)
+    if intention is None:
+        return None
+
+    provider_code = get_automatic_payment_provider_code(allow_test=True)
+    try:
+        result = resume_subscription_intention_payment(
+            intention=intention,
+            provider=provider_code,
+            utilisateur=user,
+        )
+    except (PaymentProviderError, ValueError) as exc:
+        messages.warning(
+            request,
+            _("Votre compte est actif sur le plan Gratuit. Le paiement du plan choisi pourra etre repris depuis la page des abonnements."),
+        )
+        logger.warning("subscription_intent.resume_failed user_id=%s error=%s", user.id, exc)
+        return redirect("subscription_plan_list")
+
+    if result.status == SubscriptionIntentStatus.CHECKOUT and result.checkout_url:
+        messages.info(request, _("Votre espace est cree. Finalisez le paiement pour activer le plan choisi."))
+        return redirect(result.checkout_url)
+
+    if result.status == SubscriptionIntentStatus.PROVIDER_UNAVAILABLE:
+        messages.warning(
+            request,
+            _("Votre espace est actif sur le plan Gratuit. Le paiement en ligne sera disponible depuis la page des abonnements."),
+        )
+        return redirect("subscription_plan_list")
+
+    if result.status == SubscriptionIntentStatus.FAILED_PAYMENT:
+        messages.warning(
+            request,
+            _("Le paiement precedent n'a pas ete confirme. Votre entreprise reste sur le plan Gratuit."),
+        )
+        return redirect("subscription_plan_list")
+
+    if result.status == SubscriptionIntentStatus.PENDING and result.paiement is not None:
+        reference = result.paiement.external_reference or ""
+        if reference:
+            return redirect(f"{reverse('subscription_payment_return')}?reference={reference}")
+
+    return None
+
+
 def login_view(request):
     if request.user.is_authenticated:
         messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour acceder a la page de connexion ou creer une nouvelle entreprise."))
@@ -408,6 +469,9 @@ def login_view(request):
                         metadata={"role": getattr(user, "role", "")},
                     )
                 return redirect("login_session_conflict")
+            resume_response = _resume_subscription_intention_after_login(request, login_result.user)
+            if resume_response is not None:
+                return resume_response
             dashboard_name = get_default_dashboard_name(login_result.user)
             logger.info("login.redirect user_id=%s dashboard=%s", login_result.user.id, dashboard_name)
             return redirect(dashboard_name)
@@ -488,20 +552,28 @@ def signup_view(request):
         messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour creer une autre entreprise ou tester le parcours d'inscription."))
         return redirect(get_default_dashboard_name(request.user))
 
+    subscription_signup_params = _get_requested_subscription_signup_params(request)
     form = SignupForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         try:
-            user = register_entreprise_owner(
-                company_name=form.cleaned_data["company_name"],
-                raison_sociale=form.cleaned_data["raison_sociale"],
-                owner_full_name=form.cleaned_data["owner_full_name"],
-                email=form.cleaned_data["email"],
-                telephone=form.cleaned_data["telephone"],
-                pays=form.cleaned_data["pays"],
-                devise=form.cleaned_data["devise"],
-                password=form.cleaned_data["password"],
-            )
+            with transaction.atomic():
+                user = register_entreprise_owner(
+                    company_name=form.cleaned_data["company_name"],
+                    raison_sociale=form.cleaned_data["raison_sociale"],
+                    owner_full_name=form.cleaned_data["owner_full_name"],
+                    email=form.cleaned_data["email"],
+                    telephone=form.cleaned_data["telephone"],
+                    pays=form.cleaned_data["pays"],
+                    devise=form.cleaned_data["devise"],
+                    password=form.cleaned_data["password"],
+                )
+                create_subscription_intention_from_public_selection(
+                    entreprise=user.entreprise,
+                    utilisateur=user,
+                    plan_code=subscription_signup_params["plan"],
+                    billing_cycle=subscription_signup_params["billing"],
+                )
         except ValueError as exc:
             form.add_error("email", str(exc))
         else:
@@ -519,9 +591,10 @@ def signup_view(request):
             "country_currency_map": build_country_currency_map(),
             "currency_choices": get_currency_choices(),
             "password_min_length": getattr(settings, "PASSWORD_MIN_LENGTH", 10),
+            "subscription_plan_param": subscription_signup_params["plan"],
+            "subscription_billing_param": subscription_signup_params["billing"],
         },
     )
-
 
 @permission_required("dashboard.owner")
 @module_access_required("dashboard")
