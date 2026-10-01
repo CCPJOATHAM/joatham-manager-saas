@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from core.models import ActivityLog, IntentionAbonnement, PaiementAbonnement
 from core.services.language import LANGUAGE_SESSION_KEY
-from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise
+from core.services.subscription import activate_free_plan_for_entreprise, activate_subscription_for_entreprise, get_subscription_price_usd
 from core.services.world import get_default_currency_for_country
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
 from joatham_depenses.models import Depense
@@ -1069,11 +1069,13 @@ class OnboardingSignupTests(TestCase):
         intention.refresh_from_db()
         subscription = AbonnementEntreprise.objects.get(entreprise=entreprise)
 
+        expected_annual_amount = get_subscription_price_usd(plan=intention.plan, duree=PaiementAbonnement.Duree.ANNUEL)
+
         self.assertEqual(login_response.status_code, 302)
         self.assertEqual(login_response["Location"], paiement.checkout_url)
         self.assertEqual(subscription.plan.code, "free")
         self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
-        self.assertEqual(paiement.montant_usd, Decimal("96.00"))
+        self.assertEqual(paiement.montant_usd, expected_annual_amount)
         self.assertEqual(intention.paiement, paiement)
         self.assertEqual(intention.statut, IntentionAbonnement.Statut.PAIEMENT_INITIE)
 

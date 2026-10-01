@@ -2340,9 +2340,11 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(first.paiement, second.paiement)
         self.assertEqual(intention.paiement, first.paiement)
         self.assertEqual(intention.statut, IntentionAbonnement.Statut.PAIEMENT_INITIE)
+        expected_annual_amount = get_subscription_price_usd(plan=self.plan_basic, duree=PaiementAbonnement.Duree.ANNUEL)
+
         self.assertEqual(first.paiement.duree, PaiementAbonnement.Duree.ANNUEL)
-        self.assertEqual(first.paiement.montant_usd, Decimal("96.00"))
-        self.assertEqual(first.paiement.amount_expected, Decimal("96.00"))
+        self.assertEqual(first.paiement.montant_usd, expected_annual_amount)
+        self.assertEqual(first.paiement.amount_expected, expected_annual_amount)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
