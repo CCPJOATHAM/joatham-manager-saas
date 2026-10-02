@@ -47,6 +47,7 @@ from .services.subscription import (
 from .services.payment_providers import (
     CINETPAY_NOTIFICATION_HMAC_FIELDS,
     PaymentProviderError,
+    _as_cinetpay_amount,
     get_automatic_payment_configuration_diagnostic,
 )
 from .services.subscription_intents import SubscriptionIntentStatus, resume_subscription_intention_payment
@@ -1729,8 +1730,10 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(auth_call.args[0], "https://api.cinetpay.net/v1/oauth/login")
         self.assertEqual(auth_payload, {"api_key": "api-key", "api_password": "api-password"})
         self.assertEqual(payment_call.args[0], "https://api.cinetpay.net/v1/payment")
+        self.assertEqual(payment_call.kwargs["headers"]["Authorization"], "Bearer aurore-token")
         self.assertEqual(payment_payload["merchant_transaction_id"], paiement.external_reference)
         self.assertEqual(payment_payload["amount"], 10)
+        self.assertIsInstance(payment_payload["amount"], int)
         self.assertEqual(payment_payload["currency"], "USD")
         self.assertEqual(payment_payload["designation"], "Abonnement JOATHAM Manager Starter")
         self.assertEqual(payment_payload["notify_url"], "https://app.example.com/abonnement/webhooks/cinetpay/")
@@ -1807,9 +1810,45 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(payment_payload["currency"], "CDF")
         self.assertEqual(payment_payload["amount"], 23000)
+        self.assertIsInstance(payment_payload["amount"], int)
         self.assertEqual(paiement.amount_expected, Decimal("23000.00"))
         self.assertEqual(paiement.montant_usd, Decimal("10.00"))
         self.assertEqual(paiement.paid_currency, "CDF")
+
+    def test_cinetpay_cdf_fractional_amount_uses_half_up_integer_rounding(self):
+        from django.utils import timezone
+
+        ExchangeRate.objects.create(
+            devise_source="USD",
+            devise_cible="CDF",
+            taux=Decimal("2300.055"),
+            source_provider="test_cached_rate",
+            date_taux=timezone.now(),
+        )
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+        self.client.force_login(self.owner)
+
+        with override_settings(**self._complete_cinetpay_settings(CINETPAY_CURRENCY="CDF")), patch("core.services.payment_providers.requests.post") as post_mock:
+            self._mock_cinetpay_checkout(post_mock)
+            response = self.client.post(reverse("subscription_payment_automatic_start", args=[self.plan_basic.id]))
+
+        paiement = PaiementAbonnement.objects.get(
+            entreprise=self.entreprise,
+            methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        )
+        payment_payload = post_mock.call_args_list[1].kwargs["json"]
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(payment_payload["currency"], "CDF")
+        self.assertEqual(payment_payload["amount"], 23001)
+        self.assertIsInstance(payment_payload["amount"], int)
+        self.assertEqual(paiement.amount_expected, Decimal("23001.00"))
+        self.assertEqual(paiement.paid_currency, "CDF")
+
+    def test_cinetpay_non_cdf_amount_keeps_decimal_payload_format(self):
+        self.assertEqual(_as_cinetpay_amount(Decimal("10.25"), currency="USD"), "10.25")
+        self.assertEqual(_as_cinetpay_amount(Decimal("10.00"), currency="USD"), 10)
 
     def test_cinetpay_checkout_network_error_is_safe_and_rolls_back_payment(self):
         with override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post") as post_mock:

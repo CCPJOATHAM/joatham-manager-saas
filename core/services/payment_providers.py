@@ -3,7 +3,7 @@ import hmac
 import hashlib
 import logging
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Optional
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 
@@ -184,7 +184,10 @@ class CinetPayPaymentProvider(BasePaymentProvider):
     def create_payment(self, payment_request):
         self._ensure_configured()
         token = self._authenticate()
-        amount = _as_cinetpay_amount(payment_request.amount_expected or payment_request.montant_usd or payment_request.montant)
+        amount = _as_cinetpay_amount(
+            payment_request.amount_expected or payment_request.montant_usd or payment_request.montant,
+            currency=self.currency,
+        )
         user = getattr(payment_request, "created_by", None)
         entreprise = payment_request.entreprise
         success_url = _url_with_query(self.return_url, reference=payment_request.external_reference, status="success")
@@ -542,8 +545,12 @@ def _request_payload(request):
         raise PaymentProviderVerificationError("Payload webhook invalide.") from exc
 
 
-def _as_cinetpay_amount(value):
-    amount = Decimal(value or "0").quantize(Decimal("0.01"))
+def _as_cinetpay_amount(value, *, currency=""):
+    amount = Decimal(value or "0")
+    if (currency or "").upper() == "CDF":
+        amount = amount.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    else:
+        amount = amount.quantize(Decimal("0.01"))
     if amount <= 0:
         raise PaymentProviderError("Montant CinetPay invalide.")
     if amount == amount.to_integral_value():
