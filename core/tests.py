@@ -1,6 +1,8 @@
 from django.core.exceptions import PermissionDenied
+from django.db import connection
 from django.http import Http404
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from datetime import date, timedelta
@@ -47,7 +49,7 @@ from .services.payment_providers import (
     PaymentProviderError,
     get_automatic_payment_configuration_diagnostic,
 )
-from .services.subscription_intents import resume_subscription_intention_payment
+from .services.subscription_intents import SubscriptionIntentStatus, resume_subscription_intention_payment
 from .services.subscription_payments import create_automatic_subscription_payment_request
 from .services.product_policy import get_module_access_state as get_product_module_access_state
 from .services.currency import get_currency_code
@@ -2345,6 +2347,29 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(first.paiement.duree, PaiementAbonnement.Duree.ANNUEL)
         self.assertEqual(first.paiement.montant_usd, expected_annual_amount)
         self.assertEqual(first.paiement.amount_expected, expected_annual_amount)
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    def test_subscription_intention_resume_lock_query_does_not_join_nullable_payment(self):
+        intention = IntentionAbonnement.objects.create(
+            entreprise=self.entreprise,
+            utilisateur=self.owner,
+            plan=self.plan_basic,
+            duree=PaiementAbonnement.Duree.MENSUEL,
+            statut=IntentionAbonnement.Statut.EN_ATTENTE,
+            source="landing",
+        )
+
+        with CaptureQueriesContext(connection) as captured_queries:
+            result = resume_subscription_intention_payment(intention=intention, provider="", utilisateur=self.owner)
+
+        intention_select = next(
+            query["sql"]
+            for query in captured_queries.captured_queries
+            if "core_intentionabonnement" in query["sql"] and "SELECT" in query["sql"].upper()
+        )
+        self.assertEqual(result.status, SubscriptionIntentStatus.PROVIDER_UNAVAILABLE)
+        self.assertNotIn("core_paiementabonnement", intention_select.lower())
+        self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(JOATHAM_ENABLE_TEST_PAYMENT_PROVIDER=True, JOATHAM_TEST_PAYMENT_WEBHOOK_SECRET="test-secret")
