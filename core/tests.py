@@ -2349,7 +2349,7 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(first.paiement.amount_expected, expected_annual_amount)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
-    def test_subscription_intention_resume_lock_query_does_not_join_nullable_payment(self):
+    def test_subscription_intention_resume_lock_query_does_not_join_nullable_relations(self):
         intention = IntentionAbonnement.objects.create(
             entreprise=self.entreprise,
             utilisateur=self.owner,
@@ -2368,7 +2368,10 @@ class SubscriptionPaymentTests(TestCase):
             if "core_intentionabonnement" in query["sql"] and "SELECT" in query["sql"].upper()
         )
         self.assertEqual(result.status, SubscriptionIntentStatus.PROVIDER_UNAVAILABLE)
-        self.assertNotIn("core_paiementabonnement", intention_select.lower())
+        intention_select_lower = intention_select.lower()
+        self.assertNotIn("core_paiementabonnement", intention_select_lower)
+        self.assertNotIn("joatham_users_user", intention_select_lower)
+        self.assertNotIn("left outer join", intention_select_lower)
         self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise, plan=self.plan_basic).exists())
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 

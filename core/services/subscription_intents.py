@@ -226,7 +226,7 @@ def resume_subscription_intention_payment(*, intention, provider, utilisateur=No
         return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.NO_INTENT)
     intention = (
         IntentionAbonnement.objects.select_for_update()
-        .select_related("entreprise", "plan", "utilisateur")
+        .select_related("entreprise", "plan")
         .get(pk=intention.pk)
     )
     paiement = PaiementAbonnement.objects.get(pk=intention.paiement_id) if intention.paiement_id else None
