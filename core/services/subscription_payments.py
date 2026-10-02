@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
 from django.db import transaction
@@ -354,18 +354,50 @@ def _get_provider_expected_amount_and_currency(*, provider_client, amount_usd, e
     platform_currency = get_platform_currency().upper()
     provider_currency = (getattr(provider_client, "currency", "") or platform_currency).upper()
     if not provider_currency or provider_currency == platform_currency:
-        return amount_usd, platform_currency
+        return (
+            _normalize_provider_expected_amount(
+                provider_client=provider_client,
+                amount=amount_usd,
+                currency=platform_currency,
+            ),
+            platform_currency,
+        )
 
     estimate_currency = (estimate.get("currency_code") or "").upper()
     estimated_amount = estimate.get("estimated_amount")
     if estimate_currency == provider_currency and estimated_amount is not None:
-        return Decimal(str(estimated_amount)).quantize(Decimal("0.01")), provider_currency
+        amount = Decimal(str(estimated_amount)).quantize(Decimal("0.01"))
+        return (
+            _normalize_provider_expected_amount(
+                provider_client=provider_client,
+                amount=amount,
+                currency=provider_currency,
+            ),
+            provider_currency,
+        )
 
     try:
         conversion = convert_amount(amount_usd, platform_currency, provider_currency)
     except ExchangeRateUnavailable as exc:
         raise PaymentProviderError(f"Conversion {platform_currency}->{provider_currency} indisponible pour CinetPay.") from exc
-    return conversion.amount.quantize(Decimal("0.01")), provider_currency
+    amount = conversion.amount.quantize(Decimal("0.01"))
+    return (
+        _normalize_provider_expected_amount(
+            provider_client=provider_client,
+            amount=amount,
+            currency=provider_currency,
+        ),
+        provider_currency,
+    )
+
+
+def _normalize_provider_expected_amount(*, provider_client, amount, currency):
+    if (
+        getattr(provider_client, "provider_code", "") == "cinetpay"
+        and (currency or "").upper() == "CDF"
+    ):
+        return Decimal(str(amount)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    return amount
 
 
 def _store_webhook_snapshot(paiement, verified_payment):
