@@ -226,9 +226,10 @@ def resume_subscription_intention_payment(*, intention, provider, utilisateur=No
         return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.NO_INTENT)
     intention = (
         IntentionAbonnement.objects.select_for_update()
-        .select_related("entreprise", "plan", "paiement")
+        .select_related("entreprise", "plan", "utilisateur")
         .get(pk=intention.pk)
     )
+    paiement = PaiementAbonnement.objects.get(pk=intention.paiement_id) if intention.paiement_id else None
     if intention.statut not in ACTIVE_INTENT_STATUSES:
         return SubscriptionIntentResumeResult(status=intention.statut, intention=intention)
 
@@ -245,10 +246,9 @@ def resume_subscription_intention_payment(*, intention, provider, utilisateur=No
 
     current_subscription = get_current_subscription(intention.entreprise)
     if current_subscription and current_subscription.actif and current_subscription.plan_id == intention.plan_id:
-        _mark_intention_consumed_locked(intention, paiement=intention.paiement)
-        return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.CONSUMED, intention=intention, paiement=intention.paiement)
+        _mark_intention_consumed_locked(intention, paiement=paiement)
+        return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.CONSUMED, intention=intention, paiement=paiement)
 
-    paiement = intention.paiement
     if paiement is not None:
         if paiement.statut in PAID_PAYMENT_STATUSES:
             _mark_intention_consumed_locked(intention, paiement=paiement)
