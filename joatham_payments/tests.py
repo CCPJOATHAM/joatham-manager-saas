@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from core.models import ActivityLog
 from core.services.product_policy import get_module_access_state
@@ -90,6 +91,28 @@ class PaymentTransactionTests(TestCase):
         self.assertTrue(payment.is_mobile_money)
         self.assertEqual(payment.phone_number, "+243970000000")
         self.assertEqual(payment.mobile_operator, PaymentTransaction.MobileOperator.MPESA)
+
+    def test_mobile_money_payment_requires_premium_business_access(self):
+        for plan_code in ("free","starter","pro"):
+            entreprise=create_entreprise(f"Entreprise-{plan_code}-Mobile-Money")
+            owner=create_user(f"owner-{plan_code}-mobile-money","proprietaire",entreprise)
+            if plan_code=="free":
+                plan=get_or_create_free_plan()
+            else:
+                plan=self._create_official_plan(plan_code)
+            activate_subscription_for_entreprise(entreprise=entreprise,plan=plan,utilisateur=owner)
+            with self.assertRaises(PermissionDenied):
+                create_payment_transaction(entreprise=entreprise,transaction_type=PaymentTransaction.TransactionType.ENCAISSEMENT,method=PaymentTransaction.Method.MPESA,amount=Decimal("45.00"),reference=f"MPESA-{plan_code}",phone_number="+243970000000",mobile_operator=PaymentTransaction.MobileOperator.MPESA,utilisateur=owner)
+
+    def test_pro_direct_mobile_money_post_is_blocked_server_side(self):
+        pro_entreprise=create_entreprise("Entreprise Pro Mobile URL")
+        pro_owner=create_user("owner-pro-mobile-url","proprietaire",pro_entreprise)
+        pro_plan=self._create_official_plan("pro")
+        activate_subscription_for_entreprise(entreprise=pro_entreprise,plan=pro_plan,utilisateur=pro_owner)
+        self.client.force_login(pro_owner)
+        response=self.client.post(reverse("payment_create"),{"transaction_type":PaymentTransaction.TransactionType.ENCAISSEMENT,"method":PaymentTransaction.Method.MPESA,"amount":"45.00","currency":"CDF","reference":"PRO-MPESA-DIRECT","phone_number":"+243970000000","mobile_operator":PaymentTransaction.MobileOperator.MPESA,"transaction_date":timezone.now().strftime("%Y-%m-%dT%H:%M")})
+        self.assertEqual(response.status_code,200)
+        self.assertFalse(PaymentTransaction.objects.filter(entreprise=pro_entreprise,method=PaymentTransaction.Method.MPESA).exists())
 
     def test_confirmed_invoice_payment_updates_invoice(self):
         facture = create_facture_sample(self.entreprise, self.gestionnaire, montant=Decimal("100"))
@@ -248,10 +271,17 @@ class PaymentTransactionTests(TestCase):
         self.assertIn("module=payments", response["Location"])
         self.assertIn(f"reason={expected_reason}", response["Location"])
 
-    def test_free_starter_and_pro_plans_block_payments_module(self):
-        self._assert_payments_module_blocked_for_plan(plan_code="free", expected_reason="premium_required")
-        self._assert_payments_module_blocked_for_plan(plan_code="starter", expected_reason="premium_required")
-        self._assert_payments_module_blocked_for_plan(plan_code="pro", expected_reason="premium_required")
+    def test_free_and_starter_block_payments_module_but_pro_can_use_it(self):
+        self._assert_payments_module_blocked_for_plan(plan_code="free",expected_reason="premium_required")
+        self._assert_payments_module_blocked_for_plan(plan_code="starter",expected_reason="module_not_in_plan")
+
+        pro_entreprise=create_entreprise("Entreprise Pro Paiements")
+        pro_owner=create_user("owner-pro-payments","proprietaire",pro_entreprise)
+        pro_plan=self._create_official_plan("pro")
+        activate_subscription_for_entreprise(entreprise=pro_entreprise,plan=pro_plan,utilisateur=pro_owner)
+        self.client.force_login(pro_owner)
+        self.assertEqual(self.client.get(reverse("payment_list")).status_code,200)
+        self.assertEqual(self.client.get(reverse("payment_create")).status_code,200)
 
     def test_premium_plan_allows_payments_views_and_exports(self):
         payment = create_payment_transaction(
@@ -282,27 +312,24 @@ class PaymentTransactionTests(TestCase):
         self.client.force_login(pro_owner)
         pro_response = self.client.get(reverse("admin_dashboard"))
         self.assertContains(pro_response, "Paiements")
-        self.assertContains(pro_response, "Premium")
-        self.assertNotContains(pro_response, reverse("payment_list"))
+        self.assertContains(pro_response, reverse("payment_list"))
 
         self.client.force_login(self.owner)
         premium_response = self.client.get(reverse("admin_dashboard"))
         self.assertContains(premium_response, reverse("payment_list"))
 
-    def test_default_plan_payloads_keep_payments_premium_only(self):
-        payment_modules = {
-            "payments",
-            "paiements",
-            "mobile_money",
-            "payment_validation",
-            "payments_reports",
-            "payments_exports",
-        }
+    def test_default_plan_payloads_keep_general_payments_available_to_pro_only(self):
+        payment_modules={"payments","paiements","payment_validation","payments_reports","payments_exports"}
+        mobile_money_modules={"mobile_money"}
 
         self.assertTrue(payment_modules.isdisjoint(FREE_PLAN_MODULES))
         self.assertTrue(payment_modules.isdisjoint(STARTER_PLAN_MODULES))
-        self.assertTrue(payment_modules.isdisjoint(PRO_PLAN_MODULES))
+        self.assertTrue(payment_modules.issubset(PRO_PLAN_MODULES))
         self.assertTrue(payment_modules.issubset(PREMIUM_PLAN_MODULES))
+        self.assertTrue(mobile_money_modules.isdisjoint(FREE_PLAN_MODULES))
+        self.assertTrue(mobile_money_modules.isdisjoint(STARTER_PLAN_MODULES))
+        self.assertTrue(mobile_money_modules.isdisjoint(PRO_PLAN_MODULES))
+        self.assertTrue(mobile_money_modules.issubset(PREMIUM_PLAN_MODULES))
 
     def test_premium_plan_code_allows_payments_even_when_stored_modules_are_stale(self):
         stale_entreprise = create_entreprise("Entreprise Premium Stale Paiements")

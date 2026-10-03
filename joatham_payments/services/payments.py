@@ -5,6 +5,7 @@ from django.db import connection, transaction
 from django.utils import timezone
 
 from core.audit import record_audit_event
+from core.services.product_policy import get_module_access_state
 from joatham_billing.exceptions import FacturationError
 from joatham_billing.models import Facture, PaiementFacture
 from joatham_billing.services.facturation import register_payment
@@ -254,6 +255,9 @@ def create_payment_transaction(
         raise PaymentOperationError("Le type de paiement est invalide.")
     if method not in dict(PaymentTransaction.Method.choices):
         raise PaymentOperationError("Le moyen de paiement est invalide.")
+
+    if method in PaymentTransaction.MOBILE_MONEY_METHODS and not get_module_access_state(entreprise, "mobile_money")["allowed"]:
+        raise PermissionDenied("Le Mobile Money est reserve au plan Premium Business.")
 
     desired_status = status or PaymentTransaction.Status.EN_ATTENTE
     if desired_status not in {PaymentTransaction.Status.EN_ATTENTE, PaymentTransaction.Status.CONFIRME}:

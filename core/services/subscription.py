@@ -68,6 +68,8 @@ STARTER_PLAN_MODULES = FREE_PLAN_MODULES + [
     "billing_pos",
     "pos_simple",
     "proformas",
+    "users",
+    "utilisateurs",
 ]
 PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
     "caisse",
@@ -90,8 +92,6 @@ PRO_PLAN_MODULES = STARTER_PLAN_MODULES + [
     "accounting_exports",
     "apprenants",
     "proforma_conversion",
-    "users",
-    "utilisateurs",
     "audit",
 ]
 PREMIUM_PLAN_MODULES = PRO_PLAN_MODULES + [
