@@ -22,6 +22,7 @@ from core.services.subscription import (
     activate_subscription_for_entreprise,
     build_subscription_payment_estimate,
     get_current_subscription,
+    get_default_paid_plans,
     get_or_create_free_plan,
     get_subscription_for_entreprise,
     has_active_subscription_access,
@@ -617,6 +618,27 @@ class UserManagementTests(TestCase):
         self.assertContains(response, "Utilisateurs total")
         self.assertContains(response, "Ajouter un utilisateur")
         self.assertContains(response, reverse("user_create"))
+
+    def test_starter_owner_can_manage_team_until_three_user_quota(self):
+        starter_entreprise=create_entreprise("Entreprise Starter Users")
+        starter_owner=create_user("owner-starter-users","proprietaire",starter_entreprise)
+        starter_payload=None
+        for payload in get_default_paid_plans():
+            if payload["code"]=="starter":
+                starter_payload=payload
+                break
+        self.assertIsNotNone(starter_payload)
+        starter_plan=Abonnement.objects.create(**starter_payload,actif=True)
+        activate_subscription_for_entreprise(entreprise=starter_entreprise,plan=starter_plan,utilisateur=starter_owner)
+        self.client.force_login(starter_owner)
+        self.assertEqual(self.client.get(reverse("user_list")).status_code,200)
+        for index in range(2):
+            response=self.client.post(reverse("user_create"),{"full_name":f"Starter User {index}","email":f"starter-user-{index}@example.com","telephone":"+243900000099","role":User.Role.GESTIONNAIRE,"password":"Motdepasse123!"})
+            self.assertRedirects(response,reverse("user_list"))
+        blocked_response=self.client.post(reverse("user_create"),{"full_name":"Starter User 3","email":"starter-user-3@example.com","telephone":"+243900000099","role":User.Role.GESTIONNAIRE,"password":"Motdepasse123!"})
+        self.assertEqual(blocked_response.status_code,200)
+        self.assertContains(blocked_response,"Votre plan permet jusqu")
+        self.assertFalse(User.objects.filter(email="starter-user-3@example.com").exists())
 
     def test_user_list_displays_role_and_status_badges(self):
         self.client.force_login(self.owner)

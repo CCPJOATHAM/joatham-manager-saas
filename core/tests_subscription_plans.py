@@ -30,6 +30,7 @@ from core.services.quotas import (
     assert_invoice_quota_available,
     assert_product_quota_available,
     assert_proforma_quota_available,
+    assert_user_quota_available,
     get_plan_quota_limit,
 )
 from core.services.subscription import (
@@ -169,6 +170,7 @@ class SubscriptionPlanMatrixTests(TestCase):
             },
         )
         self.assertTrue({"expenses", "depenses", "products", "produits", "stock", "billing_pos", "pos_simple", "proformas"}.issubset(set(paid_plans["starter"]["modules_inclus"])))
+        self.assertTrue({"users", "utilisateurs"}.issubset(set(paid_plans["starter"]["modules_inclus"])))
         self.assertFalse({"caisse", "rh", "advanced_reports"} & set(paid_plans["starter"]["modules_inclus"]))
         self.assertFalse(paid_plans["starter"]["acces_comptabilite"])
         self.assertTrue(
@@ -282,6 +284,8 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertTrue(can_access_module(self.starter_owner, "stock"))
         self.assertTrue(can_access_module(self.starter_owner, "billing_pos"))
         self.assertTrue(can_access_module(self.starter_owner, "proformas"))
+        self.assertTrue(can_access_module(self.starter_owner, "users"))
+        self.assertTrue(can_access_module(self.starter_owner, "utilisateurs"))
         self.assertFalse(can_access_module(self.starter_owner, "proforma_conversion"))
         self.assertFalse(can_access_module(self.starter_owner, "stock_reports"))
         self.assertFalse(can_access_module(self.starter_owner, "caisse"))
@@ -290,6 +294,7 @@ class SubscriptionPlanMatrixTests(TestCase):
         self.assertFalse(can_access_module(self.starter_owner, "accounting"))
         self.assertFalse(can_access_module(self.starter_owner, "rh"))
         self.assertFalse(can_access_module(self.starter_owner, "advanced_reports"))
+        self.assertFalse(can_access_module(self.starter_owner, "mobile_money"))
         state = get_module_access_state(self.starter_company, "inventory")
         self.assertEqual(state["reason"], "module_not_in_plan")
 
@@ -371,6 +376,41 @@ class SubscriptionPlanMatrixTests(TestCase):
             with self.subTest(module=english_name):
                 self.assertTrue(can_access_module(self.starter_owner, english_name))
                 self.assertTrue(can_access_module(self.starter_owner, french_name))
+
+
+    def test_plan_flags_block_accounting_and_exports_even_when_modules_are_stored(self):
+        flagged_company = create_entreprise("Entreprise flags plans")
+        flagged_owner = create_user("owner-flags-plans","proprietaire",flagged_company)
+        flagged_plan = Abonnement.objects.create(
+            nom="Flags",
+            code="flags",
+            prix=10,
+            duree_jours=30,
+            actif=True,
+            modules_inclus=["accounting","accounting_exports","stock_exports","payments_exports"],
+            acces_comptabilite=False,
+            acces_exports=False,
+        )
+        activate_subscription_for_entreprise(entreprise=flagged_company,plan=flagged_plan,utilisateur=flagged_owner)
+        accounting_state=get_module_access_state(flagged_company,"accounting")
+        export_state=get_module_access_state(flagged_company,"stock_exports")
+        self.assertFalse(accounting_state["allowed"])
+        self.assertEqual(accounting_state["reason"],"accounting_not_in_plan")
+        self.assertFalse(export_state["allowed"])
+        self.assertEqual(export_state["reason"],"exports_not_in_plan")
+
+    def test_user_quota_limits_follow_official_matrix(self):
+        for index in range(2):
+            create_user(f"starter-team-{index}","gestionnaire",self.starter_company)
+        with self.assertRaises(PlanQuotaExceeded):
+            assert_user_quota_available(self.starter_company)
+        for index in range(9):
+            create_user(f"pro-team-{index}","gestionnaire",self.pro_company)
+        with self.assertRaises(PlanQuotaExceeded):
+            assert_user_quota_available(self.pro_company)
+        for index in range(12):
+            create_user(f"premium-team-{index}","gestionnaire",self.premium_company)
+        assert_user_quota_available(self.premium_company)
 
 
 class SubscriptionQuotaMatrixTests(TestCase):
@@ -601,12 +641,15 @@ class SaasPlanSeedTests(TestCase):
         self.assertIn("stock", starter.modules_inclus)
         self.assertIn("billing_pos", starter.modules_inclus)
         self.assertIn("proformas", starter.modules_inclus)
+        self.assertIn("users", starter.modules_inclus)
+        self.assertIn("utilisateurs", starter.modules_inclus)
         self.assertFalse(starter.acces_exports)
         self.assertNotIn("caisse", starter.modules_inclus)
         self.assertIn("caisse", pro.modules_inclus)
         self.assertIn("proforma_conversion", pro.modules_inclus)
         self.assertIn("payments", pro.modules_inclus)
         self.assertIn("accounting", pro.modules_inclus)
+        self.assertNotIn("mobile_money", pro.modules_inclus)
         self.assertNotIn("rh", pro.modules_inclus)
         self.assertIn("rh", premium.modules_inclus)
         self.assertIn("advanced_reports", premium.modules_inclus)
