@@ -23,7 +23,9 @@ from core.services.subscription import (
     FREE_PLAN_INVOICE_LIMIT,
     FREE_PLAN_MODULES,
     FREE_PLAN_USER_LIMIT,
+    PREMIUM_PLAN_CODE,
     PRO_PLAN_CODE,
+    STARTER_PLAN_CODE,
     get_commercial_plans_queryset,
     get_default_paid_plans,
     get_plan_commercial_description,
@@ -43,6 +45,8 @@ from core.services.product_policy import get_module_label, module_access_require
 from core.services.tenancy import get_user_entreprise_or_raise
 from core.ui_text import FLASH_MESSAGES
 from core.services.subscription_intents import (
+    BILLING_CYCLE_MONTHLY,
+    BILLING_CYCLE_YEARLY,
     SubscriptionIntentStatus,
     create_subscription_intention_from_public_selection,
     get_active_subscription_intention_for_user,
@@ -75,6 +79,15 @@ PENDING_CONFLICT_USER_ID = "pending_conflict_user_id"
 PENDING_CONFLICT_FLAG = "pending_login_session_conflict"
 PENDING_CONFLICT_BACKEND = "pending_login_backend"
 PUBLIC_PLAN_ORDER = (FREE_PLAN_CODE, "starter", PRO_PLAN_CODE, "premium")
+SIGNUP_PAID_PLAN_LABELS = {
+    STARTER_PLAN_CODE: _("Starter"),
+    PRO_PLAN_CODE: _("Pro"),
+    PREMIUM_PLAN_CODE: _("Premium Business"),
+}
+SIGNUP_BILLING_LABELS = {
+    BILLING_CYCLE_MONTHLY: _("Mensuel"),
+    BILLING_CYCLE_YEARLY: _("Annuel"),
+}
 
 
 def _clear_pending_session_conflict(request):
@@ -341,6 +354,25 @@ def _get_requested_subscription_signup_params(request):
     return get_signup_plan_params(plan_code, billing_cycle)
 
 
+def _build_subscription_signup_context(subscription_signup_params):
+    plan_code = subscription_signup_params["plan"]
+    billing_cycle = subscription_signup_params["billing"]
+    is_paid_selection = plan_code in SIGNUP_PAID_PLAN_LABELS and billing_cycle in SIGNUP_BILLING_LABELS
+    context = {
+        "subscription_signup_is_paid": is_paid_selection,
+        "subscription_selected_plan_label": "",
+        "subscription_selected_billing_label": "",
+    }
+    if is_paid_selection:
+        context.update(
+            {
+                "subscription_selected_plan_label": SIGNUP_PAID_PLAN_LABELS[plan_code],
+                "subscription_selected_billing_label": SIGNUP_BILLING_LABELS[billing_cycle],
+            }
+        )
+    return context
+
+
 def _resume_subscription_intention_after_login(request, user):
     intention = get_active_subscription_intention_for_user(user)
     if intention is None:
@@ -582,18 +614,21 @@ def signup_view(request):
             messages.success(request, _("Un email de confirmation a ete envoye a votre adresse."))
             return redirect("email_verification_sent")
 
+    context = {
+        "form": form,
+        "app_name": "JOATHAM Manager",
+        "country_currency_map": build_country_currency_map(),
+        "currency_choices": get_currency_choices(),
+        "password_min_length": getattr(settings, "PASSWORD_MIN_LENGTH", 10),
+        "subscription_plan_param": subscription_signup_params["plan"],
+        "subscription_billing_param": subscription_signup_params["billing"],
+    }
+    context.update(_build_subscription_signup_context(subscription_signup_params))
+
     return render(
         request,
         "joatham_dashboard/signup.html",
-        {
-            "form": form,
-            "app_name": "JOATHAM Manager",
-            "country_currency_map": build_country_currency_map(),
-            "currency_choices": get_currency_choices(),
-            "password_min_length": getattr(settings, "PASSWORD_MIN_LENGTH", 10),
-            "subscription_plan_param": subscription_signup_params["plan"],
-            "subscription_billing_param": subscription_signup_params["billing"],
-        },
+        context,
     )
 
 @permission_required("dashboard.owner")

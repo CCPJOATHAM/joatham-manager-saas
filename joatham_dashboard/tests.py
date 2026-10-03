@@ -804,6 +804,64 @@ class OnboardingSignupTests(TestCase):
         self.assertContains(response, 'name="subscription_plan" value="starter"')
         self.assertContains(response, 'name="subscription_billing" value="yearly"')
 
+    def test_signup_page_keeps_free_plan_message_for_free_selection(self):
+        response = self.client.get(reverse("signup"), {"plan": "free", "billing": "monthly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertContains(response, "Le plan gratuit est activé")
+        self.assertNotContains(response, "PLAN SÉLECTIONNÉ")
+
+    def test_signup_page_displays_selected_starter_monthly_context(self):
+        response = self.client.get(reverse("signup"), {"plan": "starter", "billing": "monthly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PLAN SÉLECTIONNÉ — STARTER")
+        self.assertContains(response, "Créez votre entreprise avec le plan Starter.")
+        self.assertContains(response, "Cycle choisi")
+        self.assertContains(response, "Mensuel")
+        self.assertContains(response, "poursuivre vers le paiement sécurisé")
+        self.assertNotContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertNotContains(response, "Le plan gratuit est activé")
+
+    def test_signup_page_displays_selected_pro_yearly_context(self):
+        response = self.client.get(reverse("signup"), {"plan": "pro", "billing": "yearly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PLAN SÉLECTIONNÉ — PRO")
+        self.assertContains(response, "Créez votre entreprise avec le plan Pro.")
+        self.assertContains(response, "Annuel")
+        self.assertNotContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertNotContains(response, "Le plan gratuit est activé")
+
+    def test_signup_page_displays_selected_premium_business_context(self):
+        response = self.client.get(reverse("signup"), {"plan": "premium", "billing": "monthly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PLAN SÉLECTIONNÉ — PREMIUM BUSINESS")
+        self.assertContains(response, "Créez votre entreprise avec le plan Premium Business.")
+        self.assertContains(response, "Mensuel")
+        self.assertNotContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertNotContains(response, "Le plan gratuit est activé")
+
+    def test_signup_page_ignores_invalid_public_subscription_selection(self):
+        response = self.client.get(reverse("signup"), {"plan": "enterprise", "billing": "yearly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertNotContains(response, "PLAN SÉLECTIONNÉ")
+        self.assertNotContains(response, 'name="subscription_plan" value="enterprise"')
+        self.assertNotContains(response, 'name="subscription_billing" value="yearly"')
+
+    def test_signup_page_ignores_invalid_paid_billing_selection(self):
+        response = self.client.get(reverse("signup"), {"plan": "starter", "billing": "weekly"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager.")
+        self.assertNotContains(response, "PLAN SÉLECTIONNÉ")
+        self.assertNotContains(response, 'name="subscription_plan" value="starter"')
+        self.assertNotContains(response, 'name="subscription_billing" value="weekly"')
+
     def test_signup_page_displays_dynamic_password_requirements(self):
         response = self.client.get(reverse("signup"))
 
