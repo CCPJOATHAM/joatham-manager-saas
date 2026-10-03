@@ -80,6 +80,22 @@
             letter-spacing: 0.08em;
         }
 
+        .selected-plan-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+
+        .selected-plan-meta strong {
+            color: #fff;
+        }
+
         .steps {
             margin-top: 30px;
             display: grid;
@@ -334,6 +350,25 @@
     </div>
     <main class="shell">
         <section class="brand-panel">
+            {% if subscription_signup_is_paid %}
+            <div class="brand-kicker">{% trans "PLAN SÉLECTIONNÉ" %} — {{ subscription_selected_plan_label|upper }}</div>
+            <h1>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}Créez votre entreprise avec le plan {{ plan_name }}.{% endblocktrans %}</h1>
+            <p>
+                {% blocktrans with plan_name=subscription_selected_plan_label billing_label=subscription_selected_billing_label trimmed %}
+                Votre choix du plan {{ plan_name }} en facturation {{ billing_label }} sera conservé. Après la création et la vérification de votre compte, vous pourrez poursuivre vers le paiement sécurisé.
+                {% endblocktrans %}
+            </p>
+            <div class="selected-plan-meta">
+                <span>{% trans "Cycle choisi" %}</span>
+                <strong>{{ subscription_selected_billing_label }}</strong>
+            </div>
+
+            <div class="steps">
+                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
+                <div>{% trans "2. Le pays suggère automatiquement la devise par défaut" %}</div>
+                <div>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}3. Vérifiez votre adresse e-mail puis poursuivez vers le paiement de votre plan {{ plan_name }}{% endblocktrans %}</div>
+            </div>
+            {% else %}
             <div class="brand-kicker">{% trans "Parcours SaaS" %}</div>
             <h1>{% trans "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager." %}</h1>
             <p>
@@ -348,6 +383,7 @@
                 <div>{% trans "2. Le pays suggere automatiquement la devise par defaut" %}</div>
                 <div>{% trans "3. Le plan gratuit est activé et vous accédez directement à votre tableau de bord" %}</div>
             </div>
+            {% endif %}
         </section>
 
         <section class="form-panel">
