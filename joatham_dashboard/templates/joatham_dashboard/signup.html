@@ -49,12 +49,118 @@
             box-shadow: var(--shadow);
         }
 
+        .signup-theme {
+            --theme-panel-bg:
+                radial-gradient(circle at 78% 20%, rgba(125, 211, 252, 0.28), transparent 28%),
+                linear-gradient(160deg, #10233f 0%, #0f766e 100%);
+            --theme-accent: #7dd3fc;
+            --theme-accent-strong: #0ea5e9;
+            --theme-kicker-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(125, 211, 252, 0.92));
+            --theme-kicker-border: rgba(186, 230, 253, 0.62);
+            --theme-kicker-shadow: rgba(14, 165, 233, 0.28);
+            --theme-card-bg: rgba(15, 35, 63, 0.58);
+            --theme-card-border: rgba(125, 211, 252, 0.36);
+            --theme-deco-border: rgba(125, 211, 252, 0.28);
+            --theme-deco-bg: rgba(125, 211, 252, 0.12);
+            --theme-glow: rgba(125, 211, 252, 0.18);
+            --theme-step-number-bg: #bae6fd;
+            --theme-step-number-color: #082f49;
+        }
+
+        .signup-theme-starter {
+            --theme-panel-bg:
+                linear-gradient(135deg, rgba(2, 132, 199, 0.18), transparent 32%),
+                radial-gradient(circle at 88% 8%, rgba(34, 211, 238, 0.4), transparent 30%),
+                linear-gradient(145deg, #073b77 0%, #0891b2 54%, #14b8a6 100%);
+            --theme-accent: #67e8f9;
+            --theme-accent-strong: #06b6d4;
+            --theme-kicker-bg: linear-gradient(135deg, #0ea5e9, #14b8a6);
+            --theme-kicker-border: rgba(103, 232, 249, 0.68);
+            --theme-kicker-shadow: rgba(20, 184, 166, 0.32);
+            --theme-card-bg: rgba(8, 47, 73, 0.58);
+            --theme-card-border: rgba(103, 232, 249, 0.42);
+            --theme-deco-border: rgba(103, 232, 249, 0.34);
+            --theme-deco-bg: rgba(103, 232, 249, 0.12);
+            --theme-glow: rgba(45, 212, 191, 0.22);
+            --theme-step-number-bg: #a5f3fc;
+            --theme-step-number-color: #083344;
+        }
+
+        .signup-theme-pro {
+            --theme-panel-bg:
+                radial-gradient(circle at 80% 14%, rgba(168, 85, 247, 0.34), transparent 30%),
+                linear-gradient(135deg, rgba(99, 102, 241, 0.2), transparent 42%),
+                linear-gradient(150deg, #080f3d 0%, #15135c 48%, #312e81 100%);
+            --theme-accent: #d8b4fe;
+            --theme-accent-strong: #7c3aed;
+            --theme-kicker-bg: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --theme-kicker-border: rgba(216, 180, 254, 0.66);
+            --theme-kicker-shadow: rgba(124, 58, 237, 0.34);
+            --theme-card-bg: rgba(17, 24, 78, 0.64);
+            --theme-card-border: rgba(196, 181, 253, 0.42);
+            --theme-deco-border: rgba(196, 181, 253, 0.32);
+            --theme-deco-bg: rgba(124, 58, 237, 0.13);
+            --theme-glow: rgba(139, 92, 246, 0.24);
+            --theme-step-number-bg: #e9d5ff;
+            --theme-step-number-color: #312e81;
+        }
+
+        .signup-theme-premium {
+            --theme-panel-bg:
+                radial-gradient(circle at 72% 18%, rgba(245, 158, 11, 0.24), transparent 28%),
+                linear-gradient(135deg, rgba(146, 64, 14, 0.22), transparent 45%),
+                linear-gradient(155deg, #06080f 0%, #111827 52%, #23190d 100%);
+            --theme-accent: #fde68a;
+            --theme-accent-strong: #d97706;
+            --theme-kicker-bg: linear-gradient(135deg, #7c4a03, #f59e0b);
+            --theme-kicker-border: rgba(253, 230, 138, 0.72);
+            --theme-kicker-shadow: rgba(245, 158, 11, 0.3);
+            --theme-card-bg: rgba(17, 24, 39, 0.72);
+            --theme-card-border: rgba(251, 191, 36, 0.46);
+            --theme-deco-border: rgba(251, 191, 36, 0.36);
+            --theme-deco-bg: rgba(245, 158, 11, 0.12);
+            --theme-glow: rgba(245, 158, 11, 0.22);
+            --theme-step-number-bg: #fde68a;
+            --theme-step-number-color: #422006;
+        }
+
         .brand-panel {
+            position: relative;
+            overflow: hidden;
             padding: 48px;
-            background:
-                radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 24%),
-                linear-gradient(160deg, rgba(16, 35, 63, 0.97), rgba(15, 118, 110, 0.9));
+            background: var(--theme-panel-bg);
             color: white;
+        }
+
+        .brand-panel::before,
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .brand-panel::before {
+            inset: 0;
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.08), transparent 30%),
+                radial-gradient(circle at 18% 82%, var(--theme-glow), transparent 34%);
+            opacity: 0.9;
+        }
+
+        .brand-panel::after {
+            width: 330px;
+            height: 330px;
+            right: -140px;
+            top: 66px;
+            border: 1px solid var(--theme-deco-border);
+            border-radius: 52px;
+            transform: rotate(42deg);
+            background: linear-gradient(135deg, var(--theme-deco-bg), transparent);
+        }
+
+        .brand-panel > * {
+            position: relative;
+            z-index: 1;
         }
 
         .brand-panel h1 {
@@ -74,7 +180,9 @@
             align-items: center;
             padding: 8px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.12);
+            background: var(--theme-kicker-bg);
+            border: 1px solid var(--theme-kicker-border);
+            box-shadow: 0 14px 30px var(--theme-kicker-shadow);
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -87,13 +195,15 @@
             margin-top: 8px;
             padding: 10px 14px;
             border-radius: 14px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(2, 6, 23, 0.34);
+            border: 1px solid var(--theme-card-border);
             color: rgba(255,255,255,0.9);
             font-size: 0.95rem;
+            box-shadow: 0 16px 34px rgba(2, 6, 23, 0.2);
         }
 
         .selected-plan-meta strong {
-            color: #fff;
+            color: var(--theme-accent);
         }
 
         .steps {
@@ -103,9 +213,27 @@
         }
 
         .steps div {
+            display: flex;
+            align-items: center;
+            gap: 14px;
             padding: 14px;
             border-radius: 16px;
-            background: rgba(255,255,255,0.08);
+            background: var(--theme-card-bg);
+            border: 1px solid var(--theme-card-border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            border-radius: 999px;
+            background: var(--theme-step-number-bg);
+            color: var(--theme-step-number-color);
+            font-weight: 800;
         }
 
         .form-panel {
@@ -348,7 +476,7 @@
     <div class="auth-language">
         {% include "includes/language_selector.html" with language_selector_id="signup-language-select" %}
     </div>
-    <main class="shell">
+    <main class="shell signup-theme signup-theme-{{ subscription_signup_theme }}" data-signup-theme="{{ subscription_signup_theme }}">
         <section class="brand-panel">
             {% if subscription_signup_is_paid %}
             <div class="brand-kicker">{% trans "PLAN SÉLECTIONNÉ" %} — {{ subscription_selected_plan_label|upper }}</div>
@@ -364,9 +492,9 @@
             </div>
 
             <div class="steps">
-                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
-                <div>{% trans "2. Le pays suggère automatiquement la devise par défaut" %}</div>
-                <div>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}3. Vérifiez votre adresse e-mail puis poursuivez vers le paiement de votre plan {{ plan_name }}{% endblocktrans %}</div>
+                <div><span class="step-number">1</span><span>{% trans "Créez votre entreprise et votre compte propriétaire" %}</span></div>
+                <div><span class="step-number">2</span><span>{% trans "Le pays suggère automatiquement la devise par défaut" %}</span></div>
+                <div><span class="step-number">3</span><span>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}Vérifiez votre adresse e-mail puis poursuivez vers le paiement de votre plan {{ plan_name }}{% endblocktrans %}</span></div>
             </div>
             {% else %}
             <div class="brand-kicker">{% trans "Parcours SaaS" %}</div>
@@ -379,9 +507,9 @@
             </p>
 
             <div class="steps">
-                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
-                <div>{% trans "2. Le pays suggere automatiquement la devise par defaut" %}</div>
-                <div>{% trans "3. Le plan gratuit est activé et vous accédez directement à votre tableau de bord" %}</div>
+                <div><span class="step-number">1</span><span>{% trans "Créez votre entreprise et votre compte propriétaire" %}</span></div>
+                <div><span class="step-number">2</span><span>{% trans "Commencez à utiliser les fonctionnalités de base de JOATHAM Manager" %}</span></div>
+                <div><span class="step-number">3</span><span>{% trans "Vous pourrez passer à un plan payant plus tard selon vos besoins" %}</span></div>
             </div>
             {% endif %}
         </section>
