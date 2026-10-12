@@ -1079,6 +1079,14 @@
             --theme-overlay-end: rgba(109, 40, 217, 0.02);
         }
 
+        .signup-theme-premium {
+            --theme-backdrop-image: url("{% static 'img/signup/background-premium.png' %}");
+            --theme-backdrop-position: center center;
+            --theme-overlay-start: rgba(3, 7, 18, 0.66);
+            --theme-overlay-mid: rgba(69, 43, 10, 0.18);
+            --theme-overlay-end: rgba(245, 158, 11, 0.02);
+        }
+
         @media (min-width: 821px) and (orientation: landscape) {
             body:has(.signup-theme-starter) {
                 min-height: 100vh;
@@ -1573,6 +1581,256 @@
                 line-height: 1.2;
             }
         }
+        @media (min-width: 821px) and (orientation: landscape) {
+            html:has(.signup-theme-premium),
+            body:has(.signup-theme-premium) {
+                min-height: 100vh;
+                padding: 0;
+                max-width: 100vw;
+                overflow: hidden;
+            }
+
+            .signup-theme-premium.shell {
+                --premium-desktop-scale: 0.8;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 1664px;
+                height: 936px;
+                max-width: none;
+                margin: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 12px;
+                align-items: stretch;
+                transform: translate(-50%, -50%) scale(var(--premium-desktop-scale));
+                transform-origin: center center;
+            }
+
+            .signup-theme-premium .brand-panel,
+            .signup-theme-premium .form-panel {
+                height: auto;
+                min-height: 0;
+                align-self: stretch;
+                overflow: hidden;
+            }
+
+            .signup-theme-premium .brand-panel {
+                padding: 52px 80px 34px;
+                max-width: none;
+                border-radius: 30px;
+                background-size: cover, cover, auto 82%, cover;
+                background-repeat: no-repeat;
+                background-position: center center, center center, 0 100%, center center;
+            }
+
+            .signup-theme-premium .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: none;
+            }
+
+            .signup-theme-premium .brand-kicker {
+                width: fit-content;
+                max-width: 650px;
+                padding: 12px 30px;
+                font-size: 19px;
+                white-space: nowrap;
+            }
+
+            .signup-theme-premium .brand-panel h1 {
+                max-width: 540px;
+                margin: 22px 0 12px;
+                font-size: 62px;
+                line-height: 1.03;
+            }
+
+            .signup-theme-premium .brand-panel p {
+                width: 455px;
+                max-width: 455px;
+                margin: 0;
+                font-size: 20px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-premium .selected-plan-meta {
+                width: fit-content;
+                max-width: 470px;
+                margin-top: 24px;
+                padding: 12px 24px;
+                gap: 20px;
+                border-radius: 16px;
+                font-size: 20px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+
+            .signup-theme-premium .selected-plan-meta::before {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+            }
+
+            .signup-theme-premium .steps {
+                width: 760px;
+                max-width: 760px;
+                margin-top: auto;
+                padding-top: 36px;
+                gap: 8px;
+            }
+
+            .signup-theme-premium .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 56px;
+                padding: 10px 22px;
+                gap: 22px;
+                border-radius: 16px;
+                font-size: 20px;
+                line-height: 1.26;
+            }
+
+            .signup-theme-premium .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: normal;
+            }
+
+            .signup-theme-premium .step-number {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .form-panel {
+                width: 100%;
+                padding: 28px 58px 24px;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-premium .auth-language {
+                max-width: 100%;
+                margin: 0 0 22px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-premium .language-switcher {
+                padding: 4px;
+                border-radius: 14px;
+            }
+
+            .signup-theme-premium .language-select,
+            .signup-theme-premium .language-submit {
+                min-height: 36px;
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .form-panel h2 {
+                margin: 0 0 14px;
+                font-size: 52px;
+                line-height: 1.08;
+            }
+
+            .signup-theme-premium .subtitle {
+                margin: 0 0 20px;
+                font-size: 19px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-premium .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 26px;
+            }
+
+            .signup-theme-premium .field {
+                gap: 6px;
+            }
+
+            .signup-theme-premium .field label {
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .field input,
+            .signup-theme-premium .field select {
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                font-size: 20px;
+            }
+
+            .signup-theme-premium .password-guidance {
+                margin-top: 2px;
+                padding: 10px 16px;
+                border-radius: 16px;
+            }
+
+            .signup-theme-premium .password-guidance-toggle {
+                min-height: 38px;
+                font-size: 20px;
+            }
+
+            .signup-theme-premium .password-guidance-indicator {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .password-guidance-content {
+                margin-top: 8px;
+            }
+
+            .signup-theme-premium .password-guidance h3 {
+                margin-bottom: 6px;
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .password-guidance p {
+                font-size: 16px;
+                line-height: 1.3;
+            }
+
+            .signup-theme-premium .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px 14px;
+                margin-top: 6px;
+            }
+
+            .signup-theme-premium .password-rule {
+                gap: 8px;
+                font-size: 15px;
+            }
+
+            .signup-theme-premium .password-rule-icon {
+                width: 20px;
+                height: 20px;
+                flex-basis: 20px;
+                font-size: 13px;
+            }
+
+            .signup-theme-premium .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-premium .submit-btn {
+                min-height: 52px;
+                margin-top: 10px;
+                padding: 12px 18px;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .helper {
+                margin-top: 6px;
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+
 
     </style>
 </head>
@@ -1816,6 +2074,30 @@
         updateProSignupScale();
         window.addEventListener("resize", updateProSignupScale);
         window.addEventListener("orientationchange", updateProSignupScale);
+
+        const premiumSignupShell = document.querySelector(".signup-theme-premium.shell");
+
+        function updatePremiumSignupScale() {
+            if (!premiumSignupShell) {
+                return;
+            }
+            const isDesktopPremiumLayout = window.matchMedia("(min-width: 821px) and (orientation: landscape)").matches;
+            if (!isDesktopPremiumLayout) {
+                premiumSignupShell.style.removeProperty("--premium-desktop-scale");
+                return;
+            }
+            const viewportPadding = 12;
+            const referenceWidth = 1664;
+            const referenceHeight = 936;
+            const availableWidth = Math.max(320, window.innerWidth - viewportPadding);
+            const availableHeight = Math.max(320, window.innerHeight - viewportPadding);
+            const scale = Math.min(availableWidth / referenceWidth, availableHeight / referenceHeight);
+            premiumSignupShell.style.setProperty("--premium-desktop-scale", Math.max(0.1, scale).toFixed(4));
+        }
+
+        updatePremiumSignupScale();
+        window.addEventListener("resize", updatePremiumSignupScale);
+        window.addEventListener("orientationchange", updatePremiumSignupScale);
         const countryCurrencyMap = JSON.parse(document.getElementById("country-currency-map").textContent);
         const countryField = document.getElementById("id_pays");
         const currencyField = document.getElementById("id_devise");
