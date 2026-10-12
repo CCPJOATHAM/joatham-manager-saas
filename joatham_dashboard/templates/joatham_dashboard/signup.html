@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'fr' }}">
 <head>
@@ -32,90 +32,504 @@
                 radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
                 radial-gradient(circle at bottom right, rgba(192, 132, 26, 0.16), transparent 24%),
                 linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
-            padding: 24px;
+            padding: clamp(14px, 2vw, 28px);
         }
 
         .shell {
             width: 100%;
-            max-width: 1220px;
+            max-width: 1640px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr);
-            background: var(--panel-soft);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            grid-template-columns: minmax(520px, 1.06fr) minmax(560px, 0.94fr);
+            gap: clamp(18px, 2vw, 34px);
+            align-items: stretch;
+        }
+
+        .signup-theme {
+            --theme-panel-bg:
+                radial-gradient(circle at 78% 20%, rgba(125, 211, 252, 0.28), transparent 28%),
+                linear-gradient(160deg, #10233f 0%, #0f766e 100%);
+            --theme-backdrop-image: none;
+            --theme-backdrop-position: center center;
+            --theme-visual-image: none;
+            --theme-visual-position: right 46%;
+            --theme-visual-size: auto 108%;
+            --theme-visual-opacity: 0.96;
+            --theme-overlay-start: rgba(4, 18, 38, 0.86);
+            --theme-overlay-mid: rgba(7, 37, 67, 0.38);
+            --theme-overlay-end: rgba(7, 37, 67, 0.06);
+            --theme-accent: #7dd3fc;
+            --theme-accent-strong: #0ea5e9;
+            --theme-kicker-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(125, 211, 252, 0.92));
+            --theme-kicker-border: rgba(186, 230, 253, 0.62);
+            --theme-kicker-shadow: rgba(14, 165, 233, 0.28);
+            --theme-card-bg: rgba(15, 35, 63, 0.58);
+            --theme-card-border: rgba(125, 211, 252, 0.36);
+            --theme-deco-border: rgba(125, 211, 252, 0.28);
+            --theme-deco-bg: rgba(125, 211, 252, 0.12);
+            --theme-glow: rgba(125, 211, 252, 0.18);
+            --theme-step-number-bg: #bae6fd;
+            --theme-step-number-color: #082f49;
+        }
+
+        .signup-theme-starter {
+            --theme-panel-bg:
+                linear-gradient(135deg, rgba(2, 132, 199, 0.18), transparent 32%),
+                radial-gradient(circle at 88% 8%, rgba(34, 211, 238, 0.4), transparent 30%),
+                linear-gradient(145deg, #073b77 0%, #0891b2 54%, #14b8a6 100%);
+            --theme-accent: #67e8f9;
+            --theme-accent-strong: #06b6d4;
+            --theme-kicker-bg: linear-gradient(135deg, #0ea5e9, #14b8a6);
+            --theme-kicker-border: rgba(103, 232, 249, 0.68);
+            --theme-kicker-shadow: rgba(20, 184, 166, 0.32);
+            --theme-card-bg: rgba(8, 47, 73, 0.58);
+            --theme-card-border: rgba(103, 232, 249, 0.42);
+            --theme-deco-border: rgba(103, 232, 249, 0.34);
+            --theme-deco-bg: rgba(103, 232, 249, 0.12);
+            --theme-glow: rgba(45, 212, 191, 0.22);
+            --theme-step-number-bg: #a5f3fc;
+            --theme-step-number-color: #083344;
+        }
+
+        .signup-theme-pro {
+            --theme-panel-bg:
+                radial-gradient(circle at 80% 14%, rgba(168, 85, 247, 0.34), transparent 30%),
+                linear-gradient(135deg, rgba(99, 102, 241, 0.2), transparent 42%),
+                linear-gradient(150deg, #080f3d 0%, #15135c 48%, #312e81 100%);
+            --theme-accent: #d8b4fe;
+            --theme-accent-strong: #7c3aed;
+            --theme-kicker-bg: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --theme-kicker-border: rgba(216, 180, 254, 0.66);
+            --theme-kicker-shadow: rgba(124, 58, 237, 0.34);
+            --theme-card-bg: rgba(17, 24, 78, 0.64);
+            --theme-card-border: rgba(196, 181, 253, 0.42);
+            --theme-deco-border: rgba(196, 181, 253, 0.32);
+            --theme-deco-bg: rgba(124, 58, 237, 0.13);
+            --theme-glow: rgba(139, 92, 246, 0.24);
+            --theme-step-number-bg: #e9d5ff;
+            --theme-step-number-color: #312e81;
+        }
+
+        .signup-theme-premium {
+            --theme-panel-bg:
+                radial-gradient(circle at 72% 18%, rgba(245, 158, 11, 0.24), transparent 28%),
+                linear-gradient(135deg, rgba(146, 64, 14, 0.22), transparent 45%),
+                linear-gradient(155deg, #06080f 0%, #111827 52%, #23190d 100%);
+            --theme-accent: #fde68a;
+            --theme-accent-strong: #d97706;
+            --theme-kicker-bg: linear-gradient(135deg, #7c4a03, #f59e0b);
+            --theme-kicker-border: rgba(253, 230, 138, 0.72);
+            --theme-kicker-shadow: rgba(245, 158, 11, 0.3);
+            --theme-card-bg: rgba(17, 24, 39, 0.72);
+            --theme-card-border: rgba(251, 191, 36, 0.46);
+            --theme-deco-border: rgba(251, 191, 36, 0.36);
+            --theme-deco-bg: rgba(245, 158, 11, 0.12);
+            --theme-glow: rgba(245, 158, 11, 0.22);
+            --theme-step-number-bg: #fde68a;
+            --theme-step-number-color: #422006;
+        }
+
+        @media (min-width: 981px) {
+            body:has(.signup-theme-free) {
+                padding: 6px;
+            }
+
+            .signup-theme-free .auth-language {
+                max-width: 100%;
+                margin: 0 0 6px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-free .language-switcher {
+                padding: 3px;
+                border-radius: 12px;
+            }
+
+            .signup-theme-free .language-select,
+            .signup-theme-free .language-submit {
+                min-height: 28px;
+                font-size: 0.86rem;
+            }
+
+            .signup-theme-free.shell {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                transform: none;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 10px;
+            }
+
+            .signup-theme-free .brand-panel {
+                height: calc(100vh - 12px);
+                min-height: 0;
+                padding: clamp(24px, 2.7vw, 36px) clamp(42px, 4.8vw, 66px) clamp(10px, 1.4vw, 18px);
+                max-width: 100%;
+                overflow-x: clip;
+                overflow-y: auto;
+                scrollbar-gutter: stable;
+                background-position: center center, center center, 22% center, center center;
+            }
+
+            .signup-theme-free .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            .signup-theme-free .brand-kicker {
+                width: fit-content;
+                max-width: 100%;
+                padding: 10px 24px;
+                font-size: 0.96rem;
+                white-space: normal;
+            }
+
+            .signup-theme-free .brand-panel h1 {
+                max-width: 590px;
+                margin-top: 11px;
+                margin-bottom: 5px;
+                font-size: clamp(2.85rem, 4vw, 3.85rem);
+                line-height: 1.03;
+            }
+
+            .signup-theme-free .brand-panel p {
+                width: min(100%, clamp(350px, 30vw, 420px));
+                font-size: 1.02rem;
+                line-height: 1.42;
+            }
+
+            .signup-theme-free .selected-plan-meta {
+                width: fit-content;
+                max-width: 100%;
+                margin-top: 7px;
+                padding: 9px 17px;
+                gap: 16px;
+                font-size: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .signup-theme-free .selected-plan-meta::before {
+                width: 24px;
+                height: 24px;
+                flex-basis: 24px;
+            }
+
+            .signup-theme-free .steps {
+                width: min(100%, 650px);
+                margin-top: clamp(16px, 2.4vh, 30px);
+                gap: 4px;
+                padding-top: 0;
+            }
+
+            .signup-theme-free .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 44px;
+                padding: 7px 15px;
+                gap: 15px;
+                border-radius: 16px;
+                font-size: 0.96rem;
+            }
+
+            .signup-theme-free .selected-plan-meta span,
+            .signup-theme-free .selected-plan-meta strong,
+            .signup-theme-free .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: break-word;
+            }
+
+            .signup-theme-free .step-number {
+                width: 35px;
+                height: 35px;
+                flex-basis: 35px;
+                font-size: 1rem;
+            }
+
+            .signup-theme-free .form-panel {
+                width: 100%;
+                height: calc(100vh - 12px);
+                min-height: 0;
+                padding: clamp(16px, 1.8vw, 24px) clamp(34px, 3.3vw, 48px);
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-free .form-panel h2 {
+                font-size: clamp(2.35rem, 3vw, 2.85rem);
+            }
+
+            .signup-theme-free .subtitle {
+                margin-bottom: 10px;
+                font-size: 0.96rem;
+                line-height: 1.38;
+            }
+
+            .signup-theme-free .form-grid {
+                gap: 5px 20px;
+            }
+
+            .signup-theme-free .field {
+                gap: 3px;
+            }
+
+            .signup-theme-free .field label {
+                font-size: 0.9rem;
+            }
+
+            .signup-theme-free .field input,
+            .signup-theme-free .field select {
+                min-height: 40px;
+                padding: 8px 14px;
+                font-size: 0.98rem;
+            }
+
+            .signup-theme-free .password-guidance {
+                padding: 8px 12px;
+                border-radius: 13px;
+            }
+
+            .signup-theme-free .password-guidance-toggle {
+                min-height: 30px;
+            }
+
+            .signup-theme-free .password-guidance-indicator {
+                width: 24px;
+                height: 24px;
+                flex-basis: 24px;
+                font-size: 1.05rem;
+            }
+
+            .signup-theme-free .password-guidance-content {
+                margin-top: 6px;
+            }
+
+            .signup-theme-free .password-guidance h3 {
+                margin-bottom: 4px;
+                font-size: 0.95rem;
+            }
+
+            .signup-theme-free .password-guidance p {
+                font-size: 0.82rem;
+                line-height: 1.25;
+            }
+
+            .signup-theme-free .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 3px 12px;
+                margin-top: 5px;
+            }
+
+            .signup-theme-free .password-rule {
+                gap: 7px;
+                font-size: 0.78rem;
+            }
+
+            .signup-theme-free .password-rule-icon {
+                width: 17px;
+                height: 17px;
+                flex-basis: 17px;
+                font-size: 0.68rem;
+            }
+
+            .signup-theme-free .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-free .submit-btn {
+                min-height: 44px;
+                margin-top: 7px;
+                padding: 11px 18px;
+                font-size: 1.05rem;
+            }
+
+            .signup-theme-free .helper {
+                margin-top: 3px;
+                font-size: 0.82rem;
+                line-height: 1.15;
+            }
+        }
+
+        .signup-theme-free {
+            --theme-backdrop-image: url("{% static 'img/signup/background-gratuit.png' %}");
         }
 
         .brand-panel {
-            padding: 48px;
-            background:
-                radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 24%),
-                linear-gradient(160deg, rgba(16, 35, 63, 0.97), rgba(15, 118, 110, 0.9));
+            position: relative;
+            overflow: hidden;
+            min-height: min(870px, calc(100vh - 56px));
+            padding: clamp(42px, 4vw, 72px);
+            display: flex;
+            flex-direction: column;
+            border-radius: 30px;
+            background-color: #07152b;
+            background-image:
+                linear-gradient(90deg, var(--theme-overlay-start) 0%, var(--theme-overlay-mid) 48%, var(--theme-overlay-end) 100%),
+                linear-gradient(180deg, rgba(2, 6, 23, 0.08), rgba(2, 6, 23, 0.54)),
+                var(--theme-backdrop-image),
+                var(--theme-panel-bg);
+            background-size: cover, cover, cover, cover;
+            background-position: center center, center center, var(--theme-backdrop-position), center center;
             color: white;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+        }
+
+        .signup-visual-scene {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: var(--theme-visual-image);
+            background-repeat: no-repeat;
+            background-size: var(--theme-visual-size);
+            background-position: var(--theme-visual-position);
+            opacity: var(--theme-visual-opacity);
+        }
+
+        .brand-panel::before,
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .brand-panel::before {
+            z-index: 1;
+            inset: 0;
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.08), transparent 34%),
+                linear-gradient(90deg, rgba(2, 6, 23, 0.2), transparent 70%),
+                radial-gradient(circle at 18% 82%, var(--theme-glow), transparent 34%);
+            opacity: 0.96;
+        }
+
+        .brand-panel::after {
+            z-index: 1;
+            width: 330px;
+            height: 330px;
+            right: -140px;
+            top: 66px;
+            border: 1px solid var(--theme-deco-border);
+            border-radius: 52px;
+            transform: rotate(42deg);
+            background: linear-gradient(135deg, var(--theme-deco-bg), transparent);
+        }
+
+        .signup-theme-free .brand-panel::before,
+        .signup-theme-free .brand-panel::after {
+            display: none;
+        }
+
+        .brand-panel > *:not(.signup-visual-scene) {
+            position: relative;
+            z-index: 2;
         }
 
         .brand-panel h1 {
             margin: 22px 0 14px;
-            font-size: clamp(2rem, 4vw, 3.2rem);
+            max-width: 650px;
+            font-size: clamp(2.7rem, 4vw, 4.05rem);
             line-height: 1.04;
-            letter-spacing: -0.03em;
         }
 
         .brand-panel p {
+            max-width: 520px;
             color: rgba(255,255,255,0.84);
             line-height: 1.7;
+            font-size: 1.05rem;
         }
 
         .brand-kicker {
             display: inline-flex;
             align-items: center;
-            padding: 8px 14px;
+            width: fit-content;
+            padding: 12px 24px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.12);
-            font-size: 12px;
+            background: var(--theme-kicker-bg);
+            border: 1px solid var(--theme-kicker-border);
+            box-shadow: 0 14px 30px var(--theme-kicker-shadow);
+            font-size: 0.95rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
         }
 
         .selected-plan-meta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            padding: 10px 14px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.1);
+            width: fit-content;
+            gap: 16px;
+            margin-top: 12px;
+            padding: 15px 20px;
+            border-radius: 16px;
+            background: rgba(2, 6, 23, 0.48);
+            border: 1px solid var(--theme-card-border);
             color: rgba(255,255,255,0.9);
-            font-size: 0.95rem;
+            font-size: 1rem;
+            box-shadow: 0 16px 34px rgba(2, 6, 23, 0.2);
+            backdrop-filter: blur(12px);
+        }
+
+        .selected-plan-meta::before {
+            content: "";
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
+            border: 2px solid var(--theme-accent);
+            border-radius: 6px;
+            box-shadow: inset 0 6px 0 rgba(255, 255, 255, 0.12);
         }
 
         .selected-plan-meta strong {
-            color: #fff;
+            color: var(--theme-accent);
         }
 
         .steps {
-            margin-top: 30px;
+            margin-top: auto;
+            padding-top: 30px;
+            max-width: 690px;
             display: grid;
             gap: 12px;
         }
 
         .steps div {
-            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
             border-radius: 16px;
-            background: rgba(255,255,255,0.08);
+            background: var(--theme-card-bg);
+            border: 1px solid var(--theme-card-border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+            backdrop-filter: blur(14px);
+            font-size: 1.02rem;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            border-radius: 999px;
+            background: var(--theme-step-number-bg);
+            color: var(--theme-step-number-color);
+            font-weight: 800;
         }
 
         .form-panel {
-            padding: 44px 40px;
+            align-self: center;
+            padding: clamp(44px, 4vw, 64px);
             background: var(--panel);
+            border: 1px solid rgba(226, 232, 240, 0.86);
+            border-radius: 28px;
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
         }
 
         .form-panel h2 {
             margin: 0 0 10px;
-            font-size: 1.9rem;
+            font-size: clamp(2.1rem, 3vw, 2.65rem);
         }
 
         .subtitle {
@@ -127,7 +541,7 @@
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
+            gap: 18px 22px;
         }
 
         .field {
@@ -147,7 +561,8 @@
         .field input,
         .field select {
             width: 100%;
-            padding: 14px;
+            min-height: 58px;
+            padding: 15px 16px;
             border-radius: 14px;
             border: 1px solid var(--line);
             background: #fbfdff;
@@ -183,6 +598,51 @@
             border: 1px solid rgba(15, 118, 110, 0.16);
             border-radius: 16px;
             background: #f8fbff;
+        }
+
+        .password-guidance-toggle {
+            width: 100%;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .password-guidance-toggle:focus-visible {
+            outline: 3px solid rgba(15, 118, 110, 0.22);
+            outline-offset: 5px;
+            border-radius: 10px;
+        }
+
+        .password-guidance-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            flex: 0 0 28px;
+            border-radius: 999px;
+            background: #e0f2fe;
+            color: var(--brand);
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .password-guidance-content {
+            margin-top: 8px;
+        }
+
+        .password-guidance-content[hidden] {
+            display: none;
         }
 
         .password-guidance h3 {
@@ -257,8 +717,9 @@
             width: 100%;
             border: 0;
             border-radius: 14px;
-            padding: 14px 18px;
-            font-size: 1rem;
+            min-height: 58px;
+            padding: 16px 18px;
+            font-size: 1.08rem;
             font-weight: 700;
             color: white;
             cursor: pointer;
@@ -279,7 +740,7 @@
         }
 
         .auth-language {
-            max-width: 1220px;
+            max-width: 1640px;
             margin: 0 auto 12px;
             display: flex;
             justify-content: flex-end;
@@ -330,6 +791,7 @@
         @media (max-width: 980px) {
             .shell {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
 
             .brand-panel,
@@ -337,19 +799,1046 @@
                 padding: 30px 22px;
             }
 
+            .brand-panel {
+                min-height: 620px;
+                background-position: center center, center center, var(--theme-backdrop-position), center center;
+            }
+
+            .signup-visual-scene {
+                background-size: auto 86%;
+                background-position: right center;
+                opacity: 0.72;
+            }
+
+            .brand-panel h1 {
+                font-size: clamp(2.15rem, 9vw, 3rem);
+            }
+
             .form-grid {
                 grid-template-columns: 1fr;
             }
         }
+        @media (min-width: 821px) and (orientation: landscape) {
+            body:has(.signup-theme-free) {
+                min-height: 100vh;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .signup-theme-free.shell {
+                --free-desktop-scale: 0.8;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 1664px;
+                height: 936px;
+                max-width: none;
+                margin: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 12px;
+                align-items: stretch;
+                transform: translate(-50%, -50%) scale(var(--free-desktop-scale));
+                transform-origin: center center;
+            }
+
+            .signup-theme-free .brand-panel,
+            .signup-theme-free .form-panel {
+                height: auto;
+                min-height: 0;
+                align-self: stretch;
+                overflow: hidden;
+            }
+
+            .signup-theme-free .brand-panel {
+                padding: 44px 80px 18px;
+                max-width: none;
+                border-radius: 30px;
+                background-position: center center, center center, 22% center, center center;
+            }
+
+            .signup-theme-free .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: none;
+            }
+
+            .signup-theme-free .brand-kicker {
+                width: fit-content;
+                max-width: 560px;
+                padding: 12px 30px;
+                font-size: 19px;
+                white-space: nowrap;
+            }
+
+            .signup-theme-free .brand-panel h1 {
+                max-width: 730px;
+                margin: 22px 0 10px;
+                font-size: 68px;
+                line-height: 1.03;
+            }
+
+            .signup-theme-free .brand-panel p {
+                width: 455px;
+                max-width: 455px;
+                margin: 0;
+                font-size: 20px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-free .selected-plan-meta {
+                width: fit-content;
+                max-width: 440px;
+                margin-top: 24px;
+                padding: 12px 24px;
+                gap: 20px;
+                border-radius: 16px;
+                font-size: 20px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+
+            .signup-theme-free .selected-plan-meta::before {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+            }
+
+            .signup-theme-free .steps {
+                width: 760px;
+                max-width: 760px;
+                margin-top: auto;
+                padding-top: 38px;
+                gap: 8px;
+            }
+
+            .signup-theme-free .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 56px;
+                padding: 10px 22px;
+                gap: 22px;
+                border-radius: 16px;
+                font-size: 20px;
+                line-height: 1.26;
+            }
+
+            .signup-theme-free .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: normal;
+            }
+
+            .signup-theme-free .step-number {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                font-size: 21px;
+            }
+
+            .signup-theme-free .form-panel {
+                width: 100%;
+                padding: 28px 58px 24px;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-free .auth-language {
+                max-width: 100%;
+                margin: 0 0 22px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-free .language-switcher {
+                padding: 4px;
+                border-radius: 14px;
+            }
+
+            .signup-theme-free .language-select,
+            .signup-theme-free .language-submit {
+                min-height: 36px;
+                font-size: 18px;
+            }
+
+            .signup-theme-free .form-panel h2 {
+                margin: 0 0 14px;
+                font-size: 52px;
+                line-height: 1.08;
+            }
+
+            .signup-theme-free .subtitle {
+                margin: 0 0 20px;
+                font-size: 19px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-free .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 26px;
+            }
+
+            .signup-theme-free .field {
+                gap: 6px;
+            }
+
+            .signup-theme-free .field label {
+                font-size: 18px;
+            }
+
+            .signup-theme-free .field input,
+            .signup-theme-free .field select {
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                font-size: 20px;
+            }
+
+            .signup-theme-free .password-guidance {
+                margin-top: 2px;
+                padding: 10px 16px;
+                border-radius: 16px;
+            }
+
+            .signup-theme-free .password-guidance-toggle {
+                min-height: 38px;
+                font-size: 20px;
+            }
+
+            .signup-theme-free .password-guidance-indicator {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+                font-size: 21px;
+            }
+
+            .signup-theme-free .password-guidance-content {
+                margin-top: 8px;
+            }
+
+            .signup-theme-free .password-guidance h3 {
+                margin-bottom: 6px;
+                font-size: 18px;
+            }
+
+            .signup-theme-free .password-guidance p {
+                font-size: 16px;
+                line-height: 1.3;
+            }
+
+            .signup-theme-free .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px 14px;
+                margin-top: 6px;
+            }
+
+            .signup-theme-free .password-rule {
+                gap: 8px;
+                font-size: 15px;
+            }
+
+            .signup-theme-free .password-rule-icon {
+                width: 20px;
+                height: 20px;
+                flex-basis: 20px;
+                font-size: 13px;
+            }
+
+            .signup-theme-free .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-free .submit-btn {
+                min-height: 52px;
+                margin-top: 10px;
+                padding: 12px 18px;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .signup-theme-free .helper {
+                margin-top: 6px;
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+        .signup-theme-starter {
+            --theme-backdrop-image: url("{% static 'img/signup/background-starter.png' %}");
+            --theme-backdrop-position: left center;
+            --theme-overlay-start: rgba(3, 32, 70, 0.80);
+            --theme-overlay-mid: rgba(6, 95, 128, 0.32);
+            --theme-overlay-end: rgba(20, 184, 166, 0.03);
+        }
+
+        .signup-theme-pro {
+            --theme-backdrop-image: url("{% static 'img/signup/background-pro.png' %}");
+            --theme-backdrop-position: center center;
+            --theme-overlay-start: rgba(5, 10, 48, 0.82);
+            --theme-overlay-mid: rgba(49, 46, 129, 0.24);
+            --theme-overlay-end: rgba(109, 40, 217, 0.02);
+        }
+
+        .signup-theme-premium {
+            --theme-backdrop-image: url("{% static 'img/signup/background-premium.png' %}");
+            --theme-backdrop-position: center center;
+            --theme-overlay-start: rgba(3, 7, 18, 0.66);
+            --theme-overlay-mid: rgba(69, 43, 10, 0.18);
+            --theme-overlay-end: rgba(245, 158, 11, 0.02);
+        }
+
+        @media (min-width: 821px) and (orientation: landscape) {
+            body:has(.signup-theme-starter) {
+                min-height: 100vh;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .signup-theme-starter.shell {
+                --starter-desktop-scale: 0.8;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 1664px;
+                height: 936px;
+                max-width: none;
+                margin: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 12px;
+                align-items: stretch;
+                transform: translate(-50%, -50%) scale(var(--starter-desktop-scale));
+                transform-origin: center center;
+            }
+
+            .signup-theme-starter .brand-panel,
+            .signup-theme-starter .form-panel {
+                height: auto;
+                min-height: 0;
+                align-self: stretch;
+                overflow: hidden;
+            }
+
+            .signup-theme-starter .brand-panel {
+                padding: 52px 80px 34px;
+                max-width: none;
+                border-radius: 30px;
+                background-size: cover, cover, auto 70%, cover, cover, cover;
+                background-repeat: no-repeat;
+                background-position: center center, center center, 56% 100%, center center, center center, center center;
+            }
+
+            .signup-theme-starter .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: none;
+            }
+
+            .signup-theme-starter .brand-kicker {
+                width: fit-content;
+                max-width: 560px;
+                padding: 12px 30px;
+                font-size: 19px;
+                white-space: nowrap;
+            }
+
+            .signup-theme-starter .brand-panel h1 {
+                max-width: 690px;
+                margin: 22px 0 12px;
+                font-size: 66px;
+                line-height: 1.03;
+            }
+
+            .signup-theme-starter .brand-panel p {
+                width: 500px;
+                max-width: 500px;
+                margin: 0;
+                font-size: 20px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-starter .selected-plan-meta {
+                width: fit-content;
+                max-width: 450px;
+                margin-top: 24px;
+                padding: 12px 24px;
+                gap: 20px;
+                border-radius: 16px;
+                font-size: 20px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+
+            .signup-theme-starter .selected-plan-meta::before {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+            }
+
+            .signup-theme-starter .steps {
+                width: 760px;
+                max-width: 760px;
+                margin-top: auto;
+                padding-top: 36px;
+                gap: 8px;
+            }
+
+            .signup-theme-starter .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 56px;
+                padding: 10px 22px;
+                gap: 22px;
+                border-radius: 16px;
+                font-size: 20px;
+                line-height: 1.26;
+            }
+
+            .signup-theme-starter .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: normal;
+            }
+
+            .signup-theme-starter .step-number {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                font-size: 21px;
+            }
+
+            .signup-theme-starter .form-panel {
+                width: 100%;
+                padding: 28px 58px 24px;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-starter .auth-language {
+                max-width: 100%;
+                margin: 0 0 22px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-starter .language-switcher {
+                padding: 4px;
+                border-radius: 14px;
+            }
+
+            .signup-theme-starter .language-select,
+            .signup-theme-starter .language-submit {
+                min-height: 36px;
+                font-size: 18px;
+            }
+
+            .signup-theme-starter .form-panel h2 {
+                margin: 0 0 14px;
+                font-size: 52px;
+                line-height: 1.08;
+            }
+
+            .signup-theme-starter .subtitle {
+                margin: 0 0 20px;
+                font-size: 19px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-starter .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 26px;
+            }
+
+            .signup-theme-starter .field {
+                gap: 6px;
+            }
+
+            .signup-theme-starter .field label {
+                font-size: 18px;
+            }
+
+            .signup-theme-starter .field input,
+            .signup-theme-starter .field select {
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                font-size: 20px;
+            }
+
+            .signup-theme-starter .password-guidance {
+                margin-top: 2px;
+                padding: 10px 16px;
+                border-radius: 16px;
+            }
+
+            .signup-theme-starter .password-guidance-toggle {
+                min-height: 38px;
+                font-size: 20px;
+            }
+
+            .signup-theme-starter .password-guidance-indicator {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+                font-size: 21px;
+            }
+
+            .signup-theme-starter .password-guidance-content {
+                margin-top: 8px;
+            }
+
+            .signup-theme-starter .password-guidance h3 {
+                margin-bottom: 6px;
+                font-size: 18px;
+            }
+
+            .signup-theme-starter .password-guidance p {
+                font-size: 16px;
+                line-height: 1.3;
+            }
+
+            .signup-theme-starter .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px 14px;
+                margin-top: 6px;
+            }
+
+            .signup-theme-starter .password-rule {
+                gap: 8px;
+                font-size: 15px;
+            }
+
+            .signup-theme-starter .password-rule-icon {
+                width: 20px;
+                height: 20px;
+                flex-basis: 20px;
+                font-size: 13px;
+            }
+
+            .signup-theme-starter .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-starter .submit-btn {
+                min-height: 52px;
+                margin-top: 10px;
+                padding: 12px 18px;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .signup-theme-starter .helper {
+                margin-top: 6px;
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+        @media (min-width: 821px) and (orientation: landscape) {
+            body:has(.signup-theme-pro) {
+                min-height: 100vh;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .signup-theme-pro.shell {
+                --pro-desktop-scale: 0.8;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 1664px;
+                height: 936px;
+                max-width: none;
+                margin: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 12px;
+                align-items: stretch;
+                transform: translate(-50%, -50%) scale(var(--pro-desktop-scale));
+                transform-origin: center center;
+            }
+
+            .signup-theme-pro .brand-panel,
+            .signup-theme-pro .form-panel {
+                height: auto;
+                min-height: 0;
+                align-self: stretch;
+                overflow: hidden;
+            }
+
+            .signup-theme-pro .brand-panel {
+                padding: 52px 80px 34px;
+                max-width: none;
+                border-radius: 30px;
+                background-size: cover, cover, auto 64%, cover;
+                background-repeat: no-repeat;
+                background-position: center center, center center, -120px 100%, center center;
+            }
+
+            .signup-theme-pro .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: none;
+            }
+
+            .signup-theme-pro .brand-kicker {
+                width: fit-content;
+                max-width: 560px;
+                padding: 12px 30px;
+                font-size: 19px;
+                white-space: nowrap;
+            }
+
+            .signup-theme-pro .brand-panel h1 {
+                max-width: 430px;
+                margin: 22px 0 12px;
+                font-size: 66px;
+                line-height: 1.03;
+            }
+
+            .signup-theme-pro .brand-panel p {
+                width: 400px;
+                max-width: 400px;
+                margin: 0;
+                font-size: 20px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-pro .selected-plan-meta {
+                width: fit-content;
+                max-width: 450px;
+                margin-top: 24px;
+                padding: 12px 24px;
+                gap: 20px;
+                border-radius: 16px;
+                font-size: 20px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+
+            .signup-theme-pro .selected-plan-meta::before {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+            }
+
+            .signup-theme-pro .steps {
+                width: 760px;
+                max-width: 760px;
+                margin-top: auto;
+                padding-top: 36px;
+                gap: 8px;
+            }
+
+            .signup-theme-pro .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 56px;
+                padding: 10px 22px;
+                gap: 22px;
+                border-radius: 16px;
+                font-size: 20px;
+                line-height: 1.26;
+            }
+
+            .signup-theme-pro .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: normal;
+            }
+
+            .signup-theme-pro .step-number {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                font-size: 21px;
+            }
+
+            .signup-theme-pro .form-panel {
+                width: 100%;
+                padding: 28px 58px 24px;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-pro .auth-language {
+                max-width: 100%;
+                margin: 0 0 22px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-pro .language-switcher {
+                padding: 4px;
+                border-radius: 14px;
+            }
+
+            .signup-theme-pro .language-select,
+            .signup-theme-pro .language-submit {
+                min-height: 36px;
+                font-size: 18px;
+            }
+
+            .signup-theme-pro .form-panel h2 {
+                margin: 0 0 14px;
+                font-size: 52px;
+                line-height: 1.08;
+            }
+
+            .signup-theme-pro .subtitle {
+                margin: 0 0 20px;
+                font-size: 19px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-pro .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 26px;
+            }
+
+            .signup-theme-pro .field {
+                gap: 6px;
+            }
+
+            .signup-theme-pro .field label {
+                font-size: 18px;
+            }
+
+            .signup-theme-pro .field input,
+            .signup-theme-pro .field select {
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                font-size: 20px;
+            }
+
+            .signup-theme-pro .password-guidance {
+                margin-top: 2px;
+                padding: 10px 16px;
+                border-radius: 16px;
+            }
+
+            .signup-theme-pro .password-guidance-toggle {
+                min-height: 38px;
+                font-size: 20px;
+            }
+
+            .signup-theme-pro .password-guidance-indicator {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+                font-size: 21px;
+            }
+
+            .signup-theme-pro .password-guidance-content {
+                margin-top: 8px;
+            }
+
+            .signup-theme-pro .password-guidance h3 {
+                margin-bottom: 6px;
+                font-size: 18px;
+            }
+
+            .signup-theme-pro .password-guidance p {
+                font-size: 16px;
+                line-height: 1.3;
+            }
+
+            .signup-theme-pro .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px 14px;
+                margin-top: 6px;
+            }
+
+            .signup-theme-pro .password-rule {
+                gap: 8px;
+                font-size: 15px;
+            }
+
+            .signup-theme-pro .password-rule-icon {
+                width: 20px;
+                height: 20px;
+                flex-basis: 20px;
+                font-size: 13px;
+            }
+
+            .signup-theme-pro .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-pro .submit-btn {
+                min-height: 52px;
+                margin-top: 10px;
+                padding: 12px 18px;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .signup-theme-pro .helper {
+                margin-top: 6px;
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+        @media (min-width: 821px) and (orientation: landscape) {
+            html:has(.signup-theme-premium),
+            body:has(.signup-theme-premium) {
+                min-height: 100vh;
+                padding: 0;
+                max-width: 100vw;
+                overflow: hidden;
+            }
+
+            .signup-theme-premium.shell {
+                --premium-desktop-scale: 0.8;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                width: 1664px;
+                height: 936px;
+                max-width: none;
+                margin: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+                gap: 12px;
+                align-items: stretch;
+                transform: translate(-50%, -50%) scale(var(--premium-desktop-scale));
+                transform-origin: center center;
+            }
+
+            .signup-theme-premium .brand-panel,
+            .signup-theme-premium .form-panel {
+                height: auto;
+                min-height: 0;
+                align-self: stretch;
+                overflow: hidden;
+            }
+
+            .signup-theme-premium .brand-panel {
+                padding: 52px 80px 34px;
+                max-width: none;
+                border-radius: 30px;
+                background-size: cover, cover, auto 76%, cover;
+                background-repeat: no-repeat;
+                background-position: center center, center center, -96px 100%, center center;
+            }
+
+            .signup-theme-premium .brand-panel > *:not(.signup-visual-scene) {
+                min-width: 0;
+                max-width: none;
+            }
+
+            .signup-theme-premium .brand-kicker {
+                width: fit-content;
+                max-width: 650px;
+                padding: 12px 30px;
+                font-size: 19px;
+                white-space: nowrap;
+            }
+
+            .signup-theme-premium .brand-panel h1 {
+                max-width: 540px;
+                margin: 22px 0 12px;
+                font-size: 62px;
+                line-height: 1.03;
+            }
+
+            .signup-theme-premium .brand-panel p {
+                width: 370px;
+                max-width: 370px;
+                margin: 0;
+                font-size: 20px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-premium .selected-plan-meta {
+                width: fit-content;
+                max-width: 470px;
+                margin-top: 24px;
+                padding: 12px 24px;
+                gap: 20px;
+                border-radius: 16px;
+                font-size: 20px;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+
+            .signup-theme-premium .selected-plan-meta::before {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+            }
+
+            .signup-theme-premium .steps {
+                width: 760px;
+                max-width: 760px;
+                margin-top: auto;
+                padding-top: 36px;
+                gap: 8px;
+            }
+
+            .signup-theme-premium .steps div {
+                width: 100%;
+                min-width: 0;
+                min-height: 56px;
+                padding: 10px 22px;
+                gap: 22px;
+                border-radius: 16px;
+                font-size: 20px;
+                line-height: 1.26;
+            }
+
+            .signup-theme-premium .steps div span:not(.step-number) {
+                min-width: 0;
+                overflow-wrap: normal;
+            }
+
+            .signup-theme-premium .step-number {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .form-panel {
+                width: 100%;
+                padding: 28px 58px 24px;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .signup-theme-premium .auth-language {
+                max-width: 100%;
+                margin: 0 0 22px auto;
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .signup-theme-premium .language-switcher {
+                padding: 4px;
+                border-radius: 14px;
+            }
+
+            .signup-theme-premium .language-select,
+            .signup-theme-premium .language-submit {
+                min-height: 36px;
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .form-panel h2 {
+                margin: 0 0 14px;
+                font-size: 52px;
+                line-height: 1.08;
+            }
+
+            .signup-theme-premium .subtitle {
+                margin: 0 0 20px;
+                font-size: 19px;
+                line-height: 1.42;
+            }
+
+            .signup-theme-premium .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 26px;
+            }
+
+            .signup-theme-premium .field {
+                gap: 6px;
+            }
+
+            .signup-theme-premium .field label {
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .field input,
+            .signup-theme-premium .field select {
+                min-height: 50px;
+                padding: 10px 18px;
+                border-radius: 14px;
+                font-size: 20px;
+            }
+
+            .signup-theme-premium .password-guidance {
+                margin-top: 2px;
+                padding: 10px 16px;
+                border-radius: 16px;
+            }
+
+            .signup-theme-premium .password-guidance-toggle {
+                min-height: 38px;
+                font-size: 20px;
+            }
+
+            .signup-theme-premium .password-guidance-indicator {
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .password-guidance-content {
+                margin-top: 8px;
+            }
+
+            .signup-theme-premium .password-guidance h3 {
+                margin-bottom: 6px;
+                font-size: 18px;
+            }
+
+            .signup-theme-premium .password-guidance p {
+                font-size: 16px;
+                line-height: 1.3;
+            }
+
+            .signup-theme-premium .password-rule-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px 14px;
+                margin-top: 6px;
+            }
+
+            .signup-theme-premium .password-rule {
+                gap: 8px;
+                font-size: 15px;
+            }
+
+            .signup-theme-premium .password-rule-icon {
+                width: 20px;
+                height: 20px;
+                flex-basis: 20px;
+                font-size: 13px;
+            }
+
+            .signup-theme-premium .password-guidance-note {
+                display: none;
+            }
+
+            .signup-theme-premium .submit-btn {
+                min-height: 52px;
+                margin-top: 10px;
+                padding: 12px 18px;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .signup-theme-premium .helper {
+                margin-top: 6px;
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+
+
     </style>
 </head>
 <body>
     {{ country_currency_map|json_script:"country-currency-map" }}
-    <div class="auth-language">
-        {% include "includes/language_selector.html" with language_selector_id="signup-language-select" %}
-    </div>
-    <main class="shell">
+    <main class="shell signup-theme signup-theme-{{ subscription_signup_theme }}" data-signup-theme="{{ subscription_signup_theme }}">
         <section class="brand-panel">
+            <div class="signup-visual-scene" aria-hidden="true"></div>
             {% if subscription_signup_is_paid %}
             <div class="brand-kicker">{% trans "PLAN SÉLECTIONNÉ" %} — {{ subscription_selected_plan_label|upper }}</div>
             <h1>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}Créez votre entreprise avec le plan {{ plan_name }}.{% endblocktrans %}</h1>
@@ -364,29 +1853,35 @@
             </div>
 
             <div class="steps">
-                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
-                <div>{% trans "2. Le pays suggère automatiquement la devise par défaut" %}</div>
-                <div>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}3. Vérifiez votre adresse e-mail puis poursuivez vers le paiement de votre plan {{ plan_name }}{% endblocktrans %}</div>
+                <div><span class="step-number">1</span><span>{% trans "Créez votre entreprise et votre compte propriétaire" %}</span></div>
+                <div><span class="step-number">2</span><span>{% trans "Le pays suggère automatiquement la devise par défaut" %}</span></div>
+                <div><span class="step-number">3</span><span>{% blocktrans with plan_name=subscription_selected_plan_label trimmed %}Vérifiez votre adresse e-mail puis poursuivez vers le paiement de votre plan {{ plan_name }}{% endblocktrans %}</span></div>
             </div>
             {% else %}
-            <div class="brand-kicker">{% trans "Parcours SaaS" %}</div>
-            <h1>{% trans "Créez votre entreprise et commencez gratuitement avec JOATHAM Manager." %}</h1>
+            <div class="brand-kicker">{% trans "PLAN SÉLECTIONNÉ" %} — {% trans "GRATUIT" %}</div>
+            <h1>{% trans "Créez votre entreprise avec le plan Gratuit." %}</h1>
             <p>
                 {% blocktrans trimmed %}
-                En quelques informations, vous obtenez votre espace propriétaire, votre entreprise,
-                une devise par defaut selon votre pays et un demarrage propre sur le socle SaaS.
+                Commencez dès maintenant avec JOATHAM Manager. Le plan Gratuit vous permet de découvrir la plateforme et de gérer les fonctions essentielles de votre entreprise, en toute simplicité.
                 {% endblocktrans %}
             </p>
+            <div class="selected-plan-meta">
+                <span>{% trans "Cycle choisi" %}</span>
+                <strong>{% trans "Gratuit" %}</strong>
+            </div>
 
             <div class="steps">
-                <div>{% trans "1. Créez votre entreprise et votre compte propriétaire" %}</div>
-                <div>{% trans "2. Le pays suggere automatiquement la devise par defaut" %}</div>
-                <div>{% trans "3. Le plan gratuit est activé et vous accédez directement à votre tableau de bord" %}</div>
+                <div><span class="step-number">1</span><span>{% trans "Créez votre entreprise et votre compte propriétaire" %}</span></div>
+                <div><span class="step-number">2</span><span>{% trans "Commencez à utiliser les fonctionnalités de base de JOATHAM Manager" %}</span></div>
+                <div><span class="step-number">3</span><span>{% trans "Vous pourrez passer à un plan payant plus tard selon vos besoins" %}</span></div>
             </div>
             {% endif %}
         </section>
 
         <section class="form-panel">
+            <div class="auth-language">
+                {% include "includes/language_selector.html" with language_selector_id="signup-language-select" %}
+            </div>
             <h2>{% trans "Inscription entreprise" %}</h2>
             <p class="subtitle">{% trans "Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloques proprement." %}</p>
 
@@ -458,39 +1953,44 @@
                     </div>
 
                     <div class="field full password-guidance" id="signup-password-rules" data-min-length="{{ password_min_length|default:10 }}">
-                        <h3>{% trans "Conditions du mot de passe" %}</h3>
-                        <p>{% trans "Votre mot de passe doit contenir :" %}</p>
-                        <ul class="password-rule-list">
-                            <li class="password-rule" data-password-rule="length">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% blocktrans trimmed %}Au moins {{ password_min_length }} caracteres{% endblocktrans %}</span>
-                            </li>
-                            <li class="password-rule" data-password-rule="uppercase">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% trans "Au moins une lettre majuscule" %}</span>
-                            </li>
-                            <li class="password-rule" data-password-rule="lowercase">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% trans "Au moins une lettre minuscule" %}</span>
-                            </li>
-                            <li class="password-rule" data-password-rule="digit">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% trans "Au moins un chiffre" %}</span>
-                            </li>
-                            <li class="password-rule" data-password-rule="special">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% trans "Au moins un caractere special, par exemple @" %}</span>
-                            </li>
-                            <li class="password-rule" data-password-rule="match">
-                                <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                <span>{% trans "Les deux mots de passe doivent etre identiques" %}</span>
-                            </li>
-                        </ul>
-                        <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation sécurisée reste appliquee côté serveur." %}</p>
+                        <button class="password-guidance-toggle" type="button" aria-expanded="false" aria-controls="signup-password-rules-content">
+                            <span>{% trans "Conditions du mot de passe" %}</span>
+                            <span class="password-guidance-indicator" aria-hidden="true">+</span>
+                        </button>
+                        <div class="password-guidance-content" id="signup-password-rules-content" hidden>
+                            <p>{% trans "Votre mot de passe doit contenir :" %}</p>
+                            <ul class="password-rule-list">
+                                <li class="password-rule" data-password-rule="length">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% blocktrans trimmed %}Au moins {{ password_min_length }} caracteres{% endblocktrans %}</span>
+                                </li>
+                                <li class="password-rule" data-password-rule="uppercase">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% trans "Au moins une lettre majuscule" %}</span>
+                                </li>
+                                <li class="password-rule" data-password-rule="lowercase">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% trans "Au moins une lettre minuscule" %}</span>
+                                </li>
+                                <li class="password-rule" data-password-rule="digit">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% trans "Au moins un chiffre" %}</span>
+                                </li>
+                                <li class="password-rule" data-password-rule="special">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% trans "Au moins un caractere special, par exemple @" %}</span>
+                                </li>
+                                <li class="password-rule" data-password-rule="match">
+                                    <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
+                                    <span>{% trans "Les deux mots de passe doivent etre identiques" %}</span>
+                                </li>
+                            </ul>
+                            <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation sécurisée reste appliquee côté serveur." %}</p>
+                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Creer mon entreprise</button>
+                <button type="submit" class="submit-btn">{% trans "Créer mon compte" %}</button>
             </form>
 
             <p class="helper">
@@ -502,6 +2002,102 @@
     </main>
 
     <script>
+        const freeSignupShell = document.querySelector(".signup-theme-free.shell");
+
+        function updateFreeSignupScale() {
+            if (!freeSignupShell) {
+                return;
+            }
+            const isDesktopFreeLayout = window.matchMedia("(min-width: 821px) and (orientation: landscape)").matches;
+            if (!isDesktopFreeLayout) {
+                freeSignupShell.style.removeProperty("--free-desktop-scale");
+                return;
+            }
+            const viewportPadding = 12;
+            const referenceWidth = 1664;
+            const referenceHeight = 936;
+            const availableWidth = Math.max(320, window.innerWidth - viewportPadding);
+            const availableHeight = Math.max(320, window.innerHeight - viewportPadding);
+            const scale = Math.min(availableWidth / referenceWidth, availableHeight / referenceHeight);
+            freeSignupShell.style.setProperty("--free-desktop-scale", Math.max(0.1, scale).toFixed(4));
+        }
+
+        updateFreeSignupScale();
+        window.addEventListener("resize", updateFreeSignupScale);
+        window.addEventListener("orientationchange", updateFreeSignupScale);
+
+        const starterSignupShell = document.querySelector(".signup-theme-starter.shell");
+
+        function updateStarterSignupScale() {
+            if (!starterSignupShell) {
+                return;
+            }
+            const isDesktopStarterLayout = window.matchMedia("(min-width: 821px) and (orientation: landscape)").matches;
+            if (!isDesktopStarterLayout) {
+                starterSignupShell.style.removeProperty("--starter-desktop-scale");
+                return;
+            }
+            const viewportPadding = 12;
+            const referenceWidth = 1664;
+            const referenceHeight = 936;
+            const availableWidth = Math.max(320, window.innerWidth - viewportPadding);
+            const availableHeight = Math.max(320, window.innerHeight - viewportPadding);
+            const scale = Math.min(availableWidth / referenceWidth, availableHeight / referenceHeight);
+            starterSignupShell.style.setProperty("--starter-desktop-scale", Math.max(0.1, scale).toFixed(4));
+        }
+
+        updateStarterSignupScale();
+        window.addEventListener("resize", updateStarterSignupScale);
+        window.addEventListener("orientationchange", updateStarterSignupScale);
+
+
+        const proSignupShell = document.querySelector(".signup-theme-pro.shell");
+
+        function updateProSignupScale() {
+            if (!proSignupShell) {
+                return;
+            }
+            const isDesktopProLayout = window.matchMedia("(min-width: 821px) and (orientation: landscape)").matches;
+            if (!isDesktopProLayout) {
+                proSignupShell.style.removeProperty("--pro-desktop-scale");
+                return;
+            }
+            const viewportPadding = 12;
+            const referenceWidth = 1664;
+            const referenceHeight = 936;
+            const availableWidth = Math.max(320, window.innerWidth - viewportPadding);
+            const availableHeight = Math.max(320, window.innerHeight - viewportPadding);
+            const scale = Math.min(availableWidth / referenceWidth, availableHeight / referenceHeight);
+            proSignupShell.style.setProperty("--pro-desktop-scale", Math.max(0.1, scale).toFixed(4));
+        }
+
+        updateProSignupScale();
+        window.addEventListener("resize", updateProSignupScale);
+        window.addEventListener("orientationchange", updateProSignupScale);
+
+        const premiumSignupShell = document.querySelector(".signup-theme-premium.shell");
+
+        function updatePremiumSignupScale() {
+            if (!premiumSignupShell) {
+                return;
+            }
+            const isDesktopPremiumLayout = window.matchMedia("(min-width: 821px) and (orientation: landscape)").matches;
+            if (!isDesktopPremiumLayout) {
+                premiumSignupShell.style.removeProperty("--premium-desktop-scale");
+                return;
+            }
+            const viewportPadding = 12;
+            const referenceWidth = 1664;
+            const referenceHeight = 936;
+            const availableWidth = Math.max(320, window.innerWidth - viewportPadding);
+            const availableHeight = Math.max(320, window.innerHeight - viewportPadding);
+            const scale = Math.min(availableWidth / referenceWidth, availableHeight / referenceHeight);
+            premiumSignupShell.style.setProperty("--premium-desktop-scale", Math.max(0.1, scale).toFixed(4));
+        }
+
+        updatePremiumSignupScale();
+        window.addEventListener("resize", updatePremiumSignupScale);
+        window.addEventListener("orientationchange", updatePremiumSignupScale);
         const countryCurrencyMap = JSON.parse(document.getElementById("country-currency-map").textContent);
         const countryField = document.getElementById("id_pays");
         const currencyField = document.getElementById("id_devise");
@@ -529,6 +2125,8 @@
         const passwordField = document.getElementById("id_password");
         const passwordConfirmField = document.getElementById("id_password_confirm");
         const passwordRules = document.getElementById("signup-password-rules");
+        const passwordToggle = document.querySelector(".password-guidance-toggle");
+        const passwordRulesContent = document.getElementById("signup-password-rules-content");
 
         function updatePasswordChecklist() {
             if (!passwordField || !passwordRules) {
@@ -558,6 +2156,18 @@
                 }
             });
         }
+        if (passwordToggle && passwordRulesContent) {
+            passwordToggle.addEventListener("click", function () {
+                const isExpanded = passwordToggle.getAttribute("aria-expanded") === "true";
+                passwordToggle.setAttribute("aria-expanded", String(!isExpanded));
+                passwordRulesContent.hidden = isExpanded;
+                const indicator = passwordToggle.querySelector(".password-guidance-indicator");
+                if (indicator) {
+                    indicator.textContent = isExpanded ? "+" : "−";
+                }
+            });
+        }
+
 
         if (passwordField) {
             passwordField.addEventListener("input", updatePasswordChecklist);

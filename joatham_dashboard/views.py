@@ -88,6 +88,12 @@ SIGNUP_BILLING_LABELS = {
     BILLING_CYCLE_MONTHLY: _("Mensuel"),
     BILLING_CYCLE_YEARLY: _("Annuel"),
 }
+SIGNUP_PLAN_THEMES = {
+    FREE_PLAN_CODE: "free",
+    STARTER_PLAN_CODE: "starter",
+    PRO_PLAN_CODE: "pro",
+    PREMIUM_PLAN_CODE: "premium",
+}
 
 
 def _clear_pending_session_conflict(request):
@@ -362,12 +368,14 @@ def _build_subscription_signup_context(subscription_signup_params):
         "subscription_signup_is_paid": is_paid_selection,
         "subscription_selected_plan_label": "",
         "subscription_selected_billing_label": "",
+        "subscription_signup_theme": SIGNUP_PLAN_THEMES[FREE_PLAN_CODE],
     }
     if is_paid_selection:
         context.update(
             {
                 "subscription_selected_plan_label": SIGNUP_PAID_PLAN_LABELS[plan_code],
                 "subscription_selected_billing_label": SIGNUP_BILLING_LABELS[billing_cycle],
+                "subscription_signup_theme": SIGNUP_PLAN_THEMES[plan_code],
             }
         )
     return context
