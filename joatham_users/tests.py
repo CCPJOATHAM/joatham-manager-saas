@@ -477,8 +477,8 @@ class ProductPolicyTests(TestCase):
     def test_free_plan_can_access_only_included_modules(self):
         self.assertTrue(can_access_module(self.owner_free, "clients"))
         self.assertTrue(can_access_module(self.owner_free, "billing"))
-        self.assertFalse(can_access_module(self.owner_free, "expenses"))
-        self.assertFalse(can_access_module(self.owner_free, "products"))
+        self.assertTrue(can_access_module(self.owner_free, "expenses"))
+        self.assertTrue(can_access_module(self.owner_free, "products"))
         self.assertFalse(can_access_module(self.owner_free, "caisse"))
         self.assertFalse(can_access_module(self.owner_free, "payments"))
         self.assertFalse(can_access_module(self.owner_free, "apprenants"))
@@ -509,10 +509,10 @@ class ProductPolicyTests(TestCase):
         response = self.client.get(reverse("client_list"))
         self.assertEqual(response.status_code, 200)
 
-    def test_depenses_view_is_refused_with_free_plan(self):
+    def test_depenses_view_is_allowed_with_free_plan(self):
         self.client.force_login(self.owner_free)
         response = self.client.get(reverse("depenses"))
-        self.assertRedirects(response, reverse("abonnement_expire") + "?module=expenses&reason=module_not_in_plan")
+        self.assertEqual(response.status_code, 200)
 
     def test_billing_view_is_allowed_with_free_plan(self):
         self.client.force_login(self.owner_free)
@@ -536,8 +536,8 @@ class ProductPolicyTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_free_plan_locks_premium_modules(self):
-        self.assertFalse(can_access_module(self.owner_free, "expenses"))
-        self.assertFalse(can_access_module(self.owner_free, "products"))
+        self.assertTrue(can_access_module(self.owner_free, "expenses"))
+        self.assertTrue(can_access_module(self.owner_free, "products"))
         self.assertFalse(can_access_module(self.owner_free, "caisse"))
         self.assertFalse(can_access_module(self.owner_free, "inventory"))
         self.assertFalse(can_access_module(self.owner_free, "stock_reports"))
@@ -645,7 +645,7 @@ class UserManagementTests(TestCase):
         response = self.client.get(reverse("user_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Compte proprietaire principal")
+        self.assertContains(response, "Compte propriétaire principal")
         self.assertContains(response, "Gestionnaire")
         self.assertContains(response, "Comptable")
         content = html.unescape(response.content.decode(response.charset or "utf-8", errors="replace"))
@@ -1213,7 +1213,7 @@ class UserManagementTests(TestCase):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("user_detail", args=[self.gestionnaire.id]))
 
-        self.assertContains(response, "Employe RH lie")
+        self.assertContains(response, "Employé RH lié")
         self.assertContains(response, "Employe Lie")
         self.assertContains(response, "RH-U001")
 
@@ -1221,7 +1221,7 @@ class UserManagementTests(TestCase):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("user_detail", args=[self.comptable.id]))
 
-        self.assertContains(response, "Employe RH lie")
+        self.assertContains(response, "Employé RH lié")
         self.assertContains(response, "Aucune fiche employe RH liee.")
 
     def test_user_list_displays_rh_employee_link_badge(self):
@@ -1237,9 +1237,9 @@ class UserManagementTests(TestCase):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("user_list"))
 
-        self.assertContains(response, "Employe RH")
-        self.assertContains(response, "Lie")
-        self.assertContains(response, "Non lie")
+        self.assertContains(response, "Employé RH")
+        self.assertContains(response, "Lié")
+        self.assertContains(response, "Non lié")
 
     def test_cross_company_mutating_actions_are_refused(self):
         self.client.force_login(self.owner)

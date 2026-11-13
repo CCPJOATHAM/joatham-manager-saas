@@ -667,7 +667,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Entreprise Alpha")
         self.assertContains(response, "Entreprise Beta")
         self.assertContains(response, "Active")
-        self.assertContains(response, "Desactiver")
+        self.assertContains(response, "Désactiver")
         self.assertContains(response, reverse("super_admin_company_deactivate", args=[self.entreprise_a.id]))
         self.assertNotContains(response, "/super-admin/entreprises/%3Cid%3E/desactiver/")
         self.assertNotContains(response, "/super-admin/entreprises/<id>/desactiver/")
@@ -685,7 +685,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Jours restants")
         self.assertContains(response, "Activer")
         self.assertContains(response, "Changer plan")
-        self.assertContains(response, "Prolonger acces historique")
+        self.assertContains(response, "Prolonger accès historique")
         self.assertContains(response, "Suspendre")
 
     def test_super_admin_can_manage_subscription_from_subscription_page(self):
@@ -714,7 +714,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, self.super_admin.email)
         self.assertContains(response, self.owner.username)
         self.assertContains(response, "Compte courant")
-        self.assertContains(response, "Desactiver")
+        self.assertContains(response, "Désactiver")
 
     def test_super_admin_cannot_deactivate_self_from_user_list(self):
         self.client.force_login(self.super_admin)
@@ -1229,7 +1229,7 @@ class SuperAdminDashboardTests(TestCase):
 
         company_list = self.client.get(reverse("super_admin_company_list"), {"status": "inactive"})
         self.assertContains(company_list, "Entreprise Alpha")
-        self.assertContains(company_list, "Desactivee")
+        self.assertContains(company_list, "Désactivée")
 
     def test_inactive_company_user_cannot_access_platform(self):
         self.entreprise_a.is_active = False
