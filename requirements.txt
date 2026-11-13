@@ -1,0 +1,8 @@
+Django==6.0.10
+djangorestframework==3.18.3
+psycopg[binary]==3.3.9
+Pillow==13.0.0
+qrcode[pil]==8.2
+requests==2.34.2
+pypdf==7.1.0
+xhtml2pdf==0.2.28

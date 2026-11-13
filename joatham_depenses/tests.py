@@ -110,8 +110,8 @@ class DepensesServiceTests(TestCase):
         self.client.force_login(empty_user)
         response = self.client.get(reverse("depenses"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Aucune depense enregistree pour le moment")
-        self.assertContains(response, "Ajouter une depense")
+        self.assertContains(response, "Aucune dépense enregistrée pour le moment")
+        self.assertContains(response, "Ajouter une dépense")
 
     def test_depenses_page_filters_by_search(self):
         self.client.force_login(self.gestionnaire_a)
@@ -119,15 +119,15 @@ class DepensesServiceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Papeterie")
         self.assertNotContains(response, "Transport")
-        self.assertContains(response, "Depenses du mois")
-        self.assertContains(response, "Moyenne par depense")
+        self.assertContains(response, "Dépenses du mois")
+        self.assertContains(response, "Moyenne par dépense")
 
     def test_comptable_cannot_see_add_depense_ui(self):
         self.client.force_login(self.comptable_a)
         response = self.client.get(reverse("depenses"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Ajouter une depense")
+        self.assertNotContains(response, "Ajouter une dépense")
         self.assertContains(response, "Filtres et export")
 
     def test_free_plan_blocks_expense_creation_after_monthly_limit(self):

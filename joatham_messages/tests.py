@@ -7,8 +7,9 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import ActivityLog
+from core.services.subscription import activate_subscription_for_entreprise, get_default_paid_plans
 from joatham_billing.tests.factories import create_entreprise, create_user
-from joatham_users.models import Entreprise, EntrepriseInvitation, User
+from joatham_users.models import Abonnement, Entreprise, EntrepriseInvitation, User
 
 from .models import MessageAttachment, PublicQuestion, SuggestionSuperAdmin
 from .services.messages import create_conversation, create_invitation_from_public_question
@@ -27,6 +28,15 @@ class MessageTenancyTests(TestCase):
         self.owner_a = create_user("owner-msg-a", User.Role.PROPRIETAIRE, self.entreprise_a)
         self.manager_a = create_user("manager-msg-a", User.Role.GESTIONNAIRE, self.entreprise_a)
         self.owner_b = create_user("owner-msg-b", User.Role.PROPRIETAIRE, self.entreprise_b)
+
+        premium = next(plan for plan in get_default_paid_plans() if plan["code"] == "premium")
+        premium_plan = Abonnement.objects.create(**premium, actif=True)
+        activate_subscription_for_entreprise(
+            entreprise=self.entreprise_a, plan=premium_plan, utilisateur=self.owner_a
+        )
+        activate_subscription_for_entreprise(
+            entreprise=self.entreprise_b, plan=premium_plan, utilisateur=self.owner_b
+        )
 
     def test_user_never_sees_other_company_conversation(self):
         conversation = create_conversation(
