@@ -67,18 +67,13 @@ class MessageTenancyTests(TestCase):
         self.client.force_login(self.manager_a)
         response = self.client.get(reverse("message_attachment_download", args=[attachment.id]))
 
-        try:
-            self.assertEqual(response.status_code, 200)
-            self.assertIn("attachment", response.headers["Content-Disposition"])
-        finally:
-            response.close()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(b"".join(response.streaming_content), b"contenu")
+        self.assertIn("attachment", response.headers["Content-Disposition"])
 
         self.client.force_login(self.owner_b)
         denied = self.client.get(reverse("message_attachment_download", args=[attachment.id]))
-        try:
-            self.assertEqual(denied.status_code, 404)
-        finally:
-            denied.close()
+        self.assertEqual(denied.status_code, 404)
 
 
 class SuggestionAndPublicQuestionTests(TestCase):
