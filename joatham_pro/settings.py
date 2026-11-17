@@ -135,13 +135,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "core.validators.PasswordComplexityValidator"},
 ]
 
-LANGUAGE_CODE = os.getenv("DJANGO_LANGUAGE_CODE", "fr")
 LANGUAGES = [
     ("fr", _("Français")),
     ("en", _("English")),
-    ("pt", _("Português")),
-    ("es", _("Español")),
 ]
+LANGUAGE_CODE = os.getenv("DJANGO_LANGUAGE_CODE", "fr")
+if LANGUAGE_CODE not in dict(LANGUAGES):
+    LANGUAGE_CODE = "fr"
 LOCALE_PATHS = [BASE_DIR / "locale"]
 LANGUAGE_COOKIE_NAME = "joatham_language"
 TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "Africa/Kinshasa")
