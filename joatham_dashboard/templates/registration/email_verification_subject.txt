@@ -1,1 +1,2 @@
-Confirmez votre adresse email | JOATHAM Manager
+{% load i18n %}
+{% trans "Confirmez votre adresse email | JOATHAM Manager" %}

@@ -1,13 +1,15 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Services | JOATHAM Manager{% endblock %}
-{% block content_title %}Services{% endblock %}
-{% block content_subtitle %}Gérez votre catalogue de prestations immatérielles sans le mélanger au module Produits.{% endblock %}
+
+{% block page_title %}{% trans "Services | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Services" %}{% endblock %}
+{% block content_subtitle %}{% trans "Gérez votre catalogue de prestations immatérielles sans le mélanger au module Produits." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'service_list' %}" class="btn-link">Liste des services</a>
+<a href="{% url 'service_list' %}" class="btn-link">{% trans "Liste des services" %}</a>
 {% if can_manage_services_ui %}
-<a href="{% url 'service_create' %}" class="btn-link primary">Ajouter un service</a>
+<a href="{% url 'service_create' %}" class="btn-link primary">{% trans "Ajouter un service" %}</a>
 {% endif %}
 {% endblock %}
 
@@ -178,22 +180,22 @@
 
 <div class="hero">
     <div>
-        <h2>Services</h2>
-        <p>Retrouvez ici vos prestations immatérielles, avec leur prix, leur statut et un accès simple pour tenir votre catalogue à jour.</p>
+        <h2>{% trans "Services" %}</h2>
+        <p>{% trans "Retrouvez ici vos prestations immatérielles, avec leur prix, leur statut et un accès simple pour tenir votre catalogue à jour." %}</p>
     </div>
 </div>
 
 <div class="stats-grid">
     <div class="stat-card">
-        <span class="stat-label">Services</span>
+        <span class="stat-label">{% trans "Services" %}</span>
         <span class="stat-value">{{ service_count }}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Services actifs</span>
+        <span class="stat-label">{% trans "Services actifs" %}</span>
         <span class="stat-value">{{ active_count }}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Services inactifs</span>
+        <span class="stat-label">{% trans "Services inactifs" %}</span>
         <span class="stat-value">{{ inactive_count }}</span>
     </div>
 </div>
@@ -203,10 +205,10 @@
     <table class="services-table">
         <thead>
             <tr>
-                <th>Service</th>
-                <th>Prix</th>
-                <th>État</th>
-                <th>Actions</th>
+                <th>{% trans "Service" %}</th>
+                <th>{% trans "Prix" %}</th>
+                <th>{% trans "État" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -214,27 +216,27 @@
             <tr>
                 <td>
                     <div class="service-name">{{ service.nom }}</div>
-                    <div style="color:#64748b;">Prestation immatérielle</div>
+                    <div style="color:#64748b;">{% trans "Prestation immatérielle" %}</div>
                 </td>
                 <td class="price">{{ service.prix }}</td>
                 <td>
                     {% if service.actif %}
-                    <span class="badge active">Actif</span>
+                    <span class="badge active">{% trans "Actif" %}</span>
                     {% else %}
-                    <span class="badge inactive">Inactif</span>
+                    <span class="badge inactive">{% trans "Inactif" %}</span>
                     {% endif %}
                 </td>
                 <td>
                     {% if can_manage_services_ui %}
                     <div class="actions">
-                        <a href="{% url 'service_update' service.id %}" class="action-link">Modifier</a>
+                        <a href="{% url 'service_update' service.id %}" class="action-link">{% trans "Modifier" %}</a>
                         <form method="post" action="{% url 'service_toggle_status' service.id %}" class="action-form">
                             {% csrf_token %}
-                            <button type="submit">{% if service.actif %}Désactiver{% else %}Activer{% endif %}</button>
+                            <button type="submit">{% if service.actif %}{% trans "Désactiver" %}{% else %}{% trans "Activer" %}{% endif %}</button>
                         </form>
                     </div>
                     {% else %}
-                    <span style="color:#64748b;">Lecture seule</span>
+                    <span style="color:#64748b;">{% trans "Lecture seule" %}</span>
                     {% endif %}
                 </td>
             </tr>
@@ -245,10 +247,10 @@
 {% else %}
 <div class="table-shell">
     <div class="empty-state">
-        <h3>Aucun service enregistré</h3>
-        <p>Commencez par ajouter une première prestation pour constituer votre catalogue de services.</p>
+        <h3>{% trans "Aucun service enregistré" %}</h3>
+        <p>{% trans "Commencez par ajouter une première prestation pour constituer votre catalogue de services." %}</p>
         {% if can_manage_services_ui %}
-        <a href="{% url 'service_create' %}" class="btn-link primary">Ajouter un service</a>
+        <a href="{% url 'service_create' %}" class="btn-link primary">{% trans "Ajouter un service" %}</a>
         {% endif %}
     </div>
 </div>

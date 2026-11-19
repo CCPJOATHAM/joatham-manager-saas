@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block products_title %}{% trans "Rapports stock" %}{% endblock %}
-{% block products_subtitle %}{% trans "Analysez vos mouvements, vos niveaux de stock et vos inventaires sur une periode donnee." %}{% endblock %}
+{% block products_subtitle %}{% trans "Analysez vos mouvements, vos niveaux de stock et vos inventaires sur une période donnée." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -20,7 +20,7 @@
     <div class="section-header">
         <div>
             <h2 class="section-title">{% trans "Rapports stock" %}</h2>
-            <p class="section-subtitle">{% trans "Suivez les niveaux de stock, les ajustements, les inventaires et les mouvements recents sur une periode donnee." %}</p>
+            <p class="section-subtitle">{% trans "Suivez les niveaux de stock, les ajustements, les inventaires et les mouvements récents sur une période donnée." %}</p>
         </div>
         <div class="action-row">
             <a href="{% url 'stock_movement_list' %}" class="action-link">{% trans "Voir les mouvements" %}</a>
@@ -53,7 +53,7 @@
                 </select>
             </div>
             <div class="field">
-                <label for="date_debut">{% trans "Date debut" %}</label>
+                <label for="date_debut">{% trans "Date début" %}</label>
                 <input type="date" name="date_debut" id="date_debut" value="{{ selected_date_debut }}">
             </div>
             <div class="field">
@@ -71,7 +71,7 @@
         </div>
         <div class="action-row" style="margin-top:16px;">
             <button type="submit" class="action-link primary">{% trans "Filtrer" %}</button>
-            <a href="{% url 'stock_reports' %}" class="action-link">{% trans "Reinitialiser" %}</a>
+            <a href="{% url 'stock_reports' %}" class="action-link">{% trans "Réinitialiser" %}</a>
         </div>
     </form>
 </div>
@@ -82,19 +82,19 @@
     <div class="kpi-card"><span class="kpi-label">{% trans "Ruptures" %}</span><span class="kpi-value">{{ report.produits_rupture }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Stock faible" %}</span><span class="kpi-value">{{ report.produits_stock_faible }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Mouvements" %}</span><span class="kpi-value">{{ report.total_mouvements }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Entrees" %}</span><span class="kpi-value">{{ report.total_entrees }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Entrées" %}</span><span class="kpi-value">{{ report.total_entrees }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Sorties" %}</span><span class="kpi-value">{{ report.total_sorties }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Ajustements +" %}</span><span class="kpi-value">{{ report.total_ajustements_positifs }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Ajustements -" %}</span><span class="kpi-value">{{ report.total_ajustements_negatifs }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Inventaires valides" %}</span><span class="kpi-value">{{ report.inventaires_valides }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Inventaires validés" %}</span><span class="kpi-value">{{ report.inventaires_valides }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Inventaires avec écarts" %}</span><span class="kpi-value">{{ report.inventaires_avec_ecarts }}</span></div>
 </div>
 
 <div class="section-card">
     <div class="section-header">
         <div>
-            <h3 class="section-title">{% trans "Synthese par produit" %}</h3>
-            <p class="section-subtitle">{% trans "Visualisez le niveau de stock courant et l'activite recente produit par produit." %}</p>
+            <h3 class="section-title">{% trans "Synthèse par produit" %}</h3>
+            <p class="section-subtitle">{% trans "Visualisez le niveau de stock courant et l'activité récente produit par produit." %}</p>
         </div>
     </div>
     <div class="table-shell">
@@ -106,8 +106,8 @@
                         <th>{% trans "Stock actuel" %}</th>
                         <th>{% trans "Seuil alerte" %}</th>
                         <th>{% trans "Statut" %}</th>
-                        <th>{% trans "Entrees periode" %}</th>
-                        <th>{% trans "Sorties periode" %}</th>
+                        <th>{% trans "Entrées période" %}</th>
+                        <th>{% trans "Sorties période" %}</th>
                         <th>{% trans "Solde mouvements" %}</th>
                         <th>{% trans "Dernier mouvement" %}</th>
                     </tr>
@@ -122,7 +122,7 @@
                         <td>{{ row.total_entrees }}</td>
                         <td>{{ row.total_sorties }}</td>
                         <td>{{ row.solde_mouvements }}</td>
-                        <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                        <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -134,19 +134,19 @@
 <div class="section-card">
     <div class="section-header">
         <div>
-            <h3 class="section-title">{% trans "Synthese par type de mouvement" %}</h3>
-            <p class="section-subtitle">{% trans "Reperez les familles de mouvements qui dominent la periode analysee." %}</p>
+            <h3 class="section-title">{% trans "Synthèse par type de mouvement" %}</h3>
+            <p class="section-subtitle">{% trans "Repérez les familles de mouvements qui dominent la période analysée." %}</p>
         </div>
     </div>
     <div class="table-shell">
         <div class="table-scroll">
             <table class="data-table report-table">
-                <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre de mouvements" %}</th><th>{% trans "Quantite totale" %}</th></tr></thead>
+                <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre de mouvements" %}</th><th>{% trans "Quantité totale" %}</th></tr></thead>
                 <tbody>
                     {% for row in movement_type_summary %}
                     <tr><td>{{ row.movement_label }}</td><td>{{ row.movement_count }}</td><td>{{ row.total_quantity }}</td></tr>
                     {% empty %}
-                    <tr><td colspan="3" class="muted">{% trans "Aucun mouvement sur cette periode." %}</td></tr>
+                    <tr><td colspan="3" class="muted">{% trans "Aucun mouvement sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -157,38 +157,38 @@
 <div class="section-card">
     <div class="section-header">
         <div>
-            <h3 class="section-title">{% trans "Synthese inventaires" %}</h3>
+            <h3 class="section-title">{% trans "Synthèse inventaires" %}</h3>
             <p class="section-subtitle">{% trans "Suivez l'état des campagnes d'inventaire et les écarts qui en découlent." %}</p>
         </div>
     </div>
     <div class="inventory-status-grid">
         <div class="kpi-card"><span class="kpi-label">{% trans "Brouillons" %}</span><span class="kpi-value">{{ inventory_summary.draft_count }}</span></div>
         <div class="kpi-card"><span class="kpi-label">{% trans "En cours" %}</span><span class="kpi-value">{{ inventory_summary.in_progress_count }}</span></div>
-        <div class="kpi-card"><span class="kpi-label">{% trans "Clotures" %}</span><span class="kpi-value">{{ inventory_summary.closed_count }}</span></div>
-        <div class="kpi-card"><span class="kpi-label">{% trans "Valides" %}</span><span class="kpi-value">{{ inventory_summary.validated_count }}</span></div>
-        <div class="kpi-card"><span class="kpi-label">{% trans "Annules" %}</span><span class="kpi-value">{{ inventory_summary.cancelled_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Clôturés" %}</span><span class="kpi-value">{{ inventory_summary.closed_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Validés" %}</span><span class="kpi-value">{{ inventory_summary.validated_count }}</span></div>
+        <div class="kpi-card"><span class="kpi-label">{% trans "Annulés" %}</span><span class="kpi-value">{{ inventory_summary.cancelled_count }}</span></div>
     </div>
     <div class="helper-card" style="margin-bottom:18px;">
         <span class="helper-text">
-            {% trans "Ecarts positifs :" %} {{ inventory_summary.positive_differences }} |
-            {% trans "Ecarts negatifs :" %} {{ inventory_summary.negative_differences }}
+            {% trans "Écarts positifs :" %} {{ inventory_summary.positive_differences }} |
+            {% trans "Écarts négatifs :" %} {{ inventory_summary.negative_differences }}
         </span>
     </div>
     <div class="table-shell">
         <div class="table-scroll">
             <table class="data-table report-table">
-                <thead><tr><th>{% trans "Inventaire" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Date creation" %}</th><th>{% trans "Date validation" %}</th><th>{% trans "Action" %}</th></tr></thead>
+                <thead><tr><th>{% trans "Inventaire" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Date création" %}</th><th>{% trans "Date validation" %}</th><th>{% trans "Action" %}</th></tr></thead>
                 <tbody>
                     {% for session in inventory_summary.recent_inventories %}
                     <tr>
                         <td>{{ session.name }}</td>
                         <td>{{ session.get_status_display }}</td>
-                        <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
-                        <td>{% if session.validated_at %}{{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                        <td>{{ session.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        <td>{% if session.validated_at %}{{ session.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                         <td><a href="{% url 'inventory_detail' session.id %}" class="action-link">{% trans "Voir" %}</a></td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="muted">{% trans "Aucun inventaire recent." %}</td></tr>
+                    <tr><td colspan="5" class="muted">{% trans "Aucun inventaire récent." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -200,24 +200,24 @@
     <div class="section-header">
         <div>
             <h3 class="section-title">{% trans "Derniers mouvements" %}</h3>
-            <p class="section-subtitle">{% trans "Gardez un oeil sur les derniers evenements qui ont fait bouger le stock." %}</p>
+            <p class="section-subtitle">{% trans "Gardez un oeil sur les derniers événements qui ont fait bouger le stock." %}</p>
         </div>
     </div>
     <div class="table-shell">
         <div class="table-scroll">
             <table class="data-table report-table">
-                <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Source" %}</th></tr></thead>
+                <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantité" %}</th><th>{% trans "Source" %}</th></tr></thead>
                 <tbody>
                     {% for movement in recent_movements %}
                     <tr>
-                        <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ movement.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                         <td>{{ movement.produit.nom }}</td>
                         <td>{{ movement.get_movement_type_display }}</td>
                         <td>{{ movement.quantity }}</td>
                         <td>{% if movement.source_app %}{{ movement.source_app }}{% else %}<span class="muted">{% trans "Manuelle" %}</span>{% endif %}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="muted">{% trans "Aucune activite recente." %}</td></tr>
+                    <tr><td colspan="5" class="muted">{% trans "Aucune activité récente." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

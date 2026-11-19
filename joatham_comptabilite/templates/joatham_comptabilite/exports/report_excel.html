@@ -1,3 +1,5 @@
+
+{% load i18n %}
 <html>
 <head>
     <meta charset="utf-8">
@@ -8,25 +10,25 @@
             <td colspan="8"><strong>{{ report_title }}</strong></td>
         </tr>
         <tr>
-            <td colspan="8">Entreprise: {{ selected_entreprise.nom }}</td>
+            <td colspan="8">{% trans "Entreprise:" %} {{ selected_entreprise.nom }}</td>
         </tr>
         <tr>
-            <td colspan="8">Période : {{ period_label }}</td>
+            <td colspan="8">{% trans "Période :" %} {{ period_label }}</td>
         </tr>
         <tr>
-            <td colspan="8">Genere le: {{ generated_at|date:"d/m/Y H:i" }}</td>
+            <td colspan="8">{% trans "Généré le:" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
         </tr>
     </table>
 
     {% if report_slug == "balance" %}
         <table border="1">
             <tr>
-                <th>Numero</th>
-                <th>Compte</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Solde debit</th>
-                <th>Solde credit</th>
+                <th>{% trans "Numéro" %}</th>
+                <th>{% trans "Compte" %}</th>
+                <th>{% trans "Débit" %}</th>
+                <th>{% trans "Crédit" %}</th>
+                <th>{% trans "Solde débit" %}</th>
+                <th>{% trans "Solde crédit" %}</th>
             </tr>
             {% for row in rows %}
                 <tr>
@@ -46,21 +48,21 @@
                     <td colspan="8"><strong>{{ account.numero }} - {{ account.nom }}</strong></td>
                 </tr>
                 <tr>
-                    <td colspan="8">Ouverture D {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}</td>
+                    <td colspan="8">{% trans "Ouverture D" %} {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}</td>
                 </tr>
                 <tr>
-                    <th>Date</th>
-                    <th>Journal</th>
-                    <th>Piece</th>
-                    <th>Libelle</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
-                    <th>Solde debit</th>
-                    <th>Solde credit</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Journal" %}</th>
+                    <th>{% trans "Pièce" %}</th>
+                    <th>{% trans "Libellé" %}</th>
+                    <th>{% trans "Débit" %}</th>
+                    <th>{% trans "Crédit" %}</th>
+                    <th>{% trans "Solde débit" %}</th>
+                    <th>{% trans "Solde crédit" %}</th>
                 </tr>
                 {% for line in account.lignes %}
                     <tr>
-                        <td>{{ line.date_piece|date:"d/m/Y" }}</td>
+                        <td>{{ line.date_piece|date:"SHORT_DATE_FORMAT" }}</td>
                         <td>{{ line.journal }}</td>
                         <td>{{ line.numero_piece }}</td>
                         <td>{{ line.libelle }}</td>
@@ -76,12 +78,12 @@
     {% elif report_slug == "compte_resultat" %}
         <table border="1">
             <tr>
-                <th colspan="3">Produits</th>
+                <th colspan="3">{% trans "Produits" %}</th>
             </tr>
             <tr>
-                <th>Numero</th>
-                <th>Compte</th>
-                <th>Montant</th>
+                <th>{% trans "Numéro" %}</th>
+                <th>{% trans "Compte" %}</th>
+                <th>{% trans "Montant" %}</th>
             </tr>
             {% for row in produits %}
                 <tr>
@@ -91,19 +93,19 @@
                 </tr>
             {% endfor %}
             <tr>
-                <td colspan="2"><strong>Total produits</strong></td>
+                <td colspan="2"><strong>{% trans "Total produits" %}</strong></td>
                 <td><strong>{{ total_produits|floatformat:2 }}</strong></td>
             </tr>
         </table>
 
         <table border="1">
             <tr>
-                <th colspan="3">Charges</th>
+                <th colspan="3">{% trans "Charges" %}</th>
             </tr>
             <tr>
-                <th>Numero</th>
-                <th>Compte</th>
-                <th>Montant</th>
+                <th>{% trans "Numéro" %}</th>
+                <th>{% trans "Compte" %}</th>
+                <th>{% trans "Montant" %}</th>
             </tr>
             {% for row in charges %}
                 <tr>
@@ -113,18 +115,18 @@
                 </tr>
             {% endfor %}
             <tr>
-                <td colspan="2"><strong>Total charges</strong></td>
+                <td colspan="2"><strong>{% trans "Total charges" %}</strong></td>
                 <td><strong>{{ total_charges|floatformat:2 }}</strong></td>
             </tr>
             <tr>
-                <td colspan="2"><strong>Resultat net</strong></td>
+                <td colspan="2"><strong>{% trans "Résultat net" %}</strong></td>
                 <td><strong>{{ resultat_net|floatformat:2 }}</strong></td>
             </tr>
         </table>
     {% elif report_slug == "bilan" %}
         <table border="1">
             <tr>
-                <th colspan="3">Actif</th>
+                <th colspan="3">{% trans "Actif" %}</th>
             </tr>
             {% for section in actif_sections %}
                 <tr>
@@ -138,19 +140,19 @@
                     </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="2"><strong>Sous-total</strong></td>
+                    <td colspan="2"><strong>{% trans "Sous-total" %}</strong></td>
                     <td><strong>{{ section.subtotal|floatformat:2 }}</strong></td>
                 </tr>
             {% endfor %}
             <tr>
-                <td colspan="2"><strong>Total actif</strong></td>
+                <td colspan="2"><strong>{% trans "Total actif" %}</strong></td>
                 <td><strong>{{ actif|floatformat:2 }}</strong></td>
             </tr>
         </table>
 
         <table border="1">
             <tr>
-                <th colspan="3">Passif</th>
+                <th colspan="3">{% trans "Passif" %}</th>
             </tr>
             {% for section in passif_sections %}
                 <tr>
@@ -164,12 +166,12 @@
                     </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="2"><strong>Sous-total</strong></td>
+                    <td colspan="2"><strong>{% trans "Sous-total" %}</strong></td>
                     <td><strong>{{ section.subtotal|floatformat:2 }}</strong></td>
                 </tr>
             {% endfor %}
             <tr>
-                <td colspan="2"><strong>Total passif</strong></td>
+                <td colspan="2"><strong>{% trans "Total passif" %}</strong></td>
                 <td><strong>{{ passif|floatformat:2 }}</strong></td>
             </tr>
         </table>

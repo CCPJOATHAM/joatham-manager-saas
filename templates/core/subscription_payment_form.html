@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Paiement abonnement | JOATHAM Manager{% endblock %}
-{% block content_title %}Paiement de l'abonnement{% endblock %}
-{% block content_subtitle %}Choisissez votre période, vérifiez le montant en USD et envoyez votre demande après paiement pour validation manuelle.{% endblock %}
+
+{% block page_title %}{% trans "Paiement abonnement | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Paiement de l'abonnement" %}{% endblock %}
+{% block content_subtitle %}{% trans "Choisissez votre période, vérifiez le montant en USD et envoyez votre demande après paiement pour validation manuelle." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">Retour à mon abonnement</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Retour à mon abonnement" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -160,14 +162,14 @@
 
             <div class="amount-grid">
                 <div class="amount-preview">
-                    <span class="label">Montant de référence</span>
+                    <span class="label">{% trans "Montant de référence" %}</span>
                     <span class="value"><span id="amount-usd-preview">-</span> USD</span>
-                    <span class="meta">Prix plateforme conservé en USD.</span>
+                    <span class="meta">{% trans "Prix plateforme conservé en USD." %}</span>
                 </div>
                 <div class="amount-preview">
-                    <span class="label">Montant estimatif dans votre devise</span>
+                    <span class="label">{% trans "Montant estimatif dans votre devise" %}</span>
                     <span class="value"><span id="amount-local-preview">-</span> <span id="currency-preview">{{ currency_code }}</span></span>
-                    <span class="meta">Taux utilisé : <span id="rate-preview">-</span></span>
+                    <span class="meta">{% trans "Taux utilisé :" %} <span id="rate-preview">-</span></span>
                 </div>
             </div>
 
@@ -187,19 +189,19 @@
                 {{ form.preuve_paiement.errors }}
             </div>
             <div class="cta-row">
-                <button type="submit" class="submit-btn">Envoyer la demande</button>
-                <a class="secondary-link" href="{{ whatsapp_link }}" target="_blank" rel="noopener">Contacter via WhatsApp</a>
+                <button type="submit" class="submit-btn">{% trans "Envoyer la demande" %}</button>
+                <a class="secondary-link" href="{{ whatsapp_link }}" target="_blank" rel="noopener">{% trans "Contacter via WhatsApp" %}</a>
             </div>
         </form>
     </section>
 
     <aside class="payment-card instructions">
-        <h2>Demande de paiement</h2>
-        <p><strong>1.</strong> Choisissez le plan payant et la période souhaitée.</p>
-        <p><strong>2.</strong> Vérifiez le montant de référence en USD et son estimation dans la devise de votre entreprise.</p>
-        <p><strong>3.</strong> Effectuez votre paiement hors plateforme, puis ajoutez votre référence et votre preuve si disponible.</p>
-        <p><strong>4.</strong> Le statut restera <strong>Demande de paiement en attente</strong> jusqu'à validation par le super admin.</p>
-        <p>Le montant affiché dans votre devise est fourni à titre estimatif. L'activation de l'abonnement intervient uniquement après validation manuelle.</p>
+        <h2>{% trans "Demande de paiement" %}</h2>
+        <p><strong>1.</strong> {% trans "Choisissez le plan payant et la période souhaitée." %}</p>
+        <p><strong>2.</strong> {% trans "Vérifiez le montant de référence en USD et son estimation dans la devise de votre entreprise." %}</p>
+        <p><strong>3.</strong> {% trans "Effectuez votre paiement hors plateforme, puis ajoutez votre référence et votre preuve si disponible." %}</p>
+        <p><strong>4.</strong> {% trans "Le statut restera" %} <strong>{% trans "Demande de paiement en attente" %}</strong> {% trans "Jusqu'à validation par le super admin." %}</p>
+        <p>{% trans "Le montant affiché dans votre devise est fourni à titre estimatif. L'activation de l'abonnement intervient uniquement après validation manuelle." %}</p>
     </aside>
 </div>
 

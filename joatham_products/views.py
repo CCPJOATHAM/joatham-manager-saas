@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
@@ -76,7 +77,7 @@ def _build_product_ui_permissions(user):
 
 def _build_stock_type_label(movement_type):
     return {
-        StockMovement.MovementType.MANUAL_ENTRY: _("Entree"),
+        StockMovement.MovementType.MANUAL_ENTRY: _('Entrée'),
         StockMovement.MovementType.MANUAL_EXIT: _("Sortie"),
         StockMovement.MovementType.ADJUSTMENT_POSITIVE: _("Ajustement +"),
         StockMovement.MovementType.ADJUSTMENT_NEGATIVE: _("Ajustement -"),
@@ -92,9 +93,9 @@ def _build_inventory_status_label(status):
     return {
         "draft": _("Brouillon"),
         "in_progress": _("En cours"),
-        "closed": _("Cloture"),
-        "validated": _("Valide"),
-        "cancelled": _("Annule"),
+        "closed": _('Clôturé'),
+        "validated": _('Validé'),
+        "cancelled": _('Annulé'),
     }.get(status, status)
 
 
@@ -205,12 +206,12 @@ def _handle_stock_operation(*, request, entreprise, form, operation):
                 comment=data["comment"],
             )
         else:
-            raise PermissionDenied("Operation de stock invalide.")
+            raise PermissionDenied(gettext_lazy('Opération de stock invalide.'))
     except StockOperationError as exc:
         form.add_error(None, str(exc))
         return None
 
-    messages.success(request, _("Le mouvement de stock a ete enregistre avec succes."))
+    messages.success(request, _('Le mouvement de stock a été enregistré avec succès.'))
     return redirect("stock_movement_list")
 
 
@@ -275,7 +276,7 @@ def product_create(request):
         except ProductOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Le produit a ete cree avec succes."))
+            messages.success(request, _('Le produit a été créé avec succès.'))
             return redirect("product_list")
 
     return render(
@@ -283,8 +284,8 @@ def product_create(request):
         "joatham_products/product_form.html",
         {
             "form": form,
-            "page_title": _("Creer un produit"),
-            "submit_label": _("Creer le produit"),
+            "page_title": _('Créer un produit'),
+            "submit_label": _('Créer le produit'),
             "is_create_mode": True,
             **_build_product_ui_permissions(request.user),
         },
@@ -311,7 +312,7 @@ def product_update(request, product_id):
         except ProductOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Le produit a ete mis a jour avec succes."))
+            messages.success(request, _('Le produit a été mis à jour avec succès.'))
             return redirect("product_list")
 
     return render(
@@ -357,7 +358,7 @@ def stock_movement_list(request):
             "movements": rows,
             "products": products,
             "movement_types": [
-                (StockMovement.MovementType.MANUAL_ENTRY, _("Entree")),
+                (StockMovement.MovementType.MANUAL_ENTRY, _('Entrée')),
                 (StockMovement.MovementType.MANUAL_EXIT, _("Sortie")),
                 (StockMovement.MovementType.ADJUSTMENT_POSITIVE, _("Ajustement +")),
                 (StockMovement.MovementType.ADJUSTMENT_NEGATIVE, _("Ajustement -")),
@@ -403,7 +404,7 @@ def stock_reports(request):
             "recent_movements": recent_movements,
             "products": products,
             "movement_types": [
-                (StockMovement.MovementType.MANUAL_ENTRY, _("Entree")),
+                (StockMovement.MovementType.MANUAL_ENTRY, _('Entrée')),
                 (StockMovement.MovementType.MANUAL_EXIT, _("Sortie")),
                 (StockMovement.MovementType.ADJUSTMENT_POSITIVE, _("Ajustement +")),
                 (StockMovement.MovementType.ADJUSTMENT_NEGATIVE, _("Ajustement -")),
@@ -456,19 +457,19 @@ def stock_movement_export_excel(request):
         filename="mouvements-stock.xlsx",
         sheet_name="Mouvements stock",
         headers=[
-            "Date",
-            "Produit",
-            "Type",
-            "Quantite",
-            "Stock avant",
-            "Stock apres",
-            "Reference",
-            "Motif",
-            "Commentaire",
-            "Source app",
-            "Source model",
-            "Source id",
-            "Utilisateur",
+            gettext_lazy("Date"),
+            gettext_lazy("Produit"),
+            gettext_lazy("Type"),
+            gettext_lazy('Quantité'),
+            gettext_lazy("Stock avant"),
+            gettext_lazy('Stock après'),
+            gettext_lazy('Référence'),
+            gettext_lazy("Motif"),
+            gettext_lazy("Commentaire"),
+            gettext_lazy("Source app"),
+            gettext_lazy("Source model"),
+            gettext_lazy("Source id"),
+            gettext_lazy("Utilisateur"),
         ],
         rows=rows,
     )
@@ -509,15 +510,15 @@ def inventory_export_excel(request):
         filename="inventaires-stock.xlsx",
         sheet_name="Inventaires stock",
         headers=[
-            "Session",
-            "Statut",
-            "Produit",
-            "Stock theorique",
-            "Quantite comptee",
-            "Ecart",
-            "Commentaire ligne",
-            "Date creation session",
-            "Date validation",
+            gettext_lazy("Session"),
+            gettext_lazy("Statut"),
+            gettext_lazy("Produit"),
+            gettext_lazy('Stock théorique'),
+            gettext_lazy('Quantité comptée'),
+            gettext_lazy('Écart'),
+            gettext_lazy("Commentaire ligne"),
+            gettext_lazy('Date création session'),
+            gettext_lazy("Date validation"),
         ],
         rows=rows,
     )
@@ -582,9 +583,9 @@ def stock_entry_create(request):
         {
             **_build_stock_operation_context(
                 form=form,
-                page_title=_("Entree stock"),
-                submit_label=_("Enregistrer l'entree"),
-                help_text=_("Utilisez cette action pour enregistrer un reapprovisionnement ou une entree manuelle."),
+                page_title=_('Entrée stock'),
+                submit_label=_("Enregistrer l'entrée"),
+                help_text=_('Utilisez cette action pour enregistrer un réapprovisionnement ou une entrée manuelle.'),
             ),
             **_build_product_ui_permissions(request.user),
         },
@@ -617,7 +618,7 @@ def stock_exit_create(request):
                 form=form,
                 page_title=_("Sortie stock"),
                 submit_label=_("Enregistrer la sortie"),
-                help_text=_("Utilisez cette action pour enregistrer une sortie manuelle ou une perte constatee."),
+                help_text=_('Utilisez cette action pour enregistrer une sortie manuelle ou une perte constatée.'),
             ),
             **_build_product_ui_permissions(request.user),
         },
@@ -652,7 +653,7 @@ def stock_adjustment_create(request):
                 form=form,
                 page_title=_("Ajustement stock"),
                 submit_label=_("Enregistrer l'ajustement"),
-                help_text=_("Utilisez cette action pour corriger un ecart de stock apres verification interne."),
+                help_text=_('Utilisez cette action pour corriger un écart de stock après vérification interne.'),
             ),
             **_build_product_ui_permissions(request.user),
         },
@@ -686,9 +687,9 @@ def inventory_list(request):
                 ("", _("Tous les statuts")),
                 ("draft", _("Brouillon")),
                 ("in_progress", _("En cours")),
-                ("closed", _("Cloture")),
-                ("validated", _("Valide")),
-                ("cancelled", _("Annule")),
+                ("closed", _('Clôturé')),
+                ("validated", _('Validé')),
+                ("cancelled", _('Annulé')),
             ],
             **filters,
             **_build_product_ui_permissions(request.user),
@@ -709,7 +710,7 @@ def inventory_create(request):
             utilisateur=request.user,
             include_active_products=True,
         )
-        messages.success(request, _("La session d'inventaire a ete creee avec succes."))
+        messages.success(request, _("La session d'inventaire a été créée avec succès."))
         return redirect("inventory_detail", pk=session.id)
 
     return render(
@@ -718,7 +719,7 @@ def inventory_create(request):
         {
             "form": form,
             "page_title": _("Nouvel inventaire physique"),
-            "submit_label": _("Creer l'inventaire"),
+            "submit_label": _("Créer l'inventaire"),
             **_build_product_ui_permissions(request.user),
         },
     )
@@ -757,7 +758,7 @@ def inventory_count(request, pk):
         return redirect("inventory_detail", pk=session.id)
 
     if session.status != session.Status.IN_PROGRESS:
-        messages.error(request, _("Seules les sessions en cours peuvent etre comptees."))
+        messages.error(request, _('Seules les sessions en cours peuvent être comptées.'))
         return redirect("inventory_detail", pk=session.id)
 
     lines = list(get_inventory_lines_for_session(entreprise, session))
@@ -784,7 +785,7 @@ def inventory_count(request, pk):
         except InventoryOperationError as exc:
             formset._non_form_errors = formset.error_class([str(exc)])
         else:
-            messages.success(request, _("Les comptages ont ete enregistres avec succes."))
+            messages.success(request, _('Les comptages ont été enregistrés avec succès.'))
             return redirect("inventory_detail", pk=session.id)
 
     line_forms = []
@@ -808,14 +809,14 @@ def inventory_count(request, pk):
 @module_access_required("inventory")
 def inventory_close(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy('Cette action doit être soumise par formulaire.'))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         close_inventory_session(entreprise=entreprise, session_id=pk)
     except InventoryOperationError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("La session d'inventaire a ete cloturee."))
+        messages.success(request, _("La session d'inventaire a été clôturée."))
     return redirect("inventory_detail", pk=pk)
 
 
@@ -823,7 +824,7 @@ def inventory_close(request, pk):
 @module_access_required("inventory")
 def inventory_validate(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy('Cette action doit être soumise par formulaire.'))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         validate_inventory_session(
@@ -834,7 +835,7 @@ def inventory_validate(request, pk):
     except (InventoryOperationError, StockOperationError) as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("L'inventaire a ete valide et les ajustements ont ete enregistres."))
+        messages.success(request, _("L'inventaire a été validé et les ajustements ont été enregistrés."))
     return redirect("inventory_detail", pk=pk)
 
 
@@ -842,12 +843,12 @@ def inventory_validate(request, pk):
 @module_access_required("inventory")
 def inventory_cancel(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy('Cette action doit être soumise par formulaire.'))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         cancel_inventory_session(entreprise=entreprise, session_id=pk)
     except InventoryOperationError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("La session d'inventaire a ete annulee."))
+        messages.success(request, _("La session d'inventaire a été annulée."))
     return redirect("inventory_detail", pk=pk)

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.contrib import messages
@@ -112,15 +113,15 @@ def _subscription_activation_mode(subscription, payment):
         return "Accord commercial"
     if payment.methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE:
         if payment.statut == PaiementAbonnement.Statut.VALIDE:
-            return "Paiement automatique confirmé"
-        return "Paiement automatique en attente de confirmation"
+            return gettext_lazy('Paiement automatique confirmé')
+        return gettext_lazy('Paiement automatique en attente de confirmation')
     if payment.source_taux == "demande_plan":
         if payment.statut == PaiementAbonnement.Statut.APPROUVEE:
-            return "Abonnement activé manuellement par super admin"
-        return "Demande de plan traitée par super admin"
+            return gettext_lazy('Abonnement activé manuellement par super admin')
+        return gettext_lazy('Demande de plan traitée par super admin')
     if payment.statut == PaiementAbonnement.Statut.VALIDE:
-        return "Paiement manuel validé par super admin"
-    return "Demande manuelle en attente de validation"
+        return gettext_lazy('Paiement manuel validé par super admin')
+    return gettext_lazy('Demande manuelle en attente de validation')
 
 
 def _automatic_payment_provider_configured():
@@ -130,14 +131,14 @@ def _automatic_payment_provider_configured():
 
 def _build_subscription_usage(entreprise):
     return [
-        {"label": "Utilisateurs", "value": User.objects.filter(entreprise=entreprise).count()},
-        {"label": "Factures / mois", "value": get_monthly_invoice_count(entreprise)},
-        {"label": "Clients", "value": get_client_count(entreprise)},
-        {"label": "Produits", "value": get_product_count(entreprise)},
-        {"label": "Dépenses / mois", "value": get_monthly_expense_count(entreprise)},
-        {"label": "Proformas / mois", "value": get_monthly_proforma_count(entreprise)},
-        {"label": "Caisses actives", "value": get_active_cashbox_count(entreprise)},
-        {"label": "Apprenants", "value": get_apprenant_count(entreprise)},
+        {"label": gettext_lazy("Utilisateurs"), "value": User.objects.filter(entreprise=entreprise).count()},
+        {"label": gettext_lazy("Factures / mois"), "value": get_monthly_invoice_count(entreprise)},
+        {"label": gettext_lazy("Clients"), "value": get_client_count(entreprise)},
+        {"label": gettext_lazy("Produits"), "value": get_product_count(entreprise)},
+        {"label": gettext_lazy("Dépenses / mois"), "value": get_monthly_expense_count(entreprise)},
+        {"label": gettext_lazy("Proformas / mois"), "value": get_monthly_proforma_count(entreprise)},
+        {"label": gettext_lazy("Caisses actives"), "value": get_active_cashbox_count(entreprise)},
+        {"label": gettext_lazy("Apprenants"), "value": get_apprenant_count(entreprise)},
     ]
 
 
@@ -149,12 +150,12 @@ def _handle_super_admin_subscription_action(request, *, redirect_name):
 
     if action == "activate":
         if plan is None:
-            raise ValueError("Veuillez selectionner un plan pour activer l'abonnement.")
+            raise ValueError(gettext_lazy("Veuillez sélectionner un plan pour activer l'abonnement."))
         activate_company_subscription(entreprise=entreprise, plan=plan, utilisateur=request.user)
-        messages.success(request, f"Abonnement active pour {entreprise.nom}.")
+        messages.success(request, (gettext_lazy('Abonnement activé pour %(value_1)s.') % {'value_1': entreprise.nom}))
     elif action == "suspend":
         suspend_company_subscription(entreprise=entreprise, utilisateur=request.user)
-        messages.success(request, f"Entreprise suspendue : {entreprise.nom}.")
+        messages.success(request, (gettext_lazy('Entreprise suspendue : %(value_1)s.') % {'value_1': entreprise.nom}))
     elif action == "extend_trial":
         extend_company_trial(
             entreprise=entreprise,
@@ -162,14 +163,14 @@ def _handle_super_admin_subscription_action(request, *, redirect_name):
             utilisateur=request.user,
             plan=plan,
         )
-        messages.success(request, f"Acces historique prolonge pour {entreprise.nom}.")
+        messages.success(request, (gettext_lazy('Accès historique prolongé pour %(value_1)s.') % {'value_1': entreprise.nom}))
     elif action == "change_plan":
         if plan is None:
-            raise ValueError("Veuillez selectionner un plan pour modifier l'abonnement.")
+            raise ValueError(gettext_lazy("Veuillez sélectionner un plan pour modifier l'abonnement."))
         change_company_plan(entreprise=entreprise, plan=plan, utilisateur=request.user)
-        messages.success(request, f"Plan mis a jour pour {entreprise.nom}.")
+        messages.success(request, (gettext_lazy('Plan mis à jour pour %(value_1)s.') % {'value_1': entreprise.nom}))
     else:
-        messages.error(request, "Action super admin inconnue.")
+        messages.error(request, gettext_lazy("Action super admin inconnue."))
 
     return redirect(redirect_name)
 
@@ -305,7 +306,7 @@ def subscription_payment_create(request):
             preuve_paiement=form.cleaned_data.get("preuve_paiement"),
             utilisateur=request.user,
         )
-        messages.success(request, "Votre demande de paiement a ete envoyee. Elle sera activee apres validation.")
+        messages.success(request, gettext_lazy('Votre demande de paiement a été envoyée. Elle sera activée après validation.'))
         return redirect("subscription_overview")
 
     plans = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
@@ -353,22 +354,22 @@ def subscription_payment_automatic_start(request, plan_id):
     entreprise = get_user_entreprise_or_raise(request.user)
     provider_code = get_automatic_payment_provider_code(allow_test=True)
     if not provider_code:
-        messages.error(request, "Paiement automatique bientôt disponible. Utilisez la demande manuelle pour le moment.")
+        messages.error(request, gettext_lazy("Paiement automatique bientôt disponible. Utilisez la demande manuelle pour le moment."))
         return redirect("subscription_plan_list")
 
     plan = get_commercial_plans_queryset(include_free=False, paid_only=True).filter(pk=plan_id).first()
     if plan is None:
-        messages.error(request, "Plan indisponible pour le paiement automatique.")
+        messages.error(request, gettext_lazy("Plan indisponible pour le paiement automatique."))
         return redirect("subscription_plan_list")
 
     current_subscription = refresh_subscription_status(entreprise) or get_current_subscription(entreprise)
     if current_subscription and current_subscription.actif and current_subscription.plan_id == plan.id:
-        messages.info(request, "Votre entreprise utilise déjà ce plan.")
+        messages.info(request, gettext_lazy("Votre entreprise utilise déjà ce plan."))
         return redirect("subscription_plan_list")
 
     duree = request.POST.get("duree") or PaiementAbonnement.Duree.MENSUEL
     if duree not in get_subscription_payment_duration_options():
-        messages.error(request, "Durée d'abonnement invalide.")
+        messages.error(request, gettext_lazy("Durée d'abonnement invalide."))
         return redirect("subscription_plan_list")
 
     try:
@@ -453,11 +454,11 @@ def subscription_plan_list(request):
     if request.method == "POST":
         plan = get_commercial_plans_queryset(include_free=False, paid_only=True).filter(id=request.POST.get("plan_id")).first()
         if plan is None:
-            messages.error(request, "Plan indisponible.")
+            messages.error(request, gettext_lazy("Plan indisponible."))
         else:
             try:
                 create_subscription_plan_request(entreprise=entreprise, plan=plan, utilisateur=request.user)
-                messages.success(request, f"Votre demande pour le plan {get_plan_commercial_name(plan)} a ete envoyee au super admin.")
+                messages.success(request, (gettext_lazy('Votre demande pour le plan %(value_1)s a été envoyée au super admin.') % {'value_1': get_plan_commercial_name(plan)}))
                 return redirect("subscription_plan_list")
             except ValueError as exc:
                 messages.error(request, str(exc))
@@ -528,7 +529,7 @@ def super_admin_dashboard(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, f"Le paiement a ete valide et l'abonnement a ete active pour {paiement.entreprise.nom}.")
+                messages.success(request, (gettext_lazy("Le paiement a été validé et l'abonnement a été activé pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_dashboard")
             if action == "refuse_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
@@ -537,7 +538,7 @@ def super_admin_dashboard(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, f"Le paiement a ete refuse pour {paiement.entreprise.nom}.")
+                messages.success(request, (gettext_lazy('Le paiement a été refusé pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_dashboard")
 
             return _handle_super_admin_subscription_action(request, redirect_name="super_admin_dashboard")
@@ -573,7 +574,7 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, f"La demande a ete validee et l'abonnement a ete active pour {paiement.entreprise.nom}.")
+                messages.success(request, (gettext_lazy("La demande a été validée et l'abonnement a été activé pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "refuse_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
@@ -582,12 +583,12 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, f"La demande a ete refusee pour {paiement.entreprise.nom}.")
+                messages.success(request, (gettext_lazy('La demande a été refusée pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "validate_plan_request":
                 entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
                 validate_subscription_plan_request(entreprise=entreprise, super_admin=request.user)
-                messages.success(request, f"Demande de plan validee pour {entreprise.nom}. En attente de paiement manuel si necessaire.")
+                messages.success(request, (gettext_lazy('Demande de plan validée pour %(value_1)s. En attente de paiement manuel si nécessaire.') % {'value_1': entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "refuse_plan_request":
                 entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
@@ -596,7 +597,7 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, f"Demande de plan refusee pour {entreprise.nom}.")
+                messages.success(request, (gettext_lazy('Demande de plan refusée pour %(value_1)s.') % {'value_1': entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             return _handle_super_admin_subscription_action(request, redirect_name="super_admin_subscription_list")
         except ValueError as exc:
@@ -657,13 +658,13 @@ def super_admin_subscription_manual_payment(request, entreprise_id):
                 )
                 messages.success(
                     request,
-                    f"Paiement enregistre pour {entreprise.nom}. Nouvelle expiration : {updated_subscription.date_fin:%d/%m/%Y}.",
+                    (gettext_lazy('Paiement enregistré pour %(value_1)s. Nouvelle expiration : %(value_2)s.') % {'value_1': entreprise.nom, 'value_2': format(updated_subscription.date_fin,'%d/%m/%Y')}),
                 )
                 return redirect("super_admin_subscription_list")
             except ValueError as exc:
                 messages.error(request, str(exc))
         else:
-            messages.error(request, "Veuillez corriger les informations du paiement.")
+            messages.error(request, gettext_lazy("Veuillez corriger les informations du paiement."))
 
     return render(
         request,
@@ -682,24 +683,24 @@ def super_admin_user_list(request):
         action = (request.POST.get("action") or "").strip()
         target_user = User.objects.select_related("entreprise").filter(id=request.POST.get("user_id")).first()
         if target_user is None:
-            messages.error(request, "Utilisateur introuvable.")
+            messages.error(request, gettext_lazy("Utilisateur introuvable."))
             return redirect("super_admin_user_list")
         if target_user.id == request.user.id and action == "deactivate_user":
-            messages.error(request, "Vous ne pouvez pas desactiver votre propre compte super admin.")
+            messages.error(request, gettext_lazy('Vous ne pouvez pas désactiver votre propre compte super admin.'))
             return redirect("super_admin_user_list")
 
         if action == "deactivate_user":
             target_user.is_active = False
             target_user.save(update_fields=["is_active"])
             _record_super_admin_user_action(target_user=target_user, admin_user=request.user, action="utilisateur_desactive")
-            messages.success(request, f"Utilisateur desactive : {target_user.username}.")
+            messages.success(request, (gettext_lazy('Utilisateur désactivé : %(value_1)s.') % {'value_1': target_user.username}))
         elif action == "reactivate_user":
             target_user.is_active = True
             target_user.save(update_fields=["is_active"])
             _record_super_admin_user_action(target_user=target_user, admin_user=request.user, action="utilisateur_reactive")
-            messages.success(request, f"Utilisateur reactive : {target_user.username}.")
+            messages.success(request, (gettext_lazy('Utilisateur réactivé : %(value_1)s.') % {'value_1': target_user.username}))
         else:
-            messages.error(request, "Action utilisateur inconnue.")
+            messages.error(request, gettext_lazy("Action utilisateur inconnue."))
         return redirect("super_admin_user_list")
 
     selected_role = (request.GET.get("role") or "").strip()
@@ -809,7 +810,7 @@ def super_admin_settings(request):
         changed_fields = list(form.changed_data)
         if changed_fields:
             platform_settings.save(update_fields=changed_fields)
-        messages.success(request, "Parametres plateforme mis a jour.")
+        messages.success(request, gettext_lazy('Paramètres plateforme mis à jour.'))
         return redirect("super_admin_settings")
 
     return render(
@@ -834,15 +835,15 @@ def super_admin_exchange_rate_list(request):
             manual_form = ExchangeRateManualForm(request.POST)
             if manual_form.is_valid():
                 manual_form.save()
-                messages.success(request, "Taux manuel enregistre.")
+                messages.success(request, gettext_lazy('Taux manuel enregistré.'))
                 return redirect("super_admin_exchange_rate_list")
-            messages.error(request, "Veuillez corriger le taux manuel.")
+            messages.error(request, gettext_lazy("Veuillez corriger le taux manuel."))
         else:
             source = (request.POST.get("source") or "").strip().upper()
             target = (request.POST.get("target") or "").strip().upper()
             try:
                 get_exchange_rate(source, target)
-                messages.success(request, f"Taux {source} -> {target} rafraichi ou recupere depuis le cache.")
+                messages.success(request, (gettext_lazy('Taux %(value_1)s -> %(value_2)s rafraîchi ou récupéré depuis le cache.') % {'value_1': source, 'value_2': target}))
             except ExchangeRateUnavailable as exc:
                 messages.error(request, str(exc))
             return redirect("super_admin_exchange_rate_list")
@@ -905,7 +906,7 @@ def super_admin_company_deactivate(request, entreprise_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, f"Entreprise desactivee : {entreprise.nom}. Les donnees sont conservees.")
+            messages.success(request, (gettext_lazy('Entreprise désactivée : %(value_1)s. Les données sont conservées.') % {'value_1': entreprise.nom}))
             return redirect("super_admin_company_list")
 
     return render(

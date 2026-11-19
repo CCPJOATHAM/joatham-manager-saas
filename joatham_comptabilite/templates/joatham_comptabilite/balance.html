@@ -1,22 +1,24 @@
 {% extends "joatham_comptabilite/compta_base.html" %}
+{% load i18n %}
+
 
 {% block compta_content %}
 <section class="panel">
     <div class="summary-grid" style="margin-bottom:18px;">
         <article class="metric">
-            <div class="label">Total debit</div>
+            <div class="label">{% trans "Total débit" %}</div>
             <div class="value">{{ total_debit|floatformat:2 }} FC</div>
         </article>
         <article class="metric">
-            <div class="label">Total credit</div>
+            <div class="label">{% trans "Total crédit" %}</div>
             <div class="value">{{ total_credit|floatformat:2 }} FC</div>
         </article>
         <article class="metric">
-            <div class="label">Solde debiteur cumule</div>
+            <div class="label">{% trans "Solde débiteur cumulé" %}</div>
             <div class="value">{{ total_solde_debit|floatformat:2 }} FC</div>
         </article>
         <article class="metric">
-            <div class="label">Solde crediteur cumule</div>
+            <div class="label">{% trans "Solde créditeur cumulé" %}</div>
             <div class="value">{{ total_solde_credit|floatformat:2 }} FC</div>
         </article>
     </div>
@@ -25,12 +27,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>Numero</th>
-                    <th>Compte</th>
-                    <th class="number">Debit</th>
-                    <th class="number">Credit</th>
-                    <th class="number">Solde debit</th>
-                    <th class="number">Solde credit</th>
+                    <th>{% trans "Numéro" %}</th>
+                    <th>{% trans "Compte" %}</th>
+                    <th class="number">{% trans "Débit" %}</th>
+                    <th class="number">{% trans "Crédit" %}</th>
+                    <th class="number">{% trans "Solde débit" %}</th>
+                    <th class="number">{% trans "Solde crédit" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,13 +47,13 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="6" class="empty">Aucun mouvement comptable sur cette periode.</td>
+                        <td colspan="6" class="empty">{% trans "Aucun mouvement comptable sur cette période." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="2">Totaux</th>
+                    <th colspan="2">{% trans "Totaux" %}</th>
                     <th class="number">{{ total_debit|floatformat:2 }}</th>
                     <th class="number">{{ total_credit|floatformat:2 }}</th>
                     <th class="number">{{ total_solde_debit|floatformat:2 }}</th>

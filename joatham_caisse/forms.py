@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django import forms
@@ -21,11 +22,11 @@ class CaisseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["nom"].widget.attrs.update({"placeholder": _("Ex. Caisse principale")})
-        self.fields["code"].widget.attrs.update({"placeholder": "CAISSE-001"})
+        self.fields["code"].widget.attrs.update({"placeholder": gettext_lazy("CAISSE-001")})
         self.fields["description"].widget = forms.Textarea(
             attrs={"rows": 3, "placeholder": _("Description ou emplacement de la caisse")}
         )
-        self.fields["devise"].widget.attrs.update({"placeholder": "CDF"})
+        self.fields["devise"].widget.attrs.update({"placeholder": gettext_lazy("CDF")})
 
 
 class OpenSessionForm(forms.Form):
@@ -47,7 +48,7 @@ class CloseSessionForm(forms.Form):
         max_digits=14,
         decimal_places=2,
         min_value=Decimal("0.00"),
-        label=_("Solde reel"),
+        label=_('Solde réel'),
     )
     commentaire_fermeture = forms.CharField(
         required=False,
@@ -58,9 +59,9 @@ class CloseSessionForm(forms.Form):
 
 class MouvementCaisseForm(forms.Form):
     MANUAL_MOVEMENT_CHOICES = [
-        (MouvementCaisse.TypeMouvement.ENTREE, _("Entree")),
+        (MouvementCaisse.TypeMouvement.ENTREE, _('Entrée')),
         (MouvementCaisse.TypeMouvement.SORTIE, _("Sortie")),
-        (MouvementCaisse.TypeMouvement.DEPENSE, _("Depense")),
+        (MouvementCaisse.TypeMouvement.DEPENSE, _('Dépense')),
         (MouvementCaisse.TypeMouvement.AJUSTEMENT, _("Ajustement")),
     ]
 
@@ -71,8 +72,8 @@ class MouvementCaisseForm(forms.Form):
         min_value=Decimal("0.01"),
         label=_("Montant"),
     )
-    libelle = forms.CharField(max_length=255, label=_("Libelle"))
-    reference = forms.CharField(required=False, max_length=100, label=_("Reference"))
+    libelle = forms.CharField(max_length=255, label=_('Libellé'))
+    reference = forms.CharField(required=False, max_length=100, label=_('Référence'))
     commentaire = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={"rows": 3, "placeholder": _("Commentaire interne")}),

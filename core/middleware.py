@@ -12,11 +12,11 @@ MODULE_LABELS = {
     "clients": _("Clients"),
     "factures": _("Factures"),
     "services": _("Services"),
-    "depenses": _("Depenses"),
-    "comptabilite": _("Comptabilite"),
+    "depenses": _('Dépenses'),
+    "comptabilite": _('Comptabilité'),
     "apprenants": _("Apprenants"),
     "abonnements": _("Abonnements"),
-    "rapports": _("Rapports avances"),
+    "rapports": _('Rapports avancés'),
     "utilisateurs": _("Utilisateurs"),
     "messages": _("Messagerie"),
 }
@@ -121,7 +121,7 @@ class PlatformMaintenanceMiddleware:
             "core/maintenance.html",
             {
                 "platform_name": platform_settings.nom_plateforme,
-                "message": _("Le module %(module)s est momentanement en maintenance.") % {"module": module_label},
+                "message": _('Le module %(module)s est momentanément en maintenance.') % {"module": module_label},
                 "module_label": module_label,
             },
             status=503,

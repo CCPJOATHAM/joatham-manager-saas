@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django.conf import settings
@@ -8,33 +9,33 @@ from django.utils import timezone
 
 class PaymentTransaction(models.Model):
     class TransactionType(models.TextChoices):
-        ENCAISSEMENT = "encaissement", "Encaissement"
-        DECAISSEMENT = "decaissement", "Decaissement"
-        REMBOURSEMENT = "remboursement", "Remboursement"
-        AJUSTEMENT = "ajustement", "Ajustement"
+        ENCAISSEMENT = "encaissement", gettext_lazy("Encaissement")
+        DECAISSEMENT = "decaissement", gettext_lazy("Decaissement")
+        REMBOURSEMENT = "remboursement", gettext_lazy("Remboursement")
+        AJUSTEMENT = "ajustement", gettext_lazy("Ajustement")
 
     class Method(models.TextChoices):
-        CASH = "cash", "Cash"
-        MPESA = "mpesa", "M-Pesa"
-        ORANGE_MONEY = "orange_money", "Orange Money"
-        AIRTEL_MONEY = "airtel_money", "Airtel Money"
-        AFRIMONEY = "afrimoney", "Afrimoney"
-        BANK_TRANSFER = "bank_transfer", "Virement bancaire"
-        CARD = "card", "Carte bancaire"
-        OTHER = "other", "Autre"
+        CASH = "cash", gettext_lazy("Cash")
+        MPESA = "mpesa", gettext_lazy("M-Pesa")
+        ORANGE_MONEY = "orange_money", gettext_lazy("Orange Money")
+        AIRTEL_MONEY = "airtel_money", gettext_lazy("Airtel Money")
+        AFRIMONEY = "afrimoney", gettext_lazy("Afrimoney")
+        BANK_TRANSFER = "bank_transfer", gettext_lazy("Virement bancaire")
+        CARD = "card", gettext_lazy("Carte bancaire")
+        OTHER = "other", gettext_lazy("Autre")
 
     class MobileOperator(models.TextChoices):
-        MPESA = "mpesa", "M-Pesa"
-        ORANGE_MONEY = "orange_money", "Orange Money"
-        AIRTEL_MONEY = "airtel_money", "Airtel Money"
-        AFRIMONEY = "afrimoney", "Afrimoney"
-        OTHER = "other", "Autre"
+        MPESA = "mpesa", gettext_lazy("M-Pesa")
+        ORANGE_MONEY = "orange_money", gettext_lazy("Orange Money")
+        AIRTEL_MONEY = "airtel_money", gettext_lazy("Airtel Money")
+        AFRIMONEY = "afrimoney", gettext_lazy("Afrimoney")
+        OTHER = "other", gettext_lazy("Autre")
 
     class Status(models.TextChoices):
-        EN_ATTENTE = "en_attente", "En attente"
-        CONFIRME = "confirme", "Confirme"
-        REJETE = "rejete", "Rejete"
-        ANNULE = "annule", "Annule"
+        EN_ATTENTE = "en_attente", gettext_lazy("En attente")
+        CONFIRME = "confirme", gettext_lazy("Confirme")
+        REJETE = "rejete", gettext_lazy("Rejete")
+        ANNULE = "annule", gettext_lazy("Annule")
 
     MOBILE_MONEY_METHODS = {
         Method.MPESA,

@@ -49,14 +49,14 @@
     <div class="section-header">
         <div>
             <h3 class="section-title">{{ page_title }}</h3>
-            <p class="section-subtitle">{% trans "Renseignez la fiche produit en separant clairement les informations catalogue des operations de stock." %}</p>
+            <p class="section-subtitle">{% trans "Renseignez la fiche produit en séparant clairement les informations catalogue des opérations de stock." %}</p>
         </div>
     </div>
     <div class="helper-card helper-text" style="margin-bottom: 18px;">
         {% if is_create_mode %}
         {% trans "Le stock initial saisi ici sera trace automatiquement comme mouvement de stock afin de garder un historique fiable des variations." %}
         {% else %}
-        {% trans "Le stock ne se modifie plus directement depuis cette fiche. Utilisez les opérations stock dédiées pour conserver un historique complet." %}
+        {% trans "Le stock ne se modifié plus directement depuis cette fiche. Utilisez les opérations stock dédiées pour conserver un historique complet." %}
         {% endif %}
     </div>
     {% if not is_create_mode and product %}
@@ -73,7 +73,7 @@
             <a href="{% url 'stock_movement_list' %}?produit={{ product.id }}" class="action-link">{% trans "Voir les mouvements" %}</a>
             {% endif %}
             {% if can_move_stock_ui %}
-            <a href="{% url 'stock_entry_create' %}" class="action-link success">{% trans "Entree stock" %}</a>
+            <a href="{% url 'stock_entry_create' %}" class="action-link success">{% trans "Entrée stock" %}</a>
             <a href="{% url 'stock_exit_create' %}" class="action-link warning">{% trans "Sortie stock" %}</a>
             {% endif %}
             {% if can_adjust_stock_ui %}
@@ -103,7 +103,7 @@
                 {{ form.description.errors }}
             </div>
             <div class="field">
-                <label for="{{ form.reference.id_for_label }}">{% trans "Reference" %}</label>
+                <label for="{{ form.reference.id_for_label }}">{% trans "Référence" %}</label>
                 {{ form.reference }}
                 {{ form.reference.errors }}
             </div>

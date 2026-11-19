@@ -6,4 +6,5 @@ togglePasswordButton.addEventListener("click", () => {
     const showPassword = passwordInput.type === "password";
     passwordInput.type = showPassword ? "text" : "password";
     togglePasswordButton.setAttribute("aria-pressed", String(showPassword));
+    togglePasswordButton.setAttribute("aria-label", showPassword ? gettext("Masquer") : gettext("Afficher"));
 });

@@ -533,10 +533,10 @@ class SaasPlanSeedTests(TestCase):
         premium_card = cards["premium"]
 
         self.assertEqual(premium_card["display_name"], "Premium Business")
-        self.assertContains(response, "Plan decouverte permanent")
-        self.assertContains(response, "Gestion professionnelle pour petite activite")
-        self.assertContains(response, "Gestion complete pour PME")
-        self.assertContains(response, "Premium Business : acces complet")
+        self.assertContains(response, 'Plan découverte permanent')
+        self.assertContains(response, 'Gestion professionnelle pour petite activité')
+        self.assertContains(response, 'Gestion complète pour PME')
+        self.assertContains(response, 'Premium Business : accès complet')
         for card in cards.values():
             self.assertFalse(any("non inclus" in feature.lower() for feature in card["features"]))
 
@@ -561,9 +561,9 @@ class SaasPlanSeedTests(TestCase):
         self.assertIn("Stock simple", starter_card["included_modules"])
         self.assertNotIn("Caisse", starter_card["included_modules"])
         self.assertNotIn("Inventaire", starter_card["included_modules"])
-        self.assertIn("Caisse complete", starter_card["non_included"])
+        self.assertIn('Caisse complète', starter_card["non_included"])
         self.assertIn("Inventaire physique", starter_card["non_included"])
-        self.assertIn("Rapports avances", starter_card["non_included"])
+        self.assertIn('Rapports avancés', starter_card["non_included"])
         self.assertEqual(starter_limit_values["Produits / services"], "300")
         self.assertEqual(starter_limit_values["Dépenses / mois"], "100")
         self.assertEqual(starter_limit_values["Proformas / mois"], "30")
@@ -579,8 +579,8 @@ class SaasPlanSeedTests(TestCase):
         self.assertEqual(pro_limit_values["Apprenants"], "500")
         self.assertEqual(pro_limit_values["Exports"], "Inclus")
         self.assertEqual(pro_limit_values["Comptabilité"], "Incluse")
-        self.assertIn("Ressources humaines completes", pro_card["non_included"])
-        self.assertIn("Rapports Premium Business avances", pro_card["non_included"])
+        self.assertIn('Ressources humaines complètes', pro_card["non_included"])
+        self.assertIn('Rapports Premium Business avancés', pro_card["non_included"])
 
         self.assertIn("Ressources humaines", premium_card["included_modules"])
         self.assertIn("Rapports avancés", premium_card["included_modules"])

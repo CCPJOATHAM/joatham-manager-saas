@@ -1,4 +1,6 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
+
 
 {% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
 
@@ -18,37 +20,37 @@
     <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
     <p>{{ entreprise.nom }}</p>
     <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
-    <p>Edition du {{ date_generation }}</p>
+    <p>{% trans "Édition du" %} {{ date_generation }}</p>
 </div>
 
 <div class="document-title">{{ report_title }}</div>
 <div class="meta-box">
-    <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
-    <p><strong>Formation:</strong> {{ inscription.formation }}</p>
-    <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
-    <p><strong>Montant payé:</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
-    <p><strong>Solde:</strong> {{ inscription.solde|floatformat:2 }}</p>
-    <p><strong>Statut de paiement:</strong> {{ inscription.statut_paiement_label }}</p>
+    <p><strong>{% trans "Apprenant:" %}</strong> {{ inscription.apprenant }}</p>
+    <p><strong>{% trans "Formation:" %}</strong> {{ inscription.formation }}</p>
+    <p><strong>{% trans "Montant prévu:" %}</strong> {{ inscription.montant_prevu|floatformat:2 }}</p>
+    <p><strong>{% trans "Montant payé:" %}</strong> {{ inscription.montant_paye|floatformat:2 }}</p>
+    <p><strong>{% trans "Solde:" %}</strong> {{ inscription.solde|floatformat:2 }}</p>
+    <p><strong>{% trans "Statut de paiement:" %}</strong> {{ inscription.statut_paiement_label }}</p>
     {% if inscription.trop_percu > 0 %}
-        <p><strong>Trop-perçu:</strong> {{ inscription.trop_percu|floatformat:2 }}</p>
+        <p><strong>{% trans "Trop-perçu:" %}</strong> {{ inscription.trop_percu|floatformat:2 }}</p>
     {% endif %}
 </div>
 
 <table>
     <thead>
         <tr>
-            <th>Date</th>
-            <th class="text-right">Montant</th>
-            <th>Mode</th>
-            <th>Reference</th>
-            <th>Utilisateur</th>
-            <th>Observations</th>
+            <th>{% trans "Date" %}</th>
+            <th class="text-right">{% trans "Montant" %}</th>
+            <th>{% trans "Mode" %}</th>
+            <th>{% trans "Référence" %}</th>
+            <th>{% trans "Utilisateur" %}</th>
+            <th>{% trans "Observations" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for paiement in paiements %}
             <tr>
-                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                <td>{{ paiement.date_paiement|date:"SHORT_DATE_FORMAT" }}</td>
                 <td class="text-right">{{ paiement.montant|floatformat:2 }}</td>
                 <td>{{ paiement.get_mode_paiement_display }}</td>
                 <td>{{ paiement.reference|default:"-" }}</td>
@@ -57,13 +59,13 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">Aucun paiement enregistré.</td>
+                <td colspan="6">{% trans "Aucun paiement enregistré." %}</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 <div class="pdf-footer">
-    Document genere le {{ date_footer }}
+    {% trans "Document généré le" %} {{ date_footer }}
 </div>
 {% endblock %}

@@ -1,9 +1,9 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Nouvelle conversation" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Nouvelle conversation" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Nouvelle conversation" %}{% endblock %}
-{% block content_subtitle %}{% trans "Demarrez un echange avec les utilisateurs de votre entreprise." %}{% endblock %}
+{% block content_subtitle %}{% trans "Démarrez un échange avec les utilisateurs de votre entreprise." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'message_conversation_list' %}" class="btn-link">{% trans "Retour" %}</a>
@@ -73,11 +73,11 @@
         {{ form.contenu.errors }}
     </div>
     <div class="field">
-        <label for="id_attachments">{% trans "Pieces jointes" %}</label>
+        <label for="id_attachments">{% trans "Pièces jointes" %}</label>
         <input id="id_attachments" type="file" name="attachments" multiple>
     </div>
     <div class="actions">
-        <button type="submit" class="btn-link primary">{% trans "Creer" %}</button>
+        <button type="submit" class="btn-link primary">{% trans "Créer" %}</button>
         <a href="{% url 'message_conversation_list' %}" class="btn-link">{% trans "Annuler" %}</a>
     </div>
 </form>

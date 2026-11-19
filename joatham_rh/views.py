@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -91,10 +92,10 @@ def _build_salaire_status_label(status):
 
 def _build_presence_status_label(status):
     return {
-        Presence.Statut.PRESENT: _("Present"),
+        Presence.Statut.PRESENT: _('Présent'),
         Presence.Statut.ABSENT: _("Absent"),
         Presence.Statut.RETARD: _("Retard"),
-        Presence.Statut.CONGE: _("Conge"),
+        Presence.Statut.CONGE: _('Congé'),
     }.get(status, status)
 
 
@@ -102,9 +103,9 @@ def _build_conge_status_label(status):
     return {
         DemandeConge.Statut.BROUILLON: _("Brouillon"),
         DemandeConge.Statut.EN_ATTENTE: _("En attente"),
-        DemandeConge.Statut.APPROUVE: _("Approuve"),
-        DemandeConge.Statut.REFUSE: _("Refuse"),
-        DemandeConge.Statut.ANNULE: _("Annule"),
+        DemandeConge.Statut.APPROUVE: _('Approuvé'),
+        DemandeConge.Statut.REFUSE: _('Refusé'),
+        DemandeConge.Statut.ANNULE: _('Annulé'),
     }.get(status, status)
 
 
@@ -298,7 +299,7 @@ def employe_create(request):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("L'employe a ete cree avec succes."))
+            messages.success(request, _("L'employé a été créé avec succès."))
             return redirect("rh_employe_detail", employe_id=employe.id)
 
     return render(
@@ -306,8 +307,8 @@ def employe_create(request):
         "joatham_rh/employe_form.html",
         {
             "form": form,
-            "page_title": _("Nouvel employe"),
-            "submit_label": _("Creer l'employe"),
+            "page_title": _('Nouvel employé'),
+            "submit_label": _("Créer l'employé"),
             "is_create_mode": True,
             **_build_rh_ui_permissions(request.user),
         },
@@ -337,7 +338,7 @@ def employe_update(request, employe_id):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("L'employe a ete mis a jour avec succes."))
+            messages.success(request, _("L'employé a été mis à jour avec succès."))
             return redirect("rh_employe_detail", employe_id=employe.id)
 
     return render(
@@ -345,7 +346,7 @@ def employe_update(request, employe_id):
         "joatham_rh/employe_form.html",
         {
             "form": form,
-            "page_title": _("Modifier un employe"),
+            "page_title": _('Modifier un employé'),
             "submit_label": _("Enregistrer"),
             "employe": employe,
             "is_create_mode": False,
@@ -385,7 +386,7 @@ def poste_create(request):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Le poste a ete cree avec succes."))
+            messages.success(request, _('Le poste a été créé avec succès.'))
             return redirect("rh_poste_list")
 
     return render(
@@ -394,7 +395,7 @@ def poste_create(request):
         {
             "form": form,
             "page_title": _("Nouveau poste"),
-            "submit_label": _("Creer le poste"),
+            "submit_label": _('Créer le poste'),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -442,7 +443,7 @@ def presence_create(request):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("La presence a ete enregistree avec succes."))
+            messages.success(request, _('La présence a été enregistrée avec succès.'))
             return redirect("rh_presence_list")
 
     return render(
@@ -450,8 +451,8 @@ def presence_create(request):
         "joatham_rh/presence_form.html",
         {
             "form": form,
-            "page_title": _("Nouvelle presence"),
-            "submit_label": _("Enregistrer la presence"),
+            "page_title": _('Nouvelle présence'),
+            "submit_label": _('Enregistrer la présence'),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -500,7 +501,7 @@ def conge_create(request):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("La demande de conge a ete creee avec succes."))
+            messages.success(request, _('La demande de congé a été créée avec succès.'))
             return redirect("rh_conge_list")
 
     return render(
@@ -508,8 +509,8 @@ def conge_create(request):
         "joatham_rh/conge_form.html",
         {
             "form": form,
-            "page_title": _("Nouvelle demande de conge"),
-            "submit_label": _("Creer la demande"),
+            "page_title": _('Nouvelle demande de congé'),
+            "submit_label": _('Créer la demande'),
             **_build_rh_ui_permissions(request.user),
         },
     )
@@ -531,7 +532,7 @@ def conge_approve(request, conge_id):
     except RhOperationError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("La demande de conge a ete approuvee."))
+        messages.success(request, _('La demande de congé a été approuvée.'))
     return redirect("rh_conge_list")
 
 
@@ -551,7 +552,7 @@ def conge_refuse(request, conge_id):
     except RhOperationError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("La demande de conge a ete refusee."))
+        messages.success(request, _('La demande de congé a été refusée.'))
     return redirect("rh_conge_list")
 
 
@@ -591,7 +592,7 @@ def document_create(request):
         except RhOperationError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Le document RH a ete enregistre avec succes."))
+            messages.success(request, _('Le document RH a été enregistré avec succès.'))
             return redirect("rh_document_list")
 
     return render(
@@ -678,7 +679,7 @@ def employe_export_csv(request):
     employes = get_employes_by_entreprise(entreprise, **_get_employe_filters(request))
     return build_csv_response(
         filename="joatham-rh-employes.csv",
-        headers=["Matricule", "Nom", "Prenom", "Poste", "Contrat", "Statut", "Telephone", "Email", "Date embauche", "Salaire base"],
+        headers=[gettext_lazy("Matricule"), gettext_lazy("Nom"), gettext_lazy('Prénom'), gettext_lazy("Poste"), gettext_lazy("Contrat"), gettext_lazy("Statut"), gettext_lazy('Téléphone'), gettext_lazy("Email"), gettext_lazy("Date embauche"), gettext_lazy("Salaire base")],
         rows=[
             [
                 employe.matricule,
@@ -704,7 +705,7 @@ def presence_export_csv(request):
     presences = get_presences_by_entreprise(entreprise, **_get_presence_filters(request))
     return build_csv_response(
         filename="joatham-rh-presences.csv",
-        headers=["Date", "Matricule", "Employe", "Statut", "Heure arrivee", "Heure depart", "Note"],
+        headers=[gettext_lazy("Date"), gettext_lazy("Matricule"), gettext_lazy('Employé'), gettext_lazy("Statut"), gettext_lazy('Heure arrivée'), gettext_lazy('Heure départ'), gettext_lazy("Note")],
         rows=[
             [
                 format_date(presence.date),
@@ -727,7 +728,7 @@ def conge_export_csv(request):
     conges = get_conges_by_entreprise(entreprise, **_get_conge_filters(request))
     return build_csv_response(
         filename="joatham-rh-conges.csv",
-        headers=["Matricule", "Employe", "Type", "Date debut", "Date fin", "Statut", "Decide par", "Date decision", "Motif"],
+        headers=[gettext_lazy("Matricule"), gettext_lazy('Employé'), gettext_lazy("Type"), gettext_lazy('Date début'), gettext_lazy("Date fin"), gettext_lazy("Statut"), gettext_lazy('Décidé par'), gettext_lazy('Date décision'), gettext_lazy("Motif")],
         rows=[
             [
                 conge.employe.matricule,
@@ -752,7 +753,7 @@ def document_export_csv(request):
     documents = get_documents_by_entreprise(entreprise, **_get_document_filters(request))
     return build_csv_response(
         filename="joatham-rh-documents.csv",
-        headers=["Titre", "Matricule", "Employe", "Type", "Date document", "Description"],
+        headers=[gettext_lazy("Titre"), gettext_lazy("Matricule"), gettext_lazy('Employé'), gettext_lazy("Type"), gettext_lazy("Date document"), gettext_lazy("Description")],
         rows=[
             [
                 document.titre,
@@ -786,7 +787,7 @@ def rh_reports_export_csv(request):
     rows.extend([f"Poste - {row['poste']}", row["total"]] for row in report["repartition_postes"])
     return build_csv_response(
         filename="joatham-rh-rapport-synthetique.csv",
-        headers=["Indicateur", "Valeur"],
+        headers=[gettext_lazy("Indicateur"), gettext_lazy("Valeur")],
         rows=rows,
     )
 

@@ -71,9 +71,9 @@ class BillingViewsPremiumTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Facturation")
-        self.assertContains(response, "Montant facture")
-        self.assertContains(response, "Montant encaisse")
-        self.assertContains(response, "Reste a encaisser")
+        self.assertContains(response, 'Montant facturé')
+        self.assertContains(response, 'Montant encaissé')
+        self.assertContains(response, 'Reste à encaisser')
         self.assertContains(response, "Imprimer A4")
         self.assertContains(response, "Imprimer POS")
         self.assertContains(response, self.facture.numero)
@@ -82,7 +82,7 @@ class BillingViewsPremiumTests(TestCase):
         response = self.client.get(reverse("facture_detail", args=[self.facture.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Prestations facturees")
+        self.assertContains(response, 'Prestations facturées')
         self.assertContains(response, "Enregistrer un paiement")
         self.assertContains(response, "Historique")
         self.assertContains(response, "Imprimer A4")
@@ -143,8 +143,8 @@ class BillingViewsPremiumTests(TestCase):
         self.assertEqual(self.facture.total_paye, Decimal("0"))
         self.assertEqual(self.facture.reste_a_payer, self.facture.total_net)
         self.assertIn("TOTAL NET", html)
-        self.assertIn("Montant paye", html)
-        self.assertIn("Reste a payer", html)
+        self.assertIn('Montant payé', html)
+        self.assertIn('Reste à payer', html)
         self.assertIn(context["summary"]["total_paye"], html)
         self.assertIn(context["summary"]["reste_a_payer"], html)
 
@@ -161,8 +161,8 @@ class BillingViewsPremiumTests(TestCase):
 
         self.assertEqual(self.facture.total_paye, Decimal("25.00"))
         self.assertEqual(self.facture.reste_a_payer, self.facture.total_net - Decimal("25.00"))
-        self.assertIn("Montant paye", html)
-        self.assertIn("Reste a payer", html)
+        self.assertIn('Montant payé', html)
+        self.assertIn('Reste à payer', html)
         self.assertIn(context["summary"]["total_paye"], html)
         self.assertIn(context["summary"]["reste_a_payer"], html)
 
@@ -178,8 +178,8 @@ class BillingViewsPremiumTests(TestCase):
         html, context = self.render_a4_facture_html(self.facture)
 
         self.assertEqual(self.facture.reste_a_payer, Decimal("0"))
-        self.assertIn("Montant paye", html)
-        self.assertIn("Reste a payer", html)
+        self.assertIn('Montant payé', html)
+        self.assertIn('Reste à payer', html)
         self.assertIn(context["summary"]["total_paye"], html)
         self.assertIn(context["summary"]["reste_a_payer"], html)
 
@@ -305,7 +305,7 @@ class BillingViewsPremiumTests(TestCase):
 
         owner_response = self.client.get(reverse("print_settings"))
         self.assertEqual(owner_response.status_code, 200)
-        self.assertContains(owner_response, "Parametres impression")
+        self.assertContains(owner_response, 'Paramètres impression')
 
         self.client.force_login(manager)
         manager_response = self.client.get(reverse("print_settings"))

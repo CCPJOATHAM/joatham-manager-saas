@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import re
 
 from django import forms
@@ -20,12 +21,12 @@ def _clean_trimmed_required(value, *, field_label, min_length=1, max_length=None
         raise forms.ValidationError(_("%(field)s est obligatoire.") % {"field": field_label})
     if min_length and len(value) < min_length:
         raise forms.ValidationError(
-            _("%(field)s doit contenir au moins %(min)d caracteres.")
+            _('%(field)s doit contenir au moins %(min)d caractères.')
             % {"field": field_label, "min": min_length}
         )
     if max_length and len(value) > max_length:
         raise forms.ValidationError(
-            _("%(field)s ne doit pas depasser %(max)d caracteres.")
+            _('%(field)s ne doit pas dépasser %(max)d caractères.')
             % {"field": field_label, "max": max_length}
         )
     return value
@@ -78,7 +79,7 @@ class MessageReplyForm(forms.Form):
         label=_("Message"),
         required=False,
         max_length=MAX_MESSAGE_LENGTH,
-        widget=forms.Textarea(attrs={"rows": 4, "placeholder": _("Ecrire une reponse"), "maxlength": MAX_MESSAGE_LENGTH}),
+        widget=forms.Textarea(attrs={"rows": 4, "placeholder": _('Écrire une réponse'), "maxlength": MAX_MESSAGE_LENGTH}),
     )
 
     def clean_contenu(self):
@@ -94,8 +95,8 @@ class SuggestionSuperAdminForm(forms.ModelForm):
             "message": _("Suggestion"),
         }
         widgets = {
-            "sujet": forms.TextInput(attrs={"placeholder": _("Ex. amelioration du module facturation"), "maxlength": 180}),
-            "message": forms.Textarea(attrs={"rows": 6, "placeholder": _("Decrivez votre besoin ou votre suggestion"), "maxlength": MAX_MESSAGE_LENGTH}),
+            "sujet": forms.TextInput(attrs={"placeholder": _('Ex. amélioration du module facturation'), "maxlength": 180}),
+            "message": forms.Textarea(attrs={"rows": 6, "placeholder": _('Décrivez votre besoin ou votre suggestion'), "maxlength": MAX_MESSAGE_LENGTH}),
         }
 
     def clean_sujet(self):
@@ -119,14 +120,14 @@ class PublicQuestionForm(forms.ModelForm):
         labels = {
             "nom": _("Nom"),
             "email": _("E-mail"),
-            "telephone": _("Telephone"),
+            "telephone": _('Téléphone'),
             "entreprise": _("Entreprise"),
             "sujet": _("Sujet"),
             "message": _("Message"),
         }
         widgets = {
             "nom": forms.TextInput(attrs={"placeholder": _("Votre nom"), "maxlength": 150}),
-            "email": forms.EmailInput(attrs={"placeholder": "adresse@example.com"}),
+            "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("adresse@example.com")}),
             "telephone": forms.TextInput(attrs={"placeholder": "+243...", "maxlength": 50}),
             "entreprise": forms.TextInput(attrs={"placeholder": _("Nom de votre entreprise"), "maxlength": 150}),
             "sujet": forms.TextInput(attrs={"placeholder": _("Votre question"), "maxlength": 180}),
@@ -142,13 +143,13 @@ class PublicQuestionForm(forms.ModelForm):
     def clean_telephone(self):
         value = (self.cleaned_data.get("telephone") or "").strip()
         if value and not PHONE_PATTERN.match(value):
-            raise forms.ValidationError(_("Telephone invalide. Utilisez uniquement chiffres, espaces et +().-"))
+            raise forms.ValidationError(_('Téléphone invalide. Utilisez uniquement chiffres, espaces et +().-'))
         return value
 
     def clean_entreprise(self):
         value = (self.cleaned_data.get("entreprise") or "").strip()
         if len(value) > 150:
-            raise forms.ValidationError(_("Entreprise ne doit pas depasser 150 caracteres."))
+            raise forms.ValidationError(_('Entreprise ne doit pas dépasser 150 caractères.'))
         return value
 
     def clean_sujet(self):
@@ -192,7 +193,7 @@ class SuperAdminRequestFilterForm(forms.Form):
         date_from = cleaned_data.get("date_from")
         date_to = cleaned_data.get("date_to")
         if date_from and date_to and date_from > date_to:
-            raise forms.ValidationError(_("La date de debut doit etre avant la date de fin."))
+            raise forms.ValidationError(_('La date de début doit être avant la date de fin.'))
         return cleaned_data
 
 
@@ -204,13 +205,13 @@ class SuperAdminStatusUpdateForm(forms.Form):
 
 class PublicQuestionReplyForm(forms.Form):
     reponse = forms.CharField(
-        label=_("Reponse"),
+        label=_('Réponse'),
         max_length=MAX_MESSAGE_LENGTH,
         widget=forms.Textarea(
             attrs={
                 "rows": 9,
                 "maxlength": MAX_MESSAGE_LENGTH,
-                "placeholder": _("Redigez une reponse claire pour le visiteur"),
+                "placeholder": _('Rédigez une réponse claire pour le visiteur'),
             }
         ),
     )
@@ -218,7 +219,7 @@ class PublicQuestionReplyForm(forms.Form):
     def clean_reponse(self):
         return _clean_trimmed_required(
             self.cleaned_data.get("reponse"),
-            field_label=_("Reponse"),
+            field_label=_('Réponse'),
             min_length=MIN_MESSAGE_LENGTH,
             max_length=MAX_MESSAGE_LENGTH,
         )

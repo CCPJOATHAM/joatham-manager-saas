@@ -1,3 +1,4 @@
+from django.utils.translation import get_language
 import logging
 from base64 import b64encode
 from decimal import Decimal
@@ -80,7 +81,31 @@ def _redirect_if_module_denied(request, module_name):
     return redirect(f"{reverse('abonnement_expire')}?module={module_name}&reason={state['reason']}")
 
 
+def _number_in_english(number):
+    units = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+             "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+             "sixteen", "seventeen", "eighteen", "nineteen")
+    tens = ("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+    if number < 0:
+        return "minus " + _number_in_english(-number)
+    if number < 20:
+        return units[number]
+    if number < 100:
+        ten, unit = divmod(number, 10)
+        return tens[ten] + ("-" + units[unit] if unit else "")
+    scales = ((1000000000, "billion"), (1000000, "million"), (1000, "thousand"), (100, "hundred"))
+    for scale, label in scales:
+        if number >= scale:
+            quotient, remainder = divmod(number, scale)
+            words = _number_in_english(quotient) + " " + label
+            return words + (" " + _number_in_english(remainder) if remainder else "")
+    return str(number)
+
+
 def nombre_en_lettres(n, currency_wording):
+    if (get_language() or "fr").split("-")[0] == "en":
+        return _number_in_english(int(Decimal(n))).capitalize() + f" {currency_wording}"
+
     unite = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"]
     dizaine = ["", "dix", "vingt", "trente", "quarante", "cinquante", "soixante"]
 
@@ -216,7 +241,7 @@ def _build_facture_context(facture, mode, print_settings=None):
         "compact_layout": compact_layout,
         "lignes": lignes,
         "paiements": paiements,
-        "latest_payment_mode": paiements[0]["mode_display"] if paiements else _("Non renseigne"),
+        "latest_payment_mode": paiements[0]["mode_display"] if paiements else _('Non renseigné'),
         "legal_information": legal_information,
         "print_settings": print_settings,
         "pos_ticket": {
@@ -407,7 +432,7 @@ def facture_pdf(request, id):
         return response
     except PdfRenderError:
         logger.exception("Erreur generation PDF", extra={"facture_id": facture.id, "entreprise_id": facture.entreprise_id})
-        return HttpResponse(_("Erreur lors de la generation du PDF."), status=500)
+        return HttpResponse(_('Erreur lors de la génération du PDF.'), status=500)
 
 
 @login_required
@@ -420,7 +445,7 @@ def print_settings_view(request):
 
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Parametres d'impression mis a jour."))
+        messages.success(request, _("Paramètres d'impression mis à jour."))
         return redirect("print_settings")
 
     return render(
@@ -575,13 +600,13 @@ def add_proforma(request):
                 conditions=request.POST.get("conditions", ""),
                 lignes=_extract_document_lines_from_post(request.POST),
             )
-            messages.success(request, _("Proforma creee avec succes."))
+            messages.success(request, _('Proforma créée avec succès.'))
             return redirect("proforma_detail", id=proforma.id)
         except (FacturationError, PlanQuotaExceeded) as exc:
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue creation proforma", extra={"entreprise_id": entreprise.id})
-            messages.error(request, _("Une erreur inattendue est survenue lors de la creation de la proforma."))
+            messages.error(request, _('Une erreur inattendue est survenue lors de la création de la proforma.'))
 
     return render(
         request,
@@ -590,7 +615,7 @@ def add_proforma(request):
             request=request,
             entreprise=entreprise,
             page_title=_("Nouvelle facture proforma"),
-            submit_label=_("Creer la proforma"),
+            submit_label=_('Créer la proforma'),
         ),
     )
 
@@ -624,7 +649,7 @@ def edit_proforma(request, id):
                 conditions=request.POST.get("conditions", ""),
                 lignes=_extract_document_lines_from_post(request.POST),
             )
-            messages.success(request, _("Proforma mise a jour avec succes."))
+            messages.success(request, _('Proforma mise à jour avec succès.'))
             return redirect("proforma_detail", id=proforma.id)
         except FacturationError as exc:
             messages.error(request, str(exc))
@@ -692,7 +717,7 @@ def proforma_pdf(request, id):
         )
     except PdfRenderError:
         logger.exception("Erreur generation PDF proforma", extra={"proforma_id": proforma.id, "entreprise_id": proforma.entreprise_id})
-        return HttpResponse(_("Erreur lors de la generation du PDF proforma."), status=500)
+        return HttpResponse(_('Erreur lors de la génération du PDF proforma.'), status=500)
 
 
 @login_required
@@ -704,7 +729,7 @@ def cancel_proforma_view(request, id):
     proforma = get_proforma_by_entreprise(entreprise, id)
     try:
         cancel_proforma(proforma=proforma, user=request.user)
-        messages.success(request, _("Proforma annulee avec succes."))
+        messages.success(request, _('Proforma annulée avec succès.'))
     except FacturationError as exc:
         messages.error(request, str(exc))
     return redirect("proforma_detail", id=proforma.id)
@@ -719,7 +744,7 @@ def convert_proforma_view(request, id):
     proforma = get_proforma_by_entreprise(entreprise, id)
     try:
         facture = convert_proforma_to_facture(proforma=proforma, user=request.user)
-        messages.success(request, _("Proforma convertie en facture definitive."))
+        messages.success(request, _('Proforma convertie en facture définitive.'))
         return redirect("facture_detail", id=facture.id)
     except FacturationError as exc:
         messages.error(request, str(exc))
@@ -774,7 +799,7 @@ def add_facture(request):
             messages.error(request, str(exc))
         except Exception:
             logger.exception("Erreur inattendue creation facture", extra={"entreprise_id": entreprise.id})
-            messages.error(request, _("Une erreur inattendue est survenue lors de la creation de la facture."))
+            messages.error(request, _('Une erreur inattendue est survenue lors de la création de la facture.'))
 
     return render(
         request,

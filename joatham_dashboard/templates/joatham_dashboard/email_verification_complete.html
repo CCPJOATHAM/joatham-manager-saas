@@ -1,9 +1,12 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Email confirmé | JOATHAM Manager</title>
+    <title>{% trans "Email confirmé | JOATHAM Manager" %}</title>
     <style>
         body {
             margin: 0;
@@ -43,9 +46,9 @@
 </head>
 <body>
     <main class="card">
-        <h1>Adresse email confirmée</h1>
-        <p>Votre compte JOATHAM Manager est maintenant confirmé. Vous pouvez vous connecter normalement et accéder à votre espace selon votre rôle.</p>
-        <a href="{{ login_url }}" class="btn">Se connecter</a>
+        <h1>{% trans "Adresse email confirmée" %}</h1>
+        <p>{% trans "Votre compte JOATHAM Manager est maintenant confirmé. Vous pouvez vous connecter normalement et accéder à votre espace selon votre rôle." %}</p>
+        <a href="{{ login_url }}" class="btn">{% trans "Se connecter" %}</a>
     </main>
 </body>
 </html>

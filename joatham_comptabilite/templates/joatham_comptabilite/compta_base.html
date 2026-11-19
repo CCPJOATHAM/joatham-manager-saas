@@ -1,15 +1,15 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ report_title|default:"Comptabilité" }} | JOATHAM Manager{% endblock %}
-{% block content_title %}{{ report_title|default:"Comptabilité" }}{% endblock %}
-{% block content_subtitle %}{{ period_label|default:"Rapports financiers de l'entreprise." }}{% endblock %}
+{% block page_title %}{{ report_title|default:_('Comptabilité') }} {% trans "| JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{{ report_title|default:_('Comptabilité') }}{% endblock %}
+{% block content_subtitle %}{{ period_label|default:_("Rapports financiers de l'entreprise.") }}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'compta_dashboard' %}" class="btn-link {% if report_slug == 'dashboard' %}primary{% endif %}">{% trans "Dashboard" %}</a>
 <a href="{% url 'balance' %}" class="btn-link {% if report_slug == 'balance' %}primary{% endif %}">{% trans "Balance" %}</a>
 <a href="{% url 'grand_livre' %}" class="btn-link {% if report_slug == 'grand_livre' %}primary{% endif %}">{% trans "Grand livre" %}</a>
-<a href="{% url 'compte_resultat' %}" class="btn-link {% if report_slug == 'compte_resultat' %}primary{% endif %}">{% trans "Resultat" %}</a>
+<a href="{% url 'compte_resultat' %}" class="btn-link {% if report_slug == 'compte_resultat' %}primary{% endif %}">{% trans "Résultat" %}</a>
 <a href="{% url 'bilan' %}" class="btn-link {% if report_slug == 'bilan' %}primary{% endif %}">{% trans "Bilan" %}</a>
 {% endblock %}
 
@@ -208,7 +208,7 @@
 
 <div class="compta-meta">
     <span>{{ selected_entreprise.nom }}</span>
-    <span>{% trans "Genere le" %} {{ generated_at|date:"d/m/Y H:i" }}</span>
+    <span>{% trans "Généré le" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</span>
 </div>
 
 <section class="panel">
@@ -222,7 +222,7 @@
             </select>
         </div>
         <div class="field">
-            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input id="id_date_debut" type="date" name="date_debut" value="{{ filters.date_debut|date:'Y-m-d' }}">
         </div>
         <div class="field">
@@ -231,7 +231,7 @@
         </div>
         <div class="field">
             <label>&nbsp;</label>
-            <div class="muted">{% trans "Utilisez ces filtres pour recalculer les etats." %}</div>
+            <div class="muted">{% trans "Utilisez ces filtres pour recalculer les états." %}</div>
         </div>
         <div class="actions">
             <button class="btn btn-primary" type="submit">{% trans "Appliquer" %}</button>

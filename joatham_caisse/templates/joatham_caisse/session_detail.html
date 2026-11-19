@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Session {{ session.caisse.nom }}{% endblock %}
-{% block content_title %}Session {{ session.caisse.nom }}{% endblock %}
-{% block content_subtitle %}Suivi détaillé des mouvements, des soldes et des décisions de contrôle pour cette session de caisse.{% endblock %}
+
+{% block page_title %}{% trans "Session" %} {{ session.caisse.nom }}{% endblock %}
+{% block content_title %}{% trans "Session" %} {{ session.caisse.nom }}{% endblock %}
+{% block content_subtitle %}{% trans "Suivi détaillé des mouvements, des soldes et des décisions de contrôle pour cette session de caisse." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -235,8 +237,8 @@
   <div class="hero">
     <div class="hero-top">
       <div>
-        <h2>Session {{ session.caisse.nom }}</h2>
-        <p>Ouverte le {{ session.date_ouverture|date:"d/m/Y H:i" }} · Responsable {{ session.utilisateur_ouverture }}</p>
+        <h2>{% trans "Session" %} {{ session.caisse.nom }}</h2>
+        <p>{% trans "Ouverte le" %} {{ session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }} {% trans "· Responsable" %} {{ session.utilisateur_ouverture }}</p>
         <p style="margin-top:10px;">
           <span class="badge {% if session.statut == 'ouverte' %}open{% elif session.statut == 'validee' %}validated{% elif session.statut == 'annulee' %}rejected{% else %}closed{% endif %}">
             {{ session.get_statut_display }}
@@ -245,39 +247,39 @@
       </div>
       <div class="actions">
         {% if session.statut == 'ouverte' and can_add_movement %}
-        <a href="{% url 'caisse_add_movement' session.id %}" class="btn">Ajouter un mouvement</a>
+        <a href="{% url 'caisse_add_movement' session.id %}" class="btn">{% trans "Ajouter un mouvement" %}</a>
         {% endif %}
         {% if session.statut == 'ouverte' and can_close_session %}
-        <a href="{% url 'caisse_close_session' session.id %}" class="btn primary">Fermer la session</a>
+        <a href="{% url 'caisse_close_session' session.id %}" class="btn primary">{% trans "Fermer la session" %}</a>
         {% endif %}
-        <a href="{% url 'caisse_detail' session.caisse.id %}" class="btn">Retour a la caisse</a>
+        <a href="{% url 'caisse_detail' session.caisse.id %}" class="btn">{% trans "Retour à la caisse" %}</a>
       </div>
     </div>
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
-      <span class="stat-label">Solde initial</span>
+      <span class="stat-label">{% trans "Solde initial" %}</span>
       <span class="stat-value">{{ session.solde_initial }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Entrees</span>
+      <span class="stat-label">{% trans "Entrées" %}</span>
       <span class="stat-value amount-positive">{{ movement_totals.total_entrees }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Sorties</span>
+      <span class="stat-label">{% trans "Sorties" %}</span>
       <span class="stat-value amount-negative">{{ movement_totals.total_sorties }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Solde théorique</span>
+      <span class="stat-label">{% trans "Solde théorique" %}</span>
       <span class="stat-value">{{ session.solde_theorique }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Solde reel</span>
+      <span class="stat-label">{% trans "Solde réel" %}</span>
       <span class="stat-value">{{ solde_reel_display }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Ecart</span>
+      <span class="stat-label">{% trans "Écart" %}</span>
       <span class="stat-value {% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</span>
     </div>
   </div>
@@ -286,30 +288,30 @@
   {% if can_validate_session or can_reject_session %}
   <div class="panel">
     <div class="panel-header">
-      <h3>Décision de contrôle</h3>
-      <p>Validez ou rejetez la session fermée avec un commentaire explicatif.</p>
+      <h3>{% trans "Décision de contrôle" %}</h3>
+      <p>{% trans "Validez ou rejetez la session fermée avec un commentaire explicatif." %}</p>
     </div>
     <div style="padding:18px;">
       <div class="decision-grid">
         {% if can_validate_session %}
         <form method="post" action="{% url 'caisse_validate_session' session.id %}" class="decision-card">
           {% csrf_token %}
-          <h4>Valider la session</h4>
-          <p>Confirmez la clôture et conservez une trace du contrôle effectué.</p>
+          <h4>{% trans "Valider la session" %}</h4>
+          <p>{% trans "Confirmez la clôture et conservez une trace du contrôle effectué." %}</p>
           {{ decision_form.commentaire }}
           <div style="margin-top:14px;">
-            <button type="submit" class="btn primary">Valider la session</button>
+            <button type="submit" class="btn primary">{% trans "Valider la session" %}</button>
           </div>
         </form>
         {% endif %}
         {% if can_reject_session %}
         <form method="post" action="{% url 'caisse_reject_session' session.id %}" class="decision-card">
           {% csrf_token %}
-          <h4>Rejeter la session</h4>
-          <p>Signalez un point de contrôle ou un écart nécessitant un traitement.</p>
+          <h4>{% trans "Rejeter la session" %}</h4>
+          <p>{% trans "Signalez un point de contrôle ou un écart nécessitant un traitement." %}</p>
           {{ decision_form.commentaire }}
           <div style="margin-top:14px;">
-            <button type="submit" class="btn danger">Rejeter la session</button>
+            <button type="submit" class="btn danger">{% trans "Rejeter la session" %}</button>
           </div>
         </form>
         {% endif %}
@@ -321,25 +323,25 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Mouvements</h3>
-      <p>Historique des opérations rattachées à cette session.</p>
+      <h3>{% trans "Mouvements" %}</h3>
+      <p>{% trans "Historique des opérations rattachées à cette session." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Libelle</th>
-            <th>Montant</th>
-            <th>Reference</th>
-            <th>Utilisateur</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Libellé" %}</th>
+            <th>{% trans "Montant" %}</th>
+            <th>{% trans "Référence" %}</th>
+            <th>{% trans "Utilisateur" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for movement in movements %}
           <tr>
-            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.date_mouvement|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>
               <span class="badge {% if movement.type_mouvement == 'entree' %}entry{% elif movement.type_mouvement == 'paiement_facture' %}open{% elif movement.type_mouvement == 'ajustement' %}adjustment{% elif movement.type_mouvement == 'depense' %}expense{% else %}exit{% endif %}">
                 {{ movement.get_type_mouvement_display }}
@@ -351,7 +353,7 @@
             <td>{{ movement.cree_par|default:"-" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="empty-state">Aucun mouvement pour cette session.</td></tr>
+          <tr><td colspan="6" class="empty-state">{% trans "Aucun mouvement pour cette session." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

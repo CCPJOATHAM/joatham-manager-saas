@@ -4,16 +4,16 @@
 {% block apprenants_title %}{% trans "Enregistrer un paiement" %}{% endblock %}
 {% block apprenants_subtitle %}{% trans "Ajouter un paiement sur une inscription." %}{% endblock %}
 {% block apprenants_content %}
-    <h1>Enregistrer un paiement</h1>
+    <h1>{% trans "Enregistrer un paiement" %}</h1>
     <div class="summary">
-        <p><strong>Apprenant:</strong> {{ inscription.apprenant }}</p>
-        <p><strong>Formation:</strong> {{ inscription.formation }}</p>
-        <p><strong>Montant prévu:</strong> {{ inscription.montant_prevu }}</p>
-        <p><strong>Montant payé:</strong> {{ inscription.montant_paye }}</p>
-        <p><strong>Solde actuel:</strong> {{ inscription.solde }}</p>
-        <p><strong>Statut de paiement:</strong> {{ inscription.statut_paiement_label }}</p>
+        <p><strong>{% trans "Apprenant:" %}</strong> {{ inscription.apprenant }}</p>
+        <p><strong>{% trans "Formation:" %}</strong> {{ inscription.formation }}</p>
+        <p><strong>{% trans "Montant prévu:" %}</strong> {{ inscription.montant_prevu }}</p>
+        <p><strong>{% trans "Montant payé:" %}</strong> {{ inscription.montant_paye }}</p>
+        <p><strong>{% trans "Solde actuel:" %}</strong> {{ inscription.solde }}</p>
+        <p><strong>{% trans "Statut de paiement:" %}</strong> {{ inscription.statut_paiement_label }}</p>
         {% if inscription.trop_percu > 0 %}
-            <p><strong>Trop-perçu:</strong> {{ inscription.trop_percu }}</p>
+            <p><strong>{% trans "Trop-perçu:" %}</strong> {{ inscription.trop_percu }}</p>
         {% endif %}
     </div>
 
@@ -24,11 +24,11 @@
     <form method="post">
         {% csrf_token %}
         <div class="field">
-            <label for="montant">Montant</label>
+            <label for="montant">{% trans "Montant" %}</label>
             <input id="montant" name="montant" required>
         </div>
         <div class="field">
-            <label for="mode_paiement">Mode de paiement</label>
+            <label for="mode_paiement">{% trans "Mode de paiement" %}</label>
             <select id="mode_paiement" name="mode_paiement">
                 {% for value, label in modes_paiement %}
                     <option value="{{ value }}">{{ label }}</option>
@@ -36,22 +36,22 @@
             </select>
         </div>
         <div class="field">
-            <label for="reference">Reference</label>
+            <label for="reference">{% trans "Référence" %}</label>
             <input id="reference" name="reference">
         </div>
         <div class="field">
-            <label for="observations">Observations</label>
+            <label for="observations">{% trans "Observations" %}</label>
             <textarea id="observations" name="observations" rows="4"></textarea>
         </div>
 
         <div class="actions">
-            <button type="submit">Enregistrer</button>
-            <a href="{% url 'inscription_detail' inscription.id %}">Retour</a>
+            <button type="submit">{% trans "Enregistrer" %}</button>
+            <a href="{% url 'inscription_detail' inscription.id %}">{% trans "Retour" %}</a>
         </div>
     </form>
 
     <div style="margin-top:30px;">
-        <h2>Paiements existants</h2>
+        <h2>{% trans "Paiements existants" %}</h2>
         <ul>
             {% for paiement in paiements %}
                 <li>
@@ -59,7 +59,7 @@
                     - <a href="{% url 'paiement_inscription_document_pdf' inscription.id paiement.id %}">{{ paiement.document_action_label }}</a>
                 </li>
             {% empty %}
-                <li>Aucun paiement enregistré.</li>
+                <li>{% trans "Aucun paiement enregistré." %}</li>
             {% endfor %}
         </ul>
     </div>

@@ -418,7 +418,7 @@ class DashboardAccessTests(TestCase):
         confirmation_page = second_client.get(reverse("login_session_conflict"))
         self.assertEqual(confirmation_page.status_code, 200)
         self.assertContains(confirmation_page, "Session déjà active")
-        self.assertContains(confirmation_page, "Deconnecter l'ancienne session et continuer")
+        self.assertContains(confirmation_page, "Déconnecter l'ancienne session et continuer")
         self.assertContains(confirmation_page, "csrfmiddlewaretoken")
         self.assertTrue(second_client.session.get("pending_login_session_conflict"))
 
@@ -579,7 +579,7 @@ class DashboardAccessTests(TestCase):
         self.assertEqual(response.context["nombre_factures"], 1)
         self.assertEqual(response.context["nombre_clients"], 1)
         self.assertContains(response, "Pilotage quotidien")
-        self.assertContains(response, "Reste a relancer")
+        self.assertContains(response, 'Reste à relancer')
 
     def test_owner_navigation_contains_admin_links(self):
         self.client.force_login(self.proprietaire)
@@ -667,7 +667,7 @@ class DashboardAccessTests(TestCase):
         owner_response = self.client.get(reverse("admin_dashboard"))
         owner_labels = [item["label"] for item in owner_response.context["dashboard_navigation"]]
 
-        self.assertIn("Rapports avances", owner_labels)
+        self.assertIn('Rapports avancés', owner_labels)
         self.assertIn("Ressources humaines", owner_labels)
         self.assertContains(owner_response, f'href="{reverse("advanced_reports")}" class="quick-action is-orange"')
 
@@ -676,7 +676,7 @@ class DashboardAccessTests(TestCase):
         manager_labels = [item["label"] for item in manager_response.context["dashboard_navigation"]]
 
         self.assertIn("Ressources humaines", manager_labels)
-        self.assertNotIn("Rapports avances", manager_labels)
+        self.assertNotIn('Rapports avancés', manager_labels)
 
     def test_accountant_reports_quick_action_keeps_existing_accounting_route(self):
         self.client.force_login(self.comptable)
@@ -727,7 +727,7 @@ class DashboardAccessTests(TestCase):
         self.client.force_login(free_owner)
         response = self.client.get(reverse("admin_dashboard"))
 
-        self.assertContains(response, "Comptabilite")
+        self.assertContains(response, "Comptabilité")
         self.assertContains(response, "Premium")
 
         blocked = self.client.get(reverse("compta_dashboard"))
@@ -757,7 +757,7 @@ class DashboardAccessTests(TestCase):
         response = self.client.get(reverse("admin_dashboard"))
         labels = [item["label"] for item in response.context["dashboard_navigation"]]
 
-        self.assertIn("Dashboard", labels)
+        self.assertIn("Tableau de bord", labels)
         self.assertNotIn("Clients", labels)
         self.assertNotIn("Factures", labels)
         self.assertNotIn("Proformas", labels)
@@ -880,12 +880,12 @@ class OnboardingSignupTests(TestCase):
         response = self.client.get(reverse("signup"))
 
         self.assertContains(response, "Conditions du mot de passe")
-        self.assertContains(response, "Au moins 10 caracteres")
+        self.assertContains(response, 'Au moins 10 caractères')
         self.assertContains(response, "Au moins une lettre majuscule")
         self.assertContains(response, "Au moins une lettre minuscule")
         self.assertContains(response, "Au moins un chiffre")
-        self.assertContains(response, "Au moins un caractere special, par exemple @")
-        self.assertContains(response, "Les deux mots de passe doivent etre identiques")
+        self.assertContains(response, 'Au moins un caractère spécial, par exemple @')
+        self.assertContains(response, 'Les deux mots de passe doivent être identiques')
         self.assertContains(response, 'id="signup-password-rules"')
         self.assertContains(response, 'data-password-rule="special"')
         self.assertContains(response, "updatePasswordChecklist")
@@ -895,7 +895,7 @@ class OnboardingSignupTests(TestCase):
             ("without_uppercase", "motdepasse123!", "au moins une lettre majuscule"),
             ("without_lowercase", "MOTDEPASSE123!", "au moins une lettre minuscule"),
             ("without_digit", "Motdepasse!!", "au moins un chiffre"),
-            ("without_special", "Motdepasse123", "au moins un caractere special"),
+            ("without_special", "Motdepasse123", 'au moins un caractère spécial'),
         ]
 
         for key, password, expected_error in cases:

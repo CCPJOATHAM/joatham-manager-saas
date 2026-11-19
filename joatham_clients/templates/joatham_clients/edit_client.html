@@ -1,7 +1,9 @@
 {% extends "joatham_clients/base.html" %}
+{% load i18n %}
 
-{% block clients_title %}Modifier un client{% endblock %}
-{% block clients_subtitle %}Mettez à jour les informations de contact du client sélectionné.{% endblock %}
+
+{% block clients_title %}{% trans "Modifier un client" %}{% endblock %}
+{% block clients_subtitle %}{% trans "Mettez à jour les informations de contact du client sélectionné." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -59,19 +61,19 @@
         {% csrf_token %}
         <div class="form-grid">
             <div class="field full">
-                <label for="id_nom">Nom</label>
+                <label for="id_nom">{% trans "Nom" %}</label>
                 <input id="id_nom" type="text" name="nom" value="{{ client.nom }}" required>
             </div>
             <div class="field">
-                <label for="id_telephone">Téléphone</label>
+                <label for="id_telephone">{% trans "Téléphone" %}</label>
                 <input id="id_telephone" type="text" name="telephone" value="{{ client.telephone }}">
             </div>
             <div class="field">
-                <label for="id_email">Email</label>
+                <label for="id_email">{% trans "Email" %}</label>
                 <input id="id_email" type="email" name="email" value="{{ client.email }}">
             </div>
         </div>
-        <button type="submit" class="submit-btn">Mettre a jour le client</button>
+        <button type="submit" class="submit-btn">{% trans "Mettre à jour le client" %}</button>
     </form>
 </div>
 {% endblock %}

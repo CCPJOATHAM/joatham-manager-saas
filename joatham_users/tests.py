@@ -98,7 +98,7 @@ class SubscriptionServiceTests(TestCase):
         )
 
     def test_start_trial_for_entreprise_rejects_new_trials(self):
-        with self.assertRaisesMessage(ValueError, "creation de nouveaux essais est desactivee"):
+        with self.assertRaisesMessage(ValueError, 'création de nouveaux essais est désactivée'):
             start_trial_for_entreprise(
                 entreprise=self.entreprise,
                 plan=self.plan,
@@ -652,7 +652,7 @@ class UserManagementTests(TestCase):
         self.assertIn("Rôle d'accès", content)
         self.assertContains(response, "Actif")
         self.assertContains(response, "Invitations en attente")
-        self.assertContains(response, "Quota utilise")
+        self.assertContains(response, "Quota utilisé")
 
     def test_user_list_is_limited_to_current_company(self):
         self.client.force_login(self.owner)
@@ -703,7 +703,7 @@ class UserManagementTests(TestCase):
         self.assertEqual(created_user.telephone, "+243900000099")
 
     def test_owner_cannot_create_super_admin_user(self):
-        with self.assertRaisesMessage(ValueError, "Le proprietaire peut creer uniquement un gestionnaire ou un comptable."):
+        with self.assertRaisesMessage(ValueError, 'Le propriétaire peut créer uniquement un gestionnaire ou un comptable.'):
             create_company_user(
                 entreprise=self.entreprise,
                 owner_user=self.owner,
@@ -796,8 +796,8 @@ class UserManagementTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Cette fonctionnalite n&#x27;est pas incluse dans votre plan actuel")
-        self.assertContains(response, "Votre plan permet jusqu&#x27;a 1 utilisateur(s), invitations en attente incluses.")
+        self.assertContains(response, 'Cette fonctionnalité n&#x27;est pas incluse dans votre plan actuel')
+        self.assertContains(response, 'Votre plan permet jusqu&#x27;à 1 utilisateur(s), invitations en attente incluses.')
         self.assertFalse(EntrepriseInvitation.objects.filter(email="invite.bloque@example.com").exists())
 
     def test_invitation_is_blocked_when_email_is_already_used(self):
@@ -815,7 +815,7 @@ class UserManagementTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Un utilisateur de cette entreprise utilise deja cet email")
+        self.assertContains(response, 'Un utilisateur de cette entreprise utilise déjà cet email')
         self.assertFalse(EntrepriseInvitation.objects.filter(email="gestionnaire.used@example.com").exists())
 
     def test_invitation_is_blocked_when_active_duplicate_exists(self):
@@ -836,7 +836,7 @@ class UserManagementTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Une invitation active existe deja pour cet email")
+        self.assertContains(response, 'Une invitation active existe déjà pour cet email')
         self.assertEqual(EntrepriseInvitation.objects.filter(email="duplicate.invite@example.com").count(), 1)
 
     def test_owner_can_resend_and_cancel_invitation(self):
@@ -939,7 +939,7 @@ class UserManagementTests(TestCase):
         response = self.client.get(reverse("user_create"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Repere rapide")
+        self.assertContains(response, 'Repère rapide')
         self.assertContains(response, "Nom complet")
         content = html.unescape(response.content.decode(response.charset or "utf-8", errors="replace"))
         self.assertIn("Rôles d'accès gérés : Gestionnaire / Comptable", content)
@@ -1222,7 +1222,7 @@ class UserManagementTests(TestCase):
         response = self.client.get(reverse("user_detail", args=[self.comptable.id]))
 
         self.assertContains(response, "Employé RH lié")
-        self.assertContains(response, "Aucune fiche employe RH liee.")
+        self.assertContains(response, 'Aucune fiche employé RH liée.')
 
     def test_user_list_displays_rh_employee_link_badge(self):
         Employe.objects.create(

@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Entreprises | JOATHAM Manager{% endblock %}
-{% block content_title %}Gestion entreprises{% endblock %}
-{% block content_subtitle %}Administration des entreprises clientes, avec désactivation logique et conservation des données.{% endblock %}
+
+{% block page_title %}{% trans "Entreprises | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Gestion entreprises" %}{% endblock %}
+{% block content_subtitle %}{% trans "Administration des entreprises clientes, avec désactivation logique et conservation des données." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -140,20 +142,20 @@
 
 <form method="get" class="company-toolbar">
     <div>
-        <label for="id_q">Rechercher une entreprise</label>
-        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email">
+        <label for="id_q">{% trans "Rechercher une entreprise" %}</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="{% trans 'Nom, raison sociale ou email' %}">
     </div>
     <div>
-        <label for="id_status">Statut</label>
+        <label for="id_status">{% trans "Statut" %}</label>
         <select id="id_status" name="status">
-            <option value="" {% if selected_status == "" %}selected{% endif %}>Toutes</option>
-            <option value="active" {% if selected_status == "active" %}selected{% endif %}>Actives</option>
-            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Désactivées</option>
+            <option value="" {% if selected_status == "" %}selected{% endif %}>{% trans "Toutes" %}</option>
+            <option value="active" {% if selected_status == "active" %}selected{% endif %}>{% trans "Actives" %}</option>
+            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>{% trans "Désactivées" %}</option>
         </select>
     </div>
     <div class="actions">
-        <button type="submit" class="btn-small">Filtrer</button>
-        <a href="{% url 'super_admin_company_list' %}" class="btn-small">Reinitialiser</a>
+        <button type="submit" class="btn-small">{% trans "Filtrer" %}</button>
+        <a href="{% url 'super_admin_company_list' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
     </div>
 </form>
 
@@ -161,13 +163,13 @@
     <table class="company-table">
         <thead>
             <tr>
-                <th>Nom entreprise</th>
-                <th>Contact principal</th>
-                <th>Email</th>
-                <th>Statut</th>
-                <th>Abonnement actuel</th>
-                <th>Date creation</th>
-                <th>Actions</th>
+                <th>{% trans "Nom entreprise" %}</th>
+                <th>{% trans "Contact principal" %}</th>
+                <th>{% trans "Email" %}</th>
+                <th>{% trans "Statut" %}</th>
+                <th>{% trans "Abonnement actuel" %}</th>
+                <th>{% trans "Date création" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -193,9 +195,9 @@
                 <td>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</td>
                 <td>
                     {% if entreprise.is_active %}
-                    <span class="status-badge status-active">Active</span>
+                    <span class="status-badge status-active">{% trans "Active" %}</span>
                     {% else %}
-                    <span class="status-badge status-inactive">Désactivée</span>
+                    <span class="status-badge status-inactive">{% trans "Désactivée" %}</span>
                     {% endif %}
                 </td>
                 <td>
@@ -204,28 +206,28 @@
                         <span class="status-badge status-subscription">{{ subscription.get_statut_display }}</span>
                         <span>{{ subscription.plan.nom }}</span>
                         {% if subscription.date_fin %}
-                        <span class="muted">Echeance : {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                        <span class="muted">{% trans "Échéance :" %} {{ subscription.date_fin|date:"SHORT_DATE_FORMAT" }}</span>
                         {% endif %}
                     </div>
                     {% else %}
-                    <span class="muted">Aucun abonnement</span>
+                    <span class="muted">{% trans "Aucun abonnement" %}</span>
                     {% endif %}
                 </td>
                 <td>
                     {% if entreprise.date_creation %}
-                    {{ entreprise.date_creation|date:"d/m/Y" }}
+                    {{ entreprise.date_creation|date:"SHORT_DATE_FORMAT" }}
                     {% else %}
-                    <span class="muted">Non disponible</span>
+                    <span class="muted">{% trans "Non disponible" %}</span>
                     {% endif %}
                 </td>
                 <td>
                     <div class="actions">
-                        <a href="#entreprise-{{ entreprise.id }}" class="btn-small">Voir</a>
+                        <a href="#entreprise-{{ entreprise.id }}" class="btn-small">{% trans "Voir" %}</a>
                         {% if entreprise.is_active %}
                         {% url 'super_admin_company_deactivate' entreprise.pk as deactivate_url %}
-                        <a href="{{ deactivate_url }}" class="btn-small danger">Désactiver</a>
+                        <a href="{{ deactivate_url }}" class="btn-small danger">{% trans "Désactiver" %}</a>
                         {% else %}
-                        <span class="muted">Désactivée</span>
+                        <span class="muted">{% trans "Désactivée" %}</span>
                         {% endif %}
                     </div>
                 </td>
@@ -233,7 +235,7 @@
             {% endwith %}
             {% empty %}
             <tr>
-                <td colspan="7">Aucune entreprise ne correspond aux filtres.</td>
+                <td colspan="7">{% trans "Aucune entreprise ne correspond aux filtres." %}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Mon profil" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Mon profil" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Mon profil" %}{% endblock %}
 {% block content_subtitle %}{% trans "Consultez vos informations personnelles et mettez à jour les éléments modifiables de votre compte." %}{% endblock %}
 
@@ -411,7 +411,7 @@
                     <strong>{% if profile_user.entreprise %}{{ profile_user.entreprise.nom }}{% else %}{% trans "Plateforme JOATHAM Manager" %}{% endif %}</strong>
                 </div>
                 <div class="profile-detail">
-                    <span>{% trans "Langue preferee" %}</span>
+                    <span>{% trans "Langue préférée" %}</span>
                     <strong>{{ profile_user.get_preferred_language_display }}</strong>
                 </div>
             </div>
@@ -441,7 +441,7 @@
                     {{ form.telephone.errors }}
                 </div>
                 <div class="profile-field">
-                    <label for="{{ form.preferred_language.id_for_label }}">{% trans "Langue preferee" %}</label>
+                    <label for="{{ form.preferred_language.id_for_label }}">{% trans "Langue préférée" %}</label>
                     {{ form.preferred_language }}
                     {{ form.preferred_language.errors }}
                 </div>
@@ -459,7 +459,7 @@
                             </span>
                             <span class="upload-copy">
                                 <strong>{% trans "Importer une nouvelle photo" %}</strong>
-                                <span>{% trans "Choisissez une image nette, carree de preference, pour un rendu professionnel." %}</span>
+                                <span>{% trans "Choisissez une image nette, carrée de préférence, pour un rendu professionnel." %}</span>
                             </span>
                             <span class="upload-action">{% trans "Choisir" %}</span>
                         </label>

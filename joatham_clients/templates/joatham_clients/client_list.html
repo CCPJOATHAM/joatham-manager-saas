@@ -1,6 +1,8 @@
 {% extends "joatham_clients/base.html" %}
+{% load i18n %}
 
-{% block clients_subtitle %}Consultez, recherchez et gérez les clients de votre entreprise dans une interface claire et professionnelle.{% endblock %}
+
+{% block clients_subtitle %}{% trans "Consultez, recherchez et gérez les clients de votre entreprise dans une interface claire et professionnelle." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -202,18 +204,18 @@
 
 <div class="hero">
     <div>
-        <h2>Clients</h2>
-        <p>Retrouvez tous vos clients dans une vue unique, lisible et adaptée à une utilisation quotidienne de JOATHAM Manager.</p>
+        <h2>{% trans "Clients" %}</h2>
+        <p>{% trans "Retrouvez tous vos clients dans une vue unique, lisible et adaptée à une utilisation quotidienne de JOATHAM Manager." %}</p>
     </div>
-    <div class="count-badge">{{ client_count }} client{% if client_count > 1 %}s{% endif %}</div>
+    <div class="count-badge">{{ client_count }} {% trans "client" %}{% if client_count > 1 %}s{% endif %}</div>
 </div>
 
 <div class="toolbar">
     <form method="get" class="search-form">
-        <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par nom, téléphone ou e-mail">
-        <button type="submit">Rechercher</button>
+        <input type="text" name="q" value="{{ search }}" placeholder="{% trans 'Rechercher par nom, téléphone ou e-mail' %}">
+        <button type="submit">{% trans "Rechercher" %}</button>
         {% if search %}
-        <a href="{% url 'client_list' %}">Réinitialiser</a>
+        <a href="{% url 'client_list' %}">{% trans "Réinitialiser" %}</a>
         {% endif %}
     </form>
 </div>
@@ -224,23 +226,23 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Nom</th>
-                <th>Téléphone</th>
-                <th>E-mail</th>
-                <th>Actions</th>
+                <th>{% trans "Nom" %}</th>
+                <th>{% trans "Téléphone" %}</th>
+                <th>{% trans "E-mail" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for client in clients %}
             <tr>
-                <td><span class="client-id">CL-{{ client.id }}</span></td>
+                <td><span class="client-id">{% trans "CL-" %}{{ client.id }}</span></td>
                 <td><span class="client-name">{{ client.nom }}</span></td>
                 <td class="muted">{{ client.telephone|default:"-" }}</td>
                 <td class="muted">{{ client.email|default:"-" }}</td>
                 <td>
                     <div class="actions">
-                        <a href="{% url 'edit_client' client.id %}" class="action-link edit">Modifier</a>
-                        <a href="{% url 'delete_client' client.id %}" class="action-link delete" onclick="return confirm('Voulez-vous vraiment supprimer ce client ?');">Supprimer</a>
+                        <a href="{% url 'edit_client' client.id %}" class="action-link edit">{% trans "Modifier" %}</a>
+                        <a href="{% url 'delete_client' client.id %}" class="action-link delete" onclick="return confirm(window.joathamMessages.confirmDeleteClient);">{% trans "Supprimer" %}</a>
                     </div>
                 </td>
             </tr>
@@ -251,12 +253,11 @@
 {% else %}
 <div class="table-shell">
     <div class="empty-state">
-        <h3>Aucun client enregistré pour le moment</h3>
+        <h3>{% trans "Aucun client enregistré pour le moment" %}</h3>
         <p>
-            Commencez par ajouter votre premier client pour structurer votre relation commerciale
-            et faciliter la facturation.
+            {% trans "Commencez par ajouter votre premier client pour structurer votre relation commerciale et faciliter la facturation." %}
         </p>
-        <a href="{% url 'add_client' %}" class="btn-link primary">Ajouter un client</a>
+        <a href="{% url 'add_client' %}" class="btn-link primary">{% trans "Ajouter un client" %}</a>
     </div>
 </div>
 {% endif %}

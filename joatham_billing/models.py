@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django.conf import settings
@@ -320,8 +321,8 @@ class Proforma(models.Model):
 
 class EntreprisePrintSettings(models.Model):
     class POSWidth(models.TextChoices):
-        WIDTH_80 = "80", "80 mm"
-        WIDTH_58 = "58", "58 mm"
+        WIDTH_80 = "80", gettext_lazy("80 mm")
+        WIDTH_58 = "58", gettext_lazy("58 mm")
 
     class InvoiceFormat(models.TextChoices):
         A4 = "a4", _("A4")
@@ -442,11 +443,11 @@ class PaiementFacture(models.Model):
     class ModePaiement(models.TextChoices):
         ESPECES = "especes", _("Especes")
         VIREMENT = "virement", _("Virement")
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
-        MPESA = "mpesa", "M-Pesa"
-        ORANGE_MONEY = "orange_money", "Orange Money"
-        AIRTEL_MONEY = "airtel_money", "Airtel Money"
-        AFRIMONEY = "afrimoney", "Afrimoney"
+        MOBILE_MONEY = "mobile_money", gettext_lazy("Mobile Money")
+        MPESA = "mpesa", gettext_lazy("M-Pesa")
+        ORANGE_MONEY = "orange_money", gettext_lazy("Orange Money")
+        AIRTEL_MONEY = "airtel_money", gettext_lazy("Airtel Money")
+        AFRIMONEY = "afrimoney", gettext_lazy("Afrimoney")
         CARTE = "carte", _("Carte bancaire")
         CHEQUE = "cheque", _("Cheque")
         AUTRE = "autre", _("Autre")
@@ -526,3 +527,8 @@ class FactureHistorique(models.Model):
 
     def __str__(self):
         return f"{self.facture.numero} - {self.action}"
+
+    @property
+    def display_description(self):
+        from core.audit_i18n import invoice_history_description
+        return invoice_history_description(self)

@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Ressources humaines" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Ressources humaines" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% block rh_title %}{% trans "Ressources humaines" %}{% endblock %}{% endblock %}
 {% block content_subtitle %}{% block rh_subtitle %}{% trans "Employés, postes RH et présences de votre entreprise." %}{% endblock %}{% endblock %}
 
@@ -825,7 +825,7 @@
 <nav class="rh-module-nav" id="rh-sidebar" aria-label="{% trans 'Navigation ressources humaines' %}">
     <div class="rh-nav-brand">
         <span class="rh-brand-title">JOATHAM<br>Manager</span>
-        <button type="button" class="rh-menu-button" id="rh-sidebar-toggle" aria-controls="rh-sidebar" aria-expanded="true" aria-label="{% trans 'Ouvrir ou reduire le menu RH' %}">
+        <button type="button" class="rh-menu-button" id="rh-sidebar-toggle" aria-controls="rh-sidebar" aria-expanded="true" aria-label="{% trans 'Ouvrir ou réduire le menu RH' %}">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg>
         </button>
     </div>
@@ -890,7 +890,7 @@
         </a>
         {% endif %}
     </div>
-    <div class="rh-nav-footer">&copy; JOATHAM Manager</div>
+    <div class="rh-nav-footer">{% trans "© JOATHAM Manager" %}</div>
 </nav>
 {% endblock %}
 

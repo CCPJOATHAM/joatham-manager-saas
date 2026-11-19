@@ -7,10 +7,10 @@
 <div class="rh-header">
     <div>
         <h2>{% trans "Presences" %}</h2>
-        <p>{% trans "Pointages simples : present, absent, retard ou conge." %}</p>
+        <p>{% trans "Pointages simples : présent, absent, retard ou congé." %}</p>
     </div>
     <div class="rh-actions">
-        <span class="rh-count">{{ presence_count }} {% trans "presence(s)" %}</span>
+        <span class="rh-count">{{ presence_count }} {% trans "présence(s)" %}</span>
         {% if can_record_presence_ui %}
         <a href="{% url 'rh_presence_create' %}" class="rh-action-link primary">{% trans "Ajouter" %}</a>
         {% endif %}
@@ -25,7 +25,7 @@
 
 <form method="get" class="rh-filter-form">
     <div class="rh-field">
-        <label for="date_debut">{% trans "Date debut" %}</label>
+        <label for="date_debut">{% trans "Date début" %}</label>
         <input type="date" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
     </div>
     <div class="rh-field">
@@ -51,7 +51,7 @@
         </select>
     </div>
     <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
-    <a href="{% url 'rh_presence_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+    <a href="{% url 'rh_presence_list' %}" class="rh-action-link">{% trans "Réinitialiser" %}</a>
 </form>
 
 {% if presences %}
@@ -63,8 +63,8 @@
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Employé" %}</th>
                     <th>{% trans "Statut" %}</th>
-                    <th>{% trans "Arrivee" %}</th>
-                    <th>{% trans "Depart" %}</th>
+                    <th>{% trans "Arrivée" %}</th>
+                    <th>{% trans "Départ" %}</th>
                     <th>{% trans "Note" %}</th>
                 </tr>
             </thead>
@@ -87,9 +87,9 @@
 <div class="rh-table-shell">
     <div class="rh-empty">
         <h3>{% trans "Aucune présence enregistrée" %}</h3>
-        <p>{% trans "Enregistrez les presences quotidiennes lorsque vous etes pret." %}</p>
+        <p>{% trans "Enregistrez les presences quotidiennes lorsque vous êtes prêt." %}</p>
         {% if can_record_presence_ui %}
-        <a href="{% url 'rh_presence_create' %}" class="btn-link primary">{% trans "Ajouter une presence" %}</a>
+        <a href="{% url 'rh_presence_create' %}" class="btn-link primary">{% trans "Ajouter une présence" %}</a>
         {% endif %}
     </div>
 </div>

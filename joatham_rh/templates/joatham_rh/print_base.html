@@ -143,9 +143,9 @@
             </div>
             {% if entreprise.rccm or entreprise.id_nat or entreprise.numero_impot %}
                 <div class="company-meta">
-                    {% if entreprise.rccm %}<span>RCCM : {{ entreprise.rccm }}</span>{% endif %}
-                    {% if entreprise.id_nat %}<span>ID Nat : {{ entreprise.id_nat }}</span>{% endif %}
-                    {% if entreprise.numero_impot %}<span>Numero impot : {{ entreprise.numero_impot }}</span>{% endif %}
+                    {% if entreprise.rccm %}<span>{% trans "RCCM :" %} {{ entreprise.rccm }}</span>{% endif %}
+                    {% if entreprise.id_nat %}<span>{% trans "ID Nat :" %} {{ entreprise.id_nat }}</span>{% endif %}
+                    {% if entreprise.numero_impot %}<span>{% trans "Numéro impôt :" %} {{ entreprise.numero_impot }}</span>{% endif %}
                 </div>
             {% endif %}
         </header>
@@ -153,7 +153,7 @@
         <footer class="print-footer">
             {% if entreprise.adresse or entreprise.ville or entreprise.pays %}
                 <div>
-                    Adresse :
+                    {% trans "Adresse :" %}
                     {% if entreprise.adresse %}{{ entreprise.adresse }}{% endif %}
                     {% if entreprise.ville %}{% if entreprise.adresse %}, {% endif %}{{ entreprise.ville }}{% endif %}
                     {% if entreprise.pays %}{% if entreprise.adresse or entreprise.ville %}, {% endif %}{{ entreprise.pays }}{% endif %}
@@ -161,9 +161,9 @@
             {% endif %}
             {% if entreprise.telephone or entreprise.email %}
                 <div>
-                    {% if entreprise.telephone %}Tel. : {{ entreprise.telephone }}{% endif %}
+                    {% if entreprise.telephone %}{% trans "Tel. :" %} {{ entreprise.telephone }}{% endif %}
                     {% if entreprise.telephone and entreprise.email %} | {% endif %}
-                    {% if entreprise.email %}Email : {{ entreprise.email }}{% endif %}
+                    {% if entreprise.email %}{% trans "Email :" %} {{ entreprise.email }}{% endif %}
                 </div>
             {% endif %}
         </footer>

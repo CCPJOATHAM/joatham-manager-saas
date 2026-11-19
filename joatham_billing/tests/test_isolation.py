@@ -103,4 +103,4 @@ class BillingIsolationTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "produit selectionne est invalide")
+        self.assertContains(response, 'produit sélectionné est invalide')

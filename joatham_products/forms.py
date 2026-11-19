@@ -21,7 +21,7 @@ class BaseProduitForm(forms.ModelForm):
         labels = {
             "nom": _("Nom du produit"),
             "description": _("Description"),
-            "reference": _("Reference"),
+            "reference": _('Référence'),
             "prix_unitaire": _("Prix unitaire"),
             "seuil_alerte": _("Seuil d'alerte"),
             "actif": _("Produit actif"),
@@ -35,7 +35,7 @@ class BaseProduitForm(forms.ModelForm):
         self.fields["description"].widget = forms.Textarea(
             attrs={"rows": 3, "placeholder": _("Description commerciale ou technique")}
         )
-        self.fields["reference"].widget.attrs.update({"placeholder": _("Code ou reference")})
+        self.fields["reference"].widget.attrs.update({"placeholder": _('Code ou référence')})
         self.fields["prix_unitaire"].widget.attrs.update({"placeholder": "0.00", "step": "0.01", "min": "0"})
         self.fields["seuil_alerte"].widget.attrs.update({"placeholder": "0", "min": "0"})
 
@@ -59,8 +59,8 @@ class ProduitUpdateForm(BaseProduitForm):
 class StockMovementForm(forms.Form):
     produit = forms.ModelChoiceField(queryset=Produit.objects.none(), label=_("Produit"))
     movement_type = forms.ChoiceField(label=_("Type de mouvement"))
-    quantity = forms.IntegerField(min_value=1, label=_("Quantite"))
-    reference = forms.CharField(max_length=120, required=False, label=_("Reference"))
+    quantity = forms.IntegerField(min_value=1, label=_('Quantité'))
+    reference = forms.CharField(max_length=120, required=False, label=_('Référence'))
     reason = forms.CharField(max_length=120, required=False, label=_("Motif"))
     comment = forms.CharField(required=False, label=_("Commentaire"), widget=forms.Textarea(attrs={"rows": 3}))
 
@@ -75,15 +75,15 @@ class StockMovementForm(forms.Form):
         ]
         self.fields["produit"].widget.attrs.update({"data-stock-form": "product"})
         self.fields["quantity"].widget.attrs.update({"placeholder": "0", "min": "1"})
-        self.fields["reference"].widget.attrs.update({"placeholder": _("Bon, document ou reference interne")})
-        self.fields["reason"].widget.attrs.update({"placeholder": _("Expliquez brievement l'operation")})
-        self.fields["comment"].widget.attrs.update({"placeholder": _("Commentaire complementaire")})
+        self.fields["reference"].widget.attrs.update({"placeholder": _('Bon, document ou référence interne')})
+        self.fields["reason"].widget.attrs.update({"placeholder": _("Expliquez brièvement l'opération")})
+        self.fields["comment"].widget.attrs.update({"placeholder": _('Commentaire complémentaire')})
 
     def clean_movement_type(self):
         movement_type = self.cleaned_data["movement_type"]
         allowed_values = {choice[0] for choice in self.fields["movement_type"].choices}
         if movement_type not in allowed_values:
-            raise forms.ValidationError(_("Le type de mouvement selectionne est invalide."))
+            raise forms.ValidationError(_('Le type de mouvement sélectionné est invalide.'))
         return movement_type
 
 
@@ -103,7 +103,7 @@ class InventorySessionForm(forms.Form):
 
 class InventoryCountForm(forms.Form):
     line_id = forms.IntegerField(widget=forms.HiddenInput)
-    counted_quantity = forms.IntegerField(min_value=0, label=_("Quantite comptee"))
+    counted_quantity = forms.IntegerField(min_value=0, label=_('Quantité comptée'))
     comment = forms.CharField(
         required=False,
         label=_("Commentaire"),

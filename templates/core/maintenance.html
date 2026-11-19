@@ -1,9 +1,12 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance | {{ platform_name|default:"JOATHAM Manager" }}</title>
+    <title>{% trans "Maintenance |" %} {{ platform_name|default:"JOATHAM Manager" }}</title>
     <style>
         :root {
             --ink: #10233f;
@@ -91,9 +94,9 @@
     <main class="maintenance-card" role="main">
         <div class="brand">{{ platform_name|default:"JOATHAM Manager" }}</div>
         <div class="icon" aria-hidden="true">!</div>
-        <h1>Maintenance en cours</h1>
-        <p class="message">{{ message|default:"Nous effectuons une opération de maintenance afin d'améliorer votre expérience." }}</p>
-        <div class="footer-note">Nous revenons bientot.</div>
+        <h1>{% trans "Maintenance en cours" %}</h1>
+        <p class="message">{{ message|default:_("Nous effectuons une opération de maintenance afin d'améliorer votre expérience.") }}</p>
+        <div class="footer-note">{% trans "Nous revenons bientôt." %}</div>
     </main>
 </body>
 </html>

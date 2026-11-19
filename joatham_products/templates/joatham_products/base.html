@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Produits" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Produits" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% block products_title %}{% trans "Produits" %}{% endblock %}{% endblock %}
 {% block content_subtitle %}{% block products_subtitle %}{% trans "Gestion des produits et du stock de votre entreprise." %}{% endblock %}{% endblock %}
 
@@ -337,7 +337,7 @@
     <a href="{% url 'stock_movement_list' %}" class="{% if request.resolver_match.url_name == 'stock_movement_list' %}is-active{% endif %}">{% trans "Mouvements stock" %}</a>
     {% endif %}
     {% if can_move_stock_ui %}
-    <a href="{% url 'stock_entry_create' %}" class="{% if request.resolver_match.url_name == 'stock_entry_create' %}is-active{% endif %}">{% trans "Entree" %}</a>
+    <a href="{% url 'stock_entry_create' %}" class="{% if request.resolver_match.url_name == 'stock_entry_create' %}is-active{% endif %}">{% trans "Entrée" %}</a>
     <a href="{% url 'stock_exit_create' %}" class="{% if request.resolver_match.url_name == 'stock_exit_create' %}is-active{% endif %}">{% trans "Sortie" %}</a>
     {% endif %}
     {% if can_adjust_stock_ui %}

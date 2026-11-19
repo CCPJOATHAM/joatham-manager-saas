@@ -1,13 +1,13 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Classez les references RH simples sans upload de fichier dans cette phase." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Classez les références RH simples sans upload de fichier dans cette phase." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
         <h2>{% trans "Documents RH" %}</h2>
-        <p>{% trans "Contrats, attestations, certificats et autres references internes." %}</p>
+        <p>{% trans "Contrats, attestations, certificats et autres références internes." %}</p>
     </div>
     <div class="rh-actions">
         <span class="rh-count">{{ document_count }} {% trans "document(s)" %}</span>
@@ -34,7 +34,7 @@
         </select>
     </div>
     <div class="rh-field">
-        <label for="employe">{% trans "Employe" %}</label>
+        <label for="employe">{% trans "Employé" %}</label>
         <select id="employe" name="employe">
             <option value="">{% trans "Tous" %}</option>
             {% for employe in employes_filter %}
@@ -43,7 +43,7 @@
         </select>
     </div>
     <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
-    <a href="{% url 'rh_document_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+    <a href="{% url 'rh_document_list' %}" class="rh-action-link">{% trans "Réinitialiser" %}</a>
 </form>
 
 {% if documents %}
@@ -53,7 +53,7 @@
             <thead>
                 <tr>
                     <th>{% trans "Titre" %}</th>
-                    <th>{% trans "Employe" %}</th>
+                    <th>{% trans "Employé" %}</th>
                     <th>{% trans "Type" %}</th>
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Description" %}</th>
@@ -77,7 +77,7 @@
 <div class="rh-table-shell">
     <div class="rh-empty">
         <h3>{% trans "Aucun document RH" %}</h3>
-        <p>{% trans "Ajoutez les references essentielles sans stocker encore de fichier physique." %}</p>
+        <p>{% trans "Ajoutez les références essentielles sans stocker encore de fichier physique." %}</p>
         {% if can_manage_documents_ui %}
         <a href="{% url 'rh_document_create' %}" class="btn-link primary">{% trans "Ajouter un document" %}</a>
         {% endif %}

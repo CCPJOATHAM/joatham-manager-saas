@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Paiement manuel | JOATHAM Manager{% endblock %}
-{% block content_title %}Enregistrer paiement{% endblock %}
-{% block content_subtitle %}Activation ou prolongation manuelle de l'abonnement d'une entreprise.{% endblock %}
+
+{% block page_title %}{% trans "Paiement manuel | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Enregistrer paiement" %}{% endblock %}
+{% block content_subtitle %}{% trans "Activation ou prolongation manuelle de l'abonnement d'une entreprise." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">Retour aux abonnements</a>
+<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">{% trans "Retour aux abonnements" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -119,23 +121,23 @@
 
 <div class="payment-shell">
     <section class="panel">
-        <h2>Entreprise</h2>
+        <h2>{% trans "Entreprise" %}</h2>
         <div class="details">
-            <div class="detail-row"><span>Nom</span><strong>{{ entreprise.nom }}</strong></div>
-            <div class="detail-row"><span>Email</span><strong>{{ entreprise.email|default:"-" }}</strong></div>
-            <div class="detail-row"><span>Devise entreprise</span><strong>{{ entreprise.devise|default:"-" }}</strong></div>
+            <div class="detail-row"><span>{% trans "Nom" %}</span><strong>{{ entreprise.nom }}</strong></div>
+            <div class="detail-row"><span>{% trans "Email" %}</span><strong>{{ entreprise.email|default:"-" }}</strong></div>
+            <div class="detail-row"><span>{% trans "Devise entreprise" %}</span><strong>{{ entreprise.devise|default:"-" }}</strong></div>
             {% if subscription %}
-            <div class="detail-row"><span>Plan actuel</span><strong>{{ subscription.plan.nom }}</strong></div>
-            <div class="detail-row"><span>Statut</span><strong>{{ subscription.get_statut_display }}</strong></div>
-            <div class="detail-row"><span>Date fin actuelle</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
+            <div class="detail-row"><span>{% trans "Plan actuel" %}</span><strong>{{ subscription.plan.nom }}</strong></div>
+            <div class="detail-row"><span>{% trans "Statut" %}</span><strong>{{ subscription.get_statut_display }}</strong></div>
+            <div class="detail-row"><span>{% trans "Date fin actuelle" %}</span><strong>{{ subscription.date_fin|date:"SHORT_DATE_FORMAT" }}</strong></div>
             {% else %}
-            <div class="detail-row"><span>Abonnement</span><strong>Aucun abonnement actif</strong></div>
+            <div class="detail-row"><span>{% trans "Abonnement" %}</span><strong>{% trans "Aucun abonnement actif" %}</strong></div>
             {% endif %}
         </div>
     </section>
 
     <section class="panel">
-        <h2>Paiement reçu</h2>
+        <h2>{% trans "Paiement reçu" %}</h2>
         <form method="post" class="payment-form">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -161,14 +163,14 @@
             <div class="field">
                 <label for="{{ form.montant_usd.id_for_label }}">{{ form.montant_usd.label }}</label>
                 {{ form.montant_usd }}
-                <span class="help">Optionnel. A renseigner si la conversion automatique est indisponible.</span>
+                <span class="help">{% trans "Optionnel. A renseigner si la conversion automatique est indisponible." %}</span>
                 {{ form.montant_usd.errors }}
             </div>
 
             <div class="field">
                 <label for="{{ form.taux_change_reference.id_for_label }}">{{ form.taux_change_reference.label }}</label>
                 {{ form.taux_change_reference }}
-                <span class="help">Optionnel. Exemple : 2750 si 1 USD = 2750 CDF.</span>
+                <span class="help">{% trans "Optionnel. Exemple : 2750 si 1 USD = 2750 CDF." %}</span>
                 {{ form.taux_change_reference.errors }}
             </div>
 
@@ -181,7 +183,7 @@
             <div class="field">
                 <label for="{{ form.reference_paiement.id_for_label }}">{{ form.reference_paiement.label }}</label>
                 {{ form.reference_paiement }}
-                <span class="help">Exemple : référence Mobile Money, numéro de reçu, note interne.</span>
+                <span class="help">{% trans "Exemple : référence Mobile Money, numéro de reçu, note interne." %}</span>
                 {{ form.reference_paiement.errors }}
             </div>
 
@@ -194,13 +196,13 @@
             <div class="field">
                 <label for="{{ form.date_paiement.id_for_label }}">{{ form.date_paiement.label }}</label>
                 {{ form.date_paiement }}
-                <span class="help">Laissez vide pour utiliser la date du jour.</span>
+                <span class="help">{% trans "Laissez vide pour utiliser la date du jour." %}</span>
                 {{ form.date_paiement.errors }}
             </div>
 
             <div class="submit-row">
-                <button type="submit" class="btn-save">Enregistrer paiement</button>
-                <a href="{% url 'super_admin_subscription_list' %}" class="btn-secondary">Annuler</a>
+                <button type="submit" class="btn-save">{% trans "Enregistrer paiement" %}</button>
+                <a href="{% url 'super_admin_subscription_list' %}" class="btn-secondary">{% trans "Annuler" %}</a>
             </div>
         </form>
     </section>

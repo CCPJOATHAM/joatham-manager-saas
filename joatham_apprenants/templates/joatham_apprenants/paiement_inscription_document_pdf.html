@@ -1,4 +1,6 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
+
 
 {% block pdf_title %}{{ document.document_title }} - {{ entreprise.nom }}{% endblock %}
 
@@ -255,7 +257,7 @@
                     <tr>
                         {% if logo_data_uri %}
                         <td class="logo-cell">
-                            <img src="{{ logo_data_uri }}" class="company-logo" alt="Logo entreprise">
+                            <img src="{{ logo_data_uri }}" class="company-logo" alt="{% trans 'Logo entreprise' %}">
                         </td>
                         {% endif %}
                         <td>
@@ -272,19 +274,19 @@
                 <div class="copy-badge">{{ copy_label }}</div><br>
                 {% if document.document_type == "quittance" %}
                     {% if document.trop_percu > 0 %}
-                        <div class="status-badge status-badge--paid">Quittance avec trop-perçu</div>
+                        <div class="status-badge status-badge--paid">{% trans "Quittance avec trop-perçu" %}</div>
                     {% else %}
-                        <div class="status-badge status-badge--paid">Paiement soldé</div>
+                        <div class="status-badge status-badge--paid">{% trans "Paiement soldé" %}</div>
                     {% endif %}
                 {% else %}
-                    <div class="status-badge">Paiement partiel</div>
+                    <div class="status-badge">{% trans "Paiement partiel" %}</div>
                 {% endif %}
-                <p class="meta-line">Paiement N° {{ paiement.reference|default:paiement.id }} | Édité le {{ date_generation }}</p>
+                <p class="meta-line">{% trans "Paiement N°" %} {{ paiement.reference|default:paiement.id }} {% trans "| Édité le" %} {{ date_generation }}</p>
             </td>
             <td class="qr-zone">
                 {% if qr_code_data_uri %}
-                    <img src="{{ qr_code_data_uri }}" class="qr-image" alt="QR document">
-                    <div class="qr-caption">Vérification du document</div>
+                    <img src="{{ qr_code_data_uri }}" class="qr-image" alt="{% trans 'QR document' %}">
+                    <div class="qr-caption">{% trans "Vérification du document" %}</div>
                 {% endif %}
             </td>
         </tr>
@@ -292,96 +294,96 @@
 
     <div class="thin-separator">&nbsp;</div>
 
-    <div class="section-title">Informations apprenant(e)</div>
+    <div class="section-title">{% trans "Informations apprenant(e)" %}</div>
     <table class="info-table">
         <tr>
             <td class="info-box">
-                <div class="info-label">Apprenant(e)</div>
+                <div class="info-label">{% trans "Apprenant(e)" %}</div>
                 <div class="info-value">{{ inscription.apprenant }}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box">
-                <div class="info-label">Formation suivie</div>
+                <div class="info-label">{% trans "Formation suivie" %}</div>
                 <div class="info-value">{{ inscription.formation }}</div>
             </td>
         </tr>
     </table>
 
-    <div class="section-title">Détails du paiement</div>
+    <div class="section-title">{% trans "Détails du paiement" %}</div>
     {% if document.document_type == "quittance" %}
-        <div class="notice">L’apprenant a soldé la totalité de ses frais de formation.</div>
+        <div class="notice">{% trans "L’apprenant a soldé la totalité de ses frais de formation." %}</div>
     {% endif %}
     <table class="info-table">
         <tr>
             <td class="info-box">
-                <div class="info-label">Montant prévu</div>
+                <div class="info-label">{% trans "Montant prévu" %}</div>
                 <div class="info-value">{{ document_amounts.montant_prevu }}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box">
-                <div class="info-label">Montant payé</div>
+                <div class="info-label">{% trans "Montant payé" %}</div>
                 <div class="info-value">{{ document_amounts.montant_operation }}</div>
             </td>
         </tr>
         <tr>
             <td class="info-box info-box--highlight">
-                <div class="info-label">Montant payé cumulé</div>
+                <div class="info-label">{% trans "Montant payé cumulé" %}</div>
                 <div class="info-value">{{ document_amounts.montant_paye_cumule }}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box info-box--highlight">
-                <div class="info-label">Solde restant</div>
+                <div class="info-label">{% trans "Solde restant" %}</div>
                 <div class="info-value">{{ document_amounts.solde_restant }}</div>
             </td>
         </tr>
         {% if document.trop_percu > 0 %}
         <tr>
             <td class="info-box info-box--highlight">
-                <div class="info-label">Trop-perçu</div>
+                <div class="info-label">{% trans "Trop-perçu" %}</div>
                 <div class="info-value">{{ document_amounts.trop_percu }}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box">
-                <div class="info-label">Document</div>
-                <div class="info-value">Quittance avec trop-perçu</div>
+                <div class="info-label">{% trans "Document" %}</div>
+                <div class="info-value">{% trans "Quittance avec trop-perçu" %}</div>
             </td>
         </tr>
         {% endif %}
         <tr>
             <td class="info-box">
-                <div class="info-label">Mode de paiement</div>
-                <div class="info-value">{% if paiement.mode_paiement == "especes" %}Espèces{% else %}{{ paiement.get_mode_paiement_display }}{% endif %}</div>
+                <div class="info-label">{% trans "Mode de paiement" %}</div>
+                <div class="info-value">{% if paiement.mode_paiement == "especes" %}{% trans "Espèces" %}{% else %}{{ paiement.get_mode_paiement_display }}{% endif %}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box">
-                <div class="info-label">Référence</div>
+                <div class="info-label">{% trans "Référence" %}</div>
                 <div class="info-value">{{ paiement.reference|default:"-" }}</div>
             </td>
         </tr>
         <tr>
             <td class="info-box">
-                <div class="info-label">Date du paiement</div>
-                <div class="info-value">{{ paiement.date_paiement|date:"d/m/Y" }}</div>
+                <div class="info-label">{% trans "Date du paiement" %}</div>
+                <div class="info-value">{{ paiement.date_paiement|date:"SHORT_DATE_FORMAT" }}</div>
             </td>
             <td class="info-gap">&nbsp;</td>
             <td class="info-box">
-                <div class="info-label">Document</div>
-                <div class="info-value">{% if document.document_type == "quittance" %}Quittance de paiement{% else %}Reçu de paiement partiel{% endif %}</div>
+                <div class="info-label">{% trans "Document" %}</div>
+                <div class="info-value">{% if document.document_type == "quittance" %}{% trans "Quittance de paiement" %}{% else %}{% trans "Reçu de paiement partiel" %}{% endif %}</div>
             </td>
         </tr>
     </table>
 
     <table class="signature-table">
         <tr>
-            <td class="generated-line">Document généré le {{ date_footer|slice:":10" }} à {{ date_footer|slice:"13:" }} par JOATHAM Manager.</td>
+            <td class="generated-line">{% trans "Document généré le" %} {{ date_footer|slice:":10" }} à {{ date_footer|slice:"13:" }} {% trans "par JOATHAM Manager." %}</td>
             <td class="signature-cell">
-                <div class="signature-box">Signature et cachet de l’entreprise</div>
+                <div class="signature-box">{% trans "Signature et cachet de l’entreprise" %}</div>
             </td>
         </tr>
     </table>
 </div>
 {% if not forloop.last %}
-<div class="copy-separator">Découper ici</div>
+<div class="copy-separator">{% trans "Découper ici" %}</div>
 {% endif %}
 {% endfor %}
 {% endblock %}

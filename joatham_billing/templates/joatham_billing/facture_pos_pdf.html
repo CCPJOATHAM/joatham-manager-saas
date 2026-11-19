@@ -1,6 +1,8 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
 
-{% block pdf_title %}Ticket {{ facture.numero }}{% endblock %}
+
+{% block pdf_title %}{% trans "Ticket" %} {{ facture.numero }}{% endblock %}
 
 {% block pdf_styles %}
         @page {
@@ -137,7 +139,7 @@
 <div class="ticket">
     <div class="ticket-header">
         {% if print_settings.pos_show_logo and legal_information.logo_data_uri %}
-            <img src="{{ legal_information.logo_data_uri }}" alt="Logo" class="ticket-logo">
+            <img src="{{ legal_information.logo_data_uri }}" alt="{% trans 'Logo' %}" class="ticket-logo">
         {% endif %}
         {% if print_settings.pos_show_company_name %}
         <div class="company-name">{{ legal_information.primary_name }}</div>
@@ -154,38 +156,38 @@
         {% endif %}
         {% endif %}
         {% if print_settings.pos_show_phone and legal_information.phone %}
-            <div class="company-line">Tel : {{ legal_information.phone }}</div>
+            <div class="company-line">{% trans "Tel :" %} {{ legal_information.phone }}</div>
         {% endif %}
         {% if print_settings.pos_show_email and legal_information.email %}
-            <div class="company-line">Email : {{ legal_information.email }}</div>
+            <div class="company-line">{% trans "Email :" %} {{ legal_information.email }}</div>
         {% endif %}
         {% if print_settings.pos_show_tax_info and legal_information.rccm %}
-            <div class="company-line">RCCM : {{ legal_information.rccm }}</div>
+            <div class="company-line">{% trans "RCCM :" %} {{ legal_information.rccm }}</div>
         {% endif %}
         {% if print_settings.pos_show_tax_info and legal_information.impot %}
-            <div class="company-line">NIF / No impot : {{ legal_information.impot }}</div>
+            <div class="company-line">{% trans "NIF / No impôt :" %} {{ legal_information.impot }}</div>
         {% endif %}
         {% if print_settings.pos_show_tax_info and legal_information.id_nat %}
-            <div class="company-line">ID NAT : {{ legal_information.id_nat }}</div>
+            <div class="company-line">{% trans "ID NAT :" %} {{ legal_information.id_nat }}</div>
         {% endif %}
-        <div class="ticket-title">Ticket de caisse</div>
+        <div class="ticket-title">{% trans "Ticket de caisse" %}</div>
     </div>
 
     <div class="separator">&nbsp;</div>
 
-    <div class="meta-line"><strong>Facture :</strong> {{ facture.numero }}</div>
-    <div class="meta-line"><strong>Date :</strong> {{ invoice_datetime }}</div>
-    <div class="meta-line"><strong>Client :</strong> {{ client_name|default:"Client non renseigne" }}</div>
+    <div class="meta-line"><strong>{% trans "Facture :" %}</strong> {{ facture.numero }}</div>
+    <div class="meta-line"><strong>{% trans "Date :" %}</strong> {{ invoice_datetime }}</div>
+    <div class="meta-line"><strong>{% trans "Client :" %}</strong> {{ client_name|default:_('Client non renseigné') }}</div>
 
     <div class="separator">&nbsp;</div>
 
     <table>
         <thead>
             <tr>
-                <th>Article / service</th>
-                <th class="qty-col">Qté</th>
-                <th class="price-col">PU</th>
-                <th class="total-col">Total</th>
+                <th>{% trans "Article / service" %}</th>
+                <th class="qty-col">{% trans "Qté" %}</th>
+                <th class="price-col">{% trans "PU" %}</th>
+                <th class="total-col">{% trans "Total" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -204,12 +206,12 @@
 
     <table class="summary-table">
         <tr>
-            <td class="summary-label">Sous-total</td>
+            <td class="summary-label">{% trans "Sous-total" %}</td>
             <td class="summary-value">{{ summary.total_ht }}</td>
         </tr>
         {% if summary.has_reduction %}
         <tr>
-            <td class="summary-label">Remise / reduction</td>
+            <td class="summary-label">{% trans "Remise / réduction" %}</td>
             <td class="summary-value">- {{ summary.total_reduction }}</td>
         </tr>
         {% endif %}
@@ -220,19 +222,19 @@
         </tr>
         {% endif %}
         <tr class="grand-total">
-            <td>Total a payer</td>
+            <td>{% trans "Total à payer" %}</td>
             <td class="summary-value">{{ summary.total_net }}</td>
         </tr>
         <tr>
-            <td class="summary-label">Montant paye</td>
+            <td class="summary-label">{% trans "Montant payé" %}</td>
             <td class="summary-value">{{ summary.total_paye }}</td>
         </tr>
         <tr>
-            <td class="summary-label">Reste a payer</td>
+            <td class="summary-label">{% trans "Reste à payer" %}</td>
             <td class="summary-value">{{ summary.reste_a_payer }}</td>
         </tr>
         <tr>
-            <td class="summary-label">Mode paiement</td>
+            <td class="summary-label">{% trans "Mode paiement" %}</td>
             <td class="summary-value">{{ latest_payment_mode }}</td>
         </tr>
     </table>
@@ -257,7 +259,7 @@
     <div class="ticket-footer">
         <div class="footer-line">{{ pos_ticket.footer_message }}</div>
         {% if print_settings.pos_show_generated_by %}
-        <div class="footer-line">Genere par JOATHAM Manager</div>
+        <div class="footer-line">{% trans "Généré par JOATHAM Manager" %}</div>
         {% endif %}
     </div>
 </div>

@@ -1,6 +1,8 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
 
-{% block pdf_title %}Rapport caisse - {{ entreprise.nom }}{% endblock %}
+
+{% block pdf_title %}{% trans "Rapport caisse -" %} {{ entreprise.nom }}{% endblock %}
 
 {% block pdf_styles %}
 .report-shell {
@@ -69,8 +71,8 @@
                     <p class="pdf-company-name">{{ entreprise.nom }}</p>
                 </td>
                 <td class="pdf-meta-block">
-                    <p class="pdf-meta-title">Rapport caisse</p>
-                    <p class="pdf-meta-line">Edition du {{ date_generation }}</p>
+                    <p class="pdf-meta-title">{% trans "Rapport caisse" %}</p>
+                    <p class="pdf-meta-line">{% trans "Édition du" %} {{ date_generation }}</p>
                 </td>
             </tr>
         </table>
@@ -78,40 +80,40 @@
 
     <div class="separator"></div>
 
-    <h1 class="document-title">Rapport caisse</h1>
+    <h1 class="document-title">{% trans "Rapport caisse" %}</h1>
     <div class="doc-meta">
         {{ period_label }}
-        {% if selected_caisse %}<br>Caisse : {{ selected_caisse.nom }} ({{ selected_caisse.code }}){% endif %}
+        {% if selected_caisse %}<br>{% trans "Caisse :" %} {{ selected_caisse.nom }} ({{ selected_caisse.code }}){% endif %}
     </div>
 
     <div class="summary-band">
         <table class="summary-grid">
             <tr>
-                <td style="width:25%;">Total entrees<span class="summary-value">{{ report.total_entrees }}</span></td>
-                <td style="width:25%;">Total sorties<span class="summary-value">{{ report.total_sorties }}</span></td>
-                <td style="width:25%;">Depenses caisse<span class="summary-value">{{ report.total_depenses_caisse }}</span></td>
-                <td style="width:25%;">Paiements facture<span class="summary-value">{{ report.total_paiements_factures }}</span></td>
+                <td style="width:25%;">{% trans "Total entrées" %}<span class="summary-value">{{ report.total_entrees }}</span></td>
+                <td style="width:25%;">{% trans "Total sorties" %}<span class="summary-value">{{ report.total_sorties }}</span></td>
+                <td style="width:25%;">{% trans "Dépenses caisse" %}<span class="summary-value">{{ report.total_depenses_caisse }}</span></td>
+                <td style="width:25%;">{% trans "Paiements facture" %}<span class="summary-value">{{ report.total_paiements_factures }}</span></td>
             </tr>
             <tr>
-                <td>Solde net<span class="summary-value">{{ report.solde_net }}</span></td>
-                <td>Nombre de mouvements<span class="summary-value">{{ report.nombre_mouvements }}</span></td>
-                <td>Sessions O/F/V<span class="summary-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></td>
-                <td>Ecarts +/-<span class="summary-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></td>
+                <td>{% trans "Solde net" %}<span class="summary-value">{{ report.solde_net }}</span></td>
+                <td>{% trans "Nombre de mouvements" %}<span class="summary-value">{{ report.nombre_mouvements }}</span></td>
+                <td>{% trans "Sessions O/F/V" %}<span class="summary-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></td>
+                <td>{% trans "Écarts +/-" %}<span class="summary-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></td>
             </tr>
         </table>
     </div>
 
-    <p class="section-title">Synthese par caisse</p>
+    <p class="section-title">{% trans "Synthèse par caisse" %}</p>
     <table>
         <thead>
             <tr>
-                <th>Caisse</th>
-                <th class="text-center">Mouvements</th>
-                <th class="text-right">Entrees</th>
-                <th class="text-right">Sorties</th>
-                <th class="text-right">Depenses</th>
-                <th class="text-right">Paiements</th>
-                <th class="text-right">Net</th>
+                <th>{% trans "Caisse" %}</th>
+                <th class="text-center">{% trans "Mouvements" %}</th>
+                <th class="text-right">{% trans "Entrées" %}</th>
+                <th class="text-right">{% trans "Sorties" %}</th>
+                <th class="text-right">{% trans "Dépenses" %}</th>
+                <th class="text-right">{% trans "Paiements" %}</th>
+                <th class="text-right">{% trans "Net" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -126,18 +128,18 @@
                 <td class="text-right">{{ row.solde_net }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="7">Aucune synthese disponible pour cette periode.</td></tr>
+            <tr class="empty-row"><td colspan="7">{% trans "Aucune synthèse disponible pour cette période." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">Synthese par type de mouvement</p>
+    <p class="section-title">{% trans "Synthèse par type de mouvement" %}</p>
     <table>
         <thead>
             <tr>
-                <th>Type</th>
-                <th class="text-center">Nombre</th>
-                <th class="text-right">Total</th>
+                <th>{% trans "Type" %}</th>
+                <th class="text-center">{% trans "Nombre" %}</th>
+                <th class="text-right">{% trans "Total" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -148,18 +150,18 @@
                 <td class="text-right">{{ row.total }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="3">Aucun mouvement sur la periode selectionnee.</td></tr>
+            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement sur la période sélectionnée." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">Synthese par moyen de paiement</p>
+    <p class="section-title">{% trans "Synthèse par moyen de paiement" %}</p>
     <table>
         <thead>
             <tr>
-                <th>Moyen</th>
-                <th class="text-center">Nombre</th>
-                <th class="text-right">Total</th>
+                <th>{% trans "Moyen" %}</th>
+                <th class="text-center">{% trans "Nombre" %}</th>
+                <th class="text-right">{% trans "Total" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -170,27 +172,27 @@
                 <td class="text-right">{{ row.total }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="3">Aucun mouvement par moyen sur la periode selectionnee.</td></tr>
+            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement par moyen sur la période sélectionnée." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">Derniers mouvements filtres</p>
+    <p class="section-title">{% trans "Derniers mouvements filtrés" %}</p>
     <table>
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Caisse</th>
-                <th>Type</th>
-                <th>Libelle</th>
-                <th>Reference</th>
-                <th class="text-right">Montant</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Caisse" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Libellé" %}</th>
+                <th>{% trans "Référence" %}</th>
+                <th class="text-right">{% trans "Montant" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for movement in recent_movements %}
             <tr>
-                <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+                <td>{{ movement.date_mouvement|date:"SHORT_DATETIME_FORMAT" }}</td>
                 <td>{{ movement.caisse.nom }}</td>
                 <td>{{ movement.get_type_mouvement_display }}</td>
                 <td>{{ movement.libelle }}</td>
@@ -198,7 +200,7 @@
                 <td class="text-right">{{ movement.montant }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="6">Aucun mouvement filtre a afficher.</td></tr>
+            <tr class="empty-row"><td colspan="6">{% trans "Aucun mouvement filtre à afficher." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

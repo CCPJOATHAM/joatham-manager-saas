@@ -1,13 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Dashboard Proprietaire" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Dashboard Propriétaire" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Tableau de bord" %}{% endblock %}
 {% block content_card_class %}owner-content-card{% endblock %}
 
 {% block content %}
 <div class="owner-dashboard dashboard-owner-premium">
-    <section class="owner-hero" aria-label="{% trans 'Tableau de bord executif' %}">
+    <section class="owner-hero" aria-label="{% trans 'Tableau de bord exécutif' %}">
         <div class="hero-copy">
             <div class="hero-title-row">
                 <span class="hero-mark" aria-hidden="true">
@@ -63,7 +63,7 @@
                 </span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ payees }} facture{{ payees|pluralize:"s" }} payée{{ payees|pluralize:"s" }}</div>
+            <div class="kpi-note">{% blocktrans count count=payees %}{{ count }} facture payée{% plural %}{{ count }} factures payées{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-due">
@@ -78,7 +78,7 @@
                 </span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ impayees }} facture{{ impayees|pluralize:"s" }} à suivre</div>
+            <div class="kpi-note">{% blocktrans count count=impayees %}{{ count }} facture à suivre{% plural %}{{ count }} factures à suivre{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-clients">
@@ -93,7 +93,7 @@
                 </span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ nombre_apprenants }} apprenant{{ nombre_apprenants|pluralize:"s" }} actif{{ nombre_apprenants|pluralize:"s" }}</div>
+            <div class="kpi-note">{% blocktrans count count=nombre_apprenants %}{{ count }} apprenant actif{% plural %}{{ count }} apprenants actifs{% endblocktrans %}</div>
         </article>
     </section>
 
@@ -203,11 +203,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
                 </span>
                 <div class="timeline-copy">
-                    <strong>{{ log.module|title }} - {{ log.action }}</strong>
-                    <span>{{ log.description }}</span>
+                    <strong>{{ log.display_module }} - {{ log.display_action }}</strong>
+                    <span>{{ log.display_description }}</span>
                     {% if log.utilisateur %}<span>{{ log.utilisateur.username }}</span>{% endif %}
                 </div>
-                <time class="timeline-time">{{ log.date_creation|date:"d/m/Y H:i" }}</time>
+                <time class="timeline-time">{{ log.date_creation|date:"SHORT_DATETIME_FORMAT" }}</time>
             </div>
             {% endfor %}
         </div>
@@ -266,7 +266,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
                 </span>
                 <div class="alert-copy">
-                    <strong>{% trans "Stock faible" %}</strong>
+                    <strong>{% trans window.joathamMessages.lowStock %}</strong>
                     <span>{% trans "Produits dont le stock est positif mais inférieur ou égal au seuil d’alerte." %}</span>
                     <div class="alert-products">
                         {% for product in low_stock_products %}
@@ -285,7 +285,7 @@
                 </span>
                 <div class="alert-copy">
                     <strong>{% trans "Abonnement" %}: {{ subscription.get_statut_display }}</strong>
-                    <span>{% trans "Plan actuel" %}: {{ subscription.plan.nom }} | {% trans "Fin" %}: {{ subscription.date_fin|date:"d/m/Y" }}</span>
+                    <span>{% trans "Plan actuel" %}: {{ subscription.plan.nom }} | {% trans "Fin" %}: {{ subscription.date_fin|date:"SHORT_DATE_FORMAT" }}</span>
                 </div>
                 <span class="mini-badge">{% trans "Info" %}</span>
             </div>

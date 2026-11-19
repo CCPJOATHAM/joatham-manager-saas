@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n audit_labels %}
 
-{% block page_title %}Audit / logs | JOATHAM Manager{% endblock %}
-{% block content_title %}Audit / logs{% endblock %}
-{% block content_subtitle %}Consultation globale des activites importantes de la plateforme.{% endblock %}
+
+{% block page_title %}{% trans "Audit / logs | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Audit / logs" %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultation globale des activités importantes de la plateforme." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -125,56 +127,56 @@
 
 <form method="get" class="audit-filters">
     <div>
-        <label for="id_q">Recherche</label>
-        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Description, module, action, utilisateur">
+        <label for="id_q">{% trans "Recherche" %}</label>
+        <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="{% trans 'Description, module, action, utilisateur' %}">
     </div>
     <div>
-        <label for="id_entreprise">Entreprise</label>
+        <label for="id_entreprise">{% trans "Entreprise" %}</label>
         <select id="id_entreprise" name="entreprise">
-            <option value="">Toutes</option>
+            <option value="">{% trans "Toutes" %}</option>
             {% for entreprise in entreprises %}
             <option value="{{ entreprise.id }}" {% if selected_entreprise == entreprise.id|stringformat:"s" %}selected{% endif %}>{{ entreprise.nom }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
-        <label for="id_utilisateur">Utilisateur</label>
+        <label for="id_utilisateur">{% trans "Utilisateur" %}</label>
         <select id="id_utilisateur" name="utilisateur">
-            <option value="">Tous</option>
+            <option value="">{% trans "Tous" %}</option>
             {% for user in users %}
             <option value="{{ user.id }}" {% if selected_user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
-        <label for="id_module">Module</label>
+        <label for="id_module">{% trans "Module" %}</label>
         <select id="id_module" name="module">
-            <option value="">Tous</option>
+            <option value="">{% trans "Tous" %}</option>
             {% for module in modules %}
-            <option value="{{ module }}" {% if selected_module == module %}selected{% endif %}>{{ module }}</option>
+            <option value="{{ module }}" {% if selected_module == module %}selected{% endif %}>{{ module|audit_module }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
-        <label for="id_action">Action</label>
+        <label for="id_action">{% trans "Action" %}</label>
         <select id="id_action" name="action">
-            <option value="">Toutes</option>
+            <option value="">{% trans "Toutes" %}</option>
             {% for action in actions %}
-            <option value="{{ action }}" {% if selected_action == action %}selected{% endif %}>{{ action }}</option>
+            <option value="{{ action }}" {% if selected_action == action %}selected{% endif %}>{{ action|audit_action }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
-        <label for="id_date_from">Date debut</label>
+        <label for="id_date_from">{% trans "Date début" %}</label>
         <input id="id_date_from" name="date_from" type="date" value="{{ selected_date_from }}">
     </div>
     <div>
-        <label for="id_date_to">Date fin</label>
+        <label for="id_date_to">{% trans "Date fin" %}</label>
         <input id="id_date_to" name="date_to" type="date" value="{{ selected_date_to }}">
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button type="submit" class="btn-small primary">Filtrer</button>
-        <a href="{% url 'super_admin_audit_list' %}" class="btn-small">Reinitialiser</a>
+        <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
+        <a href="{% url 'super_admin_audit_list' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
     </div>
 </form>
 
@@ -182,27 +184,27 @@
     <table class="audit-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Utilisateur</th>
-                <th>Entreprise</th>
-                <th>Module</th>
-                <th>Action</th>
-                <th>Description</th>
-                <th>Objet concerne</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Utilisateur" %}</th>
+                <th>{% trans "Entreprise" %}</th>
+                <th>{% trans "Module" %}</th>
+                <th>{% trans "Action" %}</th>
+                <th>{% trans "Description" %}</th>
+                <th>{% trans "Objet concerne" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for log in logs %}
             <tr>
-                <td>{{ log.date_creation|date:"d/m/Y H:i:s" }}</td>
-                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">Systeme</span>{% endif %}</td>
+                <td>{{ log.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
+                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Système" %}</span>{% endif %}</td>
                 <td>{% if log.entreprise %}{{ log.entreprise.nom }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                <td><span class="badge">{{ log.module }}</span></td>
-                <td>{{ log.action }}</td>
-                <td>{{ log.description }}</td>
+                <td><span class="badge">{{ log.display_module }}</span></td>
+                <td>{{ log.display_action }}</td>
+                <td>{{ log.display_description }}</td>
                 <td>
                     {% if log.objet_type or log.objet_id %}
-                    {{ log.objet_type|default:"Objet" }} #{{ log.objet_id|default:"-" }}
+                    {{ log.objet_type|default:_('Objet') }} #{{ log.objet_id|default:"-" }}
                     {% else %}
                     <span class="muted">-</span>
                     {% endif %}
@@ -210,7 +212,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">Aucun evenement d'audit ne correspond aux filtres.</td>
+                <td colspan="7">{% trans "Aucun événement d'audit ne correspond aux filtres." %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -219,11 +221,11 @@
 
 <div class="pagination">
     {% if page_obj.has_previous %}
-    <a class="btn-small" href="?page={{ page_obj.previous_page_number }}">Precedent</a>
+    <a class="btn-small" href="?page={{ page_obj.previous_page_number }}">{% trans "Précédent" %}</a>
     {% endif %}
-    <span class="muted">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    <span class="muted">{% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
-    <a class="btn-small" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+    <a class="btn-small" href="?page={{ page_obj.next_page_number }}">{% trans "Suivant" %}</a>
     {% endif %}
 </div>
 {% endblock %}

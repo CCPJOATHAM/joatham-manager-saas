@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
 
 {% block page_title %}{{ caisse.nom }}{% endblock %}
 {% block content_title %}{{ caisse.nom }}{% endblock %}
-{% block content_subtitle %}Consultez le statut de cette caisse, son historique de sessions et les derniers mouvements qui lui sont rattaches.{% endblock %}
+{% block content_subtitle %}{% trans "Consultez le statut de cette caisse, son historique de sessions et les derniers mouvements qui lui sont rattachés." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -188,68 +190,68 @@
     <div class="hero-top">
       <div>
         <h2>{{ caisse.nom }}</h2>
-        <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}{% if caisse.description %} · {{ caisse.description }}{% endif %}</p>
+        <p>{% trans "Code" %} {{ caisse.code }} {% trans "· Devise" %} {{ caisse.devise }}{% if caisse.description %} · {{ caisse.description }}{% endif %}</p>
         <div class="meta-row">
           <span class="badge {% if caisse.est_active %}active{% else %}inactive{% endif %}">
-            {% if caisse.est_active %}Caisse active{% else %}Caisse inactive{% endif %}
+            {% if caisse.est_active %}{% trans "Caisse active" %}{% else %}{% trans "Caisse inactive" %}{% endif %}
           </span>
           <span class="badge {% if open_cash_session %}open{% else %}closed{% endif %}">
-            {% if open_cash_session %}Session ouverte{% else %}Aucune session ouverte{% endif %}
+            {% if open_cash_session %}{% trans "Session ouverte" %}{% else %}{% trans "Aucune session ouverte" %}{% endif %}
           </span>
         </div>
       </div>
       <div class="actions">
         {% if open_cash_session %}
-        <a href="{% url 'caisse_session_detail' open_cash_session.id %}" class="btn primary">Voir la session ouverte</a>
+        <a href="{% url 'caisse_session_detail' open_cash_session.id %}" class="btn primary">{% trans "Voir la session ouverte" %}</a>
         {% elif can_open_session %}
-        <a href="{% url 'caisse_open_session' caisse.id %}" class="btn primary">Ouvrir une session</a>
+        <a href="{% url 'caisse_open_session' caisse.id %}" class="btn primary">{% trans "Ouvrir une session" %}</a>
         {% endif %}
-        <a href="{% url 'caisse_list' %}" class="btn">Retour a la liste</a>
+        <a href="{% url 'caisse_list' %}" class="btn">{% trans "Retour à la liste" %}</a>
       </div>
     </div>
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
-      <span class="stat-label">Sessions visibles</span>
+      <span class="stat-label">{% trans "Sessions visibles" %}</span>
       <span class="stat-value">{{ sessions|length }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Derniere ouverture</span>
-      <span class="stat-value">{% if sessions %}{{ sessions.0.date_ouverture|date:"d/m/Y H:i" }}{% else %}-{% endif %}</span>
+      <span class="stat-label">{% trans "Dernière ouverture" %}</span>
+      <span class="stat-value">{% if sessions %}{{ sessions.0.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}{% else %}-{% endif %}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Session en cours</span>
+      <span class="stat-label">{% trans "Session en cours" %}</span>
       <span class="stat-value">{% if open_cash_session %}{{ open_cash_session.solde_theorique }}{% else %}-{% endif %}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Derniers mouvements</span>
+      <span class="stat-label">{% trans "Derniers mouvements" %}</span>
       <span class="stat-value">{{ recent_movements|length }}</span>
     </div>
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Historique des sessions</h3>
-      <p>Retrouvez les ouvertures, fermetures et ecarts de cette caisse.</p>
+      <h3>{% trans "Historique des sessions" %}</h3>
+      <p>{% trans "Retrouvez les ouvertures, fermetures et écarts de cette caisse." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
         <thead>
           <tr>
-            <th>Ouverture</th>
-            <th>Fermeture</th>
-            <th>Statut</th>
-            <th>Solde theorique</th>
-            <th>Ecart</th>
+            <th>{% trans "Ouverture" %}</th>
+            <th>{% trans "Fermeture" %}</th>
+            <th>{% trans "Statut" %}</th>
+            <th>{% trans "Solde théorique" %}</th>
+            <th>{% trans "Écart" %}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {% for session in sessions %}
           <tr>
-            <td>{{ session.date_ouverture|date:"d/m/Y H:i" }}</td>
-            <td>{% if session.date_fermeture %}{{ session.date_fermeture|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+            <td>{{ session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td>{% if session.date_fermeture %}{{ session.date_fermeture|date:"SHORT_DATETIME_FORMAT" }}{% else %}-{% endif %}</td>
             <td>
               <span class="badge {% if session.statut == 'ouverte' %}open{% else %}closed{% endif %}">
                 {{ session.get_statut_display }}
@@ -257,10 +259,10 @@
             </td>
             <td>{{ session.solde_theorique }}</td>
             <td class="{% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</td>
-            <td><a href="{% url 'caisse_session_detail' session.id %}" class="btn">Voir</a></td>
+            <td><a href="{% url 'caisse_session_detail' session.id %}" class="btn">{% trans "Voir" %}</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="empty-state">Aucune session pour cette caisse.</td></tr>
+          <tr><td colspan="6" class="empty-state">{% trans "Aucune session pour cette caisse." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -269,31 +271,31 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Derniers mouvements</h3>
-      <p>Apercu recent des operations rattachees a cette caisse.</p>
+      <h3>{% trans "Derniers mouvements" %}</h3>
+      <p>{% trans "Aperçu récent des opérations rattachées à cette caisse." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Libelle</th>
-            <th>Montant</th>
-            <th>Reference</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Libellé" %}</th>
+            <th>{% trans "Montant" %}</th>
+            <th>{% trans "Référence" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for movement in recent_movements %}
           <tr>
-            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.date_mouvement|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>{{ movement.get_type_mouvement_display }}</td>
             <td>{{ movement.libelle }}</td>
             <td class="{% if movement.type_mouvement == 'entree' or movement.type_mouvement == 'paiement_facture' or movement.type_mouvement == 'ajustement' %}amount-positive{% else %}amount-negative{% endif %}">{{ movement.montant }}</td>
             <td>{{ movement.reference|default:"-" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="empty-state">Aucun mouvement rattache a cette caisse pour le moment.</td></tr>
+          <tr><td colspan="5" class="empty-state">{% trans "Aucun mouvement rattaché à cette caisse pour le moment." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

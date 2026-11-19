@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -97,4 +98,4 @@ class FactureViewSet(viewsets.ReadOnlyModelViewSet):
             )
         except FacturationError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"id": paiement.id, "detail": "Paiement enregistre."}, status=status.HTTP_201_CREATED)
+        return Response({"id": paiement.id, "detail": gettext_lazy('Paiement enregistré.')}, status=status.HTTP_201_CREATED)

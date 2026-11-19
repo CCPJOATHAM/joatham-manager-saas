@@ -1,0 +1,61 @@
+name: Interface FR EN
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  translations-and-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:14.24-bookworm
+        env:
+          POSTGRES_DB: joatham_tests
+          POSTGRES_USER: joatham_tests
+          POSTGRES_PASSWORD: local-test-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U joatham_tests -d joatham_tests"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DJANGO_SETTINGS_MODULE: joatham_pro.settings
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: joatham_tests
+      DJANGO_DB_HOST: 127.0.0.1
+      DJANGO_DB_PORT: "5432"
+      DJANGO_DB_USER: joatham_tests
+      DJANGO_DB_PASSWORD: local-test-password
+      DJANGO_DB_CONN_MAX_AGE: "60"
+      DJANGO_EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14.10"
+          cache: pip
+      - name: Install gettext and PDF system libraries
+        run: sudo apt-get update && sudo apt-get install -y gettext libcairo2 tzdata
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Compile and check both translation domains
+        run: |
+          python manage.py compilemessages -l fr -l en
+          python manage.py check_translations --extract
+          git diff --exit-code -- locale
+      - name: Test French, English and existing journeys
+        run: |
+          python - <<'PY'
+          import django
+          from django.core.management import call_command
+          from django.test import override_settings
+          django.setup()
+          with override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"]):
+              call_command("test", interactive=False)
+          PY

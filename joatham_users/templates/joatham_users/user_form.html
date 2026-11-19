@@ -1,12 +1,12 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ page_title }} | JOATHAM Manager{% endblock %}
+{% block page_title %}{{ page_title }} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}{% trans "Creation et mise a jour des comptes gestionnaire et comptable de l'entreprise, avec un rôle d'accès explicite pour JOATHAM Manager." %}{% endblock %}
+{% block content_subtitle %}{% trans "Création et mise à jour des comptes gestionnaire et comptable de l'entreprise, avec un rôle d'accès explicite pour JOATHAM Manager." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour a la liste" %}</a>
+<a href="{% url 'user_list' %}" class="btn-link">{% trans "Retour à la liste" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -224,8 +224,8 @@
 
 <div class="page-grid">
     <div class="panel">
-        <h3>{% trans "Repere rapide" %}</h3>
-        <p class="panel-subtitle">{% trans "Le formulaire reste volontairement simple pour vous permettre de creer et de mettre a jour les comptes de votre equipe en quelques secondes." %}</p>
+        <h3>{% trans "Repère rapide" %}</h3>
+        <p class="panel-subtitle">{% trans "Le formulaire reste volontairement simple pour vous permettre de créer et de mettre à jour les comptes de votre équipe en quelques secondes." %}</p>
         <div class="guidance-list">
             <div class="guidance-item">
                 <strong>{% trans "Nom" %}</strong>
@@ -237,7 +237,7 @@
             </div>
             <div class="guidance-item">
                 <strong>{% trans "Mot de passe" %}</strong>
-                <span>{% if form_mode == "create" %}{% trans "Un mot de passe est requis a la creation pour rendre le compte immediatement utilisable." %}{% else %}{% trans "Laissez le champ vide si vous souhaitez conserver le mot de passe actuel de l'utilisateur." %}{% endif %}</span>
+                <span>{% if form_mode == "create" %}{% trans "Un mot de passe est requis à la création pour rendre le compte immédiatement utilisable." %}{% else %}{% trans "Laissez le champ vide si vous souhaitez conserver le mot de passe actuel de l'utilisateur." %}{% endif %}</span>
             </div>
         </div>
     </div>

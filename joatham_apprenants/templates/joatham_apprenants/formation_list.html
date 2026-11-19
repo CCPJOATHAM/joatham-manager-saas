@@ -5,25 +5,25 @@
 {% block apprenants_subtitle %}{% trans "Catalogue des formations de l'entreprise." %}{% endblock %}
 {% block apprenants_content %}
     <div class="actions">
-        <a href="{% url 'apprenant_list' %}">Retour aux apprenants</a>
+        <a href="{% url 'apprenant_list' %}">{% trans "Retour aux apprenants" %}</a>
         {% if can_manage_apprenants_ui %}
-        <a href="{% url 'formation_create' %}" style="margin-left:8px;">Nouvelle formation</a>
+        <a href="{% url 'formation_create' %}" style="margin-left:8px;">{% trans "Nouvelle formation" %}</a>
         {% endif %}
-        <a href="{% url 'formations_pdf' %}" style="margin-left:8px;">Export PDF</a>
-        <a href="{% url 'formations_excel' %}" style="margin-left:8px;">Export Excel</a>
+        <a href="{% url 'formations_pdf' %}" style="margin-left:8px;">{% trans "Export PDF" %}</a>
+        <a href="{% url 'formations_excel' %}" style="margin-left:8px;">{% trans "Export Excel" %}</a>
     </div>
-    <h1>Formations</h1>
-    <p>Entreprise: {{ entreprise.nom }}</p>
+    <h1>{% trans "Formations" %}</h1>
+    <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
 
     <table>
         <thead>
             <tr>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Prix</th>
-                <th>Duree</th>
-                <th>Actif</th>
-                <th>Actions</th>
+                <th>{% trans "Nom" %}</th>
+                <th>{% trans "Description" %}</th>
+                <th>{% trans "Prix" %}</th>
+                <th>{% trans "Durée" %}</th>
+                <th>{% trans "Actif" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -33,27 +33,27 @@
                 <td>{{ formation.description|default:"-" }}</td>
                 <td>{{ formation.prix }}</td>
                 <td>{{ formation.duree|default:"-" }}</td>
-                <td>{% if formation.actif %}Oui{% else %}Non{% endif %}</td>
+                <td>{% if formation.actif %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
                 <td>
                     {% if can_manage_apprenants_ui %}
-                    <a href="{% url 'formation_update' formation.id %}">Modifier</a>
+                    <a href="{% url 'formation_update' formation.id %}">{% trans "Modifier" %}</a>
                     <form method="post" action="{% url 'formation_toggle_status' formation.id %}" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" style="margin-left:6px;">
-                            {% if formation.actif %}Desactiver{% else %}Activer{% endif %}
+                            {% if formation.actif %}{% trans "Désactiver" %}{% else %}{% trans "Activer" %}{% endif %}
                         </button>
                     </form>
                     {% else %}
-                    <span style="color:#64748b;">Lecture seule</span>
+                    <span style="color:#64748b;">{% trans "Lecture seule" %}</span>
                     {% endif %}
                 </td>
             </tr>
         {% empty %}
             <tr>
                 <td colspan="6">
-                    Aucune formation disponible pour le moment.
+                    {% trans "Aucune formation disponible pour le moment." %}
                     {% if can_manage_apprenants_ui %}
-                    <a href="{% url 'formation_create' %}" style="margin-left:8px;">Creer une formation</a>
+                    <a href="{% url 'formation_create' %}" style="margin-left:8px;">{% trans "Créer une formation" %}</a>
                     {% endif %}
                 </td>
             </tr>

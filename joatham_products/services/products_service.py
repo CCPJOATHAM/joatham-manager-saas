@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -29,9 +30,9 @@ def _normalize_non_negative_decimal(value, field_label):
     try:
         normalized = Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ProductOperationError(f"{field_label} est invalide.") from exc
+        raise ProductOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise ProductOperationError(f"{field_label} ne peut pas etre negatif.")
+        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -41,9 +42,9 @@ def _normalize_non_negative_integer(value, field_label):
     try:
         normalized = int(value)
     except (TypeError, ValueError) as exc:
-        raise ProductOperationError(f"{field_label} est invalide.") from exc
+        raise ProductOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise ProductOperationError(f"{field_label} ne peut pas etre negatif.")
+        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -54,7 +55,7 @@ def _ensure_reference_available(entreprise, reference, *, product_id=None):
     if product_id is not None:
         queryset = queryset.exclude(id=product_id)
     if queryset.exists():
-        raise ProductOperationError("Une autre fiche produit utilise deja cette reference.")
+        raise ProductOperationError(gettext_lazy('Une autre fiche produit utilise déjà cette référence.'))
 
 
 def list_products_for_entreprise(entreprise, *, stock_filter=None):

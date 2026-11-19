@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from urllib.parse import urlencode
 
 from django.core.exceptions import PermissionDenied
@@ -33,13 +34,13 @@ def _get_available_entreprises(user):
 def _get_selected_entreprise(request):
     entreprises = _get_available_entreprises(request.user)
     if not entreprises.exists():
-        raise PermissionDenied("Aucune entreprise n'est associee a cet utilisateur.")
+        raise PermissionDenied(gettext_lazy("Aucune entreprise n'est associée à cet utilisateur."))
 
     requested_id = request.GET.get("entreprise")
     if requested_id:
         entreprise = entreprises.filter(pk=requested_id).first()
         if entreprise is None:
-            raise Http404("Entreprise introuvable.")
+            raise Http404(gettext_lazy("Entreprise introuvable."))
         return entreprise, entreprises
 
     return entreprises.first(), entreprises
@@ -137,7 +138,7 @@ def comptabilite_dashboard(request):
 @module_access_required("accounting_exports")
 def export_report(request, report_slug, fmt):
     if report_slug not in REPORT_TEMPLATES:
-        raise Http404("Rapport inconnu.")
+        raise Http404(gettext_lazy("Rapport inconnu."))
 
     entreprise, entreprises = _get_selected_entreprise(request)
     filters = _get_filters(request)
@@ -175,4 +176,4 @@ def export_report(request, report_slug, fmt):
         response["Content-Disposition"] = f'attachment; filename="{filename_root}.xls"'
         return response
 
-    raise Http404("Format d'export inconnu.")
+    raise Http404(gettext_lazy("Format d'export inconnu."))

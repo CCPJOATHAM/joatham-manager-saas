@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
@@ -24,7 +25,7 @@ def _split_full_name(full_name):
 def register_entreprise_owner(*, company_name, raison_sociale, owner_full_name, email, telephone, pays, devise, password):
     normalized_email = (email or "").strip().lower()
     if User.objects.filter(email__iexact=normalized_email).exists() or User.objects.filter(username__iexact=normalized_email).exists():
-        raise ValueError("Un compte existe déjà avec cet e-mail. Veuillez vous connecter.")
+        raise ValueError(gettext_lazy("Un compte existe déjà avec cet e-mail. Veuillez vous connecter."))
 
     entreprise = Entreprise.objects.create(
         nom=(company_name or "").strip(),

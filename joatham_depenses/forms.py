@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -19,7 +20,7 @@ class DepenseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["description"].widget.attrs.update(
             {
-                "placeholder": _("Description de la depense"),
+                "placeholder": _('Description de la dépense'),
             }
         )
         self.fields["montant"].widget.attrs.update(
@@ -31,7 +32,7 @@ class DepenseForm(forms.ModelForm):
         )
         self.fields["caisse"].widget.attrs.update(
             {
-                "placeholder": _("Selectionnez une caisse"),
+                "placeholder": _('Sélectionnez une caisse'),
             }
         )
         if entreprise is not None:
@@ -40,3 +41,5 @@ class DepenseForm(forms.ModelForm):
     class Meta:
         model = Depense
         fields = ["description", "montant", "caisse"]
+
+        labels = {'description': gettext_lazy('Description'), 'montant': gettext_lazy('Montant')}

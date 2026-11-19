@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from calendar import monthrange
 from datetime import timedelta
 
@@ -15,7 +16,7 @@ from core.services.subscription import (
 from joatham_users.models import Entreprise
 
 
-PREMIUM_REQUIRED_MESSAGE = "Cette fonctionnalite n'est pas incluse dans votre plan actuel."
+PREMIUM_REQUIRED_MESSAGE = gettext_lazy("Cette fonctionnalité n'est pas incluse dans votre plan actuel.")
 FREE_PLAN_PRODUCT_LIMIT = 30
 FREE_PLAN_EXPENSE_MONTHLY_LIMIT = 20
 FREE_PLAN_CASHBOX_LIMIT = 0
@@ -140,7 +141,7 @@ def assert_invoice_quota_available(entreprise, *, as_of=None):
     invoice_count = get_monthly_invoice_count(entreprise, as_of=as_of)
     if invoice_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} factures par mois."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s factures par mois.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -167,7 +168,7 @@ def assert_user_quota_available(entreprise):
 
     if user_count + pending_invitation_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} utilisateur(s)."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s utilisateur(s).") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -180,7 +181,7 @@ def assert_product_quota_available(entreprise):
     product_count = get_product_count(entreprise)
     if product_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} produits."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s produits.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -193,7 +194,7 @@ def assert_expense_quota_available(entreprise, *, as_of=None):
     expense_count = get_monthly_expense_count(entreprise, as_of=as_of)
     if expense_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} depenses par mois."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s dépenses par mois.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -206,7 +207,7 @@ def assert_cashbox_quota_available(entreprise):
     cashbox_count = get_active_cashbox_count(entreprise)
     if cashbox_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} caisse(s) active(s)."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s caisse(s) active(s).") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -219,7 +220,7 @@ def assert_proforma_quota_available(entreprise, *, as_of=None):
     proforma_count = get_monthly_proforma_count(entreprise, as_of=as_of)
     if proforma_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} proformas par mois."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s proformas par mois.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -232,7 +233,7 @@ def assert_apprenant_quota_available(entreprise):
     apprenant_count = get_apprenant_count(entreprise)
     if apprenant_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} apprenant(s)."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s apprenant(s).") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )
 
 
@@ -245,5 +246,5 @@ def assert_client_quota_available(entreprise):
     client_count = get_client_count(entreprise)
     if client_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {_format_quota_limit(limit)} clients."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s clients.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': _format_quota_limit(limit)})
         )

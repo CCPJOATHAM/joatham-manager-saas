@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django.utils import timezone
@@ -44,15 +45,15 @@ EXIT_STOCK_TYPES = {
 }
 
 PAYMENT_METHODS = [
-    {"code": "cash", "label": "Cash"},
-    {"code": "mpesa", "label": "M-Pesa"},
-    {"code": "orange_money", "label": "Orange Money"},
-    {"code": "airtel_money", "label": "Airtel Money"},
-    {"code": "afrimoney", "label": "Afrimoney"},
-    {"code": "mobile_money", "label": "Mobile Money"},
-    {"code": "bank", "label": "Banque"},
-    {"code": "card", "label": "Carte"},
-    {"code": "other", "label": "Autre"},
+    {"code": "cash", "label": gettext_lazy("Cash")},
+    {"code": "mpesa", "label": gettext_lazy("M-Pesa")},
+    {"code": "orange_money", "label": gettext_lazy("Orange Money")},
+    {"code": "airtel_money", "label": gettext_lazy("Airtel Money")},
+    {"code": "afrimoney", "label": gettext_lazy("Afrimoney")},
+    {"code": "mobile_money", "label": gettext_lazy("Mobile Money")},
+    {"code": "bank", "label": gettext_lazy("Banque")},
+    {"code": "card", "label": gettext_lazy("Carte")},
+    {"code": "other", "label": gettext_lazy("Autre")},
 ]
 PAYMENT_METHOD_VARIANTS = {
     "cash": {"cash", "especes"},

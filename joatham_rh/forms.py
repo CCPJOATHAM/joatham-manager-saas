@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +27,7 @@ class PosteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["nom"].widget.attrs.update({"placeholder": _("Exemple : Responsable stock")})
-        self.fields["description"].widget.attrs.update({"placeholder": _("Fonction reelle et responsabilites principales")})
+        self.fields["description"].widget.attrs.update({"placeholder": _('Fonction réelle et responsabilités principales')})
 
 
 class EmployeForm(forms.ModelForm):
@@ -51,18 +52,18 @@ class EmployeForm(forms.ModelForm):
         labels = {
             "matricule": _("Matricule"),
             "nom": _("Nom"),
-            "prenom": _("Prenom"),
+            "prenom": _('Prénom'),
             "sexe": _("Sexe"),
-            "telephone": _("Telephone"),
+            "telephone": _('Téléphone'),
             "email": _("Email"),
             "adresse": _("Adresse"),
-            "user": _("Compte utilisateur lie"),
+            "user": _('Compte utilisateur lié'),
             "poste": _("Poste RH"),
             "type_contrat": _("Type de contrat"),
             "date_embauche": _("Date d'embauche"),
             "salaire_base": _("Salaire de base"),
             "statut": _("Statut"),
-            "actif": _("Employe actif"),
+            "actif": _('Employé actif'),
         }
         widgets = {
             "date_embauche": forms.DateInput(attrs={"type": "date"}),
@@ -84,10 +85,9 @@ class EmployeForm(forms.ModelForm):
             )
             self.fields["user"].required = False
             self.fields["user"].help_text = _(
-                "Optionnel. Le compte utilisateur permet a cet employe de se connecter a JOATHAM Manager. "
-                "Le role d'acces reste gere dans le module Utilisateurs."
+                "Optionnel. Le compte utilisateur permet à cet employé de se connecter à JOATHAM Manager. Le rôle d'accès reste géré dans le module Utilisateurs."
             )
-            self.fields["user"].empty_label = _("Aucun compte utilisateur lie")
+            self.fields["user"].empty_label = _('Aucun compte utilisateur lié')
         else:
             self.fields.pop("user")
         self.fields["poste"].queryset = Poste.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "id")
@@ -95,8 +95,8 @@ class EmployeForm(forms.ModelForm):
         self.fields["salaire_base"].min_value = 0
         self.fields["matricule"].widget.attrs.update({"placeholder": _("Exemple : RH-001")})
         self.fields["nom"].widget.attrs.update({"placeholder": _("Nom de famille")})
-        self.fields["prenom"].widget.attrs.update({"placeholder": _("Prenom")})
-        self.fields["telephone"].widget.attrs.update({"placeholder": _("Telephone")})
+        self.fields["prenom"].widget.attrs.update({"placeholder": _('Prénom')})
+        self.fields["telephone"].widget.attrs.update({"placeholder": _('Téléphone')})
         self.fields["email"].widget.attrs.update({"placeholder": _("email@exemple.com")})
         self.fields["salaire_base"].widget.attrs.update({"placeholder": "0.00", "min": "0", "step": "0.01"})
 
@@ -106,11 +106,11 @@ class PresenceForm(forms.ModelForm):
         model = Presence
         fields = ["employe", "date", "statut", "heure_arrivee", "heure_depart", "note"]
         labels = {
-            "employe": _("Employe"),
+            "employe": _('Employé'),
             "date": _("Date"),
             "statut": _("Statut"),
-            "heure_arrivee": _("Heure d'arrivee"),
-            "heure_depart": _("Heure de depart"),
+            "heure_arrivee": _("Heure d'arrivée"),
+            "heure_depart": _('Heure de départ'),
             "note": _("Note"),
         }
         widgets = {
@@ -131,9 +131,9 @@ class DemandeCongeForm(forms.ModelForm):
         model = DemandeConge
         fields = ["employe", "type_conge", "date_debut", "date_fin", "motif"]
         labels = {
-            "employe": _("Employe"),
-            "type_conge": _("Type de conge"),
-            "date_debut": _("Date debut"),
+            "employe": _('Employé'),
+            "type_conge": _('Type de congé'),
+            "date_debut": _('Date début'),
             "date_fin": _("Date fin"),
             "motif": _("Motif"),
         }
@@ -146,7 +146,7 @@ class DemandeCongeForm(forms.ModelForm):
     def __init__(self, *args, entreprise=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
-        self.fields["motif"].widget.attrs.update({"placeholder": _("Motif ou precision courte")})
+        self.fields["motif"].widget.attrs.update({"placeholder": _('Motif ou précision courte')})
 
 
 class DocumentRHForm(forms.ModelForm):
@@ -154,7 +154,7 @@ class DocumentRHForm(forms.ModelForm):
         model = DocumentRH
         fields = ["employe", "type_document", "titre", "description", "date_document"]
         labels = {
-            "employe": _("Employe"),
+            "employe": _('Employé'),
             "type_document": _("Type de document"),
             "titre": _("Titre"),
             "description": _("Description"),
@@ -169,7 +169,7 @@ class DocumentRHForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["employe"].queryset = Employe.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "prenom", "id")
         self.fields["titre"].widget.attrs.update({"placeholder": _("Exemple : Contrat de travail")})
-        self.fields["description"].widget.attrs.update({"placeholder": _("Reference ou note interne")})
+        self.fields["description"].widget.attrs.update({"placeholder": _('Référence ou note interne')})
 
 
 class AvanceSalaireForm(forms.ModelForm):
@@ -233,6 +233,8 @@ class PaiementSalaireForm(forms.ModelForm):
             "date_paiement": forms.DateInput(attrs={"type": "date"}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+
+        labels.update({'caisse': gettext_lazy('Caisse')})
 
     def __init__(self, *args, entreprise=None, **kwargs):
         super().__init__(*args, **kwargs)

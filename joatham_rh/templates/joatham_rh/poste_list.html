@@ -1,13 +1,13 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Structurez les fonctions et postes RH utilises dans les dossiers employes." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Structurez les fonctions et postes RH utilisés dans les dossiers employés." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
         <h2>{% trans "Postes RH" %}</h2>
-        <p>{% trans "Le poste RH décrit la fonction réelle de l'employe dans l'entreprise." %}</p>
+        <p>{% trans "Le poste RH décrit la fonction réelle de l'employé dans l'entreprise." %}</p>
     </div>
     <div class="rh-actions">
         <span class="rh-count">{{ poste_count }} {% trans "poste(s) RH" %}</span>
@@ -25,7 +25,7 @@
                 <tr>
                     <th>{% trans "Nom" %}</th>
                     <th>{% trans "Description" %}</th>
-                    <th>{% trans "Etat" %}</th>
+                    <th>{% trans "État" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,10 +43,10 @@
 {% else %}
 <div class="rh-table-shell">
     <div class="rh-empty">
-        <h3>{% trans "Aucun poste RH cree" %}</h3>
-        <p>{% trans "Creez les fonctions principales de votre activite avant d'ajouter les employes." %}</p>
+        <h3>{% trans "Aucun poste RH créé" %}</h3>
+        <p>{% trans "Créez les fonctions principales de votre activité avant d'ajouter les employés." %}</p>
         {% if can_manage_rh_ui %}
-        <a href="{% url 'rh_poste_create' %}" class="btn-link primary">{% trans "Creer un poste RH" %}</a>
+        <a href="{% url 'rh_poste_create' %}" class="btn-link primary">{% trans "Créer un poste RH" %}</a>
         {% endif %}
     </div>
 </div>

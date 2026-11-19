@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Ajouter un mouvement{% endblock %}
-{% block content_title %}Ajouter un mouvement{% endblock %}
-{% block content_subtitle %}Enregistrez une entree, une sortie, une depense ou un ajustement sur une session de caisse ouverte.{% endblock %}
+
+{% block page_title %}{% trans "Ajouter un mouvement" %}{% endblock %}
+{% block content_title %}{% trans "Ajouter un mouvement" %}{% endblock %}
+{% block content_subtitle %}{% trans "Enregistrez une entrée, une sortie, une dépense ou un ajustement sur une session de caisse ouverte." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -136,19 +138,19 @@
 
 <section class="movement-layout">
   <div class="context-card">
-    <h2>Session de {{ session.caisse.nom }}</h2>
-    <p>Ajoutez un mouvement sur la session ouverte pour garder le solde theorique a jour et tracer chaque operation de caisse.</p>
+    <h2>{% trans "Session de" %} {{ session.caisse.nom }}</h2>
+    <p>{% trans "Ajoutez un mouvement sur la session ouverte pour garder le solde théorique à jour et tracer chaque opération de caisse." %}</p>
     <div class="context-meta">
       <div class="meta-box">
-        <span>Ouverture</span>
-        <strong>{{ session.date_ouverture|date:"d/m/Y H:i" }}</strong>
+        <span>{% trans "Ouverture" %}</span>
+        <strong>{{ session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</strong>
       </div>
       <div class="meta-box">
-        <span>Solde theorique</span>
+        <span>{% trans "Solde théorique" %}</span>
         <strong>{{ session.solde_theorique }}</strong>
       </div>
       <div class="meta-box">
-        <span>Statut</span>
+        <span>{% trans "Statut" %}</span>
         <strong>{{ session.get_statut_display }}</strong>
       </div>
     </div>
@@ -159,39 +161,39 @@
       {% csrf_token %}
       <div class="form-grid">
         <div class="field">
-          <label for="{{ form.type_mouvement.id_for_label }}">Type de mouvement</label>
+          <label for="{{ form.type_mouvement.id_for_label }}">{% trans "Type de mouvement" %}</label>
           {{ form.type_mouvement }}
-          <div class="helper">Choisissez la nature du flux a enregistrer sur la session.</div>
+          <div class="helper">{% trans "Choisissez la nature du flux à enregistrer sur la session." %}</div>
           {{ form.type_mouvement.errors }}
         </div>
         <div class="field">
-          <label for="{{ form.montant.id_for_label }}">Montant</label>
+          <label for="{{ form.montant.id_for_label }}">{% trans "Montant" %}</label>
           {{ form.montant }}
-          <div class="helper">Le montant doit etre strictement positif.</div>
+          <div class="helper">{% trans "Le montant doit être strictement positif." %}</div>
           {{ form.montant.errors }}
         </div>
         <div class="field full">
-          <label for="{{ form.libelle.id_for_label }}">Libelle</label>
+          <label for="{{ form.libelle.id_for_label }}">{% trans "Libellé" %}</label>
           {{ form.libelle }}
-          <div class="helper">Utilisez un libelle clair pour faciliter le suivi et les controles.</div>
+          <div class="helper">{% trans "Utilisez un libellé clair pour faciliter le suivi et les contrôles." %}</div>
           {{ form.libelle.errors }}
         </div>
         <div class="field">
-          <label for="{{ form.reference.id_for_label }}">Reference</label>
+          <label for="{{ form.reference.id_for_label }}">{% trans "Référence" %}</label>
           {{ form.reference }}
-          <div class="helper">Numero, piece justificative ou identifiant interne si disponible.</div>
+          <div class="helper">{% trans "Numéro, pièce justificative ou identifiant interne si disponible." %}</div>
           {{ form.reference.errors }}
         </div>
         <div class="field full">
-          <label for="{{ form.commentaire.id_for_label }}">Commentaire</label>
+          <label for="{{ form.commentaire.id_for_label }}">{% trans "Commentaire" %}</label>
           {{ form.commentaire }}
-          <div class="helper">Ajoutez un contexte interne utile pour la validation ou l'audit.</div>
+          <div class="helper">{% trans "Ajoutez un contexte interne utile pour la validation ou l'audit." %}</div>
           {{ form.commentaire.errors }}
         </div>
       </div>
       <div class="actions">
-        <button type="submit" class="btn primary">Enregistrer le mouvement</button>
-        <a href="{% url 'caisse_session_detail' session.id %}" class="btn">Retour a la session</a>
+        <button type="submit" class="btn primary">{% trans "Enregistrer le mouvement" %}</button>
+        <a href="{% url 'caisse_session_detail' session.id %}" class="btn">{% trans "Retour à la session" %}</a>
       </div>
     </form>
   </div>

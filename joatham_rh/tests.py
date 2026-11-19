@@ -151,7 +151,7 @@ class RhFoundationTests(TestCase):
         self.assertContains(response, "CYBER CENTRE ET PAPETERIE JOATHAM")
         self.assertContains(response, "RCCM : RCCM-123")
         self.assertContains(response, "ID Nat : IDN-456")
-        self.assertContains(response, "Numero impot : NIF-789")
+        self.assertContains(response, "Numéro impôt : NIF-789")
         self.assertContains(response, "Avenue WOLA KITOKO")
         self.assertContains(response, "Matadi")
         self.assertContains(response, "RDC")
@@ -304,7 +304,7 @@ class RhFoundationTests(TestCase):
         Employe.objects.filter(matricule="RH-L004").update(user=user)
         poste = self._create_poste(nom="Controle")
 
-        with self.assertRaisesMessage(RhOperationError, "Ce compte utilisateur est deja lie a un autre employe RH."):
+        with self.assertRaisesMessage(RhOperationError, 'Ce compte utilisateur est déjà lié à un autre employé RH.'):
             create_employe(
                 entreprise=self.entreprise_a,
                 matricule="RH-L005",
@@ -434,7 +434,7 @@ class RhFoundationTests(TestCase):
     def test_create_employe_rejects_negative_salary(self):
         poste = self._create_poste()
 
-        with self.assertRaisesMessage(RhOperationError, "Le salaire de base ne peut pas etre negatif."):
+        with self.assertRaisesMessage(RhOperationError, 'Le salaire de base ne peut pas être négatif.'):
             create_employe(
                 entreprise=self.entreprise_a,
                 matricule="RH-003",
@@ -449,7 +449,7 @@ class RhFoundationTests(TestCase):
     def test_duplicate_matricule_same_entreprise_is_rejected(self):
         self._create_employe(matricule="RH-004")
 
-        with self.assertRaisesMessage(RhOperationError, "Un employe avec ce matricule existe deja"):
+        with self.assertRaisesMessage(RhOperationError, 'Un employé avec ce matricule existe déjà'):
             self._create_employe(matricule="RH-004", nom="Autre")
 
     def test_same_matricule_allowed_in_two_enterprises(self):
@@ -555,10 +555,10 @@ class RhFoundationTests(TestCase):
         manager_response = self.client.get(reverse("rh_employe_list"))
 
         self.assertEqual(owner_response.status_code, 200)
-        self.assertContains(owner_response, "Employes")
+        self.assertContains(owner_response, 'Employés')
         self.assertContains(owner_response, "Poste RH")
         self.assertEqual(manager_response.status_code, 200)
-        self.assertContains(manager_response, "Employes")
+        self.assertContains(manager_response, 'Employés')
         self.assertContains(manager_response, "Poste RH")
 
     def test_owner_form_can_link_user_account(self):
@@ -567,7 +567,7 @@ class RhFoundationTests(TestCase):
 
         self.client.force_login(self.owner_a)
         form_response = self.client.get(reverse("rh_employe_create"))
-        self.assertContains(form_response, "Compte utilisateur lie")
+        self.assertContains(form_response, 'Compte utilisateur lié')
 
         response = self.client.post(
             reverse("rh_employe_create"),
@@ -720,7 +720,7 @@ class RhFoundationTests(TestCase):
         self.client.force_login(self.owner_a)
         response = self.client.get(reverse("rh_employe_detail", args=[employe.id]))
 
-        self.assertContains(response, "Compte utilisateur lie")
+        self.assertContains(response, 'Compte utilisateur lié')
         self.assertContains(response, user.username)
         self.assertContains(response, "Comptable")
 
@@ -730,8 +730,8 @@ class RhFoundationTests(TestCase):
         self.client.force_login(self.owner_a)
         response = self.client.get(reverse("rh_employe_detail", args=[employe.id]))
 
-        self.assertContains(response, "Compte utilisateur lie")
-        self.assertContains(response, "Aucun compte utilisateur lie.")
+        self.assertContains(response, 'Compte utilisateur lié')
+        self.assertContains(response, 'Aucun compte utilisateur lié.')
 
     def test_employee_list_displays_user_link_badges(self):
         user = create_user("list-link-rh", User.Role.GESTIONNAIRE, self.entreprise_a)
@@ -750,8 +750,8 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_employe_list"))
 
         self.assertContains(response, "Compte utilisateur")
-        self.assertContains(response, "Lie")
-        self.assertContains(response, "Non lie")
+        self.assertContains(response, 'Lié')
+        self.assertContains(response, 'Non lié')
 
     def test_navigation_shows_rh_only_with_access(self):
         self.client.force_login(self.owner_a)
@@ -915,7 +915,7 @@ class RhFoundationTests(TestCase):
     def test_create_conge_rejects_end_before_start(self):
         employe = self._create_employe(matricule="RH-C002")
 
-        with self.assertRaisesMessage(RhOperationError, "La date de fin doit etre superieure ou egale"):
+        with self.assertRaisesMessage(RhOperationError, 'La date de fin doit être supérieure ou égale'):
             create_conge(
                 entreprise=self.entreprise_a,
                 employe=employe,
@@ -1180,7 +1180,7 @@ class RhFoundationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Tableau de bord RH")
-        self.assertContains(response, "Activite recente")
+        self.assertContains(response, 'Activité récente')
         self.assertContains(response, "Employ\u00e9s r\u00e9cents")
         self.assertContains(response, "RH-UI001")
         self.assertContains(response, "DesignReel")
@@ -1953,7 +1953,7 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_employe_print", args=[employe.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Fiche employe")
+        self.assertContains(response, 'Fiche employé')
         self.assertContains(response, employe.matricule)
         self._assert_print_company_identity(response)
 
@@ -1964,7 +1964,7 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_employe_list_print"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Liste employes")
+        self.assertContains(response, 'Liste employés')
         self._assert_print_company_identity(response)
 
     def test_rh_reports_print_uses_company_identity(self):
@@ -1972,7 +1972,7 @@ class RhFoundationTests(TestCase):
         response = self.client.get(reverse("rh_reports_print"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Rapport RH synthetique")
+        self.assertContains(response, 'Rapport RH synthétique')
         self._assert_print_company_identity(response)
 
     def test_rh_pages_show_export_and_print_links_when_authorized(self):

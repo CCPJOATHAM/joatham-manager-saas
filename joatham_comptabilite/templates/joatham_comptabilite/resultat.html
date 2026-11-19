@@ -1,17 +1,19 @@
 {% extends "joatham_comptabilite/compta_base.html" %}
+{% load i18n %}
+
 
 {% block compta_content %}
 <section class="summary-grid">
     <article class="metric">
-        <div class="label">Total produits</div>
+        <div class="label">{% trans "Total produits" %}</div>
         <div class="value">{{ total_produits|floatformat:2 }} FC</div>
     </article>
     <article class="metric">
-        <div class="label">Total charges</div>
+        <div class="label">{% trans "Total charges" %}</div>
         <div class="value">{{ total_charges|floatformat:2 }} FC</div>
     </article>
     <article class="metric">
-        <div class="label">Resultat net</div>
+        <div class="label">{% trans "Résultat net" %}</div>
         <div class="value {% if resultat_net > 0 %}status-positive{% elif resultat_net < 0 %}status-negative{% else %}status-neutral{% endif %}">{{ resultat_net|floatformat:2 }} FC</div>
         <div class="meta">{{ resultat_label }}</div>
     </article>
@@ -19,14 +21,14 @@
 
 <section class="section-grid">
     <article class="panel">
-        <h3 class="section-title">Produits</h3>
+        <h3 class="section-title">{% trans "Produits" context "income_statement" %}</h3>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Numero</th>
-                        <th>Compte</th>
-                        <th class="number">Montant</th>
+                        <th>{% trans "Numéro" %}</th>
+                        <th>{% trans "Compte" %}</th>
+                        <th class="number">{% trans "Montant" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,12 +39,12 @@
                             <td class="number">{{ row.montant|floatformat:2 }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="empty">Aucun produit sur cette periode.</td></tr>
+                        <tr><td colspan="3" class="empty">{% trans "Aucun produit sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="2">Total produits</th>
+                        <th colspan="2">{% trans "Total produits" %}</th>
                         <th class="number">{{ total_produits|floatformat:2 }}</th>
                     </tr>
                 </tfoot>
@@ -51,14 +53,14 @@
     </article>
 
     <article class="panel">
-        <h3 class="section-title">Charges</h3>
+        <h3 class="section-title">{% trans "Charges" context "income_statement" %}</h3>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Numero</th>
-                        <th>Compte</th>
-                        <th class="number">Montant</th>
+                        <th>{% trans "Numéro" %}</th>
+                        <th>{% trans "Compte" %}</th>
+                        <th class="number">{% trans "Montant" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,12 +71,12 @@
                             <td class="number">{{ row.montant|floatformat:2 }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="empty">Aucune charge sur cette periode.</td></tr>
+                        <tr><td colspan="3" class="empty">{% trans "Aucune charge sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="2">Total charges</th>
+                        <th colspan="2">{% trans "Total charges" %}</th>
                         <th class="number">{{ total_charges|floatformat:2 }}</th>
                     </tr>
                 </tfoot>

@@ -401,12 +401,12 @@ class AuditLogTests(TestCase):
         self.client.force_login(proprietaire)
         allowed = self.client.get(reverse("activity_log_list"))
         self.assertEqual(allowed.status_code, 200)
-        self.assertContains(allowed, "Controle des flux")
+        self.assertContains(allowed, 'Contrôle des flux')
 
         self.client.force_login(self.comptable)
         comptable_allowed = self.client.get(reverse("activity_log_list"))
         self.assertEqual(comptable_allowed.status_code, 200)
-        self.assertContains(comptable_allowed, "Controle des flux")
+        self.assertContains(comptable_allowed, 'Contrôle des flux')
 
     def test_activity_log_view_redirects_when_plan_does_not_include_audit(self):
         starter_company = create_entreprise("Starter Audit")
@@ -691,7 +691,7 @@ class SuperAdminDashboardTests(TestCase):
         self.assertContains(response, "Abonnements")
         self.assertContains(response, "Entreprise Alpha")
         self.assertContains(response, "Entreprise Beta")
-        self.assertContains(response, "Date debut")
+        self.assertContains(response, 'Date début')
         self.assertContains(response, "Jours restants")
         self.assertContains(response, "Activer")
         self.assertContains(response, "Changer plan")
@@ -974,7 +974,7 @@ class SuperAdminDashboardTests(TestCase):
         response = self.client.get(reverse("super_admin_subscription_list"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Plan demande : Pro")
+        self.assertContains(response, 'Plan demandé : Pro')
         self.assertContains(response, 'value="validate_plan_request"')
         self.assertContains(response, 'value="refuse_plan_request"')
         self.assertNotContains(response, 'value="validate_payment"')
@@ -1762,7 +1762,7 @@ class SubscriptionPaymentTests(TestCase):
     def test_cinetpay_authentication_error_is_safe_and_rolls_back_payment(self):
         response = self._cinetpay_http_response({"message": "INVALID_CREDENTIALS", "data": []}, status_code=401)
         with override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post", return_value=response):
-            self._assert_cinetpay_checkout_creation_fails_safely("CinetPay a refuse la requete.")
+            self._assert_cinetpay_checkout_creation_fails_safely('CinetPay a refusé la requête.')
 
     def test_cinetpay_authentication_without_token_is_safe_and_rolls_back_payment(self):
         response = self._cinetpay_http_response({"code": 0, "message": "OPERATION_SUCCES", "data": {}})
@@ -1890,7 +1890,7 @@ class SubscriptionPaymentTests(TestCase):
 
         with override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post") as post_mock:
             post_mock.side_effect = [self._cinetpay_auth_response(), invalid_response]
-            self._assert_cinetpay_checkout_creation_fails_safely("Reponse CinetPay invalide.")
+            self._assert_cinetpay_checkout_creation_fails_safely('Réponse CinetPay invalide.')
 
     def test_cinetpay_checkout_without_checkout_url_logs_redacted_response_and_rolls_back_payment(self):
         sensitive_values = {
@@ -1932,7 +1932,7 @@ class SubscriptionPaymentTests(TestCase):
                 self._cinetpay_http_response(provider_response),
             ]
             with self.assertLogs("core.services.payment_providers", level="WARNING") as captured_logs:
-                self._assert_cinetpay_checkout_creation_fails_safely("CinetPay n'a pas retourne d'URL de paiement.")
+                self._assert_cinetpay_checkout_creation_fails_safely("CinetPay n'a pas retourné d'URL de paiement.")
 
         log_output = "\n".join(captured_logs.output)
         self.assertIn("CinetPay payment creation returned no checkout URL", log_output)
@@ -2023,7 +2023,7 @@ class SubscriptionPaymentTests(TestCase):
         payload = json.loads(response.content.decode("utf-8"))
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(payload["detail"], "Reponse CinetPay invalide.")
+        self.assertEqual(payload["detail"], 'Réponse CinetPay invalide.')
         self.assertNotIn("api-password", response.content.decode("utf-8"))
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
@@ -2457,7 +2457,7 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "en cours de verification")
+        self.assertContains(response, 'en cours de vérification')
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(

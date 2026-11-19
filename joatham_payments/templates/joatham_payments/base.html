@@ -1,4 +1,6 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
 
 {% block extra_styles %}
 {{ block.super }}
@@ -155,13 +157,13 @@
 {% endblock %}
 
 {% block before_content %}
-<nav class="payments-nav" aria-label="Navigation paiements">
-  <a href="{% url 'payment_list' %}" class="{% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}">Paiements</a>
+<nav class="payments-nav" aria-label="{% trans 'Navigation paiements' %}">
+  <a href="{% url 'payment_list' %}" class="{% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}">{% trans "Paiements" %}</a>
   {% if can_create_payment %}
-  <a href="{% url 'payment_create' %}" class="{% if request.resolver_match.url_name == 'payment_create' %}active{% endif %}">Nouveau paiement</a>
+  <a href="{% url 'payment_create' %}" class="{% if request.resolver_match.url_name == 'payment_create' %}active{% endif %}">{% trans "Nouveau paiement" %}</a>
   {% endif %}
   {% if can_view_payment_reports %}
-  <a href="{% url 'payment_reports' %}" class="{% if request.resolver_match.url_name == 'payment_reports' %}active{% endif %}">Rapports</a>
+  <a href="{% url 'payment_reports' %}" class="{% if request.resolver_match.url_name == 'payment_reports' %}active{% endif %}">{% trans "Rapports" %}</a>
   {% endif %}
 </nav>
 {% endblock %}

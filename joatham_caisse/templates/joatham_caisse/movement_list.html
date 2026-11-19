@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Mouvements caisse{% endblock %}
-{% block content_title %}Mouvements caisse{% endblock %}
-{% block content_subtitle %}Filtrez les mouvements de caisse par caisse, session, type, periode, montant et recherche texte.{% endblock %}
+
+{% block page_title %}{% trans "Mouvements caisse" %}{% endblock %}
+{% block content_title %}{% trans "Mouvements caisse" %}{% endblock %}
+{% block content_subtitle %}{% trans "Filtrez les mouvements de caisse par caisse, session, type, période, montant et recherche texte." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -59,78 +61,78 @@
 <section class="page-shell">
   <div class="panel">
     <div class="panel-header">
-      <h3>Filtres mouvements</h3>
-      <p>Isolez les mouvements utiles selon la caisse, la session, le type, la periode et le montant.</p>
+      <h3>{% trans "Filtres mouvements" %}</h3>
+      <p>{% trans "Isolez les mouvements utiles selon la caisse, la session, le type, la période et le montant." %}</p>
     </div>
     <div class="panel-body">
       <form method="get">
         <div class="filters-grid">
           <div class="field">
-            <label for="id_caisse">Caisse</label>
+            <label for="id_caisse">{% trans "Caisse" %}</label>
             <select name="caisse" id="id_caisse">
-              <option value="">Toutes les caisses</option>
+              <option value="">{% trans "Toutes les caisses" %}</option>
               {% for caisse in caisses %}
               <option value="{{ caisse.id }}" {% if filters.caisse|stringformat:"s" == caisse.id|stringformat:"s" %}selected{% endif %}>{{ caisse.nom }} ({{ caisse.code }})</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_session">Session</label>
+            <label for="id_session">{% trans "Session" %}</label>
             <select name="session" id="id_session">
-              <option value="">Toutes les sessions</option>
+              <option value="">{% trans "Toutes les sessions" %}</option>
               {% for session in sessions %}
-              <option value="{{ session.id }}" {% if filters.session|stringformat:"s" == session.id|stringformat:"s" %}selected{% endif %}>{{ session.caisse.nom }} - {{ session.date_ouverture|date:"d/m/Y H:i" }}</option>
+              <option value="{{ session.id }}" {% if filters.session|stringformat:"s" == session.id|stringformat:"s" %}selected{% endif %}>{{ session.caisse.nom }} - {{ session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_type_mouvement">Type</label>
+            <label for="id_type_mouvement">{% trans "Type" %}</label>
             <select name="type_mouvement" id="id_type_mouvement">
-              <option value="">Tous les types</option>
+              <option value="">{% trans "Tous les types" %}</option>
               {% for value, label in movement_type_choices %}
               <option value="{{ value }}" {% if filters.type_mouvement == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_q">Recherche</label>
-            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="Libelle ou reference">
+            <label for="id_q">{% trans "Recherche" %}</label>
+            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="{% trans 'Libellé ou référence' %}">
           </div>
           <div class="field">
-            <label for="id_moyen_paiement">Moyen paiement</label>
+            <label for="id_moyen_paiement">{% trans "Moyen paiement" %}</label>
             <select name="moyen_paiement" id="id_moyen_paiement">
-              <option value="">Tous les moyens</option>
+              <option value="">{% trans "Tous les moyens" %}</option>
               {% for value, label in payment_method_choices %}
               <option value="{{ value }}" {% if filters.moyen_paiement == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_date_debut">Date debut</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="field">
-            <label for="id_date_fin">Date fin</label>
+            <label for="id_date_fin">{% trans "Date fin" %}</label>
             <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
           </div>
           <div class="field">
-            <label for="id_montant_min">Montant min</label>
+            <label for="id_montant_min">{% trans "Montant min" %}</label>
             <input type="number" step="0.01" name="montant_min" id="id_montant_min" value="{{ filters.montant_min }}">
           </div>
           <div class="field">
-            <label for="id_montant_max">Montant max</label>
+            <label for="id_montant_max">{% trans "Montant max" %}</label>
             <input type="number" step="0.01" name="montant_max" id="id_montant_max" value="{{ filters.montant_max }}">
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="btn">Filtrer</button>
-          <a href="{% url 'caisse_movement_list' %}" class="ghost">Reinitialiser</a>
+          <button type="submit" class="btn">{% trans "Filtrer" %}</button>
+          <a href="{% url 'caisse_movement_list' %}" class="ghost">{% trans "Réinitialiser" %}</a>
           {% if can_export_cash %}
-          <a href="{% url 'caisse_movement_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">Export Excel</a>
+          <a href="{% url 'caisse_movement_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">{% trans "Export Excel" %}</a>
           {% endif %}
-          <a href="{% url 'caisse_session_list' %}" class="ghost">Voir les sessions</a>
+          <a href="{% url 'caisse_session_list' %}" class="ghost">{% trans "Voir les sessions" %}</a>
           {% if can_view_cash_reports %}
-          <a href="{% url 'caisse_reports' %}" class="ghost">Voir les rapports</a>
+          <a href="{% url 'caisse_reports' %}" class="ghost">{% trans "Voir les rapports" %}</a>
           {% endif %}
         </div>
       </form>
@@ -139,31 +141,31 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Mouvements filtres</h3>
-      <p>Historique detaille des operations de caisse correspondant aux criteres actifs.</p>
+      <h3>{% trans "Mouvements filtrés" %}</h3>
+      <p>{% trans "Historique détaillé des opérations de caisse correspondant aux critères actifs." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Caisse</th>
-            <th>Session</th>
-            <th>Type</th>
-            <th>Moyen</th>
-            <th>Montant</th>
-            <th>Libelle</th>
-            <th>Reference</th>
-            <th>Statut</th>
-            <th>Action</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Caisse" %}</th>
+            <th>{% trans "Session" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Moyen" %}</th>
+            <th>{% trans "Montant" %}</th>
+            <th>{% trans "Libellé" %}</th>
+            <th>{% trans "Référence" %}</th>
+            <th>{% trans "Statut" %}</th>
+            <th>{% trans "Action" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for movement in movements %}
           <tr>
-            <td>{{ movement.date_mouvement|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.date_mouvement|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>{{ movement.caisse.nom }}</td>
-            <td>{{ movement.session.date_ouverture|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>
               <span class="badge {% if movement.type_mouvement == 'entree' %}entry{% elif movement.type_mouvement == 'paiement_facture' %}payment{% elif movement.type_mouvement == 'ajustement' %}adjustment{% elif movement.type_mouvement == 'depense' %}expense{% else %}exit{% endif %}">
                 {{ movement.get_type_mouvement_display }}
@@ -178,10 +180,10 @@
                 {{ movement.get_statut_display }}
               </span>
             </td>
-            <td><a href="{% url 'caisse_session_detail' movement.session.id %}" class="ghost">Voir session</a></td>
+            <td><a href="{% url 'caisse_session_detail' movement.session.id %}" class="ghost">{% trans "Voir session" %}</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="10" class="empty-state">Aucun mouvement ne correspond aux filtres selectionnes.</td></tr>
+          <tr><td colspan="10" class="empty-state">{% trans "Aucun mouvement ne correspond aux filtres sélectionnés." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

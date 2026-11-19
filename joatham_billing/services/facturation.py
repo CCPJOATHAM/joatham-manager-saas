@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import logging
 from decimal import Decimal
 
@@ -45,7 +46,7 @@ def _prepare_ligne_facture(*, entreprise, ligne):
     if product_id:
         produit = Produit.objects.filter(id=product_id, entreprise=entreprise).first()
         if produit is None:
-            raise WorkflowFacturationError("Le produit selectionne est invalide pour cette entreprise.")
+            raise WorkflowFacturationError(gettext_lazy('Le produit sélectionné est invalide pour cette entreprise.'))
         if not designation:
             designation = (produit.description or "").strip() or produit.nom
         if raw_prix in {None, ""}:
@@ -54,7 +55,7 @@ def _prepare_ligne_facture(*, entreprise, ligne):
     if service_id and produit is None:
         service = Service.objects.filter(id=service_id, entreprise=entreprise).first()
         if service is None:
-            raise WorkflowFacturationError("Le service selectionne est invalide pour cette entreprise.")
+            raise WorkflowFacturationError(gettext_lazy('Le service sélectionné est invalide pour cette entreprise.'))
         if not designation:
             designation = service.nom
         if raw_prix in {None, ""}:
@@ -80,9 +81,9 @@ def _build_lignes_payload(*, entreprise, lignes):
             continue
 
         if quantite <= 0:
-            raise WorkflowFacturationError("Chaque ligne de facture doit avoir une quantite strictement positive.")
+            raise WorkflowFacturationError(gettext_lazy('Chaque ligne de facture doit avoir une quantité strictement positive.'))
         if prix_unitaire < 0:
-            raise WorkflowFacturationError("Le prix unitaire ne peut pas etre negatif.")
+            raise WorkflowFacturationError(gettext_lazy('Le prix unitaire ne peut pas être négatif.'))
 
         prepared_lignes.append(
             {
@@ -95,7 +96,7 @@ def _build_lignes_payload(*, entreprise, lignes):
         )
 
     if not prepared_lignes:
-        raise WorkflowFacturationError("Une facture doit contenir au moins une ligne.")
+        raise WorkflowFacturationError(gettext_lazy("Une facture doit contenir au moins une ligne."))
 
     return prepared_lignes
 
@@ -117,35 +118,35 @@ def _resolve_payment_cashbox_context(*, facture, mode, caisse):
         return None, None
 
     if mode != PaiementFacture.ModePaiement.ESPECES:
-        raise PaiementFacturationError("La caisse ne peut etre utilisee qu'avec un paiement en especes.")
+        raise PaiementFacturationError(gettext_lazy("La caisse ne peut être utilisée qu'avec un paiement en espèces."))
 
     if not isinstance(caisse, Caisse):
         caisse = Caisse.objects.filter(id=caisse).select_related("entreprise").first()
     if caisse is None:
-        raise PaiementFacturationError("La caisse selectionnee est introuvable.")
+        raise PaiementFacturationError(gettext_lazy('La caisse sélectionnée est introuvable.'))
 
     try:
         if caisse.entreprise_id != facture.entreprise_id:
-            raise PaiementFacturationError("La caisse selectionnee n'appartient pas a cette entreprise.")
+            raise PaiementFacturationError(gettext_lazy("La caisse sélectionnée n'appartient pas à cette entreprise."))
     except ValueError as exc:
-        raise PaiementFacturationError("La caisse selectionnee n'appartient pas a cette entreprise.") from exc
+        raise PaiementFacturationError(gettext_lazy("La caisse sélectionnée n'appartient pas à cette entreprise.")) from exc
     if not caisse.est_active:
-        raise PaiementFacturationError("La caisse selectionnee est inactive.")
+        raise PaiementFacturationError(gettext_lazy('La caisse sélectionnée est inactive.'))
 
     session_caisse = get_open_session_for_caisse(caisse)
     if session_caisse is None:
-        raise PaiementFacturationError("Aucune session ouverte n'est disponible pour la caisse selectionnee.")
+        raise PaiementFacturationError(gettext_lazy("Aucune session ouverte n'est disponible pour la caisse sélectionnée."))
     try:
         if session_caisse.entreprise_id != facture.entreprise_id:
-                raise PaiementFacturationError("La session ouverte de cette caisse n'appartient pas a cette entreprise.")
+                raise PaiementFacturationError(gettext_lazy("La session ouverte de cette caisse n'appartient pas à cette entreprise."))
     except ValueError as exc:
-        raise PaiementFacturationError("La session ouverte de cette caisse n'appartient pas a cette entreprise.") from exc
+        raise PaiementFacturationError(gettext_lazy("La session ouverte de cette caisse n'appartient pas à cette entreprise.")) from exc
     return caisse, session_caisse
 
 
 def _create_cash_movement_for_payment(*, paiement, utilisateur=None):
     if paiement.caisse_id is None or paiement.session_caisse_id is None:
-        raise PaiementFacturationError("Le paiement doit etre rattache a une caisse et a une session ouverte.")
+        raise PaiementFacturationError(gettext_lazy('Le paiement doit être rattaché à une caisse et à une session ouverte.'))
 
     if MouvementCaisse.objects.filter(
         entreprise=paiement.entreprise,
@@ -153,7 +154,7 @@ def _create_cash_movement_for_payment(*, paiement, utilisateur=None):
         source_model="PaiementFacture",
         source_id=paiement.id,
     ).exists():
-        raise PaiementFacturationError("Un mouvement de caisse existe deja pour ce paiement.")
+        raise PaiementFacturationError(gettext_lazy('Un mouvement de caisse existe déjà pour ce paiement.'))
 
     return record_invoice_cash_payment(
         entreprise=paiement.entreprise,
@@ -184,7 +185,7 @@ def _ensure_stock_available(*, entreprise, lignes):
     for produit_id, quantite_demandee in requested.items():
         produit = products.get(produit_id)
         if produit is None:
-            raise WorkflowFacturationError("Le produit selectionne est invalide pour cette entreprise.")
+            raise WorkflowFacturationError(gettext_lazy('Le produit sélectionné est invalide pour cette entreprise.'))
         try:
             assert_stock_available(produit=produit, quantity=quantite_demandee)
         except StockOperationError as exc:
@@ -261,15 +262,15 @@ def restore_stock_for_facture(*, facture, user):
 
 def assert_facture_editable(facture):
     if facture.statut != Facture.Statut.BROUILLON:
-        raise WorkflowFacturationError("Seules les factures en brouillon peuvent etre modifiees.")
+        raise WorkflowFacturationError(gettext_lazy('Seules les factures en brouillon peuvent être modifiées.'))
     if facture.paye or facture.statut == Facture.Statut.PAYEE:
-        raise WorkflowFacturationError("Une facture payee ne peut pas etre modifiee.")
+        raise WorkflowFacturationError(gettext_lazy('Une facture payée ne peut pas être modifiée.'))
 
 
 @transaction.atomic
 def create_facture(*, entreprise, user, client_id=None, client_nom="", tva=0, remise=0, rabais=0, ristourne=0, lignes=None):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent creer une facture.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent créer une facture.'))
     assert_invoice_quota_available(entreprise)
 
     lignes = lignes or []
@@ -339,7 +340,7 @@ def create_facture(*, entreprise, user, client_id=None, client_nom="", tva=0, re
 @transaction.atomic
 def update_facture(*, facture, user, client_id=None, client_nom="", tva=0, remise=0, rabais=0, ristourne=0, lignes=None):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent modifier une facture.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent modifier une facture.'))
 
     assert_facture_editable(facture)
     lignes = lignes or []
@@ -391,13 +392,13 @@ def update_facture(*, facture, user, client_id=None, client_nom="", tva=0, remis
 @transaction.atomic
 def change_facture_status(*, facture, nouveau_statut, user, note=""):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent changer le statut.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent changer le statut.'))
 
     if facture.statut == Facture.Statut.PAYEE and nouveau_statut != Facture.Statut.PAYEE:
-        raise WorkflowFacturationError("Une facture deja payee ne peut plus etre modifiee.")
+        raise WorkflowFacturationError(gettext_lazy('Une facture déjà payée ne peut plus être modifiée.'))
 
     if nouveau_statut not in dict(Facture.Statut.choices):
-        raise WorkflowFacturationError("Le statut demande est invalide.")
+        raise WorkflowFacturationError(gettext_lazy("Le statut demande est invalide."))
 
     ancien_statut = facture.statut
 
@@ -425,23 +426,23 @@ def change_facture_status(*, facture, nouveau_statut, user, note=""):
 @transaction.atomic
 def register_payment(*, facture, montant, mode, user, reference="", note="", caisse=None):
     if not user_has_permission(user, "billing.payments"):
-        raise PermissionFacturationError("Seuls les proprietaires et comptables peuvent enregistrer un paiement.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et comptables peuvent enregistrer un paiement.'))
 
     if facture.statut == Facture.Statut.ANNULEE:
-        raise PaiementFacturationError("Impossible d'enregistrer un paiement sur une facture annulee.")
+        raise PaiementFacturationError(gettext_lazy("Impossible d'enregistrer un paiement sur une facture annulée."))
     if facture.statut == Facture.Statut.BROUILLON:
-        raise PaiementFacturationError("Une facture brouillon doit etre emise avant de recevoir un paiement.")
+        raise PaiementFacturationError(gettext_lazy('Une facture brouillon doit être émise avant de recevoir un paiement.'))
     if facture.statut == Facture.Statut.PAYEE or facture.reste_a_payer <= Decimal("0"):
-        raise PaiementFacturationError("Cette facture est deja soldée.")
+        raise PaiementFacturationError(gettext_lazy('Cette facture est déjà soldée.'))
 
     montant = Decimal(montant or 0)
     if montant <= Decimal("0"):
-        raise PaiementFacturationError("Le montant du paiement doit etre strictement positif.")
+        raise PaiementFacturationError(gettext_lazy('Le montant du paiement doit être strictement positif.'))
     if montant > facture.reste_a_payer:
-        raise PaiementFacturationError("Le paiement ne peut pas etre superieur au reste a payer.")
+        raise PaiementFacturationError(gettext_lazy('Le paiement ne peut pas être supérieur au reste à payer.'))
     mode = mode or PaiementFacture.ModePaiement.ESPECES
     if mode not in dict(PaiementFacture.ModePaiement.choices):
-        raise PaiementFacturationError("Le mode de paiement est invalide.")
+        raise PaiementFacturationError(gettext_lazy("Le mode de paiement est invalide."))
 
     caisse_obj, session_caisse = _resolve_payment_cashbox_context(
         facture=facture,
@@ -495,9 +496,9 @@ def register_payment(*, facture, montant, mode, user, reference="", note="", cai
 @transaction.atomic
 def delete_facture(*, facture, user):
     if getattr(user, "role", None) not in {"admin", "gestionnaire"}:
-        raise PermissionFacturationError("Seuls les administrateurs et gestionnaires peuvent supprimer une facture.")
+        raise PermissionFacturationError(gettext_lazy("Seuls les administrateurs et gestionnaires peuvent supprimer une facture."))
     if facture.statut == Facture.Statut.PAYEE or facture.paye:
-        raise WorkflowFacturationError("Une facture payee ne peut pas etre supprimee.")
+        raise WorkflowFacturationError(gettext_lazy('Une facture payée ne peut pas être supprimée.'))
     assert_facture_editable(facture)
     facture_id = facture.id
     entreprise_id = facture.entreprise_id

@@ -45,7 +45,7 @@
                 </select>
             </div>
             <div class="field">
-                <label for="date_debut">{% trans "Date debut" %}</label>
+                <label for="date_debut">{% trans "Date début" %}</label>
                 <input type="date" id="date_debut" name="date_debut" value="{{ selected_date_debut }}">
             </div>
             <div class="field">
@@ -55,7 +55,7 @@
         </div>
         <div class="actions" style="margin-top:16px;">
             <button type="submit" class="action-link primary">{% trans "Filtrer" %}</button>
-            <a href="{% url 'inventory_list' %}" class="action-link">{% trans "Reinitialiser" %}</a>
+            <a href="{% url 'inventory_list' %}" class="action-link">{% trans "Réinitialiser" %}</a>
         </div>
     </form>
 </div>
@@ -68,10 +68,10 @@
                 <tr>
                     <th>{% trans "Nom" %}</th>
                     <th>{% trans "Statut" %}</th>
-                    <th>{% trans "Date debut" %}</th>
-                    <th>{% trans "Date cloture" %}</th>
+                    <th>{% trans "Date début" %}</th>
+                    <th>{% trans "Date clôture" %}</th>
                     <th>{% trans "Date validation" %}</th>
-                    <th>{% trans "Createur" %}</th>
+                    <th>{% trans "Créateur" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
@@ -84,9 +84,9 @@
                             {{ row.status_label }}
                         </span>
                     </td>
-                    <td>{% if row.instance.started_at %}{{ row.instance.started_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                    <td>{% if row.instance.closed_at %}{{ row.instance.closed_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                    <td>{% if row.instance.validated_at %}{{ row.instance.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.started_at %}{{ row.instance.started_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.closed_at %}{{ row.instance.closed_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.validated_at %}{{ row.instance.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     <td>{% if row.instance.created_by %}{{ row.instance.created_by.username }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     <td><a href="{% url 'inventory_detail' row.instance.id %}" class="action-link">{% trans "Voir" %}</a></td>
                 </tr>

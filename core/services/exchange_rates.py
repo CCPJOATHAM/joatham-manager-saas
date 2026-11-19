@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import logging
 import os
 from dataclasses import dataclass
@@ -76,7 +77,7 @@ def _fetch_exchangerate_api_rate(source_currency, target_currency, api_key):
         response = requests.get(url, timeout=5)
     except requests.RequestException as exc:
         logger.warning("Exchange rate provider request failed url=%s error=%s", url, exc)
-        raise ExchangeRateUnavailable("Provider taux de change indisponible.") from exc
+        raise ExchangeRateUnavailable(gettext_lazy("Provider taux de change indisponible.")) from exc
 
     logger.info("Exchange rate provider response url=%s status_code=%s", url, response.status_code)
     if response.status_code != 200:
@@ -86,38 +87,38 @@ def _fetch_exchangerate_api_rate(source_currency, target_currency, api_key):
             response.status_code,
             response.text[:300],
         )
-        raise ExchangeRateUnavailable(f"Provider taux de change indisponible. Status HTTP {response.status_code}.")
+        raise ExchangeRateUnavailable((gettext_lazy('Provider taux de change indisponible. Status HTTP %(value_1)s.') % {'value_1': response.status_code}))
 
     try:
         payload = response.json()
     except ValueError as exc:
-        raise ExchangeRateUnavailable("Reponse taux de change invalide.") from exc
+        raise ExchangeRateUnavailable(gettext_lazy('Réponse taux de change invalide.')) from exc
 
     if payload.get("result") != "success":
         logger.warning("Exchange rate provider returned error url=%s payload=%s", url, payload)
-        raise ExchangeRateUnavailable("Provider taux de change indisponible.")
+        raise ExchangeRateUnavailable(gettext_lazy("Provider taux de change indisponible."))
 
     rates = payload.get("rates") or {}
     if target_currency not in rates:
         logger.warning("Exchange rate missing target currency url=%s target=%s", url, target_currency)
-        raise ExchangeRateUnavailable(f"Taux {source_currency}->{target_currency} indisponible.")
+        raise ExchangeRateUnavailable((gettext_lazy('Taux %(value_1)s->%(value_2)s indisponible.') % {'value_1': source_currency, 'value_2': target_currency}))
 
     try:
         rate = Decimal(str(rates[target_currency]))
     except (KeyError, InvalidOperation) as exc:
-        raise ExchangeRateUnavailable("Taux de change invalide.") from exc
+        raise ExchangeRateUnavailable(gettext_lazy("Taux de change invalide.")) from exc
     return rate, payload
 
 
 def _fetch_rate_from_provider(source_currency, target_currency):
     provider, api_key = _provider_settings()
     if provider != "exchangerate_api":
-        raise ExchangeRateUnavailable("Provider taux de change non supporte.")
+        raise ExchangeRateUnavailable(gettext_lazy("Provider taux de change non supporte."))
     try:
         rate, payload = _fetch_exchangerate_api_rate(source_currency, target_currency, api_key)
     except ExchangeRateUnavailable as exc:
         logger.warning("Exchange rate provider failed source=%s target=%s error=%s", source_currency, target_currency, exc)
-        raise ExchangeRateUnavailable("Conversion temporairement indisponible.") from exc
+        raise ExchangeRateUnavailable(gettext_lazy("Conversion temporairement indisponible.")) from exc
     now = timezone.now()
     return ExchangeRate.objects.create(
         devise_source=source_currency,
@@ -133,7 +134,7 @@ def get_exchange_rate(source_currency, target_currency):
     source_currency = normalize_currency_code(source_currency)
     target_currency = normalize_currency_code(target_currency)
     if not source_currency or not target_currency:
-        raise ExchangeRateUnavailable("Devise invalide.")
+        raise ExchangeRateUnavailable(gettext_lazy("Devise invalide."))
     if source_currency == target_currency:
         now = timezone.now()
         return ConversionResult(

@@ -2,6 +2,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.views.i18n import JavaScriptCatalog
+from django.views.decorators.cache import never_cache
 
 from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
@@ -12,6 +14,7 @@ from joatham_messages.views import public_question_create, public_question_succe
 from joatham_users.views import profile_view
 
 urlpatterns = [
+    path('i18n/javascript/', never_cache(JavaScriptCatalog.as_view()), name='javascript_catalog'),
     path('', public_home, name='public_home'),
     path('decouvrir/', public_discover, name='public_discover'),
     path('preview-a/', public_preview_a, name='public_preview_a'),

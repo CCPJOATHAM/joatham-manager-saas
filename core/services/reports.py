@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from datetime import timedelta
 
 from django.utils import timezone
@@ -22,21 +23,21 @@ from joatham_billing.models import Facture
 
 
 PERIOD_CHOICES = [
-    ("today", "Aujourd'hui"),
-    ("this_week", "Cette semaine"),
-    ("this_month", "Ce mois"),
-    ("this_quarter", "Ce trimestre"),
-    ("this_year", "Cette annee"),
-    ("custom", "Personnalise"),
+    ("today", gettext_lazy("Aujourd'hui")),
+    ("this_week", gettext_lazy("Cette semaine")),
+    ("this_month", gettext_lazy("Ce mois")),
+    ("this_quarter", gettext_lazy("Ce trimestre")),
+    ("this_year", gettext_lazy('Cette année')),
+    ("custom", gettext_lazy('Personnalisé')),
 ]
 INVOICE_STATUS_CHOICES = [
-    ("", "Tous les statuts"),
-    (Facture.Statut.BROUILLON, "Brouillon"),
-    (Facture.Statut.EMISE, "Emise"),
-    (Facture.Statut.PAYEE, "Payee"),
-    (Facture.Statut.ANNULEE, "Annulee"),
-    ("impaye", "Impayee"),
-    ("partielle", "Partiellement payee"),
+    ("", gettext_lazy("Tous les statuts")),
+    (Facture.Statut.BROUILLON, gettext_lazy("Brouillon")),
+    (Facture.Statut.EMISE, gettext_lazy('Émise')),
+    (Facture.Statut.PAYEE, gettext_lazy('Payée')),
+    (Facture.Statut.ANNULEE, gettext_lazy('Annulée')),
+    ("impaye", gettext_lazy('Impayée')),
+    ("partielle", gettext_lazy('Partiellement payée')),
 ]
 PAYMENT_STATUS_CHOICES = [("", "Tous les statuts")] + list(PAYMENT_STATUS_LABELS.items())
 PAYMENT_METHOD_CHOICES = [("", "Tous les moyens")] + [(item["code"], item["label"]) for item in PAYMENT_METHODS]
@@ -224,21 +225,21 @@ def _stock_product_rows(entreprise, products, status_label=""):
 def decorate_advanced_report_payload(entreprise, report):
     financial = report["financial"]
     report["financial_cards"] = [
-        {"label": "Chiffre d'affaires", "value": _money(entreprise, financial["revenue_total"])},
-        {"label": "Encaisse", "value": _money(entreprise, financial["collected_total"])},
-        {"label": "Reste a encaisser", "value": _money(entreprise, financial["remaining_total"])},
-        {"label": "Depenses", "value": _money(entreprise, financial["expenses_total"])},
-        {"label": "Solde net", "value": _money(entreprise, financial["net_balance"])},
-        {"label": "Factures", "value": financial["invoice_count"]},
-        {"label": "Factures payees", "value": financial["paid_invoice_count"]},
-        {"label": "Paiements en attente", "value": financial["pending_payment_count"]},
-        {"label": "Caisse disponible", "value": _money(entreprise, financial["cash_available_total"])},
+        {"label": gettext_lazy("Chiffre d'affaires"), "value": _money(entreprise, financial["revenue_total"])},
+        {"label": gettext_lazy("Encaisse"), "value": _money(entreprise, financial["collected_total"])},
+        {"label": gettext_lazy('Reste à encaisser'), "value": _money(entreprise, financial["remaining_total"])},
+        {"label": gettext_lazy('Dépenses'), "value": _money(entreprise, financial["expenses_total"])},
+        {"label": gettext_lazy("Solde net"), "value": _money(entreprise, financial["net_balance"])},
+        {"label": gettext_lazy("Factures"), "value": financial["invoice_count"]},
+        {"label": gettext_lazy('Factures payées'), "value": financial["paid_invoice_count"]},
+        {"label": gettext_lazy("Paiements en attente"), "value": financial["pending_payment_count"]},
+        {"label": gettext_lazy("Caisse disponible"), "value": _money(entreprise, financial["cash_available_total"])},
     ]
     report["management_cards"] = [
-        {"label": "Taux de paiement", "value": _percent(report["management"]["payment_rate"])},
-        {"label": "Taux d'impayes", "value": _percent(report["management"]["unpaid_rate"])},
-        {"label": "Resultat simplifie", "value": _money(entreprise, report["management"]["simplified_margin"])},
-        {"label": "Variation stock", "value": report["management"]["stock_variation"]},
+        {"label": gettext_lazy("Taux de paiement"), "value": _percent(report["management"]["payment_rate"])},
+        {"label": gettext_lazy("Taux d'impayés"), "value": _percent(report["management"]["unpaid_rate"])},
+        {"label": gettext_lazy('Résultat simplifié'), "value": _money(entreprise, report["management"]["simplified_margin"])},
+        {"label": gettext_lazy("Variation stock"), "value": report["management"]["stock_variation"]},
     ]
 
     report["sales"]["evolution"] = _decorate_chart_rows(entreprise, report["sales"]["evolution"])

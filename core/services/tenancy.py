@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -12,12 +13,12 @@ def get_user_entreprise(user):
 
 def get_user_entreprise_or_raise(user):
     if getattr(user, "is_super_admin", False):
-        raise PermissionDenied("Le super admin plateforme n'accede pas aux espaces entreprise.")
+        raise PermissionDenied(gettext_lazy("Le super admin plateforme n'accède pas aux espaces entreprise."))
     entreprise = get_user_entreprise(user)
     if entreprise is None:
-        raise PermissionDenied("Aucune entreprise n'est associee a cet utilisateur.")
+        raise PermissionDenied(gettext_lazy("Aucune entreprise n'est associée à cet utilisateur."))
     if not getattr(entreprise, "is_active", True):
-        raise PermissionDenied("Cette entreprise est desactivee.")
+        raise PermissionDenied(gettext_lazy('Cette entreprise est désactivée.'))
     return entreprise
 
 
@@ -34,7 +35,7 @@ def get_object_for_entreprise(queryset, entreprise, **lookup):
 
 def ensure_same_entreprise(instance, entreprise, field_name="entreprise"):
     if getattr(instance, f"{field_name}_id", None) != getattr(entreprise, "id", None):
-        raise Http404("Objet introuvable.")
+        raise Http404(gettext_lazy("Objet introuvable."))
     return instance
 
 
@@ -112,5 +113,5 @@ def ensure_subscription_access_for_entreprise(entreprise, *, user=None, as_of=No
         allow_trial=allow_trial,
     )
     if not state["allowed"]:
-        raise PermissionDenied("L'abonnement de cette entreprise ne permet pas cet acces.")
+        raise PermissionDenied(gettext_lazy("L'abonnement de cette entreprise ne permet pas cet accès."))
     return state["subscription"]

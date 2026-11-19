@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.db import transaction
 from django.utils import timezone
 
@@ -19,7 +20,7 @@ def _get_locked_session_for_entreprise(*, entreprise, session):
         .first()
     )
     if locked is None:
-        raise InventoryOperationError("La session d'inventaire est invalide pour cette entreprise.")
+        raise InventoryOperationError(gettext_lazy("La session d'inventaire est invalide pour cette entreprise."))
     return locked
 
 
@@ -32,15 +33,15 @@ def _get_locked_line_for_entreprise(*, entreprise, session, line):
         .first()
     )
     if locked is None:
-        raise InventoryOperationError("La ligne d'inventaire est invalide pour cette entreprise.")
+        raise InventoryOperationError(gettext_lazy("La ligne d'inventaire est invalide pour cette entreprise."))
     return locked
 
 
 def _ensure_session_mutable(session):
     if session.status == InventorySession.Status.VALIDATED:
-        raise InventoryOperationError("Une session validee ne peut plus etre modifiee.")
+        raise InventoryOperationError(gettext_lazy('Une session validée ne peut plus être modifiée.'))
     if session.status == InventorySession.Status.CANCELLED:
-        raise InventoryOperationError("Une session annulee ne peut plus etre modifiee.")
+        raise InventoryOperationError(gettext_lazy('Une session annulée ne peut plus être modifiée.'))
 
 
 def _normalize_non_negative_quantity(quantity):
@@ -49,9 +50,9 @@ def _normalize_non_negative_quantity(quantity):
     try:
         normalized = int(quantity)
     except (TypeError, ValueError) as exc:
-        raise InventoryOperationError("La quantite comptee doit etre un entier positif ou nul.") from exc
+        raise InventoryOperationError(gettext_lazy('La quantité comptée doit être un entier positif ou nul.')) from exc
     if normalized < 0:
-        raise InventoryOperationError("La quantite comptee doit etre un entier positif ou nul.")
+        raise InventoryOperationError(gettext_lazy('La quantité comptée doit être un entier positif ou nul.'))
     return normalized
 
 
@@ -91,7 +92,7 @@ def start_inventory_session(*, entreprise, session=None, session_id=None):
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     _ensure_session_mutable(session)
     if session.status not in {InventorySession.Status.DRAFT, InventorySession.Status.IN_PROGRESS}:
-        raise InventoryOperationError("Seule une session brouillon peut etre demarree.")
+        raise InventoryOperationError(gettext_lazy('Seule une session brouillon peut être demarree.'))
     if session.status == InventorySession.Status.IN_PROGRESS:
         return session
     session.status = InventorySession.Status.IN_PROGRESS
@@ -106,7 +107,7 @@ def add_products_to_inventory(*, entreprise, session=None, session_id=None, prod
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     _ensure_session_mutable(session)
     if session.status not in {InventorySession.Status.DRAFT, InventorySession.Status.IN_PROGRESS}:
-        raise InventoryOperationError("Impossible d'ajouter des produits a cette session d'inventaire.")
+        raise InventoryOperationError(gettext_lazy("Impossible d'ajouter des produits à cette session d'inventaire."))
 
     if produits is None:
         produits_queryset = Produit.objects.filter(entreprise=entreprise, actif=True).order_by("nom", "id")
@@ -141,7 +142,7 @@ def record_inventory_count(*, entreprise, session=None, session_id=None, line=No
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     _ensure_session_mutable(session)
     if session.status != InventorySession.Status.IN_PROGRESS:
-        raise InventoryOperationError("Le comptage n'est autorise que pour une session en cours.")
+        raise InventoryOperationError(gettext_lazy("Le comptage n'est autorisé que pour une session en cours."))
 
     line = _get_locked_line_for_entreprise(entreprise=entreprise, session=session, line=line)
     line.counted_quantity = _normalize_non_negative_quantity(counted_quantity)
@@ -156,9 +157,9 @@ def close_inventory_session(*, entreprise, session=None, session_id=None):
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     _ensure_session_mutable(session)
     if session.status != InventorySession.Status.IN_PROGRESS:
-        raise InventoryOperationError("Seule une session en cours peut etre cloturee.")
+        raise InventoryOperationError(gettext_lazy('Seule une session en cours peut être clôturée.'))
     if not session.lines.exists():
-        raise InventoryOperationError("Impossible de cloturer un inventaire sans ligne.")
+        raise InventoryOperationError(gettext_lazy('Impossible de clôturer un inventaire sans ligne.'))
     session.status = InventorySession.Status.CLOSED
     session.closed_at = timezone.now()
     session.save(update_fields=["status", "closed_at", "updated_at"])
@@ -172,7 +173,7 @@ def validate_inventory_session(*, entreprise, session=None, session_id=None, val
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     _ensure_session_mutable(session)
     if session.status != InventorySession.Status.CLOSED:
-        raise InventoryOperationError("Seule une session cloturee peut etre validee.")
+        raise InventoryOperationError(gettext_lazy('Seule une session clôturée peut être validée.'))
 
     lines = list(
         InventoryLine.objects.select_for_update()
@@ -180,9 +181,9 @@ def validate_inventory_session(*, entreprise, session=None, session_id=None, val
         .filter(session=session, entreprise=entreprise)
     )
     if not lines:
-        raise InventoryOperationError("Impossible de valider un inventaire sans ligne.")
+        raise InventoryOperationError(gettext_lazy("Impossible de valider un inventaire sans ligne."))
     if any(line.counted_quantity is None for line in lines):
-        raise InventoryOperationError("Toutes les lignes doivent etre comptees avant validation.")
+        raise InventoryOperationError(gettext_lazy('Toutes les lignes doivent être comptées avant validation.'))
 
     reference = f"INV-{session.id}"
     for line in lines:
@@ -238,9 +239,9 @@ def cancel_inventory_session(*, entreprise, session=None, session_id=None):
     session = session if session is not None else session_id
     session = _get_locked_session_for_entreprise(entreprise=entreprise, session=session)
     if session.status == InventorySession.Status.VALIDATED:
-        raise InventoryOperationError("Une session validee ne peut pas etre annulee.")
+        raise InventoryOperationError(gettext_lazy('Une session validée ne peut pas être annulée.'))
     if session.status == InventorySession.Status.CANCELLED:
-        raise InventoryOperationError("Cette session d'inventaire est deja annulee.")
+        raise InventoryOperationError(gettext_lazy("Cette session d'inventaire est déjà annulée."))
     session.status = InventorySession.Status.CANCELLED
     session.save(update_fields=["status", "updated_at"])
     return session

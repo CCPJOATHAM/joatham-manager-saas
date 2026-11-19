@@ -2,26 +2,26 @@
 {% load i18n %}
 
 {% block apprenants_title %}{% trans "Dashboard apprenants" %}{% endblock %}
-{% block apprenants_subtitle %}{% trans "Synthese des formations, inscriptions et paiements." %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Synthèse des formations, inscriptions et paiements." %}{% endblock %}
 {% block apprenants_content %}
     <div class="header">
         <div>
-            <h1>Dashboard apprenants</h1>
-            <p>Entreprise: {{ entreprise.nom }}</p>
+            <h1>{% trans "Dashboard apprenants" %}</h1>
+            <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
         </div>
         <div class="actions">
-            <a href="{% url 'apprenant_list' %}">Retour au module</a>
-            <a href="{% url 'apprenants_dashboard_pdf' %}?formation={{ selected_formation }}&statut={{ selected_statut }}">Export PDF</a>
-            <a href="{% url 'apprenants_dashboard_excel' %}?formation={{ selected_formation }}&statut={{ selected_statut }}">Export Excel</a>
+            <a href="{% url 'apprenant_list' %}">{% trans "Retour au module" %}</a>
+            <a href="{% url 'apprenants_dashboard_pdf' %}?formation={{ selected_formation }}&statut={{ selected_statut }}">{% trans "Export PDF" %}</a>
+            <a href="{% url 'apprenants_dashboard_excel' %}?formation={{ selected_formation }}&statut={{ selected_statut }}">{% trans "Export Excel" %}</a>
         </div>
     </div>
 
     <div class="panel">
         <form method="get" class="filters">
             <div class="field">
-                <label for="formation">Formation</label>
+                <label for="formation">{% trans "Formation" %}</label>
                 <select id="formation" name="formation">
-                    <option value="">Toutes les formations</option>
+                    <option value="">{% trans "Toutes les formations" %}</option>
                     {% for formation in formations %}
                         <option value="{{ formation.id }}" {% if selected_formation == formation.id|stringformat:"s" %}selected{% endif %}>
                             {{ formation.nom }}
@@ -30,78 +30,78 @@
                 </select>
             </div>
             <div class="field">
-                <label for="statut">Statut</label>
+                <label for="statut">{% trans "Statut" %}</label>
                 <select id="statut" name="statut">
-                    <option value="">Tous les statuts</option>
+                    <option value="">{% trans "Tous les statuts" %}</option>
                     {% for value, label in statuts %}
                         <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <button type="submit">Filtrer</button>
+            <button type="submit">{% trans "Filtrer" %}</button>
         </form>
     </div>
 
     <div class="cards">
         <div class="card">
-            <h3>Apprenants actifs</h3>
+            <h3>{% trans "Apprenants actifs" %}</h3>
             <p>{{ kpis.active_apprenants }}</p>
         </div>
         <div class="card">
-            <h3>Formations actives</h3>
+            <h3>{% trans "Formations actives" %}</h3>
             <p>{{ kpis.active_formations }}</p>
         </div>
         <div class="card">
-            <h3>Total inscriptions</h3>
+            <h3>{% trans "Total inscriptions" %}</h3>
             <p>{{ kpis.total_inscriptions }}</p>
         </div>
         <div class="card">
-            <h3>Inscriptions non soldees</h3>
+            <h3>{% trans "Inscriptions non soldées" %}</h3>
             <p>{{ kpis.overdue_inscriptions }}</p>
         </div>
         <div class="card">
-            <h3>Total du</h3>
+            <h3>{% trans "Total dû" %}</h3>
             <p>{{ kpis.total_du }}</p>
         </div>
         <div class="card">
-            <h3>Total paye</h3>
+            <h3>{% trans "Total payé" %}</h3>
             <p>{{ kpis.total_paye }}</p>
         </div>
         <div class="card">
-            <h3>Total restant</h3>
+            <h3>{% trans "Total restant" %}</h3>
             <p>{{ kpis.total_restant }}</p>
         </div>
         <div class="card">
-            <h3>Statuts suivis</h3>
+            <h3>{% trans "Statuts suivis" %}</h3>
             <p>{{ kpis.status_breakdown|length }}</p>
         </div>
     </div>
 
     <div class="panel">
-        <h2>Repartition par statut</h2>
+        <h2>{% trans "Répartition par statut" %}</h2>
         <ul>
             {% for status_code, count in kpis.status_breakdown.items %}
                 <li>{{ status_code }} : {{ count }}</li>
             {% empty %}
-                <li>Aucune inscription pour les filtres en cours.</li>
+                <li>{% trans "Aucune inscription pour les filtres en cours." %}</li>
             {% endfor %}
         </ul>
     </div>
 
     <div class="panel">
-        <h2>Inscriptions recentes / a suivre</h2>
+        <h2>{% trans "Inscriptions récentes / à suivre" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Apprenant</th>
-                    <th>Formation</th>
-                    <th>Statut</th>
-                    <th>Montant prévu</th>
-                    <th>Montant payé</th>
-                    <th>Solde</th>
-                    <th>Statut paiement</th>
-                    <th>Trop-perçu</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Apprenant" %}</th>
+                    <th>{% trans "Formation" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                    <th>{% trans "Montant prévu" %}</th>
+                    <th>{% trans "Montant payé" %}</th>
+                    <th>{% trans "Solde" %}</th>
+                    <th>{% trans "Statut paiement" %}</th>
+                    <th>{% trans "Trop-perçu" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -125,7 +125,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9">Aucune inscription a afficher.</td>
+                    <td colspan="9">{% trans "Aucune inscription à afficher." %}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -133,16 +133,16 @@
     </div>
 
     <div class="panel">
-        <h2>Alertes apprenants</h2>
+        <h2>{% trans "Alertes apprenants" %}</h2>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
             <div>
-                <h3>Inscriptions non soldees les plus anciennes</h3>
+                <h3>{% trans "Inscriptions non soldées les plus anciennes" %}</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Apprenant</th>
-                            <th>Solde</th>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Apprenant" %}</th>
+                            <th>{% trans "Solde" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,7 +154,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">Aucune alerte.</td>
+                            <td colspan="3">{% trans "Aucune alerte." %}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -162,13 +162,13 @@
             </div>
 
             <div>
-                <h3>Apprenants avec les plus gros soldes</h3>
+                <h3>{% trans "Apprenants avec les plus gros soldes" %}</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Apprenant</th>
-                            <th>Inscriptions</th>
-                            <th>Solde total</th>
+                            <th>{% trans "Apprenant" %}</th>
+                            <th>{% trans "Inscriptions" %}</th>
+                            <th>{% trans "Solde total" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -180,7 +180,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">Aucune alerte.</td>
+                            <td colspan="3">{% trans "Aucune alerte." %}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -188,13 +188,13 @@
             </div>
 
             <div>
-                <h3>Formations avec le plus de reste a encaisser</h3>
+                <h3>{% trans "Formations avec le plus de reste à encaisser" %}</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Formation</th>
-                            <th>Inscriptions</th>
-                            <th>Solde total</th>
+                            <th>{% trans "Formation" %}</th>
+                            <th>{% trans "Inscriptions" %}</th>
+                            <th>{% trans "Solde total" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -206,7 +206,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">Aucune alerte.</td>
+                            <td colspan="3">{% trans "Aucune alerte." %}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -216,14 +216,14 @@
     </div>
 
     <div class="panel">
-        <h2>Inscriptions actives non soldees</h2>
+        <h2>{% trans "Inscriptions actives non soldées" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Apprenant</th>
-                    <th>Formation</th>
-                    <th>Solde</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Apprenant" %}</th>
+                    <th>{% trans "Formation" %}</th>
+                    <th>{% trans "Solde" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -236,7 +236,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">Aucune inscription active non soldee.</td>
+                    <td colspan="4">{% trans "Aucune inscription active non soldée." %}</td>
                 </tr>
             {% endfor %}
             </tbody>

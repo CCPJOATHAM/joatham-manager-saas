@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ full_name }} | JOATHAM Manager{% endblock %}
+{% block page_title %}{{ full_name }} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Détail utilisateur" %}{% endblock %}
 {% block content_subtitle %}{% trans "Consultez les informations du compte sans quitter le contexte de votre entreprise." %}{% endblock %}
 
@@ -71,16 +71,16 @@
         <span class="detail-value">{% if target_user.is_active %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Email verifie" %}</span>
+        <span class="detail-label">{% trans "Email vérifié" %}</span>
         <span class="detail-value">{% if target_user.email_verified %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Derniere connexion" %}</span>
-        <span class="detail-value">{{ target_user.last_login|date:"d/m/Y H:i"|default:"-" }}</span>
+        <span class="detail-label">{% trans "Dernière connexion" %}</span>
+        <span class="detail-value">{{ target_user.last_login|date:"SHORT_DATETIME_FORMAT"|default:"-" }}</span>
     </div>
     <div class="detail-card">
-        <span class="detail-label">{% trans "Date de creation" %}</span>
-        <span class="detail-value">{{ target_user.date_joined|date:"d/m/Y H:i" }}</span>
+        <span class="detail-label">{% trans "Date de création" %}</span>
+        <span class="detail-value">{{ target_user.date_joined|date:"SHORT_DATETIME_FORMAT" }}</span>
     </div>
     <div class="detail-card">
         <span class="detail-label">{% trans "Téléphone" %}</span>
@@ -94,7 +94,7 @@
         </span>
         <span class="detail-label">{{ linked_employe.matricule }}{% if linked_employe.poste %} - {{ linked_employe.poste.nom }}{% endif %}</span>
         {% else %}
-        <span class="detail-value">{% trans "Aucune fiche employe RH liee." %}</span>
+        <span class="detail-value">{% trans "Aucune fiche employé RH liée." %}</span>
         {% endif %}
     </div>
 </div>

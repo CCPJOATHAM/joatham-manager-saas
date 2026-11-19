@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from base64 import b64encode
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
@@ -403,7 +404,7 @@ def paiement_inscription_document_pdf(request, inscription_id, paiement_id):
     paiement = get_paiement_by_inscription(entreprise, inscription, paiement_id)
     document = get_paiement_document_data(inscription, paiement)
     if document is None:
-        raise Http404("Document de paiement introuvable.")
+        raise Http404(gettext_lazy("Document de paiement introuvable."))
 
     context = {
         "inscription": inscription,
@@ -436,7 +437,7 @@ def inscription_generate_facture(request, inscription_id):
                 inscription_id=inscription.id,
                 utilisateur=request.user,
             )
-            messages.success(request, _("La facture %(numero)s a ete creee et liee a l'inscription.") % {"numero": facture.numero})
+            messages.success(request, _("La facture %(numero)s a été créée et liée à l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -457,7 +458,7 @@ def inscription_link_existing_facture(request, inscription_id):
                 facture_id=request.POST.get("facture_id"),
                 utilisateur=request.user,
             )
-            messages.success(request, _("La facture %(numero)s a ete liee a l'inscription.") % {"numero": facture.numero})
+            messages.success(request, _("La facture %(numero)s a été liée à l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -478,7 +479,7 @@ def inscription_unlink_facture(request, inscription_id):
                 facture_id=request.POST.get("facture_id") or inscription.facture_id,
                 utilisateur=request.user,
             )
-            messages.success(request, _("La facture %(numero)s a ete deliee de l'inscription.") % {"numero": facture.numero})
+            messages.success(request, _("La facture %(numero)s a été déliée de l'inscription.") % {"numero": facture.numero})
         except (ValidationError, FacturationError) as exc:
             messages.error(request, str(exc))
 
@@ -522,7 +523,7 @@ def apprenants_excel(request):
     return build_xlsx_response(
         filename="apprenants.xlsx",
         sheet_name="Apprenants",
-        headers=[_("Nom"), _("Prenom"), _("Telephone"), _("Email"), _("Date inscription"), _("Actif")],
+        headers=[_("Nom"), _('Prénom'), _('Téléphone'), _("Email"), _("Date inscription"), _("Actif")],
         rows=rows,
     )
 
@@ -557,7 +558,7 @@ def formations_excel(request):
     return build_xlsx_response(
         filename="formations.xlsx",
         sheet_name="Formations",
-        headers=[_("Nom"), _("Description"), _("Prix"), _("Duree"), _("Actif")],
+        headers=[_("Nom"), _("Description"), _("Prix"), _('Durée'), _("Actif")],
         rows=rows,
     )
 
@@ -666,7 +667,7 @@ def inscription_paiements_excel(request, inscription_id):
     return build_xlsx_response(
         filename=f"inscription-{inscription.id}-paiements.xlsx",
         sheet_name="Paiements",
-        headers=[_("Date paiement"), _("Montant"), _("Mode"), _("Reference"), _("Utilisateur"), _("Observations")],
+        headers=[_("Date paiement"), _("Montant"), _("Mode"), _('Référence'), _("Utilisateur"), _("Observations")],
         rows=rows,
     )
 
@@ -684,7 +685,7 @@ def apprenants_dashboard_pdf(request):
     )
     context = {
         **dashboard_data,
-        **build_report_metadata(entreprise=entreprise, title=_("Synthese dashboard apprenants")),
+        **build_report_metadata(entreprise=entreprise, title=_('Synthèse dashboard apprenants')),
     }
     return render_pdf_response(
         request,

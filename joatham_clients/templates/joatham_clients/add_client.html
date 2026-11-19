@@ -1,7 +1,9 @@
 {% extends "joatham_clients/base.html" %}
+{% load i18n %}
 
-{% block clients_title %}Ajouter un client{% endblock %}
-{% block clients_subtitle %}Enregistrez un nouveau client dans la base de votre entreprise.{% endblock %}
+
+{% block clients_title %}{% trans "Ajouter un client" %}{% endblock %}
+{% block clients_subtitle %}{% trans "Enregistrez un nouveau client dans la base de votre entreprise." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -59,19 +61,19 @@
         {% csrf_token %}
         <div class="form-grid">
             <div class="field full">
-                <label for="id_nom">Nom</label>
-                <input id="id_nom" type="text" name="nom" placeholder="Nom du client" required>
+                <label for="id_nom">{% trans "Nom" %}</label>
+                <input id="id_nom" type="text" name="nom" placeholder="{% trans 'Nom du client' %}" required>
             </div>
             <div class="field">
-                <label for="id_telephone">Téléphone</label>
+                <label for="id_telephone">{% trans "Téléphone" %}</label>
                 <input id="id_telephone" type="text" name="telephone" placeholder="+243...">
             </div>
             <div class="field">
-                <label for="id_email">E-mail</label>
-                <input id="id_email" type="email" name="email" placeholder="client@example.com">
+                <label for="id_email">{% trans "E-mail" %}</label>
+                <input id="id_email" type="email" name="email" placeholder="{% trans 'client@example.com' %}">
             </div>
         </div>
-        <button type="submit" class="submit-btn">Enregistrer le client</button>
+        <button type="submit" class="submit-btn">{% trans "Enregistrer le client" %}</button>
     </form>
 </div>
 {% endblock %}

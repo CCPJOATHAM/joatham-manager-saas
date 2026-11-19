@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import logging
 from decimal import Decimal
 
@@ -18,14 +19,14 @@ logger = logging.getLogger(__name__)
 
 def assert_proforma_editable(proforma):
     if proforma.statut in {Proforma.Statut.ANNULEE, Proforma.Statut.CONVERTIE}:
-        raise WorkflowFacturationError("Une proforma annulee ou convertie ne peut plus etre modifiee.")
+        raise WorkflowFacturationError(gettext_lazy('Une proforma annulée ou convertie ne peut plus être modifiée.'))
 
 
 def assert_proforma_convertible(proforma):
     if proforma.facture_convertie_id or proforma.statut == Proforma.Statut.CONVERTIE:
-        raise WorkflowFacturationError("Cette proforma a deja ete convertie en facture definitive.")
+        raise WorkflowFacturationError(gettext_lazy('Cette proforma a déjà été convertie en facture définitive.'))
     if proforma.statut == Proforma.Statut.ANNULEE:
-        raise WorkflowFacturationError("Une proforma annulee ne peut pas etre convertie.")
+        raise WorkflowFacturationError(gettext_lazy('Une proforma annulée ne peut pas être convertie.'))
 
 
 def _sync_proforma_lines(*, proforma, lignes):
@@ -56,9 +57,9 @@ def _normalize_proforma_client_inputs(*, client_id=None, client_nom=""):
     normalized_client_nom = (client_nom or "").strip()
 
     if normalized_client_id and normalized_client_nom:
-        raise WorkflowFacturationError("Choisissez un client enregistre ou saisissez un client occasionnel, mais pas les deux.")
+        raise WorkflowFacturationError(gettext_lazy('Choisissez un client enregistré ou saisissez un client occasionnel, mais pas les deux.'))
     if not normalized_client_id and not normalized_client_nom:
-        raise WorkflowFacturationError("Une proforma doit etre rattachee a un client enregistre ou a un client occasionnel.")
+        raise WorkflowFacturationError(gettext_lazy('Une proforma doit être rattachée à un client enregistré ou à un client occasionnel.'))
 
     return normalized_client_id, normalized_client_nom
 
@@ -80,7 +81,7 @@ def create_proforma(
     lignes=None,
 ):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent creer une proforma.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent créer une proforma.'))
 
     assert_proforma_quota_available(entreprise)
     client_id, client_nom = _normalize_proforma_client_inputs(client_id=client_id, client_nom=client_nom)
@@ -135,7 +136,7 @@ def update_proforma(
     lignes=None,
 ):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent modifier une proforma.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent modifier une proforma.'))
 
     assert_proforma_editable(proforma)
     client_id, client_nom = _normalize_proforma_client_inputs(client_id=client_id, client_nom=client_nom)
@@ -186,9 +187,9 @@ def update_proforma(
 @transaction.atomic
 def cancel_proforma(*, proforma, user):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent annuler une proforma.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent annuler une proforma.'))
     if proforma.statut == Proforma.Statut.CONVERTIE or proforma.facture_convertie_id:
-        raise WorkflowFacturationError("Une proforma convertie ne peut plus etre annulee.")
+        raise WorkflowFacturationError(gettext_lazy('Une proforma convertie ne peut plus être annulée.'))
     if proforma.statut == Proforma.Statut.ANNULEE:
         return proforma
 
@@ -225,7 +226,7 @@ def _build_facture_lines_from_proforma(proforma):
 @transaction.atomic
 def convert_proforma_to_facture(*, proforma, user):
     if not user_has_permission(user, "billing.manage"):
-        raise PermissionFacturationError("Seuls les proprietaires et gestionnaires peuvent convertir une proforma.")
+        raise PermissionFacturationError(gettext_lazy('Seuls les propriétaires et gestionnaires peuvent convertir une proforma.'))
 
     proforma = Proforma.objects.select_for_update().get(id=proforma.id)
     assert_proforma_convertible(proforma)
@@ -251,7 +252,7 @@ def convert_proforma_to_facture(*, proforma, user):
             extra={"entreprise_id": proforma.entreprise_id, "proforma_id": proforma.id, "user_id": user.id},
         )
         raise WorkflowFacturationError(
-            "La conversion en facture definitive a echoue. Verifiez le client, les lignes, le stock et la configuration comptable."
+            gettext_lazy('La conversion en facture définitive a échoué. Vérifiez le client, les lignes, le stock et la configuration comptable.')
         ) from exc
 
     proforma.facture_convertie = facture
