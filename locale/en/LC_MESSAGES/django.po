@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 19:10+0100\n"
+"POT-Creation-Date: 2026-11-19 20:25+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: English\n"
@@ -3313,7 +3313,6 @@ msgstr "%(value_1)s is invalid."
 msgid "%(value_1)s ne peut pas être négatif."
 msgstr "%(value_1)s cannot be negative."
 
-#| msgid "Solde initial"
 msgid "Le solde initial"
 msgstr "The opening balance"
 
@@ -3323,7 +3322,6 @@ msgstr "A session is already open for this cash registers."
 msgid "Seule une session ouverte peut être fermée."
 msgstr "Only an open session can be closed."
 
-#| msgid "Solde réel"
 msgid "Le solde réel"
 msgstr "The actual balance"
 
@@ -5974,9 +5972,6 @@ msgstr "Accompanying"
 
 msgid "Nous vous orientons vers la meilleure façon de démarrer."
 msgstr "We're directing you to the best way to get started."
-
-msgid "Formulaire de question avant inscription"
-msgstr "Question form before registration"
 
 msgid "Envoyez votre question"
 msgstr "Send your question"
