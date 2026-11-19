@@ -76,10 +76,10 @@ class LanguagePreferenceTests(TestCase):
 
         self.assertEqual(get_request_language(request), "en")
 
-    def test_persist_language_preference_accepts_en_and_pt(self):
+    def test_persist_language_preference_accepts_fr_and_en(self):
         entreprise = create_entreprise("Entreprise Langues")
 
-        for language_code in ("en", "pt"):
+        for language_code in ("fr", "en"):
             user = create_user(f"lang-{language_code}", "proprietaire", entreprise)
             request = self._request(user)
 
@@ -87,6 +87,16 @@ class LanguagePreferenceTests(TestCase):
             user.refresh_from_db()
             self.assertEqual(user.preferred_language, language_code)
             self.assertEqual(request.session[LANGUAGE_SESSION_KEY], language_code)
+
+    def test_retired_language_preferences_fall_back_to_french(self):
+        user = Mock(is_authenticated=True, preferred_language="pt")
+        request = self._request(
+            user, session={LANGUAGE_SESSION_KEY: "es"}, cookies={"joatham_language": "pt"}
+        )
+
+        self.assertEqual(get_request_language(request), "fr")
+        self.assertIsNone(persist_language_preference(request, "es"))
+        user.save.assert_not_called()
 
 
 class TenancyServiceTests(TestCase):

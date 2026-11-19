@@ -975,3 +975,30 @@ msgstr "Professional working on a computer"
 
 msgid "Professionnel dans un environnement de bureau"
 msgstr "Professional in an office environment"
+
+msgid "Gérez votre entreprise en toute simplicité."
+msgstr "Manage your business with ease."
+
+msgid "Factures, dépenses, clients et rapports réunis dans un seul espace."
+msgstr "Invoices, expenses, customers and reports in one place."
+
+msgid "Vos activités au même endroit"
+msgstr "All your activities in one place"
+
+msgid "Un suivi clair au quotidien"
+msgstr "Clear day-to-day tracking"
+
+msgid "Un accès adapté à votre rôle"
+msgstr "Access tailored to your role"
+
+msgid "Connectez-vous à votre espace JOATHAM Manager."
+msgstr "Sign in to your JOATHAM Manager workspace."
+
+msgid "Mot de passe oublié ?"
+msgstr "Forgot your password?"
+
+msgid "Créer mon entreprise gratuitement"
+msgstr "Create my company for free"
+
+msgid "Une question ? Contactez-nous"
+msgstr "Have a question? Contact us"

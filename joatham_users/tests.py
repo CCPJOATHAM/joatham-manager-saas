@@ -1350,6 +1350,13 @@ class ProfileTests(TestCase):
         self.assertEqual(self.user.preferred_language, "en")
         self.assertTrue(self.user.profile_photo.name.startswith("profiles/avatar"))
 
+    def test_profile_only_offers_french_and_english(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("profile"))
+
+        choices = response.context["form"].fields["preferred_language"].choices
+        self.assertEqual([code for code, _label in choices], ["fr", "en"])
+
     def test_user_cannot_update_sensitive_profile_fields(self):
         original_email = self.user.email
         original_role = self.user.role
@@ -1362,7 +1369,7 @@ class ProfileTests(TestCase):
                 "id": self.other_user.id,
                 "full_name": "Jean Modifie",
                 "telephone": "+243830000000",
-                "preferred_language": "pt",
+                "preferred_language": "en",
                 "email": "attacker@example.com",
                 "role": User.Role.PROPRIETAIRE,
                 "entreprise": self.autre_entreprise.id,
@@ -1376,5 +1383,5 @@ class ProfileTests(TestCase):
         self.assertEqual(self.user.role, original_role)
         self.assertEqual(self.user.entreprise, original_entreprise)
         self.assertEqual(self.user.telephone, "+243830000000")
-        self.assertEqual(self.user.preferred_language, "pt")
+        self.assertEqual(self.user.preferred_language, "en")
         self.assertNotEqual(self.other_user.telephone, "+243830000000")

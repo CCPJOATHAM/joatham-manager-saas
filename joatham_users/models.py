@@ -8,14 +8,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
-LANGUAGE_CHOICES = (
-    ("fr", _("Français")),
-    ("en", _("English")),
-    ("pt", _("Português")),
-    ("es", _("Español")),
-)
-
-
 def generate_invitation_token():
     return secrets.token_urlsafe(32)
 
@@ -79,7 +71,7 @@ class User(AbstractUser):
     preferred_language = models.CharField(
         _("langue preferee"),
         max_length=5,
-        choices=LANGUAGE_CHOICES,
+        choices=settings.LANGUAGES,
         default="fr",
     )
     profile_photo = models.ImageField(upload_to="profiles/", blank=True, null=True)

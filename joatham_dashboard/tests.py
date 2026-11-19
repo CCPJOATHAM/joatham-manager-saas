@@ -271,33 +271,34 @@ class PublicHomeTests(TestCase):
         self.assertContains(response, "Free")
         self.assertNotContains(response, "Pilotez votre entreprise avec")
 
-    def test_public_home_translates_to_portuguese(self):
-        response = self._switch_public_language("pt")
+    def test_public_language_selectors_only_offer_french_and_english(self):
+        for route in ("public_home", "signup", "public_question_create", "login"):
+            with self.subTest(route=route):
+                response = self.client.get(reverse(route))
+                self.assertContains(response, 'value="fr"')
+                self.assertContains(response, 'value="en"')
+                self.assertNotContains(response, 'value="pt"')
+                self.assertNotContains(response, 'value="es"')
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Gira a sua empresa com")
-        self.assertContains(response, "simplicidade e eficiência")
-        self.assertContains(response, "Começar gratuitamente")
-        self.assertContains(response, "Planos claros para")
-        self.assertContains(response, "começar e evoluir")
-        self.assertContains(response, "96 USD/ano")
-        self.assertContains(response, "0 USD/mês")
-        self.assertContains(response, "Gratuito")
-        self.assertNotContains(response, "Run your business with")
+    def test_public_language_endpoint_rejects_retired_languages(self):
+        self._switch_public_language("en")
 
-    def test_public_home_translates_to_spanish(self):
-        response = self._switch_public_language("es")
+        for language_code in ("pt", "es"):
+            with self.subTest(language=language_code):
+                response = self._switch_public_language(language_code)
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(self.client.session[LANGUAGE_SESSION_KEY], "en")
+                self.assertNotIn("joatham_language", response.cookies)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Gestione su empresa con")
-        self.assertContains(response, "simplicidad y eficiencia")
-        self.assertContains(response, "Comenzar gratis")
-        self.assertContains(response, "Planes claros para")
-        self.assertContains(response, "empezar y crecer")
-        self.assertContains(response, "96 USD/año")
-        self.assertContains(response, "0 USD/mes")
-        self.assertContains(response, "Gratis")
-        self.assertNotContains(response, "Run your business with")
+    def test_login_translates_to_english_and_back_to_french(self):
+        for language_code, heading in (("en", "Sign in"), ("fr", "Connexion")):
+            with self.subTest(language=language_code):
+                response = self.client.post(
+                    reverse("set_language"),
+                    {"language": language_code, "next": reverse("login")},
+                    follow=True,
+                )
+                self.assertContains(response, f'<h1 id="login-heading">{heading}</h1>', html=True)
 
     def test_public_robots_txt_allows_crawling(self):
         response = self.client.get("/robots.txt")
