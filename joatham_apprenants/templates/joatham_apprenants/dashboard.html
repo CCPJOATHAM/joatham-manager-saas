@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block apprenants_title %}{% trans "Dashboard apprenants" %}{% endblock %}
-{% block apprenants_subtitle %}{% trans "Synthese des formations, inscriptions et paiements." %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Synthèse des formations, inscriptions et paiements." %}{% endblock %}
 {% block apprenants_content %}
     <div class="header">
         <div>
@@ -56,15 +56,15 @@
             <p>{{ kpis.total_inscriptions }}</p>
         </div>
         <div class="card">
-            <h3>{% trans "Inscriptions non soldees" %}</h3>
+            <h3>{% trans "Inscriptions non soldées" %}</h3>
             <p>{{ kpis.overdue_inscriptions }}</p>
         </div>
         <div class="card">
-            <h3>{% trans "Total du" %}</h3>
+            <h3>{% trans "Total dû" %}</h3>
             <p>{{ kpis.total_du }}</p>
         </div>
         <div class="card">
-            <h3>{% trans "Total paye" %}</h3>
+            <h3>{% trans "Total payé" %}</h3>
             <p>{{ kpis.total_paye }}</p>
         </div>
         <div class="card">
@@ -78,7 +78,7 @@
     </div>
 
     <div class="panel">
-        <h2>{% trans "Repartition par statut" %}</h2>
+        <h2>{% trans "Répartition par statut" %}</h2>
         <ul>
             {% for status_code, count in kpis.status_breakdown.items %}
                 <li>{{ status_code }} : {{ count }}</li>
@@ -89,7 +89,7 @@
     </div>
 
     <div class="panel">
-        <h2>{% trans "Inscriptions recentes / a suivre" %}</h2>
+        <h2>{% trans "Inscriptions récentes / à suivre" %}</h2>
         <table>
             <thead>
                 <tr>
@@ -125,7 +125,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9">{% trans "Aucune inscription a afficher." %}</td>
+                    <td colspan="9">{% trans "Aucune inscription à afficher." %}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -136,7 +136,7 @@
         <h2>{% trans "Alertes apprenants" %}</h2>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
             <div>
-                <h3>{% trans "Inscriptions non soldees les plus anciennes" %}</h3>
+                <h3>{% trans "Inscriptions non soldées les plus anciennes" %}</h3>
                 <table>
                     <thead>
                         <tr>
@@ -188,7 +188,7 @@
             </div>
 
             <div>
-                <h3>{% trans "Formations avec le plus de reste a encaisser" %}</h3>
+                <h3>{% trans "Formations avec le plus de reste à encaisser" %}</h3>
                 <table>
                     <thead>
                         <tr>
@@ -216,7 +216,7 @@
     </div>
 
     <div class="panel">
-        <h2>{% trans "Inscriptions actives non soldees" %}</h2>
+        <h2>{% trans "Inscriptions actives non soldées" %}</h2>
         <table>
             <thead>
                 <tr>
@@ -236,7 +236,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">{% trans "Aucune inscription active non soldee." %}</td>
+                    <td colspan="4">{% trans "Aucune inscription active non soldée." %}</td>
                 </tr>
             {% endfor %}
             </tbody>

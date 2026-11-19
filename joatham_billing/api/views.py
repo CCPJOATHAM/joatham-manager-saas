@@ -98,4 +98,4 @@ class FactureViewSet(viewsets.ReadOnlyModelViewSet):
             )
         except FacturationError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"id": paiement.id, "detail": gettext_lazy("Paiement enregistre.")}, status=status.HTTP_201_CREATED)
+        return Response({"id": paiement.id, "detail": gettext_lazy('Paiement enregistré.')}, status=status.HTTP_201_CREATED)

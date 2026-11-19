@@ -121,7 +121,7 @@
                             {% elif user_role_label %}
                                 {{ user_role_label }}
                             {% else %}
-                                {% trans "Vue d'ensemble de votre activite." %}
+                                {% trans "Vue d'ensemble de votre activité." %}
                             {% endif %}
                         {% endblock %}
                     </div>
@@ -145,7 +145,7 @@
                         {% block top_actions %}{% endblock %}
                         <form method="post" action="{% url 'logout' %}" class="logout-form">
                             {% csrf_token %}
-                            <button type="submit" class="btn-link danger">{% trans "Deconnexion" %}</button>
+                            <button type="submit" class="btn-link danger">{% trans "Déconnexion" %}</button>
                         </form>
                     </div>
                 </div>

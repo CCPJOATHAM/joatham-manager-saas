@@ -17,7 +17,7 @@
     <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
     <p>{{ entreprise.nom }}</p>
     <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
-    <p>{% trans "Edition du" %} {{ date_generation }}</p>
+    <p>{% trans "Édition du" %} {{ date_generation }}</p>
 </div>
 
 <div class="document-title">{{ report_title }}</div>
@@ -28,7 +28,7 @@
             <th>{% trans "Nom" %}</th>
             <th>{% trans "Description" %}</th>
             <th class="text-right">{% trans "Prix" %}</th>
-            <th>{% trans "Duree" %}</th>
+            <th>{% trans "Durée" %}</th>
             <th>{% trans "Actif" %}</th>
         </tr>
     </thead>
@@ -50,6 +50,6 @@
 </table>
 
 <div class="pdf-footer">
-    {% trans "Document genere le" %} {{ date_footer }}
+    {% trans "Document généré le" %} {{ date_footer }}
 </div>
 {% endblock %}

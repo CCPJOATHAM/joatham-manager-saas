@@ -26,7 +26,7 @@ def generate_facture_for_inscription(*, entreprise, inscription_id, utilisateur)
     ensure_same_entreprise(inscription, entreprise)
 
     if inscription.facture_id:
-        raise ValidationError(gettext_lazy("Cette inscription est deja liee a une facture."))
+        raise ValidationError(gettext_lazy('Cette inscription est déjà liée à une facture.'))
 
     apprenant_label = str(inscription.apprenant)
     formation = inscription.formation
@@ -86,10 +86,10 @@ def link_facture_to_inscription(*, entreprise, inscription_id, facture_id, utili
     if inscription.facture_id == facture.id:
         return facture
     if inscription.facture_id:
-        raise ValidationError(gettext_lazy("Cette inscription est deja liee a une autre facture."))
+        raise ValidationError(gettext_lazy('Cette inscription est déjà liée à une autre facture.'))
 
     if facture.inscriptions_formations.exclude(id=inscription.id).exists():
-        raise ValidationError(gettext_lazy("Cette facture est deja liee a une autre inscription."))
+        raise ValidationError(gettext_lazy('Cette facture est déjà liée à une autre inscription.'))
 
     inscription.facture = facture
     inscription.save(update_fields=["facture"])
@@ -127,15 +127,15 @@ def unlink_facture_from_inscription(*, entreprise, inscription_id, facture_id, u
     ensure_same_entreprise(facture, entreprise)
 
     if not inscription.facture_id:
-        raise ValidationError(gettext_lazy("Aucune facture n'est liee a cette inscription."))
+        raise ValidationError(gettext_lazy("Aucune facture n'est liée à cette inscription."))
     if inscription.facture_id != facture.id:
-        raise ValidationError(gettext_lazy("La facture demandee ne correspond pas a la facture liee a cette inscription."))
+        raise ValidationError(gettext_lazy('La facture demandée ne correspond pas à la facture liée à cette inscription.'))
     if facture.paiements.exists():
-        raise ValidationError(gettext_lazy("Impossible de delier une facture qui comporte deja des paiements."))
+        raise ValidationError(gettext_lazy('Impossible de délier une facture qui comporte déjà des paiements.'))
     if facture.paye or facture.statut == Facture.Statut.PAYEE:
-        raise ValidationError(gettext_lazy("Impossible de delier une facture deja payee."))
+        raise ValidationError(gettext_lazy('Impossible de délier une facture déjà payée.'))
     if facture.statut not in {Facture.Statut.BROUILLON, Facture.Statut.EMISE}:
-        raise ValidationError(gettext_lazy("Impossible de delier cette facture dans son etat actuel."))
+        raise ValidationError(gettext_lazy('Impossible de délier cette facture dans son état actuel.'))
 
     origine_liaison = "inconnue"
     last_link_event = (

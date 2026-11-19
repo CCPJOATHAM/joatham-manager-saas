@@ -16,11 +16,11 @@ MAINTENANCE_MODULE_CHOICES = [
     ("clients", _("Clients")),
     ("factures", _("Factures")),
     ("services", _("Services")),
-    ("depenses", _("Depenses")),
-    ("comptabilite", _("Comptabilite")),
+    ("depenses", _('Dépenses')),
+    ("comptabilite", _('Comptabilité')),
     ("apprenants", _("Apprenants")),
     ("abonnements", _("Abonnements")),
-    ("rapports", _("Rapports avances")),
+    ("rapports", _('Rapports avancés')),
     ("utilisateurs", _("Utilisateurs")),
     ("messages", _("Messagerie")),
 ]
@@ -130,7 +130,7 @@ class EntrepriseSettingsForm(forms.ModelForm):
             "numero_impot": forms.TextInput(attrs={"placeholder": gettext_lazy("Numéro d'impôt")}),
         }
 
-        labels = {'nom': gettext_lazy('Nom'), 'raison_sociale': gettext_lazy('Raison sociale'), 'adresse': gettext_lazy('Adresse'), 'ville': gettext_lazy('Ville'), 'pays': gettext_lazy('Pays'), 'devise': gettext_lazy('Devise'), 'taux_tva_defaut': gettext_lazy('Taux tva defaut'), 'referentiel_comptable': gettext_lazy('Referentiel comptable'), 'telephone': gettext_lazy('Telephone'), 'email': gettext_lazy('Email'), 'banque': gettext_lazy('Banque'), 'compte_bancaire': gettext_lazy('Compte bancaire'), 'rccm': gettext_lazy('Rccm'), 'id_nat': gettext_lazy('Id nat'), 'numero_impot': gettext_lazy('Numero impot'), 'logo': gettext_lazy('Logo')}
+        labels = {'nom': gettext_lazy('Nom'), 'raison_sociale': gettext_lazy('Raison sociale'), 'adresse': gettext_lazy('Adresse'), 'ville': gettext_lazy('Ville'), 'pays': gettext_lazy('Pays'), 'devise': gettext_lazy('Devise'), 'taux_tva_defaut': gettext_lazy('Taux tva défaut'), 'referentiel_comptable': gettext_lazy('Référentiel comptable'), 'telephone': gettext_lazy('Téléphone'), 'email': gettext_lazy('Email'), 'banque': gettext_lazy('Banque'), 'compte_bancaire': gettext_lazy('Compte bancaire'), 'rccm': gettext_lazy('Rccm'), 'id_nat': gettext_lazy('Id nat'), 'numero_impot': gettext_lazy('Numéro impôt'), 'logo': gettext_lazy('Logo')}
 
 
 class PaiementAbonnementForm(forms.ModelForm):
@@ -144,9 +144,9 @@ class PaiementAbonnementForm(forms.ModelForm):
         model = PaiementAbonnement
         fields = ["plan", "duree", "telephone_paiement", "reference_paiement", "preuve_paiement"]
         labels = {
-            "duree": _("Periode"),
-            "telephone_paiement": _("Numero de paiement"),
-            "reference_paiement": _("Reference de paiement"),
+            "duree": _('Période'),
+            "telephone_paiement": _('Numéro de paiement'),
+            "reference_paiement": _('Référence de paiement'),
             "preuve_paiement": _("Preuve de paiement"),
         }
         widgets = {
@@ -171,7 +171,7 @@ class ManualSubscriptionPaymentForm(forms.Form):
         label=_("Plan"),
         empty_label=_("Choisir un plan"),
     )
-    montant = forms.DecimalField(label=_("Montant recu"), min_value=Decimal("0.01"), max_digits=12, decimal_places=2)
+    montant = forms.DecimalField(label=_('Montant reçu'), min_value=Decimal("0.01"), max_digits=12, decimal_places=2)
     devise = forms.CharField(label=_("Devise"), max_length=10)
     montant_usd = forms.DecimalField(
         label=_("Montant USD"),
@@ -187,10 +187,10 @@ class ManualSubscriptionPaymentForm(forms.Form):
         max_digits=14,
         decimal_places=4,
     )
-    methode_paiement = forms.ChoiceField(label=_("Methode de paiement"), choices=PaiementAbonnement.Methode.choices)
-    reference_paiement = forms.CharField(label=_("Reference ou note"), required=False, max_length=120)
+    methode_paiement = forms.ChoiceField(label=_('Méthode de paiement'), choices=PaiementAbonnement.Methode.choices)
+    reference_paiement = forms.CharField(label=_('Référence ou note'), required=False, max_length=120)
     periode_jours = forms.TypedChoiceField(
-        label=_("Periode payee"),
+        label=_('Période payée'),
         choices=MANUAL_PAYMENT_PERIOD_CHOICES,
         coerce=int,
     )
@@ -254,17 +254,17 @@ class PlatformSettingsForm(forms.ModelForm):
         ]
         labels = {
             "nom_plateforme": gettext_lazy("Nom plateforme"),
-            "email_systeme": gettext_lazy("Email systeme"),
-            "devise_defaut": gettext_lazy("Devise par defaut"),
+            "email_systeme": gettext_lazy('Email système'),
+            "devise_defaut": gettext_lazy('Devise par défaut'),
             "devise_plateforme": gettext_lazy("Devise plateforme"),
             "exchange_rate_provider": gettext_lazy("Provider taux de change"),
-            "exchange_rate_api_key": gettext_lazy("Cle API taux de change"),
+            "exchange_rate_api_key": gettext_lazy('Clé API taux de change'),
             "exchange_rate_cache_hours": gettext_lazy("Cache taux en heures"),
             "allow_manual_exchange_rate_fallback": gettext_lazy("Autoriser fallback manuel"),
-            "duree_essai_jours": gettext_lazy("Duree de compatibilite essai"),
+            "duree_essai_jours": gettext_lazy('Durée de compatibilité essai'),
             "mode_maintenance": gettext_lazy("Mode maintenance"),
             "message_maintenance": gettext_lazy("Message maintenance"),
-            "maintenance_allowed_ips": gettext_lazy("IPs autorisees"),
+            "maintenance_allowed_ips": gettext_lazy('IPs autorisées'),
             "maintenance_modules": gettext_lazy("Modules en maintenance"),
         }
         widgets = {

@@ -160,7 +160,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("96.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": gettext_lazy("Facturation professionnelle, POS simple, proformas, stock simple et depenses pour une petite activite."),
+        "description": gettext_lazy('Facturation professionnelle, POS simple, proformas, stock simple et dépenses pour une petite activité.'),
         "modules_inclus": STARTER_PLAN_MODULES,
         "max_utilisateurs": 3,
         "max_factures_mois": 100,
@@ -176,7 +176,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("144.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": gettext_lazy("Gestion complete avec caisse, apprenants, stock complet, proformas avancees, rapports et exports."),
+        "description": gettext_lazy('Gestion complète avec caisse, apprenants, stock complet, proformas avancées, rapports et exports.'),
         "modules_inclus": PRO_PLAN_MODULES,
         "max_utilisateurs": 10,
         "max_factures_mois": 1000,
@@ -192,7 +192,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("192.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": gettext_lazy("Acces complet avec RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."),
+        "description": gettext_lazy('Accès complet avec RH, comptabilité avancée, rapports avancés, audit avancé et accompagnement prioritaire.'),
         "modules_inclus": PREMIUM_PLAN_MODULES,
         "max_utilisateurs": None,
         "max_factures_mois": None,
@@ -205,27 +205,27 @@ DEFAULT_PAID_PLANS = [
 PLAN_FEATURE_SUMMARY = {
     FREE_PLAN_CODE: [
         _("Tableau de bord simple, clients et factures A4 simples"),
-        _("Produits, services et depenses simples avec quotas limites"),
+        _('Produits, services et dépenses simples avec quotas limités'),
         _("Rapports basiques et support basique"),
     ],
     STARTER_PLAN_CODE: [
         _("Tout Gratuit avec volumes plus confortables"),
         _("Factures A4 professionnelles et POS simple"),
         _("Proformas simples, stock simple et personnalisation de base"),
-        _("Jusqu'a 3 utilisateurs et support standard"),
+        _("Jusqu'à 3 utilisateurs et support standard"),
     ],
     PRO_PLAN_CODE: [
         _("Tout Starter"),
-        _("POS complet, proformas avancees et conversion en facture"),
-        _("Caisse, stock complet, apprenants, recus et quittances"),
-        _("Rapports detailles, roles, permissions et exports PDF/Excel"),
+        _('POS complet, proformas avancées et conversion en facture'),
+        _('Caisse, stock complet, apprenants, reçus et quittances'),
+        _('Rapports détaillés, rôles, permissions et exports PDF/Excel'),
     ],
     PREMIUM_PLAN_CODE: [
         _("Tout Pro"),
-        _("Acces complet a tous les modules declares"),
-        _("RH, comptabilite avancee, rapports avances et audit avance"),
-        _("Validations internes, documents personnalises et plusieurs caisses"),
-        _("Support prioritaire et accompagnement a la configuration"),
+        _('Accès complet à tous les modules déclarés'),
+        _('RH, comptabilité avancée, rapports avancés et audit avancé'),
+        _('Validations internes, documents personnalisés et plusieurs caisses'),
+        _('Support prioritaire et accompagnement à la configuration'),
     ],
 }
 PLAN_EXCLUSION_SUMMARY = {
@@ -239,37 +239,37 @@ PLAN_EXCLUSION_SUMMARY = {
         _("Export Excel"),
         _("Apprenants"),
         _("Ressources humaines"),
-        _("Comptabilite avancee"),
-        _("Rapports avances"),
-        _("Audit avance"),
+        _('Comptabilité avancée'),
+        _('Rapports avancés'),
+        _('Audit avancé'),
         _("Utilisateurs multiples"),
     ],
     STARTER_PLAN_CODE: [
-        _("Caisse complete"),
+        _('Caisse complète'),
         _("Inventaire physique"),
         _("Conversion proforma"),
-        _("Export Excel avance"),
+        _('Export Excel avancé'),
         _("Apprenants"),
         _("Ressources humaines"),
-        _("Comptabilite avancee"),
-        _("Rapports avances"),
-        _("Audit avance"),
+        _('Comptabilité avancée'),
+        _('Rapports avancés'),
+        _('Audit avancé'),
     ],
     PRO_PLAN_CODE: [
-        _("Ressources humaines completes"),
-        _("Rapports Premium Business avances"),
-        _("Audit avance complet"),
-        _("Validations internes avancees"),
+        _('Ressources humaines complètes'),
+        _('Rapports Premium Business avancés'),
+        _('Audit avancé complet'),
+        _('Validations internes avancées'),
         _("Messagerie"),
         _("Mobile Money"),
     ],
     PREMIUM_PLAN_CODE: [],
 }
 PLAN_COMMERCIAL_DESCRIPTIONS = {
-    FREE_PLAN_CODE: _("Plan decouverte permanent pour demarrer avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
-    STARTER_PLAN_CODE: _("Gestion professionnelle pour petite activite : factures A4, POS simple, proformas simples, stock simple et depenses."),
-    PRO_PLAN_CODE: _("Gestion complete pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports detailles et exports."),
-    PREMIUM_PLAN_CODE: _("Premium Business : acces complet, RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."),
+    FREE_PLAN_CODE: _('Plan découverte permanent pour démarrer avec tableau de bord, clients, produits/services, factures A4 simples et dépenses limitées.'),
+    STARTER_PLAN_CODE: _('Gestion professionnelle pour petite activité : factures A4, POS simple, proformas simples, stock simple et dépenses.'),
+    PRO_PLAN_CODE: _('Gestion complète pour PME : caisse, apprenants, stock complet, POS complet, conversion proforma, rapports détaillés et exports.'),
+    PREMIUM_PLAN_CODE: _('Premium Business : accès complet, RH, comptabilité avancée, rapports avancés, audit avancé et accompagnement prioritaire.'),
 }
 PLAN_COMMERCIAL_NAMES = {
     FREE_PLAN_CODE: _("Gratuit"),
@@ -486,7 +486,7 @@ def get_or_create_free_plan():
         "devise": get_platform_currency(),
         "duree_jours": FREE_PLAN_DURATION_DAYS,
         "actif": True,
-        "description": gettext_lazy("Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
+        "description": gettext_lazy('Plan découverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et dépenses limitées.'),
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
@@ -605,7 +605,7 @@ def get_subscription_monthly_price_usd(*, plan):
 def get_subscription_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
+        raise ValueError(gettext_lazy("Durée d'abonnement invalide."))
     monthly_price = get_subscription_monthly_price_usd(plan=plan)
     if duree == PaiementAbonnement.Duree.ANNUEL:
         return (
@@ -629,7 +629,7 @@ def get_subscription_annual_savings_usd(*, plan):
 def get_subscription_equivalent_monthly_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
+        raise ValueError(gettext_lazy("Durée d'abonnement invalide."))
     divisor = duration["multiplier"] or Decimal("1")
     return (get_subscription_price_usd(plan=plan, duree=duree) / divisor).quantize(SUBSCRIPTION_PRICE_QUANTUM)
 
@@ -637,7 +637,7 @@ def get_subscription_equivalent_monthly_price_usd(*, plan, duree):
 def get_subscription_payment_duration_days(duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
+        raise ValueError(gettext_lazy("Durée d'abonnement invalide."))
     return duration["days"]
 
 
@@ -899,7 +899,7 @@ def refuse_subscription_plan_request(*, entreprise, super_admin=None, notes_vali
 @transaction.atomic
 def validate_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
-        raise ValueError(gettext_lazy("Seuls les paiements en attente peuvent etre valides."))
+        raise ValueError(gettext_lazy('Seuls les paiements en attente peuvent être validés.'))
     duration_days = get_subscription_payment_duration_days(paiement.duree)
     today = timezone.localdate()
     subscription = activate_subscription_for_entreprise(
@@ -962,17 +962,17 @@ def register_manual_subscription_payment(
     if entreprise is None:
         raise ValueError(gettext_lazy("Entreprise introuvable."))
     if plan is None:
-        raise ValueError(gettext_lazy("Veuillez selectionner un plan."))
+        raise ValueError(gettext_lazy('Veuillez sélectionner un plan.'))
     if not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
         raise ValueError(gettext_lazy("Plan indisponible."))
 
     amount = Decimal(str(montant or "0")).quantize(Decimal("0.01"))
     if amount <= 0:
-        raise ValueError(gettext_lazy("Le montant du paiement doit etre positif."))
+        raise ValueError(gettext_lazy('Le montant du paiement doit être positif.'))
 
     days = int(periode_jours or 0)
     if days not in {30, 90, 180, 365}:
-        raise ValueError(gettext_lazy("La periode payee est invalide."))
+        raise ValueError(gettext_lazy('La période payée est invalide.'))
 
     payment_date = date_paiement or timezone.localdate()
     paid_at = timezone.make_aware(datetime.combine(payment_date, datetime.min.time()))
@@ -1022,14 +1022,14 @@ def register_manual_subscription_payment(
         elif taux_change_reference:
             conversion_rate = Decimal(str(taux_change_reference))
             if conversion_rate <= 0:
-                raise ValueError(gettext_lazy("Le taux manuel doit etre positif."))
+                raise ValueError(gettext_lazy('Le taux manuel doit être positif.'))
             usd_amount = (amount / conversion_rate).quantize(Decimal("0.01"))
             rate_source = "manuel"
             rate_date = timezone.now()
         elif montant_usd:
             usd_amount = Decimal(str(montant_usd)).quantize(Decimal("0.01"))
             if usd_amount <= 0:
-                raise ValueError(gettext_lazy("Le montant USD manuel doit etre positif."))
+                raise ValueError(gettext_lazy('Le montant USD manuel doit être positif.'))
             conversion_rate = (amount / usd_amount).quantize(Decimal("0.0001"))
             rate_source = "manuel"
             rate_date = timezone.now()
@@ -1107,7 +1107,7 @@ def register_manual_subscription_payment(
 @transaction.atomic
 def refuse_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
-        raise ValueError(gettext_lazy("Seuls les paiements en attente peuvent etre refuses."))
+        raise ValueError(gettext_lazy('Seuls les paiements en attente peuvent être refusés.'))
     paiement.statut = PaiementAbonnement.Statut.REFUSE
     paiement.date_validation = timezone.now()
     paiement.valide_par = super_admin
@@ -1133,7 +1133,7 @@ def start_trial_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut
         or existing_subscription.statut != AbonnementEntreprise.Statut.ESSAI
         or not existing_subscription.essai
     ):
-        raise ValueError(gettext_lazy("La creation de nouveaux essais est desactivee. Activez le plan Gratuit ou un plan payant."))
+        raise ValueError(gettext_lazy('La création de nouveaux essais est désactivée. Activez le plan Gratuit ou un plan payant.'))
 
     date_debut = date_debut or timezone.localdate()
     duration = trial_days or get_default_trial_days() or plan.duree_jours

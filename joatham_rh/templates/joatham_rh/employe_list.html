@@ -1,15 +1,15 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Suivez les dossiers employes de votre entreprise, avec matricule, poste RH et statut." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Suivez les dossiers employés de votre entreprise, avec matricule, poste RH et statut." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
-        <h2>{% trans "Employes" %}</h2>
-        <p>{% trans "Gestion RH operationnelle : cet espace permet de gerer les employes, postes RH, presences, conges et documents selon vos permissions." %}</p>
+        <h2>{% trans "Employés" %}</h2>
+        <p>{% trans "Gestion RH opérationnelle : cet espace permet de gérer les employés, postes RH, presences, congés et documents selon vos permissions." %}</p>
     </div>
-    <span class="rh-count">{{ employe_count }} {% trans "employe(s)" %}</span>
+    <span class="rh-count">{{ employe_count }} {% trans "employé(s)" %}</span>
 </div>
 
 <div class="rh-tool-row">
@@ -43,7 +43,7 @@
         </select>
     </div>
     <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
-    <a href="{% url 'rh_employe_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+    <a href="{% url 'rh_employe_list' %}" class="rh-action-link">{% trans "Réinitialiser" %}</a>
 </form>
 
 {% if employes %}
@@ -70,12 +70,12 @@
                     <td>
                         {% if row.linked_user %}
                             {% if row.linked_user.is_active %}
-                            <span class="rh-badge success">{% trans "Lie" %}</span>
+                            <span class="rh-badge success">{% trans "Lié" %}</span>
                             {% else %}
                             <span class="rh-badge warning">{% trans "Compte inactif" %}</span>
                             {% endif %}
                         {% else %}
-                        <span class="rh-badge">{% trans "Non lie" %}</span>
+                        <span class="rh-badge">{% trans "Non lié" %}</span>
                         {% endif %}
                     </td>
                     <td>{{ row.instance.get_type_contrat_display }}</td>
@@ -101,10 +101,10 @@
 {% else %}
 <div class="rh-table-shell">
     <div class="rh-empty">
-        <h3>{% trans "Aucun employe enregistre" %}</h3>
-        <p>{% trans "Ajoutez un premier employe pour constituer le dossier RH de votre entreprise." %}</p>
+        <h3>{% trans "Aucun employé enregistré" %}</h3>
+        <p>{% trans "Ajoutez un premier employé pour constituer le dossier RH de votre entreprise." %}</p>
         {% if can_manage_rh_ui %}
-        <a href="{% url 'rh_employe_create' %}" class="btn-link primary">{% trans "Ajouter un employe" %}</a>
+        <a href="{% url 'rh_employe_create' %}" class="btn-link primary">{% trans "Ajouter un employé" %}</a>
         {% endif %}
     </div>
 </div>

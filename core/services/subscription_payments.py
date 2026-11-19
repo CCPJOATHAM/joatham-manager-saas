@@ -348,7 +348,7 @@ def _build_unique_external_reference():
         reference = generate_external_reference()
         if not PaiementAbonnement.objects.filter(external_reference=reference).exists():
             return reference
-    raise PaymentProviderError(gettext_lazy("Impossible de generer une reference paiement unique."))
+    raise PaymentProviderError(gettext_lazy('Impossible de générer une référence paiement unique.'))
 
 
 def _get_provider_expected_amount_and_currency(*, provider_client, amount_usd, estimate):

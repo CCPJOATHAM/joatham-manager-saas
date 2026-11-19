@@ -139,7 +139,7 @@ def profile_view(request):
     if request.method == "POST" and form.is_valid():
         user = form.save()
         persist_language_preference(request, user.preferred_language)
-        messages.success(request, _("Votre profil a ete mis a jour."))
+        messages.success(request, _('Votre profil a été mis à jour.'))
         return redirect("profile")
 
     return render(
@@ -189,7 +189,7 @@ def user_list(request):
             "quota_used": quota_used,
             "quota_remaining": quota_remaining,
             "quota_is_unlimited": quota_limit is None,
-            "quota_label": _("Illimite") if quota_limit is None else quota_limit,
+            "quota_label": _('Illimité') if quota_limit is None else quota_limit,
             **user_metrics,
         },
     )
@@ -213,7 +213,7 @@ def user_invite(request):
         except (InvitationEmailError, PlanQuotaExceeded, ValueError) as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Invitation envoyee avec succes."))
+            messages.success(request, _('Invitation envoyée avec succès.'))
             return redirect("user_list")
 
     return render(
@@ -233,7 +233,7 @@ def user_create(request):
 
     if request.method == "POST" and form.is_valid():
         if not form.cleaned_data["password"]:
-            form.add_error("password", _("Le mot de passe est obligatoire pour creer un utilisateur."))
+            form.add_error("password", _('Le mot de passe est obligatoire pour créer un utilisateur.'))
         else:
             try:
                 create_company_user(
@@ -256,8 +256,8 @@ def user_create(request):
         "joatham_users/user_form.html",
         {
             "form": form,
-            "page_title": _("Creer un utilisateur"),
-            "submit_label": _("Creer l'utilisateur"),
+            "page_title": _('Créer un utilisateur'),
+            "submit_label": _("Créer l'utilisateur"),
             "form_mode": "create",
         },
     )
@@ -320,8 +320,8 @@ def user_toggle_active(request, user_id):
     except ValueError as exc:
         messages.error(request, str(exc))
     else:
-        status_label = _("active") if target_user.is_active else _("desactive")
-        messages.success(request, _("Utilisateur %(status)s avec succes.") % {"status": status_label})
+        status_label = _('activé') if target_user.is_active else _('désactivé')
+        messages.success(request, _('Utilisateur %(status)s avec succès.') % {"status": status_label})
     return redirect("user_list")
 
 
@@ -372,7 +372,7 @@ def user_remove_access(request, user_id):
     except ValueError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("Acces retire avec succes."))
+        messages.success(request, _('Accès retire avec succès.'))
     return redirect("user_list")
 
 
@@ -387,7 +387,7 @@ def user_invitation_resend(request, invitation_id):
     except (InvitationEmailError, ValueError) as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("Invitation renvoyee avec succes."))
+        messages.success(request, _('Invitation renvoyée avec succès.'))
     return redirect("user_list")
 
 
@@ -402,7 +402,7 @@ def user_invitation_cancel(request, invitation_id):
     except ValueError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("Invitation annulee avec succes."))
+        messages.success(request, _('Invitation annulée avec succès.'))
     return redirect("user_list")
 
 
@@ -421,7 +421,7 @@ def user_invitation_accept(request, token):
             form.add_error(None, str(exc))
         else:
             login(request, user)
-            messages.success(request, _("Votre acces a ete active."))
+            messages.success(request, _('Votre accès a été active.'))
             return redirect(get_default_dashboard_name(user))
 
     return render(

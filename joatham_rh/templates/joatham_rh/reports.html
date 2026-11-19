@@ -8,7 +8,7 @@
 <div class="rh-dashboard-hero">
     <div>
         <h2>{% trans "Tableau de bord RH" %}</h2>
-        <p>{% trans "Vue d'ensemble de la gestion des ressources humaines avec les donnees reelles de votre entreprise." %} {{ report.month_start }} - {{ report.month_end }}</p>
+        <p>{% trans "Vue d'ensemble de la gestion des ressources humaines avec les données réelles de votre entreprise." %} {{ report.month_start }} - {{ report.month_end }}</p>
     </div>
     <div class="rh-actions">
         <a href="{% url 'rh_reports_export_csv' %}" class="rh-action-link">{% trans "Exporter CSV" %}</a>
@@ -39,9 +39,9 @@
     </div>
     <div class="rh-kpi-card">
         <div class="rh-kpi-main">
-            <span class="rh-kpi-label">{% trans "Conges en Attente" %}</span>
+            <span class="rh-kpi-label">{% trans "Congés en Attente" %}</span>
             <span class="rh-kpi-value">{{ report.conges_en_attente }}</span>
-            <span class="rh-kpi-note">{% trans "Demandes a traiter" %}</span>
+            <span class="rh-kpi-note">{% trans "Demandes à traiter" %}</span>
         </div>
         <span class="rh-kpi-icon warning" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path></svg>
@@ -62,7 +62,7 @@
 <div class="rh-card">
     <h3 class="rh-section-title">
         <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
-        {% trans "Activite recente" %}
+        {% trans "Activité récente" %}
     </h3>
     {% if report.recent_employes or report.recent_presences or report.recent_conges or report.recent_documents %}
         <div class="rh-activity-list">
@@ -83,7 +83,7 @@
                 <div class="rh-activity-left">
                     <span class="rh-activity-dot warning" aria-hidden="true"></span>
                     <div>
-                        <strong>{% trans "Demande de conge" %}</strong>
+                        <strong>{% trans "Demande de congé" %}</strong>
                         <span>{{ conge.employe.nom }} {{ conge.employe.prenom }}</span>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
                 <div class="rh-activity-left">
                     <span class="rh-activity-dot" aria-hidden="true"></span>
                     <div>
-                        <strong>{% trans "Presence" %}</strong>
+                        <strong>{% trans "Présence" %}</strong>
                         <span>{{ presence.employe.nom }} {{ presence.employe.prenom }} - {{ presence.date }}</span>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <p class="rh-muted">{% trans "Aucune activite RH recente a afficher." %}</p>
+        <p class="rh-muted">{% trans "Aucune activité RH récente à afficher." %}</p>
     {% endif %}
 </div>
 
@@ -141,7 +141,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p class="rh-muted">{% trans "Aucun employe recent." %}</p>
+    <p class="rh-muted">{% trans "Aucun employé récent." %}</p>
     {% endif %}
 </div>
 
@@ -154,12 +154,12 @@
     <div class="rh-mini-card success">
         <span class="rh-kpi-label">{% trans "Documents RH" %}</span>
         <strong>{{ report.documents_total }}</strong>
-        <p class="rh-muted">{% trans "Documents rattaches aux dossiers employes." %}</p>
+        <p class="rh-muted">{% trans "Documents rattachés aux dossiers employés." %}</p>
     </div>
     <div class="rh-mini-card accent">
-        <span class="rh-kpi-label">{% trans "Absences et conges du mois" %}</span>
+        <span class="rh-kpi-label">{% trans "Absences et congés du mois" %}</span>
         <strong>{{ report.absences_mois }}</strong>
-        <p class="rh-muted">{% trans "Absences et conges saisis pendant le mois." %}</p>
+        <p class="rh-muted">{% trans "Absences et congés saisis pendant le mois." %}</p>
     </div>
 </div>
 
@@ -169,7 +169,7 @@
             <span class="rh-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19v-6"></path><path d="M12 19V9"></path><path d="M16 19v-4"></path><path d="M20 19V7"></path></svg></span>
             {% trans "Rapports RH" %}
         </h3>
-        <p class="rh-muted">{% trans "Repartition actuelle des effectifs par poste RH." %}</p>
+        <p class="rh-muted">{% trans "Répartition actuelle des effectifs par poste RH." %}</p>
         {% if report.repartition_postes %}
         <div class="rh-table-shell">
             <div class="table-scroll">
@@ -192,7 +192,7 @@
             </div>
         </div>
         {% else %}
-        <p class="rh-muted">{% trans "Aucune repartition disponible." %}</p>
+        <p class="rh-muted">{% trans "Aucune répartition disponible." %}</p>
         {% endif %}
     </div>
 </div>

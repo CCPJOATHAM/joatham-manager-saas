@@ -3,9 +3,9 @@
 
 {% block page_title %}{% trans "Dépenses" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% block depenses_title %}{% trans "Dépenses" %}{% endblock %}{% endblock %}
-{% block content_subtitle %}{% block depenses_subtitle %}{% trans "Suivi des sorties financieres de votre entreprise dans une interface claire et professionnelle." %}{% endblock %}{% endblock %}
+{% block content_subtitle %}{% block depenses_subtitle %}{% trans "Suivi des sorties financières de votre entreprise dans une interface claire et professionnelle." %}{% endblock %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'depenses' %}" class="btn-link">{% trans "Liste des depenses" %}</a>
+<a href="{% url 'depenses' %}" class="btn-link">{% trans "Liste des dépenses" %}</a>
 <a href="{% url 'depenses_pdf' %}{% if request.GET.q or request.GET.date_debut or request.GET.date_fin %}?q={{ request.GET.q|urlencode }}&date_debut={{ request.GET.date_debut|urlencode }}&date_fin={{ request.GET.date_fin|urlencode }}{% endif %}" class="btn-link primary">{% trans "Exporter en PDF" %}</a>
 {% endblock %}

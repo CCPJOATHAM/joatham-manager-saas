@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Paiement" %} {{ payment.id }}{% endblock %}
 {% block content_title %}{% trans "Paiement" %} {{ payment.reference|default:payment.id }}{% endblock %}
-{% block content_subtitle %}{% trans "Detail, validation, liens facture et caisse pour cette transaction." %}{% endblock %}
+{% block content_subtitle %}{% trans "Détail, validation, liens facture et caisse pour cette transaction." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'payment_list' %}" class="btn-link">{% trans "Retour paiements" %}</a>
@@ -15,7 +15,7 @@
   <div class="payments-detail-grid">
     <div class="payments-panel">
       <div class="payments-panel-header">
-        <h3>{% trans "Detail transaction" %}</h3>
+        <h3>{% trans "Détail transaction" %}</h3>
         <p>{% trans "Montant" %} {{ amount_display }} {% trans "via" %} {{ payment.get_method_display }}.</p>
       </div>
       <div class="payments-panel-body">
@@ -23,19 +23,19 @@
           <div><dt>{% trans "Statut" %}</dt><dd><span class="payments-badge {% if payment.status == 'confirme' %}confirmed{% elif payment.status == 'en_attente' %}pending{% elif payment.status == 'rejete' %}rejected{% else %}cancelled{% endif %}">{{ payment.get_status_display }}</span></dd></div>
           <div><dt>{% trans "Type" %}</dt><dd>{{ payment.get_transaction_type_display }}</dd></div>
           <div><dt>{% trans "Moyen" %}</dt><dd>{{ payment.get_method_display }}</dd></div>
-          <div><dt>{% trans "Reference" %}</dt><dd>{{ payment.reference|default:"-" }}</dd></div>
+          <div><dt>{% trans "Référence" %}</dt><dd>{{ payment.reference|default:"-" }}</dd></div>
           <div><dt>{% trans "Date transaction" %}</dt><dd>{{ payment.transaction_date|date:"SHORT_DATETIME_FORMAT" }}</dd></div>
           <div><dt>{% trans "Date validation" %}</dt><dd>{% if payment.validation_date %}{{ payment.validation_date|date:"SHORT_DATETIME_FORMAT" }}{% else %}-{% endif %}</dd></div>
-          <div><dt>{% trans "Cree par" %}</dt><dd>{{ payment.created_by|default:"-" }}</dd></div>
+          <div><dt>{% trans "Créé par" %}</dt><dd>{{ payment.created_by|default:"-" }}</dd></div>
           <div><dt>{% trans "Valide par" %}</dt><dd>{{ payment.validated_by|default:"-" }}</dd></div>
-          <div><dt>{% trans "Telephone" %}</dt><dd>{{ payment.phone_number|default:"-" }}</dd></div>
-          <div><dt>{% trans "Operateur" %}</dt><dd>{% if payment.mobile_operator %}{{ payment.get_mobile_operator_display }}{% else %}-{% endif %}</dd></div>
+          <div><dt>{% trans "Téléphone" %}</dt><dd>{{ payment.phone_number|default:"-" }}</dd></div>
+          <div><dt>{% trans "Opérateur" %}</dt><dd>{% if payment.mobile_operator %}{{ payment.get_mobile_operator_display }}{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Facture" %}</dt><dd>{% if payment.facture %}<a href="{% url 'facture_detail' payment.facture.id %}">{{ payment.facture.numero }}</a>{% else %}-{% endif %}</dd></div>
-          <div><dt>{% trans "Depense" %}</dt><dd>{% if payment.depense %}{{ payment.depense.description }}{% else %}-{% endif %}</dd></div>
+          <div><dt>{% trans "Dépense" %}</dt><dd>{% if payment.depense %}{{ payment.depense.description }}{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Caisse" %}</dt><dd>{% if payment.caisse %}<a href="{% url 'caisse_detail' payment.caisse.id %}">{{ payment.caisse.nom }}</a>{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Session caisse" %}</dt><dd>{% if payment.session_caisse %}<a href="{% url 'caisse_session_detail' payment.session_caisse.id %}">{{ payment.session_caisse.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</a>{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Mouvement caisse" %}</dt><dd>{% if payment.mouvement_caisse %}<a href="{% url 'caisse_session_detail' payment.mouvement_caisse.session_id %}">{% trans "Voir mouvement" %}</a>{% else %}-{% endif %}</dd></div>
-          <div><dt>{% trans "Piece" %}</dt><dd>{% if payment.attachment %}<a href="{{ payment.attachment.url }}" target="_blank">{% trans "Voir piece" %}</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>{% trans "Pièce" %}</dt><dd>{% if payment.attachment %}<a href="{{ payment.attachment.url }}" target="_blank">{% trans "Voir pièce" %}</a>{% else %}-{% endif %}</dd></div>
         </dl>
       </div>
     </div>
@@ -43,7 +43,7 @@
     <div class="payments-panel">
       <div class="payments-panel-header">
         <h3>{% trans "Actions" %}</h3>
-        <p>{% trans "Un paiement confirme lie a une facture ou a une caisse se corrige par une operation separee." %}</p>
+        <p>{% trans "Un paiement confirmé lié à une facture ou à une caisse se corrige par une opération séparée." %}</p>
       </div>
       <div class="payments-panel-body">
         {% if payment.status == 'en_attente' and can_validate_payment %}
@@ -78,7 +78,7 @@
   <div class="payments-panel">
     <div class="payments-panel-header">
       <h3>{% trans "Note" %}</h3>
-      <p>{% trans "Informations internes rattachees a la transaction." %}</p>
+      <p>{% trans "Informations internes rattachées à la transaction." %}</p>
     </div>
     <div class="payments-panel-body">
       <p>{{ payment.note|linebreaksbr|default:_('Aucune note.') }}</p>

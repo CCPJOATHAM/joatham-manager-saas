@@ -1,10 +1,10 @@
 {% extends "joatham_apprenants/base.html" %}
 {% load i18n %}
 
-{% block apprenants_title %}{% trans "Creer un apprenant" %}{% endblock %}
-{% block apprenants_subtitle %}{% trans "Ajouter un nouvel apprenant a l'entreprise." %}{% endblock %}
+{% block apprenants_title %}{% trans "Créer un apprenant" %}{% endblock %}
+{% block apprenants_subtitle %}{% trans "Ajouter un nouvel apprenant à l'entreprise." %}{% endblock %}
 {% block apprenants_content %}
-    <h1>{% trans "Creer un apprenant" %}</h1>
+    <h1>{% trans "Créer un apprenant" %}</h1>
     <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
 
     <form method="post">
@@ -15,7 +15,7 @@
                 <input id="nom" name="nom" required>
             </div>
             <div class="field">
-                <label for="prenom">{% trans "Prenom" %}</label>
+                <label for="prenom">{% trans "Prénom" %}</label>
                 <input id="prenom" name="prenom">
             </div>
             <div class="field">

@@ -1884,7 +1884,7 @@
                 {% include "includes/language_selector.html" with language_selector_id="signup-language-select" %}
             </div>
             <h2>{% trans "Inscription entreprise" %}</h2>
-            <p class="subtitle">{% trans "Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloques proprement." %}</p>
+            <p class="subtitle">{% trans "Si vous avez déjà un compte, connectez-vous directement. Les doublons d'e-mail sont bloqués proprement." %}</p>
 
             {% if form.non_field_errors %}
             <div class="error-box">
@@ -1963,7 +1963,7 @@
                             <ul class="password-rule-list">
                                 <li class="password-rule" data-password-rule="length">
                                     <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                    <span>{% blocktrans trimmed %}Au moins {{ password_min_length }} caracteres{% endblocktrans %}</span>
+                                    <span>{% blocktrans trimmed %}Au moins {{ password_min_length }} caractères{% endblocktrans %}</span>
                                 </li>
                                 <li class="password-rule" data-password-rule="uppercase">
                                     <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
@@ -1979,14 +1979,14 @@
                                 </li>
                                 <li class="password-rule" data-password-rule="special">
                                     <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                    <span>{% trans "Au moins un caractere special, par exemple @" %}</span>
+                                    <span>{% trans "Au moins un caractère spécial, par exemple @" %}</span>
                                 </li>
                                 <li class="password-rule" data-password-rule="match">
                                     <span class="password-rule-icon" aria-hidden="true">&#8226;</span>
-                                    <span>{% trans "Les deux mots de passe doivent etre identiques" %}</span>
+                                    <span>{% trans "Les deux mots de passe doivent être identiques" %}</span>
                                 </li>
                             </ul>
-                            <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation sécurisée reste appliquee côté serveur." %}</p>
+                            <p class="password-guidance-note">{% trans "Cette aide est visuelle. La validation sécurisée reste appliquée côté serveur." %}</p>
                         </div>
                     </div>
                 </div>

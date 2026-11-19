@@ -1,10 +1,10 @@
 {% extends "joatham_rh/print_base.html" %}
 {% load i18n %}
 
-{% block print_title %}{% trans "Fiche employe" %} - {{ employe.matricule }}{% endblock %}
+{% block print_title %}{% trans "Fiche employé" %} - {{ employe.matricule }}{% endblock %}
 
 {% block print_content %}
-<h1>{% trans "Fiche employe" %}</h1>
+<h1>{% trans "Fiche employé" %}</h1>
 <p class="muted">{{ employe.matricule }} - {{ employe.nom }} {{ employe.prenom }}</p>
 
 <section class="grid">
@@ -12,18 +12,18 @@
     <div class="box"><span class="label">{% trans "Poste RH" %}</span>{{ employe.poste.nom|default:"-" }}</div>
     <div class="box"><span class="label">{% trans "Contrat" %}</span>{{ employe.get_type_contrat_display }}</div>
     <div class="box"><span class="label">{% trans "Date embauche" %}</span>{{ employe.date_embauche }}</div>
-    <div class="box"><span class="label">{% trans "Telephone" %}</span>{{ employe.telephone|default:"-" }}</div>
+    <div class="box"><span class="label">{% trans "Téléphone" %}</span>{{ employe.telephone|default:"-" }}</div>
     <div class="box"><span class="label">{% trans "Email" %}</span>{{ employe.email|default:"-" }}</div>
 </section>
 
-<h2>{% trans "Presences recentes" %}</h2>
+<h2>{% trans "Presences récentes" %}</h2>
 <table>
     <thead>
         <tr>
             <th>{% trans "Date" %}</th>
             <th>{% trans "Statut" %}</th>
-            <th>{% trans "Arrivee" %}</th>
-            <th>{% trans "Depart" %}</th>
+            <th>{% trans "Arrivée" %}</th>
+            <th>{% trans "Départ" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -35,17 +35,17 @@
             <td>{{ presence.heure_depart|default:"-" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="muted">{% trans "Aucune presence recente." %}</td></tr>
+        <tr><td colspan="4" class="muted">{% trans "Aucune présence récente." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
-<h2>{% trans "Conges recents" %}</h2>
+<h2>{% trans "Congés récents" %}</h2>
 <table>
     <thead>
         <tr>
             <th>{% trans "Type" %}</th>
-            <th>{% trans "Debut" %}</th>
+            <th>{% trans "Début" %}</th>
             <th>{% trans "Fin" %}</th>
             <th>{% trans "Statut" %}</th>
         </tr>
@@ -59,7 +59,7 @@
             <td>{{ conge.get_statut_display }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="muted">{% trans "Aucun conge recent." %}</td></tr>
+        <tr><td colspan="4" class="muted">{% trans "Aucun congé récent." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>

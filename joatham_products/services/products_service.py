@@ -32,7 +32,7 @@ def _normalize_non_negative_decimal(value, field_label):
     except (InvalidOperation, TypeError, ValueError) as exc:
         raise ProductOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
+        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -44,7 +44,7 @@ def _normalize_non_negative_integer(value, field_label):
     except (TypeError, ValueError) as exc:
         raise ProductOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
+        raise ProductOperationError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -55,7 +55,7 @@ def _ensure_reference_available(entreprise, reference, *, product_id=None):
     if product_id is not None:
         queryset = queryset.exclude(id=product_id)
     if queryset.exists():
-        raise ProductOperationError(gettext_lazy("Une autre fiche produit utilise deja cette reference."))
+        raise ProductOperationError(gettext_lazy('Une autre fiche produit utilise déjà cette référence.'))
 
 
 def list_products_for_entreprise(entreprise, *, stock_filter=None):

@@ -1,19 +1,19 @@
 {% load i18n %}
 {% trans "Bonjour" %} {{ question.nom }},
 
-{% trans "Merci pour votre interet pour JOATHAM Manager. Notre equipe a traite votre question avant inscription." %}
+{% trans "Merci pour votre intérêt pour JOATHAM Manager. Notre équipe a traité votre question avant inscription." %}
 
 {% trans "Votre question" %}
 {% trans "Sujet :" %} {{ question.sujet }}
 {{ question.message }}
 
-{% trans "Reponse de l'equipe JOATHAM Manager" %}
+{% trans "Réponse de l'équipe JOATHAM Manager" %}
 {{ question.reponse }}
 
-{% trans "Creer un compte :" %}
+{% trans "Créer un compte :" %}
 {{ signup_url }}
 
 {% trans "Cordialement," %}
-{% trans "L'equipe JOATHAM Manager" %}
+{% trans "L'équipe JOATHAM Manager" %}
 {{ support_email }}
 {{ app_url }}

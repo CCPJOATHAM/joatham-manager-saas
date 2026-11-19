@@ -10,8 +10,8 @@
 {% block top_actions %}
 <a href="{% url 'facture_list' %}" class="btn-link">{% trans "Factures" %}</a>
 <a href="{% url 'payment_list' %}" class="btn-link">{% trans "Paiements" %}</a>
-<a href="{% url 'depenses' %}" class="btn-link">{% trans "Depenses" %}</a>
-<a href="{% url 'compta_dashboard' %}" class="btn-link primary">{% trans "Comptabilite" %}</a>
+<a href="{% url 'depenses' %}" class="btn-link">{% trans "Dépenses" %}</a>
+<a href="{% url 'compta_dashboard' %}" class="btn-link primary">{% trans "Comptabilité" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +24,7 @@
                 </span>
                 <h2>{% trans "Contrôle financier" %}</h2>
             </div>
-            <p>{% trans "Suivi des encaissements, dettes clients, depenses, TVA et benefice estime." %}</p>
+            <p>{% trans "Suivi des encaissements, dettes clients, dépenses, TVA et bénéfice estime." %}</p>
             <div class="hero-badge-row">
                 {% if user_role_label %}
                 <span class="hero-badge">{{ user_role_label }}</span>
@@ -40,7 +40,7 @@
         <aside class="accountant-hero-focus" aria-label="{% trans 'Factures à contrôler' %}">
             <span>{% trans "À contrôler" %}</span>
             <strong>{{ impayees }}</strong>
-            <small>{% blocktrans count count=impayees %}facture impayee{% plural %}factures impayees{% endblocktrans %}</small>
+            <small>{% blocktrans count count=impayees %}facture impayée{% plural %}factures impayées{% endblocktrans %}</small>
         </aside>
     </section>
 
@@ -50,25 +50,25 @@
                 <div>
                     <span class="kpi-label">{% trans "Chiffre d'affaires" %}</span>
                     <strong class="kpi-value">{{ total_ca }}</strong>
-                    <span class="kpi-subtitle">{% trans "Total des ventes et factures enregistrees." %}</span>
+                    <span class="kpi-subtitle">{% trans "Total des ventes et factures enregistrées." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"></path><path d="M14 7h7v7"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{% trans "Donnee calculee depuis les factures de l'entreprise." %}</div>
+            <div class="kpi-note">{% trans "Donnée calculée depuis les factures de l'entreprise." %}</div>
         </article>
 
         <article class="kpi-card is-cash">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">{% trans "Montants encaisses" %}</span>
+                    <span class="kpi-label">{% trans "Montants encaissés" %}</span>
                     <strong class="kpi-value">{{ total_encaisse }}</strong>
-                    <span class="kpi-subtitle">{% trans "Paiements et montants percus." %}</span>
+                    <span class="kpi-subtitle">{% trans "Paiements et montants perçus." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{% blocktrans count count=payees %}{{ count }} facture payee.{% plural %}{{ count }} factures payees.{% endblocktrans %}</div>
+            <div class="kpi-note">{% blocktrans count count=payees %}{{ count }} facture payée.{% plural %}{{ count }} factures payées.{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-due">
@@ -76,25 +76,25 @@
                 <div>
                     <span class="kpi-label">{% trans "Montants dus" %}</span>
                     <strong class="kpi-value">{{ reste_encaisser }}</strong>
-                    <span class="kpi-subtitle">{% trans "Reste a encaisser aupres des clients." %}</span>
+                    <span class="kpi-subtitle">{% trans "Reste à encaisser auprès des clients." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{% blocktrans count count=impayees %}{{ count }} facture impayee.{% plural %}{{ count }} factures impayees.{% endblocktrans %}</div>
+            <div class="kpi-note">{% blocktrans count count=impayees %}{{ count }} facture impayée.{% plural %}{{ count }} factures impayées.{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-profit">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">{% trans "Benefice estime" %}</span>
+                    <span class="kpi-label">{% trans "Bénéfice estime" %}</span>
                     <strong class="kpi-value">{{ benefice }}</strong>
-                    <span class="kpi-subtitle">{% trans "Chiffre d'affaires moins depenses connues." %}</span>
+                    <span class="kpi-subtitle">{% trans "Chiffre d'affaires moins dépenses connues." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M19 9 13 15 10 12 6 16"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{% trans "Estimation basee sur les donnees disponibles." %}</div>
+            <div class="kpi-note">{% trans "Estimation basée sur les données disponibles." %}</div>
         </article>
     </section>
 
@@ -106,17 +106,17 @@
                 </span>
                 <div>
                     <h3>{% trans "Contrôle financier" %}</h3>
-                    <span class="section-kicker">{% trans "Les montants utiles pour verifier depenses, TVA, paiements et factures en attente." %}</span>
+                    <span class="section-kicker">{% trans "Les montants utiles pour vérifier dépenses, TVA, paiements et factures en attente." %}</span>
                 </div>
             </div>
         </div>
         <div class="financial-grid">
-            <div class="mini-stat is-red"><span>{% trans "Depenses" %}</span><strong>{{ total_depenses }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-red"><span>{% trans "Dépenses" %}</span><strong>{{ total_depenses }}</strong><small>{{ currency_code }}</small></div>
             <div class="mini-stat is-purple"><span>{% trans "TVA" %}</span><strong>{{ total_tva }}</strong><small>{{ currency_code }}</small></div>
-            <div class="mini-stat is-green"><span>{% trans "Factures payees" %}</span><strong>{{ payees }}</strong><small>{% trans "Factures" %}</small></div>
-            <div class="mini-stat is-amber"><span>{% trans "Factures impayees" %}</span><strong>{{ impayees }}</strong><small>{% trans "Factures" %}</small></div>
+            <div class="mini-stat is-green"><span>{% trans "Factures payées" %}</span><strong>{{ payees }}</strong><small>{% trans "Factures" %}</small></div>
+            <div class="mini-stat is-amber"><span>{% trans "Factures impayées" %}</span><strong>{{ impayees }}</strong><small>{% trans "Factures" %}</small></div>
             <div class="mini-stat is-blue"><span>{% trans "Ventes du mois" %}</span><strong>{{ total_mois }}</strong><small>{{ currency_code }}</small></div>
-            <div class="mini-stat is-red"><span>{% trans "Depenses du mois" %}</span><strong>{{ depense_mois }}</strong><small>{{ currency_code }}</small></div>
+            <div class="mini-stat is-red"><span>{% trans "Dépenses du mois" %}</span><strong>{{ depense_mois }}</strong><small>{{ currency_code }}</small></div>
         </div>
     </section>
 
@@ -129,7 +129,7 @@
                     </span>
                     <div>
                         <h3>{% trans "Accès métier comptable" %}</h3>
-                        <span class="section-kicker">{% trans "Raccourcis de controle vers les modules financiers existants." %}</span>
+                        <span class="section-kicker">{% trans "Raccourcis de contrôle vers les modules financiers existants." %}</span>
                     </div>
                 </div>
             </div>
@@ -169,20 +169,20 @@
                     </span>
                     <div>
                         <h3>{% trans "Statut des factures" %}</h3>
-                        <span class="section-kicker">{% trans "Lecture simple des factures payees, impayees et du volume total." %}</span>
+                        <span class="section-kicker">{% trans "Lecture simple des factures payées, impayées et du volume total." %}</span>
                     </div>
                 </div>
             </div>
             <div class="accountant-status-grid">
                 <div class="accountant-status-card is-paid">
-                    <span>{% trans "Payees" %}</span>
+                    <span>{% trans "Payées" %}</span>
                     <strong>{{ payees }}</strong>
-                    <small>{% trans "Factures reglees" %}</small>
+                    <small>{% trans "Factures réglées" %}</small>
                 </div>
                 <div class="accountant-status-card is-unpaid">
-                    <span>{% trans "Impayees" %}</span>
+                    <span>{% trans "Impayées" %}</span>
                     <strong>{{ impayees }}</strong>
-                    <small>{% trans "Factures a suivre" %}</small>
+                    <small>{% trans "Factures à suivre" %}</small>
                 </div>
                 <div class="accountant-status-card is-total">
                     <span>{% trans "Total factures" %}</span>
@@ -202,7 +202,7 @@
                     </span>
                     <div>
                         <h3>{% trans "Flux récents" %}</h3>
-                        <span class="section-kicker">{% trans "Dernieres operations utiles au controle comptable." %}</span>
+                        <span class="section-kicker">{% trans "Dernières opérations utiles au contrôle comptable." %}</span>
                     </div>
                 </div>
             </div>
@@ -247,7 +247,7 @@
                     </span>
                     <div>
                         <h3>{% trans "Points à contrôler" %}</h3>
-                        <span class="section-kicker">{% trans "Alertes basees uniquement sur les donnees disponibles." %}</span>
+                        <span class="section-kicker">{% trans "Alertes basées uniquement sur les données disponibles." %}</span>
                     </div>
                 </div>
             </div>
@@ -256,8 +256,8 @@
                 <div class="alert-card is-danger">
                     <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
                     <div class="alert-copy">
-                        <strong>{% trans "Factures impayees" %}</strong>
-                        <span>{% blocktrans count count=impayees with reste_encaisser=reste_encaisser %}{{ count }} facture en attente. Montant du : {{ reste_encaisser }}.{% plural %}{{ count }} factures en attente. Montant du : {{ reste_encaisser }}.{% endblocktrans %}</span>
+                        <strong>{% trans "Factures impayées" %}</strong>
+                        <span>{% blocktrans count count=impayees with reste_encaisser=reste_encaisser %}{{ count }} facture en attente. Montant dû : {{ reste_encaisser }}.{% plural %}{{ count }} factures en attente. Montant dû : {{ reste_encaisser }}.{% endblocktrans %}</span>
                     </div>
                     <span class="alert-count">{{ impayees }}</span>
                 </div>
@@ -287,7 +287,7 @@
     <section class="manager-info-card" aria-label="{% trans 'Espace Comptable' %}">
         <div>
             <strong>{% trans "Espace Comptable" %}</strong>
-            <p>{% trans "Cet espace permet de suivre les indicateurs financiers, les factures, les depenses et les flux recents afin de securiser la gestion comptable de l'entreprise." %}</p>
+            <p>{% trans "Cet espace permet de suivre les indicateurs financiers, les factures, les dépenses et les flux récents afin de sécuriser la gestion comptable de l'entreprise." %}</p>
         </div>
     </section>
 </div>

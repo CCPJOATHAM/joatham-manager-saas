@@ -4,26 +4,26 @@
 {% block print_title %}{% trans "Rapport RH" %}{% endblock %}
 
 {% block print_content %}
-<h1>{% trans "Rapport RH synthetique" %}</h1>
+<h1>{% trans "Rapport RH synthétique" %}</h1>
 <p class="muted">{{ report.month_start }} - {{ report.month_end }}</p>
 
 <section class="grid">
-    <div class="box"><span class="label">{% trans "Total employes" %}</span>{{ report.total_employes }}</div>
-    <div class="box"><span class="label">{% trans "Employes actifs" %}</span>{{ report.employes_actifs }}</div>
+    <div class="box"><span class="label">{% trans "Total employés" %}</span>{{ report.total_employes }}</div>
+    <div class="box"><span class="label">{% trans "Employés actifs" %}</span>{{ report.employes_actifs }}</div>
     <div class="box"><span class="label">{% trans "Suspendus" %}</span>{{ report.employes_suspendus }}</div>
     <div class="box"><span class="label">{% trans "Sortis" %}</span>{{ report.employes_sortis }}</div>
     <div class="box"><span class="label">{% trans "Presences du mois" %}</span>{{ report.presences_mois }}</div>
     <div class="box"><span class="label">{% trans "Absences du mois" %}</span>{{ report.absences_mois }}</div>
-    <div class="box"><span class="label">{% trans "Conges en attente" %}</span>{{ report.conges_en_attente }}</div>
-    <div class="box"><span class="label">{% trans "Conges approuves" %}</span>{{ report.conges_approuves }}</div>
+    <div class="box"><span class="label">{% trans "Congés en attente" %}</span>{{ report.conges_en_attente }}</div>
+    <div class="box"><span class="label">{% trans "Congés approuvés" %}</span>{{ report.conges_approuves }}</div>
 </section>
 
-<h2>{% trans "Repartition par poste RH" %}</h2>
+<h2>{% trans "Répartition par poste RH" %}</h2>
 <table>
     <thead>
         <tr>
             <th>{% trans "Poste RH" %}</th>
-            <th>{% trans "Employes" %}</th>
+            <th>{% trans "Employés" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -33,7 +33,7 @@
             <td>{{ row.total }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="2" class="muted">{% trans "Aucune donnee." %}</td></tr>
+        <tr><td colspan="2" class="muted">{% trans "Aucune donnée." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>

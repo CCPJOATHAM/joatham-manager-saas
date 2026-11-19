@@ -72,7 +72,7 @@
                 </td>
                 <td class="pdf-meta-block">
                     <p class="pdf-meta-title">{% trans "Rapport caisse" %}</p>
-                    <p class="pdf-meta-line">{% trans "Edition du" %} {{ date_generation }}</p>
+                    <p class="pdf-meta-line">{% trans "Édition du" %} {{ date_generation }}</p>
                 </td>
             </tr>
         </table>
@@ -89,29 +89,29 @@
     <div class="summary-band">
         <table class="summary-grid">
             <tr>
-                <td style="width:25%;">{% trans "Total entrees" %}<span class="summary-value">{{ report.total_entrees }}</span></td>
+                <td style="width:25%;">{% trans "Total entrées" %}<span class="summary-value">{{ report.total_entrees }}</span></td>
                 <td style="width:25%;">{% trans "Total sorties" %}<span class="summary-value">{{ report.total_sorties }}</span></td>
-                <td style="width:25%;">{% trans "Depenses caisse" %}<span class="summary-value">{{ report.total_depenses_caisse }}</span></td>
+                <td style="width:25%;">{% trans "Dépenses caisse" %}<span class="summary-value">{{ report.total_depenses_caisse }}</span></td>
                 <td style="width:25%;">{% trans "Paiements facture" %}<span class="summary-value">{{ report.total_paiements_factures }}</span></td>
             </tr>
             <tr>
                 <td>{% trans "Solde net" %}<span class="summary-value">{{ report.solde_net }}</span></td>
                 <td>{% trans "Nombre de mouvements" %}<span class="summary-value">{{ report.nombre_mouvements }}</span></td>
                 <td>{% trans "Sessions O/F/V" %}<span class="summary-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></td>
-                <td>{% trans "Ecarts +/-" %}<span class="summary-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></td>
+                <td>{% trans "Écarts +/-" %}<span class="summary-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></td>
             </tr>
         </table>
     </div>
 
-    <p class="section-title">{% trans "Synthese par caisse" %}</p>
+    <p class="section-title">{% trans "Synthèse par caisse" %}</p>
     <table>
         <thead>
             <tr>
                 <th>{% trans "Caisse" %}</th>
                 <th class="text-center">{% trans "Mouvements" %}</th>
-                <th class="text-right">{% trans "Entrees" %}</th>
+                <th class="text-right">{% trans "Entrées" %}</th>
                 <th class="text-right">{% trans "Sorties" %}</th>
-                <th class="text-right">{% trans "Depenses" %}</th>
+                <th class="text-right">{% trans "Dépenses" %}</th>
                 <th class="text-right">{% trans "Paiements" %}</th>
                 <th class="text-right">{% trans "Net" %}</th>
             </tr>
@@ -128,12 +128,12 @@
                 <td class="text-right">{{ row.solde_net }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="7">{% trans "Aucune synthese disponible pour cette periode." %}</td></tr>
+            <tr class="empty-row"><td colspan="7">{% trans "Aucune synthèse disponible pour cette période." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">{% trans "Synthese par type de mouvement" %}</p>
+    <p class="section-title">{% trans "Synthèse par type de mouvement" %}</p>
     <table>
         <thead>
             <tr>
@@ -150,12 +150,12 @@
                 <td class="text-right">{{ row.total }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement sur la periode selectionnee." %}</td></tr>
+            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement sur la période sélectionnée." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">{% trans "Synthese par moyen de paiement" %}</p>
+    <p class="section-title">{% trans "Synthèse par moyen de paiement" %}</p>
     <table>
         <thead>
             <tr>
@@ -172,20 +172,20 @@
                 <td class="text-right">{{ row.total }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement par moyen sur la periode selectionnee." %}</td></tr>
+            <tr class="empty-row"><td colspan="3">{% trans "Aucun mouvement par moyen sur la période sélectionnée." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="section-title">{% trans "Derniers mouvements filtres" %}</p>
+    <p class="section-title">{% trans "Derniers mouvements filtrés" %}</p>
     <table>
         <thead>
             <tr>
                 <th>{% trans "Date" %}</th>
                 <th>{% trans "Caisse" %}</th>
                 <th>{% trans "Type" %}</th>
-                <th>{% trans "Libelle" %}</th>
-                <th>{% trans "Reference" %}</th>
+                <th>{% trans "Libellé" %}</th>
+                <th>{% trans "Référence" %}</th>
                 <th class="text-right">{% trans "Montant" %}</th>
             </tr>
         </thead>
@@ -200,7 +200,7 @@
                 <td class="text-right">{{ movement.montant }}</td>
             </tr>
             {% empty %}
-            <tr class="empty-row"><td colspan="6">{% trans "Aucun mouvement filtre a afficher." %}</td></tr>
+            <tr class="empty-row"><td colspan="6">{% trans "Aucun mouvement filtre à afficher." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

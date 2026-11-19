@@ -37,14 +37,14 @@ class EntreprisePrintSettingsForm(forms.ModelForm):
         ]
         labels = {
             "pos_width": gettext_lazy("Largeur ticket POS"),
-            "default_invoice_format": gettext_lazy("Format d'impression par defaut"),
+            "default_invoice_format": gettext_lazy("Format d'impression par défaut"),
             "pos_show_logo": gettext_lazy("Afficher le logo sur le ticket"),
             "pos_show_company_name": gettext_lazy("Afficher le nom de l'entreprise"),
             "pos_show_address": gettext_lazy("Afficher l'adresse"),
-            "pos_show_phone": gettext_lazy("Afficher le telephone"),
+            "pos_show_phone": gettext_lazy('Afficher le téléphone'),
             "pos_show_email": gettext_lazy("Afficher l'email"),
             "pos_show_tax_info": gettext_lazy("Afficher RCCM, NIF et ID NAT"),
-            "pos_show_generated_by": gettext_lazy("Afficher Genere par JOATHAM Manager"),
+            "pos_show_generated_by": gettext_lazy('Afficher Généré par JOATHAM Manager'),
             "pos_footer_message": gettext_lazy("Texte de pied de ticket"),
         }
         widgets = {

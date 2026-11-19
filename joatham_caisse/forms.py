@@ -48,7 +48,7 @@ class CloseSessionForm(forms.Form):
         max_digits=14,
         decimal_places=2,
         min_value=Decimal("0.00"),
-        label=_("Solde reel"),
+        label=_('Solde réel'),
     )
     commentaire_fermeture = forms.CharField(
         required=False,
@@ -59,9 +59,9 @@ class CloseSessionForm(forms.Form):
 
 class MouvementCaisseForm(forms.Form):
     MANUAL_MOVEMENT_CHOICES = [
-        (MouvementCaisse.TypeMouvement.ENTREE, _("Entree")),
+        (MouvementCaisse.TypeMouvement.ENTREE, _('Entrée')),
         (MouvementCaisse.TypeMouvement.SORTIE, _("Sortie")),
-        (MouvementCaisse.TypeMouvement.DEPENSE, _("Depense")),
+        (MouvementCaisse.TypeMouvement.DEPENSE, _('Dépense')),
         (MouvementCaisse.TypeMouvement.AJUSTEMENT, _("Ajustement")),
     ]
 
@@ -72,8 +72,8 @@ class MouvementCaisseForm(forms.Form):
         min_value=Decimal("0.01"),
         label=_("Montant"),
     )
-    libelle = forms.CharField(max_length=255, label=_("Libelle"))
-    reference = forms.CharField(required=False, max_length=100, label=_("Reference"))
+    libelle = forms.CharField(max_length=255, label=_('Libellé'))
+    reference = forms.CharField(required=False, max_length=100, label=_('Référence'))
     commentaire = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={"rows": 3, "placeholder": _("Commentaire interne")}),

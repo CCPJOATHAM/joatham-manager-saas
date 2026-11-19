@@ -31,9 +31,9 @@ def _normalize_positive_quantity(quantity):
     try:
         normalized = int(quantity)
     except (TypeError, ValueError) as exc:
-        raise StockOperationError(gettext_lazy("La quantite doit etre un entier strictement positif.")) from exc
+        raise StockOperationError(gettext_lazy('La quantité doit être un entier strictement positif.')) from exc
     if normalized <= 0:
-        raise StockOperationError(gettext_lazy("La quantite doit etre un entier strictement positif."))
+        raise StockOperationError(gettext_lazy('La quantité doit être un entier strictement positif.'))
     return normalized
 
 
@@ -54,7 +54,7 @@ def _normalize_optional_non_negative_decimal(value, field_label):
     except (InvalidOperation, TypeError, ValueError) as exc:
         raise StockOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise StockOperationError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
+        raise StockOperationError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -67,7 +67,7 @@ def _get_locked_product_for_entreprise(*, entreprise, produit):
         .first()
     )
     if locked is None:
-        raise StockOperationError(gettext_lazy("Le produit selectionne est invalide pour cette entreprise."))
+        raise StockOperationError(gettext_lazy('Le produit sélectionné est invalide pour cette entreprise.'))
     return locked
 
 
@@ -93,7 +93,7 @@ def record_stock_movement(
     created_by=None,
 ):
     if getattr(produit, "entreprise_id", None) != getattr(entreprise, "id", None):
-        raise StockOperationError(gettext_lazy("Le produit selectionne est invalide pour cette entreprise."))
+        raise StockOperationError(gettext_lazy('Le produit sélectionné est invalide pour cette entreprise.'))
 
     quantity = _normalize_positive_quantity(quantity)
     unit_cost = _normalize_optional_non_negative_decimal(unit_cost, "Le cout unitaire")
@@ -101,9 +101,9 @@ def record_stock_movement(
     stock_after = int(stock_after or 0)
 
     if stock_before < 0:
-        raise StockOperationError(gettext_lazy("Le stock avant mouvement ne peut pas etre negatif."))
+        raise StockOperationError(gettext_lazy('Le stock avant mouvement ne peut pas être négatif.'))
     if stock_after < 0:
-        raise StockOperationError(gettext_lazy("Le stock apres mouvement ne peut pas etre negatif."))
+        raise StockOperationError(gettext_lazy('Le stock après mouvement ne peut pas être négatif.'))
 
     valid_types = {choice for choice, _label in StockMovement.MovementType.choices}
     if movement_type not in valid_types:
@@ -111,9 +111,9 @@ def record_stock_movement(
 
     delta = stock_after - stock_before
     if movement_type in POSITIVE_MOVEMENT_TYPES and delta != quantity:
-        raise StockOperationError(gettext_lazy("Le stock apres mouvement est incoherent avec ce type d'entree."))
+        raise StockOperationError(gettext_lazy("Le stock après mouvement est incohérent avec ce type d'entrée."))
     if movement_type in NEGATIVE_MOVEMENT_TYPES and delta != -quantity:
-        raise StockOperationError(gettext_lazy("Le stock apres mouvement est incoherent avec ce type de sortie."))
+        raise StockOperationError(gettext_lazy('Le stock après mouvement est incohérent avec ce type de sortie.'))
 
     movement = StockMovement.objects.create(
         entreprise=entreprise,
@@ -163,7 +163,7 @@ def assert_stock_available(*, produit, quantity):
     stock_disponible = int(produit.quantite_stock or 0)
     if quantity > stock_disponible:
         raise StockOperationError(
-            (gettext_lazy('Stock insuffisant pour le produit %(value_1)s. Stock disponible : %(value_2)s, quantite demandee : %(value_3)s.') % {'value_1': produit.nom, 'value_2': stock_disponible, 'value_3': quantity})
+            (gettext_lazy('Stock insuffisant pour le produit %(value_1)s. Stock disponible : %(value_2)s, quantité demandée : %(value_3)s.') % {'value_1': produit.nom, 'value_2': stock_disponible, 'value_3': quantity})
         )
     return stock_disponible
 

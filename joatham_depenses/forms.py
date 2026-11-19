@@ -20,7 +20,7 @@ class DepenseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["description"].widget.attrs.update(
             {
-                "placeholder": _("Description de la depense"),
+                "placeholder": _('Description de la dépense'),
             }
         )
         self.fields["montant"].widget.attrs.update(
@@ -32,7 +32,7 @@ class DepenseForm(forms.ModelForm):
         )
         self.fields["caisse"].widget.attrs.update(
             {
-                "placeholder": _("Selectionnez une caisse"),
+                "placeholder": _('Sélectionnez une caisse'),
             }
         )
         if entreprise is not None:

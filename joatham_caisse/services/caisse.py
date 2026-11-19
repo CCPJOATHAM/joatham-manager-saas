@@ -36,7 +36,7 @@ def create_caisse(
     if est_active:
         assert_cashbox_quota_available(entreprise)
     if Caisse.objects.filter(entreprise=entreprise, code=code).exists():
-        raise ValueError(gettext_lazy("Une caisse avec ce code existe deja dans votre entreprise."))
+        raise ValueError(gettext_lazy('Une caisse avec ce code existe déjà dans votre entreprise.'))
 
     caisse = Caisse.objects.create(
         entreprise=entreprise,
@@ -81,7 +81,7 @@ def update_caisse(
     if est_active and not caisse.est_active:
         assert_cashbox_quota_available(entreprise)
     if Caisse.objects.filter(entreprise=entreprise, code=normalized_code).exclude(pk=caisse.pk).exists():
-        raise ValueError(gettext_lazy("Une caisse avec ce code existe deja dans votre entreprise."))
+        raise ValueError(gettext_lazy('Une caisse avec ce code existe déjà dans votre entreprise.'))
 
     old_values = {
         "nom": caisse.nom,
@@ -122,7 +122,7 @@ def update_caisse(
 def deactivate_caisse(*, entreprise, caisse, utilisateur=None):
     ensure_same_entreprise(caisse, entreprise)
     if caisse.sessions.filter(statut=SessionCaisse.Statut.OUVERTE).exists():
-        raise ValueError(gettext_lazy("Impossible de desactiver une caisse avec une session ouverte."))
+        raise ValueError(gettext_lazy('Impossible de désactiver une caisse avec une session ouverte.'))
     if not caisse.est_active:
         return caisse
 

@@ -11,5 +11,6 @@ Toute page, fonctionnalité ou modification d'interface livrée doit être dispo
 - Ajouter ou adapter les tests des parcours modifiés en français et en anglais, y compris la conservation des données saisies. Vérifier la persistance de langue si le parcours touche l'authentification ou le profil.
 - Exécuter le contrôle des catalogues et les tests bilingues avant de demander une revue. Décrire les contrôles FR/EN dans la PR.
 - Les workflows de contrôle de PR n'effectuent aucune mise en production.
+- Relire les accents, accords et l'orthographe des textes français dans les sources et les catalogues. Protéger les noms, codes, liens, paramètres et contenus saisis ; ne jamais corriger automatiquement les données enregistrées.
 - Pour un nouvel événement système visible, ajouter ses libellés et son modèle de description dans core/audit_i18n.py ; vérifier le rendu FR/EN des événements historiques et préserver les notes libres et données persistées.
 - Pour les journaux d'activité persistés, ajouter les intitulés et modèles de description au registre core/audit_i18n.py et vérifier l'affichage dans les deux langues ; conserver les descriptions stockées et les valeurs saisies.

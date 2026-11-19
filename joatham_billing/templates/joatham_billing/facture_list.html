@@ -527,7 +527,7 @@
         <div>
             <span class="kpi-label">{% trans "Factures visibles" %}</span>
             <span class="kpi-value">{{ facture_count }}</span>
-            <span class="kpi-meta">{% blocktrans count count=paid_count %}{{ count }} payee{% plural %}{{ count }} payees{% endblocktrans %}</span>
+            <span class="kpi-meta">{% blocktrans count count=paid_count %}{{ count }} payée{% plural %}{{ count }} payées{% endblocktrans %}</span>
         </div>
     </div>
     <div class="kpi-card">
@@ -537,9 +537,9 @@
             </svg>
         </div>
         <div>
-            <span class="kpi-label">{% trans "Montant facture" %}</span>
+            <span class="kpi-label">{% trans "Montant facturé" %}</span>
             <span class="kpi-value">{{ total_emis_display }}</span>
-            <span class="kpi-meta">{% trans "Total emis sur la selection courante" %}</span>
+            <span class="kpi-meta">{% trans "Total émis sur la sélection courante" %}</span>
         </div>
     </div>
     <div class="kpi-card">
@@ -549,7 +549,7 @@
             </svg>
         </div>
         <div>
-            <span class="kpi-label">{% trans "Montant encaisse" %}</span>
+            <span class="kpi-label">{% trans "Montant encaissé" %}</span>
             <span class="kpi-value">{{ total_encaisse_display }}</span>
             <span class="kpi-meta">{% blocktrans count count=partial_count %}{{ count }} facture avec paiement partiel{% plural %}{{ count }} factures avec paiement partiel{% endblocktrans %}</span>
         </div>
@@ -563,9 +563,9 @@
             </svg>
         </div>
         <div>
-            <span class="kpi-label">{% trans "Reste a encaisser" %}</span>
+            <span class="kpi-label">{% trans "Reste à encaisser" %}</span>
             <span class="kpi-value">{{ total_restant_display }}</span>
-            <span class="kpi-meta">{% blocktrans count count=overdue_count %}{{ count }} facture non soldee{% plural %}{{ count }} factures non soldees{% endblocktrans %}</span>
+            <span class="kpi-meta">{% blocktrans count count=overdue_count %}{{ count }} facture non soldée{% plural %}{{ count }} factures non soldées{% endblocktrans %}</span>
         </div>
     </div>
 </div>
@@ -573,12 +573,12 @@
 <div class="page-grid">
     <div class="panel">
         <h3>{% trans "Filtres et actions" %}</h3>
-        <p class="panel-subtitle">{% trans "Affinez la liste par client, statut ou periode, puis reprenez rapidement vos actions de facturation." %}</p>
+        <p class="panel-subtitle">{% trans "Affinez la liste par client, statut ou période, puis reprenez rapidement vos actions de facturation." %}</p>
 
         <form method="get" class="filters-form">
             <div class="field">
                 <label for="billing-search">{% trans "Recherche" %}</label>
-                <input id="billing-search" type="text" name="search" placeholder="{% trans 'Numero, client ou mot-cle' %}" value="{{ request.GET.search }}">
+                <input id="billing-search" type="text" name="search" placeholder="{% trans 'Numéro, client ou mot-clé' %}" value="{{ request.GET.search }}">
             </div>
 
             <div class="field">
@@ -598,13 +598,13 @@
                     {% for value, label in statut_choices %}
                         <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
-                    <option value="paye" {% if request.GET.statut == "paye" %}selected{% endif %}>{% trans "Payee" %}</option>
-                    <option value="impaye" {% if request.GET.statut == "impaye" %}selected{% endif %}>{% trans "Impayee" %}</option>
+                    <option value="paye" {% if request.GET.statut == "paye" %}selected{% endif %}>{% trans "Payée" %}</option>
+                    <option value="impaye" {% if request.GET.statut == "impaye" %}selected{% endif %}>{% trans "Impayée" %}</option>
                 </select>
             </div>
 
             <div class="field">
-                <label for="billing-date-debut">{% trans "Date debut" %}</label>
+                <label for="billing-date-debut">{% trans "Date début" %}</label>
                 <input id="billing-date-debut" type="date" name="date_debut" value="{{ request.GET.date_debut }}">
             </div>
 
@@ -615,16 +615,16 @@
 
             <div class="panel-actions">
                 <button type="submit">{% trans "Appliquer les filtres" %}</button>
-                <a href="{% url 'facture_list' %}">{% trans "Reinitialiser" %}</a>
+                <a href="{% url 'facture_list' %}">{% trans "Réinitialiser" %}</a>
                 {% if can_manage_factures_ui %}
-                <a href="{% url 'add_facture' %}">{% trans "Creer une facture" %}</a>
+                <a href="{% url 'add_facture' %}">{% trans "Créer une facture" %}</a>
                 {% endif %}
             </div>
         </form>
 
         <div class="helper-card">
             <strong>{% trans "Lecture rapide" %}</strong>
-            <p>{% trans "Le tableau met en avant le total facture, le montant deja encaisse et le reste a percevoir pour faciliter le suivi commercial et le recouvrement." %}</p>
+            <p>{% trans "Le tableau met en avant le total facturé, le montant déjà encaissé et le reste à percevoir pour faciliter le suivi commercial et le recouvrement." %}</p>
         </div>
     </div>
 
@@ -633,7 +633,7 @@
             <div class="table-toolbar">
                 <div>
                     <h3>{% trans "Liste des factures" %}</h3>
-                    <p>{% trans "Vue operationnelle des documents de facturation avec acces direct au detail, au PDF et a l'enregistrement d'un paiement." %}</p>
+                    <p>{% trans "Vue opérationnelle des documents de facturation avec accès direct au détail, au PDF et à l'enregistrement d'un paiement." %}</p>
                 </div>
                 <div class="table-meta">
                     <span class="meta-pill">{% blocktrans count count=facture_count %}{{ count }} facture{% plural %}{{ count }} factures{% endblocktrans %}</span>
@@ -646,7 +646,7 @@
                 <table class="factures-table">
                     <thead>
                         <tr>
-                            <th style="width: 14%;">{% trans "Numero" %}</th>
+                            <th style="width: 14%;">{% trans "Numéro" %}</th>
                             <th style="width: 18%;">{% trans "Client" %}</th>
                             <th style="width: 14%;">{% trans "Date" %}</th>
                             <th style="width: 13%;">{% trans "Total" %}</th>
@@ -679,26 +679,26 @@
                             </td>
                             <td>
                                 {% if row.is_partial %}
-                                    <span class="status-chip status-partial">{% trans "Partiellement payee" %}</span>
+                                    <span class="status-chip status-partial">{% trans "Partiellement payée" %}</span>
                                 {% elif row.instance.statut == "brouillon" %}
                                     <span class="status-chip status-brouillon">{% trans "Brouillon" %}</span>
                                 {% elif row.instance.statut == "emise" %}
-                                    <span class="status-chip status-emise">{% trans "Emise" %}</span>
+                                    <span class="status-chip status-emise">{% trans "Émise" %}</span>
                                 {% elif row.instance.statut == "payee" %}
-                                    <span class="status-chip status-payee">{% trans "Payee" %}</span>
+                                    <span class="status-chip status-payee">{% trans "Payée" %}</span>
                                 {% elif row.instance.statut == "annulee" %}
-                                    <span class="status-chip status-annulee">{% trans "Annulee" %}</span>
+                                    <span class="status-chip status-annulee">{% trans "Annulée" %}</span>
                                 {% endif %}
                             </td>
                             <td>
                                 <div class="actions-group">
-                                    <a href="{% url 'facture_detail' row.instance.id %}" class="btn btn-print">{% trans "Detail" %}</a>
+                                    <a href="{% url 'facture_detail' row.instance.id %}" class="btn btn-print">{% trans "Détail" %}</a>
                                     {% if can_manage_factures_ui and row.instance.statut == "brouillon" %}
                                         <a href="{% url 'edit_facture' row.instance.id %}" class="btn btn-add">{% trans "Modifier" %}</a>
                                     {% endif %}
                                     <a href="{% url 'facture_pdf' row.instance.id %}" target="_blank" class="btn btn-print">{% trans "Imprimer A4" %}</a>
                                     <a href="{% url 'facture_pdf' row.instance.id %}?format=pos" target="_blank" class="btn btn-add">{% trans "Imprimer POS" %}</a>
-                                    <a href="{% url 'facture_pdf' row.instance.id %}?mode=download" class="btn btn-download">{% trans "Telecharger A4" %}</a>
+                                    <a href="{% url 'facture_pdf' row.instance.id %}?mode=download" class="btn btn-download">{% trans "Télécharger A4" %}</a>
                                     {% if can_record_payments_ui and row.can_pay %}
                                         <a href="{% url 'payer_facture' row.instance.id %}" class="btn btn-paid" onclick="return confirm(window.joathamMessages.confirmFullPayment);">{% trans "Payer" %}</a>
                                     {% endif %}
@@ -712,11 +712,11 @@
             {% else %}
                 <div class="empty-state">
                     <h3>{% trans "Aucune facture pour le moment" %}</h3>
-                    <p>{% trans "Commencez par creer votre premiere facture pour suivre vos encaissements, generer un PDF professionnel et alimenter votre activite commerciale." %}</p>
+                    <p>{% trans "Commencez par créer votre première facture pour suivre vos encaissements, générer un PDF professionnel et alimenter votre activité commerciale." %}</p>
                     {% if can_manage_factures_ui %}
                     <a href="{% url 'add_facture' %}" class="btn-link">{% trans "Ajouter une facture" %}</a>
                     {% endif %}
-                    <div class="helper">{% trans "Les filtres actifs peuvent aussi masquer vos documents deja crees." %}</div>
+                    <div class="helper">{% trans "Les filtres actifs peuvent aussi masquer vos documents déjà créés." %}</div>
                 </div>
             {% endif %}
         </div>
@@ -725,7 +725,7 @@
         <div class="pagination">
             <div>
                 {% if page_obj.has_previous %}
-                    <a class="btn btn-print" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&client={{ request.GET.client }}&statut={{ request.GET.statut }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">{% trans "Precedent" %}</a>
+                    <a class="btn btn-print" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&client={{ request.GET.client }}&statut={{ request.GET.statut }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">{% trans "Précédent" %}</a>
                 {% endif %}
             </div>
             <span>{% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>

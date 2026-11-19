@@ -71,7 +71,7 @@ def create_balanced_entry(
     total_debit = sum((Decimal(ligne["debit"]) for ligne in lignes), Decimal("0"))
     total_credit = sum((Decimal(ligne["credit"]) for ligne in lignes), Decimal("0"))
     if total_debit != total_credit:
-        raise ValidationError(gettext_lazy("L'ecriture comptable n'est pas equilibree."))
+        raise ValidationError(gettext_lazy("L'écriture comptable n'est pas équilibrée."))
 
     exercice = get_open_exercice(entreprise, date_piece)
     ecriture = EcritureComptable.objects.create(
@@ -98,7 +98,7 @@ def create_balanced_entry(
         )
 
     if not ecriture.est_equilibree():
-        raise ValidationError(gettext_lazy("L'ecriture creee n'est pas equilibree."))
+        raise ValidationError(gettext_lazy("L'écriture créée n'est pas équilibrée."))
 
     record_audit_event(
         entreprise=entreprise,
@@ -124,7 +124,7 @@ def comptabiliser_facture_emise(facture: Facture):
     compte_tva = get_compte(facture.entreprise, "443")
     montant_vente_net = facture.total_ht - facture.total_reduction
     if montant_vente_net < Decimal("0"):
-        raise ValidationError(gettext_lazy("Les reductions ne peuvent pas depasser le montant hors taxe."))
+        raise ValidationError(gettext_lazy('Les réductions ne peuvent pas dépasser le montant hors taxe.'))
 
     lignes = [
         {"compte": compte_client, "debit": facture.total_net, "credit": Decimal("0"), "libelle": facture.libelle if hasattr(facture, "libelle") else facture.numero},

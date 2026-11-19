@@ -53,19 +53,19 @@
     <div class="meta">
         <div>{% trans "Entreprise:" %} {{ selected_entreprise.nom }}</div>
         <div>{% trans "Période :" %} {{ period_label }}</div>
-        <div>{% trans "Genere le:" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+        <div>{% trans "Généré le:" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</div>
     </div>
 
     {% if report_slug == "balance" %}
         <table>
             <thead>
                 <tr>
-                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Numéro" %}</th>
                     <th>{% trans "Compte" %}</th>
-                    <th class="number">{% trans "Debit" %}</th>
-                    <th class="number">{% trans "Credit" %}</th>
-                    <th class="number">{% trans "Solde debit" %}</th>
-                    <th class="number">{% trans "Solde credit" %}</th>
+                    <th class="number">{% trans "Débit" %}</th>
+                    <th class="number">{% trans "Crédit" %}</th>
+                    <th class="number">{% trans "Solde débit" %}</th>
+                    <th class="number">{% trans "Solde crédit" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -93,12 +93,12 @@
                         <tr>
                             <th>{% trans "Date" %}</th>
                             <th>{% trans "Journal" %}</th>
-                            <th>{% trans "Piece" %}</th>
-                            <th>{% trans "Libelle" %}</th>
-                            <th class="number">{% trans "Debit" %}</th>
-                            <th class="number">{% trans "Credit" %}</th>
-                            <th class="number">{% trans "Solde debit" %}</th>
-                            <th class="number">{% trans "Solde credit" %}</th>
+                            <th>{% trans "Pièce" %}</th>
+                            <th>{% trans "Libellé" %}</th>
+                            <th class="number">{% trans "Débit" %}</th>
+                            <th class="number">{% trans "Crédit" %}</th>
+                            <th class="number">{% trans "Solde débit" %}</th>
+                            <th class="number">{% trans "Solde crédit" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,7 +123,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Numéro" %}</th>
                     <th>{% trans "Compte" %}</th>
                     <th class="number">{% trans "Montant" %}</th>
                 </tr>
@@ -143,7 +143,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Numéro" %}</th>
                     <th>{% trans "Compte" %}</th>
                     <th class="number">{% trans "Montant" %}</th>
                 </tr>
@@ -161,7 +161,7 @@
 
         <div><strong>{% trans "Total produits:" %}</strong> {{ total_produits|floatformat:2 }} FC</div>
         <div><strong>{% trans "Total charges:" %}</strong> {{ total_charges|floatformat:2 }} FC</div>
-        <div><strong>{% trans "Resultat net:" %}</strong> {{ resultat_net|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Résultat net:" %}</strong> {{ resultat_net|floatformat:2 }} FC</div>
     {% elif report_slug == "bilan" %}
         <h2>{% trans "Actif" %}</h2>
         {% for section in actif_sections %}
@@ -169,7 +169,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Numéro" %}</th>
                         <th>{% trans "Compte" %}</th>
                         <th class="number">{% trans "Montant" %}</th>
                     </tr>
@@ -192,7 +192,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Numéro" %}</th>
                         <th>{% trans "Compte" %}</th>
                         <th class="number">{% trans "Montant" %}</th>
                     </tr>

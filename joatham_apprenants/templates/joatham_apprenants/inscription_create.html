@@ -1,6 +1,6 @@
 
 {% load i18n %}
-<h1>{% trans "Inscrire un apprenant a une formation" %}</h1>
+<h1>{% trans "Inscrire un apprenant à une formation" %}</h1>
 
 <form method="post">
     {% csrf_token %}
@@ -27,7 +27,7 @@
 
     <input type="number" step="0.01" name="montant_prevu" placeholder="{% trans 'Montant prévu de la formation' %}"><br><br>
 
-    <button type="submit">{% trans "Creer l'inscription" %}</button>
+    <button type="submit">{% trans "Créer l'inscription" %}</button>
 </form>
 
 <h2>{% trans "Inscriptions existantes" %}</h2>

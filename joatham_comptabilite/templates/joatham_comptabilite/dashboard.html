@@ -15,14 +15,14 @@
         <div class="meta">{% trans "Total des comptes de classe 6" %}</div>
     </article>
     <article class="metric">
-        <div class="label">{% trans "Resultat net" %}</div>
+        <div class="label">{% trans "Résultat net" %}</div>
         <div class="value {% if resultat > 0 %}status-positive{% elif resultat < 0 %}status-negative{% else %}status-neutral{% endif %}">{{ resultat|floatformat:2 }} FC</div>
         <div class="meta">{{ resultat_label }}</div>
     </article>
     <article class="metric">
         <div class="label">{% trans "Bilan" %}</div>
         <div class="value">{{ actif|floatformat:2 }} / {{ passif|floatformat:2 }} FC</div>
-        <div class="meta">{% if equilibre_bilan %}{% trans "Actif et passif equilibres" %}{% else %}{% trans "Difference a verifier" %}{% endif %}</div>
+        <div class="meta">{% if equilibre_bilan %}{% trans "Actif et passif équilibrés" %}{% else %}{% trans "Différence à vérifier" %}{% endif %}</div>
     </article>
 </section>
 
@@ -30,15 +30,15 @@
     <article class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
             <h3 class="section-title">{% trans "Balance comptable" %}</h3>
-            <a class="subtle-badge" href="{% url 'balance' %}{{ filter_query }}">{% trans "Voir le detail" %}</a>
+            <a class="subtle-badge" href="{% url 'balance' %}{{ filter_query }}">{% trans "Voir le détail" %}</a>
         </div>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
                         <th>{% trans "Compte" %}</th>
-                        <th class="number">{% trans "Debit" %}</th>
-                        <th class="number">{% trans "Credit" %}</th>
+                        <th class="number">{% trans "Débit" %}</th>
+                        <th class="number">{% trans "Crédit" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,7 +49,7 @@
                             <td class="number">{{ row.credit|floatformat:2 }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="empty">{% trans "Aucun mouvement comptable sur cette periode." %}</td></tr>
+                        <tr><td colspan="3" class="empty">{% trans "Aucun mouvement comptable sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
@@ -66,15 +66,15 @@
     <article class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
             <h3 class="section-title">{% trans "Grand livre" %}</h3>
-            <a class="subtle-badge" href="{% url 'grand_livre' %}{{ filter_query }}">{% trans "Voir le detail" %}</a>
+            <a class="subtle-badge" href="{% url 'grand_livre' %}{{ filter_query }}">{% trans "Voir le détail" %}</a>
         </div>
         {% for account in grand_livre_preview %}
             <div style="padding:14px 0;border-bottom:1px solid #d8dfeb;">
                 <strong>{{ account.numero }} - {{ account.nom }}</strong>
-                <div class="muted" style="margin-top:6px;">{% trans "Mouvements:" %} {{ account.lignes|length }} {% trans "| Solde final debit" %} {{ account.solde_debit|floatformat:2 }} {% trans "| credit" %} {{ account.solde_credit|floatformat:2 }}</div>
+                <div class="muted" style="margin-top:6px;">{% trans "Mouvements:" %} {{ account.lignes|length }} {% trans "| Solde final débit" %} {{ account.solde_debit|floatformat:2 }} {% trans "| crédit" %} {{ account.solde_credit|floatformat:2 }}</div>
             </div>
         {% empty %}
-            <div class="empty">{% trans "Aucune ecriture a afficher." %}</div>
+            <div class="empty">{% trans "Aucune écriture à afficher." %}</div>
         {% endfor %}
     </article>
 </section>

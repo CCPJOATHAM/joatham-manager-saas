@@ -6,7 +6,7 @@ DEFAULT_EXCHANGE_SOURCE = "manuel"
 USD_CURRENCY = "USD"
 HARDCODED_FALLBACK_CURRENCY = "CDF"
 DEFAULT_CURRENCY_LABELS = {
-    "USD": gettext_lazy("Dollar americain"),
+    "USD": gettext_lazy('Dollar américain'),
     "CDF": gettext_lazy("Franc congolais"),
     "EUR": gettext_lazy("Euro"),
     "XAF": gettext_lazy("Franc CFA"),

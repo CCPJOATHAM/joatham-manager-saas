@@ -39,7 +39,7 @@ def _split_full_name(full_name):
 
 def _ensure_manageable_role(role):
     if role not in ALLOWED_MANAGED_ROLES:
-        raise ValueError(gettext_lazy("Le proprietaire peut creer uniquement un gestionnaire ou un comptable."))
+        raise ValueError(gettext_lazy('Le propriétaire peut créer uniquement un gestionnaire ou un comptable.'))
 
 
 def _ensure_email_available(email, *, exclude_user_id=None):
@@ -50,7 +50,7 @@ def _ensure_email_available(email, *, exclude_user_id=None):
         email_qs = email_qs.exclude(id=exclude_user_id)
         username_qs = username_qs.exclude(id=exclude_user_id)
     if email_qs.exists() or username_qs.exists():
-        raise ValueError(gettext_lazy("Un compte existe deja avec cet email."))
+        raise ValueError(gettext_lazy('Un compte existe déjà avec cet email.'))
     return normalized_email
 
 

@@ -1,10 +1,10 @@
 {% extends "joatham_rh/print_base.html" %}
 {% load i18n %}
 
-{% block print_title %}{% trans "Liste employes" %}{% endblock %}
+{% block print_title %}{% trans "Liste employés" %}{% endblock %}
 
 {% block print_content %}
-<h1>{% trans "Liste employes" %}</h1>
+<h1>{% trans "Liste employés" %}</h1>
 <table>
     <thead>
         <tr>
@@ -25,7 +25,7 @@
             <td>{{ employe.get_statut_display }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="muted">{% trans "Aucun employe a imprimer." %}</td></tr>
+        <tr><td colspan="5" class="muted">{% trans "Aucun employé à imprimer." %}</td></tr>
         {% endfor %}
     </tbody>
 </table>

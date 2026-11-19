@@ -368,19 +368,19 @@
         <h2>{{ facture.numero }}</h2>
         <div class="hero-meta">
             {% trans "Client :" %} <strong>{{ facture.client_display }}</strong><br>
-            {% trans "Emise le" %} {{ facture.date|date:"SHORT_DATETIME_FORMAT" }}
+            {% trans "Émise le" %} {{ facture.date|date:"SHORT_DATETIME_FORMAT" }}
         </div>
         <div style="margin-top:12px;">
             {% if est_partiellement_payee %}
-                <span class="status-chip status-partial">{% trans "Partiellement payee" %}</span>
+                <span class="status-chip status-partial">{% trans "Partiellement payée" %}</span>
             {% elif facture.statut == "brouillon" %}
                 <span class="status-chip status-brouillon">{% trans "Brouillon" %}</span>
             {% elif facture.statut == "emise" %}
-                <span class="status-chip status-emise">{% trans "Emise" %}</span>
+                <span class="status-chip status-emise">{% trans "Émise" %}</span>
             {% elif facture.statut == "payee" %}
-                <span class="status-chip status-payee">{% trans "Payee" %}</span>
+                <span class="status-chip status-payee">{% trans "Payée" %}</span>
             {% elif facture.statut == "annulee" %}
-                <span class="status-chip status-annulee">{% trans "Annulee" %}</span>
+                <span class="status-chip status-annulee">{% trans "Annulée" %}</span>
             {% endif %}
         </div>
     </div>
@@ -391,7 +391,7 @@
         {% endif %}
         <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">{% trans "Imprimer A4" %}</a>
         <a href="{% url 'facture_pdf' facture.id %}?format=pos" target="_blank" class="btn btn-add">{% trans "Imprimer POS" %}</a>
-        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">{% trans "Telecharger A4" %}</a>
+        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">{% trans "Télécharger A4" %}</a>
     </div>
 </div>
 
@@ -404,7 +404,7 @@
     <div class="summary-card">
         <span class="label">{% trans "TVA" %}</span>
         <strong>{{ total_tva }}</strong>
-        <span class="helper">{% trans "Taux applique :" %} {{ facture.tva }}%</span>
+        <span class="helper">{% trans "Taux appliqué :" %} {{ facture.tva }}%</span>
     </div>
     <div class="summary-card">
         <span class="label">{% trans "Total net" %}</span>
@@ -412,12 +412,12 @@
         <span class="helper">{% trans "Montant global de la facture" %}</span>
     </div>
     <div class="summary-card">
-        <span class="label">{% trans "Montant paye" %}</span>
+        <span class="label">{% trans "Montant payé" %}</span>
         <strong>{{ total_paye }}</strong>
-        <span class="helper">{% blocktrans count count=payment_count %}{{ count }} paiement enregistre{% plural %}{{ count }} paiements enregistres{% endblocktrans %}</span>
+        <span class="helper">{% blocktrans count count=payment_count %}{{ count }} paiement enregistré{% plural %}{{ count }} paiements enregistrés{% endblocktrans %}</span>
     </div>
     <div class="summary-card">
-        <span class="label">{% trans "Reste a payer" %}</span>
+        <span class="label">{% trans "Reste à payer" %}</span>
         <strong>{{ reste_a_payer }}</strong>
         <span class="helper">{% trans "Solde encore attendu" %}</span>
     </div>
@@ -426,12 +426,12 @@
 <div class="page-grid">
     <div>
         <div class="panel">
-            <h3>{% trans "Prestations facturees" %}</h3>
-            <p class="panel-subtitle">{% trans "Lecture detaillee des lignes de facture avec quantites, prix unitaires et montants calcules." %}</p>
+            <h3>{% trans "Prestations facturées" %}</h3>
+            <p class="panel-subtitle">{% trans "Lecture détaillée des lignes de facture avec quantités, prix unitaires et montants calculés." %}</p>
             <table class="facture-table">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">{% trans "Designation" %}</th>
+                        <th style="width: 40%;">{% trans "Désignation" %}</th>
                         <th style="width: 12%;">{% trans "Qte" %}</th>
                         <th style="width: 24%;">{% trans "Prix unitaire" %}</th>
                         <th style="width: 24%;">{% trans "Total" %}</th>
@@ -461,14 +461,14 @@
         </div>
 
         <div class="panel">
-            <h3>{% trans "Paiements enregistres" %}</h3>
-            <p class="panel-subtitle">{% trans "Historique des reglements deja saisis sur cette facture." %}</p>
+            <h3>{% trans "Paiements enregistrés" %}</h3>
+            <p class="panel-subtitle">{% trans "Historique des règlements déjà saisis sur cette facture." %}</p>
             <table class="payment-table">
                 <thead>
                     <tr>
                         <th style="width: 22%;">{% trans "Date" %}</th>
                         <th style="width: 18%;">{% trans "Mode" %}</th>
-                        <th style="width: 20%;">{% trans "Reference" %}</th>
+                        <th style="width: 20%;">{% trans "Référence" %}</th>
                         <th style="width: 20%;">{% trans "Montant" %}</th>
                         <th style="width: 20%;">{% trans "Statut" %}</th>
                     </tr>
@@ -486,7 +486,7 @@
                     </tr>
                     {% empty %}
                     <tr class="empty-row">
-                        <td colspan="5">{% trans "Aucun paiement enregistre." %}</td>
+                        <td colspan="5">{% trans "Aucun paiement enregistré." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -497,8 +497,8 @@
     <div>
         {% if can_manage_factures_ui %}
         <div class="panel">
-            <h3>{% trans "Mettre a jour le statut" %}</h3>
-            <p class="panel-subtitle">{% trans "Faites evoluer la facture dans son workflow tout en gardant une note de transition si besoin." %}</p>
+            <h3>{% trans "Mettre à jour le statut" %}</h3>
+            <p class="panel-subtitle">{% trans "Faites évoluer la facture dans son workflow tout en gardant une note de transition si besoin." %}</p>
             <form method="post" action="{% url 'change_facture_status' facture.id %}" class="inline-form" onsubmit="return confirmStatusChange(this);">
                 {% csrf_token %}
                 <div class="field">
@@ -511,9 +511,9 @@
                 </div>
                 <div class="field">
                     <label for="facture-note">{% trans "Note de transition" %}</label>
-                    <textarea id="facture-note" name="note" rows="3" placeholder="{% trans 'Ajouter un contexte interne si necessaire' %}"></textarea>
+                    <textarea id="facture-note" name="note" rows="3" placeholder="{% trans 'Ajouter un contexte interne si nécessaire' %}"></textarea>
                 </div>
-                <button type="submit" class="btn btn-print">{% trans "Mettre a jour" %}</button>
+                <button type="submit" class="btn btn-print">{% trans "Mettre à jour" %}</button>
             </form>
         </div>
         {% endif %}
@@ -521,7 +521,7 @@
         {% if can_record_payments_ui %}
         <div class="panel">
             <h3>{% trans "Enregistrer un paiement" %}</h3>
-            <p class="panel-subtitle">{% trans "Saisissez un reglement sans quitter la fiche facture." %}</p>
+            <p class="panel-subtitle">{% trans "Saisissez un règlement sans quitter la fiche facture." %}</p>
             <form method="post" action="{% url 'add_paiement_facture' facture.id %}" class="inline-form" onsubmit="return confirm(window.joathamMessages.confirmPayment);">
                 {% csrf_token %}
                 <div class="field">
@@ -548,12 +548,12 @@
                 </div>
                 {% endif %}
                 <div class="field">
-                    <label for="paiement-reference">{% trans "Reference" %}</label>
-                    <input id="paiement-reference" type="text" name="reference" placeholder="{% trans 'Reference, numero ou libelle' %}">
+                    <label for="paiement-reference">{% trans "Référence" %}</label>
+                    <input id="paiement-reference" type="text" name="reference" placeholder="{% trans 'Référence, numéro ou libellé' %}">
                 </div>
                 <div class="field">
                     <label for="paiement-note">{% trans "Note" %}</label>
-                    <textarea id="paiement-note" name="note" rows="3" placeholder="{% trans 'Commentaire interne sur ce reglement' %}"></textarea>
+                    <textarea id="paiement-note" name="note" rows="3" placeholder="{% trans 'Commentaire interne sur ce règlement' %}"></textarea>
                 </div>
                 <button type="submit" class="btn btn-paid">{% trans "Enregistrer le paiement" %}</button>
             </form>
@@ -562,7 +562,7 @@
 
         <div class="panel">
             <h3>{% trans "Historique" %}</h3>
-            <p class="panel-subtitle">{% trans "Trace recente des actions effectuees sur cette facture." %}</p>
+            <p class="panel-subtitle">{% trans "Trace récente des actions effectuées sur cette facture." %}</p>
             {% for event in historique %}
                 <div class="history-item">
                     <strong>{{ event.get_action_display }}</strong>

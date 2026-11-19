@@ -15,7 +15,7 @@ L'audit de départ a parcouru les templates, les textes Python et le JavaScript 
 | Plateforme et abonnements | Administration, maintenance, taux de change, plans et paiements | Templates, formulaires, notifications et navigation traduits |
 | Pages publiques et compte | Métadonnées, connexion, inscription, mot de passe et profil | FR/EN, catalogue JS et persistance vérifiée |
 
-Les catalogues contiennent 3 080 entrées Django et 15 entrées JavaScript par langue, sans entrée active vide ni fuzzy. Les catalogues français existants sont conservés et complétés. Le remplissage anglais a utilisé une traduction locale assistée, suivie de corrections de vocabulaire métier, des pluriels, des paramètres et des parcours principaux. Une revue éditoriale des formulations dans les écrans reste utile dans la PR.
+Les catalogues contiennent 3 039 entrées Django et 15 entrées JavaScript par langue, sans entrée active vide ni fuzzy. Les catalogues français existants sont conservés et complétés. Le remplissage anglais a utilisé une traduction locale assistée, suivie de corrections de vocabulaire métier, des pluriels, des paramètres et des parcours principaux. Une revue éditoriale des formulations dans les écrans reste utile dans la PR.
 
 Les noms d'entreprises, personnes, produits, descriptions, observations et messages saisis ne sont pas traduits. Les codes des statuts, rôles, monnaies et interfaces externes restent stables. Aucun changement de schéma n'est ajouté.
 
@@ -29,4 +29,6 @@ Les événements système connus sont traduits à l’affichage, y compris les d
 
 Les événements système connus sont traduits à l'affichage, y compris lorsqu'ils ont été enregistrés avant cette PR. Les descriptions et métadonnées stockées restent inchangées ; un texte libre non reconnu reste dans sa langue d'origine.
 
-Validation finale : 826 tests réussis sur PostgreSQL 14.24 local, dont 12 tests i18n ; extraction des sources, compilation des quatre catalogues, paramètres de formatage et absence de migration vérifiés. Les avertissements xhtml2pdf sur certaines propriétés CSS restent ceux du moteur PDF existant.
+Validation initiale : 826 tests réussis sur PostgreSQL 14.24 local, dont 12 tests i18n ; extraction des sources, compilation des quatre catalogues, paramètres de formatage et absence de migration vérifiés. Les avertissements xhtml2pdf sur certaines propriétés CSS restent ceux du moteur PDF existant.
+
+La relecture française corrige les accents et l’orthographe dans les sources et les catalogues FR/EN. Les clés historiques nécessaires aux modèles et migrations restent stables ; leurs libellés français sont corrigés à l’affichage. Les paramètres, traductions anglaises relues et données saisies sont conservés.

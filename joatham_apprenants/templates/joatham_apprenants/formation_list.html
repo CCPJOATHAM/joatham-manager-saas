@@ -21,7 +21,7 @@
                 <th>{% trans "Nom" %}</th>
                 <th>{% trans "Description" %}</th>
                 <th>{% trans "Prix" %}</th>
-                <th>{% trans "Duree" %}</th>
+                <th>{% trans "Durée" %}</th>
                 <th>{% trans "Actif" %}</th>
                 <th>{% trans "Actions" %}</th>
             </tr>
@@ -40,7 +40,7 @@
                     <form method="post" action="{% url 'formation_toggle_status' formation.id %}" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" style="margin-left:6px;">
-                            {% if formation.actif %}{% trans "Desactiver" %}{% else %}{% trans "Activer" %}{% endif %}
+                            {% if formation.actif %}{% trans "Désactiver" %}{% else %}{% trans "Activer" %}{% endif %}
                         </button>
                     </form>
                     {% else %}
@@ -53,7 +53,7 @@
                 <td colspan="6">
                     {% trans "Aucune formation disponible pour le moment." %}
                     {% if can_manage_apprenants_ui %}
-                    <a href="{% url 'formation_create' %}" style="margin-left:8px;">{% trans "Creer une formation" %}</a>
+                    <a href="{% url 'formation_create' %}" style="margin-left:8px;">{% trans "Créer une formation" %}</a>
                     {% endif %}
                 </td>
             </tr>

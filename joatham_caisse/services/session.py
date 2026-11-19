@@ -18,7 +18,7 @@ def _normalize_non_negative_amount(value, field_label):
     except (InvalidOperation, TypeError, ValueError) as exc:
         raise ValueError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < Decimal("0.00"):
-        raise ValueError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
+        raise ValueError((gettext_lazy('%(value_1)s ne peut pas être négatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -32,11 +32,11 @@ def compute_theoretical_balance(session):
 @transaction.atomic
 def open_session(*, entreprise, caisse, utilisateur, solde_initial=Decimal("0.00"), commentaire=""):
     ensure_same_entreprise(caisse, entreprise)
-    solde_initial = _normalize_non_negative_amount(solde_initial, "Le solde initial")
+    solde_initial = _normalize_non_negative_amount(solde_initial, gettext_lazy("Le solde initial"))
     if not caisse.est_active:
         raise ValueError(gettext_lazy("Cette caisse est inactive."))
     if get_open_session_for_caisse(caisse) is not None:
-        raise ValueError(gettext_lazy("Une session est deja ouverte pour cette caisse."))
+        raise ValueError(gettext_lazy('Une session est déjà ouverte pour cette caisse.'))
 
     session = SessionCaisse.objects.create(
         entreprise=entreprise,
@@ -65,10 +65,10 @@ open_session_for_caisse = open_session
 def close_session(*, entreprise, session, utilisateur, solde_reel, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut != SessionCaisse.Statut.OUVERTE:
-        raise ValueError(gettext_lazy("Seule une session ouverte peut etre fermee."))
+        raise ValueError(gettext_lazy('Seule une session ouverte peut être fermée.'))
 
     solde_theorique = compute_theoretical_balance(session)
-    solde_reel = _normalize_non_negative_amount(solde_reel, "Le solde reel")
+    solde_reel = _normalize_non_negative_amount(solde_reel, gettext_lazy("Le solde réel"))
     ecart = solde_reel - solde_theorique
     session.solde_theorique = solde_theorique
     session.solde_reel = solde_reel
@@ -111,9 +111,9 @@ def close_session(*, entreprise, session, utilisateur, solde_reel, commentaire="
 def cancel_session(*, entreprise, session, utilisateur, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut == SessionCaisse.Statut.VALIDEE:
-        raise ValueError(gettext_lazy("Une session validee ne peut plus etre annulee."))
+        raise ValueError(gettext_lazy('Une session validée ne peut plus être annulée.'))
     if session.validations.exists():
-        raise ValueError(gettext_lazy("Une session deja traitee ne peut plus etre annulee."))
+        raise ValueError(gettext_lazy('Une session déjà traitée ne peut plus être annulée.'))
 
     session.statut = SessionCaisse.Statut.ANNULEE
     if not session.date_fermeture:

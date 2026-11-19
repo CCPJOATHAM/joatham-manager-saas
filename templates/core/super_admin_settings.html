@@ -193,7 +193,7 @@
 {% if cinetpay_diagnostic %}
 <section class="settings-panel diagnostic-panel">
     <h2 class="section-title">{% trans "Diagnostic CinetPay" %}</h2>
-    <p class="muted">{% trans "Statut technique sans affichage de secrets. Les cles et tokens ne sont jamais exposes ici." %}</p>
+    <p class="muted">{% trans "Statut technique sans affichage de secrets. Les clés et tokens ne sont jamais exposés ici." %}</p>
 
     <div class="diagnostic-grid">
         <div class="diagnostic-item">
@@ -210,7 +210,7 @@
         </div>
         <div class="diagnostic-item">
             <span>{% trans "Configuration" %}</span>
-            <strong>{% if cinetpay_diagnostic.configured %}{% trans "Complete" %}{% else %}{% trans "Incomplete" %}{% endif %}</strong>
+            <strong>{% if cinetpay_diagnostic.configured %}{% trans "Complète" %}{% else %}{% trans "Incomplète" %}{% endif %}</strong>
         </div>
         <div class="diagnostic-item">
             <span>{% trans "Environnement paiement" %}</span>
@@ -223,7 +223,7 @@
             <small class="diagnostic-url">{{ cinetpay_diagnostic.payment_url }}</small>
         </div>
         <div class="diagnostic-item">
-            <span>{% trans "Source URL verification" %}</span>
+            <span>{% trans "Source URL vérification" %}</span>
             <strong>{{ cinetpay_diagnostic.check_url_source_label }}</strong>
             <small class="diagnostic-url">{{ cinetpay_diagnostic.check_url }}</small>
         </div>
@@ -231,13 +231,13 @@
 
     {% if cinetpay_diagnostic.missing_required_settings %}
         <div class="diagnostic-warning">
-            {% trans "Configuration CinetPay incomplete :" %}
+            {% trans "Configuration CinetPay incomplète :" %}
             {% for setting_name in cinetpay_diagnostic.missing_required_settings %}
                 <code>{{ setting_name }}</code>{% if not forloop.last %}, {% endif %}
             {% endfor %}
         </div>
     {% else %}
-        <div class="diagnostic-ok">{% trans "Toutes les variables requises CinetPay sont detectees." %}</div>
+        <div class="diagnostic-ok">{% trans "Toutes les variables requises CinetPay sont détectées." %}</div>
     {% endif %}
 
     {% if cinetpay_diagnostic.warnings %}
@@ -252,12 +252,12 @@
     {% endif %}
 
     <div class="diagnostic-list">
-        <span>{% trans "Variables requises presentes" %}</span>
+        <span>{% trans "Variables requises présentes" %}</span>
         <ul>
             {% for setting_name in cinetpay_diagnostic.present_required_settings %}
-                <li><code>{{ setting_name }}</code> {% trans ": present" %}</li>
+                <li><code>{{ setting_name }}</code> {% trans ": présent" %}</li>
             {% empty %}
-                <li>{% trans "Aucune variable requise detectee." %}</li>
+                <li>{% trans "Aucune variable requise détectée." %}</li>
             {% endfor %}
         </ul>
     </div>
@@ -268,7 +268,7 @@
             {% for item in cinetpay_diagnostic.optional_settings %}
                 <li>
                     <code>{{ item.name }}</code> :
-                    {% if item.present %}{% trans "present" %}{% else %}{% trans "absent" %}{% endif %}
+                    {% if item.present %}{% trans "présent" %}{% else %}{% trans "absent" %}{% endif %}
                     {% if item.source %}({{ item.source }}){% endif %}
                 </li>
             {% endfor %}
@@ -291,7 +291,7 @@
         <div class="field">
             <label for="{{ form.email_systeme.id_for_label }}">{{ form.email_systeme.label }}</label>
             {{ form.email_systeme }}
-            <span class="muted">{% trans "Cet email est un paramètre applicatif et ne modifie pas la configuration SMTP existante." %}</span>
+            <span class="muted">{% trans "Cet email est un paramètre applicatif et ne modifié pas la configuration SMTP existante." %}</span>
             {{ form.email_systeme.errors }}
         </div>
 
@@ -304,7 +304,7 @@
         <div class="field">
             <label for="{{ form.devise_plateforme.id_for_label }}">{{ form.devise_plateforme.label }}</label>
             {{ form.devise_plateforme }}
-            <span class="muted">{% trans "Devise officielle des abonnements plateforme. Par defaut : USD." %}</span>
+            <span class="muted">{% trans "Devise officielle des abonnements plateforme. Par défaut : USD." %}</span>
             {{ form.devise_plateforme.errors }}
         </div>
 
@@ -318,7 +318,7 @@
         <div class="field">
             <label for="{{ form.exchange_rate_api_key.id_for_label }}">{{ form.exchange_rate_api_key.label }}</label>
             {{ form.exchange_rate_api_key }}
-            <span class="muted">{% trans "Optionnel ici. Preferer EXCHANGE_RATE_API_KEY cote serveur." %}</span>
+            <span class="muted">{% trans "Optionnel ici. Préférer EXCHANGE_RATE_API_KEY côté serveur." %}</span>
             {{ form.exchange_rate_api_key.errors }}
         </div>
 
@@ -340,7 +340,7 @@
         <div class="field">
             <label for="{{ form.duree_essai_jours.id_for_label }}">{{ form.duree_essai_jours.label }}</label>
             {{ form.duree_essai_jours }}
-            <span class="muted">{% trans "Utilise uniquement pour les anciens essais ou les prolongations manuelles de compatibilite." %}</span>
+            <span class="muted">{% trans "Utilisé uniquement pour les anciens essais ou les prolongations manuelles de compatibilité." %}</span>
             {{ form.duree_essai_jours.errors }}
         </div>
 
@@ -348,7 +348,7 @@
             {{ form.mode_maintenance }}
             <span>
                 <strong>{{ form.mode_maintenance.label }}</strong>
-                <span class="muted">{% trans "Les utilisateurs non super_admin seront bloques tant que ce mode est actif." %}</span>
+                <span class="muted">{% trans "Les utilisateurs non super_admin seront bloqués tant que ce mode est actif." %}</span>
             </span>
         </label>
         {{ form.mode_maintenance.errors }}
@@ -363,7 +363,7 @@
         <div class="field">
             <label for="{{ form.maintenance_allowed_ips.id_for_label }}">{{ form.maintenance_allowed_ips.label }}</label>
             {{ form.maintenance_allowed_ips }}
-            <span class="muted">{% trans "Une IP par ligne ou separee par virgule." %}</span>
+            <span class="muted">{% trans "Une IP par ligne ou séparée par virgule." %}</span>
             {{ form.maintenance_allowed_ips.errors }}
         </div>
 

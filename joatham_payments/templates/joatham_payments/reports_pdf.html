@@ -21,44 +21,44 @@
 </head>
 <body>
   <h1>{{ report_title }}</h1>
-  <p class="muted">{{ entreprise.nom }} {% trans "- genere le" %} {{ date_footer }}</p>
+  <p class="muted">{{ entreprise.nom }} {% trans "- généré le" %} {{ date_footer }}</p>
 
   <table class="kpis">
     <tr>
-      <td><strong>{% trans "Total encaisse" %}</strong><br>{{ summary.total_encaisse }}</td>
+      <td><strong>{% trans "Total encaissé" %}</strong><br>{{ summary.total_encaisse }}</td>
       <td><strong>{% trans "En attente" %}</strong><br>{{ summary.total_en_attente }}</td>
-      <td><strong>{% trans "Rejete" %}</strong><br>{{ summary.total_rejete }}</td>
-      <td><strong>{% trans "Annule" %}</strong><br>{{ summary.total_annule }}</td>
+      <td><strong>{% trans "Rejeté" %}</strong><br>{{ summary.total_rejete }}</td>
+      <td><strong>{% trans "Annulé" %}</strong><br>{{ summary.total_annule }}</td>
     </tr>
   </table>
 
-  <h2>{% trans "Repartition par moyen" %}</h2>
+  <h2>{% trans "Répartition par moyen" %}</h2>
   <table>
     <thead><tr><th>{% trans "Moyen" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th></tr></thead>
     <tbody>
       {% for row in method_breakdown %}
       <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
       {% empty %}
-      <tr><td colspan="3">{% trans "Aucune donnee." %}</td></tr>
+      <tr><td colspan="3">{% trans "Aucune donnée." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <h2>{% trans "Repartition par statut" %}</h2>
+  <h2>{% trans "Répartition par statut" %}</h2>
   <table>
     <thead><tr><th>{% trans "Statut" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th></tr></thead>
     <tbody>
       {% for row in status_breakdown %}
       <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
       {% empty %}
-      <tr><td colspan="3">{% trans "Aucune donnee." %}</td></tr>
+      <tr><td colspan="3">{% trans "Aucune donnée." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <h2>{% trans "Paiements recents" %}</h2>
+  <h2>{% trans "Paiements récents" %}</h2>
   <table>
-    <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Moyen" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Reference" %}</th></tr></thead>
+    <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Moyen" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Référence" %}</th></tr></thead>
     <tbody>
       {% for payment in recent_payments %}
       <tr>

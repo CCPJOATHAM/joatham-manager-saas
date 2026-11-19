@@ -77,22 +77,22 @@
 </style>
 
 <section class="danger-panel">
-    <h2>{% trans "Desactivation de" %} {{ entreprise.nom }}</h2>
+    <h2>{% trans "Désactivation de" %} {{ entreprise.nom }}</h2>
     <p class="warning-copy">
         {% trans "Cette action ne supprime pas physiquement les données. Elle masque l'entreprise des listes actives, suspend son abonnement, désactive ses utilisateurs et bloque leur accès à la plateforme." %}
     </p>
 
     <ul class="impact-list">
-        <li>{% trans "Utilisateurs lies :" %} {{ critical_counts.users }}</li>
-        <li>{% trans "Clients conserves :" %} {{ critical_counts.clients }}</li>
-        <li>{% trans "Factures conservees :" %} {{ critical_counts.factures }}</li>
-        <li>{% trans "Services conserves :" %} {{ critical_counts.services }}</li>
+        <li>{% trans "Utilisateurs liés :" %} {{ critical_counts.users }}</li>
+        <li>{% trans "Clients conservés :" %} {{ critical_counts.clients }}</li>
+        <li>{% trans "Factures conservées :" %} {{ critical_counts.factures }}</li>
+        <li>{% trans "Services conservés :" %} {{ critical_counts.services }}</li>
         <li>{% trans "Dépenses conservées :" %} {{ critical_counts.depenses }}</li>
-        <li>{% trans "Produits conserves :" %} {{ critical_counts.produits }}</li>
-        <li>{% trans "Apprenants conserves :" %} {{ critical_counts.apprenants }}</li>
+        <li>{% trans "Produits conservés :" %} {{ critical_counts.produits }}</li>
+        <li>{% trans "Apprenants conservés :" %} {{ critical_counts.apprenants }}</li>
         <li>{% trans "Écritures comptables conservées :" %} {{ critical_counts.ecritures }}</li>
-        <li>{% trans "Paiements d'abonnement conserves :" %} {{ critical_counts.payments }}</li>
-        <li>{% trans "Evenements d'audit conserves :" %} {{ critical_counts.logs }}</li>
+        <li>{% trans "Paiements d'abonnement conservés :" %} {{ critical_counts.payments }}</li>
+        <li>{% trans "Événements d'audit conservés :" %} {{ critical_counts.logs }}</li>
     </ul>
 
     {% if not entreprise.is_active %}

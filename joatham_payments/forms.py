@@ -13,8 +13,8 @@ from .models import PaymentTransaction
 class PaymentTransactionForm(forms.ModelForm):
     confirm_now = forms.BooleanField(
         required=False,
-        label=gettext_lazy("Confirmer immediatement"),
-        help_text=gettext_lazy("Disponible uniquement aux utilisateurs habilites a valider les paiements."),
+        label=gettext_lazy('Confirmer immédiatement'),
+        help_text=gettext_lazy('Disponible uniquement aux utilisateurs habilités à valider les paiements.'),
     )
 
     class Meta:
@@ -40,16 +40,16 @@ class PaymentTransactionForm(forms.ModelForm):
             "method": gettext_lazy("Moyen de paiement"),
             "amount": gettext_lazy("Montant"),
             "currency": gettext_lazy("Devise"),
-            "reference": gettext_lazy("Reference transaction"),
-            "phone_number": gettext_lazy("Telephone Mobile Money"),
-            "mobile_operator": gettext_lazy("Operateur Mobile Money"),
+            "reference": gettext_lazy('Référence transaction'),
+            "phone_number": gettext_lazy('Téléphone Mobile Money'),
+            "mobile_operator": gettext_lazy('Opérateur Mobile Money'),
             "transaction_date": gettext_lazy("Date transaction"),
-            "facture": gettext_lazy("Facture liee"),
-            "depense": gettext_lazy("Depense liee"),
+            "facture": gettext_lazy('Facture liée'),
+            "depense": gettext_lazy('Dépense liée'),
             "caisse": gettext_lazy("Caisse"),
             "session_caisse": gettext_lazy("Session caisse"),
             "note": gettext_lazy("Note"),
-            "attachment": gettext_lazy("Piece justificative"),
+            "attachment": gettext_lazy('Pièce justificative'),
         }
         widgets = {
             "transaction_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),

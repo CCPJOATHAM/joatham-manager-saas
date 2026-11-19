@@ -29,7 +29,7 @@
             <a href="{% url 'inventory_count' session.id %}" class="action-link primary">{% trans "Compter" %}</a>
             {% endif %}
             {% if can_inventory_stock_ui and session.status == 'in_progress' %}
-            <form method="post" action="{% url 'inventory_close' session.id %}">{% csrf_token %}<button type="submit" class="action-button warning">{% trans "Cloturer" %}</button></form>
+            <form method="post" action="{% url 'inventory_close' session.id %}">{% csrf_token %}<button type="submit" class="action-button warning">{% trans "Clôturer" %}</button></form>
             {% endif %}
             {% if can_inventory_stock_ui and session.status == 'closed' %}
             <form method="post" action="{% url 'inventory_validate' session.id %}">{% csrf_token %}<button type="submit" class="action-button success">{% trans "Valider" %}</button></form>
@@ -42,10 +42,10 @@
 
     <div class="helper-card">
         <div class="inventory-meta muted">
-            <p><strong>{% trans "Createur :" %}</strong> {% if session.created_by %}{{ session.created_by.username }}{% else %}-{% endif %}</p>
-            <p><strong>{% trans "Date de creation :" %}</strong> {{ session.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
-            <p>{% if session.started_at %}<strong>{% trans "Date de debut :" %}</strong> {{ session.started_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de debut :" %}</strong> -{% endif %}</p>
-            <p>{% if session.closed_at %}<strong>{% trans "Date de cloture :" %}</strong> {{ session.closed_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de cloture :" %}</strong> -{% endif %}</p>
+            <p><strong>{% trans "Créateur :" %}</strong> {% if session.created_by %}{{ session.created_by.username }}{% else %}-{% endif %}</p>
+            <p><strong>{% trans "Date de création :" %}</strong> {{ session.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+            <p>{% if session.started_at %}<strong>{% trans "Date de début :" %}</strong> {{ session.started_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de début :" %}</strong> -{% endif %}</p>
+            <p>{% if session.closed_at %}<strong>{% trans "Date de clôture :" %}</strong> {{ session.closed_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de clôture :" %}</strong> -{% endif %}</p>
             <p>{% if session.validated_at %}<strong>{% trans "Date de validation :" %}</strong> {{ session.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de validation :" %}</strong> -{% endif %}</p>
             <p>{% if session.validated_by %}<strong>{% trans "Valide par :" %}</strong> {{ session.validated_by.username }}{% else %}<strong>{% trans "Valide par :" %}</strong> -{% endif %}</p>
         </div>
@@ -54,10 +54,10 @@
 
 <div class="kpi-grid">
     <div class="kpi-card"><span class="kpi-label">{% trans "Produits" %}</span><span class="kpi-value">{{ summary.total_lines }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Produits comptes" %}</span><span class="kpi-value">{{ summary.counted_lines }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Non comptes" %}</span><span class="kpi-value">{{ summary.uncounted_lines }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Ecarts positifs" %}</span><span class="kpi-value">{{ summary.positive_differences }}</span></div>
-    <div class="kpi-card"><span class="kpi-label">{% trans "Ecarts negatifs" %}</span><span class="kpi-value">{{ summary.negative_differences }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Produits comptés" %}</span><span class="kpi-value">{{ summary.counted_lines }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Non comptés" %}</span><span class="kpi-value">{{ summary.uncounted_lines }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Écarts positifs" %}</span><span class="kpi-value">{{ summary.positive_differences }}</span></div>
+    <div class="kpi-card"><span class="kpi-label">{% trans "Écarts négatifs" %}</span><span class="kpi-value">{{ summary.negative_differences }}</span></div>
     <div class="kpi-card"><span class="kpi-label">{% trans "Sans écart" %}</span><span class="kpi-value">{{ summary.balanced_lines }}</span></div>
 </div>
 
@@ -75,8 +75,8 @@
                     <tr>
                         <th>{% trans "Produit" %}</th>
                         <th>{% trans "Stock théorique" %}</th>
-                        <th>{% trans "Quantite comptee" %}</th>
-                        <th>{% trans "Ecart" %}</th>
+                        <th>{% trans "Quantité comptée" %}</th>
+                        <th>{% trans "Écart" %}</th>
                         <th>{% trans "Commentaire" %}</th>
                     </tr>
                 </thead>

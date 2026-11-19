@@ -183,9 +183,9 @@ def inscrire_apprenant_a_formation(
     )
     montant_paye_value = _parse_amount(montant_paye or 0, "Le montant initial paye est invalide.")
     if montant_prevu_value < Decimal("0.00"):
-        raise ValidationError(gettext_lazy("Le montant total de l'inscription ne peut pas etre negatif."))
+        raise ValidationError(gettext_lazy("Le montant total de l'inscription ne peut pas être négatif."))
     if montant_paye_value < Decimal("0.00"):
-        raise ValidationError(gettext_lazy("Le montant initial paye ne peut pas etre negatif."))
+        raise ValidationError(gettext_lazy('Le montant initial payé ne peut pas être négatif.'))
 
     inscription_data = {
         "entreprise": entreprise,
@@ -254,7 +254,7 @@ def update_inscription_montant_prevu(
         "Le montant total de l'inscription est invalide.",
     )
     if montant_prevu_value < Decimal("0.00"):
-        raise ValidationError(gettext_lazy("Le montant total de l'inscription ne peut pas etre negatif."))
+        raise ValidationError(gettext_lazy("Le montant total de l'inscription ne peut pas être négatif."))
 
     previous_amount = inscription.montant_prevu
     inscription.montant_prevu = montant_prevu_value
@@ -299,7 +299,7 @@ def create_paiement_inscription(
 
     montant_value = _parse_amount(montant or 0, "Le montant du paiement est invalide.")
     if montant_value <= Decimal("0.00"):
-        raise ValidationError(gettext_lazy("Le montant du paiement doit etre strictement positif."))
+        raise ValidationError(gettext_lazy('Le montant du paiement doit être strictement positif.'))
     mode_paiement = _validate_payment_mode(mode_paiement)
 
     paiement_data = {

@@ -9,9 +9,9 @@ window.joathamMessages = {
     confirmPayment: gettext("Confirmer l'enregistrement de ce paiement ?"),
     confirmFullPayment: gettext("Confirmer l'enregistrement du paiement complet ?"),
     confirmCancelInvoice: gettext("Confirmer l'annulation de cette facture ?"),
-    confirmPaidInvoice: gettext("Confirmer le passage de cette facture au statut payee ?"),
+    confirmPaidInvoice: gettext("Confirmer le passage de cette facture au statut payée ?"),
     confirmStatus: gettext("Confirmer le changement de statut ?"),
-    confirmConvertProforma: gettext("Convertir cette proforma en facture definitive ?"),
+    confirmConvertProforma: gettext("Convertir cette proforma en facture définitive ?"),
     confirmCancelProforma: gettext("Annuler cette proforma ?"),
     confirmDeleteClient: gettext("Voulez-vous vraiment supprimer ce client ?"),
 };

@@ -150,9 +150,9 @@ def _handle_super_admin_subscription_action(request, *, redirect_name):
 
     if action == "activate":
         if plan is None:
-            raise ValueError(gettext_lazy("Veuillez selectionner un plan pour activer l'abonnement."))
+            raise ValueError(gettext_lazy("Veuillez sélectionner un plan pour activer l'abonnement."))
         activate_company_subscription(entreprise=entreprise, plan=plan, utilisateur=request.user)
-        messages.success(request, (gettext_lazy('Abonnement active pour %(value_1)s.') % {'value_1': entreprise.nom}))
+        messages.success(request, (gettext_lazy('Abonnement activé pour %(value_1)s.') % {'value_1': entreprise.nom}))
     elif action == "suspend":
         suspend_company_subscription(entreprise=entreprise, utilisateur=request.user)
         messages.success(request, (gettext_lazy('Entreprise suspendue : %(value_1)s.') % {'value_1': entreprise.nom}))
@@ -163,12 +163,12 @@ def _handle_super_admin_subscription_action(request, *, redirect_name):
             utilisateur=request.user,
             plan=plan,
         )
-        messages.success(request, (gettext_lazy('Acces historique prolonge pour %(value_1)s.') % {'value_1': entreprise.nom}))
+        messages.success(request, (gettext_lazy('Accès historique prolongé pour %(value_1)s.') % {'value_1': entreprise.nom}))
     elif action == "change_plan":
         if plan is None:
-            raise ValueError(gettext_lazy("Veuillez selectionner un plan pour modifier l'abonnement."))
+            raise ValueError(gettext_lazy("Veuillez sélectionner un plan pour modifier l'abonnement."))
         change_company_plan(entreprise=entreprise, plan=plan, utilisateur=request.user)
-        messages.success(request, (gettext_lazy('Plan mis a jour pour %(value_1)s.') % {'value_1': entreprise.nom}))
+        messages.success(request, (gettext_lazy('Plan mis à jour pour %(value_1)s.') % {'value_1': entreprise.nom}))
     else:
         messages.error(request, gettext_lazy("Action super admin inconnue."))
 
@@ -306,7 +306,7 @@ def subscription_payment_create(request):
             preuve_paiement=form.cleaned_data.get("preuve_paiement"),
             utilisateur=request.user,
         )
-        messages.success(request, gettext_lazy("Votre demande de paiement a ete envoyee. Elle sera activee apres validation."))
+        messages.success(request, gettext_lazy('Votre demande de paiement a été envoyée. Elle sera activée après validation.'))
         return redirect("subscription_overview")
 
     plans = get_commercial_plans_queryset(include_free=False, paid_only=True).order_by("prix", "nom")
@@ -458,7 +458,7 @@ def subscription_plan_list(request):
         else:
             try:
                 create_subscription_plan_request(entreprise=entreprise, plan=plan, utilisateur=request.user)
-                messages.success(request, (gettext_lazy('Votre demande pour le plan %(value_1)s a ete envoyee au super admin.') % {'value_1': get_plan_commercial_name(plan)}))
+                messages.success(request, (gettext_lazy('Votre demande pour le plan %(value_1)s a été envoyée au super admin.') % {'value_1': get_plan_commercial_name(plan)}))
                 return redirect("subscription_plan_list")
             except ValueError as exc:
                 messages.error(request, str(exc))
@@ -529,7 +529,7 @@ def super_admin_dashboard(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, (gettext_lazy("Le paiement a ete valide et l'abonnement a ete active pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
+                messages.success(request, (gettext_lazy("Le paiement a été validé et l'abonnement a été activé pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_dashboard")
             if action == "refuse_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
@@ -538,7 +538,7 @@ def super_admin_dashboard(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, (gettext_lazy('Le paiement a ete refuse pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
+                messages.success(request, (gettext_lazy('Le paiement a été refusé pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_dashboard")
 
             return _handle_super_admin_subscription_action(request, redirect_name="super_admin_dashboard")
@@ -574,7 +574,7 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, (gettext_lazy("La demande a ete validee et l'abonnement a ete active pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
+                messages.success(request, (gettext_lazy("La demande a été validée et l'abonnement a été activé pour %(value_1)s.") % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "refuse_payment":
                 paiement = get_subscription_payment_for_super_admin(request.POST.get("paiement_id"))
@@ -583,12 +583,12 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, (gettext_lazy('La demande a ete refusee pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
+                messages.success(request, (gettext_lazy('La demande a été refusée pour %(value_1)s.') % {'value_1': paiement.entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "validate_plan_request":
                 entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
                 validate_subscription_plan_request(entreprise=entreprise, super_admin=request.user)
-                messages.success(request, (gettext_lazy('Demande de plan validee pour %(value_1)s. En attente de paiement manuel si necessaire.') % {'value_1': entreprise.nom}))
+                messages.success(request, (gettext_lazy('Demande de plan validée pour %(value_1)s. En attente de paiement manuel si nécessaire.') % {'value_1': entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             if action == "refuse_plan_request":
                 entreprise = get_entreprise_for_super_admin(request.POST.get("entreprise_id"))
@@ -597,7 +597,7 @@ def super_admin_subscription_list(request):
                     super_admin=request.user,
                     notes_validation=request.POST.get("notes_validation") or "",
                 )
-                messages.success(request, (gettext_lazy('Demande de plan refusee pour %(value_1)s.') % {'value_1': entreprise.nom}))
+                messages.success(request, (gettext_lazy('Demande de plan refusée pour %(value_1)s.') % {'value_1': entreprise.nom}))
                 return redirect("super_admin_subscription_list")
             return _handle_super_admin_subscription_action(request, redirect_name="super_admin_subscription_list")
         except ValueError as exc:
@@ -658,7 +658,7 @@ def super_admin_subscription_manual_payment(request, entreprise_id):
                 )
                 messages.success(
                     request,
-                    (gettext_lazy('Paiement enregistre pour %(value_1)s. Nouvelle expiration : %(value_2)s.') % {'value_1': entreprise.nom, 'value_2': format(updated_subscription.date_fin,'%d/%m/%Y')}),
+                    (gettext_lazy('Paiement enregistré pour %(value_1)s. Nouvelle expiration : %(value_2)s.') % {'value_1': entreprise.nom, 'value_2': format(updated_subscription.date_fin,'%d/%m/%Y')}),
                 )
                 return redirect("super_admin_subscription_list")
             except ValueError as exc:
@@ -686,19 +686,19 @@ def super_admin_user_list(request):
             messages.error(request, gettext_lazy("Utilisateur introuvable."))
             return redirect("super_admin_user_list")
         if target_user.id == request.user.id and action == "deactivate_user":
-            messages.error(request, gettext_lazy("Vous ne pouvez pas desactiver votre propre compte super admin."))
+            messages.error(request, gettext_lazy('Vous ne pouvez pas désactiver votre propre compte super admin.'))
             return redirect("super_admin_user_list")
 
         if action == "deactivate_user":
             target_user.is_active = False
             target_user.save(update_fields=["is_active"])
             _record_super_admin_user_action(target_user=target_user, admin_user=request.user, action="utilisateur_desactive")
-            messages.success(request, (gettext_lazy('Utilisateur desactive : %(value_1)s.') % {'value_1': target_user.username}))
+            messages.success(request, (gettext_lazy('Utilisateur désactivé : %(value_1)s.') % {'value_1': target_user.username}))
         elif action == "reactivate_user":
             target_user.is_active = True
             target_user.save(update_fields=["is_active"])
             _record_super_admin_user_action(target_user=target_user, admin_user=request.user, action="utilisateur_reactive")
-            messages.success(request, (gettext_lazy('Utilisateur reactive : %(value_1)s.') % {'value_1': target_user.username}))
+            messages.success(request, (gettext_lazy('Utilisateur réactivé : %(value_1)s.') % {'value_1': target_user.username}))
         else:
             messages.error(request, gettext_lazy("Action utilisateur inconnue."))
         return redirect("super_admin_user_list")
@@ -810,7 +810,7 @@ def super_admin_settings(request):
         changed_fields = list(form.changed_data)
         if changed_fields:
             platform_settings.save(update_fields=changed_fields)
-        messages.success(request, gettext_lazy("Parametres plateforme mis a jour."))
+        messages.success(request, gettext_lazy('Paramètres plateforme mis à jour.'))
         return redirect("super_admin_settings")
 
     return render(
@@ -835,7 +835,7 @@ def super_admin_exchange_rate_list(request):
             manual_form = ExchangeRateManualForm(request.POST)
             if manual_form.is_valid():
                 manual_form.save()
-                messages.success(request, gettext_lazy("Taux manuel enregistre."))
+                messages.success(request, gettext_lazy('Taux manuel enregistré.'))
                 return redirect("super_admin_exchange_rate_list")
             messages.error(request, gettext_lazy("Veuillez corriger le taux manuel."))
         else:
@@ -843,7 +843,7 @@ def super_admin_exchange_rate_list(request):
             target = (request.POST.get("target") or "").strip().upper()
             try:
                 get_exchange_rate(source, target)
-                messages.success(request, (gettext_lazy('Taux %(value_1)s -> %(value_2)s rafraichi ou recupere depuis le cache.') % {'value_1': source, 'value_2': target}))
+                messages.success(request, (gettext_lazy('Taux %(value_1)s -> %(value_2)s rafraîchi ou récupéré depuis le cache.') % {'value_1': source, 'value_2': target}))
             except ExchangeRateUnavailable as exc:
                 messages.error(request, str(exc))
             return redirect("super_admin_exchange_rate_list")
@@ -906,7 +906,7 @@ def super_admin_company_deactivate(request, entreprise_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, (gettext_lazy('Entreprise desactivee : %(value_1)s. Les donnees sont conservees.') % {'value_1': entreprise.nom}))
+            messages.success(request, (gettext_lazy('Entreprise désactivée : %(value_1)s. Les données sont conservées.') % {'value_1': entreprise.nom}))
             return redirect("super_admin_company_list")
 
     return render(

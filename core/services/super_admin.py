@@ -31,7 +31,7 @@ def get_entreprise_for_super_admin(entreprise_id):
 
 def deactivate_company_for_super_admin(*, entreprise, confirmation_name, utilisateur=None):
     if not getattr(entreprise, "is_active", True):
-        raise ValueError(gettext_lazy("Cette entreprise est deja desactivee."))
+        raise ValueError(gettext_lazy('Cette entreprise est déjà désactivée.'))
 
     expected_name = (entreprise.nom or "").strip()
     if (confirmation_name or "").strip() != expected_name:
@@ -80,15 +80,15 @@ def suspend_company_subscription(*, entreprise, utilisateur=None):
 def extend_company_trial(*, entreprise, days, utilisateur=None, plan=None):
     days = int(days or 0)
     if days <= 0:
-        raise ValueError(gettext_lazy("La prolongation d'acces historique doit etre strictement positive."))
+        raise ValueError(gettext_lazy("La prolongation d'accès historique doit être strictement positive."))
 
     subscription = get_current_subscription(entreprise)
     today = timezone.localdate()
 
     if subscription is None:
-        raise ValueError(gettext_lazy("Aucun ancien essai n'est disponible a prolonger. Activez le plan Gratuit ou un plan payant."))
+        raise ValueError(gettext_lazy("Aucun ancien essai n'est disponible à prolonger. Activez le plan Gratuit ou un plan payant."))
     if subscription.statut != AbonnementEntreprise.Statut.ESSAI or not subscription.essai:
-        raise ValueError(gettext_lazy("Seuls les anciens abonnements en essai peuvent etre prolonges."))
+        raise ValueError(gettext_lazy('Seuls les anciens abonnements en essai peuvent être prolongés.'))
 
     base_date = subscription.date_fin if subscription.date_fin and subscription.date_fin >= today else today
     subscription.date_fin = base_date + timedelta(days=days)

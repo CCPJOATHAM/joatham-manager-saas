@@ -1,4 +1,6 @@
 import io
+import json
+import re
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -12,16 +14,27 @@ from django.utils import timezone, translation
 from pypdf import PdfReader
 
 from core.i18n_audit import catalog_state, catalog_errors, python_errors, template_errors
-from core.models import ActivityLog
+from core.models import ActivityLog, PaiementAbonnement
 from core.services.currency import format_decimal_number
 from core.services.language import LANGUAGE_SESSION_KEY
-from core.services.subscription import activate_subscription_for_entreprise, get_default_paid_plans
+from core.services.quotas import PREMIUM_REQUIRED_MESSAGE
+from core.services.subscription import activate_subscription_for_entreprise, get_default_paid_plans, validate_subscription_payment
 from joatham_billing.tests.factories import create_client, create_entreprise, create_facture_sample, create_user
 from joatham_users.models import Abonnement, User
 from joatham_clients.models import Client
 
 
 class TranslationCoverageTests(SimpleTestCase):
+    def test_cash_report_keeps_technical_css_class_in_both_languages(self):
+        for language in ("fr", "en"):
+            with self.subTest(language=language), translation.override(language):
+                rendered = render_to_string("joatham_caisse/reports.html", {
+                    "report": {"solde_net": Decimal("-1")},
+                    "request": SimpleNamespace(user=SimpleNamespace(username="preview", email=""), get_full_path=lambda: "/caisse/rapports/"),
+                })
+                self.assertIn('class="kpi-value negative"', rendered)
+                self.assertNotIn('class="kpi-value négative"', rendered)
+
     def test_invitation_email_keeps_recipient_and_activation_link_in_both_languages(self):
         activation_url = "https://example.invalid/activate/unchanged-token/"
         context = {
@@ -40,6 +53,8 @@ class TranslationCoverageTests(SimpleTestCase):
                     self.assertIn("accounting for your business.", body)
                 else:
                     self.assertNotIn("Your JOATHAM Manager account is ready.", body)
+                    self.assertIn("Votre accès JOATHAM Manager est prêt.", body)
+                    self.assertIn("la comptabilité de votre activité.", body)
 
     def test_catalog_comparison_ignores_order_but_detects_content_changes(self):
         first = 'msgid "Connexion"\nmsgstr "Sign in"\n\n'
@@ -81,6 +96,7 @@ class TranslationCoverageTests(SimpleTestCase):
             self.assertEqual(log.display_description, "Invoice F-001 created for Société française.")
         with translation.override("fr"):
             self.assertEqual(log.display_action, "Facture créée")
+            self.assertEqual(log.display_description, "Facture F-001 créée pour Société française.")
         self.assertEqual(log.description, original)
         log.description = "Commentaire libre de Société française"
         with translation.override("en"):
@@ -119,6 +135,49 @@ class BilingualJourneyTests(TestCase):
         response = self.client.get(reverse("facture_list"))
         self.assertContains(response, "2 outstanding invoices")
         self.assertContains(response, "Client français conservé")
+
+    def test_french_invoice_accents_and_plurals_preserve_entered_customer_name(self):
+        self.customer.nom = "Montant encaisse"
+        self.customer.save(update_fields=["nom"])
+        self.client.force_login(self.owner)
+        self.switch_language("fr")
+        response = self.client.get(reverse("facture_list"))
+        self.assertContains(response, '<span class="kpi-label">Montant encaissé</span>', html=True)
+        self.assertContains(response, "1 facture non soldée")
+        create_facture_sample(self.company, self.owner, self.customer)
+        response = self.client.get(reverse("facture_list"))
+        self.assertContains(response, "2 factures non soldées")
+        self.assertContains(response, "Montant encaisse")
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.nom, "Montant encaisse")
+
+    def test_subscription_payment_validation_has_accents_and_keeps_english(self):
+        for language, expected in (
+            ("fr", "Seuls les paiements en attente peuvent être validés."),
+            ("en", "Only pending payments can be approved."),
+        ):
+            with self.subTest(language=language), translation.override(language):
+                self.assertEqual(str(PaiementAbonnement.Statut.VALIDE.label), "Validé" if language == "fr" else "Approved")
+                self.assertEqual(
+                    str(PREMIUM_REQUIRED_MESSAGE),
+                    "Cette fonctionnalité n'est pas incluse dans votre plan actuel." if language == "fr"
+                    else "This feature is not included in your current plan.",
+                )
+                with self.assertRaisesMessage(ValueError, expected):
+                    validate_subscription_payment(
+                        paiement=SimpleNamespace(statut=PaiementAbonnement.Statut.REFUSE),
+                        super_admin=None,
+                    )
+
+    def test_javascript_confirmation_has_french_accents_and_keeps_english(self):
+        message = "Confirmer le passage de cette facture au statut payée ?"
+        for language, expected in (("fr", message), ("en", "Confirm marking this invoice as paid?")):
+            self.switch_language(language, "login")
+            response = self.client.get(reverse("javascript_catalog"))
+            match = re.search(r"const newcatalog = (\{.*?\});", response.content.decode(), re.S)
+            self.assertIsNotNone(match)
+            catalog = json.loads(match.group(1))
+            self.assertEqual(catalog[message], expected)
 
     def test_main_modules_render_in_both_languages(self):
         routes = (
@@ -224,3 +283,6 @@ class BilingualJourneyTests(TestCase):
             text = " ".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(contents)).pages)
             self.assertIn(invoice_label.upper(), text.upper())
             self.assertIn("Client français conservé", text)
+            self.assertIn("Reste à payer" if language == "fr" else "Balance due", text)
+            if language == "fr":
+                self.assertIn("Montant payé", text)

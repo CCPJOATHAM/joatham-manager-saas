@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Taux de change | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Taux de change" %}{% endblock %}
-{% block content_subtitle %}{% trans "Suivi des taux utilises uniquement pour les abonnements SaaS plateforme." %}{% endblock %}
+{% block content_subtitle %}{% trans "Suivi des taux utilisés uniquement pour les abonnements SaaS plateforme." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_settings' %}" class="btn-link">{% trans "Paramètres plateforme" %}</a>
@@ -107,7 +107,7 @@
         <label for="refresh_target">{% trans "Cible" %}</label>
         <input id="refresh_target" type="text" name="target" value="{{ selected_target|default:'CDF' }}">
     </div>
-    <button type="submit" class="btn-small primary">{% trans "Rafraichir taux" %}</button>
+    <button type="submit" class="btn-small primary">{% trans "Rafraîchir taux" %}</button>
 </form>
 
 <form method="post" class="toolbar">
@@ -148,7 +148,7 @@
                 <th>{% trans "Taux" %}</th>
                 <th>{% trans "Provider" %}</th>
                 <th>{% trans "Date taux" %}</th>
-                <th>{% trans "Recupere le" %}</th>
+                <th>{% trans "Récupéré le" %}</th>
                 <th>{% trans "Statut" %}</th>
             </tr>
         </thead>

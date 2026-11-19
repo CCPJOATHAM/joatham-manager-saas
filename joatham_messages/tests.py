@@ -626,7 +626,7 @@ class SuggestionAndPublicQuestionTests(TestCase):
         self.assertEqual(len(mail.outbox[0].alternatives), 1)
         html_body, html_mimetype = mail.outbox[0].alternatives[0]
         self.assertEqual(html_mimetype, "text/html")
-        self.assertIn("Creer un compte", html_body)
+        self.assertIn('Créer un compte', html_body)
         self.assertIn("https://app.joatham.com/signup/", html_body)
         self.assertTrue(
             ActivityLog.objects.filter(
@@ -700,7 +700,7 @@ class SuggestionAndPublicQuestionTests(TestCase):
             )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "La reponse n&#x27;a pas pu etre envoyee par email")
+        self.assertContains(response, 'La réponse n&#x27;a pas pu être envoyée par email')
         question.refresh_from_db()
         self.assertEqual(question.statut, PublicQuestion.Statut.NOUVEAU)
         self.assertEqual(question.reponse, "")

@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Abonnements | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Abonnements" %}{% endblock %}
-{% block content_subtitle %}{% trans "Gestion des plans, statuts, echeances et essais historiques des entreprises clientes." %}{% endblock %}
+{% block content_subtitle %}{% trans "Gestion des plans, statuts, échéances et essais historiques des entreprises clientes." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
@@ -204,7 +204,7 @@
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
-        <a href="{% url 'super_admin_subscription_list' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+        <a href="{% url 'super_admin_subscription_list' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
     </div>
 </form>
 
@@ -215,7 +215,7 @@
                 <th>{% trans "Entreprise" %}</th>
                 <th>{% trans "Plan" %}</th>
                 <th>{% trans "Statut" %}</th>
-                <th>{% trans "Date debut" %}</th>
+                <th>{% trans "Date début" %}</th>
                 <th>{% trans "Date fin" %}</th>
                 <th>{% trans "Jours restants" %}</th>
                 <th>{% trans "Montant plan" %}</th>
@@ -327,7 +327,7 @@
                             <strong>{% trans "Demande en attente" %}</strong>
                             <span class="muted">
                                 {% if entreprise.last_payment_source == "demande_plan" %}
-                                {% trans "Plan demande :" %} {{ entreprise.last_payment_plan_name|default:"-" }}
+                                {% trans "Plan demandé :" %} {{ entreprise.last_payment_plan_name|default:"-" }}
                                 {% else %}
                                 {% trans "Paiement en attente :" %} {{ entreprise.last_payment_reference|default:"-" }}
                                 {% endif %}

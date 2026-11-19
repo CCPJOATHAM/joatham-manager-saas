@@ -4,7 +4,7 @@
 
 {% block page_title %}{{ caisse.nom }}{% endblock %}
 {% block content_title %}{{ caisse.nom }}{% endblock %}
-{% block content_subtitle %}{% trans "Consultez le statut de cette caisse, son historique de sessions et les derniers mouvements qui lui sont rattaches." %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez le statut de cette caisse, son historique de sessions et les derniers mouvements qui lui sont rattachés." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -206,7 +206,7 @@
         {% elif can_open_session %}
         <a href="{% url 'caisse_open_session' caisse.id %}" class="btn primary">{% trans "Ouvrir une session" %}</a>
         {% endif %}
-        <a href="{% url 'caisse_list' %}" class="btn">{% trans "Retour a la liste" %}</a>
+        <a href="{% url 'caisse_list' %}" class="btn">{% trans "Retour à la liste" %}</a>
       </div>
     </div>
   </div>
@@ -217,7 +217,7 @@
       <span class="stat-value">{{ sessions|length }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">{% trans "Derniere ouverture" %}</span>
+      <span class="stat-label">{% trans "Dernière ouverture" %}</span>
       <span class="stat-value">{% if sessions %}{{ sessions.0.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}{% else %}-{% endif %}</span>
     </div>
     <div class="stat-card">
@@ -233,7 +233,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>{% trans "Historique des sessions" %}</h3>
-      <p>{% trans "Retrouvez les ouvertures, fermetures et ecarts de cette caisse." %}</p>
+      <p>{% trans "Retrouvez les ouvertures, fermetures et écarts de cette caisse." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -242,8 +242,8 @@
             <th>{% trans "Ouverture" %}</th>
             <th>{% trans "Fermeture" %}</th>
             <th>{% trans "Statut" %}</th>
-            <th>{% trans "Solde theorique" %}</th>
-            <th>{% trans "Ecart" %}</th>
+            <th>{% trans "Solde théorique" %}</th>
+            <th>{% trans "Écart" %}</th>
             <th></th>
           </tr>
         </thead>
@@ -272,7 +272,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>{% trans "Derniers mouvements" %}</h3>
-      <p>{% trans "Apercu recent des operations rattachees a cette caisse." %}</p>
+      <p>{% trans "Aperçu récent des opérations rattachées à cette caisse." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -280,9 +280,9 @@
           <tr>
             <th>{% trans "Date" %}</th>
             <th>{% trans "Type" %}</th>
-            <th>{% trans "Libelle" %}</th>
+            <th>{% trans "Libellé" %}</th>
             <th>{% trans "Montant" %}</th>
-            <th>{% trans "Reference" %}</th>
+            <th>{% trans "Référence" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -295,7 +295,7 @@
             <td>{{ movement.reference|default:"-" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="empty-state">{% trans "Aucun mouvement rattache a cette caisse pour le moment." %}</td></tr>
+          <tr><td colspan="5" class="empty-state">{% trans "Aucun mouvement rattaché à cette caisse pour le moment." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

@@ -1553,7 +1553,7 @@ class ApprenantsViewsTests(TestCase):
 
         response = self.client.get(reverse("inscription_detail", args=[self.inscription.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Liee manuellement")
+        self.assertContains(response, 'Liée manuellement')
 
     def test_inscription_detail_shows_unlink_action_when_facture_is_linked(self):
         facture = Facture.objects.create(
@@ -1566,7 +1566,7 @@ class ApprenantsViewsTests(TestCase):
 
         self.client.force_login(self.gestionnaire)
         response = self.client.get(reverse("inscription_detail", args=[self.inscription.id]))
-        self.assertContains(response, "Delier la facture")
+        self.assertContains(response, 'Délier la facture')
 
     def test_gestionnaire_can_unlink_facture_from_inscription(self):
         facture = Facture.objects.create(
@@ -1620,7 +1620,7 @@ class ApprenantsViewsTests(TestCase):
             {"facture_id": facture.id},
         )
         response = self.client.get(reverse("inscription_detail", args=[self.inscription.id]))
-        self.assertContains(response, "Aucune facture liee")
+        self.assertContains(response, 'Aucune facture liée')
 
     def test_inscription_detail_displays_billing_history(self):
         self.client.force_login(self.gestionnaire)

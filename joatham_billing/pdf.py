@@ -31,6 +31,6 @@ def render_pdf_response(request, template_name, context, filename, disposition="
 
     pdf_status = pisa.CreatePDF(src=html, dest=response, encoding="UTF-8")
     if pdf_status.err:
-        raise PdfRenderError(gettext_lazy("Erreur lors de la generation du PDF."))
+        raise PdfRenderError(gettext_lazy('Erreur lors de la génération du PDF.'))
 
     return response

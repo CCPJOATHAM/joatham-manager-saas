@@ -13,9 +13,9 @@ def _normalize_positive_amount(value):
     try:
         normalized = Decimal(str(value or "0"))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ValueError(gettext_lazy("Le montant du mouvement doit etre valide.")) from exc
+        raise ValueError(gettext_lazy('Le montant du mouvement doit être valide.')) from exc
     if normalized <= Decimal("0.00"):
-        raise ValueError(gettext_lazy("Le montant du mouvement doit etre strictement positif."))
+        raise ValueError(gettext_lazy('Le montant du mouvement doit être strictement positif.'))
     return normalized
 
 
@@ -30,9 +30,9 @@ def _validate_open_session(entreprise, session, caisse):
     ensure_same_entreprise(session, entreprise)
     ensure_same_entreprise(caisse, entreprise)
     if session.caisse_id != caisse.id:
-        raise ValueError(gettext_lazy("Cette session n'appartient pas a la caisse selectionnee."))
+        raise ValueError(gettext_lazy("Cette session n'appartient pas à la caisse sélectionnée."))
     if session.statut != SessionCaisse.Statut.OUVERTE:
-        raise ValueError(gettext_lazy("Les mouvements ne peuvent etre ajoutes que sur une session ouverte."))
+        raise ValueError(gettext_lazy('Les mouvements ne peuvent être ajoutés que sur une session ouverte.'))
     if not caisse.est_active:
         raise ValueError(gettext_lazy("Cette caisse est inactive."))
 

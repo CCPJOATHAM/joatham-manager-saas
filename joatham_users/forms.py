@@ -17,7 +17,7 @@ ROLE_CHOICES = [
 class UserManagementForm(forms.Form):
     full_name = forms.CharField(max_length=150, label=_("Nom"))
     email = forms.EmailField(label=_("E-mail"))
-    telephone = forms.CharField(max_length=50, required=False, label=_("Telephone"))
+    telephone = forms.CharField(max_length=50, required=False, label=_('Téléphone'))
     role = forms.ChoiceField(choices=ROLE_CHOICES, label=_("Rôle d'accès"))
     password = forms.CharField(
         required=False,
@@ -49,7 +49,7 @@ class UserManagementForm(forms.Form):
         self.fields["role"].widget.attrs.update({"aria-label": _("Rôle d'accès")})
         self.fields["password"].widget.attrs.update(
             {
-                "placeholder": _("Mot de passe securise"),
+                "placeholder": _('Mot de passe sécurisé'),
                 "autocomplete": "new-password",
             }
         )
@@ -81,7 +81,7 @@ class InvitationAcceptanceForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput,
         label=_("Mot de passe"),
-        help_text=_("Choisissez un mot de passe securise pour activer votre acces."),
+        help_text=_('Choisissez un mot de passe sécurisé pour activer votre accès.'),
     )
     password_confirm = forms.CharField(
         widget=forms.PasswordInput,
@@ -93,13 +93,13 @@ class InvitationAcceptanceForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["password"].widget.attrs.update(
             {
-                "placeholder": _("Mot de passe securise"),
+                "placeholder": _('Mot de passe sécurisé'),
                 "autocomplete": "new-password",
             }
         )
         self.fields["password_confirm"].widget.attrs.update(
             {
-                "placeholder": _("Repetez le mot de passe"),
+                "placeholder": _('Répétez le mot de passe'),
                 "autocomplete": "new-password",
             }
         )
@@ -126,8 +126,8 @@ class ProfileUpdateForm(forms.ModelForm):
         model = User
         fields = ["full_name", "telephone", "preferred_language", "profile_photo"]
         labels = {
-            "telephone": _("Telephone"),
-            "preferred_language": _("Langue preferee"),
+            "telephone": _('Téléphone'),
+            "preferred_language": _('Langue préférée'),
             "profile_photo": _("Photo de profil"),
         }
         widgets = {
@@ -146,7 +146,7 @@ class ProfileUpdateForm(forms.ModelForm):
                 "autocomplete": "name",
             }
         )
-        self.fields["preferred_language"].widget.attrs.update({"aria-label": _("Langue preferee")})
+        self.fields["preferred_language"].widget.attrs.update({"aria-label": _('Langue préférée')})
         self.fields["profile_photo"].widget.attrs.update({"accept": "image/*"})
 
     def save(self, commit=True):

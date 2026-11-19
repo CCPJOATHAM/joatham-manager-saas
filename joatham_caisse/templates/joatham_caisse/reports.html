@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Rapports caisse" %}{% endblock %}
 {% block content_title %}{% trans "Rapports caisse" %}{% endblock %}
-{% block content_subtitle %}{% trans "Synthese operationnelle des entrees, sorties, depenses, paiements facture et ecarts de caisse sur la periode choisie." %}{% endblock %}
+{% block content_subtitle %}{% trans "Synthèse opérationnelle des entrées, sorties, dépenses, paiements facture et écarts de caisse sur la période choisie." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -50,7 +50,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>{% trans "Filtres du rapport" %}</h3>
-      <p>{% trans "Limitez la synthese a une caisse ou a une periode pour obtenir une lecture operationnelle claire." %}</p>
+      <p>{% trans "Limitez la synthèse à une caisse ou à une période pour obtenir une lecture opérationnelle claire." %}</p>
     </div>
     <div class="panel-body">
       <form method="get">
@@ -65,7 +65,7 @@
             </select>
           </div>
           <div class="field">
-            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="field">
@@ -74,8 +74,8 @@
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="btn">{% trans "Mettre a jour" %}</button>
-          <a href="{% url 'caisse_reports' %}" class="ghost">{% trans "Reinitialiser" %}</a>
+          <button type="submit" class="btn">{% trans "Mettre à jour" %}</button>
+          <a href="{% url 'caisse_reports' %}" class="ghost">{% trans "Réinitialiser" %}</a>
           {% if can_export_cash %}
           <a href="{% url 'caisse_reports_export_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">{% trans "Export PDF" %}</a>
           {% endif %}
@@ -87,21 +87,21 @@
   </div>
 
   <div class="kpis">
-    <div class="kpi"><span class="kpi-label">{% trans "Total entrees" %}</span><span class="kpi-value positive">{{ report.total_entrees }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Total entrées" %}</span><span class="kpi-value positive">{{ report.total_entrees }}</span></div>
     <div class="kpi"><span class="kpi-label">{% trans "Total sorties" %}</span><span class="kpi-value negative">{{ report.total_sorties }}</span></div>
-    <div class="kpi"><span class="kpi-label">{% trans "Depenses caisse" %}</span><span class="kpi-value negative">{{ report.total_depenses_caisse }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Dépenses caisse" %}</span><span class="kpi-value negative">{{ report.total_depenses_caisse }}</span></div>
     <div class="kpi"><span class="kpi-label">{% trans "Paiements facture caisse" %}</span><span class="kpi-value positive">{{ report.total_paiements_factures }}</span></div>
-    <div class="kpi"><span class="kpi-label">{% trans "Solde net" %}</span><span class="kpi-value {% if report.solde_net >= 0 %}positive{% else %}{% trans "negative" %}{% endif %}">{{ report.solde_net }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Solde net" %}</span><span class="kpi-value {% if report.solde_net >= 0 %}positive{% else %}negative{% endif %}">{{ report.solde_net }}</span></div>
     <div class="kpi"><span class="kpi-label">{% trans "Nombre de mouvements" %}</span><span class="kpi-value">{{ report.nombre_mouvements }}</span></div>
-    <div class="kpi"><span class="kpi-label">{% trans "Sessions ouvertes / fermees / validees" %}</span><span class="kpi-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></div>
-    <div class="kpi"><span class="kpi-label">{% trans "Ecarts positifs / negatifs" %}</span><span class="kpi-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Sessions ouvertes / fermées / validées" %}</span><span class="kpi-value">{{ report.sessions_ouvertes }} / {{ report.sessions_fermees }} / {{ report.sessions_validees }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Écarts positifs / négatifs" %}</span><span class="kpi-value">{{ report.ecarts_positifs }} / {{ report.ecarts_negatifs }}</span></div>
   </div>
 
   <div class="double-panels">
     <div class="panel">
       <div class="panel-header">
-        <h3>{% trans "Synthese par caisse" %}</h3>
-        <p>{% trans "Vue consolidee des flux par caisse sur la periode active." %}</p>
+        <h3>{% trans "Synthèse par caisse" %}</h3>
+        <p>{% trans "Vue consolidée des flux par caisse sur la période active." %}</p>
       </div>
       <div class="table-wrap">
         <table class="table">
@@ -109,9 +109,9 @@
             <tr>
               <th>{% trans "Caisse" %}</th>
               <th>{% trans "Mouvements" %}</th>
-              <th>{% trans "Entrees" %}</th>
+              <th>{% trans "Entrées" %}</th>
               <th>{% trans "Sorties" %}</th>
-              <th>{% trans "Depenses" %}</th>
+              <th>{% trans "Dépenses" %}</th>
               <th>{% trans "Paiements" %}</th>
               <th>{% trans "Net" %}</th>
             </tr>
@@ -128,7 +128,7 @@
               <td>{{ row.solde_net }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" class="empty-state">{% trans "Aucune donnee a afficher pour cette periode." %}</td></tr>
+            <tr><td colspan="7" class="empty-state">{% trans "Aucune donnée à afficher pour cette période." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -137,8 +137,8 @@
 
     <div class="panel">
       <div class="panel-header">
-        <h3>{% trans "Synthese par type de mouvement" %}</h3>
-        <p>{% trans "Repartition des flux confirmes par categorie de mouvement." %}</p>
+        <h3>{% trans "Synthèse par type de mouvement" %}</h3>
+        <p>{% trans "Répartition des flux confirmés par catégorie de mouvement." %}</p>
       </div>
       <div class="table-wrap">
         <table class="table">
@@ -157,7 +157,7 @@
               <td>{{ row.total }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="3" class="empty-state">{% trans "Aucun mouvement sur la periode selectionnee." %}</td></tr>
+            <tr><td colspan="3" class="empty-state">{% trans "Aucun mouvement sur la période sélectionnée." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -167,8 +167,8 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>{% trans "Synthese par moyen de paiement" %}</h3>
-      <p>{% trans "Repartition des mouvements de caisse selon le canal utilise." %}</p>
+      <h3>{% trans "Synthèse par moyen de paiement" %}</h3>
+      <p>{% trans "Répartition des mouvements de caisse selon le canal utilisé." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -187,7 +187,7 @@
             <td>{{ row.total }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="3" class="empty-state">{% trans "Aucun mouvement par moyen sur la periode selectionnee." %}</td></tr>
+          <tr><td colspan="3" class="empty-state">{% trans "Aucun mouvement par moyen sur la période sélectionnée." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

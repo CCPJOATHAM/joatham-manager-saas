@@ -319,7 +319,7 @@
 <div class="users-hero">
     <div>
         <h2>{% trans "Gestion des utilisateurs" %}</h2>
-        <p>{% trans "Administrez les comptes de votre entreprise, suivez les invitations en attente et gardez une lecture nette du quota autorise par votre abonnement." %}</p>
+        <p>{% trans "Administrez les comptes de votre entreprise, suivez les invitations en attente et gardez une lecture nette du quota autorisé par votre abonnement." %}</p>
     </div>
     <div class="hero-actions">
         <a href="{% url 'user_invite' %}" class="btn-link primary">{% trans "Inviter un utilisateur" %}</a>
@@ -341,7 +341,7 @@
     <div class="stat-card">
         <span class="stat-label">{% trans "Gestionnaires" %}</span>
         <span class="stat-value">{{ gestionnaire_count }}</span>
-        <span class="stat-meta">{% trans "Operations quotidiennes" %}</span>
+        <span class="stat-meta">{% trans "Opérations quotidiennes" %}</span>
     </div>
     <div class="stat-card">
         <span class="stat-label">{% trans "Comptables" %}</span>
@@ -349,11 +349,11 @@
         <span class="stat-meta">{% trans "Finance et rapports" %}</span>
     </div>
     <div class="stat-card">
-        <span class="stat-label">{% trans "Quota utilise" %}</span>
+        <span class="stat-label">{% trans "Quota utilisé" %}</span>
         <span class="stat-value">{{ quota_used }} / {{ quota_label }}</span>
         <span class="stat-meta">
             {% if quota_is_unlimited %}
-            {% trans "Limite non appliquee" %}
+            {% trans "Limite non appliquée" %}
             {% else %}
             {{ quota_remaining }} {% trans "place" %}{{ quota_remaining|pluralize:"s" }} {% trans "disponible" %}{{ quota_remaining|pluralize:"s" }}
             {% endif %}
@@ -440,9 +440,9 @@
                     <td>
                         <div>{{ managed_user.email_display }}</div>
                         {% if managed_user.email_verified %}
-                        <span class="badge badge-verified">{% trans "Email verifie" %}</span>
+                        <span class="badge badge-verified">{% trans "Email vérifié" %}</span>
                         {% else %}
-                            <span class="badge badge-unverified">{% trans "Email non verifie" %}</span>
+                            <span class="badge badge-unverified">{% trans "Email non vérifié" %}</span>
                         {% endif %}
                     </td>
                     <td>
@@ -487,7 +487,7 @@
     </div>
     {% else %}
     <div class="empty-state">
-        {% trans "Aucun utilisateur ne correspond aux filtres appliques." %}
+        {% trans "Aucun utilisateur ne correspond aux filtres appliqués." %}
     </div>
     {% endif %}
 </div>
@@ -506,7 +506,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>{% trans "Invite" %}</th>
+                    <th>{% trans "Invité" %}</th>
                     <th>{% trans "Rôle d'accès" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Créée le" %}</th>

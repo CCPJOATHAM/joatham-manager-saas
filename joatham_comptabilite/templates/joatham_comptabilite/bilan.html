@@ -14,7 +14,7 @@
     </article>
     <article class="metric">
         <div class="label">{% trans "Statut du bilan" %}</div>
-        <div class="value {% if equilibre %}status-positive{% else %}status-negative{% endif %}">{% if equilibre %}{% trans "Equilibre" %}{% else %}{% trans "A verifier" %}{% endif %}</div>
+        <div class="value {% if equilibre %}status-positive{% else %}status-negative{% endif %}">{% if equilibre %}{% trans "Équilibré" %}{% else %}{% trans "À vérifier" %}{% endif %}</div>
     </article>
 </section>
 
@@ -28,7 +28,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>{% trans "Numero" %}</th>
+                                <th>{% trans "Numéro" %}</th>
                                 <th>{% trans "Compte" %}</th>
                                 <th class="number">{% trans "Montant" %}</th>
                             </tr>
@@ -52,7 +52,7 @@
                 </div>
             </div>
         {% empty %}
-            <div class="empty">{% trans "Aucun poste d'actif sur cette periode." %}</div>
+            <div class="empty">{% trans "Aucun poste d'actif sur cette période." %}</div>
         {% endfor %}
     </article>
 
@@ -65,7 +65,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>{% trans "Numero" %}</th>
+                                <th>{% trans "Numéro" %}</th>
                                 <th>{% trans "Compte" %}</th>
                                 <th class="number">{% trans "Montant" %}</th>
                             </tr>
@@ -89,7 +89,7 @@
                 </div>
             </div>
         {% empty %}
-            <div class="empty">{% trans "Aucun poste de passif sur cette periode." %}</div>
+            <div class="empty">{% trans "Aucun poste de passif sur cette période." %}</div>
         {% endfor %}
     </article>
 </section>

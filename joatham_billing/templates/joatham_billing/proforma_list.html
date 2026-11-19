@@ -179,10 +179,10 @@
 <section class="hero">
     <div>
         <h2>{% trans "Factures proforma" %}</h2>
-        <p>{% trans "Documents commerciaux provisoires avant validation definitive. Une proforma ne cree aucun paiement, ne modifie pas le stock et n'entre pas dans le chiffre d'affaires." %}</p>
+        <p>{% trans "Documents commerciaux provisoires avant validation définitive. Une proforma ne crée aucun paiement, ne modifié pas le stock et n'entre pas dans le chiffre d'affaires." %}</p>
     </div>
     <div class="hero-actions">
-        <a href="{% url 'facture_list' %}" class="btn btn-print">{% trans "Factures definitives" %}</a>
+        <a href="{% url 'facture_list' %}" class="btn btn-print">{% trans "Factures définitives" %}</a>
         {% if can_manage_factures_ui %}
             <a href="{% url 'add_proforma' %}" class="btn btn-add">{% trans "Nouvelle proforma" %}</a>
         {% endif %}
@@ -192,7 +192,7 @@
 <form method="get" class="filters">
     <div class="field">
         <label for="search">{% trans "Recherche" %}</label>
-        <input type="search" name="search" id="search" value="{{ request.GET.search }}" placeholder="{% trans 'Numero ou client' %}">
+        <input type="search" name="search" id="search" value="{{ request.GET.search }}" placeholder="{% trans 'Numéro ou client' %}">
     </div>
     <div class="field">
         <label for="statut">{% trans "Statut" %}</label>
@@ -219,10 +219,10 @@
         <table class="proformas-table">
             <thead>
                 <tr>
-                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Numéro" %}</th>
                     <th>{% trans "Client" %}</th>
                     <th>{% trans "Date" %}</th>
-                    <th>{% trans "Validite" %}</th>
+                    <th>{% trans "Validité" %}</th>
                     <th>{% trans "Total net" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Actions" %}</th>
@@ -259,7 +259,7 @@
     {% else %}
         <div class="empty-state">
             <h3>{% trans "Aucune proforma" %}</h3>
-            <p>{% trans "Creer une proforma pour presenter une offre commerciale avant emission d'une facture definitive." %}</p>
+            <p>{% trans "Créer une proforma pour présenter une offre commerciale avant émission d'une facture définitive." %}</p>
             {% if can_manage_factures_ui %}
                 <a href="{% url 'add_proforma' %}" class="btn btn-add">{% trans "Nouvelle proforma" %}</a>
             {% endif %}

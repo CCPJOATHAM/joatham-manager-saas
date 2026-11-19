@@ -28,7 +28,7 @@ def _normalize_amount(value):
     except (InvalidOperation, TypeError, ValueError) as exc:
         raise PaymentOperationError(gettext_lazy("Le montant du paiement est invalide.")) from exc
     if amount <= Decimal("0"):
-        raise PaymentOperationError(gettext_lazy("Le montant du paiement doit etre strictement positif."))
+        raise PaymentOperationError(gettext_lazy('Le montant du paiement doit être strictement positif.'))
     return amount
 
 
@@ -67,9 +67,9 @@ def _resolve_session(value, entreprise, caisse=None):
     if session is None:
         return None
     if caisse is not None and session.caisse_id != caisse.id:
-        raise PaymentOperationError(gettext_lazy("La session selectionnee n'appartient pas a cette caisse."))
+        raise PaymentOperationError(gettext_lazy("La session sélectionnée n'appartient pas à cette caisse."))
     if session.statut != SessionCaisse.Statut.OUVERTE:
-        raise PaymentOperationError(gettext_lazy("La session de caisse doit etre ouverte."))
+        raise PaymentOperationError(gettext_lazy('La session de caisse doit être ouverte.'))
     return session
 
 
@@ -119,7 +119,7 @@ def _link_invoice_payment(transaction_obj, utilisateur):
     if facture is None or facture.entreprise_id != transaction_obj.entreprise_id:
         raise PaymentOperationError(gettext_lazy("Facture introuvable."))
     if transaction_obj.amount > facture.reste_a_payer:
-        raise PaymentOperationError(gettext_lazy("Le paiement ne peut pas etre superieur au reste a payer."))
+        raise PaymentOperationError(gettext_lazy('Le paiement ne peut pas être supérieur au reste à payer.'))
 
     caisse = transaction_obj.caisse if transaction_obj.method == PaymentTransaction.Method.CASH else None
     try:
@@ -258,11 +258,11 @@ def create_payment_transaction(
         raise PaymentOperationError(gettext_lazy("Le moyen de paiement est invalide."))
 
     if method in PaymentTransaction.MOBILE_MONEY_METHODS and not get_module_access_state(entreprise, "mobile_money")["allowed"]:
-        raise PermissionDenied(gettext_lazy("Le Mobile Money est reserve au plan Premium Business."))
+        raise PermissionDenied(gettext_lazy('Le Mobile Money est réservé au plan Premium Business.'))
 
     desired_status = status or PaymentTransaction.Status.EN_ATTENTE
     if desired_status not in {PaymentTransaction.Status.EN_ATTENTE, PaymentTransaction.Status.CONFIRME}:
-        raise PaymentOperationError(gettext_lazy("Un nouveau paiement doit etre en attente ou confirme."))
+        raise PaymentOperationError(gettext_lazy('Un nouveau paiement doit être en attente ou confirmé.'))
     if desired_status == PaymentTransaction.Status.CONFIRME and not user_has_permission(utilisateur, "payments.validate"):
         raise PermissionDenied(gettext_lazy("Vous n'avez pas les droits pour confirmer un paiement."))
 
@@ -307,9 +307,9 @@ def create_payment_transaction(
             .first()
         )
     if caisse_obj is not None and not caisse_obj.est_active:
-        raise PaymentOperationError(gettext_lazy("La caisse selectionnee est inactive."))
+        raise PaymentOperationError(gettext_lazy('La caisse sélectionnée est inactive.'))
     if facture_obj is not None and transaction_type != PaymentTransaction.TransactionType.ENCAISSEMENT:
-        raise PaymentOperationError(gettext_lazy("Une facture ne peut etre liee qu'a un encaissement."))
+        raise PaymentOperationError(gettext_lazy("Une facture ne peut être liée qu'à un encaissement."))
 
     transaction_obj = PaymentTransaction.objects.create(
         entreprise=entreprise,
@@ -357,7 +357,7 @@ def confirm_payment_transaction(*, transaction_obj, utilisateur):
     if locked.status == PaymentTransaction.Status.CONFIRME:
         return locked
     if locked.status != PaymentTransaction.Status.EN_ATTENTE:
-        raise PaymentOperationError(gettext_lazy("Seuls les paiements en attente peuvent etre confirmes."))
+        raise PaymentOperationError(gettext_lazy('Seuls les paiements en attente peuvent être confirmés.'))
 
     locked.status = PaymentTransaction.Status.CONFIRME
     locked.validation_date = timezone.now()
@@ -390,7 +390,7 @@ def reject_payment_transaction(*, transaction_obj, utilisateur, note=""):
     if locked is None:
         raise PaymentOperationError(gettext_lazy("Paiement introuvable."))
     if locked.status != PaymentTransaction.Status.EN_ATTENTE:
-        raise PaymentOperationError(gettext_lazy("Seuls les paiements en attente peuvent etre rejetes."))
+        raise PaymentOperationError(gettext_lazy('Seuls les paiements en attente peuvent être rejetés.'))
 
     if note:
         locked.note = f"{locked.note}\nRejet: {note}".strip()
@@ -425,7 +425,7 @@ def cancel_payment_transaction(*, transaction_obj, utilisateur, note=""):
         locked.paiement_facture_id or locked.mouvement_caisse_id
     ):
         raise PaymentOperationError(
-            gettext_lazy("Ce paiement confirme a deja impacte la facture ou la caisse. Enregistrez une correction separee.")
+            gettext_lazy('Ce paiement confirmé a déjà impacté la facture ou la caisse. Enregistrez une correction séparée.')
         )
 
     if note:

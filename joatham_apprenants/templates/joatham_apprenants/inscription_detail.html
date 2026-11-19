@@ -1,7 +1,7 @@
 {% extends "joatham_apprenants/base.html" %}
 {% load i18n %}
 
-{% block apprenants_title %}{% trans "Detail inscription" %}{% endblock %}
+{% block apprenants_title %}{% trans "Détail inscription" %}{% endblock %}
 {% block apprenants_subtitle %}{% trans "Paiements et liaison facturation de l'inscription." %}{% endblock %}
 {% block apprenants_content %}
     <div class="actions" style="margin-bottom:20px;">
@@ -15,7 +15,7 @@
             <form method="post" action="{% url 'inscription_generate_facture' inscription.id %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" style="padding:10px 14px; border:none; background:#1d4ed8; color:#fff; border-radius:6px; cursor:pointer;">
-                    {% trans "Generer une facture" %}
+                    {% trans "Générer une facture" %}
                 </button>
             </form>
         {% elif can_manage_inscription_billing_ui %}
@@ -23,7 +23,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="facture_id" value="{{ inscription.facture.id }}">
                 <button type="submit" style="padding:10px 14px; border:none; background:#b91c1c; color:#fff; border-radius:6px; cursor:pointer;">
-                    {% trans "Delier la facture" %}
+                    {% trans "Délier la facture" %}
                 </button>
             </form>
         {% endif %}
@@ -54,18 +54,18 @@
             </form>
         {% endif %}
         <p>
-            <strong>{% trans "Facture liee:" %}</strong>
+            <strong>{% trans "Facture liée:" %}</strong>
             {% if inscription.facture %}
                 {{ inscription.facture.numero }} ({{ inscription.facture.get_statut_display }})
                 -
                 <a href="{% url 'facture_detail' inscription.facture.id %}">{% trans "Voir la facture" %}</a>
                 {% if facture_link_mode == "cree_depuis_inscription" %}
-                    {% trans "- Creee depuis l'inscription" %}
+                    {% trans "- Créée depuis l'inscription" %}
                 {% elif facture_link_mode == "liee_manuellement" %}
-                    {% trans "- Liee manuellement" %}
+                    {% trans "- Liée manuellement" %}
                 {% endif %}
             {% else %}
-                {% trans "Aucune facture liee" %}
+                {% trans "Aucune facture liée" %}
             {% endif %}
         </p>
     </div>
@@ -91,7 +91,7 @@
             </div>
         </form>
         {% if not factures_candidates %}
-            <p style="margin-top:12px;">{% trans "Aucune facture disponible a lier pour cette entreprise." %}</p>
+            <p style="margin-top:12px;">{% trans "Aucune facture disponible à lier pour cette entreprise." %}</p>
         {% endif %}
     </div>
     {% endif %}
@@ -104,7 +104,7 @@
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Montant" %}</th>
                     <th>{% trans "Mode" %}</th>
-                    <th>{% trans "Reference" %}</th>
+                    <th>{% trans "Référence" %}</th>
                     <th>{% trans "Utilisateur" %}</th>
                     <th>{% trans "Observations" %}</th>
                     <th>{% trans "Document" %}</th>
@@ -138,7 +138,7 @@
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Utilisateur" %}</th>
                     <th>{% trans "Action" %}</th>
-                    <th>{% trans "Numero facture" %}</th>
+                    <th>{% trans "Numéro facture" %}</th>
                     <th>{% trans "Description" %}</th>
                 </tr>
             </thead>
@@ -153,7 +153,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5">{% trans "Aucun evenement de facturation rattache a cette inscription." %}</td>
+                    <td colspan="5">{% trans "Aucun événement de facturation rattaché à cette inscription." %}</td>
                 </tr>
             {% endfor %}
             </tbody>

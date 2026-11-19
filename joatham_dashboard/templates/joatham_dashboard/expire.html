@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% trans "Acces abonnement" %}</title>
+    <title>{% trans "Accès abonnement" %}</title>
     <style>
         body {
             font-family: Arial;
@@ -52,11 +52,11 @@
 </head>
 <body>
 <div class="box">
-    <h1>{% trans "Acces abonnement limite" %}</h1>
+    <h1>{% trans "Accès abonnement limite" %}</h1>
     {% if module_label %}
-    <p>{% trans "Le module" %} <strong>{{ module_label }}</strong> {% trans "n'est pas accessible avec l'etat actuel de votre abonnement." %}</p>
+    <p>{% trans "Le module" %} <strong>{{ module_label }}</strong> {% trans "n'est pas accessible avec l'état actuel de votre abonnement." %}</p>
     {% else %}
-    <p>{% trans "Votre acces est actuellement limite par l'etat de votre abonnement." %}</p>
+    <p>{% trans "Votre accès est actuellement limité par l'état de votre abonnement." %}</p>
     {% endif %}
 
     {% if messages %}

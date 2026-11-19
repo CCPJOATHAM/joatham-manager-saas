@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Question envoyee" %} {% trans "| JOATHAM Manager" %}</title>
+    <title>{% trans "Question envoyée" %} {% trans "| JOATHAM Manager" %}</title>
     <style>
         :root {
             --text: #10233f;
@@ -91,8 +91,8 @@
             <strong>JOATHAM Manager</strong>
             {% include "includes/language_selector.html" with language_selector_id="public-question-thanks-language-select" %}
         </div>
-        <h1>{% trans "Votre question a ete envoyee" %}</h1>
-        <p>{% trans "Merci. Votre demande est maintenant transmise a l'equipe JOATHAM Manager. Elle sera analysee depuis l'espace plateforme." %}</p>
+        <h1>{% trans "Votre question a été envoyée" %}</h1>
+        <p>{% trans "Merci. Votre demande est maintenant transmise à l'équipe JOATHAM Manager. Elle sera analysée depuis l'espace plateforme." %}</p>
         <div class="actions">
             <a href="{% url 'public_question_create' %}" class="btn primary">{% trans "Envoyer une autre question" %}</a>
             <a href="{% url 'login' %}" class="btn">{% trans "Retour connexion" %}</a>

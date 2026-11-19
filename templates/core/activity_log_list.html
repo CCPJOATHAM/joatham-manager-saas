@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Controle des flux | JOATHAM Manager" %}</title>
+    <title>{% trans "Contrôle des flux | JOATHAM Manager" %}</title>
     <style>
         :root {
             --bg: #f3f7fb;
@@ -241,7 +241,7 @@
     <div class="container">
         <div class="hero">
             <div>
-                <h1>{% trans "Controle des flux" %}</h1>
+                <h1>{% trans "Contrôle des flux" %}</h1>
                 <p>{% trans "Suivez les opérations créées dans l'entreprise, identifiez rapidement leur auteur, leur rôle, le module concerné et isolez les flux récents ou inhabituels sans quitter JOATHAM Manager." %}</p>
                 <div class="muted">{{ entreprise.nom }}</div>
             </div>
@@ -256,15 +256,15 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-label">{% trans "Evenements visibles" %}</span>
+                <span class="stat-label">{% trans "Événements visibles" %}</span>
                 <span class="stat-value">{{ log_count }}</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">{% trans "Modules traces" %}</span>
+                <span class="stat-label">{% trans "Modules tracés" %}</span>
                 <span class="stat-value">{{ modules|length }}</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">{% trans "Utilisateurs traces" %}</span>
+                <span class="stat-label">{% trans "Utilisateurs tracés" %}</span>
                 <span class="stat-value">{{ users|length }}</span>
             </div>
             <div class="stat-card">
@@ -301,7 +301,7 @@
                     </select>
                 </div>
                 <div>
-                    <label for="id_role">{% trans "Role" %}</label>
+                    <label for="id_role">{% trans "Rôle" %}</label>
                     <select id="id_role" name="role">
                         <option value="">{% trans "Tous" %}</option>
                         {% for item in roles %}
@@ -319,7 +319,7 @@
                     </select>
                 </div>
                 <div>
-                    <label for="id_date_from">{% trans "Date debut" %}</label>
+                    <label for="id_date_from">{% trans "Date début" %}</label>
                     <input id="id_date_from" name="date_from" type="date" value="{{ selected_date_from }}">
                 </div>
                 <div>
@@ -332,7 +332,7 @@
                 </div>
                 <div>
                     <label>&nbsp;</label>
-                    <a class="ghost-link" href="{% url 'activity_log_list' %}">{% trans "Reinitialiser" %}</a>
+                    <a class="ghost-link" href="{% url 'activity_log_list' %}">{% trans "Réinitialiser" %}</a>
                 </div>
             </form>
         </div>
@@ -344,7 +344,7 @@
                         <tr>
                             <th>{% trans "Date" %}</th>
                             <th>{% trans "Utilisateur" %}</th>
-                            <th>{% trans "Role" %}</th>
+                            <th>{% trans "Rôle" %}</th>
                             <th>{% trans "Module" %}</th>
                             <th>{% trans "Action" %}</th>
                             <th>{% trans "Objet" %}</th>
@@ -356,7 +356,7 @@
                         {% for log in logs %}
                             <tr>
                                 <td>{{ log.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
-                                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Systeme" %}</span>{% endif %}</td>
+                                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Système" %}</span>{% endif %}</td>
                                 <td>
                                     {% if log.utilisateur %}
                                         <span class="badge">{{ log.utilisateur.get_role_display }}</span>
@@ -372,7 +372,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="8" class="empty">{% trans "Aucun evenement d'audit pour ces filtres." %}</td>
+                                <td colspan="8" class="empty">{% trans "Aucun événement d'audit pour ces filtres." %}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

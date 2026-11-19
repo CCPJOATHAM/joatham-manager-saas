@@ -1,9 +1,9 @@
 {% extends "joatham_billing/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Parametres impression" %} {% trans "| JOATHAM Manager" %}{% endblock %}
-{% block content_title %}{% trans "Parametres impression" %}{% endblock %}
-{% block content_subtitle %}{% trans "Configurez le format POS des tickets et le format par defaut des factures." %}{% endblock %}
+{% block page_title %}{% trans "Paramètres impression" %} {% trans "| JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Paramètres impression" %}{% endblock %}
+{% block content_subtitle %}{% trans "Configurez le format POS des tickets et le format par défaut des factures." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -82,7 +82,7 @@
 
 <div class="settings-card">
     <p class="help-text">
-        {% trans "Ces reglages s'appliquent aux tickets POS. Le format A4 conserve son comportement habituel." %}
+        {% trans "Ces réglages s'appliquent aux tickets POS. Le format A4 conserve son comportement habituel." %}
     </p>
 
     <form method="post">
@@ -113,7 +113,7 @@
 
         {% if form.errors %}
         <div class="help-text" style="color:#b91c1c; margin-top:16px;">
-            {% trans "Verifiez les champs du formulaire avant d'enregistrer." %}
+            {% trans "Vérifiez les champs du formulaire avant d'enregistrer." %}
         </div>
         {% endif %}
 

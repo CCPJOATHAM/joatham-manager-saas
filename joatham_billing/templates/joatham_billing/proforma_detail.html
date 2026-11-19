@@ -215,7 +215,7 @@
     </div>
     <div class="hero-actions">
         <span class="status-chip status-{{ proforma.statut }}">{{ proforma.get_statut_display }}</span>
-        <a href="{% url 'proforma_pdf' proforma.id %}" class="btn btn-print" target="_blank" rel="noopener">{% trans "Telecharger PDF" %}</a>
+        <a href="{% url 'proforma_pdf' proforma.id %}" class="btn btn-print" target="_blank" rel="noopener">{% trans "Télécharger PDF" %}</a>
         {% if can_edit_proforma %}
             <a href="{% url 'edit_proforma' proforma.id %}" class="btn btn-add">{% trans "Modifier" %}</a>
         {% endif %}
@@ -232,7 +232,7 @@
         <strong>{{ total_tva }}</strong>
     </div>
     <div class="summary-card">
-        <span class="label">{% trans "Reductions" %}</span>
+        <span class="label">{% trans "Réductions" %}</span>
         <strong>{{ total_reduction }}</strong>
     </div>
     <div class="summary-card">
@@ -245,13 +245,13 @@
     <div>
         <section class="panel">
             <h3>{% trans "Lignes de proforma" %}</h3>
-            <p class="panel-subtitle">{% trans "Ces lignes seront copiees dans une facture definitive lors de la conversion." %}</p>
+            <p class="panel-subtitle">{% trans "Ces lignes seront copiées dans une facture définitive lors de la conversion." %}</p>
             <table class="proforma-table">
                 <thead>
                     <tr>
                         <th>{% trans "Origine" %}</th>
-                        <th>{% trans "Libelle" %}</th>
-                        <th>{% trans "Quantite" %}</th>
+                        <th>{% trans "Libellé" %}</th>
+                        <th>{% trans "Quantité" %}</th>
                         <th>{% trans "Prix unitaire" %}</th>
                         <th>{% trans "Total" %}</th>
                     </tr>
@@ -290,7 +290,7 @@
         <section class="panel">
             <h3>{% trans "Nature du document" %}</h3>
             <div class="notice">
-                {% trans "Cette facture proforma est provisoire. Aucun paiement n'est enregistre sur une proforma et elle ne constitue pas une facture definitive." %}
+                {% trans "Cette facture proforma est provisoire. Aucun paiement n'est enregistré sur une proforma et elle ne constitue pas une facture définitive." %}
             </div>
         </section>
 
@@ -300,7 +300,7 @@
                 <a href="{% url 'proforma_list' %}" class="btn btn-print">{% trans "Retour aux proformas" %}</a>
                 <a href="{% url 'proforma_pdf' proforma.id %}" class="btn btn-download" target="_blank" rel="noopener">{% trans "Imprimer A4" %}</a>
                 {% if proforma.facture_convertie %}
-                    <a href="{% url 'facture_detail' proforma.facture_convertie.id %}" class="btn btn-add">{% trans "Voir la facture definitive" %}</a>
+                    <a href="{% url 'facture_detail' proforma.facture_convertie.id %}" class="btn btn-add">{% trans "Voir la facture définitive" %}</a>
                 {% endif %}
                 {% if can_convert_proforma %}
                     <form method="post" action="{% url 'convert_proforma' proforma.id %}" class="action-form">

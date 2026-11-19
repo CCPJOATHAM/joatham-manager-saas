@@ -171,7 +171,7 @@ class ProformaWorkflowTests(TestCase):
         response = self.client.get(reverse("proforma_detail", args=[proforma.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Aucun paiement n'est enregistre")
+        self.assertContains(response, "Aucun paiement n'est enregistré")
         self.assertNotContains(response, "Enregistrer un paiement")
         self.assertEqual(PaiementFacture.objects.count(), 0)
 
@@ -403,7 +403,7 @@ class ProformaWorkflowTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Choisissez un client enregistre ou saisissez un client occasionnel")
+        self.assertContains(response, 'Choisissez un client enregistré ou saisissez un client occasionnel')
         self.assertEqual(Proforma.objects.filter(entreprise=self.entreprise).count(), 0)
         self.assertEqual(Facture.objects.filter(entreprise=self.entreprise).count(), 0)
 

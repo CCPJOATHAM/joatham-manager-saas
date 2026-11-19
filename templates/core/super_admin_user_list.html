@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Utilisateurs | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Utilisateurs" %}{% endblock %}
-{% block content_subtitle %}{% trans "Gestion plateforme des comptes utilisateurs, sans suppression definitive." %}{% endblock %}
+{% block content_subtitle %}{% trans "Gestion plateforme des comptes utilisateurs, sans suppression définitive." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
@@ -142,7 +142,7 @@
         <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="{% trans 'Email, username ou nom' %}">
     </div>
     <div>
-        <label for="id_role">{% trans "Role" %}</label>
+        <label for="id_role">{% trans "Rôle" %}</label>
         <select id="id_role" name="role">
             <option value="">{% trans "Tous" %}</option>
             {% for value, label in role_choices %}
@@ -169,7 +169,7 @@
     </div>
     <div class="actions">
         <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
-        <a href="{% url 'super_admin_user_list' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+        <a href="{% url 'super_admin_user_list' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
     </div>
 </form>
 
@@ -180,11 +180,11 @@
                 <th>ID</th>
                 <th>{% trans "Email" %}</th>
                 <th>{% trans "Username" %}</th>
-                <th>{% trans "Role" %}</th>
-                <th>{% trans "Entreprise liee" %}</th>
+                <th>{% trans "Rôle" %}</th>
+                <th>{% trans "Entreprise liée" %}</th>
                 <th>{% trans "Statut" %}</th>
-                <th>{% trans "Email verifie" %}</th>
-                <th>{% trans "Date creation" %}</th>
+                <th>{% trans "Email vérifié" %}</th>
+                <th>{% trans "Date création" %}</th>
                 <th>{% trans "Actions" %}</th>
             </tr>
         </thead>

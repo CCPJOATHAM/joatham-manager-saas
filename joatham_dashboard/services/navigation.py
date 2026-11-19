@@ -59,7 +59,7 @@ NAV_ITEMS = [
         "prefixes": ["/super-admin/audit/"],
     },
     {
-        "label": _("Parametres plateforme"),
+        "label": _('Paramètres plateforme'),
         "url_name": "super_admin_settings",
         "permission": "superadmin.view",
         "module": None,
@@ -107,7 +107,7 @@ NAV_ITEMS = [
         "badge_counter": "unread_messages",
     },
     {
-        "label": _("Rapports avances"),
+        "label": _('Rapports avancés'),
         "url_name": "advanced_reports",
         "permission": "reports.advanced_view",
         "module": "advanced_reports",
@@ -138,7 +138,7 @@ NAV_ITEMS = [
         "prefixes": ["/services/"],
     },
     {
-        "label": _("Depenses"),
+        "label": _('Dépenses'),
         "url_name": "depenses",
         "permission": "expenses.view",
         "module": "expenses",
@@ -182,7 +182,7 @@ NAV_ITEMS = [
         "prefixes": ["/factures/proformas/"],
     },
     {
-        "label": gettext_lazy("Comptabilite"),
+        "label": gettext_lazy('Comptabilité'),
         "translate_label": False,
         "url_name": "compta_dashboard",
         "permission": "accounting.view",
@@ -240,7 +240,7 @@ NAV_ITEMS = [
 
 ROLE_LABELS = {
     "super_admin": _("Super admin"),
-    "proprietaire": _("Proprietaire"),
+    "proprietaire": _('Propriétaire'),
     "gestionnaire": _("Gestionnaire"),
     "comptable": _("Comptable"),
 }

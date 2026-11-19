@@ -2,7 +2,7 @@
 {% load i18n %}
 
 
-{% block pdf_title %}{% trans "Liste des depenses -" %} {{ entreprise.nom }}{% endblock %}
+{% block pdf_title %}{% trans "Liste des dépenses -" %} {{ entreprise.nom }}{% endblock %}
 
 {% block pdf_styles %}
 .expenses-table tbody tr:nth-child(even) {
@@ -151,14 +151,14 @@
                 </td>
                 <td class="pdf-meta-block">
                     <div class="header-title-wrapper">
-                        <p class="pdf-meta-title">{% trans "Liste des depenses" %}</p>
-                        <p class="header-subtitle">{% trans "Etat financier de suivi" %}</p>
+                        <p class="pdf-meta-title">{% trans "Liste des dépenses" %}</p>
+                        <p class="header-subtitle">{% trans "État financier de suivi" %}</p>
                     </div>
-                    <p class="pdf-meta-line">{% trans "Edition du" %} {{ date_generation }}</p>
+                    <p class="pdf-meta-line">{% trans "Édition du" %} {{ date_generation }}</p>
                     <p class="pdf-meta-line">{% trans "Devise :" %} {{ currency_display }}</p>
                     {% if qr_code_data_uri %}
                     <div class="qr-box">
-                        <img src="{{ qr_code_data_uri }}" alt="{% trans 'QR code depenses' %}">
+                        <img src="{{ qr_code_data_uri }}" alt="{% trans 'QR code dépenses' %}">
                     </div>
                     {% endif %}
                 </td>
@@ -168,14 +168,14 @@
 
     <div class="separator"></div>
 
-    <h1 class="document-title">{% trans "Liste des depenses" %}</h1>
+    <h1 class="document-title">{% trans "Liste des dépenses" %}</h1>
     <div class="doc-meta">{{ period_label }}</div>
 
     <div class="summary-band">
         <table class="summary-band-table">
             <tr>
                 <td style="width:33%;">
-                    {% trans "Nombre de depenses" %}
+                    {% trans "Nombre de dépenses" %}
                     <span class="summary-value">{{ depense_count }}</span>
                 </td>
                 <td style="width:33%;" class="text-center">
@@ -183,7 +183,7 @@
                     <span class="summary-value">{{ currency_code }}</span>
                 </td>
                 <td style="width:34%;" class="text-right">
-                    {% trans "Edition" %}
+                    {% trans "Édition" %}
                     <span class="summary-value">{{ date_generation }}</span>
                 </td>
             </tr>
@@ -214,14 +214,14 @@
     </table>
 
     <div class="total-panel">
-        <p class="total-panel-label">{% trans "Total des depenses" %}</p>
+        <p class="total-panel-label">{% trans "Total des dépenses" %}</p>
         <p class="total-panel-value">{{ total_display }}</p>
     </div>
 
     <div class="pdf-footer">
         <table class="pdf-footer-table">
             <tr>
-                <td>{% trans "Document genere automatiquement par JOATHAM Manager" %}</td>
+                <td>{% trans "Document généré automatiquement par JOATHAM Manager" %}</td>
                 <td class="text-center">{{ date_footer }}</td>
                 <td class="text-right">{% trans "Page" %} <pdf:pagenumber /> / <pdf:pagecount /></td>
             </tr>

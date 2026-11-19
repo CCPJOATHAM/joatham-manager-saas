@@ -33,17 +33,17 @@ def _resolve_cashbox_context(*, entreprise, caisse):
         raise ValueError(get_module_access_denied_message("caisse_integrations", state["reason"]))
     ensure_same_entreprise(caisse, entreprise)
     if not caisse.est_active:
-        raise ValueError(gettext_lazy("La caisse selectionnee est inactive."))
+        raise ValueError(gettext_lazy('La caisse sélectionnée est inactive.'))
     session = get_open_session_for_caisse(caisse)
     if session is None:
-        raise ValueError(gettext_lazy("Aucune session ouverte n'est disponible pour la caisse selectionnee."))
+        raise ValueError(gettext_lazy("Aucune session ouverte n'est disponible pour la caisse sélectionnée."))
     ensure_same_entreprise(session, entreprise)
     return caisse, session
 
 
 def create_cash_movement_for_depense(*, depense, entreprise, utilisateur=None):
     if depense.caisse_id is None or depense.session_caisse_id is None:
-        raise ValueError(gettext_lazy("La depense doit etre rattachee a une caisse et a une session ouverte."))
+        raise ValueError(gettext_lazy('La dépense doit être rattachée à une caisse et à une session ouverte.'))
     ensure_same_entreprise(depense, entreprise)
     ensure_same_entreprise(depense.caisse, entreprise)
     ensure_same_entreprise(depense.session_caisse, entreprise)
@@ -54,7 +54,7 @@ def create_cash_movement_for_depense(*, depense, entreprise, utilisateur=None):
         source_model="Depense",
         source_id=depense.id,
     ).exists():
-        raise ValueError(gettext_lazy("Un mouvement de caisse existe deja pour cette depense."))
+        raise ValueError(gettext_lazy('Un mouvement de caisse existe déjà pour cette dépense.'))
 
     return record_cash_expense(
         entreprise=entreprise,

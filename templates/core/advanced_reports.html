@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Rapports avancés" %}{% endblock %}
 {% block content_title %}{% trans "Rapports avancés" %}{% endblock %}
-{% block content_subtitle %}{% trans "Vue decisionnelle globale de la performance de l'entreprise." %}{% endblock %}
+{% block content_subtitle %}{% trans "Vue décisionnelle globale de la performance de l'entreprise." %}{% endblock %}
 
 {% block top_actions %}
 {% if can_export_advanced_reports %}
@@ -203,7 +203,7 @@
             </select>
         </div>
         <div class="filter-field">
-            <label for="date_debut">{% trans "Date debut" %}</label>
+            <label for="date_debut">{% trans "Date début" %}</label>
             <input id="date_debut" type="date" name="date_debut" value="{{ filters.date_debut }}">
         </div>
         <div class="filter-field">
@@ -253,7 +253,7 @@
         </div>
         <div class="filter-actions">
             <button type="submit">{% trans "Appliquer" %}</button>
-            <a href="{% url 'advanced_reports' %}" class="btn-link">{% trans "Reinitialiser" %}</a>
+            <a href="{% url 'advanced_reports' %}" class="btn-link">{% trans "Réinitialiser" %}</a>
         </div>
     </form>
 
@@ -268,7 +268,7 @@
 
     <section class="reports-grid">
         <article class="report-panel">
-            <h3>{% trans "Evolution des ventes" %}</h3>
+            <h3>{% trans "Évolution des ventes" %}</h3>
             <div class="bar-list">
                 {% for row in report.sales.evolution %}
                 <div class="bar-row">
@@ -277,7 +277,7 @@
                     <strong>{{ row.total_display }}</strong>
                 </div>
                 {% empty %}
-                <p class="row-muted">{% trans "Aucune vente dans cette periode." %}</p>
+                <p class="row-muted">{% trans "Aucune vente dans cette période." %}</p>
                 {% endfor %}
             </div>
         </article>
@@ -303,7 +303,7 @@
                         {% for client in report.sales.top_clients %}
                         <tr><td>{{ client.name }}</td><td>{{ client.count }}</td><td>{{ client.total_display }}</td></tr>
                         {% empty %}
-                        <tr><td colspan="3">{% trans "Aucune donnee client." %}</td></tr>
+                        <tr><td colspan="3">{% trans "Aucune donnée client." %}</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -314,7 +314,7 @@
             <h3>{% trans "Top produits et services" %}</h3>
             <div class="table-scroll compact">
                 <table>
-                    <thead><tr><th>{% trans "Designation" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Total" %}</th></tr></thead>
+                    <thead><tr><th>{% trans "Désignation" %}</th><th>{% trans "Quantité" %}</th><th>{% trans "Total" %}</th></tr></thead>
                     <tbody>
                         {% for item in report.sales.top_items %}
                         <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>{{ item.total_display }}</td></tr>
@@ -336,7 +336,7 @@
             </div>
             <div class="table-scroll compact" style="margin-top:14px;">
                 <table>
-                    <thead><tr><th>{% trans "Moyen" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th><th>{% trans "Confirme" %}</th></tr></thead>
+                    <thead><tr><th>{% trans "Moyen" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th><th>{% trans "Confirmé" %}</th></tr></thead>
                     <tbody>
                         {% for row in report.payments.method_breakdown %}
                         <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td><td>{{ row.confirmed_total_display }}</td></tr>
@@ -363,14 +363,14 @@
         <article class="report-panel">
             <h3>{% trans "Analyse caisse" %}</h3>
             <div class="mini-grid">
-                <div class="mini-tile"><span class="mini-label">{% trans "Entrees" %}</span><strong class="mini-value">{{ report.cash.total_entries_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">{% trans "Entrées" %}</span><strong class="mini-value">{{ report.cash.total_entries_display }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Sorties" %}</span><strong class="mini-value">{{ report.cash.total_exits_display }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Sessions ouvertes" %}</span><strong class="mini-value">{{ report.cash.open_sessions }}</strong></div>
-                <div class="mini-tile"><span class="mini-label">{% trans "Ecarts" %}</span><strong class="mini-value">{{ report.cash.sessions_with_gap }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">{% trans "Écarts" %}</span><strong class="mini-value">{{ report.cash.sessions_with_gap }}</strong></div>
             </div>
             <div class="table-scroll compact" style="margin-top:14px;">
                 <table>
-                    <thead><tr><th>{% trans "Caisse" %}</th><th>{% trans "Entrees" %}</th><th>{% trans "Sorties" %}</th><th>{% trans "Solde" %}</th></tr></thead>
+                    <thead><tr><th>{% trans "Caisse" %}</th><th>{% trans "Entrées" %}</th><th>{% trans "Sorties" %}</th><th>{% trans "Solde" %}</th></tr></thead>
                     <tbody>
                         {% for row in report.cash.balance_by_caisse %}
                         <tr><td>{{ row.name }}</td><td>{{ row.total_entries_display }}</td><td>{{ row.total_exits_display }}</td><td>{{ row.balance_display }}</td></tr>
@@ -388,7 +388,7 @@
                 <div class="mini-tile"><span class="mini-label">{% trans "Valeur stock" %}</span><strong class="mini-value">{{ report.stock.stock_value_display }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Stock faible" %}</span><strong class="mini-value">{{ report.stock.low_stock_count }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Rupture" %}</span><strong class="mini-value">{{ report.stock.out_of_stock_count }}</strong></div>
-                <div class="mini-tile"><span class="mini-label">{% trans "Ecarts inventaire" %}</span><strong class="mini-value">{{ report.stock.inventory_gap_count }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">{% trans "Écarts inventaire" %}</span><strong class="mini-value">{{ report.stock.inventory_gap_count }}</strong></div>
             </div>
             <div class="table-scroll compact" style="margin-top:14px;">
                 <table>
@@ -410,7 +410,7 @@
                 <div class="mini-tile"><span class="mini-label">{% trans "Total" %}</span><strong class="mini-value">{{ report.expenses.total_display }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Nombre" %}</span><strong class="mini-value">{{ report.expenses.count }}</strong></div>
                 <div class="mini-tile"><span class="mini-label">{% trans "Comptabilité" %}</span><strong class="mini-value">{{ report.accounting.result_label }}</strong></div>
-                <div class="mini-tile"><span class="mini-label">{% trans "Resultat compta" %}</span><strong class="mini-value">{{ report.accounting.result_display }}</strong></div>
+                <div class="mini-tile"><span class="mini-label">{% trans "Résultat compta" %}</span><strong class="mini-value">{{ report.accounting.result_display }}</strong></div>
             </div>
             <div class="bar-list" style="margin-top:14px;">
                 {% for row in report.expenses.evolution %}
@@ -426,7 +426,7 @@
         </article>
 
         <article class="report-panel">
-            <h3>{% trans "Factures a surveiller" %}</h3>
+            <h3>{% trans "Factures à surveiller" %}</h3>
             <div class="split-table">
                 <div class="table-scroll compact">
                     <table>
@@ -435,7 +435,7 @@
                             {% for row in report.sales.unpaid_invoice_rows %}
                             <tr><td>{{ row.numero }}</td><td>{{ row.client }}</td><td>{{ row.date }}</td><td>{{ row.amount_display }}</td></tr>
                             {% empty %}
-                            <tr><td colspan="4">{% trans "Aucune facture impayee." %}</td></tr>
+                            <tr><td colspan="4">{% trans "Aucune facture impayée." %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

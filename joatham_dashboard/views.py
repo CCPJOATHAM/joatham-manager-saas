@@ -121,7 +121,7 @@ def _public_free_plan_payload():
         "prix_annuel": Decimal("0.00"),
         "devise": "USD",
         "duree_jours": FREE_PLAN_DURATION_DAYS,
-        "description": _("Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
+        "description": _('Plan découverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et dépenses limitées.'),
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
@@ -396,13 +396,13 @@ def _resume_subscription_intention_after_login(request, user):
     except (PaymentProviderError, ValueError) as exc:
         messages.warning(
             request,
-            _("Votre compte est actif sur le plan Gratuit. Le paiement du plan choisi pourra etre repris depuis la page des abonnements."),
+            _('Votre compte est actif sur le plan Gratuit. Le paiement du plan choisi pourra être repris depuis la page des abonnements.'),
         )
         logger.warning("subscription_intent.resume_failed user_id=%s error=%s", user.id, exc)
         return redirect("subscription_plan_list")
 
     if result.status == SubscriptionIntentStatus.CHECKOUT and result.checkout_url:
-        messages.info(request, _("Votre espace est cree. Finalisez le paiement pour activer le plan choisi."))
+        messages.info(request, _('Votre espace est créé. Finalisez le paiement pour activer le plan choisi.'))
         return redirect(result.checkout_url)
 
     if result.status == SubscriptionIntentStatus.PROVIDER_UNAVAILABLE:
@@ -415,7 +415,7 @@ def _resume_subscription_intention_after_login(request, user):
     if result.status == SubscriptionIntentStatus.FAILED_PAYMENT:
         messages.warning(
             request,
-            _("Le paiement precedent n'a pas ete confirme. Votre entreprise reste sur le plan Gratuit."),
+            _("Le paiement précédent n'a pas été confirmé. Votre entreprise reste sur le plan Gratuit."),
         )
         return redirect("subscription_plan_list")
 
@@ -429,7 +429,7 @@ def _resume_subscription_intention_after_login(request, user):
 
 def login_view(request):
     if request.user.is_authenticated:
-        messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour acceder a la page de connexion ou creer une nouvelle entreprise."))
+        messages.info(request, _('Vous êtes déjà connecté. Déconnectez-vous pour accéder à la page de connexion ou créer une nouvelle entreprise.'))
         return redirect(get_default_dashboard_name(request.user))
 
     _clear_pending_session_conflict(request)
@@ -481,7 +481,7 @@ def login_view(request):
                 )
                 raise
             if entreprise is not None and not getattr(entreprise, "is_active", True):
-                error = _("Votre entreprise est desactivee. Contactez l'administrateur JOATHAM.")
+                error = _("Votre entreprise est désactivée. Contactez l'administrateur JOATHAM.")
                 return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
             if not getattr(user, "email_verified", True):
                 request.session["pending_verification_user_id"] = user.id
@@ -550,7 +550,7 @@ def login_session_conflict_view(request):
                     metadata={"role": getattr(user, "role", "")},
                 )
             _clear_pending_session_conflict(request)
-            messages.info(request, _("Connexion annulee. Votre session precedente reste active."))
+            messages.info(request, _('Connexion annulée. Votre session précédente reste active.'))
             return redirect("login")
 
         if action == "continue":
@@ -589,7 +589,7 @@ def login_session_conflict_view(request):
 
 def signup_view(request):
     if request.user.is_authenticated:
-        messages.info(request, _("Vous etes deja connecte. Deconnectez-vous pour creer une autre entreprise ou tester le parcours d'inscription."))
+        messages.info(request, _("Vous êtes déjà connecté. Déconnectez-vous pour créer une autre entreprise ou tester le parcours d'inscription."))
         return redirect(get_default_dashboard_name(request.user))
 
     subscription_signup_params = _get_requested_subscription_signup_params(request)
@@ -619,7 +619,7 @@ def signup_view(request):
         else:
             request.session["pending_verification_user_id"] = user.id
             send_email_verification(request, user)
-            messages.success(request, _("Un email de confirmation a ete envoye a votre adresse."))
+            messages.success(request, _('Un email de confirmation a été envoyé à votre adresse.'))
             return redirect("email_verification_sent")
 
     context = {
@@ -729,7 +729,7 @@ def email_verification_resend_view(request):
 
     if request.method == "POST" and user is not None and not getattr(user, "email_verified", True):
         send_email_verification(request, user)
-        messages.success(request, _("Un nouvel email de confirmation a ete envoye."))
+        messages.success(request, _('Un nouvel email de confirmation a été envoyé.'))
 
     return redirect("email_verification_sent")
 

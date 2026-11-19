@@ -13,7 +13,7 @@
         <div class="value">{{ total_charges|floatformat:2 }} FC</div>
     </article>
     <article class="metric">
-        <div class="label">{% trans "Resultat net" %}</div>
+        <div class="label">{% trans "Résultat net" %}</div>
         <div class="value {% if resultat_net > 0 %}status-positive{% elif resultat_net < 0 %}status-negative{% else %}status-neutral{% endif %}">{{ resultat_net|floatformat:2 }} FC</div>
         <div class="meta">{{ resultat_label }}</div>
     </article>
@@ -26,7 +26,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Numéro" %}</th>
                         <th>{% trans "Compte" %}</th>
                         <th class="number">{% trans "Montant" %}</th>
                     </tr>
@@ -39,7 +39,7 @@
                             <td class="number">{{ row.montant|floatformat:2 }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="empty">{% trans "Aucun produit sur cette periode." %}</td></tr>
+                        <tr><td colspan="3" class="empty">{% trans "Aucun produit sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
@@ -58,7 +58,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Numéro" %}</th>
                         <th>{% trans "Compte" %}</th>
                         <th class="number">{% trans "Montant" %}</th>
                     </tr>
@@ -71,7 +71,7 @@
                             <td class="number">{{ row.montant|floatformat:2 }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="empty">{% trans "Aucune charge sur cette periode." %}</td></tr>
+                        <tr><td colspan="3" class="empty">{% trans "Aucune charge sur cette période." %}</td></tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>

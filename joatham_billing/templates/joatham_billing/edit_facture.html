@@ -99,14 +99,14 @@
 
 <div class="editor-card">
     <h2>{% trans "Modifier" %} {{ facture.numero }}</h2>
-    <p>{% trans "Edition autorisee uniquement tant que la facture est en brouillon." %}</p>
+    <p>{% trans "Édition autorisée uniquement tant que la facture est en brouillon." %}</p>
 
     <form method="post">
         {% csrf_token %}
 
         <div class="editor-grid">
             <div>
-                <label>{% trans "Client enregistre" %}</label>
+                <label>{% trans "Client enregistré" %}</label>
                 <select name="client" id="client">
                     <option value="">{% trans "-- Aucun --" %}</option>
                     {% for client in clients %}

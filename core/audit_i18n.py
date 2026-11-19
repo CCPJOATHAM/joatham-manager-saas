@@ -116,146 +116,146 @@ ACTION_LABELS = {
 
 DESCRIPTION_PATTERNS = {
     'abonnement_active': [
-        (re.compile('Abonnement\\ active\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement active sur le plan %(value_1)s.')),
+        (re.compile('Abonnement\\ active\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement activé sur le plan %(value_1)s.')),
     ],
     'abonnement_expire': [
         (re.compile('Abonnement\\ expire\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement expire pour le plan %(value_1)s.')),
     ],
     'abonnement_plan_demande': [
-        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ envoyee\\.', re.DOTALL), _('Demande de plan %(value_1)s envoyee.')),
+        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ envoyee\\.', re.DOTALL), _('Demande de plan %(value_1)s envoyée.')),
     ],
     'abonnement_plan_demande_refusee': [
-        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ refusee\\.', re.DOTALL), _('Demande de plan %(value_1)s refusee.')),
+        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ refusee\\.', re.DOTALL), _('Demande de plan %(value_1)s refusée.')),
     ],
     'abonnement_plan_demande_validee': [
-        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ validee\\.', re.DOTALL), _('Demande de plan %(value_1)s validee.')),
+        (re.compile('Demande\\ de\\ plan\\ (?P<value_1>.*?)\\ validee\\.', re.DOTALL), _('Demande de plan %(value_1)s validée.')),
     ],
     'abonnement_plan_modifie': [
-        (re.compile('Plan\\ modifie\\ vers\\ (?P<value_1>.*?)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Plan modifie vers %(value_1)s pour %(value_2)s.')),
+        (re.compile('Plan\\ modifie\\ vers\\ (?P<value_1>.*?)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Plan modifié vers %(value_1)s pour %(value_2)s.')),
     ],
     'abonnement_suspendu': [
         (re.compile('Abonnement\\ suspendu\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement suspendu pour le plan %(value_1)s.')),
     ],
     'caisse_created': [
-        (re.compile('Caisse\\ creee\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse creee : %(value_1)s.')),
+        (re.compile('Caisse\\ creee\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse créée : %(value_1)s.')),
     ],
     'caisse_deactivated': [
-        (re.compile('Caisse\\ desactivee\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse desactivee : %(value_1)s.')),
+        (re.compile('Caisse\\ desactivee\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse désactivée : %(value_1)s.')),
     ],
     'caisse_movement_created': [
-        (re.compile('Mouvement\\ (?P<value_1>.*?)\\ enregistre\\ pour\\ la\\ caisse\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Mouvement %(value_1)s enregistre pour la caisse %(value_2)s.')),
+        (re.compile('Mouvement\\ (?P<value_1>.*?)\\ enregistre\\ pour\\ la\\ caisse\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Mouvement %(value_1)s enregistré pour la caisse %(value_2)s.')),
     ],
     'caisse_session_cancelled': [
-        (re.compile('Session\\ annulee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session annulee pour la caisse %(value_1)s.')),
+        (re.compile('Session\\ annulee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session annulée pour la caisse %(value_1)s.')),
     ],
     'caisse_session_closed': [
-        (re.compile('Session\\ fermee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session fermee pour la caisse %(value_1)s.')),
+        (re.compile('Session\\ fermee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session fermée pour la caisse %(value_1)s.')),
     ],
     'caisse_session_opened': [
         (re.compile('Session\\ ouverte\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session ouverte pour la caisse %(value_1)s.')),
     ],
     'caisse_session_rejected': [
-        (re.compile('Session\\ rejetee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session rejetee pour la caisse %(value_1)s.')),
+        (re.compile('Session\\ rejetee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session rejetée pour la caisse %(value_1)s.')),
     ],
     'caisse_session_validated': [
-        (re.compile('Session\\ validee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session validee pour la caisse %(value_1)s.')),
+        (re.compile('Session\\ validee\\ pour\\ la\\ caisse\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Session validée pour la caisse %(value_1)s.')),
     ],
     'caisse_updated': [
-        (re.compile('Caisse\\ mise\\ a\\ jour\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse mise a jour : %(value_1)s.')),
+        (re.compile('Caisse\\ mise\\ a\\ jour\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Caisse mise à jour : %(value_1)s.')),
     ],
     'client_cree': [
-        (re.compile('Client\\ cree:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Client cree: %(value_1)s.')),
+        (re.compile('Client\\ cree:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Client créé: %(value_1)s.')),
     ],
     'creation_apprenant': [
-        (re.compile('Apprenant\\ cree:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Apprenant cree: %(value_1)s.')),
+        (re.compile('Apprenant\\ cree:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Apprenant créé: %(value_1)s.')),
     ],
     'depense_creee': [
-        (re.compile('Depense\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Depense creee: %(value_1)s.')),
+        (re.compile('Depense\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Dépense créée: %(value_1)s.')),
     ],
     'ecriture_comptable_creee': [
-        (re.compile('Ecriture\\ comptable\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Ecriture comptable creee: %(value_1)s.')),
+        (re.compile('Ecriture\\ comptable\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Écriture comptable créée: %(value_1)s.')),
     ],
     'email_verification_sent': [
-        (re.compile('Email\\ de\\ confirmation\\ envoye\\ a\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Email de confirmation envoye a %(value_1)s.')),
+        (re.compile('Email\\ de\\ confirmation\\ envoye\\ a\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Email de confirmation envoyé à %(value_1)s.')),
     ],
     'email_verified': [
-        (re.compile('Adresse\\ email\\ confirmee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Adresse email confirmee pour %(value_1)s.')),
+        (re.compile('Adresse\\ email\\ confirmee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Adresse email confirmée pour %(value_1)s.')),
     ],
     'entreprise_creee': [
-        (re.compile('Entreprise\\ creee\\ depuis\\ le\\ parcours\\ SaaS:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Entreprise creee depuis le parcours SaaS: %(value_1)s.')),
+        (re.compile('Entreprise\\ creee\\ depuis\\ le\\ parcours\\ SaaS:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Entreprise créée depuis le parcours SaaS: %(value_1)s.')),
     ],
     'entreprise_desactivee': [
-        (re.compile('Entreprise\\ desactivee\\ par\\ super\\ admin\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Entreprise desactivee par super admin : %(value_1)s.')),
+        (re.compile('Entreprise\\ desactivee\\ par\\ super\\ admin\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Entreprise désactivée par super admin : %(value_1)s.')),
     ],
     'entreprise_modifiee': [
-        (re.compile("Parametres\\ de\\ l'entreprise\\ mis\\ a\\ jour\\ pour\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Parametres de l'entreprise mis a jour pour %(value_1)s.")),
+        (re.compile("Parametres\\ de\\ l'entreprise\\ mis\\ a\\ jour\\ pour\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Paramètres de l'entreprise mis à jour pour %(value_1)s.")),
     ],
     'essai_prolonge': [
-        (re.compile('Acces\\ historique\\ prolonge\\ de\\ (?P<value_1>.*?)\\ jour\\(s\\)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Acces historique prolonge de %(value_1)s jour(s) pour %(value_2)s.')),
-        (re.compile('Ancien\\ essai\\ prolonge\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Ancien essai prolonge sur le plan %(value_1)s.')),
+        (re.compile('Acces\\ historique\\ prolonge\\ de\\ (?P<value_1>.*?)\\ jour\\(s\\)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Accès historique prolongé de %(value_1)s jour(s) pour %(value_2)s.')),
+        (re.compile('Ancien\\ essai\\ prolonge\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Ancien essai prolongé sur le plan %(value_1)s.')),
     ],
     'facture_creee': [
-        (re.compile('Facture\\ (?P<value_1>.*?)\\ creee\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Facture %(value_1)s creee pour %(value_2)s.')),
+        (re.compile('Facture\\ (?P<value_1>.*?)\\ creee\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Facture %(value_1)s créée pour %(value_2)s.')),
     ],
     'facture_deliee_inscription': [
-        (re.compile("Facture\\ (?P<value_1>.*?)\\ deliee\\ de\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture %(value_1)s deliee de l'inscription %(value_2)s.")),
+        (re.compile("Facture\\ (?P<value_1>.*?)\\ deliee\\ de\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture %(value_1)s déliée de l'inscription %(value_2)s.")),
     ],
     'facture_existante_liee_inscription': [
-        (re.compile("Facture\\ existante\\ (?P<value_1>.*?)\\ liee\\ a\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture existante %(value_1)s liee a l'inscription %(value_2)s.")),
+        (re.compile("Facture\\ existante\\ (?P<value_1>.*?)\\ liee\\ a\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture existante %(value_1)s liée à l'inscription %(value_2)s.")),
     ],
     'facture_inscription_creee': [
-        (re.compile("Facture\\ (?P<value_1>.*?)\\ creee\\ pour\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture %(value_1)s creee pour l'inscription %(value_2)s.")),
+        (re.compile("Facture\\ (?P<value_1>.*?)\\ creee\\ pour\\ l'inscription\\ (?P<value_2>.*?)\\.", re.DOTALL), _("Facture %(value_1)s créée pour l'inscription %(value_2)s.")),
     ],
     'facture_payee': [
-        (re.compile('Paiement\\ enregistre\\ sur\\ la\\ facture\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement enregistre sur la facture %(value_1)s.')),
+        (re.compile('Paiement\\ enregistre\\ sur\\ la\\ facture\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement enregistré sur la facture %(value_1)s.')),
     ],
     'formation_creee': [
-        (re.compile('Formation\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Formation creee: %(value_1)s.')),
+        (re.compile('Formation\\ creee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Formation créée: %(value_1)s.')),
     ],
     'formation_modifiee': [
-        (re.compile('Formation\\ modifiee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Formation modifiee: %(value_1)s.')),
+        (re.compile('Formation\\ modifiee:\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Formation modifiée: %(value_1)s.')),
     ],
     'formation_statut_modifie': [
         (re.compile('Formation\\ (?P<value_1>.*?):\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Formation %(value_1)s: %(value_2)s.')),
     ],
     'inscription_formation_creee': [
-        (re.compile('Inscription\\ creee\\ pour\\ (?P<value_1>.*?)\\ a\\ la\\ formation\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Inscription creee pour %(value_1)s a la formation %(value_2)s.')),
+        (re.compile('Inscription\\ creee\\ pour\\ (?P<value_1>.*?)\\ a\\ la\\ formation\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Inscription créée pour %(value_1)s à la formation %(value_2)s.')),
     ],
     'inscription_montant_prevu_modifie': [
         (re.compile("Montant\\ prévu\\ modifié\\ pour\\ l'inscription\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Montant prévu modifié pour l'inscription %(value_1)s.")),
     ],
     'inventory_session_created': [
-        (re.compile("Session\\ d'inventaire\\ creee\\ :\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Session d'inventaire creee : %(value_1)s.")),
+        (re.compile("Session\\ d'inventaire\\ creee\\ :\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Session d'inventaire créée : %(value_1)s.")),
     ],
     'inventory_session_validated': [
-        (re.compile("Session\\ d'inventaire\\ validee\\ :\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Session d'inventaire validee : %(value_1)s.")),
+        (re.compile("Session\\ d'inventaire\\ validee\\ :\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Session d'inventaire validée : %(value_1)s.")),
     ],
     'invitation_acceptee': [
-        (re.compile('Invitation\\ acceptee\\ par\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation acceptee par %(value_1)s.')),
+        (re.compile('Invitation\\ acceptee\\ par\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation acceptée par %(value_1)s.')),
     ],
     'invitation_annulee': [
-        (re.compile('Invitation\\ annulee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation annulee pour %(value_1)s.')),
+        (re.compile('Invitation\\ annulee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation annulée pour %(value_1)s.')),
     ],
     'invitation_relance_envoyee': [
-        (re.compile("Relance\\ envoyee\\ pour\\ l'invitation\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Relance envoyee pour l'invitation %(value_1)s.")),
+        (re.compile("Relance\\ envoyee\\ pour\\ l'invitation\\ (?P<value_1>.*?)\\.", re.DOTALL), _("Relance envoyée pour l'invitation %(value_1)s.")),
     ],
     'invitation_renvoyee': [
-        (re.compile('Invitation\\ renvoyee\\ a\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation renvoyee a %(value_1)s.')),
+        (re.compile('Invitation\\ renvoyee\\ a\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Invitation renvoyée à %(value_1)s.')),
     ],
     'paiement_abonnement_cree': [
-        (re.compile('Demande\\ de\\ paiement\\ abonnement\\ creee\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Demande de paiement abonnement creee pour le plan %(value_1)s.')),
+        (re.compile('Demande\\ de\\ paiement\\ abonnement\\ creee\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Demande de paiement abonnement créée pour le plan %(value_1)s.')),
     ],
     'paiement_abonnement_enregistre': [
-        (re.compile('Paiement\\ manuel\\ enregistre\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement manuel enregistre pour %(value_1)s.')),
+        (re.compile('Paiement\\ manuel\\ enregistre\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement manuel enregistré pour %(value_1)s.')),
     ],
     'paiement_abonnement_refuse': [
-        (re.compile('Paiement\\ abonnement\\ refuse\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement abonnement refuse pour le plan %(value_1)s.')),
+        (re.compile('Paiement\\ abonnement\\ refuse\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement abonnement refusé pour le plan %(value_1)s.')),
     ],
     'paiement_abonnement_valide': [
-        (re.compile('Paiement\\ abonnement\\ valide\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement abonnement valide pour le plan %(value_1)s.')),
+        (re.compile('Paiement\\ abonnement\\ valide\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement abonnement validé pour le plan %(value_1)s.')),
     ],
     'paiement_inscription_cree': [
-        (re.compile('Paiement\\ enregistre\\ pour\\ (?P<value_1>.*?)\\ sur\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Paiement enregistre pour %(value_1)s sur %(value_2)s.')),
+        (re.compile('Paiement\\ enregistre\\ pour\\ (?P<value_1>.*?)\\ sur\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Paiement enregistré pour %(value_1)s sur %(value_2)s.')),
     ],
     'password_reset_completed': [
         (re.compile('Mot\\ de\\ passe\\ réinitialisé\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Mot de passe réinitialisé pour %(value_1)s.')),
@@ -264,58 +264,58 @@ DESCRIPTION_PATTERNS = {
         (re.compile('Demande\\ de\\ réinitialisation\\ du\\ mot\\ de\\ passe\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Demande de réinitialisation du mot de passe pour %(value_1)s.')),
     ],
     'plan_gratuit_active': [
-        (re.compile('Plan\\ gratuit\\ active\\ sur\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Plan gratuit active sur %(value_1)s.')),
+        (re.compile('Plan\\ gratuit\\ active\\ sur\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Plan gratuit activé sur %(value_1)s.')),
     ],
     'previous_session_terminated_for_new_login': [
-        (re.compile('Session\\ precedente\\ terminee\\ pour\\ connecter\\ (?P<value_1>.*?)\\ sur\\ un\\ nouvel\\ appareil\\.', re.DOTALL), _('Session precedente terminee pour connecter %(value_1)s sur un nouvel appareil.')),
+        (re.compile('Session\\ precedente\\ terminee\\ pour\\ connecter\\ (?P<value_1>.*?)\\ sur\\ un\\ nouvel\\ appareil\\.', re.DOTALL), _('Session précédente terminée pour connecter %(value_1)s sur un nouvel appareil.')),
     ],
     'produit_cree': [
-        (re.compile('Produit\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Produit cree : %(value_1)s.')),
+        (re.compile('Produit\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Produit créé : %(value_1)s.')),
     ],
     'produit_modifie': [
-        (re.compile('Produit\\ modifie\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Produit modifie : %(value_1)s.')),
+        (re.compile('Produit\\ modifie\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Produit modifié : %(value_1)s.')),
     ],
     'proforma_annulee': [
-        (re.compile('Proforma\\ (?P<value_1>.*?)\\ annulee\\.', re.DOTALL), _('Proforma %(value_1)s annulee.')),
+        (re.compile('Proforma\\ (?P<value_1>.*?)\\ annulee\\.', re.DOTALL), _('Proforma %(value_1)s annulée.')),
     ],
     'proforma_convertie': [
         (re.compile('Proforma\\ (?P<value_1>.*?)\\ convertie\\ en\\ facture\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Proforma %(value_1)s convertie en facture %(value_2)s.')),
     ],
     'proforma_creee': [
-        (re.compile('Proforma\\ (?P<value_1>.*?)\\ creee\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Proforma %(value_1)s creee pour %(value_2)s.')),
+        (re.compile('Proforma\\ (?P<value_1>.*?)\\ creee\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Proforma %(value_1)s créée pour %(value_2)s.')),
     ],
     'proforma_modifiee': [
-        (re.compile('Proforma\\ (?P<value_1>.*?)\\ modifiee\\.', re.DOTALL), _('Proforma %(value_1)s modifiee.')),
+        (re.compile('Proforma\\ (?P<value_1>.*?)\\ modifiee\\.', re.DOTALL), _('Proforma %(value_1)s modifiée.')),
     ],
     'rh_avance_salaire_cancelled': [
-        (re.compile('Avance\\ sur\\ salaire\\ annulee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Avance sur salaire annulee pour %(value_1)s.')),
+        (re.compile('Avance\\ sur\\ salaire\\ annulee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Avance sur salaire annulée pour %(value_1)s.')),
     ],
     'rh_avance_salaire_created': [
-        (re.compile('Avance\\ sur\\ salaire\\ creee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Avance sur salaire creee pour %(value_1)s.')),
+        (re.compile('Avance\\ sur\\ salaire\\ creee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Avance sur salaire créée pour %(value_1)s.')),
     ],
     'rh_conge_created': [
-        (re.compile('Demande\\ de\\ conge\\ creee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Demande de conge creee pour %(value_1)s.')),
+        (re.compile('Demande\\ de\\ conge\\ creee\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Demande de congé créée pour %(value_1)s.')),
     ],
     'rh_conge_decided': [
-        (re.compile('Demande\\ de\\ conge\\ (?P<value_1>.*?)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Demande de conge %(value_1)s pour %(value_2)s.')),
+        (re.compile('Demande\\ de\\ conge\\ (?P<value_1>.*?)\\ pour\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Demande de congé %(value_1)s pour %(value_2)s.')),
     ],
     'rh_document_created': [
-        (re.compile('Document\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Document RH cree : %(value_1)s.')),
+        (re.compile('Document\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Document RH créé : %(value_1)s.')),
     ],
     'rh_employe_created': [
-        (re.compile('Employe\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Employe RH cree : %(value_1)s.')),
+        (re.compile('Employe\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Employé RH créé : %(value_1)s.')),
     ],
     'rh_employe_updated': [
-        (re.compile('Employe\\ RH\\ modifie\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Employe RH modifie : %(value_1)s.')),
+        (re.compile('Employe\\ RH\\ modifie\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Employé RH modifié : %(value_1)s.')),
     ],
     'rh_paiement_salaire_created': [
-        (re.compile('Paiement\\ salaire\\ cree\\ pour\\ (?P<value_1>.*?)\\ \\-\\ (?P<value_2>.*?)/(?P<value_3>.*?)\\.', re.DOTALL), _('Paiement salaire cree pour %(value_1)s - %(value_2)s/%(value_3)s.')),
+        (re.compile('Paiement\\ salaire\\ cree\\ pour\\ (?P<value_1>.*?)\\ \\-\\ (?P<value_2>.*?)/(?P<value_3>.*?)\\.', re.DOTALL), _('Paiement salaire créé pour %(value_1)s - %(value_2)s/%(value_3)s.')),
     ],
     'rh_poste_created': [
-        (re.compile('Poste\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Poste RH cree : %(value_1)s.')),
+        (re.compile('Poste\\ RH\\ cree\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Poste RH créé : %(value_1)s.')),
     ],
     'rh_presence_recorded': [
-        (re.compile('Presence\\ RH\\ enregistree\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Presence RH enregistree pour %(value_1)s.')),
+        (re.compile('Presence\\ RH\\ enregistree\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Présence RH enregistrée pour %(value_1)s.')),
     ],
     'service_cree': [
         (re.compile('Service\\ créé\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Service créé : %(value_1)s.')),
@@ -327,55 +327,55 @@ DESCRIPTION_PATTERNS = {
         (re.compile('Statut\\ du\\ service\\ modifié\\ :\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Statut du service modifié : %(value_1)s.')),
     ],
     'session_conflict_cancelled': [
-        (re.compile('Conflit\\ de\\ session\\ annule\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Conflit de session annule pour %(value_1)s.')),
+        (re.compile('Conflit\\ de\\ session\\ annule\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Conflit de session annulé pour %(value_1)s.')),
     ],
     'session_conflict_detected': [
-        (re.compile('Conflit\\ de\\ session\\ detecte\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Conflit de session detecte pour %(value_1)s.')),
+        (re.compile('Conflit\\ de\\ session\\ detecte\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Conflit de session détecté pour %(value_1)s.')),
     ],
     'subscription_auto_activated': [
-        (re.compile('Abonnement\\ active\\ automatiquement\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement active automatiquement sur le plan %(value_1)s.')),
+        (re.compile('Abonnement\\ active\\ automatiquement\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement activé automatiquement sur le plan %(value_1)s.')),
     ],
     'subscription_intent_created': [
-        (re.compile('Intention\\ abonnement\\ creee\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Intention abonnement creee pour le plan %(value_1)s.')),
+        (re.compile('Intention\\ abonnement\\ creee\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Intention abonnement créée pour le plan %(value_1)s.')),
     ],
     'subscription_payment_auto_confirmed': [
-        (re.compile('Paiement\\ automatique\\ confirme\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique confirme pour le plan %(value_1)s.')),
+        (re.compile('Paiement\\ automatique\\ confirme\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique confirmé pour le plan %(value_1)s.')),
     ],
     'subscription_payment_auto_created': [
-        (re.compile('Paiement\\ automatique\\ cree\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique cree pour le plan %(value_1)s.')),
+        (re.compile('Paiement\\ automatique\\ cree\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique créé pour le plan %(value_1)s.')),
     ],
     'subscription_payment_auto_failed': [
-        (re.compile('Paiement\\ automatique\\ echoue\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique echoue pour le plan %(value_1)s.')),
+        (re.compile('Paiement\\ automatique\\ echoue\\ pour\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Paiement automatique échoué pour le plan %(value_1)s.')),
     ],
     'subscription_payment_webhook_duplicate': [
-        (re.compile('Webhook\\ paiement\\ abonnement\\ deja\\ traite\\.', re.DOTALL), _('Webhook paiement abonnement deja traite.')),
+        (re.compile('Webhook\\ paiement\\ abonnement\\ deja\\ traite\\.', re.DOTALL), _('Webhook paiement abonnement déjà traite.')),
     ],
     'subscription_payment_webhook_rejected': [
-        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ apres\\ verification\\.', re.DOTALL), _('Webhook paiement abonnement rejete apres verification.')),
-        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ avant\\ identification\\.', re.DOTALL), _('Webhook paiement abonnement rejete avant identification.')),
-        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ pour\\ reference\\ inconnue\\.', re.DOTALL), _('Webhook paiement abonnement rejete pour reference inconnue.')),
+        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ apres\\ verification\\.', re.DOTALL), _('Webhook paiement abonnement rejeté après vérification.')),
+        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ avant\\ identification\\.', re.DOTALL), _('Webhook paiement abonnement rejeté avant identification.')),
+        (re.compile('Webhook\\ paiement\\ abonnement\\ rejete\\ pour\\ reference\\ inconnue\\.', re.DOTALL), _('Webhook paiement abonnement rejeté pour référence inconnue.')),
     ],
     'utilisateur_acces_retire': [
-        (re.compile('Acces\\ retire\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Acces retire pour %(value_1)s.')),
+        (re.compile('Acces\\ retire\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Accès retire pour %(value_1)s.')),
     ],
     'utilisateur_cree': [
-        (re.compile('Compte\\ proprietaire\\ cree\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Compte proprietaire cree pour %(value_1)s.')),
-        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ cree\\ avec\\ le\\ role\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Utilisateur %(value_1)s cree avec le role %(value_2)s.')),
+        (re.compile('Compte\\ proprietaire\\ cree\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Compte propriétaire créé pour %(value_1)s.')),
+        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ cree\\ avec\\ le\\ role\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Utilisateur %(value_1)s créé avec le rôle %(value_2)s.')),
     ],
     'utilisateur_desactive_historique': [
-        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ desactive\\ afin\\ de\\ preserver\\ la\\ tracabilite\\.', re.DOTALL), _('Utilisateur %(value_1)s desactive afin de preserver la tracabilite.')),
+        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ desactive\\ afin\\ de\\ preserver\\ la\\ tracabilite\\.', re.DOTALL), _('Utilisateur %(value_1)s désactivé afin de préserver la traçabilité.')),
     ],
     'utilisateur_invite': [
-        (re.compile('Invitation\\ envoyee\\ a\\ (?P<value_1>.*?)\\ pour\\ le\\ role\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Invitation envoyee a %(value_1)s pour le role %(value_2)s.')),
+        (re.compile('Invitation\\ envoyee\\ a\\ (?P<value_1>.*?)\\ pour\\ le\\ role\\ (?P<value_2>.*?)\\.', re.DOTALL), _('Invitation envoyée à %(value_1)s pour le rôle %(value_2)s.')),
     ],
     'utilisateur_modifie': [
-        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ modifie\\.', re.DOTALL), _('Utilisateur %(value_1)s modifie.')),
+        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ modifie\\.', re.DOTALL), _('Utilisateur %(value_1)s modifié.')),
     ],
     'utilisateur_statut_modifie': [
-        (re.compile('Statut\\ utilisateur\\ mis\\ a\\ jour\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Statut utilisateur mis a jour pour %(value_1)s.')),
+        (re.compile('Statut\\ utilisateur\\ mis\\ a\\ jour\\ pour\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Statut utilisateur mis à jour pour %(value_1)s.')),
     ],
     'utilisateur_supprime': [
-        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ supprime\\.', re.DOTALL), _('Utilisateur %(value_1)s supprime.')),
+        (re.compile('Utilisateur\\ (?P<value_1>.*?)\\ supprime\\.', re.DOTALL), _('Utilisateur %(value_1)s supprimé.')),
     ],
 }
 
@@ -406,5 +406,5 @@ def invoice_history_description(event):
     if event.action == "modification":
         match = re.fullmatch(r"Facture (.*?) modifiee\.", event.description, re.DOTALL)
         if match:
-            return _("Facture %(number)s modifiee.") % {"number": match.group(1)}
+            return _('Facture %(number)s modifiée.') % {"number": match.group(1)}
     return event.description

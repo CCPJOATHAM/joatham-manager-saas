@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Caisse" %}{% endblock %}
 {% block content_title %}{% trans "Caisse" %}{% endblock %}
-{% block content_subtitle %}{% trans "Vue d'ensemble de vos caisses, de vos sessions ouvertes et des flux recents pour piloter l'activite quotidienne sans friction." %}{% endblock %}
+{% block content_subtitle %}{% trans "Vue d'ensemble de vos caisses, de vos sessions ouvertes et des flux récents pour piloter l'activité quotidienne sans friction." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -251,7 +251,7 @@
   <div class="cash-hero">
     <div>
       <h2>{% trans "Pilotage de caisse" %}</h2>
-      <p>{% trans "Suivez vos caisses actives, surveillez les sessions ouvertes, reperez les ecarts et retrouvez rapidement les derniers mouvements de votre entreprise." %}</p>
+      <p>{% trans "Suivez vos caisses actives, surveillez les sessions ouvertes, repérez les écarts et retrouvez rapidement les derniers mouvements de votre entreprise." %}</p>
     </div>
     <div class="cash-hero-actions">
       {% if can_create_caisse %}
@@ -270,7 +270,7 @@
     <div class="cash-kpi">
       <span class="cash-kpi-label">{% trans "Caisses actives" %}</span>
       <span class="cash-kpi-value">{{ dashboard.caisses_actives }}</span>
-      <span class="cash-kpi-meta">{% trans "Caisses disponibles pour les operations du jour" %}</span>
+      <span class="cash-kpi-meta">{% trans "Caisses disponibles pour les opérations du jour" %}</span>
     </div>
     <div class="cash-kpi">
       <span class="cash-kpi-label">{% trans "Sessions ouvertes" %}</span>
@@ -278,33 +278,33 @@
       <span class="cash-kpi-meta">{% trans "Sessions actuellement en exploitation" %}</span>
     </div>
     <div class="cash-kpi">
-      <span class="cash-kpi-label">{% trans "Entrees du jour" %}</span>
+      <span class="cash-kpi-label">{% trans "Entrées du jour" %}</span>
       <span class="cash-kpi-value">{{ dashboard.total_entrees_jour }}</span>
-      <span class="cash-kpi-meta">{% trans "Encaissements et entrees confirmes aujourd'hui" %}</span>
+      <span class="cash-kpi-meta">{% trans "Encaissements et entrées confirmés aujourd'hui" %}</span>
     </div>
     <div class="cash-kpi">
       <span class="cash-kpi-label">{% trans "Sorties du jour" %}</span>
       <span class="cash-kpi-value">{{ dashboard.total_sorties_jour }}</span>
-      <span class="cash-kpi-meta">{% trans "Sorties, depenses et transferts confirmes aujourd'hui" %}</span>
+      <span class="cash-kpi-meta">{% trans "Sorties, dépenses et transferts confirmés aujourd'hui" %}</span>
     </div>
     <div class="cash-kpi">
-      <span class="cash-kpi-label">{% trans "Solde theorique ouvert" %}</span>
+      <span class="cash-kpi-label">{% trans "Solde théorique ouvert" %}</span>
       <span class="cash-kpi-value">{{ dashboard.solde_theorique_ouvert }}</span>
-      <span class="cash-kpi-meta">{% trans "Total theorique des sessions encore ouvertes" %}</span>
+      <span class="cash-kpi-meta">{% trans "Total théorique des sessions encore ouvertes" %}</span>
     </div>
     <div class="cash-kpi">
-      <span class="cash-kpi-label">{% trans "Ecarts recents" %}</span>
+      <span class="cash-kpi-label">{% trans "Écarts récents" %}</span>
       <span class="cash-kpi-value">{{ dashboard.ecarts_recents|length }}</span>
-      <span class="cash-kpi-meta">{% trans "Sessions recentes avec ecart detecte" %}</span>
+      <span class="cash-kpi-meta">{% trans "Sessions récentes avec écart détecté" %}</span>
     </div>
   </div>
 
   <div class="quick-actions-panel cash-panel">
     <h3>{% trans "Raccourcis utiles" %}</h3>
-    <p>{% trans "Accedez rapidement aux actions courantes du module caisse." %}</p>
+    <p>{% trans "Accédez rapidement aux actions courantes du module caisse." %}</p>
     <div class="quick-actions">
       {% if can_create_caisse %}
-      <a href="{% url 'caisse_create' %}" class="cash-btn">{% trans "Creer une caisse" %}</a>
+      <a href="{% url 'caisse_create' %}" class="cash-btn">{% trans "Créer une caisse" %}</a>
       {% endif %}
       <a href="{% url 'caisse_session_list' %}" class="ghost-btn">{% trans "Sessions" %}</a>
       <a href="{% url 'caisse_movement_list' %}" class="ghost-btn">{% trans "Mouvements" %}</a>
@@ -319,7 +319,7 @@
       <div class="cash-panel-header">
         <div>
           <h3>{% trans "Caisses" %}</h3>
-          <p>{% trans "Liste des caisses configurees avec acces direct a leur fiche detail." %}</p>
+          <p>{% trans "Liste des caisses configurées avec accès direct à leur fiche détail." %}</p>
         </div>
       </div>
       <div class="cash-table-wrap">
@@ -347,7 +347,7 @@
               <td><a href="{% url 'caisse_detail' caisse.id %}" class="action-link">{% trans "Ouvrir" %}</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="empty-state">{% trans "Aucune caisse enregistree pour le moment." %}</td></tr>
+            <tr><td colspan="5" class="empty-state">{% trans "Aucune caisse enregistrée pour le moment." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -358,7 +358,7 @@
       <div class="cash-panel-header">
         <div>
           <h3>{% trans "Sessions ouvertes" %}</h3>
-          <p>{% trans "Suivi immediat des caisses encore en exploitation." %}</p>
+          <p>{% trans "Suivi immédiat des caisses encore en exploitation." %}</p>
         </div>
       </div>
       <div class="cash-table-wrap">
@@ -368,7 +368,7 @@
               <th>{% trans "Caisse" %}</th>
               <th>{% trans "Ouverture" %}</th>
               <th>{% trans "Responsable" %}</th>
-              <th>{% trans "Solde theorique" %}</th>
+              <th>{% trans "Solde théorique" %}</th>
               <th></th>
             </tr>
           </thead>
@@ -394,8 +394,8 @@
     <div class="cash-panel" id="mouvements-recents">
       <div class="cash-panel-header">
         <div>
-          <h3>{% trans "Dernieres operations" %}</h3>
-          <p>{% trans "Historique recent des mouvements confirmes sur l'ensemble des caisses." %}</p>
+          <h3>{% trans "Dernières opérations" %}</h3>
+          <p>{% trans "Historique récent des mouvements confirmés sur l'ensemble des caisses." %}</p>
         </div>
       </div>
       <div class="cash-table-wrap">
@@ -405,9 +405,9 @@
               <th>{% trans "Date" %}</th>
               <th>{% trans "Caisse" %}</th>
               <th>{% trans "Type" %}</th>
-              <th>{% trans "Libelle" %}</th>
+              <th>{% trans "Libellé" %}</th>
               <th>{% trans "Montant" %}</th>
-              <th>{% trans "Reference" %}</th>
+              <th>{% trans "Référence" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -425,7 +425,7 @@
               <td>{{ movement.reference|default:"-" }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="6" class="empty-state">{% trans "Aucun mouvement confirme pour le moment." %}</td></tr>
+            <tr><td colspan="6" class="empty-state">{% trans "Aucun mouvement confirmé pour le moment." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -435,8 +435,8 @@
     <div class="cash-panel" id="ecarts-recents">
       <div class="cash-panel-header">
         <div>
-          <h3>{% trans "Ecarts recents" %}</h3>
-          <p>{% trans "Sessions recentes qui meritent une verification ou une validation." %}</p>
+          <h3>{% trans "Écarts récents" %}</h3>
+          <p>{% trans "Sessions récentes qui méritent une vérification ou une validation." %}</p>
         </div>
       </div>
       <div class="cash-table-wrap">
@@ -446,7 +446,7 @@
               <th>{% trans "Caisse" %}</th>
               <th>{% trans "Fermeture" %}</th>
               <th>{% trans "Statut" %}</th>
-              <th>{% trans "Ecart" %}</th>
+              <th>{% trans "Écart" %}</th>
               <th></th>
             </tr>
           </thead>
@@ -461,10 +461,10 @@
                 </span>
               </td>
               <td class="{% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</td>
-              <td><a href="{% url 'caisse_session_detail' session.id %}" class="action-link">{% trans "Verifier" %}</a></td>
+              <td><a href="{% url 'caisse_session_detail' session.id %}" class="action-link">{% trans "Vérifier" %}</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="empty-state">{% trans "Aucun ecart recent a signaler." %}</td></tr>
+            <tr><td colspan="5" class="empty-state">{% trans "Aucun écart récent à signaler." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>

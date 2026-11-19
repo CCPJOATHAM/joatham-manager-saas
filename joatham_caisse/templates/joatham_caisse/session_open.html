@@ -111,7 +111,7 @@
       <div class="field">
         <label for="{{ form.solde_initial.id_for_label }}">{% trans "Solde initial" %}</label>
         {{ form.solde_initial }}
-        <div class="helper">{% trans "Saisissez le montant reel present en caisse au demarrage de la session." %}</div>
+        <div class="helper">{% trans "Saisissez le montant réel présent en caisse au démarrage de la session." %}</div>
         {{ form.solde_initial.errors }}
       </div>
       <div class="field">
@@ -123,7 +123,7 @@
     </div>
     <div class="actions">
       <button type="submit" class="btn primary">{% trans "Ouvrir la session" %}</button>
-      <a href="{% url 'caisse_detail' caisse.id %}" class="btn">{% trans "Retour a la caisse" %}</a>
+      <a href="{% url 'caisse_detail' caisse.id %}" class="btn">{% trans "Retour à la caisse" %}</a>
     </div>
   </form>
 </div>

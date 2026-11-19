@@ -59,9 +59,9 @@ def _ensure_company_user(user, entreprise):
 
 def _ensure_super_admin_user(user):
     if not user or not getattr(user, "is_authenticated", False):
-        raise PermissionDenied(gettext_lazy("Utilisateur non authentifie."))
+        raise PermissionDenied(gettext_lazy('Utilisateur non authentifié.'))
     if getattr(user, "normalized_role", getattr(user, "role", "")) != User.Role.SUPER_ADMIN:
-        raise PermissionDenied(gettext_lazy("Seul le super admin peut repondre a une question publique."))
+        raise PermissionDenied(gettext_lazy('Seul le super admin peut répondre à une question publique.'))
 
 
 def _clean_required_text(value, *, field_label, max_length=MAX_MESSAGE_LENGTH, min_length=1):
@@ -69,23 +69,23 @@ def _clean_required_text(value, *, field_label, max_length=MAX_MESSAGE_LENGTH, m
     if not value:
         raise ValidationError((gettext_lazy('%(value_1)s est obligatoire.') % {'value_1': field_label}))
     if min_length and len(value) < min_length:
-        raise ValidationError((gettext_lazy('%(value_1)s doit contenir au moins %(value_2)s caracteres.') % {'value_1': field_label, 'value_2': min_length}))
+        raise ValidationError((gettext_lazy('%(value_1)s doit contenir au moins %(value_2)s caractères.') % {'value_1': field_label, 'value_2': min_length}))
     if max_length and len(value) > max_length:
-        raise ValidationError((gettext_lazy('%(value_1)s ne doit pas depasser %(value_2)s caracteres.') % {'value_1': field_label, 'value_2': max_length}))
+        raise ValidationError((gettext_lazy('%(value_1)s ne doit pas dépasser %(value_2)s caractères.') % {'value_1': field_label, 'value_2': max_length}))
     return value
 
 
 def _validate_attachments(uploaded_files):
     files = list(uploaded_files or [])
     if len(files) > MAX_ATTACHMENTS:
-        raise ValidationError((gettext_lazy('Maximum %(value_1)s pieces jointes par message.') % {'value_1': MAX_ATTACHMENTS}))
+        raise ValidationError((gettext_lazy('Maximum %(value_1)s pièces jointes par message.') % {'value_1': MAX_ATTACHMENTS}))
     for uploaded_file in files:
         original_name = os.path.basename(getattr(uploaded_file, "name", "") or "piece-jointe")
         extension = os.path.splitext(original_name)[1].lower()
         if extension in DANGEROUS_ATTACHMENT_EXTENSIONS:
-            raise ValidationError(gettext_lazy("Ce type de piece jointe n'est pas autorise."))
+            raise ValidationError(gettext_lazy("Ce type de pièce jointe n'est pas autorisé."))
         if (getattr(uploaded_file, "size", 0) or 0) > MAX_ATTACHMENT_SIZE:
-            raise ValidationError(gettext_lazy("Une piece jointe depasse la taille maximale autorisee de 10 Mo."))
+            raise ValidationError(gettext_lazy('Une pièce jointe dépassé la taille maximale autorisée de 10 Mo.'))
     return files
 
 
@@ -164,7 +164,7 @@ def _send_public_question_reply_email(*, question):
             getattr(question, "id", None),
         )
         raise PublicQuestionReplyEmailError(
-            gettext_lazy("La reponse n'a pas pu etre envoyee par email. Verifiez la configuration email puis reessayez.")
+            gettext_lazy("La réponse n'a pas pu être envoyée par email. Vérifiez la configuration email puis réessayez.")
         ) from exc
 
 
@@ -173,7 +173,7 @@ def _get_participants(entreprise, participant_ids, creator):
     ids.add(creator.id)
     participants = list(User.objects.filter(entreprise=entreprise, is_active=True, id__in=ids))
     if creator.id not in {participant.id for participant in participants}:
-        raise PermissionDenied(gettext_lazy("Le createur doit appartenir a l'entreprise."))
+        raise PermissionDenied(gettext_lazy("Le créateur doit appartenir à l'entreprise."))
     if len(participants) != len(ids):
         raise PermissionDenied(gettext_lazy("Un participant ne fait pas partie de votre entreprise."))
     return participants
@@ -229,13 +229,13 @@ def create_conversation(*, entreprise, creator, subject, participant_ids, conten
 def send_message(*, conversation, sender, content, attachments=None):
     _ensure_company_user(sender, conversation.entreprise)
     if not conversation.participants.filter(id=sender.id).exists():
-        raise PermissionDenied(gettext_lazy("Vous ne participez pas a cette conversation."))
+        raise PermissionDenied(gettext_lazy('Vous ne participez pas à cette conversation.'))
     content = (content or "").strip()
     attachments = _validate_attachments(attachments)
     if not content and not attachments:
         raise ValidationError(gettext_lazy("Le message est obligatoire."))
     if len(content) > MAX_MESSAGE_LENGTH:
-        raise ValidationError((gettext_lazy('Le message ne doit pas depasser %(value_1)s caracteres.') % {'value_1': MAX_MESSAGE_LENGTH}))
+        raise ValidationError((gettext_lazy('Le message ne doit pas dépasser %(value_1)s caractères.') % {'value_1': MAX_MESSAGE_LENGTH}))
 
     message = Message.objects.create(
         entreprise=conversation.entreprise,
@@ -262,7 +262,7 @@ def send_message(*, conversation, sender, content, attachments=None):
 def mark_conversation_read(*, conversation, user):
     _ensure_company_user(user, conversation.entreprise)
     if not conversation.participants.filter(id=user.id).exists():
-        raise PermissionDenied(gettext_lazy("Vous ne participez pas a cette conversation."))
+        raise PermissionDenied(gettext_lazy('Vous ne participez pas à cette conversation.'))
     unread_messages = conversation.messages.exclude(expediteur=user).exclude(lecteurs=user)
     for message in unread_messages:
         message.lecteurs.add(user)
@@ -272,7 +272,7 @@ def mark_conversation_read(*, conversation, user):
 def create_suggestion_for_super_admin(*, entreprise, user, subject, message):
     _ensure_company_user(user, entreprise)
     if getattr(user, "normalized_role", getattr(user, "role", "")) != User.Role.PROPRIETAIRE:
-        raise PermissionDenied(gettext_lazy("Seul le proprietaire peut envoyer une suggestion."))
+        raise PermissionDenied(gettext_lazy('Seul le propriétaire peut envoyer une suggestion.'))
     subject = _clean_required_text(subject, field_label=gettext_lazy("Le sujet"), max_length=180)
     message = _clean_required_text(message, field_label=gettext_lazy("La suggestion"), min_length=10)
     suggestion = SuggestionSuperAdmin.objects.create(
@@ -330,7 +330,7 @@ def create_public_question(*, nom, email, telephone, entreprise="", subject, mes
     _notify_super_admins_new_request(
         subject=gettext_lazy("Nouvelle question avant inscription - JOATHAM Manager"),
         body=(
-            (gettext_lazy('Nom : %(value_1)s\nEmail : %(value_2)s\nTelephone : %(value_3)s\nEntreprise : %(value_4)s\nSujet : %(value_5)s\n\n%(value_6)s') % {'value_1': question.nom, 'value_2': question.email, 'value_3': question.telephone or '-', 'value_4': question.entreprise or '-', 'value_5': question.sujet, 'value_6': question.message})
+            (gettext_lazy('Nom : %(value_1)s\nEmail : %(value_2)s\nTéléphone : %(value_3)s\nEntreprise : %(value_4)s\nSujet : %(value_5)s\n\n%(value_6)s') % {'value_1': question.nom, 'value_2': question.email, 'value_3': question.telephone or '-', 'value_4': question.entreprise or '-', 'value_5': question.sujet, 'value_6': question.message})
         ),
     )
     return question
@@ -394,7 +394,7 @@ def create_invitation_from_public_question(*, question, created_by):
     _ensure_super_admin_user(created_by)
     question = PublicQuestion.objects.select_for_update().get(id=question.id)
     if question.lead_status == PublicQuestion.LeadStatus.CONVERTI:
-        raise ValidationError(gettext_lazy("Ce lead est deja converti."))
+        raise ValidationError(gettext_lazy('Ce lead est déjà converti.'))
     if question.invitation_id:
         if question.lead_status != PublicQuestion.LeadStatus.EN_COURS:
             question.lead_status = PublicQuestion.LeadStatus.EN_COURS
@@ -432,7 +432,7 @@ def create_invitation_from_public_question(*, question, created_by):
 @transaction.atomic
 def answer_public_question(*, question, responder, response):
     _ensure_super_admin_user(responder)
-    response = _clean_required_text(response, field_label=gettext_lazy("La reponse"), min_length=10)
+    response = _clean_required_text(response, field_label=gettext_lazy('La réponse'), min_length=10)
     now = timezone.now()
     old_status = question.statut
 

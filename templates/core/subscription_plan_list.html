@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Packs SaaS | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Packs SaaS" %}{% endblock %}
-{% block content_subtitle %}{% trans "Comparez les offres JOATHAM Manager et choisissez le niveau adapte a votre organisation." %}{% endblock %}
+{% block content_subtitle %}{% trans "Comparez les offres JOATHAM Manager et choisissez le niveau adapté à votre organisation." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Mon abonnement" %}</a>
@@ -187,7 +187,7 @@
     <div class="plans-hero-copy">
         <strong>{% trans "JOATHAM Manager SaaS" %}</strong>
         <p>
-            {% trans "Les packs actifs sont repris depuis la configuration existante de la plateforme. Les montants restent exprimes dans la devise officielle du plan, avec une estimation locale quand elle est disponible." %}
+            {% trans "Les packs actifs sont repris depuis la configuration existante de la plateforme. Les montants restent exprimés dans la devise officielle du plan, avec une estimation locale quand elle est disponible." %}
         </p>
     </div>
     <aside class="plans-status-panel" aria-label="{% trans 'Situation abonnement' %}">
@@ -280,7 +280,7 @@
             </div>
             {% else %}
             <div class="module-list">
-                <span class="module-pill">{% trans "Modules autorises" %}</span>
+                <span class="module-pill">{% trans "Modules autorisés" %}</span>
             </div>
             {% endif %}
         </div>
@@ -337,9 +337,9 @@
         <div class="compare-item">
             <strong>{{ plan_card.display_name }}</strong>
             <span>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} {% trans "/ mois" %}</span>
-            <span>{% trans "Utilisateurs :" %} {{ plan.max_utilisateurs|default_if_none:_('Illimite') }}</span>
-            <span>{% trans "Factures / mois :" %} {{ plan.max_factures_mois|default_if_none:_('Illimite') }}</span>
-            <span>{% trans "Clients :" %} {{ plan.max_clients|default_if_none:_('Illimite') }}</span>
+            <span>{% trans "Utilisateurs :" %} {{ plan.max_utilisateurs|default_if_none:_('Illimité') }}</span>
+            <span>{% trans "Factures / mois :" %} {{ plan.max_factures_mois|default_if_none:_('Illimité') }}</span>
+            <span>{% trans "Clients :" %} {{ plan.max_clients|default_if_none:_('Illimité') }}</span>
         </div>
         {% endwith %}
         {% endfor %}
@@ -347,7 +347,7 @@
 </section>
 {% else %}
 <div class="empty-state">
-    {% trans "Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour preparer votre abonnement." %}
+    {% trans "Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour préparer votre abonnement." %}
 </div>
 {% endif %}
 {% endblock %}

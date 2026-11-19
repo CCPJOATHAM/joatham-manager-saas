@@ -114,18 +114,18 @@ def _active_company_invitation_queryset(entreprise):
 def _ensure_invitation_email_available(entreprise, email, *, exclude_invitation_id=None):
     normalized_email = (email or "").strip().lower()
     if User.objects.filter(entreprise=entreprise, email__iexact=normalized_email).exists():
-        raise ValueError(gettext_lazy("Un utilisateur de cette entreprise utilise deja cet email."))
+        raise ValueError(gettext_lazy('Un utilisateur de cette entreprise utilise déjà cet email.'))
     if User.objects.filter(entreprise=entreprise, username__iexact=normalized_email).exists():
-        raise ValueError(gettext_lazy("Un utilisateur de cette entreprise utilise deja cet email."))
+        raise ValueError(gettext_lazy('Un utilisateur de cette entreprise utilise déjà cet email.'))
     if User.objects.filter(email__iexact=normalized_email).exclude(entreprise=entreprise).exists():
-        raise ValueError(gettext_lazy("Un compte existe deja avec cet email."))
+        raise ValueError(gettext_lazy('Un compte existe déjà avec cet email.'))
     if User.objects.filter(username__iexact=normalized_email).exclude(entreprise=entreprise).exists():
-        raise ValueError(gettext_lazy("Un compte existe deja avec cet email."))
+        raise ValueError(gettext_lazy('Un compte existe déjà avec cet email.'))
     invitation_qs = _active_company_invitation_queryset(entreprise).filter(email__iexact=normalized_email)
     if exclude_invitation_id:
         invitation_qs = invitation_qs.exclude(id=exclude_invitation_id)
     if invitation_qs.exists():
-        raise ValueError(gettext_lazy("Une invitation active existe deja pour cet email."))
+        raise ValueError(gettext_lazy('Une invitation active existe déjà pour cet email.'))
     return normalized_email
 
 
@@ -139,7 +139,7 @@ def assert_company_invitation_quota_available(entreprise):
     pending_count = _active_company_invitation_queryset(entreprise).count()
     if user_count + pending_count >= limit:
         raise PlanQuotaExceeded(
-            (gettext_lazy("%(value_1)s Votre plan permet jusqu'a %(value_2)s utilisateur(s), invitations en attente incluses.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': limit})
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'à %(value_2)s utilisateur(s), invitations en attente incluses.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': limit})
         )
 
 
@@ -178,7 +178,7 @@ def send_invitation_email(invitation):
             invitation.id,
             invitation.email,
         )
-        raise InvitationEmailError(gettext_lazy("L'invitation n'a pas pu etre envoyee par email.")) from exc
+        raise InvitationEmailError(gettext_lazy("L'invitation n'a pas pu être envoyée par email.")) from exc
 
 
 @transaction.atomic
@@ -231,7 +231,7 @@ def resend_company_invitation(*, invitation, entreprise, owner_user):
 @transaction.atomic
 def cancel_company_invitation(*, invitation, entreprise, owner_user):
     if not is_company_invitation_for(invitation, entreprise) or invitation.is_used:
-        raise ValueError(gettext_lazy("Cette invitation ne peut pas etre annulee."))
+        raise ValueError(gettext_lazy('Cette invitation ne peut pas être annulée.'))
 
     invitation.is_used = True
     invitation.source = build_cancelled_company_invitation_source(invitation)
@@ -313,7 +313,7 @@ def send_invitation_reminder(invitation):
         return InvitationReminderResult(status=REMINDER_SKIPPED, reason=skip_reason)
 
     context = _get_invitation_email_context(invitation)
-    subject = gettext_lazy("Votre acces JOATHAM Manager est pret")
+    subject = gettext_lazy('Votre accès JOATHAM Manager est prêt')
 
     try:
         text_body = render_to_string("joatham_users/emails/invitation_reminder.txt", context).strip()

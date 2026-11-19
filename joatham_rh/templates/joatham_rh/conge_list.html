@@ -1,12 +1,12 @@
 {% extends "joatham_rh/base.html" %}
 {% load i18n %}
 
-{% block rh_subtitle %}{% trans "Suivez les demandes de conge sans gestion avancee des soldes." %}{% endblock %}
+{% block rh_subtitle %}{% trans "Suivez les demandes de congé sans gestion avancée des soldes." %}{% endblock %}
 
 {% block content %}
 <div class="rh-header">
     <div>
-        <h2>{% trans "Conges" %}</h2>
+        <h2>{% trans "Congés" %}</h2>
         <p>{% trans "Demandes simples : en attente, approuvées, refusées ou annulées." %}</p>
     </div>
     <div class="rh-actions">
@@ -51,7 +51,7 @@
         <input type="date" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
     </div>
     <button type="submit" class="rh-action-button primary">{% trans "Filtrer" %}</button>
-    <a href="{% url 'rh_conge_list' %}" class="rh-action-link">{% trans "Reinitialiser" %}</a>
+    <a href="{% url 'rh_conge_list' %}" class="rh-action-link">{% trans "Réinitialiser" %}</a>
 </form>
 
 {% if conges %}
@@ -62,7 +62,7 @@
                 <tr>
                     <th>{% trans "Employé" %}</th>
                     <th>{% trans "Type" %}</th>
-                    <th>{% trans "Debut" %}</th>
+                    <th>{% trans "Début" %}</th>
                     <th>{% trans "Fin" %}</th>
                     <th>{% trans "Statut" %}</th>
                     <th>{% trans "Actions" %}</th>
@@ -105,8 +105,8 @@
 {% else %}
 <div class="rh-table-shell">
     <div class="rh-empty">
-        <h3>{% trans "Aucune demande de conge" %}</h3>
-        <p>{% trans "Enregistrez une premiere demande lorsque votre equipe en a besoin." %}</p>
+        <h3>{% trans "Aucune demande de congé" %}</h3>
+        <p>{% trans "Enregistrez une première demande lorsque votre équipe en a besoin." %}</p>
         {% if can_manage_rh_ui %}
         <a href="{% url 'rh_conge_create' %}" class="btn-link primary">{% trans "Nouvelle demande" %}</a>
         {% endif %}

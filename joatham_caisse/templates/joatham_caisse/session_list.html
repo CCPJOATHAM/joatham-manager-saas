@@ -88,7 +88,7 @@
             </select>
           </div>
           <div class="field">
-            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="field">
@@ -111,7 +111,7 @@
         </div>
         <div class="actions">
           <button type="submit" class="btn">{% trans "Filtrer" %}</button>
-          <a href="{% url 'caisse_session_list' %}" class="ghost">{% trans "Reinitialiser" %}</a>
+          <a href="{% url 'caisse_session_list' %}" class="ghost">{% trans "Réinitialiser" %}</a>
           <a href="{% url 'caisse_list' %}" class="ghost">{% trans "Retour dashboard" %}</a>
           {% if can_view_cash_reports %}
           <a href="{% url 'caisse_reports' %}" class="ghost">{% trans "Voir les rapports" %}</a>

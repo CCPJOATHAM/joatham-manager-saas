@@ -15,12 +15,12 @@ class PasswordComplexityValidator:
         if not re.search(r"\d", password or ""):
             errors.append(_("Le mot de passe doit contenir au moins un chiffre."))
         if not re.search(r"[^A-Za-z0-9]", password or ""):
-            errors.append(_("Le mot de passe doit contenir au moins un caractere special."))
+            errors.append(_('Le mot de passe doit contenir au moins un caractère spécial.'))
 
         if errors:
             raise ValidationError(errors)
 
     def get_help_text(self):
         return _(
-            "Votre mot de passe doit inclure au moins une majuscule, une minuscule, un chiffre et un caractere special."
+            'Votre mot de passe doit inclure au moins une majuscule, une minuscule, un chiffre et un caractère spécial.'
         )

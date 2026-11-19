@@ -24,7 +24,7 @@
     <h1>{% trans "Rapport stock" %}</h1>
     <div class="meta">
         <div><strong>{% trans "Entreprise :" %}</strong> {{ entreprise.nom }}</div>
-        <div><strong>{% trans "Date generation :" %}</strong> {{ date_generation }}</div>
+        <div><strong>{% trans "Date génération :" %}</strong> {{ date_generation }}</div>
         <div><strong>{% trans "Période :" %}</strong> {% if selected_date_debut or selected_date_fin %}{{ selected_date_debut|default:"-" }} - {{ selected_date_fin|default:"-" }}{% else %}{% trans "Toutes les dates" %}{% endif %}</div>
         {% if selected_product_name %}<div><strong>{% trans "Produit filtre :" %}</strong> {{ selected_product_name }}</div>{% endif %}
     </div>
@@ -38,7 +38,7 @@
         </tr>
         <tr>
             <td>{% trans "Mouvements" %}: {{ report.total_mouvements }}</td>
-            <td>{% trans "Entrees" %}: {{ report.total_entrees }}</td>
+            <td>{% trans "Entrées" %}: {{ report.total_entrees }}</td>
             <td>{% trans "Sorties" %}: {{ report.total_sorties }}</td>
             <td>{% trans "Inventaires validés" %}: {{ report.inventaires_valides }}</td>
         </tr>
@@ -51,7 +51,7 @@
     </table>
 
     <div class="section">
-        <h2>{% trans "Synthese par produit" %}</h2>
+        <h2>{% trans "Synthèse par produit" %}</h2>
         <table>
             <thead>
                 <tr>
@@ -59,7 +59,7 @@
                     <th>{% trans "Stock actuel" %}</th>
                     <th>{% trans "Seuil" %}</th>
                     <th>{% trans "Statut" %}</th>
-                    <th>{% trans "Entrees" %}</th>
+                    <th>{% trans "Entrées" %}</th>
                     <th>{% trans "Sorties" %}</th>
                     <th>{% trans "Solde" %}</th>
                     <th>{% trans "Dernier mouvement" %}</th>
@@ -83,9 +83,9 @@
     </div>
 
     <div class="section">
-        <h2>{% trans "Synthese par type de mouvement" %}</h2>
+        <h2>{% trans "Synthèse par type de mouvement" %}</h2>
         <table>
-            <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Quantite totale" %}</th></tr></thead>
+            <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Quantité totale" %}</th></tr></thead>
             <tbody>
                 {% for row in movement_type_summary %}
                 <tr><td>{{ row.movement_label }}</td><td>{{ row.movement_count }}</td><td>{{ row.total_quantity }}</td></tr>
@@ -95,13 +95,13 @@
     </div>
 
     <div class="section">
-        <h2>{% trans "Synthese inventaires" %}</h2>
+        <h2>{% trans "Synthèse inventaires" %}</h2>
         <table>
             <tbody>
                 <tr><td>{% trans "Brouillons" %}</td><td>{{ inventory_summary.draft_count }}</td><td>{% trans "En cours" %}</td><td>{{ inventory_summary.in_progress_count }}</td></tr>
-                <tr><td>{% trans "Clotures" %}</td><td>{{ inventory_summary.closed_count }}</td><td>{% trans "Valides" %}</td><td>{{ inventory_summary.validated_count }}</td></tr>
+                <tr><td>{% trans "Clôturés" %}</td><td>{{ inventory_summary.closed_count }}</td><td>{% trans "Validés" %}</td><td>{{ inventory_summary.validated_count }}</td></tr>
                 <tr><td>{% trans "Annulés" %}</td><td>{{ inventory_summary.cancelled_count }}</td><td>{% trans "Inventaires avec écarts" %}</td><td>{{ inventory_summary.inventories_with_differences }}</td></tr>
-                <tr><td>{% trans "Ecarts positifs" %}</td><td>{{ inventory_summary.positive_differences }}</td><td>{% trans "Ecarts negatifs" %}</td><td>{{ inventory_summary.negative_differences }}</td></tr>
+                <tr><td>{% trans "Écarts positifs" %}</td><td>{{ inventory_summary.positive_differences }}</td><td>{% trans "Écarts négatifs" %}</td><td>{{ inventory_summary.negative_differences }}</td></tr>
             </tbody>
         </table>
     </div>
@@ -109,7 +109,7 @@
     <div class="section">
         <h2>{% trans "Derniers mouvements" %}</h2>
         <table>
-            <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantite" %}</th><th>{% trans "Source" %}</th></tr></thead>
+            <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Produit" %}</th><th>{% trans "Type" %}</th><th>{% trans "Quantité" %}</th><th>{% trans "Source" %}</th></tr></thead>
             <tbody>
                 {% for movement in recent_movements %}
                 <tr>
@@ -123,6 +123,6 @@
             </tbody>
         </table>
     </div>
-    <div class="footer">{% trans "Rapport genere par le module stock." %}</div>
+    <div class="footer">{% trans "Rapport généré par le module stock." %}</div>
 </body>
 </html>

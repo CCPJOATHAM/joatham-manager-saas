@@ -92,7 +92,7 @@ def _fetch_exchangerate_api_rate(source_currency, target_currency, api_key):
     try:
         payload = response.json()
     except ValueError as exc:
-        raise ExchangeRateUnavailable(gettext_lazy("Reponse taux de change invalide.")) from exc
+        raise ExchangeRateUnavailable(gettext_lazy('Réponse taux de change invalide.')) from exc
 
     if payload.get("result") != "success":
         logger.warning("Exchange rate provider returned error url=%s payload=%s", url, payload)

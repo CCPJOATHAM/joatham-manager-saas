@@ -7,21 +7,21 @@
 {% block content_subtitle %}{% trans "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Retour a mon abonnement" %}</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Retour à mon abonnement" %}</a>
 {% endblock %}
 
 {% block content %}
 <section class="content-card">
     {% if paiement %}
-        <p><strong>{% trans "Reference :" %}</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
+        <p><strong>{% trans "Référence :" %}</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
         <p><strong>{% trans "Plan :" %}</strong> {{ paiement.plan.nom }}</p>
         <p><strong>{% trans "Statut :" %}</strong> {{ paiement.get_statut_display }}</p>
         {% if paiement.statut == "valide" %}
             <p>{% trans "Votre paiement est confirmé. L'abonnement a été activé automatiquement." %}</p>
         {% elif paiement.statut == "echoue" %}
-            <p>{% trans "Le paiement n'a pas ete confirme." %} {{ paiement.failure_reason }}</p>
+            <p>{% trans "Le paiement n'a pas été confirmé." %} {{ paiement.failure_reason }}</p>
         {% else %}
-            <p>{% trans "Votre paiement est en cours de verification. Vous pouvez revenir plus tard sur cette page." %}</p>
+            <p>{% trans "Votre paiement est en cours de vérification. Vous pouvez revenir plus tard sur cette page." %}</p>
         {% endif %}
     {% else %}
         <p>{% trans "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise." %}</p>

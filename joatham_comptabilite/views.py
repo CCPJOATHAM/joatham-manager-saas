@@ -34,7 +34,7 @@ def _get_available_entreprises(user):
 def _get_selected_entreprise(request):
     entreprises = _get_available_entreprises(request.user)
     if not entreprises.exists():
-        raise PermissionDenied(gettext_lazy("Aucune entreprise n'est associee a cet utilisateur."))
+        raise PermissionDenied(gettext_lazy("Aucune entreprise n'est associée à cet utilisateur."))
 
     requested_id = request.GET.get("entreprise")
     if requested_id:

@@ -165,7 +165,7 @@
             <div class="company-line">{% trans "RCCM :" %} {{ legal_information.rccm }}</div>
         {% endif %}
         {% if print_settings.pos_show_tax_info and legal_information.impot %}
-            <div class="company-line">{% trans "NIF / No impot :" %} {{ legal_information.impot }}</div>
+            <div class="company-line">{% trans "NIF / No impôt :" %} {{ legal_information.impot }}</div>
         {% endif %}
         {% if print_settings.pos_show_tax_info and legal_information.id_nat %}
             <div class="company-line">{% trans "ID NAT :" %} {{ legal_information.id_nat }}</div>
@@ -177,7 +177,7 @@
 
     <div class="meta-line"><strong>{% trans "Facture :" %}</strong> {{ facture.numero }}</div>
     <div class="meta-line"><strong>{% trans "Date :" %}</strong> {{ invoice_datetime }}</div>
-    <div class="meta-line"><strong>{% trans "Client :" %}</strong> {{ client_name|default:_('Client non renseigne') }}</div>
+    <div class="meta-line"><strong>{% trans "Client :" %}</strong> {{ client_name|default:_('Client non renseigné') }}</div>
 
     <div class="separator">&nbsp;</div>
 
@@ -211,7 +211,7 @@
         </tr>
         {% if summary.has_reduction %}
         <tr>
-            <td class="summary-label">{% trans "Remise / reduction" %}</td>
+            <td class="summary-label">{% trans "Remise / réduction" %}</td>
             <td class="summary-value">- {{ summary.total_reduction }}</td>
         </tr>
         {% endif %}
@@ -222,15 +222,15 @@
         </tr>
         {% endif %}
         <tr class="grand-total">
-            <td>{% trans "Total a payer" %}</td>
+            <td>{% trans "Total à payer" %}</td>
             <td class="summary-value">{{ summary.total_net }}</td>
         </tr>
         <tr>
-            <td class="summary-label">{% trans "Montant paye" %}</td>
+            <td class="summary-label">{% trans "Montant payé" %}</td>
             <td class="summary-value">{{ summary.total_paye }}</td>
         </tr>
         <tr>
-            <td class="summary-label">{% trans "Reste a payer" %}</td>
+            <td class="summary-label">{% trans "Reste à payer" %}</td>
             <td class="summary-value">{{ summary.reste_a_payer }}</td>
         </tr>
         <tr>
@@ -259,7 +259,7 @@
     <div class="ticket-footer">
         <div class="footer-line">{{ pos_ticket.footer_message }}</div>
         {% if print_settings.pos_show_generated_by %}
-        <div class="footer-line">{% trans "Genere par JOATHAM Manager" %}</div>
+        <div class="footer-line">{% trans "Généré par JOATHAM Manager" %}</div>
         {% endif %}
     </div>
 </div>

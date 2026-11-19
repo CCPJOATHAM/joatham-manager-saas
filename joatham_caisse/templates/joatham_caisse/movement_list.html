@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Mouvements caisse" %}{% endblock %}
 {% block content_title %}{% trans "Mouvements caisse" %}{% endblock %}
-{% block content_subtitle %}{% trans "Filtrez les mouvements de caisse par caisse, session, type, periode, montant et recherche texte." %}{% endblock %}
+{% block content_subtitle %}{% trans "Filtrez les mouvements de caisse par caisse, session, type, période, montant et recherche texte." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -62,7 +62,7 @@
   <div class="panel">
     <div class="panel-header">
       <h3>{% trans "Filtres mouvements" %}</h3>
-      <p>{% trans "Isolez les mouvements utiles selon la caisse, la session, le type, la periode et le montant." %}</p>
+      <p>{% trans "Isolez les mouvements utiles selon la caisse, la session, le type, la période et le montant." %}</p>
     </div>
     <div class="panel-body">
       <form method="get">
@@ -96,7 +96,7 @@
           </div>
           <div class="field">
             <label for="id_q">{% trans "Recherche" %}</label>
-            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="{% trans 'Libelle ou reference' %}">
+            <input type="text" name="q" id="id_q" value="{{ filters.q }}" placeholder="{% trans 'Libellé ou référence' %}">
           </div>
           <div class="field">
             <label for="id_moyen_paiement">{% trans "Moyen paiement" %}</label>
@@ -108,7 +108,7 @@
             </select>
           </div>
           <div class="field">
-            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="field">
@@ -126,7 +126,7 @@
         </div>
         <div class="actions">
           <button type="submit" class="btn">{% trans "Filtrer" %}</button>
-          <a href="{% url 'caisse_movement_list' %}" class="ghost">{% trans "Reinitialiser" %}</a>
+          <a href="{% url 'caisse_movement_list' %}" class="ghost">{% trans "Réinitialiser" %}</a>
           {% if can_export_cash %}
           <a href="{% url 'caisse_movement_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="ghost">{% trans "Export Excel" %}</a>
           {% endif %}
@@ -141,8 +141,8 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>{% trans "Mouvements filtres" %}</h3>
-      <p>{% trans "Historique detaille des operations de caisse correspondant aux criteres actifs." %}</p>
+      <h3>{% trans "Mouvements filtrés" %}</h3>
+      <p>{% trans "Historique détaillé des opérations de caisse correspondant aux critères actifs." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -154,8 +154,8 @@
             <th>{% trans "Type" %}</th>
             <th>{% trans "Moyen" %}</th>
             <th>{% trans "Montant" %}</th>
-            <th>{% trans "Libelle" %}</th>
-            <th>{% trans "Reference" %}</th>
+            <th>{% trans "Libellé" %}</th>
+            <th>{% trans "Référence" %}</th>
             <th>{% trans "Statut" %}</th>
             <th>{% trans "Action" %}</th>
           </tr>
@@ -183,7 +183,7 @@
             <td><a href="{% url 'caisse_session_detail' movement.session.id %}" class="ghost">{% trans "Voir session" %}</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="10" class="empty-state">{% trans "Aucun mouvement ne correspond aux filtres selectionnes." %}</td></tr>
+          <tr><td colspan="10" class="empty-state">{% trans "Aucun mouvement ne correspond aux filtres sélectionnés." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

@@ -10,9 +10,9 @@ from ..models import SessionCaisse, ValidationCaisse
 def validate_session(*, entreprise, session, utilisateur, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut != SessionCaisse.Statut.FERMEE:
-        raise ValueError(gettext_lazy("Seule une session fermee peut etre validee."))
+        raise ValueError(gettext_lazy('Seule une session fermée peut être validée.'))
     if session.validations.exists():
-        raise ValueError(gettext_lazy("Cette session a deja fait l'objet d'une validation."))
+        raise ValueError(gettext_lazy("Cette session a déjà fait l'objet d'une validation."))
 
     validation = ValidationCaisse.objects.create(
         entreprise=entreprise,
@@ -40,9 +40,9 @@ def validate_session(*, entreprise, session, utilisateur, commentaire=""):
 def reject_session(*, entreprise, session, utilisateur, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut != SessionCaisse.Statut.FERMEE:
-        raise ValueError(gettext_lazy("Seule une session fermee peut etre rejetee."))
+        raise ValueError(gettext_lazy('Seule une session fermée peut être rejetée.'))
     if session.validations.exists():
-        raise ValueError(gettext_lazy("Cette session a deja fait l'objet d'une validation."))
+        raise ValueError(gettext_lazy("Cette session a déjà fait l'objet d'une validation."))
 
     validation = ValidationCaisse.objects.create(
         entreprise=entreprise,

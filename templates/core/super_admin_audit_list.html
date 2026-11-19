@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Audit / logs | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Audit / logs" %}{% endblock %}
-{% block content_subtitle %}{% trans "Consultation globale des activites importantes de la plateforme." %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultation globale des activités importantes de la plateforme." %}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
@@ -167,7 +167,7 @@
         </select>
     </div>
     <div>
-        <label for="id_date_from">{% trans "Date debut" %}</label>
+        <label for="id_date_from">{% trans "Date début" %}</label>
         <input id="id_date_from" name="date_from" type="date" value="{{ selected_date_from }}">
     </div>
     <div>
@@ -176,7 +176,7 @@
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
-        <a href="{% url 'super_admin_audit_list' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+        <a href="{% url 'super_admin_audit_list' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
     </div>
 </form>
 
@@ -197,7 +197,7 @@
             {% for log in logs %}
             <tr>
                 <td>{{ log.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
-                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Systeme" %}</span>{% endif %}</td>
+                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Système" %}</span>{% endif %}</td>
                 <td>{% if log.entreprise %}{{ log.entreprise.nom }}{% else %}<span class="muted">-</span>{% endif %}</td>
                 <td><span class="badge">{{ log.display_module }}</span></td>
                 <td>{{ log.display_action }}</td>
@@ -212,7 +212,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">{% trans "Aucun evenement d'audit ne correspond aux filtres." %}</td>
+                <td colspan="7">{% trans "Aucun événement d'audit ne correspond aux filtres." %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -221,7 +221,7 @@
 
 <div class="pagination">
     {% if page_obj.has_previous %}
-    <a class="btn-small" href="?page={{ page_obj.previous_page_number }}">{% trans "Precedent" %}</a>
+    <a class="btn-small" href="?page={{ page_obj.previous_page_number }}">{% trans "Précédent" %}</a>
     {% endif %}
     <span class="muted">{% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}

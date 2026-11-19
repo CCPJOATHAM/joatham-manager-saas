@@ -252,7 +252,7 @@
         {% if session.statut == 'ouverte' and can_close_session %}
         <a href="{% url 'caisse_close_session' session.id %}" class="btn primary">{% trans "Fermer la session" %}</a>
         {% endif %}
-        <a href="{% url 'caisse_detail' session.caisse.id %}" class="btn">{% trans "Retour a la caisse" %}</a>
+        <a href="{% url 'caisse_detail' session.caisse.id %}" class="btn">{% trans "Retour à la caisse" %}</a>
       </div>
     </div>
   </div>
@@ -263,7 +263,7 @@
       <span class="stat-value">{{ session.solde_initial }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">{% trans "Entrees" %}</span>
+      <span class="stat-label">{% trans "Entrées" %}</span>
       <span class="stat-value amount-positive">{{ movement_totals.total_entrees }}</span>
     </div>
     <div class="stat-card">
@@ -275,11 +275,11 @@
       <span class="stat-value">{{ session.solde_theorique }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">{% trans "Solde reel" %}</span>
+      <span class="stat-label">{% trans "Solde réel" %}</span>
       <span class="stat-value">{{ solde_reel_display }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">{% trans "Ecart" %}</span>
+      <span class="stat-label">{% trans "Écart" %}</span>
       <span class="stat-value {% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</span>
     </div>
   </div>
@@ -332,9 +332,9 @@
           <tr>
             <th>{% trans "Date" %}</th>
             <th>{% trans "Type" %}</th>
-            <th>{% trans "Libelle" %}</th>
+            <th>{% trans "Libellé" %}</th>
             <th>{% trans "Montant" %}</th>
-            <th>{% trans "Reference" %}</th>
+            <th>{% trans "Référence" %}</th>
             <th>{% trans "Utilisateur" %}</th>
           </tr>
         </thead>

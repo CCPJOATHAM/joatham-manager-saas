@@ -4,7 +4,7 @@
 
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}{% trans "Configurez une caisse claire, active et facile a exploiter pour vos operations quotidiennes." %}{% endblock %}
+{% block content_subtitle %}{% trans "Configurez une caisse claire, active et facile à exploiter pour vos opérations quotidiennes." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -115,7 +115,7 @@
 
 <div class="intro-card">
   <h2>{% trans "Configuration de la caisse" %}</h2>
-  <p>{% trans "Renseignez un nom exploitable, un code unique, une devise et une courte description pour faciliter le pilotage et les controles ulterieurs." %}</p>
+  <p>{% trans "Renseignez un nom exploitable, un code unique, une devise et une courte description pour faciliter le pilotage et les contrôles ultérieurs." %}</p>
 </div>
 
 <div class="cash-form-card">
@@ -135,7 +135,7 @@
       <div class="field">
         <label for="{{ form.devise.id_for_label }}">{% trans "Devise" %}</label>
         {{ form.devise }}{{ form.devise.errors }}
-        <div class="helper">{% trans "Utilisez la devise reellement pratiquee sur cette caisse." %}</div>
+        <div class="helper">{% trans "Utilisez la devise réellement pratiquée sur cette caisse." %}</div>
       </div>
       <div class="field checkbox">
         {{ form.est_active }}
@@ -145,12 +145,12 @@
       <div class="field full">
         <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
         {{ form.description }}{{ form.description.errors }}
-        <div class="helper">{% trans "Vous pouvez preciser l'emplacement, l'equipe ou le contexte d'utilisation." %}</div>
+        <div class="helper">{% trans "Vous pouvez préciser l'emplacement, l'équipe ou le contexte d'utilisation." %}</div>
       </div>
     </div>
     <div class="actions">
       <button type="submit" class="submit-btn">{{ submit_label }}</button>
-      <a href="{% url 'caisse_list' %}" class="secondary-btn">{% trans "Retour a la caisse" %}</a>
+      <a href="{% url 'caisse_list' %}" class="secondary-btn">{% trans "Retour à la caisse" %}</a>
     </div>
   </form>
 </div>

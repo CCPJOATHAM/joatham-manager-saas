@@ -4,7 +4,7 @@
 
 {% block page_title %}{% trans "Rapports paiements" %}{% endblock %}
 {% block content_title %}{% trans "Rapports paiements" %}{% endblock %}
-{% block content_subtitle %}{% trans "Synthese des paiements par periode, moyen, statut, facture et caisse." %}{% endblock %}
+{% block content_subtitle %}{% trans "Synthèse des paiements par période, moyen, statut, facture et caisse." %}{% endblock %}
 
 {% block content %}
 <section class="payments-shell">
@@ -35,7 +35,7 @@
             </select>
           </div>
           <div class="payments-field">
-            <label for="id_date_debut">{% trans "Date debut" %}</label>
+            <label for="id_date_debut">{% trans "Date début" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="payments-field">
@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="payments-actions">
-          <button type="submit" class="payments-btn">{% trans "Mettre a jour" %}</button>
-          <a href="{% url 'payment_reports' %}" class="payments-ghost">{% trans "Reinitialiser" %}</a>
+          <button type="submit" class="payments-btn">{% trans "Mettre à jour" %}</button>
+          <a href="{% url 'payment_reports' %}" class="payments-ghost">{% trans "Réinitialiser" %}</a>
           {% if can_export_payments %}
           <a href="{% url 'payment_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">{% trans "Export Excel" %}</a>
           <a href="{% url 'payment_reports_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">{% trans "Export PDF" %}</a>
@@ -56,10 +56,10 @@
   </div>
 
   <div class="payments-grid">
-    <div class="payments-kpi"><span>{% trans "Total encaisse confirme" %}</span><strong class="positive">{{ summary.total_encaisse }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total encaissé confirmé" %}</span><strong class="positive">{{ summary.total_encaisse }}</strong></div>
     <div class="payments-kpi"><span>{% trans "Total en attente" %}</span><strong class="warning">{{ summary.total_en_attente }}</strong></div>
-    <div class="payments-kpi"><span>{% trans "Total rejete" %}</span><strong class="danger">{{ summary.total_rejete }}</strong></div>
-    <div class="payments-kpi"><span>{% trans "Total annule" %}</span><strong class="danger">{{ summary.total_annule }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total rejeté" %}</span><strong class="danger">{{ summary.total_rejete }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total annulé" %}</span><strong class="danger">{{ summary.total_annule }}</strong></div>
   </div>
 
   <div class="payments-detail-grid">
@@ -75,7 +75,7 @@
             {% for row in method_breakdown %}
             <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
             {% empty %}
-            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnee par moyen." %}</td></tr>
+            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnée par moyen." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -85,7 +85,7 @@
     <div class="payments-panel">
       <div class="payments-panel-header">
         <h3>{% trans "Par statut" %}</h3>
-        <p>{% trans "Vue de validation et de controle operationnel." %}</p>
+        <p>{% trans "Vue de validation et de contrôle opérationnel." %}</p>
       </div>
       <div class="payments-table-wrap">
         <table class="payments-table">
@@ -94,7 +94,7 @@
             {% for row in status_breakdown %}
             <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
             {% empty %}
-            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnee par statut." %}</td></tr>
+            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnée par statut." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -104,12 +104,12 @@
 
   <div class="payments-panel">
     <div class="payments-panel-header">
-      <h3>{% trans "Paiements recents" %}</h3>
-      <p>{% trans "Dernieres transactions dans le perimetre du rapport." %}</p>
+      <h3>{% trans "Paiements récents" %}</h3>
+      <p>{% trans "Dernières transactions dans le périmètre du rapport." %}</p>
     </div>
     <div class="payments-table-wrap">
       <table class="payments-table">
-        <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Moyen" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Reference" %}</th><th>{% trans "Facture" %}</th></tr></thead>
+        <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Moyen" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Référence" %}</th><th>{% trans "Facture" %}</th></tr></thead>
         <tbody>
           {% for payment in recent_payments %}
           <tr>
@@ -121,7 +121,7 @@
             <td>{% if payment.facture %}{{ payment.facture.numero }}{% else %}-{% endif %}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="payments-empty">{% trans "Aucun paiement recent." %}</td></tr>
+          <tr><td colspan="6" class="payments-empty">{% trans "Aucun paiement récent." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

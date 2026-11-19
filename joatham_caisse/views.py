@@ -335,8 +335,8 @@ def movement_export_excel(request):
             gettext_lazy("Moyen paiement"),
             gettext_lazy("Montant"),
             gettext_lazy("Devise"),
-            gettext_lazy("Libelle"),
-            gettext_lazy("Reference"),
+            gettext_lazy('Libellé'),
+            gettext_lazy('Référence'),
             gettext_lazy("Statut"),
             gettext_lazy("Utilisateur"),
         ],
@@ -392,13 +392,13 @@ def caisse_create(request):
         except (PlanQuotaExceeded, ValueError) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("La caisse a ete creee avec succes."))
+            messages.success(request, gettext_lazy('La caisse a été créée avec succès.'))
             return redirect("caisse_detail", caisse_id=caisse.id)
 
     return render(
         request,
         "joatham_caisse/caisse_form.html",
-        {"form": form, "page_title": gettext_lazy("Nouvelle caisse"), "submit_label": gettext_lazy("Creer la caisse")},
+        {"form": form, "page_title": gettext_lazy("Nouvelle caisse"), "submit_label": gettext_lazy('Créer la caisse')},
     )
 
 
@@ -443,7 +443,7 @@ def open_session_view(request, caisse_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("La session de caisse a ete ouverte."))
+            messages.success(request, gettext_lazy('La session de caisse a été ouverte.'))
             return redirect("caisse_session_detail", session_id=session.id)
 
     return render(
@@ -500,7 +500,7 @@ def close_session_view(request, session_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("La session de caisse a ete fermee."))
+            messages.success(request, gettext_lazy('La session de caisse a été fermée.'))
             return redirect("caisse_session_detail", session_id=session.id)
 
     return render(
@@ -545,7 +545,7 @@ def add_movement_view(request, session_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("Le mouvement de caisse a ete enregistre."))
+            messages.success(request, gettext_lazy('Le mouvement de caisse a été enregistré.'))
             return redirect("caisse_session_detail", session_id=session.id)
 
     return render(
@@ -575,7 +575,7 @@ def validate_session_view(request, session_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("La session a ete validee."))
+            messages.success(request, gettext_lazy('La session a été validée.'))
     return redirect("caisse_session_detail", session_id=session.id)
 
 
@@ -599,5 +599,5 @@ def reject_session_view(request, session_id):
         except ValueError as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("La session a ete rejetee."))
+            messages.success(request, gettext_lazy('La session a été rejetée.'))
     return redirect("caisse_session_detail", session_id=session.id)

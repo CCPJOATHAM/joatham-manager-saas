@@ -81,7 +81,7 @@
                 <p class="pdf-meta-line"><strong>{{ proforma.numero }}</strong></p>
                 <p class="pdf-meta-line">{% trans "Date :" %} {{ proforma.date|date:"SHORT_DATETIME_FORMAT" }}</p>
                 {% if proforma.date_validite %}
-                    <p class="pdf-meta-line">{% trans "Validite :" %} {{ proforma.date_validite|date:"SHORT_DATE_FORMAT" }}</p>
+                    <p class="pdf-meta-line">{% trans "Validité :" %} {{ proforma.date_validite|date:"SHORT_DATE_FORMAT" }}</p>
                 {% endif %}
                 <p class="pdf-meta-line">{% trans "Statut :" %} {{ proforma.get_statut_display }}</p>
             </td>
@@ -91,7 +91,7 @@
 
 <div class="separator"></div>
 <h2 class="document-title">{% trans "FACTURE PROFORMA" %}</h2>
-<p class="header-note">{% trans "Ce document presente une offre commerciale provisoire avant emission d'une facture definitive." %}</p>
+<p class="header-note">{% trans "Ce document présente une offre commerciale provisoire avant émission d'une facture définitive." %}</p>
 
 <div class="client-box">
     <strong>{% trans "Client :" %}</strong> {{ client_name }}
@@ -101,8 +101,8 @@
     <thead>
         <tr>
             <th style="width: 8%;">#</th>
-            <th>{% trans "Designation" %}</th>
-            <th style="width: 14%;" class="text-center">{% trans "Quantite" %}</th>
+            <th>{% trans "Désignation" %}</th>
+            <th style="width: 14%;" class="text-center">{% trans "Quantité" %}</th>
             <th style="width: 18%;" class="text-right">{% trans "Prix unitaire" %}</th>
             <th style="width: 18%;" class="text-right">{% trans "Total ligne" %}</th>
         </tr>
@@ -130,7 +130,7 @@
         <td class="text-right">{{ summary.total_tva }}</td>
     </tr>
     <tr>
-        <td>{% trans "Reductions" %}</td>
+        <td>{% trans "Réductions" %}</td>
         <td class="text-right">{{ summary.total_reduction }}</td>
     </tr>
     <tr class="total-row">
@@ -153,14 +153,14 @@
 {% endif %}
 
 <div class="legal-mention">
-    {% trans "Ce document est une facture proforma et ne constitue pas une facture definitive." %}<br>
-    {% trans "Aucun paiement n'est enregistre sur une facture proforma." %}
+    {% trans "Ce document est une facture proforma et ne constitue pas une facture définitive." %}<br>
+    {% trans "Aucun paiement n'est enregistré sur une facture proforma." %}
 </div>
 
 <div class="pdf-footer">
     <table class="pdf-footer-table">
         <tr>
-            <td>{% trans "Genere par JOATHAM Manager" %}</td>
+            <td>{% trans "Généré par JOATHAM Manager" %}</td>
             <td class="text-right">{{ footer_datetime }}</td>
         </tr>
     </table>

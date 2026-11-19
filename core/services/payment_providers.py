@@ -118,7 +118,7 @@ class TestPaymentProvider(BasePaymentProvider):
 
         reference = (payload.get("external_reference") or payload.get("reference") or "").strip()
         if not reference:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference paiement manquante."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence paiement manquante.'))
 
         raw_status = (payload.get("status") or "").strip().lower()
         status = _normalize_provider_status(raw_status)
@@ -180,7 +180,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
 
     def _ensure_configured(self):
         if not self.is_configured():
-            raise PaymentProviderError(gettext_lazy("Paiement automatique CinetPay non configure."))
+            raise PaymentProviderError(gettext_lazy('Paiement automatique CinetPay non configuré.'))
 
     def create_payment(self, payment_request):
         self._ensure_configured()
@@ -231,7 +231,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
                 "CinetPay payment creation returned no checkout URL: %s",
                 _redact_sensitive_payload(response_payload),
             )
-            raise PaymentProviderError(gettext_lazy("CinetPay n'a pas retourne d'URL de paiement."))
+            raise PaymentProviderError(gettext_lazy("CinetPay n'a pas retourné d'URL de paiement."))
         return ProviderPaymentSession(
             provider_checkout_id=_pick(data, details, response_payload, "payment_token", "paymentToken").strip(),
             checkout_url=checkout_url,
@@ -250,7 +250,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         self._ensure_configured()
         merchant_transaction_id = _pick(payload, "merchant_transaction_id", "merchantTransactionId").strip()
         if not merchant_transaction_id:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference CinetPay manquante."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence CinetPay manquante.'))
         notify_token = _pick(payload, "notify_token", "notifyToken").strip()
         if not notify_token:
             raise PaymentProviderVerificationError(gettext_lazy("Token notification CinetPay manquant."))
@@ -269,13 +269,13 @@ class CinetPayPaymentProvider(BasePaymentProvider):
             raise PaymentProviderVerificationError(gettext_lazy("Paiement abonnement introuvable."))
         expected_notify_token = (paiement.provider_notify_token or "").strip()
         if not expected_notify_token:
-            raise PaymentProviderVerificationError(gettext_lazy("Token notification CinetPay non configure."))
+            raise PaymentProviderVerificationError(gettext_lazy('Token notification CinetPay non configuré.'))
         if not hmac.compare_digest(notify_token, expected_notify_token):
             raise PaymentProviderVerificationError(gettext_lazy("Token notification CinetPay invalide."))
 
         verified = self.fetch_transaction_status(merchant_transaction_id)
         if verified.external_reference and verified.external_reference != merchant_transaction_id:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference CinetPay incoherente."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence CinetPay incohérente.'))
         verified_payload = dict(verified.raw_payload)
         verified_payload["notification"] = _redact_sensitive_payload(payload)
         return VerifiedWebhookPayment(
@@ -293,7 +293,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
     def _verify_checkout_v2_webhook(self, request, payload):
         transaction_id = (payload.get("cpm_trans_id") or "").strip()
         if not transaction_id:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference CinetPay manquante."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence CinetPay manquante.'))
         posted_site_id = (payload.get("cpm_site_id") or "").strip()
         if posted_site_id and posted_site_id != self.site_id:
             raise PaymentProviderVerificationError(gettext_lazy("Site CinetPay invalide."))
@@ -317,7 +317,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         self._ensure_configured()
         merchant_transaction_id = (provider_transaction_id or "").strip()
         if not merchant_transaction_id:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference CinetPay manquante."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence CinetPay manquante.'))
         token = self._authenticate()
         response_payload = _get_json(
             _cinetpay_status_url(self.check_url, merchant_transaction_id),
@@ -346,7 +346,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
     def _fetch_checkout_v2_transaction_status(self, provider_transaction_id):
         transaction_id = (provider_transaction_id or "").strip()
         if not transaction_id:
-            raise PaymentProviderVerificationError(gettext_lazy("Reference CinetPay manquante."))
+            raise PaymentProviderVerificationError(gettext_lazy('Référence CinetPay manquante.'))
         response_payload = _post_json(
             self.legacy_check_url,
             {
@@ -393,11 +393,11 @@ class CinetPayPaymentProvider(BasePaymentProvider):
 
     def _ensure_legacy_webhook_configured(self):
         if not self.apikey or not self.site_id or not self.secret_key:
-            raise PaymentProviderVerificationError(gettext_lazy("Configuration CinetPay Checkout v2 incomplete."))
+            raise PaymentProviderVerificationError(gettext_lazy('Configuration CinetPay Checkout v2 incomplète.'))
 
     def _verify_hmac_token(self, request, payload):
         if not self.secret_key:
-            raise PaymentProviderVerificationError(gettext_lazy("Secret HMAC CinetPay non configure."))
+            raise PaymentProviderVerificationError(gettext_lazy('Secret HMAC CinetPay non configuré.'))
         received_token = (request.headers.get("x-token") or "").strip()
         if not received_token:
             raise PaymentProviderVerificationError(gettext_lazy("Token HMAC CinetPay manquant."))
@@ -654,9 +654,9 @@ def _post_json(url, payload, *, timeout, headers=None):
     try:
         response_payload = response.json()
     except ValueError as exc:
-        raise PaymentProviderError(gettext_lazy("Reponse CinetPay invalide.")) from exc
+        raise PaymentProviderError(gettext_lazy('Réponse CinetPay invalide.')) from exc
     if response.status_code >= 400:
-        raise PaymentProviderError(gettext_lazy("CinetPay a refuse la requete."))
+        raise PaymentProviderError(gettext_lazy('CinetPay a refusé la requête.'))
     return response_payload
 
 
@@ -672,9 +672,9 @@ def _get_json(url, *, timeout, headers=None):
     try:
         response_payload = response.json()
     except ValueError as exc:
-        raise PaymentProviderError(gettext_lazy("Reponse CinetPay invalide.")) from exc
+        raise PaymentProviderError(gettext_lazy('Réponse CinetPay invalide.')) from exc
     if response.status_code >= 400:
-        raise PaymentProviderError(gettext_lazy("CinetPay a refuse la requete."))
+        raise PaymentProviderError(gettext_lazy('CinetPay a refusé la requête.'))
     return response_payload
 
 

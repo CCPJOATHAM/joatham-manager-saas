@@ -170,7 +170,7 @@ def payment_create(request):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("Le paiement a ete enregistre."))
+            messages.success(request, gettext_lazy('Le paiement a été enregistré.'))
             return redirect("payment_detail", payment_id=payment.id)
 
     return render(
@@ -214,7 +214,7 @@ def payment_confirm(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("Le paiement a ete confirme."))
+            messages.success(request, gettext_lazy('Le paiement a été confirmé.'))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -235,7 +235,7 @@ def payment_reject(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("Le paiement a ete rejete."))
+            messages.success(request, gettext_lazy('Le paiement a été rejeté.'))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -256,7 +256,7 @@ def payment_cancel(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, gettext_lazy("Le paiement a ete annule."))
+            messages.success(request, gettext_lazy('Le paiement a été annulé.'))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -316,12 +316,12 @@ def payment_export_excel(request):
             gettext_lazy("Statut"),
             gettext_lazy("Montant"),
             gettext_lazy("Devise"),
-            gettext_lazy("Reference"),
-            gettext_lazy("Telephone"),
-            gettext_lazy("Operateur"),
+            gettext_lazy('Référence'),
+            gettext_lazy('Téléphone'),
+            gettext_lazy('Opérateur'),
             gettext_lazy("Facture"),
             gettext_lazy("Caisse"),
-            gettext_lazy("Cree par"),
+            gettext_lazy('Créé par'),
             gettext_lazy("Valide par"),
         ],
         rows=rows,

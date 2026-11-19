@@ -551,7 +551,7 @@
             </select>
         </div>
         <div>
-            <label for="id_date_from">{% trans "Date debut" %}</label>
+            <label for="id_date_from">{% trans "Date début" %}</label>
             <input id="id_date_from" name="date_from" type="date" value="{{ selected_filters.date_from|date:'Y-m-d' }}">
         </div>
         <div>
@@ -560,7 +560,7 @@
         </div>
         <div class="filter-actions">
             <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
-            <a href="{% url 'super_admin_messages' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
+            <a href="{% url 'super_admin_messages' %}" class="btn-small">{% trans "Réinitialiser" %}</a>
         </div>
     </form>
 </div>
@@ -602,7 +602,7 @@
                         {% if item.lead_status == "converti" %}
                         <span class="btn-small disabled">{% trans "Converti" %}</span>
                         {% elif item.has_invitation %}
-                        <span class="btn-small disabled">{% trans "Invitation envoyee" %}</span>
+                        <span class="btn-small disabled">{% trans "Invitation envoyée" %}</span>
                         {% else %}
                         <form method="post" action="{% url 'super_admin_send_public_question_invitation' item.id %}" class="invitation-action-form">
                             {% csrf_token %}
@@ -632,17 +632,17 @@
                     <div class="status-stack">
                         <span class="status-badge status-{{ item.statut }}">{{ item.statut_label }}</span>
                         {% if item.date_traitement %}
-                        <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"SHORT_DATETIME_FORMAT" }}</div>
+                        <div class="muted">{% trans "Traité le" %} {{ item.date_traitement|date:"SHORT_DATETIME_FORMAT" }}</div>
                         {% endif %}
                         {% if item.type == "question" %}
                             {% if item.has_reply %}
-                            <span class="reply-badge sent">{% trans "Repondu" %}</span>
+                            <span class="reply-badge sent">{% trans "Répondu" %}</span>
                             <div class="muted">
                                 {{ item.date_reponse|date:"SHORT_DATETIME_FORMAT" }}
                                 {% if item.repondu_par %}- {{ item.repondu_par }}{% endif %}
                             </div>
                             {% else %}
-                            <span class="reply-badge">{% trans "Non repondu" %}</span>
+                            <span class="reply-badge">{% trans "Non répondu" %}</span>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -659,10 +659,10 @@
                                 <option value="{{ value }}" {% if item.statut == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit" class="btn-small">{% trans "Mettre a jour" %}</button>
+                            <button type="submit" class="btn-small">{% trans "Mettre à jour" %}</button>
                         </form>
                         {% if item.type == "question" %}
-                        <a href="{% url 'super_admin_public_question_reply' item.id %}" class="btn-small primary reply-action">{% trans "Repondre" %}</a>
+                        <a href="{% url 'super_admin_public_question_reply' item.id %}" class="btn-small primary reply-action">{% trans "Répondre" %}</a>
                         {% endif %}
                     </div>
                 </td>
@@ -678,7 +678,7 @@
 
 <div class="pagination">
     {% if page_obj.has_previous %}
-    <a class="btn-small" href="?{% if querystring_without_page %}{{ querystring_without_page }}&{% endif %}page={{ page_obj.previous_page_number }}">{% trans "Precedent" %}</a>
+    <a class="btn-small" href="?{% if querystring_without_page %}{{ querystring_without_page }}&{% endif %}page={{ page_obj.previous_page_number }}">{% trans "Précédent" %}</a>
     {% endif %}
     <span class="muted">{% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
