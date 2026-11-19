@@ -1,4 +1,6 @@
 {% extends "joatham_billing/base.html" %}
+{% load i18n %}
+
 
 {% block content %}
 <style>
@@ -365,74 +367,74 @@
     <div>
         <h2>{{ facture.numero }}</h2>
         <div class="hero-meta">
-            Client : <strong>{{ facture.client_display }}</strong><br>
-            Emise le {{ facture.date|date:"d/m/Y H:i:s" }}
+            {% trans "Client :" %} <strong>{{ facture.client_display }}</strong><br>
+            {% trans "Emise le" %} {{ facture.date|date:"SHORT_DATETIME_FORMAT" }}
         </div>
         <div style="margin-top:12px;">
             {% if est_partiellement_payee %}
-                <span class="status-chip status-partial">Partiellement payee</span>
+                <span class="status-chip status-partial">{% trans "Partiellement payee" %}</span>
             {% elif facture.statut == "brouillon" %}
-                <span class="status-chip status-brouillon">Brouillon</span>
+                <span class="status-chip status-brouillon">{% trans "Brouillon" %}</span>
             {% elif facture.statut == "emise" %}
-                <span class="status-chip status-emise">Emise</span>
+                <span class="status-chip status-emise">{% trans "Emise" %}</span>
             {% elif facture.statut == "payee" %}
-                <span class="status-chip status-payee">Payee</span>
+                <span class="status-chip status-payee">{% trans "Payee" %}</span>
             {% elif facture.statut == "annulee" %}
-                <span class="status-chip status-annulee">Annulee</span>
+                <span class="status-chip status-annulee">{% trans "Annulee" %}</span>
             {% endif %}
         </div>
     </div>
     <div class="hero-actions">
-        <a href="{% url 'facture_list' %}" class="btn btn-print">Retour</a>
+        <a href="{% url 'facture_list' %}" class="btn btn-print">{% trans "Retour" %}</a>
         {% if can_manage_factures_ui and facture.statut == "brouillon" %}
-        <a href="{% url 'edit_facture' facture.id %}" class="btn btn-add">Modifier</a>
+        <a href="{% url 'edit_facture' facture.id %}" class="btn btn-add">{% trans "Modifier" %}</a>
         {% endif %}
-        <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">Imprimer A4</a>
-        <a href="{% url 'facture_pdf' facture.id %}?format=pos" target="_blank" class="btn btn-add">Imprimer POS</a>
-        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">Telecharger A4</a>
+        <a href="{% url 'facture_pdf' facture.id %}" target="_blank" class="btn btn-print">{% trans "Imprimer A4" %}</a>
+        <a href="{% url 'facture_pdf' facture.id %}?format=pos" target="_blank" class="btn btn-add">{% trans "Imprimer POS" %}</a>
+        <a href="{% url 'facture_pdf' facture.id %}?mode=download" class="btn btn-download">{% trans "Telecharger A4" %}</a>
     </div>
 </div>
 
 <div class="summary-grid">
     <div class="summary-card">
-        <span class="label">Total HT</span>
+        <span class="label">{% trans "Total HT" %}</span>
         <strong>{{ total_ht }}</strong>
-        <span class="helper">{{ line_count }} ligne{{ line_count|pluralize:"s" }} de facturation</span>
+        <span class="helper">{% blocktrans count count=line_count %}{{ count }} ligne de facturation{% plural %}{{ count }} lignes de facturation{% endblocktrans %}</span>
     </div>
     <div class="summary-card">
-        <span class="label">TVA</span>
+        <span class="label">{% trans "TVA" %}</span>
         <strong>{{ total_tva }}</strong>
-        <span class="helper">Taux applique : {{ facture.tva }}%</span>
+        <span class="helper">{% trans "Taux applique :" %} {{ facture.tva }}%</span>
     </div>
     <div class="summary-card">
-        <span class="label">Total net</span>
+        <span class="label">{% trans "Total net" %}</span>
         <strong>{{ total_net }}</strong>
-        <span class="helper">Montant global de la facture</span>
+        <span class="helper">{% trans "Montant global de la facture" %}</span>
     </div>
     <div class="summary-card">
-        <span class="label">Montant paye</span>
+        <span class="label">{% trans "Montant paye" %}</span>
         <strong>{{ total_paye }}</strong>
-        <span class="helper">{{ payment_count }} paiement{{ payment_count|pluralize:"s" }} enregistre{{ payment_count|pluralize:"s" }}</span>
+        <span class="helper">{% blocktrans count count=payment_count %}{{ count }} paiement enregistre{% plural %}{{ count }} paiements enregistres{% endblocktrans %}</span>
     </div>
     <div class="summary-card">
-        <span class="label">Reste a payer</span>
+        <span class="label">{% trans "Reste a payer" %}</span>
         <strong>{{ reste_a_payer }}</strong>
-        <span class="helper">Solde encore attendu</span>
+        <span class="helper">{% trans "Solde encore attendu" %}</span>
     </div>
 </div>
 
 <div class="page-grid">
     <div>
         <div class="panel">
-            <h3>Prestations facturees</h3>
-            <p class="panel-subtitle">Lecture detaillee des lignes de facture avec quantites, prix unitaires et montants calcules.</p>
+            <h3>{% trans "Prestations facturees" %}</h3>
+            <p class="panel-subtitle">{% trans "Lecture detaillee des lignes de facture avec quantites, prix unitaires et montants calcules." %}</p>
             <table class="facture-table">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">Designation</th>
-                        <th style="width: 12%;">Qte</th>
-                        <th style="width: 24%;">Prix unitaire</th>
-                        <th style="width: 24%;">Total</th>
+                        <th style="width: 40%;">{% trans "Designation" %}</th>
+                        <th style="width: 12%;">{% trans "Qte" %}</th>
+                        <th style="width: 24%;">{% trans "Prix unitaire" %}</th>
+                        <th style="width: 24%;">{% trans "Total" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -459,16 +461,16 @@
         </div>
 
         <div class="panel">
-            <h3>Paiements enregistres</h3>
-            <p class="panel-subtitle">Historique des reglements deja saisis sur cette facture.</p>
+            <h3>{% trans "Paiements enregistres" %}</h3>
+            <p class="panel-subtitle">{% trans "Historique des reglements deja saisis sur cette facture." %}</p>
             <table class="payment-table">
                 <thead>
                     <tr>
-                        <th style="width: 22%;">Date</th>
-                        <th style="width: 18%;">Mode</th>
-                        <th style="width: 20%;">Reference</th>
-                        <th style="width: 20%;">Montant</th>
-                        <th style="width: 20%;">Statut</th>
+                        <th style="width: 22%;">{% trans "Date" %}</th>
+                        <th style="width: 18%;">{% trans "Mode" %}</th>
+                        <th style="width: 20%;">{% trans "Reference" %}</th>
+                        <th style="width: 20%;">{% trans "Montant" %}</th>
+                        <th style="width: 20%;">{% trans "Statut" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -484,7 +486,7 @@
                     </tr>
                     {% empty %}
                     <tr class="empty-row">
-                        <td colspan="5">Aucun paiement enregistre.</td>
+                        <td colspan="5">{% trans "Aucun paiement enregistre." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -495,12 +497,12 @@
     <div>
         {% if can_manage_factures_ui %}
         <div class="panel">
-            <h3>Mettre a jour le statut</h3>
-            <p class="panel-subtitle">Faites evoluer la facture dans son workflow tout en gardant une note de transition si besoin.</p>
+            <h3>{% trans "Mettre a jour le statut" %}</h3>
+            <p class="panel-subtitle">{% trans "Faites evoluer la facture dans son workflow tout en gardant une note de transition si besoin." %}</p>
             <form method="post" action="{% url 'change_facture_status' facture.id %}" class="inline-form" onsubmit="return confirmStatusChange(this);">
                 {% csrf_token %}
                 <div class="field">
-                    <label for="facture-statut">Nouveau statut</label>
+                    <label for="facture-statut">{% trans "Nouveau statut" %}</label>
                     <select id="facture-statut" name="statut">
                         {% for value, label in statut_choices %}
                             <option value="{{ value }}" {% if facture.statut == value %}selected{% endif %}>{{ label }}</option>
@@ -508,26 +510,26 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="facture-note">Note de transition</label>
-                    <textarea id="facture-note" name="note" rows="3" placeholder="Ajouter un contexte interne si necessaire"></textarea>
+                    <label for="facture-note">{% trans "Note de transition" %}</label>
+                    <textarea id="facture-note" name="note" rows="3" placeholder="{% trans 'Ajouter un contexte interne si necessaire' %}"></textarea>
                 </div>
-                <button type="submit" class="btn btn-print">Mettre a jour</button>
+                <button type="submit" class="btn btn-print">{% trans "Mettre a jour" %}</button>
             </form>
         </div>
         {% endif %}
 
         {% if can_record_payments_ui %}
         <div class="panel">
-            <h3>Enregistrer un paiement</h3>
-            <p class="panel-subtitle">Saisissez un reglement sans quitter la fiche facture.</p>
-            <form method="post" action="{% url 'add_paiement_facture' facture.id %}" class="inline-form" onsubmit="return confirm('Confirmer l\\'enregistrement de ce paiement ?');">
+            <h3>{% trans "Enregistrer un paiement" %}</h3>
+            <p class="panel-subtitle">{% trans "Saisissez un reglement sans quitter la fiche facture." %}</p>
+            <form method="post" action="{% url 'add_paiement_facture' facture.id %}" class="inline-form" onsubmit="return confirm(window.joathamMessages.confirmPayment);">
                 {% csrf_token %}
                 <div class="field">
-                    <label for="paiement-montant">Montant</label>
-                    <input id="paiement-montant" type="number" step="0.01" min="0" max="{{ facture.reste_a_payer }}" name="montant" placeholder="Montant du paiement">
+                    <label for="paiement-montant">{% trans "Montant" %}</label>
+                    <input id="paiement-montant" type="number" step="0.01" min="0" max="{{ facture.reste_a_payer }}" name="montant" placeholder="{% trans 'Montant du paiement' %}">
                 </div>
                 <div class="field">
-                    <label for="paiement-mode">Mode de paiement</label>
+                    <label for="paiement-mode">{% trans "Mode de paiement" %}</label>
                     <select id="paiement-mode" name="mode">
                         {% for value, label in mode_choices %}
                             <option value="{{ value }}">{{ label }}</option>
@@ -536,9 +538,9 @@
                 </div>
                 {% if can_link_cash_payments_ui %}
                 <div class="field">
-                    <label for="paiement-caisse">Caisse (optionnel)</label>
+                    <label for="paiement-caisse">{% trans "Caisse (optionnel)" %}</label>
                     <select id="paiement-caisse" name="caisse">
-                        <option value="">Sans caisse</option>
+                        <option value="">{% trans "Sans caisse" %}</option>
                         {% for caisse in caisses_actives %}
                             <option value="{{ caisse.id }}">{{ caisse.nom }} ({{ caisse.code }})</option>
                         {% endfor %}
@@ -546,29 +548,29 @@
                 </div>
                 {% endif %}
                 <div class="field">
-                    <label for="paiement-reference">Reference</label>
-                    <input id="paiement-reference" type="text" name="reference" placeholder="Reference, numero ou libelle">
+                    <label for="paiement-reference">{% trans "Reference" %}</label>
+                    <input id="paiement-reference" type="text" name="reference" placeholder="{% trans 'Reference, numero ou libelle' %}">
                 </div>
                 <div class="field">
-                    <label for="paiement-note">Note</label>
-                    <textarea id="paiement-note" name="note" rows="3" placeholder="Commentaire interne sur ce reglement"></textarea>
+                    <label for="paiement-note">{% trans "Note" %}</label>
+                    <textarea id="paiement-note" name="note" rows="3" placeholder="{% trans 'Commentaire interne sur ce reglement' %}"></textarea>
                 </div>
-                <button type="submit" class="btn btn-paid">Enregistrer le paiement</button>
+                <button type="submit" class="btn btn-paid">{% trans "Enregistrer le paiement" %}</button>
             </form>
         </div>
         {% endif %}
 
         <div class="panel">
-            <h3>Historique</h3>
-            <p class="panel-subtitle">Trace recente des actions effectuees sur cette facture.</p>
+            <h3>{% trans "Historique" %}</h3>
+            <p class="panel-subtitle">{% trans "Trace recente des actions effectuees sur cette facture." %}</p>
             {% for event in historique %}
                 <div class="history-item">
                     <strong>{{ event.get_action_display }}</strong>
-                    <div class="history-meta">{{ event.created_at|date:"d/m/Y H:i:s" }}</div>
-                    <div class="history-desc">{{ event.description|default:"Aucun commentaire" }}</div>
+                    <div class="history-meta">{{ event.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+                    <div class="history-desc">{{ event.display_description|default:_('Aucun commentaire') }}</div>
                 </div>
             {% empty %}
-                <p class="panel-subtitle" style="margin:0;">Aucun historique disponible.</p>
+                <p class="panel-subtitle" style="margin:0;">{% trans "Aucun historique disponible." %}</p>
             {% endfor %}
         </div>
     </div>
@@ -578,12 +580,12 @@
 function confirmStatusChange(form) {
     const statut = form.querySelector('select[name="statut"]').value;
     if (statut === 'annulee') {
-        return confirm("Confirmer l'annulation de cette facture ?");
+        return confirm(window.joathamMessages.confirmCancelInvoice);
     }
     if (statut === 'payee') {
-        return confirm("Confirmer le passage de cette facture au statut payee ?");
+        return confirm(window.joathamMessages.confirmPaidInvoice);
     }
-    return confirm("Confirmer le changement de statut ?");
+    return confirm(window.joathamMessages.confirmStatus);
 }
 </script>
 {% endblock %}

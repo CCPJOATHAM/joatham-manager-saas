@@ -1,9 +1,9 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ report_title|default:"Comptabilité" }} | JOATHAM Manager{% endblock %}
-{% block content_title %}{{ report_title|default:"Comptabilité" }}{% endblock %}
-{% block content_subtitle %}{{ period_label|default:"Rapports financiers de l'entreprise." }}{% endblock %}
+{% block page_title %}{{ report_title|default:_('Comptabilité') }} {% trans "| JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{{ report_title|default:_('Comptabilité') }}{% endblock %}
+{% block content_subtitle %}{{ period_label|default:_("Rapports financiers de l'entreprise.") }}{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'compta_dashboard' %}" class="btn-link {% if report_slug == 'dashboard' %}primary{% endif %}">{% trans "Dashboard" %}</a>
@@ -208,7 +208,7 @@
 
 <div class="compta-meta">
     <span>{{ selected_entreprise.nom }}</span>
-    <span>{% trans "Genere le" %} {{ generated_at|date:"d/m/Y H:i" }}</span>
+    <span>{% trans "Genere le" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</span>
 </div>
 
 <section class="panel">

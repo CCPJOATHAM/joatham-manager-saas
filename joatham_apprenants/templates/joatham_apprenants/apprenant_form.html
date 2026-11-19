@@ -4,47 +4,47 @@
 {% block apprenants_title %}{% trans "Creer un apprenant" %}{% endblock %}
 {% block apprenants_subtitle %}{% trans "Ajouter un nouvel apprenant a l'entreprise." %}{% endblock %}
 {% block apprenants_content %}
-    <h1>Creer un apprenant</h1>
-    <p>Entreprise: {{ entreprise.nom }}</p>
+    <h1>{% trans "Creer un apprenant" %}</h1>
+    <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
 
     <form method="post">
         {% csrf_token %}
         <div class="grid">
             <div class="field">
-                <label for="nom">Nom</label>
+                <label for="nom">{% trans "Nom" %}</label>
                 <input id="nom" name="nom" required>
             </div>
             <div class="field">
-                <label for="prenom">Prenom</label>
+                <label for="prenom">{% trans "Prenom" %}</label>
                 <input id="prenom" name="prenom">
             </div>
             <div class="field">
-                <label for="telephone">Téléphone</label>
+                <label for="telephone">{% trans "Téléphone" %}</label>
                 <input id="telephone" name="telephone">
             </div>
             <div class="field">
-                <label for="email">Email</label>
+                <label for="email">{% trans "Email" %}</label>
                 <input id="email" name="email" type="email">
             </div>
             <div class="field field-full">
-                <label for="adresse">Adresse</label>
+                <label for="adresse">{% trans "Adresse" %}</label>
                 <input id="adresse" name="adresse">
             </div>
             <div class="field field-full">
-                <label for="observations">Observations</label>
+                <label for="observations">{% trans "Observations" %}</label>
                 <textarea id="observations" name="observations" rows="4"></textarea>
             </div>
             <div class="field field-full">
                 <label>
                     <input type="checkbox" name="actif" checked>
-                    Apprenant actif
+                    {% trans "Apprenant actif" %}
                 </label>
             </div>
         </div>
 
         <div class="actions">
-            <button type="submit">Enregistrer</button>
-            <a href="{% url 'apprenant_list' %}">Retour</a>
+            <button type="submit">{% trans "Enregistrer" %}</button>
+            <a href="{% url 'apprenant_list' %}">{% trans "Retour" %}</a>
         </div>
     </form>
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django.db import models
@@ -137,7 +138,7 @@ class PaiementInscription(models.Model):
     class ModePaiement(models.TextChoices):
         ESPECES = "especes", _("Especes")
         VIREMENT = "virement", _("Virement")
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        MOBILE_MONEY = "mobile_money", gettext_lazy("Mobile Money")
         CHEQUE = "cheque", _("Cheque")
         AUTRE = "autre", _("Autre")
 

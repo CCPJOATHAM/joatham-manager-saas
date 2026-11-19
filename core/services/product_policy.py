@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from functools import wraps
 
 from django.contrib import messages
@@ -318,22 +319,22 @@ def can_access_module(user, module_name, *, as_of=None):
 def get_module_access_denied_message(module_name, reason):
     module_label = get_module_label(module_name)
     if reason == "module_not_in_plan":
-        return f"Le module {module_label} n'est pas inclus dans le plan actuel de votre entreprise."
+        return gettext_lazy("Le module %(module)s n'est pas inclus dans le plan actuel de votre entreprise.") % {"module": module_label}
     if reason == "exports_not_in_plan":
-        return "Les exports avances ne sont pas inclus dans le plan actuel de votre entreprise."
+        return gettext_lazy('Les exports avances ne sont pas inclus dans le plan actuel de votre entreprise.')
     if reason == "accounting_not_in_plan":
-        return "La comptabilite avancee n'est pas incluse dans le plan actuel de votre entreprise."
+        return gettext_lazy("La comptabilite avancee n'est pas incluse dans le plan actuel de votre entreprise.")
     if reason == "premium_required":
-        return "Cette fonctionnalite est reservee aux plans superieurs."
+        return gettext_lazy('Cette fonctionnalite est reservee aux plans superieurs.')
     if reason == "feature_not_declared":
-        return "Cette fonctionnalite n'est pas disponible dans l'offre actuelle."
+        return gettext_lazy("Cette fonctionnalite n'est pas disponible dans l'offre actuelle.")
     if reason == "active_subscription_required":
-        return f"Le module {module_label} necessite un plan actif compatible."
+        return gettext_lazy('Le module %(module)s necessite un plan actif compatible.') % {"module": module_label}
     if reason == "missing_subscription":
-        return f"Le module {module_label} necessite un plan actif."
+        return gettext_lazy('Le module %(module)s necessite un plan actif.') % {"module": module_label}
     if reason in {"inactive_subscription", "expired_subscription"}:
-        return f"L'acces au module {module_label} est indisponible car le plan actuel de votre entreprise n'est plus actif."
-    return f"Vous ne pouvez pas acceder au module {module_label} avec votre plan actuel."
+        return gettext_lazy("L'acces au module %(module)s est indisponible car le plan actuel de votre entreprise n'est plus actif.") % {"module": module_label}
+    return gettext_lazy('Vous ne pouvez pas acceder au module %(module)s avec votre plan actuel.') % {"module": module_label}
 
 
 def module_access_required(module_name):

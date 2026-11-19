@@ -1,9 +1,12 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Confirmation email | JOATHAM Manager</title>
+    <title>{% trans "Confirmation email | JOATHAM Manager" %}</title>
     <style>
         body {
             margin: 0;
@@ -83,24 +86,24 @@
 </head>
 <body>
     <main class="card">
-        <h1>Confirmez votre adresse email</h1>
-        <p>Un email de confirmation a été envoyé. Veuillez cliquer sur le lien reçu avant d’utiliser JOATHAM Manager.</p>
+        <h1>{% trans "Confirmez votre adresse email" %}</h1>
+        <p>{% trans "Un email de confirmation a été envoyé. Veuillez cliquer sur le lien reçu avant d’utiliser JOATHAM Manager." %}</p>
         {% if pending_email %}
         <div class="email-box">{{ pending_email }}</div>
         {% endif %}
-        <p>Le lien reste valable pendant environ {{ expiration_minutes }} minute{{ expiration_minutes|pluralize:"s" }}. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.</p>
+        <p>{% blocktrans count count=expiration_minutes %}Le lien reste valable pendant environ {{ count }} minute. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% plural %}Le lien reste valable pendant environ {{ count }} minutes. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% endblocktrans %}</p>
         {% if debug_verification_url %}
         <div class="email-box">
-            <small>Lien local de vérification</small>
+            <small>{% trans "Lien local de vérification" %}</small>
             <a href="{{ debug_verification_url }}">{{ debug_verification_url }}</a>
         </div>
         {% endif %}
         <div class="actions">
             <form method="post" action="{% url 'email_verification_resend' %}">
                 {% csrf_token %}
-                <button type="submit" class="btn primary">Renvoyer l’email</button>
+                <button type="submit" class="btn primary">{% trans "Renvoyer l’email" %}</button>
             </form>
-            <a href="{% url 'login' %}" class="btn">Retour à la connexion</a>
+            <a href="{% url 'login' %}" class="btn">{% trans "Retour à la connexion" %}</a>
         </div>
     </main>
 </body>

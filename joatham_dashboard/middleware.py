@@ -22,6 +22,7 @@ ALLOWED_UNVERIFIED_URL_NAMES = {
     "login_session_conflict",
     "logout",
     "set_language",
+    "javascript_catalog",
     "signup",
     "password_reset",
     "password_reset_done",

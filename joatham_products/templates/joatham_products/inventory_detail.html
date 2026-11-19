@@ -43,10 +43,10 @@
     <div class="helper-card">
         <div class="inventory-meta muted">
             <p><strong>{% trans "Createur :" %}</strong> {% if session.created_by %}{{ session.created_by.username }}{% else %}-{% endif %}</p>
-            <p><strong>{% trans "Date de creation :" %}</strong> {{ session.created_at|date:"d/m/Y H:i" }}</p>
-            <p>{% if session.started_at %}<strong>{% trans "Date de debut :" %}</strong> {{ session.started_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de debut :" %}</strong> -{% endif %}</p>
-            <p>{% if session.closed_at %}<strong>{% trans "Date de cloture :" %}</strong> {{ session.closed_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de cloture :" %}</strong> -{% endif %}</p>
-            <p>{% if session.validated_at %}<strong>{% trans "Date de validation :" %}</strong> {{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<strong>{% trans "Date de validation :" %}</strong> -{% endif %}</p>
+            <p><strong>{% trans "Date de creation :" %}</strong> {{ session.created_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+            <p>{% if session.started_at %}<strong>{% trans "Date de debut :" %}</strong> {{ session.started_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de debut :" %}</strong> -{% endif %}</p>
+            <p>{% if session.closed_at %}<strong>{% trans "Date de cloture :" %}</strong> {{ session.closed_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de cloture :" %}</strong> -{% endif %}</p>
+            <p>{% if session.validated_at %}<strong>{% trans "Date de validation :" %}</strong> {{ session.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<strong>{% trans "Date de validation :" %}</strong> -{% endif %}</p>
             <p>{% if session.validated_by %}<strong>{% trans "Valide par :" %}</strong> {{ session.validated_by.username }}{% else %}<strong>{% trans "Valide par :" %}</strong> -{% endif %}</p>
         </div>
     </div>

@@ -1,6 +1,7 @@
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="utf-8">
     <title>{% trans "Rapport stock" %}</title>
@@ -74,7 +75,7 @@
                     <td>{{ row.total_entrees }}</td>
                     <td>{{ row.total_sorties }}</td>
                     <td>{{ row.solde_mouvements }}</td>
-                    <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+                    <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"SHORT_DATETIME_FORMAT" }}{% else %}-{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -112,11 +113,11 @@
             <tbody>
                 {% for movement in recent_movements %}
                 <tr>
-                    <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ movement.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                     <td>{{ movement.produit.nom }}</td>
                     <td>{{ movement.get_movement_type_display }}</td>
                     <td>{{ movement.quantity }}</td>
-                    <td>{{ movement.source_app|default:"Manuelle" }}</td>
+                    <td>{{ movement.source_app|default:_('Manuelle') }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

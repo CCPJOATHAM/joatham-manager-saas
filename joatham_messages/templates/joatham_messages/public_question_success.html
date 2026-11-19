@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Question envoyee" %} | JOATHAM Manager</title>
+    <title>{% trans "Question envoyee" %} {% trans "| JOATHAM Manager" %}</title>
     <style>
         :root {
             --text: #10233f;
@@ -171,14 +171,14 @@
     <main class="success-shell">
         <header class="success-header">
             <div class="brand">
-                <span class="brand-mark">JM</span>
+                <span class="brand-mark">{% trans "JM" %}</span>
                 <span>JOATHAM Manager</span>
             </div>
             {% include "includes/language_selector.html" with language_selector_id="public-question-success-language-select" %}
         </header>
 
         <section class="success-body">
-            <div class="success-icon" aria-hidden="true">OK</div>
+            <div class="success-icon" aria-hidden="true">{% trans "OK" %}</div>
             <h1>{% trans "Votre question a bien ete envoyee" %}</h1>
             <p>{% trans "Merci pour votre interet. Votre demande est maintenant enregistree et sera analysee par l'equipe JOATHAM Manager." %}</p>
             <div class="next-steps">

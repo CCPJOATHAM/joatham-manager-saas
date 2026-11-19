@@ -7,6 +7,7 @@
     <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard.css' %}">
     {% block extra_styles %}{% endblock %}
+{% include "includes/javascript_i18n.html" %}
 </head>
 <body>
     <div class="app-shell dashboard-layout-premium">
@@ -93,7 +94,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <span>© 2026 JOATHAM Manager</span>
+                <span>{% trans "© 2026 JOATHAM Manager" %}</span>
                 <span>{% trans "Gestion SaaS sécurisée par JOATHAM Manager." %}</span>
             </div>
         </aside>

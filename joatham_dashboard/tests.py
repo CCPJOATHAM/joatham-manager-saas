@@ -727,7 +727,7 @@ class DashboardAccessTests(TestCase):
         self.client.force_login(free_owner)
         response = self.client.get(reverse("admin_dashboard"))
 
-        self.assertContains(response, "Comptabilite")
+        self.assertContains(response, "Comptabilité")
         self.assertContains(response, "Premium")
 
         blocked = self.client.get(reverse("compta_dashboard"))
@@ -757,7 +757,7 @@ class DashboardAccessTests(TestCase):
         response = self.client.get(reverse("admin_dashboard"))
         labels = [item["label"] for item in response.context["dashboard_navigation"]]
 
-        self.assertIn("Dashboard", labels)
+        self.assertIn("Tableau de bord", labels)
         self.assertNotIn("Clients", labels)
         self.assertNotIn("Factures", labels)
         self.assertNotIn("Proformas", labels)

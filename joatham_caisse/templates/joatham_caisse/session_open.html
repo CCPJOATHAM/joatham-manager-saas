@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Ouvrir une session{% endblock %}
-{% block content_title %}Ouvrir une session{% endblock %}
-{% block content_subtitle %}Démarrez une nouvelle session de caisse pour suivre les mouvements et le solde théorique de la journée.{% endblock %}
+
+{% block page_title %}{% trans "Ouvrir une session" %}{% endblock %}
+{% block content_title %}{% trans "Ouvrir une session" %}{% endblock %}
+{% block content_subtitle %}{% trans "Démarrez une nouvelle session de caisse pour suivre les mouvements et le solde théorique de la journée." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -99,7 +101,7 @@
 
 <div class="context-card">
   <h2>{{ caisse.nom }}</h2>
-  <p>Code {{ caisse.code }} · Devise {{ caisse.devise }}. L'ouverture initialise la session active et servira de base au calcul du solde théorique.</p>
+  <p>{% trans "Code" %} {{ caisse.code }} {% trans "· Devise" %} {{ caisse.devise }}{% trans ". L'ouverture initialise la session active et servira de base au calcul du solde théorique." %}</p>
 </div>
 
 <div class="cash-form-shell">
@@ -107,21 +109,21 @@
     {% csrf_token %}
     <div class="cash-form-grid">
       <div class="field">
-        <label for="{{ form.solde_initial.id_for_label }}">Solde initial</label>
+        <label for="{{ form.solde_initial.id_for_label }}">{% trans "Solde initial" %}</label>
         {{ form.solde_initial }}
-        <div class="helper">Saisissez le montant reel present en caisse au demarrage de la session.</div>
+        <div class="helper">{% trans "Saisissez le montant reel present en caisse au demarrage de la session." %}</div>
         {{ form.solde_initial.errors }}
       </div>
       <div class="field">
-        <label for="{{ form.commentaire_ouverture.id_for_label }}">Commentaire d'ouverture</label>
+        <label for="{{ form.commentaire_ouverture.id_for_label }}">{% trans "Commentaire d'ouverture" %}</label>
         {{ form.commentaire_ouverture }}
-        <div class="helper">Ajoutez un contexte utile : équipe présente, point de départ, remarque opérationnelle.</div>
+        <div class="helper">{% trans "Ajoutez un contexte utile : équipe présente, point de départ, remarque opérationnelle." %}</div>
         {{ form.commentaire_ouverture.errors }}
       </div>
     </div>
     <div class="actions">
-      <button type="submit" class="btn primary">Ouvrir la session</button>
-      <a href="{% url 'caisse_detail' caisse.id %}" class="btn">Retour a la caisse</a>
+      <button type="submit" class="btn primary">{% trans "Ouvrir la session" %}</button>
+      <a href="{% url 'caisse_detail' caisse.id %}" class="btn">{% trans "Retour a la caisse" %}</a>
     </div>
   </form>
 </div>

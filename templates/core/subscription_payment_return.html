@@ -1,33 +1,35 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Retour paiement abonnement | JOATHAM Manager{% endblock %}
-{% block content_title %}Retour paiement abonnement{% endblock %}
-{% block content_subtitle %}Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook.{% endblock %}
+
+{% block page_title %}{% trans "Retour paiement abonnement | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Retour paiement abonnement" %}{% endblock %}
+{% block content_subtitle %}{% trans "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">Retour a mon abonnement</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Retour a mon abonnement" %}</a>
 {% endblock %}
 
 {% block content %}
 <section class="content-card">
     {% if paiement %}
-        <p><strong>Reference :</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
-        <p><strong>Plan :</strong> {{ paiement.plan.nom }}</p>
-        <p><strong>Statut :</strong> {{ paiement.get_statut_display }}</p>
+        <p><strong>{% trans "Reference :" %}</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
+        <p><strong>{% trans "Plan :" %}</strong> {{ paiement.plan.nom }}</p>
+        <p><strong>{% trans "Statut :" %}</strong> {{ paiement.get_statut_display }}</p>
         {% if paiement.statut == "valide" %}
-            <p>Votre paiement est confirmé. L'abonnement a été activé automatiquement.</p>
+            <p>{% trans "Votre paiement est confirmé. L'abonnement a été activé automatiquement." %}</p>
         {% elif paiement.statut == "echoue" %}
-            <p>Le paiement n'a pas ete confirme. {{ paiement.failure_reason }}</p>
+            <p>{% trans "Le paiement n'a pas ete confirme." %} {{ paiement.failure_reason }}</p>
         {% else %}
-            <p>Votre paiement est en cours de verification. Vous pouvez revenir plus tard sur cette page.</p>
+            <p>{% trans "Votre paiement est en cours de verification. Vous pouvez revenir plus tard sur cette page." %}</p>
         {% endif %}
     {% else %}
-        <p>Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise.</p>
-        <p>Si votre abonnement a été validé manuellement par le super admin, consultez votre page Mon abonnement.</p>
+        <p>{% trans "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise." %}</p>
+        <p>{% trans "Si votre abonnement a été validé manuellement par le super admin, consultez votre page Mon abonnement." %}</p>
     {% endif %}
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
-        <a class="btn-link primary" href="{% url 'subscription_overview' %}">Voir mon abonnement</a>
-        <a class="btn-link" href="{% url 'subscription_plan_list' %}">Voir les plans</a>
+        <a class="btn-link primary" href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
+        <a class="btn-link" href="{% url 'subscription_plan_list' %}">{% trans "Voir les plans" %}</a>
     </div>
 </section>
 {% endblock %}

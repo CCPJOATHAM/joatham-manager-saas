@@ -1,18 +1,19 @@
-Bonjour {% if invitation.full_name %}{{ invitation.full_name }}{% else %}{{ invitation.email }}{% endif %},
+{% load i18n %}
+{% trans "Bonjour" %} {% if invitation.full_name %}{{ invitation.full_name }}{% else %}{{ invitation.email }}{% endif %},
 
-Votre acces JOATHAM Manager est pret.
+{% trans "Votre acces JOATHAM Manager est pret." %}
 
-Activez votre compte avec ce lien securise :
+{% trans "Activez votre compte avec ce lien securise :" %}
 {{ activation_url }}
 
-Ce lien expire le {{ invitation.expires_at|date:"d/m/Y H:i" }}.
+{% trans "Ce lien expire le" %} {{ invitation.expires_at|date:"d/m/Y H:i" }}.
 
-JOATHAM Manager vous aide notamment avec :
-- la facturation professionnelle ;
-- la gestion clients ;
-- la comptabilite de votre activite.
+{% trans "JOATHAM Manager vous aide notamment avec :" %}
+{% trans "- la facturation professionnelle ;" %}
+{% trans "- la gestion clients ;" %}
+{% trans "- la comptabilite de votre activite." %}
 
-Cordialement,
-L'equipe JOATHAM Manager
+{% trans "Cordialement," %}
+{% trans "L'equipe JOATHAM Manager" %}
 {{ support_email }}
 {{ app_url }}

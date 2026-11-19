@@ -122,7 +122,7 @@
                         <td>{{ row.total_entrees }}</td>
                         <td>{{ row.total_sorties }}</td>
                         <td>{{ row.solde_mouvements }}</td>
-                        <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                        <td>{% if row.dernier_mouvement %}{{ row.dernier_mouvement|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -183,8 +183,8 @@
                     <tr>
                         <td>{{ session.name }}</td>
                         <td>{{ session.get_status_display }}</td>
-                        <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
-                        <td>{% if session.validated_at %}{{ session.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                        <td>{{ session.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        <td>{% if session.validated_at %}{{ session.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                         <td><a href="{% url 'inventory_detail' session.id %}" class="action-link">{% trans "Voir" %}</a></td>
                     </tr>
                     {% empty %}
@@ -210,7 +210,7 @@
                 <tbody>
                     {% for movement in recent_movements %}
                     <tr>
-                        <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ movement.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                         <td>{{ movement.produit.nom }}</td>
                         <td>{{ movement.get_movement_type_display }}</td>
                         <td>{{ movement.quantity }}</td>

@@ -1,9 +1,12 @@
+
+{% load i18n audit_labels %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle des flux | JOATHAM Manager</title>
+    <title>{% trans "Controle des flux | JOATHAM Manager" %}</title>
     <style>
         :root {
             --bg: #f3f7fb;
@@ -238,98 +241,98 @@
     <div class="container">
         <div class="hero">
             <div>
-                <h1>Controle des flux</h1>
-                <p>Suivez les opérations créées dans l'entreprise, identifiez rapidement leur auteur, leur rôle, le module concerné et isolez les flux récents ou inhabituels sans quitter JOATHAM Manager.</p>
+                <h1>{% trans "Controle des flux" %}</h1>
+                <p>{% trans "Suivez les opérations créées dans l'entreprise, identifiez rapidement leur auteur, leur rôle, le module concerné et isolez les flux récents ou inhabituels sans quitter JOATHAM Manager." %}</p>
                 <div class="muted">{{ entreprise.nom }}</div>
             </div>
             <div class="hero-actions">
                 {% if request.user.normalized_role == "comptable" %}
-                    <a class="top-link" href="{% url 'comptable_dashboard' %}">Retour au dashboard comptable</a>
+                    <a class="top-link" href="{% url 'comptable_dashboard' %}">{% trans "Retour au dashboard comptable" %}</a>
                 {% else %}
-                    <a class="top-link" href="{% url 'admin_dashboard' %}">Retour au dashboard</a>
+                    <a class="top-link" href="{% url 'admin_dashboard' %}">{% trans "Retour au dashboard" %}</a>
                 {% endif %}
             </div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-label">Evenements visibles</span>
+                <span class="stat-label">{% trans "Evenements visibles" %}</span>
                 <span class="stat-value">{{ log_count }}</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Modules traces</span>
+                <span class="stat-label">{% trans "Modules traces" %}</span>
                 <span class="stat-value">{{ modules|length }}</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Utilisateurs traces</span>
+                <span class="stat-label">{% trans "Utilisateurs traces" %}</span>
                 <span class="stat-value">{{ users|length }}</span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Filtres actifs</span>
+                <span class="stat-label">{% trans "Filtres actifs" %}</span>
                 <span class="stat-value">
                     {% if selected_module or selected_user or selected_action or selected_role or selected_date_from or selected_date_to %}
-                        Oui
+                        {% trans "Oui" %}
                     {% else %}
-                        Non
+                        {% trans "Non" %}
                     {% endif %}
                 </span>
             </div>
         </div>
 
         <div class="panel">
-            <p class="helper">Utilisez les filtres pour isoler un auteur, un rôle, un module ou une période précise. Cette vue est particulièrement utile pour contrôler les flux saisis par le propriétaire ou le gestionnaire.</p>
+            <p class="helper">{% trans "Utilisez les filtres pour isoler un auteur, un rôle, un module ou une période précise. Cette vue est particulièrement utile pour contrôler les flux saisis par le propriétaire ou le gestionnaire." %}</p>
             <form method="get" class="filters">
                 <div>
-                    <label for="id_module">Module</label>
+                    <label for="id_module">{% trans "Module" %}</label>
                     <select id="id_module" name="module">
-                        <option value="">Tous</option>
+                        <option value="">{% trans "Tous" %}</option>
                         {% for item in modules %}
-                            <option value="{{ item }}" {% if item == selected_module %}selected{% endif %}>{{ item }}</option>
+                            <option value="{{ item }}" {% if item == selected_module %}selected{% endif %}>{{ item|audit_module }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label for="id_utilisateur">Utilisateur</label>
+                    <label for="id_utilisateur">{% trans "Utilisateur" %}</label>
                     <select id="id_utilisateur" name="utilisateur">
-                        <option value="">Tous</option>
+                        <option value="">{% trans "Tous" %}</option>
                         {% for item in users %}
                             <option value="{{ item.id }}" {% if item.id|stringformat:'s' == selected_user %}selected{% endif %}>{{ item.username }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label for="id_role">Role</label>
+                    <label for="id_role">{% trans "Role" %}</label>
                     <select id="id_role" name="role">
-                        <option value="">Tous</option>
+                        <option value="">{% trans "Tous" %}</option>
                         {% for item in roles %}
                             <option value="{{ item.value }}" {% if item.value == selected_role %}selected{% endif %}>{{ item.label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label for="id_action">Action</label>
+                    <label for="id_action">{% trans "Action" %}</label>
                     <select id="id_action" name="action">
-                        <option value="">Toutes</option>
+                        <option value="">{% trans "Toutes" %}</option>
                         {% for item in actions %}
-                            <option value="{{ item }}" {% if item == selected_action %}selected{% endif %}>{{ item }}</option>
+                            <option value="{{ item }}" {% if item == selected_action %}selected{% endif %}>{{ item|audit_action }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label for="id_date_from">Date debut</label>
+                    <label for="id_date_from">{% trans "Date debut" %}</label>
                     <input id="id_date_from" name="date_from" type="date" value="{{ selected_date_from }}">
                 </div>
                 <div>
-                    <label for="id_date_to">Date fin</label>
+                    <label for="id_date_to">{% trans "Date fin" %}</label>
                     <input id="id_date_to" name="date_to" type="date" value="{{ selected_date_to }}">
                 </div>
                 <div>
                     <label>&nbsp;</label>
-                    <button type="submit">Filtrer</button>
+                    <button type="submit">{% trans "Filtrer" %}</button>
                 </div>
                 <div>
                     <label>&nbsp;</label>
-                    <a class="ghost-link" href="{% url 'activity_log_list' %}">Reinitialiser</a>
+                    <a class="ghost-link" href="{% url 'activity_log_list' %}">{% trans "Reinitialiser" %}</a>
                 </div>
             </form>
         </div>
@@ -339,21 +342,21 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Utilisateur</th>
-                            <th>Role</th>
-                            <th>Module</th>
-                            <th>Action</th>
-                            <th>Objet</th>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Utilisateur" %}</th>
+                            <th>{% trans "Role" %}</th>
+                            <th>{% trans "Module" %}</th>
+                            <th>{% trans "Action" %}</th>
+                            <th>{% trans "Objet" %}</th>
                             <th>ID</th>
-                            <th>Description</th>
+                            <th>{% trans "Description" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for log in logs %}
                             <tr>
-                                <td>{{ log.date_creation|date:"d/m/Y H:i:s" }}</td>
-                                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">Systeme</span>{% endif %}</td>
+                                <td>{{ log.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                <td>{% if log.utilisateur %}{{ log.utilisateur.username }}{% else %}<span class="muted">{% trans "Systeme" %}</span>{% endif %}</td>
                                 <td>
                                     {% if log.utilisateur %}
                                         <span class="badge">{{ log.utilisateur.get_role_display }}</span>
@@ -361,15 +364,15 @@
                                         <span class="muted">-</span>
                                     {% endif %}
                                 </td>
-                                <td><span class="badge">{{ log.module }}</span></td>
-                                <td>{{ log.action }}</td>
+                                <td><span class="badge">{{ log.display_module }}</span></td>
+                                <td>{{ log.display_action }}</td>
                                 <td>{{ log.objet_type|default:"-" }}</td>
                                 <td>{{ log.objet_id|default:"-" }}</td>
-                                <td class="desc">{{ log.description }}</td>
+                                <td class="desc">{{ log.display_description }}</td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="8" class="empty">Aucun evenement d'audit pour ces filtres.</td>
+                                <td colspan="8" class="empty">{% trans "Aucun evenement d'audit pour ces filtres." %}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

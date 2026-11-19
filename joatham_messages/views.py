@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -81,7 +82,7 @@ def conversation_create(request):
         except (PermissionDenied, ValidationError) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Conversation creee.")
+            messages.success(request, gettext_lazy("Conversation creee."))
             return redirect("message_conversation_detail", conversation_id=conversation.id)
 
     return render(request, "joatham_messages/conversation_form.html", {"form": form})
@@ -121,9 +122,9 @@ def send_conversation_message(request, conversation_id):
         except (PermissionDenied, ValidationError) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Message envoye.")
+            messages.success(request, gettext_lazy("Message envoye."))
     else:
-        messages.error(request, "Veuillez renseigner un message.")
+        messages.error(request, gettext_lazy("Veuillez renseigner un message."))
     return redirect("message_conversation_detail", conversation_id=conversation.id)
 
 
@@ -139,7 +140,7 @@ def download_attachment(request, attachment_id):
             content_type=attachment.type_contenu or None,
         )
     except FileNotFoundError as exc:
-        raise Http404("Piece jointe introuvable.") from exc
+        raise Http404(gettext_lazy("Piece jointe introuvable.")) from exc
 
 
 @permission_required("suggestions.create")
@@ -157,7 +158,7 @@ def suggestion_create(request):
         except (PermissionDenied, ValidationError) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Suggestion transmise au super admin.")
+            messages.success(request, gettext_lazy("Suggestion transmise au super admin."))
             return redirect("message_suggestion_create")
 
     return render(
@@ -222,7 +223,7 @@ def super_admin_public_question_reply(request, question_id):
         except (PermissionDenied, ValidationError) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Reponse envoyee au visiteur.")
+            messages.success(request, gettext_lazy("Reponse envoyee au visiteur."))
             return redirect("super_admin_messages")
 
     return render(
@@ -240,7 +241,7 @@ def super_admin_messages(request):
     if request.method == "POST":
         form = SuperAdminStatusUpdateForm(request.POST)
         if not form.is_valid():
-            messages.error(request, "Action de statut invalide.")
+            messages.error(request, gettext_lazy("Action de statut invalide."))
             return redirect("super_admin_messages")
         try:
             if form.cleaned_data["item_type"] == "suggestion":
@@ -250,7 +251,7 @@ def super_admin_messages(request):
                     status=form.cleaned_data["status"],
                     changed_by=request.user,
                 )
-                messages.success(request, "Statut de suggestion mis a jour.")
+                messages.success(request, gettext_lazy("Statut de suggestion mis a jour."))
             elif form.cleaned_data["item_type"] == "question":
                 question = get_public_question_for_super_admin(form.cleaned_data["item_id"])
                 update_public_question_status(
@@ -258,9 +259,9 @@ def super_admin_messages(request):
                     status=form.cleaned_data["status"],
                     changed_by=request.user,
                 )
-                messages.success(request, "Statut de question mis a jour.")
+                messages.success(request, gettext_lazy("Statut de question mis a jour."))
             else:
-                messages.error(request, "Action inconnue.")
+                messages.error(request, gettext_lazy("Action inconnue."))
         except ValidationError as exc:
             messages.error(request, str(exc))
         return redirect("super_admin_messages")
@@ -268,7 +269,7 @@ def super_admin_messages(request):
     filter_form = SuperAdminRequestFilterForm(request.GET or None)
     filters = filter_form.cleaned_data if filter_form.is_valid() else {}
     if request.GET and not filter_form.is_valid():
-        messages.error(request, "Certains filtres sont invalides.")
+        messages.error(request, gettext_lazy("Certains filtres sont invalides."))
     selected_lead_status = (request.GET.get("status") or "").strip()
     valid_lead_statuses = {value for value, _label in PublicQuestion.LeadStatus.choices}
     if selected_lead_status not in valid_lead_statuses:
@@ -310,7 +311,7 @@ def update_lead_status(request, id):
     except ValidationError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, "Statut CRM du lead mis a jour.")
+        messages.success(request, gettext_lazy("Statut CRM du lead mis a jour."))
     return redirect(request.META.get("HTTP_REFERER") or "super_admin_messages")
 
 
@@ -327,7 +328,7 @@ def send_public_question_invitation(request, question_id):
         messages.error(request, str(exc))
     else:
         if result.created:
-            messages.success(request, "Invitation envoyee au lead.")
+            messages.success(request, gettext_lazy("Invitation envoyee au lead."))
         else:
-            messages.info(request, "Une invitation existe deja pour ce lead.")
+            messages.info(request, gettext_lazy("Une invitation existe deja pour ce lead."))
     return redirect("super_admin_messages")

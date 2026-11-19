@@ -123,7 +123,7 @@
             <tbody>
                 {% for row in movements %}
                 <tr>
-                    <td>{{ row.instance.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ row.instance.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                     <td>{{ row.instance.produit.nom }}</td>
                     <td>
                         <span class="badge {% if row.instance.movement_type == 'manual_entry' or row.instance.movement_type == 'transfer_in' %}success{% elif row.instance.movement_type == 'manual_exit' or row.instance.movement_type == 'transfer_out' %}warning{% elif row.instance.movement_type == 'adjustment_positive' %}success{% elif row.instance.movement_type == 'adjustment_negative' %}danger{% elif row.instance.movement_type == 'invoice_sale' or row.instance.movement_type == 'invoice_restore' %}info{% else %}neutral{% endif %}">

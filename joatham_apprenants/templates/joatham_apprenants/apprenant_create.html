@@ -1,13 +1,15 @@
-<h1>Ajouter un apprenant</h1>
+
+{% load i18n %}
+<h1>{% trans "Ajouter un apprenant" %}</h1>
 
 <form method="post">
     {% csrf_token %}
-    <input type="text" name="nom" placeholder="Nom"><br><br>
-    <input type="text" name="prenom" placeholder="Prenom"><br><br>
-    <input type="text" name="telephone" placeholder="Téléphone"><br><br>
-    <input type="email" name="email" placeholder="Email"><br><br>
-    <input type="text" name="adresse" placeholder="Adresse"><br><br>
-    <textarea name="observations" placeholder="Observations"></textarea><br><br>
-    <label><input type="checkbox" name="actif" checked> Actif</label><br><br>
-    <button type="submit">Enregistrer</button>
+    <input type="text" name="nom" placeholder="{% trans 'Nom' %}"><br><br>
+    <input type="text" name="prenom" placeholder="{% trans 'Prenom' %}"><br><br>
+    <input type="text" name="telephone" placeholder="{% trans 'Téléphone' %}"><br><br>
+    <input type="email" name="email" placeholder="{% trans 'Email' %}"><br><br>
+    <input type="text" name="adresse" placeholder="{% trans 'Adresse' %}"><br><br>
+    <textarea name="observations" placeholder="{% trans 'Observations' %}"></textarea><br><br>
+    <label><input type="checkbox" name="actif" checked> {% trans "Actif" %}</label><br><br>
+    <button type="submit">{% trans "Enregistrer" %}</button>
 </form>

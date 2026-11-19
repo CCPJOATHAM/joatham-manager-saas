@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-19 13:04+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: JOATHAM Manager contributors\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Masquer"
+msgstr "Masquer"
+
+msgid "Afficher"
+msgstr "Afficher"
+
+msgid "-- Choisir --"
+msgstr "-- Choisir --"
+
+msgid "Rupture de stock"
+msgstr "Rupture de stock"
+
+msgid "Stock faible"
+msgstr "Stock faible"
+
+msgid "Supprimer"
+msgstr "Supprimer"
+
+msgid "Confirmer la modification de cette facture brouillon ?"
+msgstr "Confirmer la modification de cette facture brouillon ?"
+
+msgid "Confirmer l'enregistrement de ce paiement ?"
+msgstr "Confirmer l'enregistrement de ce paiement ?"
+
+msgid "Confirmer l'enregistrement du paiement complet ?"
+msgstr "Confirmer l'enregistrement du paiement complet ?"
+
+msgid "Confirmer l'annulation de cette facture ?"
+msgstr "Confirmer l'annulation de cette facture ?"
+
+msgid "Confirmer le passage de cette facture au statut payee ?"
+msgstr "Confirmer le passage de cette facture au statut payee ?"
+
+msgid "Confirmer le changement de statut ?"
+msgstr "Confirmer le changement de statut ?"
+
+msgid "Convertir cette proforma en facture definitive ?"
+msgstr "Convertir cette proforma en facture definitive ?"
+
+msgid "Annuler cette proforma ?"
+msgstr "Annuler cette proforma ?"
+
+msgid "Voulez-vous vraiment supprimer ce client ?"
+msgstr "Voulez-vous vraiment supprimer ce client ?"

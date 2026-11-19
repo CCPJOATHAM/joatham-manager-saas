@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Sessions caisse{% endblock %}
-{% block content_title %}Sessions caisse{% endblock %}
-{% block content_subtitle %}Consultez et filtrez les sessions de caisse par caisse, statut, période, responsable d'ouverture et présence d'écart.{% endblock %}
+
+{% block page_title %}{% trans "Sessions caisse" %}{% endblock %}
+{% block content_title %}{% trans "Sessions caisse" %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez et filtrez les sessions de caisse par caisse, statut, période, responsable d'ouverture et présence d'écart." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -61,42 +63,42 @@
 <section class="page-shell">
   <div class="panel">
     <div class="panel-header">
-      <h3>Filtres sessions</h3>
-      <p>Affinez la liste pour retrouver rapidement les sessions à contrôler ou à analyser.</p>
+      <h3>{% trans "Filtres sessions" %}</h3>
+      <p>{% trans "Affinez la liste pour retrouver rapidement les sessions à contrôler ou à analyser." %}</p>
     </div>
     <div class="panel-body">
       <form method="get">
         <div class="filters-grid">
           <div class="field">
-            <label for="id_caisse">Caisse</label>
+            <label for="id_caisse">{% trans "Caisse" %}</label>
             <select name="caisse" id="id_caisse">
-              <option value="">Toutes les caisses</option>
+              <option value="">{% trans "Toutes les caisses" %}</option>
               {% for caisse in caisses %}
               <option value="{{ caisse.id }}" {% if filters.caisse|stringformat:"s" == caisse.id|stringformat:"s" %}selected{% endif %}>{{ caisse.nom }} ({{ caisse.code }})</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_statut">Statut</label>
+            <label for="id_statut">{% trans "Statut" %}</label>
             <select name="statut" id="id_statut">
-              <option value="">Tous les statuts</option>
+              <option value="">{% trans "Tous les statuts" %}</option>
               {% for value, label in status_choices %}
               <option value="{{ value }}" {% if filters.statut == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="field">
-            <label for="id_date_debut">Date debut</label>
+            <label for="id_date_debut">{% trans "Date debut" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="field">
-            <label for="id_date_fin">Date fin</label>
+            <label for="id_date_fin">{% trans "Date fin" %}</label>
             <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
           </div>
           <div class="field">
-            <label for="id_utilisateur_ouverture">Responsable ouverture</label>
+            <label for="id_utilisateur_ouverture">{% trans "Responsable ouverture" %}</label>
             <select name="utilisateur_ouverture" id="id_utilisateur_ouverture">
-              <option value="">Tous les responsables</option>
+              <option value="">{% trans "Tous les responsables" %}</option>
               {% for user in opening_users %}
               <option value="{{ user.id }}" {% if filters.utilisateur_ouverture|stringformat:"s" == user.id|stringformat:"s" %}selected{% endif %}>{{ user }}</option>
               {% endfor %}
@@ -104,15 +106,15 @@
           </div>
           <div class="checkbox-row">
             <input type="checkbox" name="avec_ecart" id="id_avec_ecart" value="1" {% if filters.avec_ecart %}checked{% endif %}>
-            <label for="id_avec_ecart">Sessions avec écart uniquement</label>
+            <label for="id_avec_ecart">{% trans "Sessions avec écart uniquement" %}</label>
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="btn">Filtrer</button>
-          <a href="{% url 'caisse_session_list' %}" class="ghost">Reinitialiser</a>
-          <a href="{% url 'caisse_list' %}" class="ghost">Retour dashboard</a>
+          <button type="submit" class="btn">{% trans "Filtrer" %}</button>
+          <a href="{% url 'caisse_session_list' %}" class="ghost">{% trans "Reinitialiser" %}</a>
+          <a href="{% url 'caisse_list' %}" class="ghost">{% trans "Retour dashboard" %}</a>
           {% if can_view_cash_reports %}
-          <a href="{% url 'caisse_reports' %}" class="ghost">Voir les rapports</a>
+          <a href="{% url 'caisse_reports' %}" class="ghost">{% trans "Voir les rapports" %}</a>
           {% endif %}
         </div>
       </form>
@@ -120,35 +122,35 @@
   </div>
 
   <div class="kpis">
-    <div class="kpi"><span class="kpi-label">Sessions trouvées</span><span class="kpi-value">{{ session_counts.total }}</span></div>
-    <div class="kpi"><span class="kpi-label">Ouvertes</span><span class="kpi-value">{{ session_counts.open }}</span></div>
-    <div class="kpi"><span class="kpi-label">Avec écart</span><span class="kpi-value">{{ session_counts.with_ecart }}</span></div>
-    <div class="kpi"><span class="kpi-label">Dernière mise à jour</span><span class="kpi-value">{% if sessions %}{{ sessions.0.date_modification|date:"d/m/Y" }}{% else %}-{% endif %}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Sessions trouvées" %}</span><span class="kpi-value">{{ session_counts.total }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Ouvertes" %}</span><span class="kpi-value">{{ session_counts.open }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Avec écart" %}</span><span class="kpi-value">{{ session_counts.with_ecart }}</span></div>
+    <div class="kpi"><span class="kpi-label">{% trans "Dernière mise à jour" %}</span><span class="kpi-value">{% if sessions %}{{ sessions.0.date_modification|date:"SHORT_DATE_FORMAT" }}{% else %}-{% endif %}</span></div>
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>Sessions filtrées</h3>
-      <p>Consultez les soldes, les écarts et accédez à la fiche détail de chaque session.</p>
+      <h3>{% trans "Sessions filtrées" %}</h3>
+      <p>{% trans "Consultez les soldes, les écarts et accédez à la fiche détail de chaque session." %}</p>
     </div>
     <div class="table-wrap">
       <table class="table">
         <thead>
           <tr>
-            <th>Ouverture</th>
-            <th>Caisse</th>
-            <th>Responsable</th>
-            <th>Statut</th>
-            <th>Solde initial</th>
-            <th>Solde théorique</th>
-            <th>Écart</th>
-            <th>Action</th>
+            <th>{% trans "Ouverture" %}</th>
+            <th>{% trans "Caisse" %}</th>
+            <th>{% trans "Responsable" %}</th>
+            <th>{% trans "Statut" %}</th>
+            <th>{% trans "Solde initial" %}</th>
+            <th>{% trans "Solde théorique" %}</th>
+            <th>{% trans "Écart" %}</th>
+            <th>{% trans "Action" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for session in sessions %}
           <tr>
-            <td>{{ session.date_ouverture|date:"d/m/Y H:i" }}</td>
+            <td>{{ session.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>{{ session.caisse.nom }}</td>
             <td>{{ session.utilisateur_ouverture }}</td>
             <td>
@@ -159,10 +161,10 @@
             <td>{{ session.solde_initial }}</td>
             <td>{{ session.solde_theorique }}</td>
             <td class="{% if session.ecart > 0 %}amount-positive{% elif session.ecart < 0 %}amount-negative{% endif %}">{{ session.ecart }}</td>
-            <td><a href="{% url 'caisse_session_detail' session.id %}" class="ghost">Voir</a></td>
+            <td><a href="{% url 'caisse_session_detail' session.id %}" class="ghost">{% trans "Voir" %}</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="8" class="empty-state">Aucune session ne correspond aux filtres sélectionnés.</td></tr>
+          <tr><td colspan="8" class="empty-state">{% trans "Aucune session ne correspond aux filtres sélectionnés." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

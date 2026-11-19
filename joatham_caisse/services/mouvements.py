@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -12,9 +13,9 @@ def _normalize_positive_amount(value):
     try:
         normalized = Decimal(str(value or "0"))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ValueError("Le montant du mouvement doit etre valide.") from exc
+        raise ValueError(gettext_lazy("Le montant du mouvement doit etre valide.")) from exc
     if normalized <= Decimal("0.00"):
-        raise ValueError("Le montant du mouvement doit etre strictement positif.")
+        raise ValueError(gettext_lazy("Le montant du mouvement doit etre strictement positif."))
     return normalized
 
 
@@ -29,11 +30,11 @@ def _validate_open_session(entreprise, session, caisse):
     ensure_same_entreprise(session, entreprise)
     ensure_same_entreprise(caisse, entreprise)
     if session.caisse_id != caisse.id:
-        raise ValueError("Cette session n'appartient pas a la caisse selectionnee.")
+        raise ValueError(gettext_lazy("Cette session n'appartient pas a la caisse selectionnee."))
     if session.statut != SessionCaisse.Statut.OUVERTE:
-        raise ValueError("Les mouvements ne peuvent etre ajoutes que sur une session ouverte.")
+        raise ValueError(gettext_lazy("Les mouvements ne peuvent etre ajoutes que sur une session ouverte."))
     if not caisse.est_active:
-        raise ValueError("Cette caisse est inactive.")
+        raise ValueError(gettext_lazy("Cette caisse est inactive."))
 
 
 @transaction.atomic
@@ -57,7 +58,7 @@ def record_mouvement(
     _validate_open_session(entreprise, session, caisse)
     valid_types = {choice for choice, _label in MouvementCaisse.TypeMouvement.choices}
     if type_mouvement not in valid_types:
-        raise ValueError("Le type de mouvement de caisse est invalide.")
+        raise ValueError(gettext_lazy("Le type de mouvement de caisse est invalide."))
     montant = _normalize_positive_amount(montant)
     libelle = _normalize_required_text(libelle, "Le libelle du mouvement est obligatoire.")
     mouvement = MouvementCaisse.objects.create(

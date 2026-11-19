@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
@@ -205,7 +206,7 @@ def _handle_stock_operation(*, request, entreprise, form, operation):
                 comment=data["comment"],
             )
         else:
-            raise PermissionDenied("Operation de stock invalide.")
+            raise PermissionDenied(gettext_lazy("Operation de stock invalide."))
     except StockOperationError as exc:
         form.add_error(None, str(exc))
         return None
@@ -456,19 +457,19 @@ def stock_movement_export_excel(request):
         filename="mouvements-stock.xlsx",
         sheet_name="Mouvements stock",
         headers=[
-            "Date",
-            "Produit",
-            "Type",
-            "Quantite",
-            "Stock avant",
-            "Stock apres",
-            "Reference",
-            "Motif",
-            "Commentaire",
-            "Source app",
-            "Source model",
-            "Source id",
-            "Utilisateur",
+            gettext_lazy("Date"),
+            gettext_lazy("Produit"),
+            gettext_lazy("Type"),
+            gettext_lazy("Quantite"),
+            gettext_lazy("Stock avant"),
+            gettext_lazy("Stock apres"),
+            gettext_lazy("Reference"),
+            gettext_lazy("Motif"),
+            gettext_lazy("Commentaire"),
+            gettext_lazy("Source app"),
+            gettext_lazy("Source model"),
+            gettext_lazy("Source id"),
+            gettext_lazy("Utilisateur"),
         ],
         rows=rows,
     )
@@ -509,15 +510,15 @@ def inventory_export_excel(request):
         filename="inventaires-stock.xlsx",
         sheet_name="Inventaires stock",
         headers=[
-            "Session",
-            "Statut",
-            "Produit",
-            "Stock theorique",
-            "Quantite comptee",
-            "Ecart",
-            "Commentaire ligne",
-            "Date creation session",
-            "Date validation",
+            gettext_lazy("Session"),
+            gettext_lazy("Statut"),
+            gettext_lazy("Produit"),
+            gettext_lazy("Stock theorique"),
+            gettext_lazy("Quantite comptee"),
+            gettext_lazy("Ecart"),
+            gettext_lazy("Commentaire ligne"),
+            gettext_lazy("Date creation session"),
+            gettext_lazy("Date validation"),
         ],
         rows=rows,
     )
@@ -808,7 +809,7 @@ def inventory_count(request, pk):
 @module_access_required("inventory")
 def inventory_close(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy("Cette action doit etre soumise par formulaire."))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         close_inventory_session(entreprise=entreprise, session_id=pk)
@@ -823,7 +824,7 @@ def inventory_close(request, pk):
 @module_access_required("inventory")
 def inventory_validate(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy("Cette action doit etre soumise par formulaire."))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         validate_inventory_session(
@@ -842,7 +843,7 @@ def inventory_validate(request, pk):
 @module_access_required("inventory")
 def inventory_cancel(request, pk):
     if request.method != "POST":
-        raise PermissionDenied("Cette action doit etre soumise par formulaire.")
+        raise PermissionDenied(gettext_lazy("Cette action doit etre soumise par formulaire."))
     entreprise = get_user_entreprise_or_raise(request.user)
     try:
         cancel_inventory_session(entreprise=entreprise, session_id=pk)

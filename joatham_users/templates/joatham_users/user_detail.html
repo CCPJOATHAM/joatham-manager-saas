@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ full_name }} | JOATHAM Manager{% endblock %}
+{% block page_title %}{{ full_name }} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Détail utilisateur" %}{% endblock %}
 {% block content_subtitle %}{% trans "Consultez les informations du compte sans quitter le contexte de votre entreprise." %}{% endblock %}
 
@@ -76,11 +76,11 @@
     </div>
     <div class="detail-card">
         <span class="detail-label">{% trans "Derniere connexion" %}</span>
-        <span class="detail-value">{{ target_user.last_login|date:"d/m/Y H:i"|default:"-" }}</span>
+        <span class="detail-value">{{ target_user.last_login|date:"SHORT_DATETIME_FORMAT"|default:"-" }}</span>
     </div>
     <div class="detail-card">
         <span class="detail-label">{% trans "Date de creation" %}</span>
-        <span class="detail-value">{{ target_user.date_joined|date:"d/m/Y H:i" }}</span>
+        <span class="detail-value">{{ target_user.date_joined|date:"SHORT_DATETIME_FORMAT" }}</span>
     </div>
     <div class="detail-card">
         <span class="detail-label">{% trans "Téléphone" %}</span>

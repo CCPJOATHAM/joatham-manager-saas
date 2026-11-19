@@ -1,4 +1,6 @@
 {% extends "joatham_billing/base.html" %}
+{% load i18n %}
+
 
 {% block content %}
 <style>
@@ -96,60 +98,60 @@
 </style>
 
 <div class="editor-card">
-    <h2>Créer une facture</h2>
-    <p>Sélectionnez un produit, un service ou saisissez une ligne libre. Le libellé et le prix se préremplissent, mais restent modifiables.</p>
+    <h2>{% trans "Créer une facture" %}</h2>
+    <p>{% trans "Sélectionnez un produit, un service ou saisissez une ligne libre. Le libellé et le prix se préremplissent, mais restent modifiables." %}</p>
 
     <form method="post">
         {% csrf_token %}
 
         <div class="editor-grid">
             <div>
-                <label for="client">Client enregistré</label>
+                <label for="client">{% trans "Client enregistré" %}</label>
                 <select name="client" id="client">
-                    <option value="">-- Aucun --</option>
+                    <option value="">{% trans "-- Aucun --" %}</option>
                     {% for client in clients %}
                         <option value="{{ client.id }}">{{ client.nom }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div>
-                <label for="client_nom">Client occasionnel</label>
+                <label for="client_nom">{% trans "Client occasionnel" %}</label>
                 <input type="text" name="client_nom" id="client_nom">
             </div>
             <div>
-                <label for="tva">TVA (%)</label>
+                <label for="tva">{% trans "TVA (%)" %}</label>
                 <input type="number" step="0.01" min="0" name="tva" id="tva" value="{{ default_tva|default:'0' }}">
             </div>
             <div>
-                <label for="remise">Remise (%)</label>
+                <label for="remise">{% trans "Remise (%)" %}</label>
                 <input type="number" step="0.01" min="0" id="remise" name="remise" value="0">
             </div>
             <div>
-                <label for="rabais">Rabais (%)</label>
+                <label for="rabais">{% trans "Rabais (%)" %}</label>
                 <input type="number" step="0.01" min="0" id="rabais" name="rabais" value="0">
             </div>
             <div>
-                <label for="ristourne">Ristourne (%)</label>
+                <label for="ristourne">{% trans "Ristourne (%)" %}</label>
                 <input type="number" step="0.01" min="0" id="ristourne" name="ristourne" value="0">
             </div>
         </div>
 
-        <button type="button" class="btn btn-add" onclick="ajouterLigne()">Ajouter une ligne</button>
+        <button type="button" class="btn btn-add" onclick="ajouterLigne()">{% trans "Ajouter une ligne" %}</button>
 
         <table class="line-table" id="table_facture">
             <tr>
-                <th>Produit</th>
-                <th>Service</th>
-                <th>Libellé</th>
-                <th>Quantité</th>
+                <th>{% trans "Produit" %}</th>
+                <th>{% trans "Service" %}</th>
+                <th>{% trans "Libellé" %}</th>
+                <th>{% trans "Quantité" %}</th>
                 <th>P.U</th>
-                <th>Total</th>
-                <th>Action</th>
+                <th>{% trans "Total" %}</th>
+                <th>{% trans "Action" %}</th>
             </tr>
             <tr>
                 <td>
                     <select name="product_id[]" class="product_select">
-                        <option value="">-- Choisir --</option>
+                        <option value="">{% trans "-- Choisir --" %}</option>
                         {% for product in products %}
                             <option
                                 value="{{ product.id }}"
@@ -168,7 +170,7 @@
                 </td>
                 <td>
                     <select name="service_id[]" class="service_select">
-                        <option value="">-- Choisir --</option>
+                        <option value="">{% trans "-- Choisir --" %}</option>
                         {% for service in services %}
                             <option value="{{ service.id }}" data-name="{{ service.nom }}" data-prix="{{ service.prix }}">
                                 {{ service.nom }}
@@ -180,39 +182,39 @@
                 <td><input type="number" name="quantite[]" class="qte" value="1" min="1"></td>
                 <td><input type="number" name="prix[]" class="prix" step="0.01" min="0"></td>
                 <td><input type="text" class="total_ligne" readonly></td>
-                <td><button type="button" onclick="supprimerLigne(this)">Supprimer</button></td>
+                <td><button type="button" onclick="supprimerLigne(this)">{% trans "Supprimer" %}</button></td>
             </tr>
         </table>
 
         <div class="summary">
-            <h3>Prévisualisation des totaux</h3>
+            <h3>{% trans "Prévisualisation des totaux" %}</h3>
             <div class="summary-grid">
                 <div class="summary-card">
-                    <strong>Quantité totale</strong>
+                    <strong>{% trans "Quantité totale" %}</strong>
                     <span id="total_quantite">0</span>
                 </div>
                 <div class="summary-card">
-                    <strong>Total HT</strong>
+                    <strong>{% trans "Total HT" %}</strong>
                     <span id="total_ht">0</span>
                 </div>
                 <div class="summary-card">
-                    <strong>TVA</strong>
+                    <strong>{% trans "TVA" %}</strong>
                     <span id="total_tva">0</span>
                 </div>
                 <div class="summary-card">
-                    <strong>Réductions</strong>
+                    <strong>{% trans "Réductions" %}</strong>
                     <span id="total_reduction">0</span>
                 </div>
                 <div class="summary-card">
-                    <strong>Total net</strong>
+                    <strong>{% trans "Total net" %}</strong>
                     <span id="total_net">0</span>
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn btn-print">Créer la facture</button>
-            <a href="{% url 'facture_list' %}" class="btn btn-download">Annuler</a>
+            <button type="submit" class="btn btn-print">{% trans "Créer la facture" %}</button>
+            <a href="{% url 'facture_list' %}" class="btn btn-download">{% trans "Annuler" %}</a>
         </div>
     </form>
 </div>
@@ -221,7 +223,7 @@
 const currencyCode = "{{ currency_code|default:'CDF'|escapejs }}";
 
 function formatMoney(value) {
-    return new Intl.NumberFormat("fr-FR", {
+    return new Intl.NumberFormat(document.documentElement.lang || "fr", {
         style: "currency",
         currency: currencyCode,
         minimumFractionDigits: 2,
@@ -234,10 +236,10 @@ function getProductWarning(option) {
     const stock = parseFloat(option.getAttribute("data-stock") || "0");
     const seuil = parseFloat(option.getAttribute("data-seuil") || "0");
     if (stock <= 0) {
-        return { text: "Rupture de stock", className: "out" };
+        return { text: window.joathamMessages.outOfStock, className: "out" };
     }
     if (stock <= seuil) {
-        return { text: "Stock faible", className: "low" };
+        return { text: window.joathamMessages.lowStock, className: "low" };
     }
     return { text: "", className: "" };
 }
@@ -345,7 +347,7 @@ function supprimerLigne(button) {
 }
 
 const productOptions = `
-    <option value="">-- Choisir --</option>
+    <option value="">${window.joathamMessages.choose}</option>
     {% for product in products %}
         <option
             value="{{ product.id }}"
@@ -362,7 +364,7 @@ const productOptions = `
 `;
 
 const serviceOptions = `
-    <option value="">-- Choisir --</option>
+    <option value="">${window.joathamMessages.choose}</option>
     {% for service in services %}
         <option value="{{ service.id }}" data-name="{{ service.nom|escapejs }}" data-prix="{{ service.prix }}">
             {{ service.nom|escapejs }}
@@ -385,7 +387,7 @@ function ajouterLigne() {
         <td><input type="number" name="quantite[]" class="qte" value="1" min="1"></td>
         <td><input type="number" name="prix[]" class="prix" step="0.01" min="0"></td>
         <td><input type="text" class="total_ligne" readonly></td>
-        <td><button type="button" onclick="supprimerLigne(this)">Supprimer</button></td>
+        <td><button type="button" onclick="supprimerLigne(this)">${window.joathamMessages.remove}</button></td>
     `;
     setupRow(row);
     calculer();

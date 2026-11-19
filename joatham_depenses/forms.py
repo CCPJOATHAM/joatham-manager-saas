@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -40,3 +41,5 @@ class DepenseForm(forms.ModelForm):
     class Meta:
         model = Depense
         fields = ["description", "montant", "caisse"]
+
+        labels = {'description': gettext_lazy('Description'), 'montant': gettext_lazy('Montant')}

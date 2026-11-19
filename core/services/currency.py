@@ -1,3 +1,4 @@
+from django.utils.translation import get_language, gettext_lazy
 from decimal import Decimal, ROUND_HALF_UP
 
 
@@ -5,10 +6,10 @@ DEFAULT_EXCHANGE_SOURCE = "manuel"
 USD_CURRENCY = "USD"
 HARDCODED_FALLBACK_CURRENCY = "CDF"
 DEFAULT_CURRENCY_LABELS = {
-    "USD": "Dollar americain",
-    "CDF": "Franc congolais",
-    "EUR": "Euro",
-    "XAF": "Franc CFA",
+    "USD": gettext_lazy("Dollar americain"),
+    "CDF": gettext_lazy("Franc congolais"),
+    "EUR": gettext_lazy("Euro"),
+    "XAF": gettext_lazy("Franc CFA"),
 }
 def _normalize_currency_code(currency_code):
     return (currency_code or get_platform_default_currency()).strip().upper()
@@ -47,6 +48,8 @@ def format_decimal_number(value, decimal_places=2):
     quantize_pattern = "0." + ("0" * max(int(decimal_places), 0))
     quantized_value = Decimal(value or 0).quantize(Decimal(quantize_pattern), rounding=ROUND_HALF_UP)
     formatted = f"{quantized_value:,.{max(int(decimal_places), 0)}f}"
+    if (get_language() or "fr").split("-")[0] == "en":
+        return formatted
     return formatted.replace(",", " ").replace(".", ",")
 
 

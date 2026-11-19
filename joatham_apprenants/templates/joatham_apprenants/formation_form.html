@@ -4,8 +4,8 @@
 {% block apprenants_title %}{% if formation %}{% trans "Modifier une formation" %}{% else %}{% trans "Creer une formation" %}{% endif %}{% endblock %}
 {% block apprenants_subtitle %}{% trans "Configurer le catalogue de formation." %}{% endblock %}
 {% block apprenants_content %}
-    <h1>{% if formation %}Modifier{% else %}Creer{% endif %} une formation</h1>
-    <p>Entreprise: {{ entreprise.nom }}</p>
+    <h1>{% if formation %}{% trans "Modifier" %}{% else %}{% trans "Creer" %}{% endif %} {% trans "une formation" %}</h1>
+    <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
 
     {% if error %}
         <div class="error">{{ error }}</div>
@@ -14,31 +14,31 @@
     <form method="post">
         {% csrf_token %}
         <div class="field">
-            <label for="nom">Nom</label>
+            <label for="nom">{% trans "Nom" %}</label>
             <input id="nom" name="nom" value="{{ formation.nom|default:'' }}" required>
         </div>
         <div class="field">
-            <label for="description">Description</label>
+            <label for="description">{% trans "Description" %}</label>
             <textarea id="description" name="description" rows="4">{{ formation.description|default:'' }}</textarea>
         </div>
         <div class="field">
-            <label for="prix">Prix</label>
+            <label for="prix">{% trans "Prix" %}</label>
             <input id="prix" name="prix" value="{{ formation.prix|default:'0.00' }}" required>
         </div>
         <div class="field">
-            <label for="duree">Duree</label>
+            <label for="duree">{% trans "Duree" %}</label>
             <input id="duree" name="duree" value="{{ formation.duree|default:'' }}">
         </div>
         <div class="field">
             <label>
                 <input type="checkbox" name="actif" {% if formation is None or formation.actif %}checked{% endif %}>
-                Formation active
+                {% trans "Formation active" %}
             </label>
         </div>
 
         <div class="actions">
-            <button type="submit">Enregistrer</button>
-            <a href="{% url 'formation_list' %}">Retour</a>
+            <button type="submit">{% trans "Enregistrer" %}</button>
+            <a href="{% url 'formation_list' %}">{% trans "Retour" %}</a>
         </div>
     </form>
 {% endblock %}

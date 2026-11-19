@@ -1,159 +1,161 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Administration SaaS | JOATHAM Manager{% endblock %}
-{% block content_title %}Administration SaaS{% endblock %}
-{% block content_subtitle %}Plateforme JOATHAM Manager / pilotage global{% endblock %}
+
+{% block page_title %}{% trans "Administration SaaS | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Administration SaaS" %}{% endblock %}
+{% block content_subtitle %}{% trans "Plateforme JOATHAM Manager / pilotage global" %}{% endblock %}
 {% block content_card_class %}super-admin-content-card{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_company_list' %}" class="btn-link">Entreprises</a>
-<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">Abonnements</a>
-<a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">Rafraichir</a>
+<a href="{% url 'super_admin_company_list' %}" class="btn-link">{% trans "Entreprises" %}</a>
+<a href="{% url 'super_admin_subscription_list' %}" class="btn-link">{% trans "Abonnements" %}</a>
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link primary">{% trans "Rafraichir" %}</a>
 {% endblock %}
 
 {% block content %}
 <div class="super-admin-dashboard">
-    <section class="super-admin-hero" aria-label="Administration SaaS">
+    <section class="super-admin-hero" aria-label="{% trans 'Administration SaaS' %}">
         <div class="hero-copy">
             <div class="hero-title-row">
                 <span class="hero-mark" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
                 </span>
-                <h2>Administration SaaS</h2>
+                <h2>{% trans "Administration SaaS" %}</h2>
             </div>
-            <p>Vue globale de la plateforme JOATHAM Manager : entreprises, abonnements, paiements et activite commerciale.</p>
+            <p>{% trans "Vue globale de la plateforme JOATHAM Manager : entreprises, abonnements, paiements et activite commerciale." %}</p>
             <div class="hero-badge-row">
                 {% if user_role_label %}
                 <span class="hero-badge">{{ user_role_label }}</span>
                 {% endif %}
-                <span class="hero-badge">Plateforme active</span>
-                <span class="hero-badge">{{ counts.total_accounts }} entreprise{{ counts.total_accounts|pluralize:"s" }}</span>
-                <span class="hero-badge">{{ counts.actif }} abonnement{{ counts.actif|pluralize:"s" }} actif{{ counts.actif|pluralize:"s" }}</span>
+                <span class="hero-badge">{% trans "Plateforme active" %}</span>
+                <span class="hero-badge">{% blocktrans count count=counts.total_accounts %}{{ count }} entreprise{% plural %}{{ count }} entreprises{% endblocktrans %}</span>
+                <span class="hero-badge">{% blocktrans count count=counts.actif %}{{ count }} abonnement actif{% plural %}{{ count }} abonnements actifs{% endblocktrans %}</span>
             </div>
         </div>
-        <aside class="super-admin-hero-focus" aria-label="Paiements à valider">
-            <span>Paiements</span>
+        <aside class="super-admin-hero-focus" aria-label="{% trans 'Paiements à valider' %}">
+            <span>{% trans "Paiements" %}</span>
             <strong>{{ counts.pending_payments }}</strong>
-            <small>en attente</small>
+            <small>{% trans "en attente" %}</small>
         </aside>
     </section>
 
-    <section id="dashboard-global" class="kpi-grid" aria-label="KPI plateforme">
+    <section id="dashboard-global" class="kpi-grid" aria-label="{% trans 'KPI plateforme' %}">
         <article class="kpi-card is-revenue">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">Entreprises inscrites</span>
+                    <span class="kpi-label">{% trans "Entreprises inscrites" %}</span>
                     <strong class="kpi-value">{{ counts.total_accounts }}</strong>
-                    <span class="kpi-subtitle">Comptes clients actifs sur la plateforme.</span>
+                    <span class="kpi-subtitle">{% trans "Comptes clients actifs sur la plateforme." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ counts.inactive_entreprises }} entreprise{{ counts.inactive_entreprises|pluralize:"s" }} inactive{{ counts.inactive_entreprises|pluralize:"s" }} conservée{{ counts.inactive_entreprises|pluralize:"s" }}.</div>
+            <div class="kpi-note">{% blocktrans count count=counts.inactive_entreprises %}{{ count }} entreprise inactive conservée.{% plural %}{{ count }} entreprises inactives conservées.{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-cash">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">Abonnements actifs</span>
+                    <span class="kpi-label">{% trans "Abonnements actifs" %}</span>
                     <strong class="kpi-value">{{ counts.actif }}</strong>
-                    <span class="kpi-subtitle">Entreprises avec abonnement actif.</span>
+                    <span class="kpi-subtitle">{% trans "Entreprises avec abonnement actif." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ counts.essai }} essai{{ counts.essai|pluralize:"s" }} historique{{ counts.essai|pluralize:"s" }}.</div>
+            <div class="kpi-note">{% blocktrans count count=counts.essai %}{{ count }} essai historique.{% plural %}{{ count }} essais historiques.{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-due">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">Paiements en attente</span>
+                    <span class="kpi-label">{% trans "Paiements en attente" %}</span>
                     <strong class="kpi-value">{{ counts.pending_payments }}</strong>
-                    <span class="kpi-subtitle">Demandes d'abonnement à valider.</span>
+                    <span class="kpi-subtitle">{% trans "Demandes d'abonnement à valider." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">Paiements manuels non encore traites.</div>
+            <div class="kpi-note">{% trans "Paiements manuels non encore traites." %}</div>
         </article>
 
         <article class="kpi-card is-clients">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">Plans actifs</span>
+                    <span class="kpi-label">{% trans "Plans actifs" %}</span>
                     <strong class="kpi-value">{{ plans|length }}</strong>
-                    <span class="kpi-subtitle">Plans commerciaux disponibles.</span>
+                    <span class="kpi-subtitle">{% trans "Plans commerciaux disponibles." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 16 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{{ counts.expire }} abonnement{{ counts.expire|pluralize:"s" }} expire{{ counts.expire|pluralize:"s" }}.</div>
+            <div class="kpi-note">{% blocktrans count count=counts.expire %}{{ count }} abonnement expire.{% plural %}{{ count }} abonnements expires.{% endblocktrans %}</div>
         </article>
 
         <article class="kpi-card is-profit">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">Revenus validés</span>
+                    <span class="kpi-label">{% trans "Revenus validés" %}</span>
                     <strong class="kpi-value">{{ counts.validated_revenue }}</strong>
-                    <span class="kpi-subtitle">Total des paiements validés en USD.</span>
+                    <span class="kpi-subtitle">{% trans "Total des paiements validés en USD." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M19 9 13 15 10 12 6 16"></path></svg></span>
             </div>
             <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">Montant calculé depuis les paiements d'abonnement validés.</div>
+            <div class="kpi-note">{% trans "Montant calculé depuis les paiements d'abonnement validés." %}</div>
         </article>
     </section>
 
-    <section class="owner-panel" aria-label="Actions rapides Super Admin">
+    <section class="owner-panel" aria-label="{% trans 'Actions rapides Super Admin' %}">
         <div class="section-heading">
             <div class="section-title-row">
                 <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 11-14h-8l1-6Z"></path></svg>
                 </span>
                 <div>
-                    <h3>Actions rapides Super Admin</h3>
-                    <span class="section-kicker">Accès directs aux zones de pilotage global de la plateforme.</span>
+                    <h3>{% trans "Actions rapides Super Admin" %}</h3>
+                    <span class="section-kicker">{% trans "Accès directs aux zones de pilotage global de la plateforme." %}</span>
                 </div>
             </div>
         </div>
         <div class="quick-actions-grid">
             <a href="{% url 'super_admin_company_list' %}" class="quick-action is-blue">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path></svg></span>
-                <strong>Gerer les entreprises</strong>
+                <strong>{% trans "Gerer les entreprises" %}</strong>
             </a>
             <a href="#super-admin-paiements" class="quick-action is-green">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg></span>
-                <strong>Voir les paiements</strong>
+                <strong>{% trans "Voir les paiements" %}</strong>
             </a>
             <a href="{% url 'super_admin_subscription_list' %}" class="quick-action is-purple">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="m2 16 10 5 10-5"></path></svg></span>
-                <strong>Gerer les plans</strong>
+                <strong>{% trans "Gerer les plans" %}</strong>
             </a>
             <a href="{% url 'super_admin_subscription_list' %}" class="quick-action is-orange">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg></span>
-                <strong>Voir les abonnements</strong>
+                <strong>{% trans "Voir les abonnements" %}</strong>
             </a>
             <a href="{% url 'super_admin_messages' %}" class="quick-action is-magenta">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg></span>
-                <strong>Voir les messages/questions</strong>
+                <strong>{% trans "Voir les messages/questions" %}</strong>
             </a>
             <a href="{% url 'super_admin_settings' %}" class="quick-action is-red">
                 <span class="quick-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg></span>
-                <strong>Paramètres plateforme</strong>
+                <strong>{% trans "Paramètres plateforme" %}</strong>
             </a>
         </div>
     </section>
 
-    <section id="super-admin-alertes" class="owner-panel" aria-label="Points à surveiller">
+    <section id="super-admin-alertes" class="owner-panel" aria-label="{% trans 'Points à surveiller' %}">
         <div class="section-heading">
             <div class="section-title-row">
                 <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
                 </span>
                 <div>
-                    <h3>Points à surveiller</h3>
-                    <span class="section-kicker">Alertes plateforme construites uniquement depuis les compteurs disponibles.</span>
+                    <h3>{% trans "Points à surveiller" %}</h3>
+                    <span class="section-kicker">{% trans "Alertes plateforme construites uniquement depuis les compteurs disponibles." %}</span>
                 </div>
             </div>
         </div>
@@ -162,8 +164,8 @@
             <div class="alert-card is-warning">
                 <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg></span>
                 <div class="alert-copy">
-                    <strong>Paiements en attente</strong>
-                    <span>{{ counts.pending_payments }} paiement{{ counts.pending_payments|pluralize:"s" }} d'abonnement a traiter.</span>
+                    <strong>{% trans "Paiements en attente" %}</strong>
+                    <span>{% blocktrans count count=counts.pending_payments %}{{ count }} paiement d'abonnement a traiter.{% plural %}{{ count }} paiements d'abonnement a traiter.{% endblocktrans %}</span>
                 </div>
                 <span class="alert-count">{{ counts.pending_payments }}</span>
             </div>
@@ -173,8 +175,8 @@
             <div class="alert-card is-danger">
                 <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
                 <div class="alert-copy">
-                    <strong>Abonnements expires</strong>
-                    <span>{{ counts.expire }} abonnement{{ counts.expire|pluralize:"s" }} expire{{ counts.expire|pluralize:"s" }}.</span>
+                    <strong>{% trans "Abonnements expires" %}</strong>
+                    <span>{% blocktrans count count=counts.expire %}{{ count }} abonnement expire.{% plural %}{{ count }} abonnements expires.{% endblocktrans %}</span>
                 </div>
                 <span class="alert-count">{{ counts.expire }}</span>
             </div>
@@ -184,28 +186,28 @@
             <div class="alert-card is-info">
                 <span class="alert-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>
                 <div class="alert-copy">
-                    <strong>Abonnements suspendus</strong>
-                    <span>{{ counts.suspendu }} compte{{ counts.suspendu|pluralize:"s" }} client{{ counts.suspendu|pluralize:"s" }} suspendu{{ counts.suspendu|pluralize:"s" }}.</span>
+                    <strong>{% trans "Abonnements suspendus" %}</strong>
+                    <span>{% blocktrans count count=counts.suspendu %}{{ count }} compte client suspendu.{% plural %}{{ count }} comptes clients suspendus.{% endblocktrans %}</span>
                 </div>
                 <span class="alert-count">{{ counts.suspendu }}</span>
             </div>
             {% endif %}
 
             {% if not counts.pending_payments and not counts.expire and not counts.suspendu %}
-            <div class="dashboard-empty">Aucun point critique a surveiller pour le moment.</div>
+            <div class="dashboard-empty">{% trans "Aucun point critique a surveiller pour le moment." %}</div>
             {% endif %}
         </div>
     </section>
 
-    <section id="super-admin-paiements" class="owner-panel" aria-label="Paiements en attente">
+    <section id="super-admin-paiements" class="owner-panel" aria-label="{% trans 'Paiements en attente' %}">
         <div class="section-heading">
             <div class="section-title-row">
                 <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
                 </span>
                 <div>
-                    <h3>Paiements en attente</h3>
-                    <span class="section-kicker">Paiements d'abonnement en attente de validation ou de refus.</span>
+                    <h3>{% trans "Paiements en attente" %}</h3>
+                    <span class="section-kicker">{% trans "Paiements d'abonnement en attente de validation ou de refus." %}</span>
                 </div>
             </div>
         </div>
@@ -214,14 +216,14 @@
             <table class="super-admin-table super-admin-payments-table">
                 <thead>
                     <tr>
-                        <th>Entreprise</th>
-                        <th>Plan</th>
-                        <th>Montant</th>
-                        <th>Date</th>
-                        <th>Statut</th>
-                        <th>Reference</th>
-                        <th>Preuve</th>
-                        <th>Actions</th>
+                        <th>{% trans "Entreprise" %}</th>
+                        <th>{% trans "Plan" %}</th>
+                        <th>{% trans "Montant" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Statut" %}</th>
+                        <th>{% trans "Reference" %}</th>
+                        <th>{% trans "Preuve" %}</th>
+                        <th>{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -242,14 +244,14 @@
                                 <span class="muted">{{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:paiement.entreprise.devise }}</span>
                             </div>
                         </td>
-                        <td>{{ paiement.date_creation|date:"d/m/Y H:i" }}</td>
+                        <td>{{ paiement.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
                         <td><span class="super-status-badge status-en-attente">{{ paiement.get_statut_display }}</span></td>
                         <td>{{ paiement.reference_paiement }}</td>
                         <td>
                             {% if paiement.preuve_paiement %}
-                            <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">Voir la preuve</a>
+                            <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">{% trans "Voir la preuve" %}</a>
                             {% else %}
-                            <span class="muted">Aucune preuve</span>
+                            <span class="muted">{% trans "Aucune preuve" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -257,14 +259,14 @@
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                    <input type="text" name="notes_validation" placeholder="Note interne (optionnel)">
-                                    <button type="submit" name="action" value="validate_payment" class="btn-small primary">Valider le paiement</button>
+                                    <input type="text" name="notes_validation" placeholder="{% trans 'Note interne (optionnel)' %}">
+                                    <button type="submit" name="action" value="validate_payment" class="btn-small primary">{% trans "Valider le paiement" %}</button>
                                 </form>
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
-                                    <input type="text" name="notes_validation" placeholder="Motif du refus (optionnel)">
-                                    <button type="submit" name="action" value="refuse_payment" class="btn-small danger">Refuser le paiement</button>
+                                    <input type="text" name="notes_validation" placeholder="{% trans 'Motif du refus (optionnel)' %}">
+                                    <button type="submit" name="action" value="refuse_payment" class="btn-small danger">{% trans "Refuser le paiement" %}</button>
                                 </form>
                             </div>
                         </td>
@@ -274,41 +276,41 @@
             </table>
         </div>
         {% else %}
-        <div class="dashboard-empty">Aucun paiement en attente pour le moment.</div>
+        <div class="dashboard-empty">{% trans "Aucun paiement en attente pour le moment." %}</div>
         {% endif %}
     </section>
 
-    <section id="super-admin-entreprises" class="owner-panel" aria-label="Entreprises">
+    <section id="super-admin-entreprises" class="owner-panel" aria-label="{% trans 'Entreprises' %}">
         <div class="section-heading">
             <div class="section-title-row">
                 <span class="section-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path></svg>
                 </span>
                 <div>
-                    <h3>Entreprises</h3>
-                    <span class="section-kicker">Suivi des comptes clients, statuts d'abonnement et actions SaaS.</span>
+                    <h3>{% trans "Entreprises" %}</h3>
+                    <span class="section-kicker">{% trans "Suivi des comptes clients, statuts d'abonnement et actions SaaS." %}</span>
                 </div>
             </div>
-            <a href="{% url 'super_admin_company_list' %}" class="section-link">Voir tout</a>
+            <a href="{% url 'super_admin_company_list' %}" class="section-link">{% trans "Voir tout" %}</a>
         </div>
 
         <form method="get" class="super-admin-filters">
             <div class="super-admin-filter-field">
-                <label for="id_q">Rechercher une entreprise</label>
-                <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="Nom, raison sociale ou email propriétaire">
+                <label for="id_q">{% trans "Rechercher une entreprise" %}</label>
+                <input id="id_q" type="text" name="q" value="{{ selected_search }}" placeholder="{% trans 'Nom, raison sociale ou email propriétaire' %}">
             </div>
             <div class="super-admin-filter-field">
-                <label for="id_statut">Statut abonnement</label>
+                <label for="id_statut">{% trans "Statut abonnement" %}</label>
                 <select id="id_statut" name="statut">
-                    <option value="">Tous les statuts</option>
+                    <option value="">{% trans "Tous les statuts" %}</option>
                     {% for value, label in statut_choices %}
                     <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="super-admin-filter-actions">
-                <button type="submit" class="btn-small primary">Filtrer</button>
-                <a href="{% url 'super_admin_dashboard' %}" class="btn-small">Reinitialiser</a>
+                <button type="submit" class="btn-small primary">{% trans "Filtrer" %}</button>
+                <a href="{% url 'super_admin_dashboard' %}" class="btn-small">{% trans "Reinitialiser" %}</a>
             </div>
         </form>
 
@@ -316,13 +318,13 @@
             <table class="super-admin-table super-admin-companies-table">
                 <thead>
                     <tr>
-                        <th>Entreprise</th>
-                        <th>Contact principal</th>
-                        <th>Statut</th>
-                        <th>Abonnement</th>
-                        <th>Echeance</th>
-                        <th>Derniere demande</th>
-                        <th>Actions</th>
+                        <th>{% trans "Entreprise" %}</th>
+                        <th>{% trans "Contact principal" %}</th>
+                        <th>{% trans "Statut" %}</th>
+                        <th>{% trans "Abonnement" %}</th>
+                        <th>{% trans "Echeance" %}</th>
+                        <th>{% trans "Derniere demande" %}</th>
+                        <th>{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -348,9 +350,9 @@
                         </td>
                         <td>
                             {% if entreprise.is_active %}
-                            <span class="super-status-badge status-actif">Active</span>
+                            <span class="super-status-badge status-actif">{% trans "Active" %}</span>
                             {% else %}
-                            <span class="super-status-badge status-suspendu">Inactive</span>
+                            <span class="super-status-badge status-suspendu">{% trans "Inactive" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -360,12 +362,12 @@
                                 <span class="super-status-badge status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
                             </div>
                             {% else %}
-                            <span class="super-status-badge status-none">Aucun abonnement</span>
+                            <span class="super-status-badge status-none">{% trans "Aucun abonnement" %}</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if subscription and subscription.date_fin %}
-                                {{ subscription.date_fin|date:"d/m/Y" }}
+                                {{ subscription.date_fin|date:"SHORT_DATE_FORMAT" }}
                             {% else %}
                                 -
                             {% endif %}
@@ -373,10 +375,10 @@
                         <td>
                             <div class="stacked">
                                 {% if entreprise.last_payment_created_at %}
-                                <strong>{{ entreprise.last_payment_created_at|date:"d/m/Y" }}</strong>
+                                <strong>{{ entreprise.last_payment_created_at|date:"SHORT_DATE_FORMAT" }}</strong>
                                 <span class="muted">{{ entreprise.last_payment_amount|default:"0" }} - {{ entreprise.last_payment_status|default:"-" }}</span>
                                 {% else %}
-                                <span class="muted">Aucune demande</span>
+                                <span class="muted">{% trans "Aucune demande" %}</span>
                                 {% endif %}
                             </div>
                         </td>
@@ -387,12 +389,12 @@
                                     <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                                     <div class="action-row">
                                         <select name="plan_id" class="plan-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
-                                            <option value="">Choisir un plan</option>
+                                            <option value="">{% trans "Choisir un plan" %}</option>
                                             {% for plan in plans %}
                                             <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>Activer</button>
+                                        <button type="submit" name="action" value="activate" class="btn-small primary" {% if subscription and subscription.statut == "actif" %}disabled{% endif %}>{% trans "Activer" %}</button>
                                     </div>
                                 </form>
 
@@ -401,12 +403,12 @@
                                     <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                                     <div class="action-row">
                                         <select name="plan_id" class="plan-select plan-change-select" data-current-plan="{{ subscription.plan_id|default:'' }}">
-                                            <option value="">Conserver le plan</option>
+                                            <option value="">{% trans "Conserver le plan" %}</option>
                                             {% for plan in plans %}
                                             <option value="{{ plan.id }}" {% if subscription and subscription.plan_id == plan.id %}selected{% endif %}>{{ plan.nom }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>Changer plan</button>
+                                        <button type="submit" name="action" value="change_plan" class="btn-small change-plan-button" {% if not subscription %}disabled{% endif %}>{% trans "Changer plan" %}</button>
                                     </div>
                                 </form>
 
@@ -416,7 +418,7 @@
                                     <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                                     <div class="action-row">
                                         <input type="number" name="trial_days" value="7" min="1" step="1">
-                                        <button type="submit" name="action" value="extend_trial" class="btn-small warning">Prolonger accès historique</button>
+                                        <button type="submit" name="action" value="extend_trial" class="btn-small warning">{% trans "Prolonger accès historique" %}</button>
                                     </div>
                                 </form>
                                 {% endif %}
@@ -424,7 +426,7 @@
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
-                                    <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>Suspendre</button>
+                                    <button type="submit" name="action" value="suspend" class="btn-small danger" {% if subscription and subscription.statut == "suspendu" %}disabled{% endif %}>{% trans "Suspendre" %}</button>
                                 </form>
                             </div>
                         </td>
@@ -432,7 +434,7 @@
                     {% endwith %}
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="super-admin-table-empty">Aucun compte client ne correspond aux filtres.</td>
+                        <td colspan="7" class="super-admin-table-empty">{% trans "Aucun compte client ne correspond aux filtres." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -440,10 +442,10 @@
         </div>
     </section>
 
-    <section class="manager-info-card" aria-label="Espace Super Admin">
+    <section class="manager-info-card" aria-label="{% trans 'Espace Super Admin' %}">
         <div>
-            <strong>Espace Super Admin</strong>
-            <p>Cet espace permet de piloter la plateforme JOATHAM Manager, suivre les entreprises clientes, contrôler les abonnements et valider les paiements.</p>
+            <strong>{% trans "Espace Super Admin" %}</strong>
+            <p>{% trans "Cet espace permet de piloter la plateforme JOATHAM Manager, suivre les entreprises clientes, contrôler les abonnements et valider les paiements." %}</p>
         </div>
     </section>
 </div>

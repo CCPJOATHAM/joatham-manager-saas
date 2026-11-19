@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from joatham_users.models import Abonnement as SaaSPlan
@@ -38,6 +39,21 @@ class ActivityLog(models.Model):
     def __str__(self):
         return f"{self.module}:{self.action}#{self.objet_id or '-'}"
 
+    @property
+    def display_module(self):
+        from core.audit_i18n import module_label
+        return module_label(self.module)
+
+    @property
+    def display_action(self):
+        from core.audit_i18n import action_label
+        return action_label(self.action)
+
+    @property
+    def display_description(self):
+        from core.audit_i18n import description_label
+        return description_label(self)
+
 
 class PaiementAbonnement(models.Model):
     class Duree(models.TextChoices):
@@ -59,10 +75,10 @@ class PaiementAbonnement(models.Model):
     class Methode(models.TextChoices):
         MANUEL = "manuel", _("Manuel")
         AUTOMATIQUE = "automatique", _("Automatique")
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
+        MOBILE_MONEY = "mobile_money", gettext_lazy("Mobile Money")
         CARTE = "carte", _("Carte")
         VIREMENT = "virement", _("Virement")
-        CASH = "cash", "Cash"
+        CASH = "cash", gettext_lazy("Cash")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",

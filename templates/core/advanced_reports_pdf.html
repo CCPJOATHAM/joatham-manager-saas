@@ -1,5 +1,8 @@
+
+{% load i18n %}
 <!doctype html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
   <meta charset="utf-8">
   <title>{{ report_title }}</title>
@@ -18,7 +21,7 @@
 </head>
 <body>
   <h1>{{ report_title }}</h1>
-  <p class="muted">{{ entreprise.nom }} - genere le {{ date_footer }}</p>
+  <p class="muted">{{ entreprise.nom }} {% trans "- genere le" %} {{ date_footer }}</p>
 
   <table class="kpis">
     <tr>
@@ -33,7 +36,7 @@
     </tr>
   </table>
 
-  <h2>Indicateurs de gestion</h2>
+  <h2>{% trans "Indicateurs de gestion" %}</h2>
   <table>
     <tbody>
       {% for card in report.management_cards %}
@@ -42,21 +45,21 @@
     </tbody>
   </table>
 
-  <h2>Top clients</h2>
+  <h2>{% trans "Top clients" %}</h2>
   <table>
-    <thead><tr><th>Client</th><th>Factures</th><th>Total</th></tr></thead>
+    <thead><tr><th>{% trans "Client" %}</th><th>{% trans "Factures" %}</th><th>{% trans "Total" %}</th></tr></thead>
     <tbody>
       {% for row in report.sales.top_clients %}
       <tr><td>{{ row.name }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td></tr>
       {% empty %}
-      <tr><td colspan="3">Aucune donnee.</td></tr>
+      <tr><td colspan="3">{% trans "Aucune donnee." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <h2>Paiements par moyen</h2>
+  <h2>{% trans "Paiements par moyen" %}</h2>
   <table>
-    <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th><th>Confirme</th></tr></thead>
+    <thead><tr><th>{% trans "Moyen" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th><th>{% trans "Confirme" %}</th></tr></thead>
     <tbody>
       {% for row in report.payments.method_breakdown %}
       <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total_display }}</td><td>{{ row.confirmed_total_display }}</td></tr>
@@ -64,27 +67,27 @@
     </tbody>
   </table>
 
-  <h2>Caisse et stock</h2>
+  <h2>{% trans "Caisse et stock" %}</h2>
   <table>
     <tbody>
-      <tr><th>Entrees caisse</th><td>{{ report.cash.total_entries_display }}</td><th>Sorties caisse</th><td>{{ report.cash.total_exits_display }}</td></tr>
-      <tr><th>Valeur stock</th><td>{{ report.stock.stock_value_display }}</td><th>Ruptures</th><td>{{ report.stock.out_of_stock_count }}</td></tr>
-      <tr><th>Stock faible</th><td>{{ report.stock.low_stock_count }}</td><th>Ecarts inventaire</th><td>{{ report.stock.inventory_gap_count }}</td></tr>
+      <tr><th>{% trans "Entrees caisse" %}</th><td>{{ report.cash.total_entries_display }}</td><th>{% trans "Sorties caisse" %}</th><td>{{ report.cash.total_exits_display }}</td></tr>
+      <tr><th>{% trans "Valeur stock" %}</th><td>{{ report.stock.stock_value_display }}</td><th>{% trans "Ruptures" %}</th><td>{{ report.stock.out_of_stock_count }}</td></tr>
+      <tr><th>{% trans "Stock faible" %}</th><td>{{ report.stock.low_stock_count }}</td><th>{% trans "Ecarts inventaire" %}</th><td>{{ report.stock.inventory_gap_count }}</td></tr>
     </tbody>
   </table>
 
-  <h2>Factures impayees recentes</h2>
+  <h2>{% trans "Factures impayees recentes" %}</h2>
   <table>
-    <thead><tr><th>Facture</th><th>Client</th><th>Date</th><th>Total</th></tr></thead>
+    <thead><tr><th>{% trans "Facture" %}</th><th>{% trans "Client" %}</th><th>{% trans "Date" %}</th><th>{% trans "Total" %}</th></tr></thead>
     <tbody>
       {% for row in report.sales.unpaid_invoice_rows %}
       <tr><td>{{ row.numero }}</td><td>{{ row.client }}</td><td>{{ row.date }}</td><td>{{ row.amount_display }}</td></tr>
       {% empty %}
-      <tr><td colspan="4">Aucune facture impayee.</td></tr>
+      <tr><td colspan="4">{% trans "Aucune facture impayee." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <p class="footer">JOATHAM Manager - rapport avancé</p>
+  <p class="footer">{% trans "JOATHAM Manager - rapport avancé" %}</p>
 </body>
 </html>

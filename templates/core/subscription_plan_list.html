@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Packs SaaS | JOATHAM Manager{% endblock %}
-{% block content_title %}Packs SaaS{% endblock %}
-{% block content_subtitle %}Comparez les offres JOATHAM Manager et choisissez le niveau adapte a votre organisation.{% endblock %}
+
+{% block page_title %}{% trans "Packs SaaS | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Packs SaaS" %}{% endblock %}
+{% block content_subtitle %}{% trans "Comparez les offres JOATHAM Manager et choisissez le niveau adapte a votre organisation." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">Mon abonnement</a>
+<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Mon abonnement" %}</a>
 {% endblock %}
 
 {% block content_card_class %}subscription-plans-shell{% endblock %}
@@ -183,35 +185,34 @@
 
 <section class="plans-hero">
     <div class="plans-hero-copy">
-        <strong>JOATHAM Manager SaaS</strong>
+        <strong>{% trans "JOATHAM Manager SaaS" %}</strong>
         <p>
-            Les packs actifs sont repris depuis la configuration existante de la plateforme.
-            Les montants restent exprimes dans la devise officielle du plan, avec une estimation locale quand elle est disponible.
+            {% trans "Les packs actifs sont repris depuis la configuration existante de la plateforme. Les montants restent exprimes dans la devise officielle du plan, avec une estimation locale quand elle est disponible." %}
         </p>
     </div>
-    <aside class="plans-status-panel" aria-label="Situation abonnement">
+    <aside class="plans-status-panel" aria-label="{% trans 'Situation abonnement' %}">
         <div>
-            <div class="status-label">Organisation</div>
+            <div class="status-label">{% trans "Organisation" %}</div>
             <div class="status-value">{{ entreprise.nom }}</div>
         </div>
         <div>
-            <div class="status-label">Abonnement actuel</div>
+            <div class="status-label">{% trans "Abonnement actuel" %}</div>
             {% if subscription %}
             <div class="status-value">{{ subscription_plan_display_name }}</div>
             <span class="status-pill">{{ subscription.get_statut_display }}</span>
             {% else %}
-            <div class="status-value">Aucun plan actif</div>
-            <span class="status-pill is-warning">Action requise</span>
+            <div class="status-value">{% trans "Aucun plan actif" %}</div>
+            <span class="status-pill is-warning">{% trans "Action requise" %}</span>
             {% endif %}
         </div>
         <div>
-            <div class="status-label">Paiement en ligne</div>
+            <div class="status-label">{% trans "Paiement en ligne" %}</div>
             {% if automatic_payment_provider_configured %}
-            <div class="status-value">Disponible</div>
-            <span class="status-pill">CinetPay configuré</span>
+            <div class="status-value">{% trans "Disponible" %}</div>
+            <span class="status-pill">{% trans "CinetPay configuré" %}</span>
             {% else %}
-            <div class="status-value">Non configuré</div>
-            <span class="status-pill is-warning">Validation manuelle</span>
+            <div class="status-value">{% trans "Non configuré" %}</div>
+            <span class="status-pill is-warning">{% trans "Validation manuelle" %}</span>
             {% endif %}
         </div>
     </aside>
@@ -222,7 +223,7 @@
     {% for plan_card in plan_cards %}
     {% with plan=plan_card.plan price_info=plan_card.price_info monthly_price_info=plan_card.monthly_price_info annual_price_info=plan_card.annual_price_info %}
     <article class="plan-card {% if plan.code == 'pro' %}is-popular{% endif %}">
-        {% if plan.code == "pro" %}<span class="plan-badge">Populaire</span>{% endif %}
+        {% if plan.code == "pro" %}<span class="plan-badge">{% trans "Populaire" %}</span>{% endif %}
         <div class="plan-head">
             <h2>{{ plan_card.display_name }}</h2>
             <p>{{ plan_card.description }}</p>
@@ -231,28 +232,28 @@
         <div class="price">
             {% if plan_card.is_free %}
             <strong>0 {{ plan.devise|default:"USD" }}</strong>
-            <span>plan gratuit</span>
+            <span>{% trans "plan gratuit" %}</span>
             {% else %}
             <strong>{{ monthly_price_info.amount_usd|default:price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }}</strong>
-            <span>Prix mensuel</span>
+            <span>{% trans "Prix mensuel" %}</span>
             {% endif %}
             {% if annual_price_info.amount_usd %}
-            <span>{{ annual_price_info.amount_usd }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} par an</span>
+            <span>{{ annual_price_info.amount_usd }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} {% trans "par an" %}</span>
             {% endif %}
             {% if not plan_card.is_free and not price_info.unavailable %}
-            <span>Estimation locale : {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
-            <span>Taux : 1 {{ price_info.official_currency }} = {{ price_info.rate }} {{ price_info.company_currency }}</span>
+            <span>{% trans "Estimation locale :" %} {{ price_info.estimated_amount }} {{ price_info.company_currency }}</span>
+            <span>{% trans "Taux : 1" %} {{ price_info.official_currency }} = {{ price_info.rate }} {{ price_info.company_currency }}</span>
             {% elif not plan_card.is_free and price_info.unavailable %}
-            <span>Conversion temporairement indisponible pour {{ price_info.company_currency }}</span>
+            <span>{% trans "Conversion temporairement indisponible pour" %} {{ price_info.company_currency }}</span>
             {% endif %}
         </div>
 
         {% if plan_card.features %}
         <div>
-            <div class="section-label">Avantages principaux</div>
+            <div class="section-label">{% trans "Avantages principaux" %}</div>
             <div class="limits">
                 {% for feature in plan_card.features %}
-                <div class="limit-row"><span>{{ feature }}</span><strong>Inclus</strong></div>
+                <div class="limit-row"><span>{{ feature }}</span><strong>{% trans "Inclus" %}</strong></div>
                 {% endfor %}
             </div>
         </div>
@@ -260,7 +261,7 @@
 
         {% if plan_card.non_included %}
         <div>
-            <div class="section-label">Non inclus</div>
+            <div class="section-label">{% trans "Non inclus" %}</div>
             <div class="module-list">
                 {% for item in plan_card.non_included %}
                 <span class="module-pill is-muted">{{ item }}</span>
@@ -270,7 +271,7 @@
         {% endif %}
 
         <div>
-            <div class="section-label">Modules inclus</div>
+            <div class="section-label">{% trans "Modules inclus" %}</div>
             {% if plan_card.included_modules %}
             <div class="module-list">
                 {% for module in plan_card.included_modules %}
@@ -279,13 +280,13 @@
             </div>
             {% else %}
             <div class="module-list">
-                <span class="module-pill">Modules autorises</span>
+                <span class="module-pill">{% trans "Modules autorises" %}</span>
             </div>
             {% endif %}
         </div>
 
         <div class="limits">
-            <div class="section-label">Limites</div>
+            <div class="section-label">{% trans "Limites" %}</div>
             {% for limit in plan_card.limits %}
             <div class="limit-row"><span>{{ limit.label }}</span><strong>{{ limit.value }}</strong></div>
             {% endfor %}
@@ -296,7 +297,7 @@
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ plan.id }}">
             <button type="submit" class="btn-request" {% if plan_card.is_free or plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                {% if plan_card.is_current %}Plan actuel{% elif plan_card.is_free %}Plan gratuit{% elif plan.id in pending_plan_ids %}Demande envoyée{% else %}Choisir ce pack{% endif %}
+                {% if plan_card.is_current %}{% trans "Plan actuel" %}{% elif plan_card.is_free %}{% trans "Plan gratuit" %}{% elif plan.id in pending_plan_ids %}{% trans "Demande envoyée" %}{% else %}{% trans "Choisir ce pack" %}{% endif %}
             </button>
         </form>
         {% if not plan_card.is_free %}
@@ -305,18 +306,18 @@
                 {% csrf_token %}
                 <input type="hidden" name="duree" value="{{ plan_card.monthly_duration }}">
                 <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                    Payer mensuel avec CinetPay
+                    {% trans "Payer mensuel avec CinetPay" %}
                 </button>
             </form>
             <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="duree" value="{{ plan_card.annual_duration }}">
                 <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
-                    Payer annuel avec CinetPay
+                    {% trans "Payer annuel avec CinetPay" %}
                 </button>
             </form>
             {% else %}
-            <div class="auto-payment-note">Paiement CinetPay non configuré</div>
+            <div class="auto-payment-note">{% trans "Paiement CinetPay non configuré" %}</div>
             {% endif %}
         {% endif %}
         </div>
@@ -325,20 +326,20 @@
     {% endfor %}
 </div>
 
-<section class="compare-panel" aria-label="Comparaison rapide">
+<section class="compare-panel" aria-label="{% trans 'Comparaison rapide' %}">
     <div class="compare-header">
-        <h2>Comparaison rapide</h2>
-        <span>Prix, utilisateurs et volume de factures par plan.</span>
+        <h2>{% trans "Comparaison rapide" %}</h2>
+        <span>{% trans "Prix, utilisateurs et volume de factures par plan." %}</span>
     </div>
     <div class="compare-grid">
         {% for plan_card in plan_cards %}
         {% with plan=plan_card.plan price_info=plan_card.price_info %}
         <div class="compare-item">
             <strong>{{ plan_card.display_name }}</strong>
-            <span>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} / mois</span>
-            <span>Utilisateurs : {{ plan.max_utilisateurs|default_if_none:"Illimite" }}</span>
-            <span>Factures / mois : {{ plan.max_factures_mois|default_if_none:"Illimite" }}</span>
-            <span>Clients : {{ plan.max_clients|default_if_none:"Illimite" }}</span>
+            <span>{{ price_info.official_amount|default:plan.prix }} {{ price_info.official_currency|default:plan.devise|default:"USD" }} {% trans "/ mois" %}</span>
+            <span>{% trans "Utilisateurs :" %} {{ plan.max_utilisateurs|default_if_none:_('Illimite') }}</span>
+            <span>{% trans "Factures / mois :" %} {{ plan.max_factures_mois|default_if_none:_('Illimite') }}</span>
+            <span>{% trans "Clients :" %} {{ plan.max_clients|default_if_none:_('Illimite') }}</span>
         </div>
         {% endwith %}
         {% endfor %}
@@ -346,7 +347,7 @@
 </section>
 {% else %}
 <div class="empty-state">
-    Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour preparer votre abonnement.
+    {% trans "Aucun plan payant n'est disponible pour le moment. Contactez JOATHAM Manager pour preparer votre abonnement." %}
 </div>
 {% endif %}
 {% endblock %}

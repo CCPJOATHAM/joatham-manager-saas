@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -30,9 +31,9 @@ def _normalize_positive_quantity(quantity):
     try:
         normalized = int(quantity)
     except (TypeError, ValueError) as exc:
-        raise StockOperationError("La quantite doit etre un entier strictement positif.") from exc
+        raise StockOperationError(gettext_lazy("La quantite doit etre un entier strictement positif.")) from exc
     if normalized <= 0:
-        raise StockOperationError("La quantite doit etre un entier strictement positif.")
+        raise StockOperationError(gettext_lazy("La quantite doit etre un entier strictement positif."))
     return normalized
 
 
@@ -42,7 +43,7 @@ def _normalize_source_id(source_id):
     try:
         return int(source_id)
     except (TypeError, ValueError) as exc:
-        raise StockOperationError("La source du mouvement est invalide.") from exc
+        raise StockOperationError(gettext_lazy("La source du mouvement est invalide.")) from exc
 
 
 def _normalize_optional_non_negative_decimal(value, field_label):
@@ -51,9 +52,9 @@ def _normalize_optional_non_negative_decimal(value, field_label):
     try:
         normalized = Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise StockOperationError(f"{field_label} est invalide.") from exc
+        raise StockOperationError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < 0:
-        raise StockOperationError(f"{field_label} ne peut pas etre negatif.")
+        raise StockOperationError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -66,7 +67,7 @@ def _get_locked_product_for_entreprise(*, entreprise, produit):
         .first()
     )
     if locked is None:
-        raise StockOperationError("Le produit selectionne est invalide pour cette entreprise.")
+        raise StockOperationError(gettext_lazy("Le produit selectionne est invalide pour cette entreprise."))
     return locked
 
 
@@ -92,7 +93,7 @@ def record_stock_movement(
     created_by=None,
 ):
     if getattr(produit, "entreprise_id", None) != getattr(entreprise, "id", None):
-        raise StockOperationError("Le produit selectionne est invalide pour cette entreprise.")
+        raise StockOperationError(gettext_lazy("Le produit selectionne est invalide pour cette entreprise."))
 
     quantity = _normalize_positive_quantity(quantity)
     unit_cost = _normalize_optional_non_negative_decimal(unit_cost, "Le cout unitaire")
@@ -100,19 +101,19 @@ def record_stock_movement(
     stock_after = int(stock_after or 0)
 
     if stock_before < 0:
-        raise StockOperationError("Le stock avant mouvement ne peut pas etre negatif.")
+        raise StockOperationError(gettext_lazy("Le stock avant mouvement ne peut pas etre negatif."))
     if stock_after < 0:
-        raise StockOperationError("Le stock apres mouvement ne peut pas etre negatif.")
+        raise StockOperationError(gettext_lazy("Le stock apres mouvement ne peut pas etre negatif."))
 
     valid_types = {choice for choice, _label in StockMovement.MovementType.choices}
     if movement_type not in valid_types:
-        raise StockOperationError("Le type de mouvement stock est invalide.")
+        raise StockOperationError(gettext_lazy("Le type de mouvement stock est invalide."))
 
     delta = stock_after - stock_before
     if movement_type in POSITIVE_MOVEMENT_TYPES and delta != quantity:
-        raise StockOperationError("Le stock apres mouvement est incoherent avec ce type d'entree.")
+        raise StockOperationError(gettext_lazy("Le stock apres mouvement est incoherent avec ce type d'entree."))
     if movement_type in NEGATIVE_MOVEMENT_TYPES and delta != -quantity:
-        raise StockOperationError("Le stock apres mouvement est incoherent avec ce type de sortie.")
+        raise StockOperationError(gettext_lazy("Le stock apres mouvement est incoherent avec ce type de sortie."))
 
     movement = StockMovement.objects.create(
         entreprise=entreprise,
@@ -162,8 +163,7 @@ def assert_stock_available(*, produit, quantity):
     stock_disponible = int(produit.quantite_stock or 0)
     if quantity > stock_disponible:
         raise StockOperationError(
-            f"Stock insuffisant pour le produit {produit.nom}. "
-            f"Stock disponible : {stock_disponible}, quantite demandee : {quantity}."
+            (gettext_lazy('Stock insuffisant pour le produit %(value_1)s. Stock disponible : %(value_2)s, quantite demandee : %(value_3)s.') % {'value_1': produit.nom, 'value_2': stock_disponible, 'value_3': quantity})
         )
     return stock_disponible
 
@@ -264,7 +264,7 @@ def apply_adjustment(
         StockMovement.MovementType.ADJUSTMENT_POSITIVE,
         StockMovement.MovementType.ADJUSTMENT_NEGATIVE,
     }:
-        raise StockOperationError("Le type d'ajustement stock est invalide.")
+        raise StockOperationError(gettext_lazy("Le type d'ajustement stock est invalide."))
 
     locked_product = _get_locked_product_for_entreprise(entreprise=entreprise, produit=produit)
     quantity = _normalize_positive_quantity(quantity)

@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Repondre a une question publique" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Repondre a une question publique" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Repondre a une question publique" %}{% endblock %}
 {% block content_subtitle %}{% trans "Envoyez une reponse email au visiteur et marquez la demande comme traitee." %}{% endblock %}
 
@@ -263,7 +263,7 @@
                 </div>
                 <div class="detail-row">
                     <span>{% trans "Date d'envoi" %}</span>
-                    <strong>{{ question.date_creation|date:"d/m/Y H:i" }}</strong>
+                    <strong>{{ question.date_creation|date:"SHORT_DATETIME_FORMAT" }}</strong>
                 </div>
             </div>
         </div>
@@ -275,7 +275,7 @@
             <div class="status-line">
                 <span class="status-badge">{{ question.get_statut_display }}</span>
                 {% if question.date_traitement %}
-                <span class="muted">{% trans "Traite le" %} {{ question.date_traitement|date:"d/m/Y H:i" }}</span>
+                <span class="muted">{% trans "Traite le" %} {{ question.date_traitement|date:"SHORT_DATETIME_FORMAT" }}</span>
                 {% endif %}
             </div>
         </div>
@@ -286,7 +286,7 @@
         <div class="previous-reply">
             <h2>{% trans "Reponse deja envoyee" %}</h2>
             <div class="muted">
-                {{ question.date_reponse|date:"d/m/Y H:i" }}
+                {{ question.date_reponse|date:"SHORT_DATETIME_FORMAT" }}
                 {% if question.repondu_par %}
                 - {{ question.repondu_par.get_full_name|default:question.repondu_par.username }}
                 {% endif %}

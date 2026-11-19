@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -233,6 +234,8 @@ class PaiementSalaireForm(forms.ModelForm):
             "date_paiement": forms.DateInput(attrs={"type": "date"}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+
+        labels.update({'caisse': gettext_lazy('Caisse')})
 
     def __init__(self, *args, entreprise=None, **kwargs):
         super().__init__(*args, **kwargs)

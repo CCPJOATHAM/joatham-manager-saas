@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from core.models import PaiementAbonnement
 
 
@@ -62,4 +63,4 @@ def get_subscription_payment_for_super_admin(paiement_id):
     try:
         return PaiementAbonnement.objects.select_related("entreprise", "plan").get(id=paiement_id)
     except (PaiementAbonnement.DoesNotExist, TypeError, ValueError):
-        raise ValueError("Paiement abonnement introuvable.")
+        raise ValueError(gettext_lazy("Paiement abonnement introuvable."))

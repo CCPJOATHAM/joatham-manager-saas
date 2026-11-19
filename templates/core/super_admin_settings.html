@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Paramètres plateforme | JOATHAM Manager{% endblock %}
-{% block content_title %}Paramètres plateforme{% endblock %}
-{% block content_subtitle %}Configuration centrale de JOATHAM Manager et du mode maintenance.{% endblock %}
+
+{% block page_title %}{% trans "Paramètres plateforme | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Paramètres plateforme" %}{% endblock %}
+{% block content_subtitle %}{% trans "Configuration centrale de JOATHAM Manager et du mode maintenance." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_dashboard' %}" class="btn-link">Pilotage SaaS</a>
+<a href="{% url 'super_admin_dashboard' %}" class="btn-link">{% trans "Pilotage SaaS" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -190,38 +192,38 @@
 
 {% if cinetpay_diagnostic %}
 <section class="settings-panel diagnostic-panel">
-    <h2 class="section-title">Diagnostic CinetPay</h2>
-    <p class="muted">Statut technique sans affichage de secrets. Les cles et tokens ne sont jamais exposes ici.</p>
+    <h2 class="section-title">{% trans "Diagnostic CinetPay" %}</h2>
+    <p class="muted">{% trans "Statut technique sans affichage de secrets. Les cles et tokens ne sont jamais exposes ici." %}</p>
 
     <div class="diagnostic-grid">
         <div class="diagnostic-item">
-            <span>Paiement automatique</span>
-            <strong>{% if cinetpay_diagnostic.enabled %}Actif{% else %}Inactif{% endif %}</strong>
+            <span>{% trans "Paiement automatique" %}</span>
+            <strong>{% if cinetpay_diagnostic.enabled %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</strong>
         </div>
         <div class="diagnostic-item">
-            <span>Provider</span>
+            <span>{% trans "Provider" %}</span>
             <strong>{{ cinetpay_diagnostic.provider|default:"-" }}</strong>
         </div>
         <div class="diagnostic-item">
-            <span>Provider CinetPay</span>
-            <strong>{% if cinetpay_diagnostic.provider_is_cinetpay %}Oui{% else %}Non{% endif %}</strong>
+            <span>{% trans "Provider CinetPay" %}</span>
+            <strong>{% if cinetpay_diagnostic.provider_is_cinetpay %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</strong>
         </div>
         <div class="diagnostic-item">
-            <span>Configuration</span>
-            <strong>{% if cinetpay_diagnostic.configured %}Complete{% else %}Incomplete{% endif %}</strong>
+            <span>{% trans "Configuration" %}</span>
+            <strong>{% if cinetpay_diagnostic.configured %}{% trans "Complete" %}{% else %}{% trans "Incomplete" %}{% endif %}</strong>
         </div>
         <div class="diagnostic-item">
-            <span>Environnement paiement</span>
+            <span>{% trans "Environnement paiement" %}</span>
             <strong>{{ cinetpay_diagnostic.payment_environment }}</strong>
-            <small class="diagnostic-url">Sandbox flag : {% if cinetpay_diagnostic.sandbox_flag %}Actif{% else %}Inactif{% endif %}</small>
+            <small class="diagnostic-url">{% trans "Sandbox flag :" %} {% if cinetpay_diagnostic.sandbox_flag %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</small>
         </div>
         <div class="diagnostic-item">
-            <span>Source URL paiement</span>
+            <span>{% trans "Source URL paiement" %}</span>
             <strong>{{ cinetpay_diagnostic.payment_url_source_label }}</strong>
             <small class="diagnostic-url">{{ cinetpay_diagnostic.payment_url }}</small>
         </div>
         <div class="diagnostic-item">
-            <span>Source URL verification</span>
+            <span>{% trans "Source URL verification" %}</span>
             <strong>{{ cinetpay_diagnostic.check_url_source_label }}</strong>
             <small class="diagnostic-url">{{ cinetpay_diagnostic.check_url }}</small>
         </div>
@@ -229,18 +231,18 @@
 
     {% if cinetpay_diagnostic.missing_required_settings %}
         <div class="diagnostic-warning">
-            Configuration CinetPay incomplete :
+            {% trans "Configuration CinetPay incomplete :" %}
             {% for setting_name in cinetpay_diagnostic.missing_required_settings %}
                 <code>{{ setting_name }}</code>{% if not forloop.last %}, {% endif %}
             {% endfor %}
         </div>
     {% else %}
-        <div class="diagnostic-ok">Toutes les variables requises CinetPay sont detectees.</div>
+        <div class="diagnostic-ok">{% trans "Toutes les variables requises CinetPay sont detectees." %}</div>
     {% endif %}
 
     {% if cinetpay_diagnostic.warnings %}
         <div class="diagnostic-list">
-            <span>Alertes de cohérence</span>
+            <span>{% trans "Alertes de cohérence" %}</span>
             <ul>
                 {% for warning in cinetpay_diagnostic.warnings %}
                     <li>{{ warning }}</li>
@@ -250,23 +252,23 @@
     {% endif %}
 
     <div class="diagnostic-list">
-        <span>Variables requises presentes</span>
+        <span>{% trans "Variables requises presentes" %}</span>
         <ul>
             {% for setting_name in cinetpay_diagnostic.present_required_settings %}
-                <li><code>{{ setting_name }}</code> : present</li>
+                <li><code>{{ setting_name }}</code> {% trans ": present" %}</li>
             {% empty %}
-                <li>Aucune variable requise detectee.</li>
+                <li>{% trans "Aucune variable requise detectee." %}</li>
             {% endfor %}
         </ul>
     </div>
 
     <div class="diagnostic-list">
-        <span>Variables optionnelles</span>
+        <span>{% trans "Variables optionnelles" %}</span>
         <ul>
             {% for item in cinetpay_diagnostic.optional_settings %}
                 <li>
                     <code>{{ item.name }}</code> :
-                    {% if item.present %}present{% else %}absent{% endif %}
+                    {% if item.present %}{% trans "present" %}{% else %}{% trans "absent" %}{% endif %}
                     {% if item.source %}({{ item.source }}){% endif %}
                 </li>
             {% endfor %}
@@ -289,7 +291,7 @@
         <div class="field">
             <label for="{{ form.email_systeme.id_for_label }}">{{ form.email_systeme.label }}</label>
             {{ form.email_systeme }}
-            <span class="muted">Cet email est un paramètre applicatif et ne modifie pas la configuration SMTP existante.</span>
+            <span class="muted">{% trans "Cet email est un paramètre applicatif et ne modifie pas la configuration SMTP existante." %}</span>
             {{ form.email_systeme.errors }}
         </div>
 
@@ -302,21 +304,21 @@
         <div class="field">
             <label for="{{ form.devise_plateforme.id_for_label }}">{{ form.devise_plateforme.label }}</label>
             {{ form.devise_plateforme }}
-            <span class="muted">Devise officielle des abonnements plateforme. Par defaut : USD.</span>
+            <span class="muted">{% trans "Devise officielle des abonnements plateforme. Par defaut : USD." %}</span>
             {{ form.devise_plateforme.errors }}
         </div>
 
         <div class="field">
             <label for="{{ form.exchange_rate_provider.id_for_label }}">{{ form.exchange_rate_provider.label }}</label>
             {{ form.exchange_rate_provider }}
-            <span class="muted">Provider actuel : exchangerate_api. Les variables d'environnement restent prioritaires.</span>
+            <span class="muted">{% trans "Provider actuel : exchangerate_api. Les variables d'environnement restent prioritaires." %}</span>
             {{ form.exchange_rate_provider.errors }}
         </div>
 
         <div class="field">
             <label for="{{ form.exchange_rate_api_key.id_for_label }}">{{ form.exchange_rate_api_key.label }}</label>
             {{ form.exchange_rate_api_key }}
-            <span class="muted">Optionnel ici. Preferer EXCHANGE_RATE_API_KEY cote serveur.</span>
+            <span class="muted">{% trans "Optionnel ici. Preferer EXCHANGE_RATE_API_KEY cote serveur." %}</span>
             {{ form.exchange_rate_api_key.errors }}
         </div>
 
@@ -330,7 +332,7 @@
             {{ form.allow_manual_exchange_rate_fallback }}
             <span>
                 <strong>{{ form.allow_manual_exchange_rate_fallback.label }}</strong>
-                <span class="muted">Permet au super_admin de saisir un montant USD ou un taux si l'API est indisponible.</span>
+                <span class="muted">{% trans "Permet au super_admin de saisir un montant USD ou un taux si l'API est indisponible." %}</span>
             </span>
         </label>
         {{ form.allow_manual_exchange_rate_fallback.errors }}
@@ -338,7 +340,7 @@
         <div class="field">
             <label for="{{ form.duree_essai_jours.id_for_label }}">{{ form.duree_essai_jours.label }}</label>
             {{ form.duree_essai_jours }}
-            <span class="muted">Utilise uniquement pour les anciens essais ou les prolongations manuelles de compatibilite.</span>
+            <span class="muted">{% trans "Utilise uniquement pour les anciens essais ou les prolongations manuelles de compatibilite." %}</span>
             {{ form.duree_essai_jours.errors }}
         </div>
 
@@ -346,7 +348,7 @@
             {{ form.mode_maintenance }}
             <span>
                 <strong>{{ form.mode_maintenance.label }}</strong>
-                <span class="muted">Les utilisateurs non super_admin seront bloques tant que ce mode est actif.</span>
+                <span class="muted">{% trans "Les utilisateurs non super_admin seront bloques tant que ce mode est actif." %}</span>
             </span>
         </label>
         {{ form.mode_maintenance.errors }}
@@ -354,20 +356,20 @@
         <div class="field">
             <label for="{{ form.message_maintenance.id_for_label }}">{{ form.message_maintenance.label }}</label>
             {{ form.message_maintenance }}
-            <span class="muted">Message affiche aux utilisateurs lorsque le mode maintenance est actif.</span>
+            <span class="muted">{% trans "Message affiche aux utilisateurs lorsque le mode maintenance est actif." %}</span>
             {{ form.message_maintenance.errors }}
         </div>
 
         <div class="field">
             <label for="{{ form.maintenance_allowed_ips.id_for_label }}">{{ form.maintenance_allowed_ips.label }}</label>
             {{ form.maintenance_allowed_ips }}
-            <span class="muted">Une IP par ligne ou separee par virgule.</span>
+            <span class="muted">{% trans "Une IP par ligne ou separee par virgule." %}</span>
             {{ form.maintenance_allowed_ips.errors }}
         </div>
 
-        <h2 class="section-title">Maintenance par module</h2>
+        <h2 class="section-title">{% trans "Maintenance par module" %}</h2>
         <div class="field">
-            <span class="muted">Cochez uniquement les modules à rendre temporairement indisponibles. Le super_admin et les IPs autorisées gardent l'accès.</span>
+            <span class="muted">{% trans "Cochez uniquement les modules à rendre temporairement indisponibles. Le super_admin et les IPs autorisées gardent l'accès." %}</span>
             <div class="module-grid">
                 {% for checkbox in form.maintenance_modules %}
                     <label class="module-check" for="{{ checkbox.id_for_label }}">
@@ -379,7 +381,7 @@
             {{ form.maintenance_modules.errors }}
         </div>
 
-        <button type="submit" class="btn-save">Enregistrer</button>
+        <button type="submit" class="btn-save">{% trans "Enregistrer" %}</button>
     </form>
 </section>
 {% endblock %}

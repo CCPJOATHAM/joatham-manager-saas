@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+
 
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}Configurez une caisse claire, active et facile a exploiter pour vos operations quotidiennes.{% endblock %}
+{% block content_subtitle %}{% trans "Configurez une caisse claire, active et facile a exploiter pour vos operations quotidiennes." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -112,8 +114,8 @@
 </style>
 
 <div class="intro-card">
-  <h2>Configuration de la caisse</h2>
-  <p>Renseignez un nom exploitable, un code unique, une devise et une courte description pour faciliter le pilotage et les controles ulterieurs.</p>
+  <h2>{% trans "Configuration de la caisse" %}</h2>
+  <p>{% trans "Renseignez un nom exploitable, un code unique, une devise et une courte description pour faciliter le pilotage et les controles ulterieurs." %}</p>
 </div>
 
 <div class="cash-form-card">
@@ -121,34 +123,34 @@
     {% csrf_token %}
     <div class="cash-form-grid">
       <div class="field">
-        <label for="{{ form.nom.id_for_label }}">Nom</label>
+        <label for="{{ form.nom.id_for_label }}">{% trans "Nom" %}</label>
         {{ form.nom }}{{ form.nom.errors }}
-        <div class="helper">Exemple : caisse principale, caisse boutique ou caisse accueil.</div>
+        <div class="helper">{% trans "Exemple : caisse principale, caisse boutique ou caisse accueil." %}</div>
       </div>
       <div class="field">
-        <label for="{{ form.code.id_for_label }}">Code</label>
+        <label for="{{ form.code.id_for_label }}">{% trans "Code" %}</label>
         {{ form.code }}{{ form.code.errors }}
-        <div class="helper">Le code doit rester simple, court et identifiable rapidement.</div>
+        <div class="helper">{% trans "Le code doit rester simple, court et identifiable rapidement." %}</div>
       </div>
       <div class="field">
-        <label for="{{ form.devise.id_for_label }}">Devise</label>
+        <label for="{{ form.devise.id_for_label }}">{% trans "Devise" %}</label>
         {{ form.devise }}{{ form.devise.errors }}
-        <div class="helper">Utilisez la devise reellement pratiquee sur cette caisse.</div>
+        <div class="helper">{% trans "Utilisez la devise reellement pratiquee sur cette caisse." %}</div>
       </div>
       <div class="field checkbox">
         {{ form.est_active }}
-        <label for="{{ form.est_active.id_for_label }}">Caisse active</label>
+        <label for="{{ form.est_active.id_for_label }}">{% trans "Caisse active" %}</label>
         {{ form.est_active.errors }}
       </div>
       <div class="field full">
-        <label for="{{ form.description.id_for_label }}">Description</label>
+        <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
         {{ form.description }}{{ form.description.errors }}
-        <div class="helper">Vous pouvez preciser l'emplacement, l'equipe ou le contexte d'utilisation.</div>
+        <div class="helper">{% trans "Vous pouvez preciser l'emplacement, l'equipe ou le contexte d'utilisation." %}</div>
       </div>
     </div>
     <div class="actions">
       <button type="submit" class="submit-btn">{{ submit_label }}</button>
-      <a href="{% url 'caisse_list' %}" class="secondary-btn">Retour a la caisse</a>
+      <a href="{% url 'caisse_list' %}" class="secondary-btn">{% trans "Retour a la caisse" %}</a>
     </div>
   </form>
 </div>

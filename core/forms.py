@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django import forms
@@ -44,8 +45,8 @@ class ExchangeRateManualForm(forms.ModelForm):
             "actif": _("Actif"),
         }
         widgets = {
-            "devise_source": forms.TextInput(attrs={"placeholder": "USD"}),
-            "devise_cible": forms.TextInput(attrs={"placeholder": "CDF"}),
+            "devise_source": forms.TextInput(attrs={"placeholder": gettext_lazy("USD")}),
+            "devise_cible": forms.TextInput(attrs={"placeholder": gettext_lazy("CDF")}),
             "date_taux": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
 
@@ -117,17 +118,19 @@ class EntrepriseSettingsForm(forms.ModelForm):
         ]
 
         widgets = {
-            "adresse": forms.TextInput(attrs={"placeholder": "Adresse de l'entreprise"}),
-            "ville": forms.TextInput(attrs={"placeholder": "Ville"}),
-            "pays": forms.TextInput(attrs={"placeholder": "Pays"}),
+            "adresse": forms.TextInput(attrs={"placeholder": gettext_lazy("Adresse de l'entreprise")}),
+            "ville": forms.TextInput(attrs={"placeholder": gettext_lazy("Ville")}),
+            "pays": forms.TextInput(attrs={"placeholder": gettext_lazy("Pays")}),
             "telephone": forms.TextInput(attrs={"placeholder": "+243..."}),
-            "email": forms.EmailInput(attrs={"placeholder": "contact@entreprise.com"}),
-            "banque": forms.TextInput(attrs={"placeholder": "Banque"}),
-            "compte_bancaire": forms.TextInput(attrs={"placeholder": "Numéro de compte"}),
-            "rccm": forms.TextInput(attrs={"placeholder": "RCCM"}),
-            "id_nat": forms.TextInput(attrs={"placeholder": "ID NAT"}),
-            "numero_impot": forms.TextInput(attrs={"placeholder": "Numéro d'impôt"}),
+            "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("contact@entreprise.com")}),
+            "banque": forms.TextInput(attrs={"placeholder": gettext_lazy("Banque")}),
+            "compte_bancaire": forms.TextInput(attrs={"placeholder": gettext_lazy("Numéro de compte")}),
+            "rccm": forms.TextInput(attrs={"placeholder": gettext_lazy("RCCM")}),
+            "id_nat": forms.TextInput(attrs={"placeholder": gettext_lazy("ID NAT")}),
+            "numero_impot": forms.TextInput(attrs={"placeholder": gettext_lazy("Numéro d'impôt")}),
         }
+
+        labels = {'nom': gettext_lazy('Nom'), 'raison_sociale': gettext_lazy('Raison sociale'), 'adresse': gettext_lazy('Adresse'), 'ville': gettext_lazy('Ville'), 'pays': gettext_lazy('Pays'), 'devise': gettext_lazy('Devise'), 'taux_tva_defaut': gettext_lazy('Taux tva defaut'), 'referentiel_comptable': gettext_lazy('Referentiel comptable'), 'telephone': gettext_lazy('Telephone'), 'email': gettext_lazy('Email'), 'banque': gettext_lazy('Banque'), 'compte_bancaire': gettext_lazy('Compte bancaire'), 'rccm': gettext_lazy('Rccm'), 'id_nat': gettext_lazy('Id nat'), 'numero_impot': gettext_lazy('Numero impot'), 'logo': gettext_lazy('Logo')}
 
 
 class PaiementAbonnementForm(forms.ModelForm):
@@ -148,10 +151,10 @@ class PaiementAbonnementForm(forms.ModelForm):
         }
         widgets = {
             "telephone_paiement": forms.TextInput(
-                attrs={"placeholder": "Ex. +243... pour le compte utilisé"}
+                attrs={"placeholder": gettext_lazy("Ex. +243... pour le compte utilisé")}
             ),
             "reference_paiement": forms.TextInput(
-                attrs={"placeholder": "Ex. transaction Mobile Money, virement, reçu"}
+                attrs={"placeholder": gettext_lazy("Ex. transaction Mobile Money, virement, reçu")}
             ),
         }
 
@@ -250,26 +253,26 @@ class PlatformSettingsForm(forms.ModelForm):
             "maintenance_modules",
         ]
         labels = {
-            "nom_plateforme": "Nom plateforme",
-            "email_systeme": "Email systeme",
-            "devise_defaut": "Devise par defaut",
-            "devise_plateforme": "Devise plateforme",
-            "exchange_rate_provider": "Provider taux de change",
-            "exchange_rate_api_key": "Cle API taux de change",
-            "exchange_rate_cache_hours": "Cache taux en heures",
-            "allow_manual_exchange_rate_fallback": "Autoriser fallback manuel",
-            "duree_essai_jours": "Duree de compatibilite essai",
-            "mode_maintenance": "Mode maintenance",
-            "message_maintenance": "Message maintenance",
-            "maintenance_allowed_ips": "IPs autorisees",
-            "maintenance_modules": "Modules en maintenance",
+            "nom_plateforme": gettext_lazy("Nom plateforme"),
+            "email_systeme": gettext_lazy("Email systeme"),
+            "devise_defaut": gettext_lazy("Devise par defaut"),
+            "devise_plateforme": gettext_lazy("Devise plateforme"),
+            "exchange_rate_provider": gettext_lazy("Provider taux de change"),
+            "exchange_rate_api_key": gettext_lazy("Cle API taux de change"),
+            "exchange_rate_cache_hours": gettext_lazy("Cache taux en heures"),
+            "allow_manual_exchange_rate_fallback": gettext_lazy("Autoriser fallback manuel"),
+            "duree_essai_jours": gettext_lazy("Duree de compatibilite essai"),
+            "mode_maintenance": gettext_lazy("Mode maintenance"),
+            "message_maintenance": gettext_lazy("Message maintenance"),
+            "maintenance_allowed_ips": gettext_lazy("IPs autorisees"),
+            "maintenance_modules": gettext_lazy("Modules en maintenance"),
         }
         widgets = {
-            "nom_plateforme": forms.TextInput(attrs={"placeholder": "JOATHAM Manager"}),
-            "email_systeme": forms.EmailInput(attrs={"placeholder": "admin@joatham.com"}),
+            "nom_plateforme": forms.TextInput(attrs={"placeholder": gettext_lazy("JOATHAM Manager")}),
+            "email_systeme": forms.EmailInput(attrs={"placeholder": gettext_lazy("admin@joatham.com")}),
             "devise_defaut": forms.Select(choices=[]),
-            "devise_plateforme": forms.TextInput(attrs={"placeholder": "USD"}),
-            "exchange_rate_provider": forms.TextInput(attrs={"placeholder": "exchangerate_api"}),
+            "devise_plateforme": forms.TextInput(attrs={"placeholder": gettext_lazy("USD")}),
+            "exchange_rate_provider": forms.TextInput(attrs={"placeholder": gettext_lazy("exchangerate_api")}),
             "exchange_rate_api_key": forms.PasswordInput(render_value=True),
             "exchange_rate_cache_hours": forms.NumberInput(attrs={"min": "1", "step": "1"}),
             "duree_essai_jours": forms.NumberInput(attrs={"min": "1", "step": "1"}),

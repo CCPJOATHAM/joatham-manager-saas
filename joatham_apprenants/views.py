@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from base64 import b64encode
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
@@ -403,7 +404,7 @@ def paiement_inscription_document_pdf(request, inscription_id, paiement_id):
     paiement = get_paiement_by_inscription(entreprise, inscription, paiement_id)
     document = get_paiement_document_data(inscription, paiement)
     if document is None:
-        raise Http404("Document de paiement introuvable.")
+        raise Http404(gettext_lazy("Document de paiement introuvable."))
 
     context = {
         "inscription": inscription,

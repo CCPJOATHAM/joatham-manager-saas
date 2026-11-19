@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from functools import wraps
 
 from django.contrib.auth.decorators import login_required
@@ -105,7 +106,7 @@ def user_has_permission(user, permission_code):
 
     allowed_roles = PERMISSIONS.get(permission_code)
     if allowed_roles is None:
-        raise KeyError(f"Permission inconnue: {permission_code}")
+        raise KeyError((gettext_lazy('Permission inconnue: %(value_1)s') % {'value_1': permission_code}))
 
     return user_role in allowed_roles
 

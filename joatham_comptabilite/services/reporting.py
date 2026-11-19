@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from collections import defaultdict
 from decimal import Decimal
 
@@ -339,7 +340,7 @@ def build_report_payload(report_slug, entreprise, date_debut=None, date_fin=None
         "bilan": build_bilan_simplifie,
     }
     if report_slug not in builders:
-        raise ValueError(f"Rapport inconnu: {report_slug}")
+        raise ValueError((gettext_lazy('Rapport inconnu: %(value_1)s') % {'value_1': report_slug}))
 
     data = builders[report_slug](entreprise, date_debut=date_debut, date_fin=date_fin)
     return {

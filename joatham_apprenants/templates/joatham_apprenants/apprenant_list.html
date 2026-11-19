@@ -6,37 +6,37 @@
 {% block apprenants_content %}
     <div class="header">
         <div>
-            <h1>Apprenants</h1>
-            <p>Entreprise: {{ entreprise.nom }}</p>
+            <h1>{% trans "Apprenants" %}</h1>
+            <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
         </div>
         <div class="actions">
-            <a href="{% url 'apprenants_dashboard' %}">Dashboard</a>
-            <a href="{% url 'formation_list' %}">Formations</a>
+            <a href="{% url 'apprenants_dashboard' %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'formation_list' %}">{% trans "Formations" %}</a>
             {% if can_manage_apprenants_ui %}
-            <a href="{% url 'inscription_create' %}">Nouvelle inscription</a>
+            <a href="{% url 'inscription_create' %}">{% trans "Nouvelle inscription" %}</a>
             {% endif %}
             {% if can_add_apprenants_ui %}
-            <a href="{% url 'apprenant_create' %}">Nouvel apprenant</a>
+            <a href="{% url 'apprenant_create' %}">{% trans "Nouvel apprenant" %}</a>
             {% endif %}
         </div>
     </div>
 
     <div class="card">
         <div class="sub-actions">
-            <a href="{% url 'apprenants_pdf' %}">Export PDF apprenants</a>
-            <a href="{% url 'apprenants_excel' %}">Export Excel apprenants</a>
-            <a href="{% url 'inscriptions_pdf' %}">Export PDF inscriptions</a>
-            <a href="{% url 'inscriptions_excel' %}">Export Excel inscriptions</a>
+            <a href="{% url 'apprenants_pdf' %}">{% trans "Export PDF apprenants" %}</a>
+            <a href="{% url 'apprenants_excel' %}">{% trans "Export Excel apprenants" %}</a>
+            <a href="{% url 'inscriptions_pdf' %}">{% trans "Export PDF inscriptions" %}</a>
+            <a href="{% url 'inscriptions_excel' %}">{% trans "Export Excel inscriptions" %}</a>
         </div>
-        <h2>Liste des apprenants</h2>
+        <h2>{% trans "Liste des apprenants" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Nom</th>
-                    <th>Téléphone</th>
-                    <th>Email</th>
-                    <th>Date inscription</th>
-                    <th>Actif</th>
+                    <th>{% trans "Nom" %}</th>
+                    <th>{% trans "Téléphone" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Date inscription" %}</th>
+                    <th>{% trans "Actif" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,14 +46,14 @@
                     <td>{{ apprenant.telephone|default:"-" }}</td>
                     <td>{{ apprenant.email|default:"-" }}</td>
                     <td>{{ apprenant.date_inscription }}</td>
-                    <td>{% if apprenant.actif %}Oui{% else %}Non{% endif %}</td>
+                    <td>{% if apprenant.actif %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
                 </tr>
             {% empty %}
                 <tr>
                     <td colspan="5" class="empty">
-                        Aucun apprenant enregistré pour le moment.
+                        {% trans "Aucun apprenant enregistré pour le moment." %}
                         {% if can_add_apprenants_ui %}
-                        <a href="{% url 'apprenant_create' %}" style="margin-left:8px;">Ajouter un apprenant</a>
+                        <a href="{% url 'apprenant_create' %}" style="margin-left:8px;">{% trans "Ajouter un apprenant" %}</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -63,19 +63,19 @@
     </div>
 
     <div class="card">
-        <h2>Inscriptions recentes</h2>
+        <h2>{% trans "Inscriptions recentes" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Apprenant</th>
-                    <th>Formation</th>
-                    <th>Statut</th>
-                <th>Montant prévu</th>
-                <th>Montant payé</th>
-                <th>Solde</th>
-                <th>Statut de paiement</th>
-                <th>Trop-perçu</th>
-                <th>Actions</th>
+                    <th>{% trans "Apprenant" %}</th>
+                    <th>{% trans "Formation" %}</th>
+                    <th>{% trans "Statut" %}</th>
+                <th>{% trans "Montant prévu" %}</th>
+                <th>{% trans "Montant payé" %}</th>
+                <th>{% trans "Solde" %}</th>
+                <th>{% trans "Statut de paiement" %}</th>
+                <th>{% trans "Trop-perçu" %}</th>
+                <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,18 +96,18 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'inscription_detail' inscription.id %}">Voir</a>
+                        <a href="{% url 'inscription_detail' inscription.id %}">{% trans "Voir" %}</a>
                         {% if can_record_apprenant_payments_ui %}
-                        <a href="{% url 'paiement_inscription_create' inscription.id %}" style="margin-left:8px;">Ajouter paiement</a>
+                        <a href="{% url 'paiement_inscription_create' inscription.id %}" style="margin-left:8px;">{% trans "Ajouter paiement" %}</a>
                         {% endif %}
                     </td>
                 </tr>
             {% empty %}
                 <tr>
                     <td colspan="9" class="empty">
-                        Aucune inscription enregistrée pour le moment.
+                        {% trans "Aucune inscription enregistrée pour le moment." %}
                         {% if can_manage_apprenants_ui %}
-                        <a href="{% url 'inscription_create' %}" style="margin-left:8px;">Nouvelle inscription</a>
+                        <a href="{% url 'inscription_create' %}" style="margin-left:8px;">{% trans "Nouvelle inscription" %}</a>
                         {% endif %}
                     </td>
                 </tr>

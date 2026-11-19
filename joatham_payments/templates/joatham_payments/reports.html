@@ -1,52 +1,54 @@
 {% extends "joatham_payments/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Rapports paiements{% endblock %}
-{% block content_title %}Rapports paiements{% endblock %}
-{% block content_subtitle %}Synthese des paiements par periode, moyen, statut, facture et caisse.{% endblock %}
+
+{% block page_title %}{% trans "Rapports paiements" %}{% endblock %}
+{% block content_title %}{% trans "Rapports paiements" %}{% endblock %}
+{% block content_subtitle %}{% trans "Synthese des paiements par periode, moyen, statut, facture et caisse." %}{% endblock %}
 
 {% block content %}
 <section class="payments-shell">
   <div class="payments-panel">
     <div class="payments-panel-header">
-      <h3>Filtres du rapport</h3>
-      <p>Les filtres actifs sont repris depuis la liste des paiements et les exports.</p>
+      <h3>{% trans "Filtres du rapport" %}</h3>
+      <p>{% trans "Les filtres actifs sont repris depuis la liste des paiements et les exports." %}</p>
     </div>
     <div class="payments-panel-body">
       <form method="get">
         <div class="payments-filters">
           <div class="payments-field">
-            <label for="id_status">Statut</label>
+            <label for="id_status">{% trans "Statut" %}</label>
             <select name="status" id="id_status">
-              <option value="">Tous les statuts</option>
+              <option value="">{% trans "Tous les statuts" %}</option>
               {% for value, label in status_choices %}
               <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="payments-field">
-            <label for="id_method">Moyen</label>
+            <label for="id_method">{% trans "Moyen" %}</label>
             <select name="method" id="id_method">
-              <option value="">Tous les moyens</option>
+              <option value="">{% trans "Tous les moyens" %}</option>
               {% for value, label in method_choices %}
               <option value="{{ value }}" {% if filters.method == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="payments-field">
-            <label for="id_date_debut">Date debut</label>
+            <label for="id_date_debut">{% trans "Date debut" %}</label>
             <input type="date" name="date_debut" id="id_date_debut" value="{{ filters.date_debut }}">
           </div>
           <div class="payments-field">
-            <label for="id_date_fin">Date fin</label>
+            <label for="id_date_fin">{% trans "Date fin" %}</label>
             <input type="date" name="date_fin" id="id_date_fin" value="{{ filters.date_fin }}">
           </div>
         </div>
         <div class="payments-actions">
-          <button type="submit" class="payments-btn">Mettre a jour</button>
-          <a href="{% url 'payment_reports' %}" class="payments-ghost">Reinitialiser</a>
+          <button type="submit" class="payments-btn">{% trans "Mettre a jour" %}</button>
+          <a href="{% url 'payment_reports' %}" class="payments-ghost">{% trans "Reinitialiser" %}</a>
           {% if can_export_payments %}
-          <a href="{% url 'payment_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">Export Excel</a>
-          <a href="{% url 'payment_reports_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">Export PDF</a>
+          <a href="{% url 'payment_export_excel' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">{% trans "Export Excel" %}</a>
+          <a href="{% url 'payment_reports_pdf' %}{% if filter_query %}?{{ filter_query }}{% endif %}" class="payments-ghost">{% trans "Export PDF" %}</a>
           {% endif %}
         </div>
       </form>
@@ -54,26 +56,26 @@
   </div>
 
   <div class="payments-grid">
-    <div class="payments-kpi"><span>Total encaisse confirme</span><strong class="positive">{{ summary.total_encaisse }}</strong></div>
-    <div class="payments-kpi"><span>Total en attente</span><strong class="warning">{{ summary.total_en_attente }}</strong></div>
-    <div class="payments-kpi"><span>Total rejete</span><strong class="danger">{{ summary.total_rejete }}</strong></div>
-    <div class="payments-kpi"><span>Total annule</span><strong class="danger">{{ summary.total_annule }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total encaisse confirme" %}</span><strong class="positive">{{ summary.total_encaisse }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total en attente" %}</span><strong class="warning">{{ summary.total_en_attente }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total rejete" %}</span><strong class="danger">{{ summary.total_rejete }}</strong></div>
+    <div class="payments-kpi"><span>{% trans "Total annule" %}</span><strong class="danger">{{ summary.total_annule }}</strong></div>
   </div>
 
   <div class="payments-detail-grid">
     <div class="payments-panel">
       <div class="payments-panel-header">
-        <h3>Par moyen de paiement</h3>
-        <p>Cash, Mobile Money, banque, carte et autres canaux.</p>
+        <h3>{% trans "Par moyen de paiement" %}</h3>
+        <p>{% trans "Cash, Mobile Money, banque, carte et autres canaux." %}</p>
       </div>
       <div class="payments-table-wrap">
         <table class="payments-table">
-          <thead><tr><th>Moyen</th><th>Nombre</th><th>Total</th></tr></thead>
+          <thead><tr><th>{% trans "Moyen" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th></tr></thead>
           <tbody>
             {% for row in method_breakdown %}
             <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
             {% empty %}
-            <tr><td colspan="3" class="payments-empty">Aucune donnee par moyen.</td></tr>
+            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnee par moyen." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -82,17 +84,17 @@
 
     <div class="payments-panel">
       <div class="payments-panel-header">
-        <h3>Par statut</h3>
-        <p>Vue de validation et de controle operationnel.</p>
+        <h3>{% trans "Par statut" %}</h3>
+        <p>{% trans "Vue de validation et de controle operationnel." %}</p>
       </div>
       <div class="payments-table-wrap">
         <table class="payments-table">
-          <thead><tr><th>Statut</th><th>Nombre</th><th>Total</th></tr></thead>
+          <thead><tr><th>{% trans "Statut" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Total" %}</th></tr></thead>
           <tbody>
             {% for row in status_breakdown %}
             <tr><td>{{ row.label }}</td><td>{{ row.count }}</td><td>{{ row.total }}</td></tr>
             {% empty %}
-            <tr><td colspan="3" class="payments-empty">Aucune donnee par statut.</td></tr>
+            <tr><td colspan="3" class="payments-empty">{% trans "Aucune donnee par statut." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -102,16 +104,16 @@
 
   <div class="payments-panel">
     <div class="payments-panel-header">
-      <h3>Paiements recents</h3>
-      <p>Dernieres transactions dans le perimetre du rapport.</p>
+      <h3>{% trans "Paiements recents" %}</h3>
+      <p>{% trans "Dernieres transactions dans le perimetre du rapport." %}</p>
     </div>
     <div class="payments-table-wrap">
       <table class="payments-table">
-        <thead><tr><th>Date</th><th>Moyen</th><th>Statut</th><th>Montant</th><th>Reference</th><th>Facture</th></tr></thead>
+        <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Moyen" %}</th><th>{% trans "Statut" %}</th><th>{% trans "Montant" %}</th><th>{% trans "Reference" %}</th><th>{% trans "Facture" %}</th></tr></thead>
         <tbody>
           {% for payment in recent_payments %}
           <tr>
-            <td>{{ payment.transaction_date|date:"d/m/Y H:i" }}</td>
+            <td>{{ payment.transaction_date|date:"SHORT_DATETIME_FORMAT" }}</td>
             <td>{{ payment.get_method_display }}</td>
             <td>{{ payment.get_status_display }}</td>
             <td>{{ payment.amount }} {{ payment.currency }}</td>
@@ -119,7 +121,7 @@
             <td>{% if payment.facture %}{{ payment.facture.numero }}{% else %}-{% endif %}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="payments-empty">Aucun paiement recent.</td></tr>
+          <tr><td colspan="6" class="payments-empty">{% trans "Aucun paiement recent." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

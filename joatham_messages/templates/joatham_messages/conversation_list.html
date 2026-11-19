@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Messagerie" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Messagerie" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Messagerie" %}{% endblock %}
 {% block content_subtitle %}{% trans "Echanges internes securises entre les utilisateurs de votre entreprise." %}{% endblock %}
 
@@ -79,7 +79,7 @@
                     {{ participant.get_full_name|default:participant.username }}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </div>
-            <div class="message-meta">{% trans "Derniere activite" %} : {{ conversation.date_modification|date:"d/m/Y H:i" }}</div>
+            <div class="message-meta">{% trans "Derniere activite" %} : {{ conversation.date_modification|date:"SHORT_DATETIME_FORMAT" }}</div>
         </div>
         {% if conversation.unread_count %}
         <span class="message-badge">{{ conversation.unread_count }}</span>

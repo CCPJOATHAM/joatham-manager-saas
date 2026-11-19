@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.shortcuts import render
 
 from core.services.product_policy import can_access_module, module_access_required
@@ -48,7 +49,7 @@ def advanced_reports_export_excel(request):
     return build_xlsx_response(
         filename="rapport-avance.xlsx",
         sheet_name="Rapport avance",
-        headers=["Section", "Indicateur", "Valeur", "Note"],
+        headers=[gettext_lazy("Section"), gettext_lazy("Indicateur"), gettext_lazy("Valeur"), gettext_lazy("Note")],
         rows=build_advanced_report_export_rows(entreprise, report),
     )
 

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -181,7 +182,7 @@ NAV_ITEMS = [
         "prefixes": ["/factures/proformas/"],
     },
     {
-        "label": "Comptabilite",
+        "label": gettext_lazy("Comptabilite"),
         "translate_label": False,
         "url_name": "compta_dashboard",
         "permission": "accounting.view",

@@ -4,8 +4,8 @@
 {% block apprenants_title %}{% trans "Inscrire un apprenant" %}{% endblock %}
 {% block apprenants_subtitle %}{% trans "Rattacher un apprenant a une formation." %}{% endblock %}
 {% block apprenants_content %}
-    <h1>Inscrire un apprenant</h1>
-    <p>Entreprise: {{ entreprise.nom }}</p>
+    <h1>{% trans "Inscrire un apprenant" %}</h1>
+    <p>{% trans "Entreprise:" %} {{ entreprise.nom }}</p>
 
     {% if error %}
         <div class="error">{{ error }}</div>
@@ -14,9 +14,9 @@
     <form method="post">
         {% csrf_token %}
         <div class="field">
-            <label for="apprenant">Apprenant</label>
+            <label for="apprenant">{% trans "Apprenant" %}</label>
             <select id="apprenant" name="apprenant" required>
-                <option value="">Choisir un apprenant</option>
+                <option value="">{% trans "Choisir un apprenant" %}</option>
                 {% for apprenant in apprenants %}
                     <option value="{{ apprenant.id }}">{{ apprenant.nom }} {{ apprenant.prenom }}</option>
                 {% endfor %}
@@ -24,9 +24,9 @@
         </div>
 
         <div class="field">
-            <label for="formation">Formation</label>
+            <label for="formation">{% trans "Formation" %}</label>
             <select id="formation" name="formation" required>
-                <option value="">Choisir une formation</option>
+                <option value="">{% trans "Choisir une formation" %}</option>
                 {% for formation in formations %}
                     <option value="{{ formation.id }}">{{ formation.nom }} - {{ formation.prix }}</option>
                 {% endfor %}
@@ -34,7 +34,7 @@
         </div>
 
         <div class="field">
-            <label for="statut">Statut</label>
+            <label for="statut">{% trans "Statut" %}</label>
             <select id="statut" name="statut">
                 {% for value, label in statuts %}
                     <option value="{{ value }}">{{ label }}</option>
@@ -43,13 +43,13 @@
         </div>
 
         <div class="field">
-            <label for="montant_prevu">Montant prévu de la formation</label>
-            <input id="montant_prevu" name="montant_prevu" placeholder="Laisser vide pour reprendre le prix de la formation">
+            <label for="montant_prevu">{% trans "Montant prévu de la formation" %}</label>
+            <input id="montant_prevu" name="montant_prevu" placeholder="{% trans 'Laisser vide pour reprendre le prix de la formation' %}">
         </div>
 
         <div class="actions">
-            <button type="submit">Enregistrer l'inscription</button>
-            <a href="{% url 'apprenant_list' %}">Retour</a>
+            <button type="submit">{% trans "Enregistrer l'inscription" %}</button>
+            <a href="{% url 'apprenant_list' %}">{% trans "Retour" %}</a>
         </div>
     </form>
 {% endblock %}

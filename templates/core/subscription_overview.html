@@ -1,8 +1,10 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Mon abonnement | JOATHAM Manager{% endblock %}
-{% block content_title %}Mon abonnement{% endblock %}
-{% block content_subtitle %}Consultez votre statut, le prix de référence en USD et les prochaines actions disponibles pour votre organisation.{% endblock %}
+
+{% block page_title %}{% trans "Mon abonnement | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Mon abonnement" %}{% endblock %}
+{% block content_subtitle %}{% trans "Consultez votre statut, le prix de référence en USD et les prochaines actions disponibles pour votre organisation." %}{% endblock %}
 
 {% block content %}
 <style>
@@ -206,23 +208,23 @@
 
 <div class="subscription-grid">
     <section class="sub-card">
-        <h2>État actuel</h2>
+        <h2>{% trans "État actuel" %}</h2>
         {% if subscription %}
         <div class="details">
-            <div class="detail-row"><span>Organisation</span><strong>{{ entreprise.nom }}</strong></div>
-            <div class="detail-row"><span>Plan actuel</span><strong>{{ current_plan_display_name }}</strong></div>
+            <div class="detail-row"><span>{% trans "Organisation" %}</span><strong>{{ entreprise.nom }}</strong></div>
+            <div class="detail-row"><span>{% trans "Plan actuel" %}</span><strong>{{ current_plan_display_name }}</strong></div>
             <div class="detail-row">
-                <span>Statut</span>
+                <span>{% trans "Statut" %}</span>
                 <span class="status-pill status-{{ subscription.statut }}">{{ subscription.get_statut_display }}</span>
             </div>
-            <div class="detail-row"><span>Date de début</span><strong>{{ subscription.date_debut|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Date de fin</span><strong>{{ subscription.date_fin|date:"d/m/Y" }}</strong></div>
-            <div class="detail-row"><span>Plan gratuit</span><strong>{% if is_current_free_plan %}Oui{% else %}Non{% endif %}</strong></div>
-            <div class="detail-row"><span>Accès courant</span><strong>{% if subscription.actif %}Actif{% else %}Inactif{% endif %}</strong></div>
-            <div class="detail-row"><span>Mode d'activation</span><strong>{{ activation_mode }}</strong></div>
-            <div class="detail-row"><span>Renouvellement</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
+            <div class="detail-row"><span>{% trans "Date de début" %}</span><strong>{{ subscription.date_debut|date:"SHORT_DATE_FORMAT" }}</strong></div>
+            <div class="detail-row"><span>{% trans "Date de fin" %}</span><strong>{{ subscription.date_fin|date:"SHORT_DATE_FORMAT" }}</strong></div>
+            <div class="detail-row"><span>{% trans "Plan gratuit" %}</span><strong>{% if is_current_free_plan %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</strong></div>
+            <div class="detail-row"><span>{% trans "Accès courant" %}</span><strong>{% if subscription.actif %}{% trans "Actif" %}{% else %}{% trans "Inactif" %}{% endif %}</strong></div>
+            <div class="detail-row"><span>{% trans "Mode d'activation" %}</span><strong>{{ activation_mode }}</strong></div>
+            <div class="detail-row"><span>{% trans "Renouvellement" %}</span><strong>{{ subscription.get_renouvellement_display }}</strong></div>
         </div>
-        <h2 style="margin-top:22px;">Modules et limites</h2>
+        <h2 style="margin-top:22px;">{% trans "Modules et limites" %}</h2>
         {% if current_plan_modules %}
         <div class="module-list">
             {% for module in current_plan_modules %}
@@ -230,12 +232,12 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="info-box">Tous les modules autorisés par votre abonnement restent disponibles.</div>
+        <div class="info-box">{% trans "Tous les modules autorisés par votre abonnement restent disponibles." %}</div>
         {% endif %}
         {% if current_plan_features %}
         <div class="details" style="margin-top:14px;">
             {% for feature in current_plan_features %}
-            <div class="detail-row"><span>{{ feature }}</span><strong>Inclus</strong></div>
+            <div class="detail-row"><span>{{ feature }}</span><strong>{% trans "Inclus" %}</strong></div>
             {% endfor %}
         </div>
         {% endif %}
@@ -247,7 +249,7 @@
         </div>
         {% endif %}
         {% if subscription_usage %}
-        <h2 style="margin-top:22px;">Consommation actuelle</h2>
+        <h2 style="margin-top:22px;">{% trans "Consommation actuelle" %}</h2>
         <div class="details" style="margin-top:14px;">
             {% for usage in subscription_usage %}
             <div class="detail-row"><span>{{ usage.label }}</span><strong>{{ usage.value }}</strong></div>
@@ -256,117 +258,117 @@
         {% endif %}
         {% else %}
         <div class="empty-state">
-            Aucun abonnement n'est encore configuré pour votre organisation.
+            {% trans "Aucun abonnement n'est encore configuré pour votre organisation." %}
         </div>
         {% endif %}
     </section>
 
     <section class="sub-card">
-        <h2>Changer de plan</h2>
+        <h2>{% trans "Changer de plan" %}</h2>
         {% if featured_plan and pricing_options %}
         <div class="pricing-grid">
             {% for option in pricing_options %}
             <article class="pricing-card">
                 <strong>{{ option.label }}</strong>
                 <div class="usd-value">{{ option.amount_usd }} USD</div>
-                <span>Montant estimatif dans votre devise : {{ option.estimated_amount }} {{ option.currency_code }}</span>
-                <span>Taux utilisé pour l'estimation : {{ option.exchange_rate }}</span>
+                <span>{% trans "Montant estimatif dans votre devise :" %} {{ option.estimated_amount }} {{ option.currency_code }}</span>
+                <span>{% trans "Taux utilisé pour l'estimation :" %} {{ option.exchange_rate }}</span>
             </article>
             {% endfor %}
         </div>
         <div class="info-box" style="margin-top:16px;">
-            La plateforme conserve toujours le montant de référence en USD. Le montant affiché dans votre devise est fourni à titre estimatif.
+            {% trans "La plateforme conserve toujours le montant de référence en USD. Le montant affiché dans votre devise est fourni à titre estimatif." %}
         </div>
         {% else %}
         <div class="info-box">
-            Aucun plan payant n'est disponible pour le moment. Contactez l'équipe JOATHAM Manager pour être accompagné.
+            {% trans "Aucun plan payant n'est disponible pour le moment. Contactez l'équipe JOATHAM Manager pour être accompagné." %}
         </div>
         {% endif %}
 
-        <h2 style="margin-top:22px;">Historique récent</h2>
+        <h2 style="margin-top:22px;">{% trans "Historique récent" %}</h2>
         {% if paiements %}
         <div class="history-list">
             {% for paiement in paiements %}
             <article class="history-item">
                 <strong>{{ paiement.plan_display_name }} - {{ paiement.get_statut_display }}</strong>
-                <span>Date : {{ paiement.date_creation|date:"d/m/Y H:i" }}</span>
+                <span>{% trans "Date :" %} {{ paiement.date_creation|date:"SHORT_DATETIME_FORMAT" }}</span>
                 {% if paiement.methode_paiement == "automatique" %}
                     {% if paiement.statut == "valide" %}
-                    <span>Type : Paiement automatique confirmé</span>
+                    <span>{% trans "Type : Paiement automatique confirmé" %}</span>
                     {% elif paiement.statut == "echoue" %}
-                    <span>Type : Paiement automatique échoué</span>
+                    <span>{% trans "Type : Paiement automatique échoué" %}</span>
                     {% else %}
-                    <span>Type : Paiement automatique en attente</span>
+                    <span>{% trans "Type : Paiement automatique en attente" %}</span>
                     {% endif %}
                 {% elif paiement.source_taux == "demande_plan" %}
                     {% if paiement.statut == "approuvee" %}
-                    <span>Type : Abonnement activé manuellement par super admin</span>
+                    <span>{% trans "Type : Abonnement activé manuellement par super admin" %}</span>
                     {% elif paiement.statut == "refuse" %}
-                    <span>Type : Demande de plan refusée par super admin</span>
+                    <span>{% trans "Type : Demande de plan refusée par super admin" %}</span>
                     {% else %}
-                    <span>Type : Demande de plan en attente de validation super admin</span>
+                    <span>{% trans "Type : Demande de plan en attente de validation super admin" %}</span>
                     {% endif %}
                 {% else %}
                     {% if paiement.statut == "valide" %}
-                    <span>Type : Paiement manuel validé par super admin</span>
+                    <span>{% trans "Type : Paiement manuel validé par super admin" %}</span>
                     {% elif paiement.statut == "refuse" %}
-                    <span>Type : Demande manuelle refusée par super admin</span>
+                    <span>{% trans "Type : Demande manuelle refusée par super admin" %}</span>
                     {% else %}
-                    <span>Type : Demande manuelle en attente de validation</span>
+                    <span>{% trans "Type : Demande manuelle en attente de validation" %}</span>
                     {% endif %}
                 {% endif %}
-                <span>Période : {{ paiement.get_duree_display }}</span>
-                <span>Montant de référence : {{ paiement.montant_usd|default:paiement.montant }} USD</span>
-                <span>Montant estimatif local : {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:currency_code }}</span>
+                <span>{% trans "Période :" %} {{ paiement.get_duree_display }}</span>
+                <span>{% trans "Montant de référence :" %} {{ paiement.montant_usd|default:paiement.montant }} USD</span>
+                <span>{% trans "Montant estimatif local :" %} {{ paiement.montant_devise_locale_estime|default:"-" }} {{ paiement.devise_entreprise|default:currency_code }}</span>
             </article>
             {% endfor %}
         </div>
         {% else %}
         <div class="empty-state">
-            Aucun événement d'abonnement récent n'est disponible pour le moment.
+            {% trans "Aucun événement d'abonnement récent n'est disponible pour le moment." %}
         </div>
         {% endif %}
     </section>
 </div>
 
 <section class="actions-card">
-    <h2>Actions disponibles</h2>
+    <h2>{% trans "Actions disponibles" %}</h2>
     <p>
         {% if subscription %}
-            Selon votre plan actuel, vous pouvez passer a un plan superieur, demander une reactivation ou preparer un changement de plan.
+            {% trans "Selon votre plan actuel, vous pouvez passer a un plan superieur, demander une reactivation ou preparer un changement de plan." %}
         {% else %}
-            Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué.
+            {% trans "Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué." %}
         {% endif %}
     </p>
     {% if pending_payments_count %}
     <div class="subscription-alert">
-        Demandes / paiements en cours : {{ pending_payments_count }}
+        {% trans "Demandes / paiements en cours :" %} {{ pending_payments_count }}
     </div>
     {% endif %}
 
     <div class="subscription-actions">
-        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Voir les plans</a>
+        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">{% trans "Voir les plans" %}</a>
         {% if subscription %}
             {% if subscription.statut == "essai" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Choisir un plan supérieur</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "Choisir un plan supérieur" %}</a>
             {% elif subscription.statut == "expire" or subscription.statut == "suspendu" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Réactiver l'abonnement</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "Réactiver l'abonnement" %}</a>
             {% elif subscription.statut == "actif" %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Changer de plan</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "Changer de plan" %}</a>
             {% else %}
-            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Gérer mon abonnement</a>
+            <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "Gérer mon abonnement" %}</a>
             {% endif %}
         {% else %}
-        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">Activer un abonnement</a>
+        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "Activer un abonnement" %}</a>
         {% endif %}
 
-        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">J'ai effectué le paiement</a>
+        <a class="btn-action primary" href="{% url 'subscription_payment_create' %}">{% trans "J'ai effectué le paiement" %}</a>
         {% if automatic_payment_provider_configured %}
-        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">Payer automatiquement</a>
+        <a class="btn-action primary" href="{% url 'subscription_plan_list' %}">{% trans "Payer automatiquement" %}</a>
         {% else %}
-        <span class="btn-action disabled" aria-disabled="true">Paiement automatique bientôt disponible</span>
+        <span class="btn-action disabled" aria-disabled="true">{% trans "Paiement automatique bientôt disponible" %}</span>
         {% endif %}
-        <a class="btn-action secondary" href="{{ whatsapp_link }}" target="_blank" rel="noopener">Contacter via WhatsApp</a>
+        <a class="btn-action secondary" href="{{ whatsapp_link }}" target="_blank" rel="noopener">{% trans "Contacter via WhatsApp" %}</a>
     </div>
 </section>
 {% endblock %}

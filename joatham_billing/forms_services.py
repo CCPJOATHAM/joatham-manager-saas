@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 
 from .models import EntreprisePrintSettings, Service
@@ -8,14 +9,14 @@ class ServiceForm(forms.ModelForm):
         model = Service
         fields = ["nom", "prix", "actif"]
         labels = {
-            "nom": "Nom du service",
-            "prix": "Prix",
-            "actif": "Service actif",
+            "nom": gettext_lazy("Nom du service"),
+            "prix": gettext_lazy("Prix"),
+            "actif": gettext_lazy("Service actif"),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["nom"].widget.attrs.update({"placeholder": "Nom du service"})
+        self.fields["nom"].widget.attrs.update({"placeholder": gettext_lazy("Nom du service")})
         self.fields["prix"].widget.attrs.update({"placeholder": "0.00", "step": "0.01", "min": "0"})
 
 
@@ -35,16 +36,16 @@ class EntreprisePrintSettingsForm(forms.ModelForm):
             "pos_footer_message",
         ]
         labels = {
-            "pos_width": "Largeur ticket POS",
-            "default_invoice_format": "Format d'impression par defaut",
-            "pos_show_logo": "Afficher le logo sur le ticket",
-            "pos_show_company_name": "Afficher le nom de l'entreprise",
-            "pos_show_address": "Afficher l'adresse",
-            "pos_show_phone": "Afficher le telephone",
-            "pos_show_email": "Afficher l'email",
-            "pos_show_tax_info": "Afficher RCCM, NIF et ID NAT",
-            "pos_show_generated_by": "Afficher Genere par JOATHAM Manager",
-            "pos_footer_message": "Texte de pied de ticket",
+            "pos_width": gettext_lazy("Largeur ticket POS"),
+            "default_invoice_format": gettext_lazy("Format d'impression par defaut"),
+            "pos_show_logo": gettext_lazy("Afficher le logo sur le ticket"),
+            "pos_show_company_name": gettext_lazy("Afficher le nom de l'entreprise"),
+            "pos_show_address": gettext_lazy("Afficher l'adresse"),
+            "pos_show_phone": gettext_lazy("Afficher le telephone"),
+            "pos_show_email": gettext_lazy("Afficher l'email"),
+            "pos_show_tax_info": gettext_lazy("Afficher RCCM, NIF et ID NAT"),
+            "pos_show_generated_by": gettext_lazy("Afficher Genere par JOATHAM Manager"),
+            "pos_footer_message": gettext_lazy("Texte de pied de ticket"),
         }
         widgets = {
             "pos_footer_message": forms.Textarea(attrs={"rows": 3, "maxlength": 180}),
@@ -58,6 +59,6 @@ class EntreprisePrintSettingsForm(forms.ModelForm):
             field.widget.attrs.setdefault("class", "form-control")
         self.fields["pos_footer_message"].widget.attrs.update(
             {
-                "placeholder": "Merci pour votre confiance",
+                "placeholder": gettext_lazy("Merci pour votre confiance"),
             }
         )

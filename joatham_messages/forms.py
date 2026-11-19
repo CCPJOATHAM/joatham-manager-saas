@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import re
 
 from django import forms
@@ -126,7 +127,7 @@ class PublicQuestionForm(forms.ModelForm):
         }
         widgets = {
             "nom": forms.TextInput(attrs={"placeholder": _("Votre nom"), "maxlength": 150}),
-            "email": forms.EmailInput(attrs={"placeholder": "adresse@example.com"}),
+            "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("adresse@example.com")}),
             "telephone": forms.TextInput(attrs={"placeholder": "+243...", "maxlength": 50}),
             "entreprise": forms.TextInput(attrs={"placeholder": _("Nom de votre entreprise"), "maxlength": 150}),
             "sujet": forms.TextInput(attrs={"placeholder": _("Votre question"), "maxlength": 180}),

@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Demandes SaaS" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Demandes SaaS" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Demandes SaaS" %}{% endblock %}
 {% block content_subtitle %}{% trans "Messages de marche, suggestions clients et questions avant inscription." %}{% endblock %}
 
@@ -632,13 +632,13 @@
                     <div class="status-stack">
                         <span class="status-badge status-{{ item.statut }}">{{ item.statut_label }}</span>
                         {% if item.date_traitement %}
-                        <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"d/m/Y H:i" }}</div>
+                        <div class="muted">{% trans "Traite le" %} {{ item.date_traitement|date:"SHORT_DATETIME_FORMAT" }}</div>
                         {% endif %}
                         {% if item.type == "question" %}
                             {% if item.has_reply %}
                             <span class="reply-badge sent">{% trans "Repondu" %}</span>
                             <div class="muted">
-                                {{ item.date_reponse|date:"d/m/Y H:i" }}
+                                {{ item.date_reponse|date:"SHORT_DATETIME_FORMAT" }}
                                 {% if item.repondu_par %}- {{ item.repondu_par }}{% endif %}
                             </div>
                             {% else %}
@@ -647,7 +647,7 @@
                         {% endif %}
                     </div>
                 </td>
-                <td>{{ item.date_creation|date:"d/m/Y H:i" }}</td>
+                <td>{{ item.date_creation|date:"SHORT_DATETIME_FORMAT" }}</td>
                 <td>
                     <div class="row-actions">
                         <form method="post" class="status-form">

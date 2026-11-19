@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -49,15 +50,15 @@ class Produit(models.Model):
 
 class StockMovement(models.Model):
     class MovementType(models.TextChoices):
-        MANUAL_ENTRY = "manual_entry", "Entree manuelle"
-        MANUAL_EXIT = "manual_exit", "Sortie manuelle"
-        INVOICE_SALE = "invoice_sale", "Vente facture"
-        INVOICE_RESTORE = "invoice_restore", "Restauration facture"
-        ADJUSTMENT_POSITIVE = "adjustment_positive", "Ajustement positif"
-        ADJUSTMENT_NEGATIVE = "adjustment_negative", "Ajustement negatif"
-        INVENTORY_RECOUNT = "inventory_recount", "Inventaire"
-        TRANSFER_OUT = "transfer_out", "Transfert sortant"
-        TRANSFER_IN = "transfer_in", "Transfert entrant"
+        MANUAL_ENTRY = "manual_entry", gettext_lazy("Entree manuelle")
+        MANUAL_EXIT = "manual_exit", gettext_lazy("Sortie manuelle")
+        INVOICE_SALE = "invoice_sale", gettext_lazy("Vente facture")
+        INVOICE_RESTORE = "invoice_restore", gettext_lazy("Restauration facture")
+        ADJUSTMENT_POSITIVE = "adjustment_positive", gettext_lazy("Ajustement positif")
+        ADJUSTMENT_NEGATIVE = "adjustment_negative", gettext_lazy("Ajustement negatif")
+        INVENTORY_RECOUNT = "inventory_recount", gettext_lazy("Inventaire")
+        TRANSFER_OUT = "transfer_out", gettext_lazy("Transfert sortant")
+        TRANSFER_IN = "transfer_in", gettext_lazy("Transfert entrant")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -118,11 +119,11 @@ class StockMovement(models.Model):
 
 class InventorySession(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", "Brouillon"
-        IN_PROGRESS = "in_progress", "En cours"
-        CLOSED = "closed", "Cloture"
-        VALIDATED = "validated", "Valide"
-        CANCELLED = "cancelled", "Annule"
+        DRAFT = "draft", gettext_lazy("Brouillon")
+        IN_PROGRESS = "in_progress", gettext_lazy("En cours")
+        CLOSED = "closed", gettext_lazy("Cloture")
+        VALIDATED = "validated", gettext_lazy("Valide")
+        CANCELLED = "cancelled", gettext_lazy("Annule")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",

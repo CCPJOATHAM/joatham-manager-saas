@@ -1,7 +1,9 @@
+
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Acces abonnement</title>
+    <title>{% trans "Acces abonnement" %}</title>
     <style>
         body {
             font-family: Arial;
@@ -50,11 +52,11 @@
 </head>
 <body>
 <div class="box">
-    <h1>Acces abonnement limite</h1>
+    <h1>{% trans "Acces abonnement limite" %}</h1>
     {% if module_label %}
-    <p>Le module <strong>{{ module_label }}</strong> n'est pas accessible avec l'etat actuel de votre abonnement.</p>
+    <p>{% trans "Le module" %} <strong>{{ module_label }}</strong> {% trans "n'est pas accessible avec l'etat actuel de votre abonnement." %}</p>
     {% else %}
-    <p>Votre acces est actuellement limite par l'etat de votre abonnement.</p>
+    <p>{% trans "Votre acces est actuellement limite par l'etat de votre abonnement." %}</p>
     {% endif %}
 
     {% if messages %}
@@ -64,7 +66,7 @@
     {% endif %}
 
     {% if show_subscription_link %}
-    <a href="{% url 'subscription_overview' %}">Voir mon abonnement</a>
+    <a href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
     {% endif %}
 </div>
 </body>

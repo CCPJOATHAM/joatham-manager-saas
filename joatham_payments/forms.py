@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.utils import timezone
 
@@ -12,8 +13,8 @@ from .models import PaymentTransaction
 class PaymentTransactionForm(forms.ModelForm):
     confirm_now = forms.BooleanField(
         required=False,
-        label="Confirmer immediatement",
-        help_text="Disponible uniquement aux utilisateurs habilites a valider les paiements.",
+        label=gettext_lazy("Confirmer immediatement"),
+        help_text=gettext_lazy("Disponible uniquement aux utilisateurs habilites a valider les paiements."),
     )
 
     class Meta:
@@ -35,20 +36,20 @@ class PaymentTransactionForm(forms.ModelForm):
             "attachment",
         ]
         labels = {
-            "transaction_type": "Type de paiement",
-            "method": "Moyen de paiement",
-            "amount": "Montant",
-            "currency": "Devise",
-            "reference": "Reference transaction",
-            "phone_number": "Telephone Mobile Money",
-            "mobile_operator": "Operateur Mobile Money",
-            "transaction_date": "Date transaction",
-            "facture": "Facture liee",
-            "depense": "Depense liee",
-            "caisse": "Caisse",
-            "session_caisse": "Session caisse",
-            "note": "Note",
-            "attachment": "Piece justificative",
+            "transaction_type": gettext_lazy("Type de paiement"),
+            "method": gettext_lazy("Moyen de paiement"),
+            "amount": gettext_lazy("Montant"),
+            "currency": gettext_lazy("Devise"),
+            "reference": gettext_lazy("Reference transaction"),
+            "phone_number": gettext_lazy("Telephone Mobile Money"),
+            "mobile_operator": gettext_lazy("Operateur Mobile Money"),
+            "transaction_date": gettext_lazy("Date transaction"),
+            "facture": gettext_lazy("Facture liee"),
+            "depense": gettext_lazy("Depense liee"),
+            "caisse": gettext_lazy("Caisse"),
+            "session_caisse": gettext_lazy("Session caisse"),
+            "note": gettext_lazy("Note"),
+            "attachment": gettext_lazy("Piece justificative"),
         }
         widgets = {
             "transaction_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -116,7 +117,7 @@ class PaymentTransactionForm(forms.ModelForm):
 class PaymentDecisionForm(forms.Form):
     note = forms.CharField(
         required=False,
-        widget=forms.Textarea(attrs={"rows": 3, "class": "form-control", "placeholder": "Note interne"}),
-        label="Note",
+        widget=forms.Textarea(attrs={"rows": 3, "class": "form-control", "placeholder": gettext_lazy("Note interne")}),
+        label=gettext_lazy("Note"),
     )
 

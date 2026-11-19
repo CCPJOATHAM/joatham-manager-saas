@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django.conf import settings
@@ -49,10 +50,10 @@ class Caisse(models.Model):
 
 class SessionCaisse(models.Model):
     class Statut(models.TextChoices):
-        OUVERTE = "ouverte", "Ouverte"
-        FERMEE = "fermee", "Fermee"
-        VALIDEE = "validee", "Validee"
-        ANNULEE = "annulee", "Annulee"
+        OUVERTE = "ouverte", gettext_lazy("Ouverte")
+        FERMEE = "fermee", gettext_lazy("Fermee")
+        VALIDEE = "validee", gettext_lazy("Validee")
+        ANNULEE = "annulee", gettext_lazy("Annulee")
 
     entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE, related_name="sessions_caisse")
     caisse = models.ForeignKey(Caisse, on_delete=models.CASCADE, related_name="sessions")
@@ -112,17 +113,17 @@ class SessionCaisse(models.Model):
 
 class MouvementCaisse(models.Model):
     class TypeMouvement(models.TextChoices):
-        ENTREE = "entree", "Entree"
-        SORTIE = "sortie", "Sortie"
-        DEPENSE = "depense", "Depense"
-        PAIEMENT_FACTURE = "paiement_facture", "Paiement facture"
-        AJUSTEMENT = "ajustement", "Ajustement"
-        TRANSFERT = "transfert", "Transfert"
+        ENTREE = "entree", gettext_lazy("Entree")
+        SORTIE = "sortie", gettext_lazy("Sortie")
+        DEPENSE = "depense", gettext_lazy("Depense")
+        PAIEMENT_FACTURE = "paiement_facture", gettext_lazy("Paiement facture")
+        AJUSTEMENT = "ajustement", gettext_lazy("Ajustement")
+        TRANSFERT = "transfert", gettext_lazy("Transfert")
 
     class Statut(models.TextChoices):
-        BROUILLON = "brouillon", "Brouillon"
-        CONFIRME = "confirme", "Confirme"
-        ANNULE = "annule", "Annule"
+        BROUILLON = "brouillon", gettext_lazy("Brouillon")
+        CONFIRME = "confirme", gettext_lazy("Confirme")
+        ANNULE = "annule", gettext_lazy("Annule")
 
     entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE, related_name="mouvements_caisse")
     caisse = models.ForeignKey(Caisse, on_delete=models.CASCADE, related_name="mouvements")
@@ -181,8 +182,8 @@ class MouvementCaisse(models.Model):
 
 class ValidationCaisse(models.Model):
     class Decision(models.TextChoices):
-        VALIDEE = "validee", "Validee"
-        REJETEE = "rejetee", "Rejetee"
+        VALIDEE = "validee", gettext_lazy("Validee")
+        REJETEE = "rejetee", gettext_lazy("Rejetee")
 
     entreprise = models.ForeignKey(Entreprise, on_delete=models.CASCADE, related_name="validations_caisse")
     session = models.ForeignKey(SessionCaisse, on_delete=models.CASCADE, related_name="validations")

@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}Désactiver entreprise | JOATHAM Manager{% endblock %}
-{% block content_title %}Désactiver une entreprise{% endblock %}
-{% block content_subtitle %}Désactivation logique sécurisée : les données sont conservées et les accès sont bloqués.{% endblock %}
+
+{% block page_title %}{% trans "Désactiver entreprise | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Désactiver une entreprise" %}{% endblock %}
+{% block content_subtitle %}{% trans "Désactivation logique sécurisée : les données sont conservées et les accès sont bloqués." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'super_admin_company_list' %}" class="btn-link">Retour aux entreprises</a>
+<a href="{% url 'super_admin_company_list' %}" class="btn-link">{% trans "Retour aux entreprises" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -75,35 +77,34 @@
 </style>
 
 <section class="danger-panel">
-    <h2>Desactivation de {{ entreprise.nom }}</h2>
+    <h2>{% trans "Desactivation de" %} {{ entreprise.nom }}</h2>
     <p class="warning-copy">
-        Cette action ne supprime pas physiquement les données. Elle masque l'entreprise des listes actives,
-        suspend son abonnement, désactive ses utilisateurs et bloque leur accès à la plateforme.
+        {% trans "Cette action ne supprime pas physiquement les données. Elle masque l'entreprise des listes actives, suspend son abonnement, désactive ses utilisateurs et bloque leur accès à la plateforme." %}
     </p>
 
     <ul class="impact-list">
-        <li>Utilisateurs lies : {{ critical_counts.users }}</li>
-        <li>Clients conserves : {{ critical_counts.clients }}</li>
-        <li>Factures conservees : {{ critical_counts.factures }}</li>
-        <li>Services conserves : {{ critical_counts.services }}</li>
-        <li>Dépenses conservées : {{ critical_counts.depenses }}</li>
-        <li>Produits conserves : {{ critical_counts.produits }}</li>
-        <li>Apprenants conserves : {{ critical_counts.apprenants }}</li>
-        <li>Écritures comptables conservées : {{ critical_counts.ecritures }}</li>
-        <li>Paiements d'abonnement conserves : {{ critical_counts.payments }}</li>
-        <li>Evenements d'audit conserves : {{ critical_counts.logs }}</li>
+        <li>{% trans "Utilisateurs lies :" %} {{ critical_counts.users }}</li>
+        <li>{% trans "Clients conserves :" %} {{ critical_counts.clients }}</li>
+        <li>{% trans "Factures conservees :" %} {{ critical_counts.factures }}</li>
+        <li>{% trans "Services conserves :" %} {{ critical_counts.services }}</li>
+        <li>{% trans "Dépenses conservées :" %} {{ critical_counts.depenses }}</li>
+        <li>{% trans "Produits conserves :" %} {{ critical_counts.produits }}</li>
+        <li>{% trans "Apprenants conserves :" %} {{ critical_counts.apprenants }}</li>
+        <li>{% trans "Écritures comptables conservées :" %} {{ critical_counts.ecritures }}</li>
+        <li>{% trans "Paiements d'abonnement conserves :" %} {{ critical_counts.payments }}</li>
+        <li>{% trans "Evenements d'audit conserves :" %} {{ critical_counts.logs }}</li>
     </ul>
 
     {% if not entreprise.is_active %}
-    <p class="warning-copy">Cette entreprise est déjà désactivée.</p>
+    <p class="warning-copy">{% trans "Cette entreprise est déjà désactivée." %}</p>
     {% else %}
     <form method="post" class="confirm-form">
         {% csrf_token %}
-        <label for="id_confirmation_name">Saisissez exactement le nom de l'entreprise pour confirmer</label>
+        <label for="id_confirmation_name">{% trans "Saisissez exactement le nom de l'entreprise pour confirmer" %}</label>
         <input id="id_confirmation_name" type="text" name="confirmation_name" autocomplete="off" placeholder="{{ entreprise.nom }}">
         <div class="confirm-actions">
-            <button type="submit" class="btn-link danger">Désactiver l'entreprise</button>
-            <a href="{% url 'super_admin_company_list' %}" class="btn-link">Annuler</a>
+            <button type="submit" class="btn-link danger">{% trans "Désactiver l'entreprise" %}</button>
+            <a href="{% url 'super_admin_company_list' %}" class="btn-link">{% trans "Annuler" %}</a>
         </div>
     </form>
     {% endif %}

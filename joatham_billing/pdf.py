@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -18,7 +19,7 @@ def render_pdf_response(request, template_name, context, filename, disposition="
         try:
             from weasyprint import HTML
         except ImportError as exc:
-            raise PdfRenderError("WeasyPrint n'est pas installe.") from exc
+            raise PdfRenderError(gettext_lazy("WeasyPrint n'est pas installe.")) from exc
 
         HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf(response)
         return response
@@ -26,10 +27,10 @@ def render_pdf_response(request, template_name, context, filename, disposition="
     try:
         from xhtml2pdf import pisa
     except ImportError as exc:
-        raise PdfRenderError("xhtml2pdf n'est pas installe.") from exc
+        raise PdfRenderError(gettext_lazy("xhtml2pdf n'est pas installe.")) from exc
 
     pdf_status = pisa.CreatePDF(src=html, dest=response, encoding="UTF-8")
     if pdf_status.err:
-        raise PdfRenderError("Erreur lors de la generation du PDF.")
+        raise PdfRenderError(gettext_lazy("Erreur lors de la generation du PDF."))
 
     return response

@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{{ conversation.sujet }} | JOATHAM Manager{% endblock %}
+{% block page_title %}{{ conversation.sujet }} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{{ conversation.sujet }}{% endblock %}
 {% block content_subtitle %}{% trans "Conversation interne de votre entreprise." %}{% endblock %}
 
@@ -84,7 +84,7 @@
     <article class="bubble {% if message.expediteur_id == request.user.id %}mine{% endif %}">
         <div class="bubble-head">
             <strong>{{ message.expediteur.get_full_name|default:message.expediteur.username }}</strong>
-            <span>{{ message.date_creation|date:"d/m/Y H:i" }}</span>
+            <span>{{ message.date_creation|date:"SHORT_DATETIME_FORMAT" }}</span>
         </div>
         <p>{{ message.contenu }}</p>
         {% if message.pieces_jointes.all %}

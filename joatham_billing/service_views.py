@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -46,7 +47,7 @@ def service_create(request):
             utilisateur=request.user,
             **form.cleaned_data,
         )
-        messages.success(request, "Le service a été créé avec succès.")
+        messages.success(request, gettext_lazy("Le service a été créé avec succès."))
         return redirect("service_list")
 
     return render(
@@ -54,8 +55,8 @@ def service_create(request):
         "joatham_billing/service_form.html",
         {
             "form": form,
-            "page_title": "Créer un service",
-            "submit_label": "Créer le service",
+            "page_title": gettext_lazy("Créer un service"),
+            "submit_label": gettext_lazy("Créer le service"),
             **_get_services_ui_permissions(request.user),
         },
     )
@@ -76,7 +77,7 @@ def service_update(request, service_id):
             utilisateur=request.user,
             **form.cleaned_data,
         )
-        messages.success(request, "Le service a été mis à jour avec succès.")
+        messages.success(request, gettext_lazy("Le service a été mis à jour avec succès."))
         return redirect("service_list")
 
     return render(
@@ -84,8 +85,8 @@ def service_update(request, service_id):
         "joatham_billing/service_form.html",
         {
             "form": form,
-            "page_title": "Modifier un service",
-            "submit_label": "Enregistrer les modifications",
+            "page_title": gettext_lazy("Modifier un service"),
+            "submit_label": gettext_lazy("Enregistrer les modifications"),
             "service": service,
             **_get_services_ui_permissions(request.user),
         },
@@ -103,5 +104,5 @@ def service_toggle_status(request, service_id):
             utilisateur=request.user,
         )
         status_label = "activé" if service.actif else "désactivé"
-        messages.success(request, f"Le service a été {status_label}.")
+        messages.success(request, (gettext_lazy('Le service a été %(value_1)s.') % {'value_1': status_label}))
     return redirect("service_list")

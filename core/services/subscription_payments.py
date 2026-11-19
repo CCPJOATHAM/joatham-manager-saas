@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
@@ -47,7 +48,7 @@ def create_automatic_subscription_payment_request(
     utilisateur=None,
 ):
     if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
-        raise ValueError("Plan indisponible.")
+        raise ValueError(gettext_lazy("Plan indisponible."))
 
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
     amount_usd = estimate["amount_usd"].quantize(Decimal("0.01"))
@@ -153,7 +154,7 @@ def handle_subscription_payment_webhook(provider, request):
                     "event_id": verified_payment.event_id,
                 },
             )
-            raise PaymentProviderVerificationError("Paiement abonnement introuvable.")
+            raise PaymentProviderVerificationError(gettext_lazy("Paiement abonnement introuvable."))
 
         expected_amount = (paiement.amount_expected or paiement.montant_usd or paiement.montant).quantize(Decimal("0.01"))
         expected_currency = (paiement.paid_currency or get_platform_currency()).upper()
@@ -347,7 +348,7 @@ def _build_unique_external_reference():
         reference = generate_external_reference()
         if not PaiementAbonnement.objects.filter(external_reference=reference).exists():
             return reference
-    raise PaymentProviderError("Impossible de generer une reference paiement unique.")
+    raise PaymentProviderError(gettext_lazy("Impossible de generer une reference paiement unique."))
 
 
 def _get_provider_expected_amount_and_currency(*, provider_client, amount_usd, estimate):
@@ -379,7 +380,7 @@ def _get_provider_expected_amount_and_currency(*, provider_client, amount_usd, e
     try:
         conversion = convert_amount(amount_usd, platform_currency, provider_currency)
     except ExchangeRateUnavailable as exc:
-        raise PaymentProviderError(f"Conversion {platform_currency}->{provider_currency} indisponible pour CinetPay.") from exc
+        raise PaymentProviderError((gettext_lazy('Conversion %(value_1)s->%(value_2)s indisponible pour CinetPay.') % {'value_1': platform_currency, 'value_2': provider_currency})) from exc
     amount = conversion.amount.quantize(Decimal("0.01"))
     return (
         _normalize_provider_expected_amount(

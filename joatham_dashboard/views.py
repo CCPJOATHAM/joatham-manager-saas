@@ -219,8 +219,8 @@ def _build_public_plan_cards():
                 "is_free": is_free,
                 "is_popular": code == PRO_PLAN_CODE,
                 "annual_discount_percent": annual_discount_percent,
-                "monthly_price_label": f"{_format_public_price(monthly_price)} {currency}/{_('mois')}",
-                "annual_price_label": f"{_format_public_price(annual_price)} {currency}/{_('an')}",
+                "monthly_price_label": "{} {}/{}".format(_format_public_price(monthly_price), currency, _("mois")),
+                "annual_price_label": "{} {}/{}".format(_format_public_price(annual_price), currency, _("an")),
                 "annual_equivalent_label": "" if is_free else _(
                     "équivalent à %(amount)s %(currency)s/%(period)s, facturé annuellement"
                 ) % {

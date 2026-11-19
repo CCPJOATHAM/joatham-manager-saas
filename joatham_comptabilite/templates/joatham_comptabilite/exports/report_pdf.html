@@ -1,5 +1,8 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="utf-8">
     <title>{{ report_title }}</title>
@@ -48,21 +51,21 @@
 <body>
     <h1>{{ report_title }}</h1>
     <div class="meta">
-        <div>Entreprise: {{ selected_entreprise.nom }}</div>
-        <div>Période : {{ period_label }}</div>
-        <div>Genere le: {{ generated_at|date:"d/m/Y H:i" }}</div>
+        <div>{% trans "Entreprise:" %} {{ selected_entreprise.nom }}</div>
+        <div>{% trans "Période :" %} {{ period_label }}</div>
+        <div>{% trans "Genere le:" %} {{ generated_at|date:"SHORT_DATETIME_FORMAT" }}</div>
     </div>
 
     {% if report_slug == "balance" %}
         <table>
             <thead>
                 <tr>
-                    <th>Numero</th>
-                    <th>Compte</th>
-                    <th class="number">Debit</th>
-                    <th class="number">Credit</th>
-                    <th class="number">Solde debit</th>
-                    <th class="number">Solde credit</th>
+                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Compte" %}</th>
+                    <th class="number">{% trans "Debit" %}</th>
+                    <th class="number">{% trans "Credit" %}</th>
+                    <th class="number">{% trans "Solde debit" %}</th>
+                    <th class="number">{% trans "Solde credit" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,25 +86,25 @@
             <div class="section">
                 <h3>{{ account.numero }} - {{ account.nom }}</h3>
                 <div class="meta">
-                    Ouverture D {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}
+                    {% trans "Ouverture D" %} {{ account.ouverture_debit|floatformat:2 }} / C {{ account.ouverture_credit|floatformat:2 }}
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Journal</th>
-                            <th>Piece</th>
-                            <th>Libelle</th>
-                            <th class="number">Debit</th>
-                            <th class="number">Credit</th>
-                            <th class="number">Solde debit</th>
-                            <th class="number">Solde credit</th>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Journal" %}</th>
+                            <th>{% trans "Piece" %}</th>
+                            <th>{% trans "Libelle" %}</th>
+                            <th class="number">{% trans "Debit" %}</th>
+                            <th class="number">{% trans "Credit" %}</th>
+                            <th class="number">{% trans "Solde debit" %}</th>
+                            <th class="number">{% trans "Solde credit" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for line in account.lignes %}
                             <tr>
-                                <td>{{ line.date_piece|date:"d/m/Y" }}</td>
+                                <td>{{ line.date_piece|date:"SHORT_DATE_FORMAT" }}</td>
                                 <td>{{ line.journal }}</td>
                                 <td>{{ line.numero_piece }}</td>
                                 <td>{{ line.libelle }}</td>
@@ -116,13 +119,13 @@
             </div>
         {% endfor %}
     {% elif report_slug == "compte_resultat" %}
-        <h2>Produits</h2>
+        <h2>{% trans "Produits" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Numero</th>
-                    <th>Compte</th>
-                    <th class="number">Montant</th>
+                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Compte" %}</th>
+                    <th class="number">{% trans "Montant" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -136,13 +139,13 @@
             </tbody>
         </table>
 
-        <h2>Charges</h2>
+        <h2>{% trans "Charges" %}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Numero</th>
-                    <th>Compte</th>
-                    <th class="number">Montant</th>
+                    <th>{% trans "Numero" %}</th>
+                    <th>{% trans "Compte" %}</th>
+                    <th class="number">{% trans "Montant" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,19 +159,19 @@
             </tbody>
         </table>
 
-        <div><strong>Total produits:</strong> {{ total_produits|floatformat:2 }} FC</div>
-        <div><strong>Total charges:</strong> {{ total_charges|floatformat:2 }} FC</div>
-        <div><strong>Resultat net:</strong> {{ resultat_net|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Total produits:" %}</strong> {{ total_produits|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Total charges:" %}</strong> {{ total_charges|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Resultat net:" %}</strong> {{ resultat_net|floatformat:2 }} FC</div>
     {% elif report_slug == "bilan" %}
-        <h2>Actif</h2>
+        <h2>{% trans "Actif" %}</h2>
         {% for section in actif_sections %}
             <h3>{{ section.label }}</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Numero</th>
-                        <th>Compte</th>
-                        <th class="number">Montant</th>
+                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Compte" %}</th>
+                        <th class="number">{% trans "Montant" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -183,15 +186,15 @@
             </table>
         {% endfor %}
 
-        <h2>Passif</h2>
+        <h2>{% trans "Passif" %}</h2>
         {% for section in passif_sections %}
             <h3>{{ section.label }}</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Numero</th>
-                        <th>Compte</th>
-                        <th class="number">Montant</th>
+                        <th>{% trans "Numero" %}</th>
+                        <th>{% trans "Compte" %}</th>
+                        <th class="number">{% trans "Montant" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -206,8 +209,8 @@
             </table>
         {% endfor %}
 
-        <div><strong>Total actif:</strong> {{ actif|floatformat:2 }} FC</div>
-        <div><strong>Total passif:</strong> {{ passif|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Total actif:" %}</strong> {{ actif|floatformat:2 }} FC</div>
+        <div><strong>{% trans "Total passif:" %}</strong> {{ passif|floatformat:2 }} FC</div>
     {% endif %}
 </body>
 </html>

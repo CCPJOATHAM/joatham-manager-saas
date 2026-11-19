@@ -1,8 +1,11 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="UTF-8">
-    <title>{% block pdf_title %}Document{% endblock %}</title>
+    <title>{% block pdf_title %}{% trans "Document" %}{% endblock %}</title>
     <style>
         @page {
             size: A4;

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import secrets
 from datetime import timedelta
 
@@ -18,8 +19,8 @@ def default_invitation_expiry():
 
 class Entreprise(models.Model):
     class ReferentielComptable(models.TextChoices):
-        SYSCOHADA = "syscohada", "SYSCOHADA"
-        PCG = "pcg", "PCG"
+        SYSCOHADA = "syscohada", gettext_lazy("SYSCOHADA")
+        PCG = "pcg", gettext_lazy("PCG")
         IFRS_SIMPLIFIE = "ifrs_simplifie", _("IFRS simplifie")
         AUTRE = "autre", _("Autre")
 

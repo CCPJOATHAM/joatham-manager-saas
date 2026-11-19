@@ -1,4 +1,6 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
+
 
 {% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
 
@@ -15,7 +17,7 @@
     <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
     <p>{{ entreprise.nom }}</p>
     <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
-    <p>Edition du {{ date_generation }}</p>
+    <p>{% trans "Edition du" %} {{ date_generation }}</p>
 </div>
 
 <div class="document-title">{{ report_title }}</div>
@@ -23,12 +25,12 @@
 <table>
     <thead>
         <tr>
-            <th>Nom</th>
-            <th>Prenom</th>
-            <th>Téléphone</th>
-            <th>Email</th>
-            <th>Date inscription</th>
-            <th>Actif</th>
+            <th>{% trans "Nom" %}</th>
+            <th>{% trans "Prenom" %}</th>
+            <th>{% trans "Téléphone" %}</th>
+            <th>{% trans "Email" %}</th>
+            <th>{% trans "Date inscription" %}</th>
+            <th>{% trans "Actif" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -38,18 +40,18 @@
                 <td>{{ apprenant.prenom|default:"-" }}</td>
                 <td>{{ apprenant.telephone|default:"-" }}</td>
                 <td>{{ apprenant.email|default:"-" }}</td>
-                <td>{{ apprenant.date_inscription|date:"d/m/Y" }}</td>
-                <td>{% if apprenant.actif %}Oui{% else %}Non{% endif %}</td>
+                <td>{{ apprenant.date_inscription|date:"SHORT_DATE_FORMAT" }}</td>
+                <td>{% if apprenant.actif %}{% trans "Oui" %}{% else %}{% trans "Non" %}{% endif %}</td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">Aucun apprenant enregistré.</td>
+                <td colspan="6">{% trans "Aucun apprenant enregistré." %}</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 <div class="pdf-footer">
-    Document genere le {{ date_footer }}
+    {% trans "Document genere le" %} {{ date_footer }}
 </div>
 {% endblock %}

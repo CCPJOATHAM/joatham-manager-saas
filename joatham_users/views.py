@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
@@ -124,7 +125,7 @@ def _get_invitation_or_404(entreprise, invitation_id):
     try:
         return get_company_invitation_by_id(entreprise, invitation_id)
     except EntrepriseInvitation.DoesNotExist as exc:
-        raise Http404("Invitation introuvable") from exc
+        raise Http404(gettext_lazy("Invitation introuvable")) from exc
 
 
 @login_required(login_url="login")

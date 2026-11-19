@@ -1,3 +1,4 @@
+from django.utils.translation import get_language
 import logging
 from base64 import b64encode
 from decimal import Decimal
@@ -80,7 +81,31 @@ def _redirect_if_module_denied(request, module_name):
     return redirect(f"{reverse('abonnement_expire')}?module={module_name}&reason={state['reason']}")
 
 
+def _number_in_english(number):
+    units = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+             "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+             "sixteen", "seventeen", "eighteen", "nineteen")
+    tens = ("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+    if number < 0:
+        return "minus " + _number_in_english(-number)
+    if number < 20:
+        return units[number]
+    if number < 100:
+        ten, unit = divmod(number, 10)
+        return tens[ten] + ("-" + units[unit] if unit else "")
+    scales = ((1000000000, "billion"), (1000000, "million"), (1000, "thousand"), (100, "hundred"))
+    for scale, label in scales:
+        if number >= scale:
+            quotient, remainder = divmod(number, scale)
+            words = _number_in_english(quotient) + " " + label
+            return words + (" " + _number_in_english(remainder) if remainder else "")
+    return str(number)
+
+
 def nombre_en_lettres(n, currency_wording):
+    if (get_language() or "fr").split("-")[0] == "en":
+        return _number_in_english(int(Decimal(n))).capitalize() + f" {currency_wording}"
+
     unite = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"]
     dizaine = ["", "dix", "vingt", "trente", "quarante", "cinquante", "soixante"]
 

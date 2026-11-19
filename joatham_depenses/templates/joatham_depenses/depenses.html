@@ -1,4 +1,6 @@
 {% extends "joatham_depenses/base.html" %}
+{% load i18n %}
+
 {% block content %}
 <style>
     .hero {
@@ -309,8 +311,8 @@
 
 <div class="hero">
     <div>
-        <h2>Dépenses</h2>
-        <p>Suivez les sorties financières de votre entreprise, filtrez rapidement les mouvements et exportez un document PDF professionnel.</p>
+        <h2>{% trans "Dépenses" %}</h2>
+        <p>{% trans "Suivez les sorties financières de votre entreprise, filtrez rapidement les mouvements et exportez un document PDF professionnel." %}</p>
     </div>
     <div class="stat-badges">
         <div class="stat-badge">
@@ -321,7 +323,7 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Total cumule</span>
+                <span class="label">{% trans "Total cumule" %}</span>
                 <strong>{{ global_total_display }}</strong>
             </div>
         </div>
@@ -332,9 +334,9 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Dépenses du mois</span>
+                <span class="label">{% trans "Dépenses du mois" %}</span>
                 <strong>{{ month_total_display }}</strong>
-                <span class="trend {{ evolution_direction }}">Évolution : {{ evolution_display }}</span>
+                <span class="trend {{ evolution_direction }}">{% trans "Évolution :" %} {{ evolution_display }}</span>
             </div>
         </div>
         <div class="stat-badge">
@@ -345,7 +347,7 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Dépenses du jour</span>
+                <span class="label">{% trans "Dépenses du jour" %}</span>
                 <strong>{{ today_total_display }}</strong>
             </div>
         </div>
@@ -357,9 +359,9 @@
                 </svg>
             </div>
             <div class="stat-content">
-                <span class="label">Moyenne par dépense</span>
+                <span class="label">{% trans "Moyenne par dépense" %}</span>
                 <strong>{{ average_total_display }}</strong>
-                <span class="label">{{ global_depense_count }} dépense{% if global_depense_count > 1 %}s{% endif %}</span>
+                <span class="label">{{ global_depense_count }} {% trans "dépense" %}{% if global_depense_count > 1 %}s{% endif %}</span>
             </div>
         </div>
     </div>
@@ -368,51 +370,51 @@
 <div class="page-grid" {% if not can_manage_expenses_ui %}style="grid-template-columns: 1fr;"{% endif %}>
     {% if can_manage_expenses_ui %}
     <section class="panel">
-        <h3>Ajouter une dépense</h3>
-        <p class="panel-subtitle">Enregistrez rapidement une nouvelle sortie financière pour garder votre suivi à jour.</p>
+        <h3>{% trans "Ajouter une dépense" %}</h3>
+        <p class="panel-subtitle">{% trans "Enregistrez rapidement une nouvelle sortie financière pour garder votre suivi à jour." %}</p>
         <form method="post" class="expense-form">
             {% csrf_token %}
             <div class="field">
-                <label for="{{ form.description.id_for_label }}">Description</label>
+                <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
                 {{ form.description }}
             </div>
             <div class="field">
-                <label for="{{ form.montant.id_for_label }}">Montant</label>
+                <label for="{{ form.montant.id_for_label }}">{% trans "Montant" %}</label>
                 {{ form.montant }}
             </div>
             {% if can_link_cash_expenses_ui %}
             <div class="field">
-                <label for="{{ form.caisse.id_for_label }}">Caisse</label>
+                <label for="{{ form.caisse.id_for_label }}">{% trans "Caisse" %}</label>
                 {{ form.caisse }}
             </div>
             {% endif %}
             <div class="panel-actions">
-                <button type="submit">Ajouter la dépense</button>
+                <button type="submit">{% trans "Ajouter la dépense" %}</button>
             </div>
         </form>
     </section>
     {% endif %}
 
     <section class="panel">
-        <h3>Filtres et export</h3>
-        <p class="panel-subtitle">Affinez la liste par période ou recherche texte, puis exportez le résultat en PDF.</p>
+        <h3>{% trans "Filtres et export" %}</h3>
+        <p class="panel-subtitle">{% trans "Affinez la liste par période ou recherche texte, puis exportez le résultat en PDF." %}</p>
         <form method="get" class="filters-form">
             <div class="field">
-                <label for="id_date_debut">Date début</label>
+                <label for="id_date_debut">{% trans "Date début" %}</label>
                 <input id="id_date_debut" type="date" name="date_debut" value="{{ date_debut }}">
             </div>
             <div class="field">
-                <label for="id_date_fin">Date fin</label>
+                <label for="id_date_fin">{% trans "Date fin" %}</label>
                 <input id="id_date_fin" type="date" name="date_fin" value="{{ date_fin }}">
             </div>
             <div class="field">
-                <label for="id_q">Recherche</label>
-                <input id="id_q" type="text" name="q" value="{{ search }}" placeholder="Description...">
+                <label for="id_q">{% trans "Recherche" %}</label>
+                <input id="id_q" type="text" name="q" value="{{ search }}" placeholder="{% trans 'Description...' %}">
             </div>
             <div class="panel-actions">
-                <button type="submit">Appliquer les filtres</button>
-                <a href="{% url 'depenses' %}">Réinitialiser</a>
-                <a href="{% url 'depenses_pdf' %}?date_debut={{ date_debut|urlencode }}&date_fin={{ date_fin|urlencode }}&q={{ search|urlencode }}">Exporter le PDF</a>
+                <button type="submit">{% trans "Appliquer les filtres" %}</button>
+                <a href="{% url 'depenses' %}">{% trans "Réinitialiser" %}</a>
+                <a href="{% url 'depenses_pdf' %}?date_debut={{ date_debut|urlencode }}&date_fin={{ date_fin|urlencode }}&q={{ search|urlencode }}">{% trans "Exporter le PDF" %}</a>
             </div>
         </form>
     </section>
@@ -423,9 +425,9 @@
     <table class="depenses-table">
         <thead>
             <tr>
-                <th>Description</th>
-                <th>Montant</th>
-                <th>Date</th>
+                <th>{% trans "Description" %}</th>
+                <th>{% trans "Montant" %}</th>
+                <th>{% trans "Date" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -442,12 +444,12 @@
 {% else %}
 <div class="table-shell" style="margin-top: 20px;">
     <div class="empty-state">
-        <h3>Aucune dépense enregistrée pour le moment</h3>
-        <p>Ajoutez votre première dépense pour commencer à suivre les sorties financières de l'entreprise et générer vos rapports PDF.</p>
+        <h3>{% trans "Aucune dépense enregistrée pour le moment" %}</h3>
+        <p>{% trans "Ajoutez votre première dépense pour commencer à suivre les sorties financières de l'entreprise et générer vos rapports PDF." %}</p>
         {% if can_manage_expenses_ui %}
-        <a href="{% url 'depenses' %}" class="btn-link primary">Ajouter une dépense</a>
+        <a href="{% url 'depenses' %}" class="btn-link primary">{% trans "Ajouter une dépense" %}</a>
         {% endif %}
-        <div class="helper">Vous pourrez ensuite filtrer, suivre le total mensuel et exporter un document PDF professionnel.</div>
+        <div class="helper">{% trans "Vous pourrez ensuite filtrer, suivre le total mensuel et exporter un document PDF professionnel." %}</div>
     </div>
 </div>
 {% endif %}

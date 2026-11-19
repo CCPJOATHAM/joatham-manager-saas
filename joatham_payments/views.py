@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -169,7 +170,7 @@ def payment_create(request):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Le paiement a ete enregistre.")
+            messages.success(request, gettext_lazy("Le paiement a ete enregistre."))
             return redirect("payment_detail", payment_id=payment.id)
 
     return render(
@@ -177,8 +178,8 @@ def payment_create(request):
         "joatham_payments/payment_form.html",
         {
             "form": form,
-            "page_title": "Nouveau paiement",
-            "submit_label": "Enregistrer le paiement",
+            "page_title": gettext_lazy("Nouveau paiement"),
+            "submit_label": gettext_lazy("Enregistrer le paiement"),
             **_payment_context_flags(request.user),
         },
     )
@@ -213,7 +214,7 @@ def payment_confirm(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Le paiement a ete confirme.")
+            messages.success(request, gettext_lazy("Le paiement a ete confirme."))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -234,7 +235,7 @@ def payment_reject(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Le paiement a ete rejete.")
+            messages.success(request, gettext_lazy("Le paiement a ete rejete."))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -255,7 +256,7 @@ def payment_cancel(request, payment_id):
         except (PaymentOperationError, PermissionDenied) as exc:
             messages.error(request, str(exc))
         else:
-            messages.success(request, "Le paiement a ete annule.")
+            messages.success(request, gettext_lazy("Le paiement a ete annule."))
     return redirect("payment_detail", payment_id=payment.id)
 
 
@@ -309,19 +310,19 @@ def payment_export_excel(request):
         filename="paiements.xlsx",
         sheet_name="Paiements",
         headers=[
-            "Date",
-            "Type",
-            "Moyen",
-            "Statut",
-            "Montant",
-            "Devise",
-            "Reference",
-            "Telephone",
-            "Operateur",
-            "Facture",
-            "Caisse",
-            "Cree par",
-            "Valide par",
+            gettext_lazy("Date"),
+            gettext_lazy("Type"),
+            gettext_lazy("Moyen"),
+            gettext_lazy("Statut"),
+            gettext_lazy("Montant"),
+            gettext_lazy("Devise"),
+            gettext_lazy("Reference"),
+            gettext_lazy("Telephone"),
+            gettext_lazy("Operateur"),
+            gettext_lazy("Facture"),
+            gettext_lazy("Caisse"),
+            gettext_lazy("Cree par"),
+            gettext_lazy("Valide par"),
         ],
         rows=rows,
     )

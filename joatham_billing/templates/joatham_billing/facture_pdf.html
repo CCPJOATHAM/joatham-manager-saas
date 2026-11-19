@@ -1,4 +1,6 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
+
 
 {% block pdf_title %}{{ facture.numero }}{% endblock %}
 
@@ -320,7 +322,7 @@
                                         {% if legal_information.logo_data_uri %}
                                         <td class="logo-cell">
                                             <div class="logo-box">
-                                                <img src="{{ legal_information.logo_data_uri }}" alt="Logo">
+                                                <img src="{{ legal_information.logo_data_uri }}" alt="{% trans 'Logo' %}">
                                             </div>
                                         </td>
                                         {% endif %}
@@ -336,24 +338,24 @@
                                                 <div class="brand-subtitle">{{ legal_information.city }}{% if legal_information.city and legal_information.country %} - {% endif %}{{ legal_information.country }}</div>
                                             {% endif %}
                                             {% if legal_information.phone or legal_information.email %}
-                                                <div class="brand-subtitle">{% if legal_information.phone %}Tel : {{ legal_information.phone }}{% endif %}{% if legal_information.phone and legal_information.email %} | {% endif %}{% if legal_information.email %}Email : {{ legal_information.email }}{% endif %}</div>
+                                                <div class="brand-subtitle">{% if legal_information.phone %}{% trans "Tel :" %} {{ legal_information.phone }}{% endif %}{% if legal_information.phone and legal_information.email %} | {% endif %}{% if legal_information.email %}{% trans "Email :" %} {{ legal_information.email }}{% endif %}</div>
                                             {% endif %}
                                         </td>
                                     </tr>
                                 </table>
                             </td>
                             <td width="26%" class="invoice-block">
-                                <div class="invoice-title">FACTURE</div>
-                                <div class="invoice-number">No {{ facture.numero }}</div>
+                                <div class="invoice-title">{% trans "FACTURE" %}</div>
+                                <div class="invoice-number">{% trans "No" %} {{ facture.numero }}</div>
                                 <div class="invoice-date">
-                                    Date : {{ facture.date|date:"d/m/Y" }}<br>
-                                    Heure : {{ facture.date|date:"H:i:s" }}
+                                    {% trans "Date :" %} {{ facture.date|date:"SHORT_DATE_FORMAT" }}<br>
+                                    {% trans "Heure :" %} {{ facture.date|date:"H:i:s" }}
                                 </div>
                             </td>
                             <td width="20%" class="qr-block">
                                 <div class="qr-box">
-                                    <img src="{{ qr_code_data_uri }}" alt="QR facture">
-                                    <div class="qr-caption">Verification facture</div>
+                                    <img src="{{ qr_code_data_uri }}" alt="{% trans 'QR facture' %}">
+                                    <div class="qr-caption">{% trans "Verification facture" %}</div>
                                 </div>
                             </td>
                         </tr>
@@ -362,7 +364,7 @@
                     <div class="spacer-sm">&nbsp;</div>
 
                     <div class="client-line">
-                        <strong>Client :</strong> {{ client_name|default:"Client non renseigne" }}
+                        <strong>{% trans "Client :" %}</strong> {{ client_name|default:_('Client non renseigne') }}
                     </div>
 
                     <div class="spacer-sm">&nbsp;</div>
@@ -371,11 +373,11 @@
                     <thead>
                         <tr>
                             <th width="7%">#</th>
-                            <th width="47%">Prestations</th>
-                            <th width="12%" class="numeric-col">Qte</th>
+                            <th width="47%">{% trans "Prestations" %}</th>
+                            <th width="12%" class="numeric-col">{% trans "Qte" %}</th>
                             <th width="15%" class="numeric-col">P.U</th>
-                            <th width="9%" class="numeric-col">TVA</th>
-                            <th width="10%" class="numeric-col">Total</th>
+                            <th width="9%" class="numeric-col">{% trans "TVA" %}</th>
+                            <th width="10%" class="numeric-col">{% trans "Total" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -390,7 +392,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="6" class="text-left">Aucune ligne de facturation enregistree.</td>
+                                <td colspan="6" class="text-left">{% trans "Aucune ligne de facturation enregistree." %}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -401,7 +403,7 @@
                     <div class="summary-wrap">
                         <table class="summary-table">
                             <tr>
-                                <td class="summary-label">Total HT</td>
+                                <td class="summary-label">{% trans "Total HT" %}</td>
                                 <td class="text-right">{{ summary.total_ht }}</td>
                             </tr>
                             <tr>
@@ -409,19 +411,19 @@
                                 <td class="text-right">{{ summary.total_tva }}</td>
                             </tr>
                             <tr>
-                                <td class="summary-label">Reduction</td>
+                                <td class="summary-label">{% trans "Reduction" %}</td>
                                 <td class="text-right">{{ summary.total_reduction }}</td>
                             </tr>
                             <tr class="grand-total">
-                                <td>TOTAL NET</td>
+                                <td>{% trans "TOTAL NET" %}</td>
                                 <td class="text-right">{{ summary.total_net }}</td>
                             </tr>
                             <tr>
-                                <td class="summary-label">Montant paye</td>
+                                <td class="summary-label">{% trans "Montant paye" %}</td>
                                 <td class="text-right">{{ summary.total_paye }}</td>
                             </tr>
                             <tr>
-                                <td class="summary-label">Reste a payer</td>
+                                <td class="summary-label">{% trans "Reste a payer" %}</td>
                                 <td class="text-right">{{ summary.reste_a_payer }}</td>
                             </tr>
                         </table>
@@ -430,7 +432,7 @@
                     <div class="spacer-sm">&nbsp;</div>
 
                     <div class="amount-in-words">
-                        <strong>Arrete a :</strong> {{ summary.amount_in_words }}
+                        <strong>{% trans "Arrete a :" %}</strong> {{ summary.amount_in_words }}
                     </div>
 
                     <div class="spacer-sm">&nbsp;</div>
@@ -439,17 +441,17 @@
                         <tr>
                             <td width="50%" class="card-split-left">
                                 <div class="info-card">
-                                    <div class="section-title">Coordonnees bancaires</div>
-                                    {% if legal_information.bank_name %}<p><strong>Banque :</strong> {{ legal_information.bank_name }}</p>{% endif %}
-                                    {% if legal_information.bank_account %}<p><strong>Compte :</strong> {{ legal_information.bank_account }}</p>{% endif %}
+                                    <div class="section-title">{% trans "Coordonnees bancaires" %}</div>
+                                    {% if legal_information.bank_name %}<p><strong>{% trans "Banque :" %}</strong> {{ legal_information.bank_name }}</p>{% endif %}
+                                    {% if legal_information.bank_account %}<p><strong>{% trans "Compte :" %}</strong> {{ legal_information.bank_account }}</p>{% endif %}
                                 </div>
                             </td>
                             <td width="50%" class="card-split-right">
                                 <div class="info-card">
-                                    <div class="section-title">Informations legales</div>
-                                    {% if legal_information.impot %}<p><strong>No Impot :</strong> {{ legal_information.impot }}</p>{% endif %}
-                                    {% if legal_information.rccm %}<p><strong>RCCM :</strong> {{ legal_information.rccm }}</p>{% endif %}
-                                    {% if legal_information.id_nat %}<p><strong>ID NAT :</strong> {{ legal_information.id_nat }}</p>{% endif %}
+                                    <div class="section-title">{% trans "Informations legales" %}</div>
+                                    {% if legal_information.impot %}<p><strong>{% trans "No Impot :" %}</strong> {{ legal_information.impot }}</p>{% endif %}
+                                    {% if legal_information.rccm %}<p><strong>{% trans "RCCM :" %}</strong> {{ legal_information.rccm }}</p>{% endif %}
+                                    {% if legal_information.id_nat %}<p><strong>{% trans "ID NAT :" %}</strong> {{ legal_information.id_nat }}</p>{% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -460,7 +462,7 @@
                     <div class="footer">
                         <table class="footer-table">
                             <tr>
-                                <td width="62%" class="footer-left">Facture générée automatiquement par JOATHAM Manager</td>
+                                <td width="62%" class="footer-left">{% trans "Facture générée automatiquement par JOATHAM Manager" %}</td>
                                 <td width="38%" class="footer-right">{{ footer_datetime }}</td>
                             </tr>
                         </table>
@@ -469,7 +471,7 @@
             </div>
 
             {% if not forloop.last and compact_layout %}
-                <div class="cut-line">Decouper ici</div>
+                <div class="cut-line">{% trans "Decouper ici" %}</div>
             {% endif %}
         {% endfor %}
     </div>

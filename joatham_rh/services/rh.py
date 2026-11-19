@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth import get_user_model
@@ -53,9 +54,9 @@ def _normalize_salary(value):
     try:
         amount = Decimal(str(value)).quantize(Decimal("0.01"))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise RhOperationError("Le salaire de base est invalide.") from exc
+        raise RhOperationError(gettext_lazy("Le salaire de base est invalide.")) from exc
     if amount < 0:
-        raise RhOperationError("Le salaire de base ne peut pas etre negatif.")
+        raise RhOperationError(gettext_lazy("Le salaire de base ne peut pas etre negatif."))
     return amount
 
 
@@ -84,9 +85,9 @@ def _normalize_period_month(value):
     try:
         month = int(value)
     except (TypeError, ValueError) as exc:
-        raise RhOperationError("Le mois de paie est invalide.") from exc
+        raise RhOperationError(gettext_lazy("Le mois de paie est invalide.")) from exc
     if month < 1 or month > 12:
-        raise RhOperationError("Le mois de paie est invalide.")
+        raise RhOperationError(gettext_lazy("Le mois de paie est invalide."))
     return month
 
 
@@ -94,9 +95,9 @@ def _normalize_period_year(value):
     try:
         year = int(value)
     except (TypeError, ValueError) as exc:
-        raise RhOperationError("L'annee de paie est invalide.") from exc
+        raise RhOperationError(gettext_lazy("L'annee de paie est invalide.")) from exc
     if year < 2000:
-        raise RhOperationError("L'annee de paie est invalide.")
+        raise RhOperationError(gettext_lazy("L'annee de paie est invalide."))
     return year
 
 
@@ -213,7 +214,7 @@ def validate_employe_user_link(employe, user, entreprise, *, utilisateur=None):
     if employe.pk:
         linked_employes = linked_employes.exclude(pk=employe.pk)
     if linked_employes.exists():
-        raise RhOperationError("Ce compte utilisateur est deja lie a un autre employe RH.")
+        raise RhOperationError(gettext_lazy("Ce compte utilisateur est deja lie a un autre employe RH."))
 
     return user
 
@@ -229,7 +230,7 @@ def create_poste(*, entreprise, nom, description="", actif=True, utilisateur=Non
     try:
         poste.save()
     except IntegrityError as exc:
-        raise RhOperationError("Un poste avec ce nom existe deja pour cette entreprise.") from exc
+        raise RhOperationError(gettext_lazy("Un poste avec ce nom existe deja pour cette entreprise.")) from exc
 
     record_audit_event(
         entreprise=entreprise,
@@ -314,7 +315,7 @@ def create_employe(
                     utilisateur=utilisateur,
                 )
     except IntegrityError as exc:
-        raise RhOperationError("Un employe avec ce matricule existe deja pour cette entreprise.") from exc
+        raise RhOperationError(gettext_lazy("Un employe avec ce matricule existe deja pour cette entreprise.")) from exc
     return employe
 
 
@@ -389,7 +390,7 @@ def update_employe(
                 metadata={"employe_id": employe.id, "matricule": employe.matricule},
             )
     except IntegrityError as exc:
-        raise RhOperationError("Un employe avec ce matricule existe deja pour cette entreprise.") from exc
+        raise RhOperationError(gettext_lazy("Un employe avec ce matricule existe deja pour cette entreprise.")) from exc
     return employe
 
 
@@ -399,7 +400,7 @@ def record_presence(*, entreprise, employe, date, statut, heure_arrivee=None, he
     normalized_date = _normalize_date(date, "La date de presence est obligatoire.")
     normalized_status = _validate_choice(statut, Presence.Statut.choices, "Le statut de presence est invalide.")
     if Presence.objects.filter(entreprise=entreprise, employe=employe, date=normalized_date).exists():
-        raise RhOperationError("Une presence existe deja pour cet employe a cette date.")
+        raise RhOperationError(gettext_lazy("Une presence existe deja pour cet employe a cette date."))
 
     presence = Presence.objects.create(
         entreprise=entreprise,
@@ -427,7 +428,7 @@ def _ensure_valid_date_range(date_debut, date_fin):
     normalized_start = _normalize_date(date_debut, "La date de debut est obligatoire.")
     normalized_end = _normalize_date(date_fin, "La date de fin est obligatoire.")
     if normalized_end < normalized_start:
-        raise RhOperationError("La date de fin doit etre superieure ou egale a la date de debut.")
+        raise RhOperationError(gettext_lazy("La date de fin doit etre superieure ou egale a la date de debut."))
     return normalized_start, normalized_end
 
 
@@ -469,11 +470,11 @@ def create_conge(
 
 def _ensure_conge_can_be_decided(conge):
     if conge.statut == DemandeConge.Statut.ANNULE:
-        raise RhOperationError("Une demande annulee ne peut pas etre approuvee ou refusee.")
+        raise RhOperationError(gettext_lazy("Une demande annulee ne peut pas etre approuvee ou refusee."))
     if conge.statut == DemandeConge.Statut.APPROUVE:
-        raise RhOperationError("Une demande approuvee ne peut plus etre modifiee.")
+        raise RhOperationError(gettext_lazy("Une demande approuvee ne peut plus etre modifiee."))
     if conge.statut == DemandeConge.Statut.REFUSE:
-        raise RhOperationError("Une demande deja refusee ne peut plus etre modifiee.")
+        raise RhOperationError(gettext_lazy("Une demande deja refusee ne peut plus etre modifiee."))
     return conge
 
 
@@ -482,7 +483,7 @@ def decide_conge(*, entreprise, conge, statut, decide_par=None, commentaire_deci
     _ensure_same_entreprise(conge, entreprise, "La demande de conge appartient a une autre entreprise.")
     _ensure_conge_can_be_decided(conge)
     if statut not in {DemandeConge.Statut.APPROUVE, DemandeConge.Statut.REFUSE}:
-        raise RhOperationError("La decision de conge est invalide.")
+        raise RhOperationError(gettext_lazy("La decision de conge est invalide."))
     conge.statut = statut
     conge.approuve_par = decide_par
     conge.date_decision = timezone.now()
@@ -642,18 +643,18 @@ def _resolve_paiement_salaire_cashbox_context(*, entreprise, caisse, utilisateur
     if not state["allowed"]:
         raise RhOperationError(get_module_access_denied_message("caisse_integrations", state["reason"]))
     if utilisateur is not None and not user_has_permission(utilisateur, "caisse.add_movement"):
-        raise RhOperationError("Vous n'avez pas les droits pour créer un mouvement de caisse.")
+        raise RhOperationError(gettext_lazy("Vous n'avez pas les droits pour créer un mouvement de caisse."))
     if not isinstance(caisse, Caisse):
         try:
             caisse = Caisse.objects.get(id=caisse)
         except (Caisse.DoesNotExist, TypeError, ValueError) as exc:
-            raise RhOperationError("La caisse sélectionnée est introuvable.") from exc
+            raise RhOperationError(gettext_lazy("La caisse sélectionnée est introuvable.")) from exc
     _ensure_same_entreprise(caisse, entreprise, "La caisse sélectionnée appartient à une autre entreprise.")
     if not caisse.est_active:
-        raise RhOperationError("La caisse sélectionnée est inactive.")
+        raise RhOperationError(gettext_lazy("La caisse sélectionnée est inactive."))
     session = get_open_session_for_caisse(caisse)
     if session is None:
-        raise RhOperationError("Aucune session de caisse ouverte pour cette caisse.")
+        raise RhOperationError(gettext_lazy("Aucune session de caisse ouverte pour cette caisse."))
     _ensure_same_entreprise(session, entreprise, "La session de caisse appartient à une autre entreprise.")
     return caisse, session
 
@@ -681,7 +682,7 @@ def create_cash_movement_for_paiement_salaire(*, paiement, entreprise, utilisate
     if paiement.mouvement_caisse_id:
         return paiement.mouvement_caisse
     if paiement.caisse_id is None or paiement.session_caisse_id is None:
-        raise RhOperationError("Le paiement de salaire doit être rattaché à une caisse et à une session ouverte.")
+        raise RhOperationError(gettext_lazy("Le paiement de salaire doit être rattaché à une caisse et à une session ouverte."))
     _ensure_same_entreprise(paiement.caisse, entreprise, "La caisse sélectionnée appartient à une autre entreprise.")
     _ensure_same_entreprise(paiement.session_caisse, entreprise, "La session de caisse appartient à une autre entreprise.")
 

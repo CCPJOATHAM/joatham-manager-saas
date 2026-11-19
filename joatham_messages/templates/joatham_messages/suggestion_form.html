@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
 
-{% block page_title %}{% trans "Suggestions" %} | JOATHAM Manager{% endblock %}
+{% block page_title %}{% trans "Suggestions" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Suggestions au super admin" %}{% endblock %}
 {% block content_subtitle %}{% trans "Transmettez une demande ou une idee d'amelioration a l'equipe plateforme." %}{% endblock %}
 
@@ -76,7 +76,7 @@
         {% for suggestion in suggestions %}
         <article class="history-row">
             <h2>{{ suggestion.sujet }}</h2>
-            <div class="meta">{{ suggestion.get_statut_display }} - {{ suggestion.date_creation|date:"d/m/Y H:i" }}</div>
+            <div class="meta">{{ suggestion.get_statut_display }} - {{ suggestion.date_creation|date:"SHORT_DATETIME_FORMAT" }}</div>
             <p>{{ suggestion.message }}</p>
         </article>
         {% empty %}

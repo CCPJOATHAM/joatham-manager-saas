@@ -1,11 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
 
-{% block page_title %}{{ page_title }} | JOATHAM Manager{% endblock %}
+
+{% block page_title %}{{ page_title }} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}Renseignez les informations essentielles du service tout en gardant la saisie libre disponible dans les factures.{% endblock %}
+{% block content_subtitle %}{% trans "Renseignez les informations essentielles du service tout en gardant la saisie libre disponible dans les factures." %}{% endblock %}
 
 {% block top_actions %}
-<a href="{% url 'service_list' %}" class="btn-link">Liste des services</a>
+<a href="{% url 'service_list' %}" class="btn-link">{% trans "Liste des services" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -93,23 +95,23 @@
 </style>
 
 <div class="form-card">
-    <p class="help">Un service représente une prestation immatérielle. Il reste distinct du module Produits, qui est réservé aux articles stockables.</p>
+    <p class="help">{% trans "Un service représente une prestation immatérielle. Il reste distinct du module Produits, qui est réservé aux articles stockables." %}</p>
     <form method="post">
         {% csrf_token %}
         <div class="form-grid">
             <div class="field full">
-                <label for="{{ form.nom.id_for_label }}">Nom du service</label>
+                <label for="{{ form.nom.id_for_label }}">{% trans "Nom du service" %}</label>
                 {{ form.nom }}
                 {{ form.nom.errors }}
             </div>
             <div class="field">
-                <label for="{{ form.prix.id_for_label }}">Prix</label>
+                <label for="{{ form.prix.id_for_label }}">{% trans "Prix" %}</label>
                 {{ form.prix }}
                 {{ form.prix.errors }}
             </div>
             <div class="field checkbox full">
                 {{ form.actif }}
-                <label for="{{ form.actif.id_for_label }}">Service actif</label>
+                <label for="{{ form.actif.id_for_label }}">{% trans "Service actif" %}</label>
                 {{ form.actif.errors }}
             </div>
         </div>

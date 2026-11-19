@@ -1,4 +1,6 @@
 {% extends "pdf/base_pdf.html" %}
+{% load i18n %}
+
 
 {% block pdf_title %}{{ report_title }} - {{ entreprise.nom }}{% endblock %}
 
@@ -21,7 +23,7 @@
     <h1>{{ entreprise.raison_sociale|default:entreprise.nom }}</h1>
     <p>{{ entreprise.nom }}</p>
     <p>{{ entreprise.ville }}, {{ entreprise.pays }} | {{ entreprise.email }} | {{ entreprise.telephone }}</p>
-    <p>Edition du {{ date_generation }}</p>
+    <p>{% trans "Edition du" %} {{ date_generation }}</p>
 </div>
 
 <div class="document-title">{{ report_title }}</div>
@@ -29,15 +31,15 @@
 <table>
     <thead>
         <tr>
-            <th>Apprenant</th>
-            <th>Formation</th>
-            <th>Date</th>
-            <th>Statut</th>
-            <th class="text-right">Montant prévu</th>
-            <th class="text-right">Montant payé</th>
-            <th class="text-right">Solde</th>
-            <th>Statut paiement</th>
-            <th class="text-right">Trop-perçu</th>
+            <th>{% trans "Apprenant" %}</th>
+            <th>{% trans "Formation" %}</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Statut" %}</th>
+            <th class="text-right">{% trans "Montant prévu" %}</th>
+            <th class="text-right">{% trans "Montant payé" %}</th>
+            <th class="text-right">{% trans "Solde" %}</th>
+            <th>{% trans "Statut paiement" %}</th>
+            <th class="text-right">{% trans "Trop-perçu" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -45,7 +47,7 @@
             <tr>
                 <td>{{ inscription.apprenant }}</td>
                 <td>{{ inscription.formation }}</td>
-                <td>{{ inscription.date_inscription|date:"d/m/Y" }}</td>
+                <td>{{ inscription.date_inscription|date:"SHORT_DATE_FORMAT" }}</td>
                 <td>{{ inscription.get_statut_display }}</td>
                 <td class="text-right">{{ inscription.montant_prevu|floatformat:2 }}</td>
                 <td class="text-right">{{ inscription.montant_paye|floatformat:2 }}</td>
@@ -55,13 +57,13 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="9">Aucune inscription enregistrée.</td>
+                <td colspan="9">{% trans "Aucune inscription enregistrée." %}</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 <div class="pdf-footer">
-    Document genere le {{ date_footer }}
+    {% trans "Document genere le" %} {{ date_footer }}
 </div>
 {% endblock %}

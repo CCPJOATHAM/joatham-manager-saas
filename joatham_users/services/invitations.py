@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import logging
 from dataclasses import dataclass
 from datetime import timedelta
@@ -99,7 +100,7 @@ def _split_full_name(full_name):
 
 def _ensure_invited_role(role):
     if role not in ALLOWED_INVITED_ROLES:
-        raise ValueError("Vous pouvez inviter uniquement un gestionnaire ou un comptable.")
+        raise ValueError(gettext_lazy("Vous pouvez inviter uniquement un gestionnaire ou un comptable."))
 
 
 def _active_company_invitation_queryset(entreprise):
@@ -113,18 +114,18 @@ def _active_company_invitation_queryset(entreprise):
 def _ensure_invitation_email_available(entreprise, email, *, exclude_invitation_id=None):
     normalized_email = (email or "").strip().lower()
     if User.objects.filter(entreprise=entreprise, email__iexact=normalized_email).exists():
-        raise ValueError("Un utilisateur de cette entreprise utilise deja cet email.")
+        raise ValueError(gettext_lazy("Un utilisateur de cette entreprise utilise deja cet email."))
     if User.objects.filter(entreprise=entreprise, username__iexact=normalized_email).exists():
-        raise ValueError("Un utilisateur de cette entreprise utilise deja cet email.")
+        raise ValueError(gettext_lazy("Un utilisateur de cette entreprise utilise deja cet email."))
     if User.objects.filter(email__iexact=normalized_email).exclude(entreprise=entreprise).exists():
-        raise ValueError("Un compte existe deja avec cet email.")
+        raise ValueError(gettext_lazy("Un compte existe deja avec cet email."))
     if User.objects.filter(username__iexact=normalized_email).exclude(entreprise=entreprise).exists():
-        raise ValueError("Un compte existe deja avec cet email.")
+        raise ValueError(gettext_lazy("Un compte existe deja avec cet email."))
     invitation_qs = _active_company_invitation_queryset(entreprise).filter(email__iexact=normalized_email)
     if exclude_invitation_id:
         invitation_qs = invitation_qs.exclude(id=exclude_invitation_id)
     if invitation_qs.exists():
-        raise ValueError("Une invitation active existe deja pour cet email.")
+        raise ValueError(gettext_lazy("Une invitation active existe deja pour cet email."))
     return normalized_email
 
 
@@ -138,7 +139,7 @@ def assert_company_invitation_quota_available(entreprise):
     pending_count = _active_company_invitation_queryset(entreprise).count()
     if user_count + pending_count >= limit:
         raise PlanQuotaExceeded(
-            f"{PREMIUM_REQUIRED_MESSAGE} Votre plan permet jusqu'a {limit} utilisateur(s), invitations en attente incluses."
+            (gettext_lazy("%(value_1)s Votre plan permet jusqu'a %(value_2)s utilisateur(s), invitations en attente incluses.") % {'value_1': PREMIUM_REQUIRED_MESSAGE, 'value_2': limit})
         )
 
 
@@ -177,7 +178,7 @@ def send_invitation_email(invitation):
             invitation.id,
             invitation.email,
         )
-        raise InvitationEmailError("L'invitation n'a pas pu etre envoyee par email.") from exc
+        raise InvitationEmailError(gettext_lazy("L'invitation n'a pas pu etre envoyee par email.")) from exc
 
 
 @transaction.atomic
@@ -208,7 +209,7 @@ def create_company_invitation(*, entreprise, owner_user, full_name, email, role)
 @transaction.atomic
 def resend_company_invitation(*, invitation, entreprise, owner_user):
     if not is_company_invitation_for(invitation, entreprise) or invitation.is_used or invitation.is_expired:
-        raise ValueError("Cette invitation n'est plus active.")
+        raise ValueError(gettext_lazy("Cette invitation n'est plus active."))
 
     send_invitation_email(invitation)
     invitation.last_reminder_sent_at = timezone.now()
@@ -230,7 +231,7 @@ def resend_company_invitation(*, invitation, entreprise, owner_user):
 @transaction.atomic
 def cancel_company_invitation(*, invitation, entreprise, owner_user):
     if not is_company_invitation_for(invitation, entreprise) or invitation.is_used:
-        raise ValueError("Cette invitation ne peut pas etre annulee.")
+        raise ValueError(gettext_lazy("Cette invitation ne peut pas etre annulee."))
 
     invitation.is_used = True
     invitation.source = build_cancelled_company_invitation_source(invitation)
@@ -252,7 +253,7 @@ def cancel_company_invitation(*, invitation, entreprise, owner_user):
 def accept_company_invitation(*, invitation, password):
     parsed = parse_company_invitation_source(invitation.source)
     if not parsed["is_company"] or parsed["cancelled"] or invitation.is_used or invitation.is_expired:
-        raise ValueError("Cette invitation n'est plus valide.")
+        raise ValueError(gettext_lazy("Cette invitation n'est plus valide."))
 
     entreprise = Entreprise.objects.get(id=parsed["entreprise_id"])
     role = parsed["role"]
@@ -312,7 +313,7 @@ def send_invitation_reminder(invitation):
         return InvitationReminderResult(status=REMINDER_SKIPPED, reason=skip_reason)
 
     context = _get_invitation_email_context(invitation)
-    subject = "Votre acces JOATHAM Manager est pret"
+    subject = gettext_lazy("Votre acces JOATHAM Manager est pret")
 
     try:
         text_body = render_to_string("joatham_users/emails/invitation_reminder.txt", context).strip()

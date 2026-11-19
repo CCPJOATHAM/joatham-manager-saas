@@ -84,9 +84,9 @@
                             {{ row.status_label }}
                         </span>
                     </td>
-                    <td>{% if row.instance.started_at %}{{ row.instance.started_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                    <td>{% if row.instance.closed_at %}{{ row.instance.closed_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
-                    <td>{% if row.instance.validated_at %}{{ row.instance.validated_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.started_at %}{{ row.instance.started_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.closed_at %}{{ row.instance.closed_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td>{% if row.instance.validated_at %}{{ row.instance.validated_at|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     <td>{% if row.instance.created_by %}{{ row.instance.created_by.username }}{% else %}<span class="muted">-</span>{% endif %}</td>
                     <td><a href="{% url 'inventory_detail' row.instance.id %}" class="action-link">{% trans "Voir" %}</a></td>
                 </tr>

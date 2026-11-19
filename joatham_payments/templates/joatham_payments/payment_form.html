@@ -1,15 +1,17 @@
 {% extends "joatham_payments/base.html" %}
+{% load i18n %}
+
 
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content_title %}{{ page_title }}{% endblock %}
-{% block content_subtitle %}Saisissez un paiement manuel controle, lie si besoin a une facture, une depense ou une session caisse.{% endblock %}
+{% block content_subtitle %}{% trans "Saisissez un paiement manuel controle, lie si besoin a une facture, une depense ou une session caisse." %}{% endblock %}
 
 {% block content %}
 <section class="payments-shell">
   <div class="payments-panel">
     <div class="payments-panel-header">
-      <h3>Informations paiement</h3>
-      <p>Les paiements confirmes peuvent alimenter la facture et la caisse selon le canal choisi.</p>
+      <h3>{% trans "Informations paiement" %}</h3>
+      <p>{% trans "Les paiements confirmes peuvent alimenter la facture et la caisse selon le canal choisi." %}</p>
     </div>
     <div class="payments-panel-body">
       <form method="post" enctype="multipart/form-data">
@@ -29,7 +31,7 @@
         </div>
         <div class="payments-actions">
           <button type="submit" class="payments-btn">{{ submit_label }}</button>
-          <a href="{% url 'payment_list' %}" class="payments-ghost">Annuler</a>
+          <a href="{% url 'payment_list' %}" class="payments-ghost">{% trans "Annuler" %}</a>
         </div>
       </form>
     </div>

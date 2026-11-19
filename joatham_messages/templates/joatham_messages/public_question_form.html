@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Question avant inscription" %} | JOATHAM Manager</title>
+    <title>{% trans "Question avant inscription" %} {% trans "| JOATHAM Manager" %}</title>
     <style>
         :root {
             --text: #10233f;
@@ -358,7 +358,7 @@
     <main class="page-shell">
         <header class="topbar">
             <a href="{% url 'login' %}" class="brand" aria-label="JOATHAM Manager">
-                <span class="brand-mark">JM</span>
+                <span class="brand-mark">{% trans "JM" %}</span>
                 <span>JOATHAM Manager</span>
             </a>
             {% include "includes/language_selector.html" with language_selector_id="public-question-language-select" %}

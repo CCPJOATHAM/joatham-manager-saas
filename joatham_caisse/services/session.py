@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -15,9 +16,9 @@ def _normalize_non_negative_amount(value, field_label):
     try:
         normalized = Decimal(str(value or "0"))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ValueError(f"{field_label} est invalide.") from exc
+        raise ValueError((gettext_lazy('%(value_1)s est invalide.') % {'value_1': field_label})) from exc
     if normalized < Decimal("0.00"):
-        raise ValueError(f"{field_label} ne peut pas etre negatif.")
+        raise ValueError((gettext_lazy('%(value_1)s ne peut pas etre negatif.') % {'value_1': field_label}))
     return normalized
 
 
@@ -33,9 +34,9 @@ def open_session(*, entreprise, caisse, utilisateur, solde_initial=Decimal("0.00
     ensure_same_entreprise(caisse, entreprise)
     solde_initial = _normalize_non_negative_amount(solde_initial, "Le solde initial")
     if not caisse.est_active:
-        raise ValueError("Cette caisse est inactive.")
+        raise ValueError(gettext_lazy("Cette caisse est inactive."))
     if get_open_session_for_caisse(caisse) is not None:
-        raise ValueError("Une session est deja ouverte pour cette caisse.")
+        raise ValueError(gettext_lazy("Une session est deja ouverte pour cette caisse."))
 
     session = SessionCaisse.objects.create(
         entreprise=entreprise,
@@ -64,7 +65,7 @@ open_session_for_caisse = open_session
 def close_session(*, entreprise, session, utilisateur, solde_reel, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut != SessionCaisse.Statut.OUVERTE:
-        raise ValueError("Seule une session ouverte peut etre fermee.")
+        raise ValueError(gettext_lazy("Seule une session ouverte peut etre fermee."))
 
     solde_theorique = compute_theoretical_balance(session)
     solde_reel = _normalize_non_negative_amount(solde_reel, "Le solde reel")
@@ -110,9 +111,9 @@ def close_session(*, entreprise, session, utilisateur, solde_reel, commentaire="
 def cancel_session(*, entreprise, session, utilisateur, commentaire=""):
     ensure_same_entreprise(session, entreprise)
     if session.statut == SessionCaisse.Statut.VALIDEE:
-        raise ValueError("Une session validee ne peut plus etre annulee.")
+        raise ValueError(gettext_lazy("Une session validee ne peut plus etre annulee."))
     if session.validations.exists():
-        raise ValueError("Une session deja traitee ne peut plus etre annulee.")
+        raise ValueError(gettext_lazy("Une session deja traitee ne peut plus etre annulee."))
 
     session.statut = SessionCaisse.Statut.ANNULEE
     if not session.date_fermeture:

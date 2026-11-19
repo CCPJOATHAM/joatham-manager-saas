@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from decimal import Decimal
 
 from django import forms
@@ -21,11 +22,11 @@ class CaisseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["nom"].widget.attrs.update({"placeholder": _("Ex. Caisse principale")})
-        self.fields["code"].widget.attrs.update({"placeholder": "CAISSE-001"})
+        self.fields["code"].widget.attrs.update({"placeholder": gettext_lazy("CAISSE-001")})
         self.fields["description"].widget = forms.Textarea(
             attrs={"rows": 3, "placeholder": _("Description ou emplacement de la caisse")}
         )
-        self.fields["devise"].widget.attrs.update({"placeholder": "CDF"})
+        self.fields["devise"].widget.attrs.update({"placeholder": gettext_lazy("CDF")})
 
 
 class OpenSessionForm(forms.Form):

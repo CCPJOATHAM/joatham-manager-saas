@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django.conf import settings
 from decimal import Decimal
 
@@ -40,22 +41,22 @@ class Poste(models.Model):
 
 class Employe(models.Model):
     class Sexe(models.TextChoices):
-        HOMME = "homme", "Homme"
-        FEMME = "femme", "Femme"
-        AUTRE = "autre", "Autre"
+        HOMME = "homme", gettext_lazy("Homme")
+        FEMME = "femme", gettext_lazy("Femme")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     class TypeContrat(models.TextChoices):
-        CDI = "cdi", "CDI"
-        CDD = "cdd", "CDD"
-        STAGE = "stage", "Stage"
-        JOURNALIER = "journalier", "Journalier"
-        PRESTATION = "prestation", "Prestation"
-        AUTRE = "autre", "Autre"
+        CDI = "cdi", gettext_lazy("CDI")
+        CDD = "cdd", gettext_lazy("CDD")
+        STAGE = "stage", gettext_lazy("Stage")
+        JOURNALIER = "journalier", gettext_lazy("Journalier")
+        PRESTATION = "prestation", gettext_lazy("Prestation")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     class Statut(models.TextChoices):
-        ACTIF = "actif", "Actif"
-        SUSPENDU = "suspendu", "Suspendu"
-        SORTI = "sorti", "Sorti"
+        ACTIF = "actif", gettext_lazy("Actif")
+        SUSPENDU = "suspendu", gettext_lazy("Suspendu")
+        SORTI = "sorti", gettext_lazy("Sorti")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -68,7 +69,7 @@ class Employe(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="rh_employe",
-        verbose_name="Compte utilisateur lie",
+        verbose_name=gettext_lazy("Compte utilisateur lie"),
     )
     matricule = models.CharField(max_length=50)
     nom = models.CharField(max_length=120)
@@ -127,10 +128,10 @@ class Employe(models.Model):
 
 class Presence(models.Model):
     class Statut(models.TextChoices):
-        PRESENT = "present", "Present"
-        ABSENT = "absent", "Absent"
-        RETARD = "retard", "Retard"
-        CONGE = "conge", "Conge"
+        PRESENT = "present", gettext_lazy("Present")
+        ABSENT = "absent", gettext_lazy("Absent")
+        RETARD = "retard", gettext_lazy("Retard")
+        CONGE = "conge", gettext_lazy("Conge")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -171,18 +172,18 @@ class Presence(models.Model):
 
 class DemandeConge(models.Model):
     class TypeConge(models.TextChoices):
-        ANNUEL = "annuel", "Annuel"
-        MALADIE = "maladie", "Maladie"
-        EXCEPTIONNEL = "exceptionnel", "Exceptionnel"
-        SANS_SOLDE = "sans_solde", "Sans solde"
-        AUTRE = "autre", "Autre"
+        ANNUEL = "annuel", gettext_lazy("Annuel")
+        MALADIE = "maladie", gettext_lazy("Maladie")
+        EXCEPTIONNEL = "exceptionnel", gettext_lazy("Exceptionnel")
+        SANS_SOLDE = "sans_solde", gettext_lazy("Sans solde")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     class Statut(models.TextChoices):
-        BROUILLON = "brouillon", "Brouillon"
-        EN_ATTENTE = "en_attente", "En attente"
-        APPROUVE = "approuve", "Approuve"
-        REFUSE = "refuse", "Refuse"
-        ANNULE = "annule", "Annule"
+        BROUILLON = "brouillon", gettext_lazy("Brouillon")
+        EN_ATTENTE = "en_attente", gettext_lazy("En attente")
+        APPROUVE = "approuve", gettext_lazy("Approuve")
+        REFUSE = "refuse", gettext_lazy("Refuse")
+        ANNULE = "annule", gettext_lazy("Annule")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -233,11 +234,11 @@ class DemandeConge(models.Model):
 
 class DocumentRH(models.Model):
     class TypeDocument(models.TextChoices):
-        CONTRAT = "contrat", "Contrat"
-        PIECE_IDENTITE = "piece_identite", "Piece d'identite"
-        ATTESTATION = "attestation", "Attestation"
-        CERTIFICAT = "certificat", "Certificat"
-        AUTRE = "autre", "Autre"
+        CONTRAT = "contrat", gettext_lazy("Contrat")
+        PIECE_IDENTITE = "piece_identite", gettext_lazy("Piece d'identite")
+        ATTESTATION = "attestation", gettext_lazy("Attestation")
+        CERTIFICAT = "certificat", gettext_lazy("Certificat")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -274,15 +275,15 @@ class DocumentRH(models.Model):
 
 class AvanceSalaire(models.Model):
     class Statut(models.TextChoices):
-        EN_ATTENTE = "en_attente", "En attente"
-        VALIDEE = "validee", "Validée"
-        ANNULEE = "annulee", "Annulée"
+        EN_ATTENTE = "en_attente", gettext_lazy("En attente")
+        VALIDEE = "validee", gettext_lazy("Validée")
+        ANNULEE = "annulee", gettext_lazy("Annulée")
 
     class ModePaiement(models.TextChoices):
-        ESPECES = "especes", "Espèces"
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
-        VIREMENT = "virement", "Virement"
-        AUTRE = "autre", "Autre"
+        ESPECES = "especes", gettext_lazy("Espèces")
+        MOBILE_MONEY = "mobile_money", gettext_lazy("Mobile Money")
+        VIREMENT = "virement", gettext_lazy("Virement")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
@@ -332,15 +333,15 @@ class AvanceSalaire(models.Model):
 
 class PaiementSalaire(models.Model):
     class Statut(models.TextChoices):
-        NON_PAYE = "non_paye", "Non payé"
-        PARTIEL = "partiel", "Partiel"
-        PAYE = "paye", "Payé"
+        NON_PAYE = "non_paye", gettext_lazy("Non payé")
+        PARTIEL = "partiel", gettext_lazy("Partiel")
+        PAYE = "paye", gettext_lazy("Payé")
 
     class ModePaiement(models.TextChoices):
-        ESPECES = "especes", "Espèces"
-        MOBILE_MONEY = "mobile_money", "Mobile Money"
-        VIREMENT = "virement", "Virement"
-        AUTRE = "autre", "Autre"
+        ESPECES = "especes", gettext_lazy("Espèces")
+        MOBILE_MONEY = "mobile_money", gettext_lazy("Mobile Money")
+        VIREMENT = "virement", gettext_lazy("Virement")
+        AUTRE = "autre", gettext_lazy("Autre")
 
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",

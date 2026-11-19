@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 import unicodedata
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -159,7 +160,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("96.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Facturation professionnelle, POS simple, proformas, stock simple et depenses pour une petite activite.",
+        "description": gettext_lazy("Facturation professionnelle, POS simple, proformas, stock simple et depenses pour une petite activite."),
         "modules_inclus": STARTER_PLAN_MODULES,
         "max_utilisateurs": 3,
         "max_factures_mois": 100,
@@ -175,7 +176,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("144.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Gestion complete avec caisse, apprenants, stock complet, proformas avancees, rapports et exports.",
+        "description": gettext_lazy("Gestion complete avec caisse, apprenants, stock complet, proformas avancees, rapports et exports."),
         "modules_inclus": PRO_PLAN_MODULES,
         "max_utilisateurs": 10,
         "max_factures_mois": 1000,
@@ -191,7 +192,7 @@ DEFAULT_PAID_PLANS = [
         "prix_annuel": Decimal("192.00"),
         "devise": "USD",
         "duree_jours": 30,
-        "description": "Acces complet avec RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire.",
+        "description": gettext_lazy("Acces complet avec RH, comptabilite avancee, rapports avances, audit avance et accompagnement prioritaire."),
         "modules_inclus": PREMIUM_PLAN_MODULES,
         "max_utilisateurs": None,
         "max_factures_mois": None,
@@ -312,10 +313,10 @@ PLAN_MODULE_DISPLAY_ALIAS_TO_GROUP = {
 }
 PLAN_MODULE_DISPLAY_LABELS = {group_key: label for group_key, label, _aliases in PLAN_MODULE_DISPLAY_GROUPS}
 SUBSCRIPTION_PAYMENT_DURATIONS = {
-    PaiementAbonnement.Duree.MENSUEL: {"label": "Mensuel", "days": 30, "multiplier": Decimal("1")},
-    PaiementAbonnement.Duree.TRIMESTRIEL: {"label": "Trimestriel", "days": 90, "multiplier": Decimal("3")},
-    PaiementAbonnement.Duree.SEMESTRIEL: {"label": "Semestriel", "days": 180, "multiplier": Decimal("6")},
-    PaiementAbonnement.Duree.ANNUEL: {"label": "Annuel", "days": 365, "multiplier": Decimal("12")},
+    PaiementAbonnement.Duree.MENSUEL: {"label": gettext_lazy("Mensuel"), "days": 30, "multiplier": Decimal("1")},
+    PaiementAbonnement.Duree.TRIMESTRIEL: {"label": gettext_lazy("Trimestriel"), "days": 90, "multiplier": Decimal("3")},
+    PaiementAbonnement.Duree.SEMESTRIEL: {"label": gettext_lazy("Semestriel"), "days": 180, "multiplier": Decimal("6")},
+    PaiementAbonnement.Duree.ANNUEL: {"label": gettext_lazy("Annuel"), "days": 365, "multiplier": Decimal("12")},
 }
 
 
@@ -485,7 +486,7 @@ def get_or_create_free_plan():
         "devise": get_platform_currency(),
         "duree_jours": FREE_PLAN_DURATION_DAYS,
         "actif": True,
-        "description": "Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees.",
+        "description": gettext_lazy("Plan decouverte permanent avec tableau de bord, clients, produits/services, factures A4 simples et depenses limitees."),
         "modules_inclus": FREE_PLAN_MODULES,
         "max_utilisateurs": FREE_PLAN_USER_LIMIT,
         "max_factures_mois": FREE_PLAN_INVOICE_LIMIT,
@@ -604,7 +605,7 @@ def get_subscription_monthly_price_usd(*, plan):
 def get_subscription_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError("Duree d'abonnement invalide.")
+        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
     monthly_price = get_subscription_monthly_price_usd(plan=plan)
     if duree == PaiementAbonnement.Duree.ANNUEL:
         return (
@@ -628,7 +629,7 @@ def get_subscription_annual_savings_usd(*, plan):
 def get_subscription_equivalent_monthly_price_usd(*, plan, duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError("Duree d'abonnement invalide.")
+        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
     divisor = duration["multiplier"] or Decimal("1")
     return (get_subscription_price_usd(plan=plan, duree=duree) / divisor).quantize(SUBSCRIPTION_PRICE_QUANTUM)
 
@@ -636,7 +637,7 @@ def get_subscription_equivalent_monthly_price_usd(*, plan, duree):
 def get_subscription_payment_duration_days(duree):
     duration = SUBSCRIPTION_PAYMENT_DURATIONS.get(duree)
     if duration is None:
-        raise ValueError("Duree d'abonnement invalide.")
+        raise ValueError(gettext_lazy("Duree d'abonnement invalide."))
     return duration["days"]
 
 
@@ -696,7 +697,7 @@ def create_subscription_payment_request(
     utilisateur=None,
 ):
     if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
-        raise ValueError("Plan indisponible.")
+        raise ValueError(gettext_lazy("Plan indisponible."))
 
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
     montant = estimate["amount_usd"]
@@ -739,9 +740,9 @@ def create_subscription_payment_request(
 @transaction.atomic
 def create_subscription_plan_request(*, entreprise, plan, utilisateur=None):
     if entreprise is None:
-        raise ValueError("Entreprise introuvable.")
+        raise ValueError(gettext_lazy("Entreprise introuvable."))
     if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
-        raise ValueError("Plan indisponible.")
+        raise ValueError(gettext_lazy("Plan indisponible."))
 
     existing_request = (
         PaiementAbonnement.objects.filter(
@@ -812,7 +813,7 @@ def get_pending_subscription_plan_request(entreprise):
 def validate_subscription_plan_request(*, entreprise, super_admin=None):
     request = get_pending_subscription_plan_request(entreprise)
     if request is None:
-        raise ValueError("Demande de plan introuvable.")
+        raise ValueError(gettext_lazy("Demande de plan introuvable."))
 
     plan = request.plan
     today = timezone.localdate()
@@ -874,7 +875,7 @@ def validate_subscription_plan_request(*, entreprise, super_admin=None):
 def refuse_subscription_plan_request(*, entreprise, super_admin=None, notes_validation=""):
     request = get_pending_subscription_plan_request(entreprise)
     if request is None:
-        raise ValueError("Demande de plan introuvable.")
+        raise ValueError(gettext_lazy("Demande de plan introuvable."))
 
     request.statut = PaiementAbonnement.Statut.REFUSE
     request.date_validation = timezone.now()
@@ -898,7 +899,7 @@ def refuse_subscription_plan_request(*, entreprise, super_admin=None, notes_vali
 @transaction.atomic
 def validate_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
-        raise ValueError("Seuls les paiements en attente peuvent etre valides.")
+        raise ValueError(gettext_lazy("Seuls les paiements en attente peuvent etre valides."))
     duration_days = get_subscription_payment_duration_days(paiement.duree)
     today = timezone.localdate()
     subscription = activate_subscription_for_entreprise(
@@ -959,19 +960,19 @@ def register_manual_subscription_payment(
     super_admin=None,
 ):
     if entreprise is None:
-        raise ValueError("Entreprise introuvable.")
+        raise ValueError(gettext_lazy("Entreprise introuvable."))
     if plan is None:
-        raise ValueError("Veuillez selectionner un plan.")
+        raise ValueError(gettext_lazy("Veuillez selectionner un plan."))
     if not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
-        raise ValueError("Plan indisponible.")
+        raise ValueError(gettext_lazy("Plan indisponible."))
 
     amount = Decimal(str(montant or "0")).quantize(Decimal("0.01"))
     if amount <= 0:
-        raise ValueError("Le montant du paiement doit etre positif.")
+        raise ValueError(gettext_lazy("Le montant du paiement doit etre positif."))
 
     days = int(periode_jours or 0)
     if days not in {30, 90, 180, 365}:
-        raise ValueError("La periode payee est invalide.")
+        raise ValueError(gettext_lazy("La periode payee est invalide."))
 
     payment_date = date_paiement or timezone.localdate()
     paid_at = timezone.make_aware(datetime.combine(payment_date, datetime.min.time()))
@@ -1021,14 +1022,14 @@ def register_manual_subscription_payment(
         elif taux_change_reference:
             conversion_rate = Decimal(str(taux_change_reference))
             if conversion_rate <= 0:
-                raise ValueError("Le taux manuel doit etre positif.")
+                raise ValueError(gettext_lazy("Le taux manuel doit etre positif."))
             usd_amount = (amount / conversion_rate).quantize(Decimal("0.01"))
             rate_source = "manuel"
             rate_date = timezone.now()
         elif montant_usd:
             usd_amount = Decimal(str(montant_usd)).quantize(Decimal("0.01"))
             if usd_amount <= 0:
-                raise ValueError("Le montant USD manuel doit etre positif.")
+                raise ValueError(gettext_lazy("Le montant USD manuel doit etre positif."))
             conversion_rate = (amount / usd_amount).quantize(Decimal("0.0001"))
             rate_source = "manuel"
             rate_date = timezone.now()
@@ -1041,7 +1042,7 @@ def register_manual_subscription_payment(
     except ExchangeRateUnavailable:
         usd_amount = Decimal(str(montant_usd or "0")).quantize(Decimal("0.01"))
         if usd_amount <= 0:
-            raise ValueError("Conversion indisponible. Saisissez le montant USD ou un taux manuel.")
+            raise ValueError(gettext_lazy("Conversion indisponible. Saisissez le montant USD ou un taux manuel."))
         conversion_rate = (amount / usd_amount).quantize(Decimal("0.0001"))
         rate_source = "manuel_super_admin"
         rate_date = timezone.now()
@@ -1106,7 +1107,7 @@ def register_manual_subscription_payment(
 @transaction.atomic
 def refuse_subscription_payment(*, paiement, super_admin, notes_validation=""):
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
-        raise ValueError("Seuls les paiements en attente peuvent etre refuses.")
+        raise ValueError(gettext_lazy("Seuls les paiements en attente peuvent etre refuses."))
     paiement.statut = PaiementAbonnement.Statut.REFUSE
     paiement.date_validation = timezone.now()
     paiement.valide_par = super_admin
@@ -1132,7 +1133,7 @@ def start_trial_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut
         or existing_subscription.statut != AbonnementEntreprise.Statut.ESSAI
         or not existing_subscription.essai
     ):
-        raise ValueError("La creation de nouveaux essais est desactivee. Activez le plan Gratuit ou un plan payant.")
+        raise ValueError(gettext_lazy("La creation de nouveaux essais est desactivee. Activez le plan Gratuit ou un plan payant."))
 
     date_debut = date_debut or timezone.localdate()
     duration = trial_days or get_default_trial_days() or plan.duree_jours

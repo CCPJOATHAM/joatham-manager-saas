@@ -1,9 +1,12 @@
+
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+{% get_current_language as CURRENT_LANGUAGE %}
+<html lang="{{ CURRENT_LANGUAGE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lien invalide | JOATHAM Manager</title>
+    <title>{% trans "Lien invalide | JOATHAM Manager" %}</title>
     <style>
         body {
             margin: 0;
@@ -50,9 +53,9 @@
 </head>
 <body>
     <main class="card">
-        <h1>Lien de confirmation invalide ou expiré</h1>
-        <p>Ce lien n’est plus valide. Vous pouvez demander un nouvel email de confirmation depuis l’écran d’attente de validation.</p>
-        <a href="{% url 'email_verification_sent' %}" class="btn">Retour à la confirmation email</a>
+        <h1>{% trans "Lien de confirmation invalide ou expiré" %}</h1>
+        <p>{% trans "Ce lien n’est plus valide. Vous pouvez demander un nouvel email de confirmation depuis l’écran d’attente de validation." %}</p>
+        <a href="{% url 'email_verification_sent' %}" class="btn">{% trans "Retour à la confirmation email" %}</a>
     </main>
 </body>
 </html>

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -35,7 +36,7 @@ class UserManagementForm(forms.Form):
         )
         self.fields["email"].widget.attrs.update(
             {
-                "placeholder": "adresse@entreprise.com",
+                "placeholder": gettext_lazy("adresse@entreprise.com"),
                 "autocomplete": "email",
             }
         )
@@ -69,7 +70,7 @@ class UserInviteForm(forms.Form):
         )
         self.fields["email"].widget.attrs.update(
             {
-                "placeholder": "adresse@entreprise.com",
+                "placeholder": gettext_lazy("adresse@entreprise.com"),
                 "autocomplete": "email",
             }
         )
