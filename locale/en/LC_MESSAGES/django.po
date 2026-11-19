@@ -1458,10 +1458,10 @@ msgid "Entreprise introuvable."
 msgstr "Company not found."
 
 msgid "Demande de plan introuvable."
-msgstr "Request for a plan that could not be found."
+msgstr "Plan request not found."
 
 msgid "Seuls les paiements en attente peuvent etre valides."
-msgstr "Only pending payments may be valid."
+msgstr "Only pending payments can be approved."
 
 msgid "Veuillez selectionner un plan."
 msgstr "Please select a plan."
@@ -1470,25 +1470,25 @@ msgid "Le montant du paiement doit etre positif."
 msgstr "The amount of the payment must be positive."
 
 msgid "La periode payee est invalide."
-msgstr "The pay period is invalid."
+msgstr "The paid subscription period is invalid."
 
 msgid "Le taux manuel doit etre positif."
 msgstr "The manual rate must be positive."
 
 msgid "Le montant USD manuel doit etre positif."
-msgstr "The amount of USD manual must be positive."
+msgstr "The manually entered USD amount must be positive."
 
 msgid "Conversion indisponible. Saisissez le montant USD ou un taux manuel."
-msgstr "Conversion unavailable. Enter the amount USD or a manual rate."
+msgstr "Currency conversion is unavailable. Enter the USD amount or an exchange rate manually."
 
 msgid "Seuls les paiements en attente peuvent etre refuses."
-msgstr "Only pending payments may be refused."
+msgstr "Only pending payments can be rejected."
 
 msgid "La creation de nouveaux essais est desactivee. Activez le plan Gratuit ou un plan payant."
 msgstr "New trials are disabled. Activate the Free plan or a paid plan."
 
 msgid "Impossible de generer une reference paiement unique."
-msgstr "Unable to generate a single payment reference."
+msgstr "Unable to generate a unique payment reference."
 
 #, python-format
 msgid "Conversion %(value_1)s->%(value_2)s indisponible pour CinetPay."
@@ -1507,7 +1507,7 @@ msgid "Aucun ancien essai n'est disponible a prolonger. Activez le plan Gratuit 
 msgstr "No previous trial is available to extend. Activate the Free plan or a paid plan."
 
 msgid "Seuls les anciens abonnements en essai peuvent etre prolonges."
-msgstr "Only former subscriptions on trial can be extended."
+msgstr "Only existing trial subscriptions can be extended."
 
 msgid "Le super admin plateforme n'accede pas aux espaces entreprise."
 msgstr "The super admin platform does not access business spaces."
@@ -1531,7 +1531,7 @@ msgid "Vous etes deja connecte. Deconnectez-vous pour acceder a cette page."
 msgstr "You're already logged in. Log out to access this page."
 
 msgid "Votre entreprise a ete creee avec succes. Le plan gratuit a ete active."
-msgstr "Your company was created successfully. The free plan was active."
+msgstr "Your company has been created successfully. The Free plan has been activated."
 
 msgid "Vous avez ete deconnecte. Vous pouvez maintenant vous connecter ou creer votre entreprise."
 msgstr "You have been logged out. You can now sign in or create your company."
@@ -1570,7 +1570,7 @@ msgid "Depense"
 msgstr "Expense"
 
 msgid "Facture"
-msgstr "INVOICE"
+msgstr "Invoice"
 
 msgid "Utilisateur"
 msgstr "User"
@@ -1606,17 +1606,17 @@ msgid "Demande de plan traitée par super admin"
 msgstr "Request for plan processed by super admin"
 
 msgid "Paiement manuel validé par super admin"
-msgstr "Manual payment validated by super admin"
+msgstr "Manual payment approved by the super admin"
 
 msgid "Demande manuelle en attente de validation"
-msgstr "Manual request pending validation"
+msgstr "Manual request awaiting approval"
 
 msgid "Veuillez selectionner un plan pour activer l'abonnement."
 msgstr "Please select a plan to activate the subscription."
 
 #, python-format
 msgid "Abonnement active pour %(value_1)s."
-msgstr "Active subscription for %(value_1)s."
+msgstr "Subscription activated for %(value_1)s."
 
 #, python-format
 msgid "Entreprise suspendue : %(value_1)s."
@@ -1637,10 +1637,10 @@ msgid "Action super admin inconnue."
 msgstr "Unknown super admin action."
 
 msgid "Votre demande de paiement a ete envoyee. Elle sera activee apres validation."
-msgstr "Your payment request has been sent. It will be activated after validation."
+msgstr "Your payment request has been submitted. Your subscription will be activated once the payment is approved."
 
 msgid "Paiement automatique bientôt disponible. Utilisez la demande manuelle pour le moment."
-msgstr "Automatic payment soon available. Use manual request at the moment."
+msgstr "Automatic payments will be available soon. Please submit a manual payment request for now."
 
 msgid "Plan indisponible pour le paiement automatique."
 msgstr "Plan not available for automatic payment."
@@ -1661,7 +1661,7 @@ msgstr "Payment approved and subscription activated for %(value_1)s."
 
 #, python-format
 msgid "Le paiement a ete refuse pour %(value_1)s."
-msgstr "The payment was refused for %(value_1)s."
+msgstr "Payment rejected for %(value_1)s."
 
 #, python-format
 msgid "La demande a ete validee et l'abonnement a ete active pour %(value_1)s."
@@ -1669,15 +1669,15 @@ msgstr "Request approved and subscription activated for %(value_1)s."
 
 #, python-format
 msgid "La demande a ete refusee pour %(value_1)s."
-msgstr "The application was refused for %(value_1)s."
+msgstr "Request rejected for %(value_1)s."
 
 #, python-format
 msgid "Demande de plan validee pour %(value_1)s. En attente de paiement manuel si necessaire."
-msgstr "Valid plan request for %(value_1)s. Waiting for manual payment if necessary."
+msgstr "Plan request approved for %(value_1)s. Awaiting manual payment if required."
 
 #, python-format
 msgid "Demande de plan refusee pour %(value_1)s."
-msgstr "Request for a plan refused for %(value_1)s."
+msgstr "Plan request rejected for %(value_1)s."
 
 #, python-format
 msgid "Paiement enregistre pour %(value_1)s. Nouvelle expiration : %(value_2)s."
@@ -2498,10 +2498,10 @@ msgid "Seuls les proprietaires et gestionnaires peuvent changer le statut."
 msgstr "Only owners and managers can change the status."
 
 msgid "Une facture deja payee ne peut plus etre modifiee."
-msgstr "An invoice already paid cannot be changed any more."
+msgstr "An invoice that has already been paid can no longer be edited."
 
 msgid "Le statut demande est invalide."
-msgstr "The application status is invalid."
+msgstr "The requested status is invalid."
 
 msgid "Seuls les proprietaires et comptables peuvent enregistrer un paiement."
 msgstr "Only owners and accountants can register a payment."
@@ -2513,10 +2513,10 @@ msgid "Une facture brouillon doit etre emise avant de recevoir un paiement."
 msgstr "A draft invoice must be issued before a payment is received."
 
 msgid "Cette facture est deja soldée."
-msgstr "This bill is already closed."
+msgstr "This invoice has already been paid in full."
 
 msgid "Le paiement ne peut pas etre superieur au reste a payer."
-msgstr "The payment cannot be superior to the rest to be paid."
+msgstr "The payment cannot exceed the outstanding balance."
 
 msgid "Seuls les administrateurs et gestionnaires peuvent supprimer une facture."
 msgstr "Only administrators and managers can delete an invoice."
@@ -2661,7 +2661,7 @@ msgid "Prix unitaire"
 msgstr "Unit price"
 
 msgid "Client :"
-msgstr "Client:"
+msgstr "Customer:"
 
 msgid "Emise le"
 msgstr "Issued on"
@@ -2682,7 +2682,7 @@ msgstr[0] "%(count)s billing line"
 msgstr[1] "%(count)s billing lines"
 
 msgid "Taux applique :"
-msgstr "Rates apply:"
+msgstr "Applied rate:"
 
 msgid "Montant global de la facture"
 msgstr "Total invoice amount"
@@ -2693,20 +2693,20 @@ msgstr "Amount paid"
 #, python-format
 msgid "%(count)s paiement enregistre"
 msgid_plural "%(count)s paiements enregistres"
-msgstr[0] "%(count)s payment records"
+msgstr[0] "%(count)s recorded payment"
 msgstr[1] "%(count)s recorded payments"
 
 msgid "Reste a payer"
-msgstr "Remaining to be paid"
+msgstr "Balance due"
 
 msgid "Solde encore attendu"
-msgstr "Balance still expected"
+msgstr "Outstanding balance"
 
 msgid "Prestations facturees"
 msgstr "Billed services"
 
 msgid "Lecture detaillee des lignes de facture avec quantites, prix unitaires et montants calcules."
-msgstr "Reading of invoice lines with quantities, unit prices and calculated amounts."
+msgstr "Invoice line details, including quantities, unit prices and calculated amounts."
 
 msgid "Designation"
 msgstr "Designation"
@@ -2715,10 +2715,10 @@ msgid "Qte"
 msgstr "Qty"
 
 msgid "Paiements enregistres"
-msgstr "Registered payments"
+msgstr "Recorded payments"
 
 msgid "Historique des reglements deja saisis sur cette facture."
-msgstr "History of the regulations already entered on this invoice."
+msgstr "History of payments already recorded for this invoice."
 
 msgid "Aucun paiement enregistre."
 msgstr "No payment records."
@@ -2727,7 +2727,7 @@ msgid "Mettre a jour le statut"
 msgstr "Update Status"
 
 msgid "Faites evoluer la facture dans son workflow tout en gardant une note de transition si besoin."
-msgstr "Make the bill work in its workflow while keeping a transition note if necessary."
+msgstr "Update the invoice status and add a note if needed."
 
 msgid "Nouveau statut"
 msgstr "New status"
@@ -2742,10 +2742,10 @@ msgid "Mettre a jour"
 msgstr "Update"
 
 msgid "Saisissez un reglement sans quitter la fiche facture."
-msgstr "Enter a settlement without leaving the invoice form."
+msgstr "Record a payment without leaving the invoice details page."
 
 msgid "Montant du paiement"
-msgstr "Amount of payment"
+msgstr "Payment amount"
 
 msgid "Caisse (optionnel)"
 msgstr "Cash register (optional)"
@@ -2760,7 +2760,7 @@ msgid "Commentaire interne sur ce reglement"
 msgstr "Internal note about this payment"
 
 msgid "Enregistrer le paiement"
-msgstr "Save payment"
+msgstr "Record payment"
 
 msgid "Historique"
 msgstr "History"
@@ -2796,19 +2796,19 @@ msgid "Total emis sur la selection courante"
 msgstr "Total issued on current selection"
 
 msgid "Montant encaisse"
-msgstr "Cash"
+msgstr "Amount received"
 
 #, python-format
 msgid "%(count)s facture avec paiement partiel"
 msgid_plural "%(count)s factures avec paiement partiel"
-msgstr[0] "%(count)s invoice with partial payment"
-msgstr[1] "%(count)s invoices with partial payment"
+msgstr[0] "%(count)s partially paid invoice"
+msgstr[1] "%(count)s partially paid invoices"
 
 #, python-format
 msgid "%(count)s facture non soldee"
 msgid_plural "%(count)s factures non soldees"
-msgstr[0] "%(count)s invoice not outstanding"
-msgstr[1] "%(count)s invoices not outstanding"
+msgstr[0] "%(count)s outstanding invoice"
+msgstr[1] "%(count)s outstanding invoices"
 
 msgid "Filtres et actions"
 msgstr "Filters and actions"
@@ -2844,10 +2844,10 @@ msgid "Lecture rapide"
 msgstr "Quick reading"
 
 msgid "Le tableau met en avant le total facture, le montant deja encaisse et le reste a percevoir pour faciliter le suivi commercial et le recouvrement."
-msgstr "The table highlights the total invoice, the amount already cash and the rest has to be collected to facilitate commercial monitoring and recovery."
+msgstr "The table highlights the total invoiced, the amount received and the outstanding balance to help you track sales and collect payments."
 
 msgid "Vue operationnelle des documents de facturation avec acces direct au detail, au PDF et a l'enregistrement d'un paiement."
-msgstr "Operational view of billing documents with direct access to detail, PDF and registration of a payment."
+msgstr "View billing documents, open their details or PDF, and record payments."
 
 #, python-format
 msgid "%(count)s facture"
@@ -2874,7 +2874,7 @@ msgid "Aucune facture pour le moment"
 msgstr "No invoice at the moment"
 
 msgid "Commencez par creer votre premiere facture pour suivre vos encaissements, generer un PDF professionnel et alimenter votre activite commerciale."
-msgstr "Start by creating your first bill to track your receipts, generate a professional PDF and feed your business."
+msgstr "Create your first invoice to track payments received, generate a professional PDF and manage your sales."
 
 msgid "Ajouter une facture"
 msgstr "Add invoice"
@@ -2910,10 +2910,10 @@ msgid "Heure :"
 msgstr "Time:"
 
 msgid "QR facture"
-msgstr "QR invoice"
+msgstr "Invoice QR code"
 
 msgid "Verification facture"
-msgstr "Verification invoice"
+msgstr "Invoice verification"
 
 msgid "Prestations"
 msgstr "Services"
@@ -2922,16 +2922,16 @@ msgid "Aucune ligne de facturation enregistree."
 msgstr "No billing line recorded."
 
 msgid "Reduction"
-msgstr "Reduction"
+msgstr "Discount"
 
 msgid "TOTAL NET"
-msgstr "TOTAL NET"
+msgstr "NET TOTAL"
 
 msgid "Arrete a :"
 msgstr "Amount in words:"
 
 msgid "Coordonnees bancaires"
-msgstr "Banking co-ordinates"
+msgstr "Bank details"
 
 msgid "Banque :"
 msgstr "Bank:"
@@ -2964,7 +2964,7 @@ msgid "NIF / No impot :"
 msgstr "NIF / Tax No.:"
 
 msgid "Ticket de caisse"
-msgstr "Cash ticket"
+msgstr "Sales receipt"
 
 msgid "Facture :"
 msgstr "Invoice:"
@@ -2982,16 +2982,16 @@ msgid "Sous-total"
 msgstr "Subtotal"
 
 msgid "Remise / reduction"
-msgstr "Discount / reduction"
+msgstr "Discount"
 
 msgid "Total a payer"
-msgstr "Total payable"
+msgstr "Total amount due"
 
 msgid "Mode paiement"
 msgstr "Payment method"
 
 msgid "Genere par JOATHAM Manager"
-msgstr "Generates JOATHAM Manager"
+msgstr "Generated by JOATHAM Manager"
 
 msgid "Configurez le format POS des tickets et le format par defaut des factures."
 msgstr "Set the POS format of the tickets and the format by default of the invoices."
@@ -3012,13 +3012,13 @@ msgid "Telecharger PDF"
 msgstr "Download PDF"
 
 msgid "Reductions"
-msgstr "Reductions"
+msgstr "Discounts"
 
 msgid "Lignes de proforma"
 msgstr "Proforma lines"
 
 msgid "Ces lignes seront copiees dans une facture definitive lors de la conversion."
-msgstr "These lines will be copied to a final invoice when converting."
+msgstr "These lines will be copied to a final invoice when you convert this pro forma invoice."
 
 msgid "Origine"
 msgstr "Origin"
@@ -3042,7 +3042,7 @@ msgid "Nature du document"
 msgstr "Nature of document"
 
 msgid "Cette facture proforma est provisoire. Aucun paiement n'est enregistre sur une proforma et elle ne constitue pas une facture definitive."
-msgstr "This proforma invoice is provisional. No payment is recorded on a proforma and does not constitute a definitive invoice."
+msgstr "This pro forma invoice is provisional. No payment is recorded against it, and it is not a final invoice."
 
 msgid "Retour aux proformas"
 msgstr "Back to proformas"
@@ -3057,19 +3057,19 @@ msgid "Annuler la proforma"
 msgstr "Cancel proforma"
 
 msgid "La proforma est un document provisoire. Elle ne cree aucun paiement, ne modifie pas le stock et ne remplace pas une facture definitive."
-msgstr "The proforma is a provisional document. It creates no payment, does not change the stock and does not replace a final invoice."
+msgstr "A pro forma invoice is a provisional document. It does not record a payment, change stock levels or replace a final invoice."
 
 msgid "La conversion en facture definitive generera un numero de facture propre et appliquera le flux normal de facturation."
-msgstr "Conversion to a final invoice will generate a clean invoice number and apply the normal billing flow."
+msgstr "Converting to a final invoice will generate a new invoice number and follow the standard billing process."
 
 msgid "Choisissez un client enregistre ou saisissez un client occasionnel."
-msgstr "Choose a customer registers or enter an occasional customer."
+msgstr "Select an existing customer or enter a one-off customer."
 
 msgid "Ce champ est utilise uniquement si aucun client enregistre n'est selectionne."
 msgstr "This field is used only if no registered client is selected."
 
 msgid "Date de validite"
-msgstr "Date of validation"
+msgstr "Valid until"
 
 msgid "Notes"
 msgstr "Notes"
@@ -3084,13 +3084,13 @@ msgid "Quantite totale"
 msgstr "Total quantity"
 
 msgid "Factures proforma"
-msgstr "Invoices proforma"
+msgstr "Pro forma invoices"
 
 msgid "Documents commerciaux provisoires avant validation definitive. Une proforma ne cree aucun paiement, ne modifie pas le stock et n'entre pas dans le chiffre d'affaires."
-msgstr "Provisional commercial documents before final validation. A proforma does not create any payments, change the stock and do not enter into the turnover."
+msgstr "Provisional sales documents issued before final approval. A pro forma invoice does not record a payment, change stock levels or count towards revenue."
 
 msgid "Factures definitives"
-msgstr "Definitive invoices"
+msgstr "Final invoices"
 
 msgid "Numero ou client"
 msgstr "Number or customer"
@@ -3117,7 +3117,7 @@ msgid "NIF :"
 msgstr "NIF:"
 
 msgid "Facture proforma"
-msgstr "PRO FORMA INVOICE"
+msgstr "Pro forma invoice"
 
 msgid "Validite :"
 msgstr "Validity:"
@@ -3132,13 +3132,13 @@ msgid "Ce document presente une offre commerciale provisoire avant emission d'un
 msgstr "This document presents a provisional commercial offer before issuing a final invoice."
 
 msgid "Total ligne"
-msgstr "Total line"
+msgstr "Line total"
 
 msgid "Ce document est une facture proforma et ne constitue pas une facture definitive."
-msgstr "This document is a proforma invoice and does not constitute a definitive invoice."
+msgstr "This document is a pro forma invoice, not a final invoice."
 
 msgid "Aucun paiement n'est enregistre sur une facture proforma."
-msgstr "No payment is recorded on a proforma invoice."
+msgstr "No payment is recorded against a pro forma invoice."
 
 msgid "Renseignez les informations essentielles du service tout en gardant la saisie libre disponible dans les factures."
 msgstr "Inform the essential information of the service while keeping the free entry available in the invoices."
@@ -4326,8 +4326,8 @@ msgstr "Amounts received through validated payments"
 #, python-format
 msgid "%(count)s facture payée"
 msgid_plural "%(count)s factures payées"
-msgstr[0] "%(count)s invoice paid"
-msgstr[1] "%(count)s invoices paid"
+msgstr[0] "%(count)s paid invoice"
+msgstr[1] "%(count)s paid invoices"
 
 msgid "Reste à encaisser"
 msgstr "Outstanding balance"
@@ -4338,8 +4338,8 @@ msgstr "Amounts still due from customers"
 #, python-format
 msgid "%(count)s facture à suivre"
 msgid_plural "%(count)s factures à suivre"
-msgstr[0] "%(count)s invoice to be followed"
-msgstr[1] "%(count)s invoices to follow"
+msgstr[0] "%(count)s invoice to follow up"
+msgstr[1] "%(count)s invoices to follow up"
 
 msgid "Portefeuille clients"
 msgstr "Customer portfolio"
@@ -4541,8 +4541,8 @@ msgstr "Payments and amounts received."
 #, python-format
 msgid "%(count)s facture payee."
 msgid_plural "%(count)s factures payees."
-msgstr[0] "%(count)s invoice paid."
-msgstr[1] "%(count)s invoices paid."
+msgstr[0] "%(count)s paid invoice."
+msgstr[1] "%(count)s paid invoices."
 
 msgid "Montants dus"
 msgstr "Amounts due"
@@ -4553,8 +4553,8 @@ msgstr "Amounts still due from customers."
 #, python-format
 msgid "%(count)s facture impayee."
 msgid_plural "%(count)s factures impayees."
-msgstr[0] "%(count)s impayee invoice."
-msgstr[1] "%(count)s impayed invoices."
+msgstr[0] "%(count)s unpaid invoice."
+msgstr[1] "%(count)s unpaid invoices."
 
 msgid "Benefice estime"
 msgstr "Estimated profit"
@@ -4640,8 +4640,8 @@ msgstr "Alerts based only on available data."
 #, python-format
 msgid "%(count)s facture en attente. Montant du : %(reste_encaisser)s."
 msgid_plural "%(count)s factures en attente. Montant du : %(reste_encaisser)s."
-msgstr[0] "%(count)s invoice pending. Amount from: %(reste_encaisser)s."
-msgstr[1] "%(count)s invoices pending. Amount of %(reste_encaisser)s."
+msgstr[0] "%(count)s pending invoice. Amount due: %(reste_encaisser)s."
+msgstr[1] "%(count)s pending invoices. Amount due: %(reste_encaisser)s."
 
 msgid "Plan actuel :"
 msgstr "Current plan:"
@@ -4710,10 +4710,10 @@ msgid "Réinitialisation du mot de passe"
 msgstr "Password reset"
 
 msgid "Bonjour,"
-msgstr "Hello."
+msgstr "Hello,"
 
 msgid "Nous avons reçu une demande de réinitialisation du mot de passe de votre compte JOATHAM Manager."
-msgstr "We have received a request to reset the password from your JOATHAM Manager account."
+msgstr "We received a request to reset the password for your JOATHAM Manager account."
 
 msgid "Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Ce lien est temporaire et ne peut être utilisé qu’une seule fois."
 msgstr "Click on the button below to choose a new password. This link is temporary and can only be used once."
@@ -4725,10 +4725,10 @@ msgid "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :"
 msgstr "If the button does not work, copy this link to your browser:"
 
 msgid "Si vous n’êtes pas à l’origine de cette demande, ignorez simplement cet email. Votre mot de passe actuel restera inchangé."
-msgstr "If you are not at the origin of this request, simply ignore this email. Your current password will remain unchanged."
+msgstr "If you did not request this password reset, simply ignore this email. Your current password will remain unchanged."
 
 msgid "Logiciel de gestion d’entreprise. Email automatique, merci de ne pas y répondre."
-msgstr "Business management software. Automatic email, please do not answer."
+msgstr "Business management software. This is an automated email; please do not reply."
 
 msgid "Pour définir un nouveau mot de passe, ouvrez le lien ci-dessous :"
 msgstr "To set a new password, open the link below:"
@@ -4740,7 +4740,7 @@ msgid "Logiciel de gestion d’entreprise"
 msgstr "Enterprise management software"
 
 msgid "Réinitialisation de votre mot de passe | JOATHAM Manager"
-msgstr "Reset your password | JOATHAM Manager"
+msgstr "Reset your JOATHAM Manager password"
 
 msgid "Acces abonnement"
 msgstr "Subscription access"
@@ -4862,8 +4862,8 @@ msgstr "Today's priorities"
 #, python-format
 msgid "%(count)s facture en attente. Montant a relancer : %(reste_encaisser)s."
 msgid_plural "%(count)s factures en attente. Montant a relancer : %(reste_encaisser)s."
-msgstr[0] "%(count)s invoice pending. Amount to be renewed: %(reste_encaisser)s."
-msgstr[1] "%(count)s invoices outstanding. Amount to be renewed: %(reste_encaisser)s."
+msgstr[0] "%(count)s pending invoice. Amount to follow up: %(reste_encaisser)s."
+msgstr[1] "%(count)s pending invoices. Amount to follow up: %(reste_encaisser)s."
 
 msgid "Quantite en stock inferieure ou egale a 0."
 msgstr "Stock quantity less than or equal to 0."
@@ -5489,7 +5489,7 @@ msgid "Poser une question avant inscription"
 msgstr "Ask a question before listing"
 
 msgid "Bonjour"
-msgstr "Hello."
+msgstr "Hello"
 
 msgid "Merci pour votre inscription sur JOATHAM Manager. Pour activer votre espace entreprise, confirmez votre adresse email."
 msgstr "Thank you for registering on JOATHAM Manager. To activate your business space, confirm your email address."
@@ -5511,10 +5511,10 @@ msgid_plural ""
 "                            "
 msgstr[0] ""
 "\n"
-"This link automatically expires after %(count)s seconds. If you are not the originator of this registration, simply ignore this email."
+"This link expires automatically after %(count)s second. If you did not sign up for this account, simply ignore this email."
 msgstr[1] ""
 "\n"
-"This link expires automatically after %(count)s seconds. If you are not the originator of this registration, simply ignore this email."
+"This link expires automatically after %(count)s seconds. If you did not sign up for this account, simply ignore this email."
 
 msgid "Merci pour votre inscription sur JOATHAM Manager."
 msgstr "Thank you for registering on JOATHAM Manager."
@@ -5529,7 +5529,7 @@ msgid "seconde"
 msgstr "second"
 
 msgid "Si vous n’êtes pas à l’origine de cette inscription, ignorez simplement cet email."
-msgstr "If you are not at the origin of this registration, simply ignore this email."
+msgstr "If you did not sign up for this account, simply ignore this email."
 
 msgid "Confirmez votre adresse email | JOATHAM Manager"
 msgstr "Confirm your email address | JOATHAM Manager"
@@ -5579,16 +5579,16 @@ msgid "économie annuelle : %(amount)s %(currency)s"
 msgstr "annual savings: %(amount)s %(currency)s"
 
 msgid "Votre compte est actif sur le plan Gratuit. Le paiement du plan choisi pourra etre repris depuis la page des abonnements."
-msgstr "Your account is active on the Free Plan. Payment for the chosen plan can be taken from the Subscription page."
+msgstr "Your account is active on the Free plan. You can resume payment for your chosen plan from the subscriptions page."
 
 msgid "Votre espace est cree. Finalisez le paiement pour activer le plan choisi."
-msgstr "Your space is created. Finish the payment to activate the chosen plan."
+msgstr "Your workspace has been created. Complete the payment to activate your chosen plan."
 
 msgid "Votre espace est actif sur le plan Gratuit. Le paiement en ligne sera disponible depuis la page des abonnements."
 msgstr "Your space is active on the free plan. Online payment will be available from the subscription page."
 
 msgid "Le paiement precedent n'a pas ete confirme. Votre entreprise reste sur le plan Gratuit."
-msgstr "The previous payment has not been confirmed. Your company remains on the free plan."
+msgstr "The previous payment was not confirmed. Your company remains on the Free plan."
 
 msgid "Vous etes deja connecte. Deconnectez-vous pour acceder a la page de connexion ou creer une nouvelle entreprise."
 msgstr "You are already logged in. Log out to access the login page or create a new business."
@@ -5735,7 +5735,7 @@ msgid "Total des depenses"
 msgstr "Total expenditure"
 
 msgid "Document genere automatiquement par JOATHAM Manager"
-msgstr "Document generates automatically by JOATHAM Manager"
+msgstr "Document generated automatically by JOATHAM Manager"
 
 msgid "Messagerie JOATHAM"
 msgstr "JOATHAM messaging"
@@ -6001,7 +6001,7 @@ msgid "Vous pouvez aussi visiter"
 msgstr "You can also visit"
 
 msgid "L'equipe JOATHAM Manager"
-msgstr "Team JOATHAM Manager"
+msgstr "The JOATHAM Manager team"
 
 msgid "Sujet :"
 msgstr "Subject:"
@@ -6256,10 +6256,10 @@ msgid "Note interne"
 msgstr "Internal note"
 
 msgid "Encaissement"
-msgstr "Receipt"
+msgstr "Incoming payment"
 
 msgid "Decaissement"
-msgstr "Disbursement"
+msgstr "Outgoing payment"
 
 msgid "Remboursement"
 msgstr "Refund"
@@ -6387,28 +6387,28 @@ msgid "Aucune note."
 msgstr "No note."
 
 msgid "Saisissez un paiement manuel controle, lie si besoin a une facture, une depense ou une session caisse."
-msgstr "Enter a manual payment control, bound if necessary to an invoice, expense or cash session."
+msgstr "Record a manual payment and link it to an invoice, expense or cash register session if needed."
 
 msgid "Informations paiement"
 msgstr "Payment information"
 
 msgid "Les paiements confirmes peuvent alimenter la facture et la caisse selon le canal choisi."
-msgstr "Confirmed payments can power the invoice and the cash registers according to the chosen channel."
+msgstr "Confirmed payments can update the invoice and cash register, depending on the payment method."
 
 msgid "Suivi des encaissements, decaissements, remboursements et ajustements par canal de paiement."
-msgstr "Monitoring of receipts, receipts, refunds and adjustments by payment channel."
+msgstr "Track incoming payments, outgoing payments, refunds and adjustments by payment method."
 
 msgid "Total encaisse confirme"
-msgstr "Total cash confirmed"
+msgstr "Total confirmed payments received"
 
 msgid "Total en attente"
-msgstr "Total outstanding"
+msgstr "Total pending"
 
 msgid "Total rejete"
 msgstr "Total rejected"
 
 msgid "Total annule"
-msgstr "Total cancels"
+msgstr "Total cancelled"
 
 msgid "Filtres"
 msgstr "Filters"
@@ -6432,31 +6432,31 @@ msgid "Aucun paiement ne correspond aux filtres selectionnes."
 msgstr "No payments match the selected filters."
 
 msgid "Repartition par moyen"
-msgstr "Distribution by means"
+msgstr "Breakdown by payment method"
 
 msgid "Lecture rapide du poids de chaque canal dans les paiements filtres."
-msgstr "Quick reading of the weight of each channel in filter payments."
+msgstr "See each payment method's share of the filtered payments."
 
 msgid "Aucune repartition disponible."
 msgstr "No distribution available."
 
 msgid "Rapports paiements"
-msgstr "Reporting payments"
+msgstr "Payment reports"
 
 msgid "Synthese des paiements par periode, moyen, statut, facture et caisse."
-msgstr "Synthesis of payments by period, average, status, invoice and cash."
+msgstr "Payment summary by period, payment method, status, invoice and cash register."
 
 msgid "Les filtres actifs sont repris depuis la liste des paiements et les exports."
 msgstr "Active filters are included in the list of payments and exports."
 
 msgid "Par moyen de paiement"
-msgstr "By means of payment"
+msgstr "By payment method"
 
 msgid "Cash, Mobile Money, banque, carte et autres canaux."
 msgstr "Cash, Mobile Money, bank, card and other channels."
 
 msgid "Aucune donnee par moyen."
-msgstr "No data by means."
+msgstr "No data by payment method."
 
 msgid "Par statut"
 msgstr "By status"
@@ -6477,10 +6477,10 @@ msgid "Aucun paiement recent."
 msgstr "No new payments."
 
 msgid "- genere le"
-msgstr "- Generates it."
+msgstr "- generated on"
 
 msgid "Total encaisse"
-msgstr "Total cash"
+msgstr "Total received"
 
 msgid "Aucune donnee."
 msgstr "No data."
@@ -7771,10 +7771,10 @@ msgid "Avances du mois"
 msgstr "Advances of the month"
 
 msgid "Reste à payer"
-msgstr "Due"
+msgstr "Balance due"
 
 msgid "Paiements enregistrés"
-msgstr "Payments recorded"
+msgstr "Recorded payments"
 
 msgid "Tableau de bord RH"
 msgstr "HR dashboard"
@@ -8076,7 +8076,7 @@ msgid "Cette invitation n'est plus valide."
 msgstr "This invitation is no longer valid."
 
 msgid "Votre acces JOATHAM Manager est pret"
-msgstr "Your access JOATHAM Manager is ready"
+msgstr "Your JOATHAM Manager account is ready"
 
 msgid "Votre session a expiré après 30 minutes d’inactivité. Veuillez vous reconnecter."
 msgstr "Your session has expired after 30 minutes of inactivity. Please log in again."
@@ -8115,7 +8115,7 @@ msgid "Rôle d'accès prévu"
 msgstr "Planned access role"
 
 msgid "Activer mon accès"
-msgstr "Enable my access"
+msgstr "Activate my access"
 
 msgid "Invitation JOATHAM Manager"
 msgstr "Invitation JOATHAM Manager"
@@ -8124,10 +8124,10 @@ msgid "Invitation securisee"
 msgstr "Secure invitation"
 
 msgid ", votre invitation est prete. Activez votre compte pour demarrer sans creation automatique d'entreprise."
-msgstr ", your invitation is ready. Activate your account to start without automatic business creation."
+msgstr ", your invitation is ready. Activate your account to get started without creating a new company."
 
 msgid "JOATHAM Manager vous aide a piloter :"
-msgstr "JOATHAM Manager helps you to pilot :"
+msgstr "JOATHAM Manager helps you manage:"
 
 msgid "la facturation professionnelle,"
 msgstr "professional billing,"
@@ -8136,25 +8136,25 @@ msgid "la gestion clients,"
 msgstr "customer management,"
 
 msgid "la comptabilite de votre activite."
-msgstr "accountancy of your business."
+msgstr "accounting for your business."
 
 msgid "Activer mon compte"
-msgstr "Enable My Account"
+msgstr "Activate my account"
 
 msgid "Ce lien expire le"
 msgstr "This link expires on"
 
 msgid ". Si le delai est depasse, demandez une nouvelle invitation."
-msgstr ". If the delay exceeds, ask for a new invitation."
+msgstr ". If the link has expired, request a new invitation."
 
 msgid "Votre acces JOATHAM Manager est pret."
-msgstr "Your access JOATHAM Manager is ready."
+msgstr "Your JOATHAM Manager account is ready."
 
 msgid "Activez votre compte avec ce lien securise :"
 msgstr "Activate your account with this secure link:"
 
 msgid "JOATHAM Manager vous aide notamment avec :"
-msgstr "JOATHAM Manager helps you in particular with :"
+msgstr "JOATHAM Manager helps you with:"
 
 msgid "- la facturation professionnelle ;"
 msgstr "- professional billing;"
@@ -8163,10 +8163,10 @@ msgid "- la gestion clients ;"
 msgstr "- customer management;"
 
 msgid "- la comptabilite de votre activite."
-msgstr "- the accountancy of your activity."
+msgstr "- accounting for your business."
 
 msgid "Invitation entreprise"
-msgstr "Invitation by company"
+msgstr "Company invitation"
 
 msgid ", nous vous rappelons que votre invitation est disponible."
 msgstr ", we remind you that your invitation is available."
@@ -8759,13 +8759,13 @@ msgid "Actions disponibles"
 msgstr "Available actions"
 
 msgid "Selon votre plan actuel, vous pouvez passer a un plan superieur, demander une reactivation ou preparer un changement de plan."
-msgstr "Depending on your current plan, you can switch to a superior plan, request a reactivation or prepare a plan change."
+msgstr "Depending on your current plan, you can upgrade, request reactivation or arrange a plan change."
 
 msgid "Votre organisation n'a pas encore d'abonnement actif. Vous pouvez contacter JOATHAM Manager ou déclarer votre paiement dès qu'il est effectué."
-msgstr "Your organization does not have an active subscription yet. You can contact JOATHAM Manager or declare your payment as soon as it is made."
+msgstr "Your organisation does not have an active subscription yet. Contact JOATHAM Manager or submit your payment details once you have paid."
 
 msgid "Demandes / paiements en cours :"
-msgstr "Applications / payments in progress:"
+msgstr "Pending requests / payments:"
 
 msgid "Voir les plans"
 msgstr "See the plans"
@@ -8774,13 +8774,13 @@ msgid "Choisir un plan supérieur"
 msgstr "Choose a higher plan"
 
 msgid "Réactiver l'abonnement"
-msgstr "Reactivating Subscription"
+msgstr "Reactivate subscription"
 
 msgid "Gérer mon abonnement"
 msgstr "Manage my subscription"
 
 msgid "Activer un abonnement"
-msgstr "Enable subscription"
+msgstr "Activate subscription"
 
 msgid "J'ai effectué le paiement"
 msgstr "I made the payment"
@@ -8798,10 +8798,10 @@ msgid "Paiement abonnement | JOATHAM Manager"
 msgstr "Subscription payment | JOATHAM Manager"
 
 msgid "Paiement de l'abonnement"
-msgstr "Payment of subscription"
+msgstr "Subscription payment"
 
 msgid "Choisissez votre période, vérifiez le montant en USD et envoyez votre demande après paiement pour validation manuelle."
-msgstr "Choose your period, check the amount in USD and send your application after payment for manual validation."
+msgstr "Choose your subscription period, check the USD amount and submit your request after payment for manual approval."
 
 msgid "Retour à mon abonnement"
 msgstr "Back to my subscription"
@@ -8822,7 +8822,7 @@ msgid "Envoyer la demande"
 msgstr "Send request"
 
 msgid "Demande de paiement"
-msgstr "Claim for payment"
+msgstr "Payment request"
 
 msgid "Choisissez le plan payant et la période souhaitée."
 msgstr "Choose the paid plan and the desired period."
@@ -8831,25 +8831,25 @@ msgid "Vérifiez le montant de référence en USD et son estimation dans la devi
 msgstr "Check the reference amount in USD and its estimate in your company's currency."
 
 msgid "Effectuez votre paiement hors plateforme, puis ajoutez votre référence et votre preuve si disponible."
-msgstr "Make your payment off-platform, then add your reference and proof if available."
+msgstr "Make your payment outside the platform, then add the payment reference and proof of payment if available."
 
 msgid "Le statut restera"
 msgstr "Status will remain"
 
 msgid "Demande de paiement en attente"
-msgstr "Request for pending payment"
+msgstr "Pending payment request"
 
 msgid "jusqu'à validation par le super admin."
-msgstr "until validation by the super admin."
+msgstr "until approved by the super admin."
 
 msgid "Le montant affiché dans votre devise est fourni à titre estimatif. L'activation de l'abonnement intervient uniquement après validation manuelle."
-msgstr "The amount displayed in your currency is provided as an estimate. Subscription activation is only done after manual validation."
+msgstr "The amount shown in your currency is an estimate. Your subscription will only be activated after manual approval."
 
 msgid "Retour paiement abonnement | JOATHAM Manager"
 msgstr "Subscription payment result | JOATHAM Manager"
 
 msgid "Retour paiement abonnement"
-msgstr "Return payment subscription"
+msgstr "Subscription payment result"
 
 msgid "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook."
 msgstr "This page displays the known status of the payment. Subscription is enabled only after secure confirmation of the webhook."

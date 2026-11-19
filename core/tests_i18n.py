@@ -2,11 +2,13 @@ import io
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 
 from django.conf import settings
 from django.test import SimpleTestCase, TestCase
+from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 from pypdf import PdfReader
 
 from core.i18n_audit import catalog_state, catalog_errors, python_errors, template_errors
@@ -20,6 +22,25 @@ from joatham_clients.models import Client
 
 
 class TranslationCoverageTests(SimpleTestCase):
+    def test_invitation_email_keeps_recipient_and_activation_link_in_both_languages(self):
+        activation_url = "https://example.invalid/activate/unchanged-token/"
+        context = {
+            "invitation": SimpleNamespace(full_name="Élodie Martin", email="elodie@example.invalid", expires_at=timezone.now()),
+            "activation_url": activation_url,
+            "support_email": "support@example.invalid",
+            "app_url": "https://example.invalid/",
+        }
+        for language in ("fr", "en"):
+            with self.subTest(language=language), translation.override(language):
+                body = render_to_string("joatham_users/emails/invitation_reminder.txt", context)
+                self.assertIn("Élodie Martin", body)
+                self.assertIn(activation_url, body)
+                if language == "en":
+                    self.assertIn("Your JOATHAM Manager account is ready.", body)
+                    self.assertIn("accounting for your business.", body)
+                else:
+                    self.assertNotIn("Your JOATHAM Manager account is ready.", body)
+
     def test_catalog_comparison_ignores_order_but_detects_content_changes(self):
         first = 'msgid "Connexion"\nmsgstr "Sign in"\n\n'
         second = 'msgctxt "billing"\nmsgid "Facture"\nmsgstr "Invoice"\n\n'
@@ -87,6 +108,17 @@ class BilingualJourneyTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.client.session[LANGUAGE_SESSION_KEY], language)
         return response
+
+    def test_unpaid_invoice_summary_keeps_outstanding_meaning_and_plurals(self):
+        self.client.force_login(self.owner)
+        self.switch_language("en")
+        response = self.client.get(reverse("facture_list"))
+        self.assertContains(response, "1 outstanding invoice")
+        self.assertNotContains(response, "not outstanding")
+        create_facture_sample(self.company, self.owner, self.customer)
+        response = self.client.get(reverse("facture_list"))
+        self.assertContains(response, "2 outstanding invoices")
+        self.assertContains(response, "Client français conservé")
 
     def test_main_modules_render_in_both_languages(self):
         routes = (
