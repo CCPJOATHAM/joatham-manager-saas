@@ -1,5 +1,7 @@
 import io
 from decimal import Decimal
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from django.conf import settings
 from django.test import SimpleTestCase, TestCase
@@ -7,7 +9,7 @@ from django.urls import reverse
 from django.utils import translation
 from pypdf import PdfReader
 
-from core.i18n_audit import catalog_errors, python_errors, template_errors
+from core.i18n_audit import catalog_state, catalog_errors, python_errors, template_errors
 from core.models import ActivityLog
 from core.services.currency import format_decimal_number
 from core.services.language import LANGUAGE_SESSION_KEY
@@ -18,6 +20,22 @@ from joatham_clients.models import Client
 
 
 class TranslationCoverageTests(SimpleTestCase):
+    def test_catalog_comparison_ignores_order_but_detects_content_changes(self):
+        first = 'msgid "Connexion"\nmsgstr "Sign in"\n\n'
+        second = 'msgctxt "billing"\nmsgid "Facture"\nmsgstr "Invoice"\n\n'
+        with TemporaryDirectory() as directory:
+            original, extracted = Path(directory) / "original.po", Path(directory) / "extracted.po"
+            original.write_text(first + second, encoding="utf-8")
+            extracted.write_text(second + first, encoding="utf-8")
+            self.assertEqual(catalog_state(original), catalog_state(extracted))
+            for changed in (
+                second.replace("Invoice", "Bill") + first,
+                '#, fuzzy\n' + second + first,
+                first,
+            ):
+                extracted.write_text(changed, encoding="utf-8")
+                self.assertNotEqual(catalog_state(original), catalog_state(extracted))
+
     def test_both_catalogs_are_complete(self):
         self.assertEqual(catalog_errors(), [])
 

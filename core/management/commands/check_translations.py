@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
-from core.i18n_audit import catalog_entries, catalog_errors, python_errors, template_errors
+from core.i18n_audit import catalog_state, catalog_errors, python_errors, template_errors
 
 
 class Command(BaseCommand):
@@ -16,7 +16,7 @@ class Command(BaseCommand):
             paths = [settings.BASE_DIR / "locale" / language / "LC_MESSAGES" / (domain + ".po")
                      for language in ("fr", "en") for domain in ("django", "djangojs")]
             original = {path: path.read_bytes() for path in paths}
-            before = {path: list(catalog_entries(path)) for path in paths}
+            before = {path: catalog_state(path) for path in paths}
             try:
                 for domain in ("django", "djangojs"):
                     call_command("makemessages", locale=["fr", "en"], domain=domain,
@@ -24,7 +24,7 @@ class Command(BaseCommand):
                                  ignore_patterns=[".venv", "env", ".git", "test_project", "test*.py"],
                                  verbosity=0)
                 stale = [str(path.relative_to(settings.BASE_DIR)) for path in paths
-                         if list(catalog_entries(path)) != before[path]]
+                         if catalog_state(path) != before[path]]
             finally:
                 for path, content in original.items():
                     path.write_bytes(content)

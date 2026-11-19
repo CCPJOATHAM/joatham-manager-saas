@@ -36,6 +36,13 @@ def catalog_entries(path):
             yield fields, bool(re.search(r"^#,\s*.*\bfuzzy\b", paragraph, re.M))
 
 
+def catalog_state(path):
+    """Compare catalog content independently of filesystem traversal order."""
+    return sorted(catalog_entries(path), key=lambda entry: (
+        entry[0].get("msgctxt", ""), entry[0]["msgid"],
+    ))
+
+
 def catalog_errors():
     errors = []
     for language in ("fr", "en"):
