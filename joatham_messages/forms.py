@@ -126,10 +126,10 @@ class PublicQuestionForm(forms.ModelForm):
             "message": _("Message"),
         }
         widgets = {
-            "nom": forms.TextInput(attrs={"placeholder": _("Votre nom"), "maxlength": 150}),
-            "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("adresse@example.com")}),
-            "telephone": forms.TextInput(attrs={"placeholder": "+243...", "maxlength": 50}),
-            "entreprise": forms.TextInput(attrs={"placeholder": _("Nom de votre entreprise"), "maxlength": 150}),
+            "nom": forms.TextInput(attrs={"placeholder": _("Votre nom"), "maxlength": 150, "autocomplete": "name"}),
+            "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("adresse@example.com"), "autocomplete": "email"}),
+            "telephone": forms.TextInput(attrs={"placeholder": "+243...", "maxlength": 50, "autocomplete": "tel", "inputmode": "tel"}),
+            "entreprise": forms.TextInput(attrs={"placeholder": _("Nom de votre entreprise"), "maxlength": 150, "autocomplete": "organization"}),
             "sujet": forms.TextInput(attrs={"placeholder": _("Votre question"), "maxlength": 180}),
             "message": forms.Textarea(attrs={"rows": 6, "placeholder": _("Votre message"), "maxlength": MAX_MESSAGE_LENGTH}),
         }

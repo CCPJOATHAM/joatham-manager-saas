@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 19:10+0100\n"
+"POT-Creation-Date: 2026-11-19 20:25+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: French\n"
@@ -3313,7 +3313,6 @@ msgstr "%(value_1)s est invalide."
 msgid "%(value_1)s ne peut pas être négatif."
 msgstr "%(value_1)s ne peut pas être négatif."
 
-#| msgid "Solde initial"
 msgid "Le solde initial"
 msgstr "Le solde initial"
 
@@ -3323,7 +3322,6 @@ msgstr "Une session est déjà ouverte pour cette caisse."
 msgid "Seule une session ouverte peut être fermée."
 msgstr "Seule une session ouverte peut être fermée."
 
-#| msgid "Solde réel"
 msgid "Le solde réel"
 msgstr "Le solde réel"
 
@@ -5976,9 +5974,6 @@ msgstr "Accompagnement"
 
 msgid "Nous vous orientons vers la meilleure façon de démarrer."
 msgstr "Nous vous orientons vers la meilleure façon de démarrer."
-
-msgid "Formulaire de question avant inscription"
-msgstr "Formulaire de question avant inscription"
 
 msgid "Envoyez votre question"
 msgstr "Envoyez votre question"
