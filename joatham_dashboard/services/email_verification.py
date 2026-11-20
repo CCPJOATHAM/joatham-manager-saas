@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes
@@ -58,6 +59,7 @@ def send_email_verification(request, user):
     context = {
         "user": user,
         "verification_url": verification_url,
+        "email_logo_url": request.build_absolute_uri(static("joatham_dashboard/img/email-logo.png")),
         "app_name": "JOATHAM Manager",
         "expiration_seconds": getattr(settings, "EMAIL_VERIFICATION_TIMEOUT", getattr(settings, "PASSWORD_RESET_TIMEOUT", 3600)),
     }

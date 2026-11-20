@@ -3,19 +3,30 @@
 <!DOCTYPE html>
 {% get_current_language as CURRENT_LANGUAGE %}
 <html lang="{{ CURRENT_LANGUAGE }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>{% trans "Confirmez votre adresse email" %} | JOATHAM Manager</title>
+    <style>
+        @media only screen and (max-width: 480px) {
+            .email-padding { padding-left: 22px !important; padding-right: 22px !important; }
+        }
+    </style>
+</head>
 <body style="margin:0; padding:0; background:#f3f6fb; color:#10233f;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%; background:#f3f6fb; padding:28px 14px; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;">
         <tr>
             <td align="center">
-                <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:100%; max-width:640px; background:#ffffff; border-radius:22px; overflow:hidden; box-shadow:0 16px 38px rgba(15,23,42,0.10);">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%; max-width:640px; background:#ffffff; border-radius:22px; overflow:hidden; box-shadow:0 16px 38px rgba(15,23,42,0.10);">
                     <tr>
-                        <td style="padding:28px 32px; background:linear-gradient(135deg,#10233f,#0f766e); color:#ffffff;">
-                            <div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.82;">JOATHAM Manager</div>
-                            <h1 style="margin:12px 0 0; font-size:28px; line-height:1.2;">{% trans "Confirmez votre adresse email" %}</h1>
+                        <td class="email-padding" bgcolor="#00364d" style="padding:32px; background-color:#00364d; background-image:linear-gradient(130deg,#002d49,#055366); color:#ffffff;">
+                            <img src="{{ email_logo_url }}" width="240" height="94" alt="JOATHAM Manager" style="display:block; width:240px; max-width:100%; height:auto; border:0; color:#ffffff; font-size:20px; font-weight:700;">
+                            <h1 style="margin:28px 0 0; font-size:28px; line-height:1.2;">{% trans "Confirmez votre adresse email" %}</h1>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:32px;">
+                        <td class="email-padding" style="padding:32px;">
                             <p style="margin:0 0 16px; color:#334155; font-size:16px; line-height:1.7;">{% trans "Bonjour" %} {{ user.get_full_name|default:user.username }},</p>
                             <p style="margin:0 0 18px; color:#475569; font-size:15px; line-height:1.7;">
                                 {% trans "Merci pour votre inscription sur JOATHAM Manager. Pour activer votre espace entreprise, confirmez votre adresse email." %}
@@ -40,7 +51,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:20px 32px; background:#f8fafc; border-top:1px solid #e2e8f0; color:#64748b; font-size:13px; line-height:1.6;">
+                        <td class="email-padding" style="padding:20px 32px; background:#f8fafc; border-top:1px solid #e2e8f0; color:#64748b; font-size:13px; line-height:1.6;">
                             <strong style="color:#10233f;">JOATHAM Manager</strong><br>
                             {% trans "Logiciel de gestion d’entreprise. Email automatique, merci de ne pas y répondre." %}
                         </td>
