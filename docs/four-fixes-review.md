@@ -43,7 +43,9 @@ Les badges Premium/abonnement requis existants restent des invitations à change
 
 ## Captures avant/après
 
-Les captures de facture montrent les montants saisis et la prévisualisation. Le tableau de lignes peut défiler horizontalement sans déplacer la prévisualisation des totaux.
+CI validée : **860 tests Django réussis sur PostgreSQL 14.24**, **3 tests Node réussis**, compilation/extraction des catalogues FR/EN réussies. Le moteur Docker local étant indisponible, les tests de base sont exécutés en CI ; les contrôles navigateur et Node ont également été exécutés sur le poste.
+
+Les captures de facture montrent les montants saisis et la prévisualisation. Le tableau de lignes peut défiler horizontalement sans déplacer la prévisualisation des totaux. Les captures mobiles d'abonnement sont cadrées sur les estimations ; celles du menu sont cadrées sur ses dernières entrées, là où Audit doit apparaître pour le comptable autorisé.
 
 | Parcours | FR ordinateur avant / après | FR mobile avant / après | EN ordinateur avant / après | EN mobile avant / après |
 |---|---|---|---|---|
