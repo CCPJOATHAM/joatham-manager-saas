@@ -50,3 +50,17 @@ class PasswordResetPageLogoTests(TestCase):
                 self.assertContains(response, gettext("Lien invalide ou expiré"))
                 self.assertContains(response, f'href="{reverse("password_reset")}"')
                 self.assertContains(response, 'alt="JOATHAM Manager"')
+
+    def test_done_page_keeps_bilingual_neutral_confirmation_and_links(self):
+        for language in ("fr", "en"):
+            with self.subTest(language=language), override(language):
+                self.client.post(reverse("set_language"), {"language": language, "next": reverse("password_reset_done")})
+                response = self.client.get(reverse("password_reset_done"))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, f'<html lang="{language}">')
+                self.assertContains(response, gettext("Consultez votre boîte de réception"))
+                self.assertContains(response, gettext("Si un compte existe avec cet email, vous recevrez un message contenant les instructions pour réinitialiser votre mot de passe. Cette confirmation reste volontairement neutre afin de protéger la sécurité des comptes."))
+                self.assertContains(response, 'class="brand-logo" src="/static/joatham_dashboard/img/login-logo.webp" alt="JOATHAM Manager"')
+                self.assertNotContains(response, '<div class="brand">JOATHAM Manager</div>')
+                self.assertContains(response, f'href="{reverse("login")}"')
+                self.assertContains(response, f'href="{reverse("password_reset")}"')
