@@ -1,5 +1,5 @@
 {% extends "joatham_dashboard/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 
 {% block page_title %}{% trans "Paiement abonnement | JOATHAM Manager" %}{% endblock %}
@@ -207,6 +207,7 @@
 </div>
 
 {% trans "Conversion temporairement indisponible." as conversion_unavailable %}
+<script src="{% static 'joatham_dashboard/js/subscription-estimate.js' %}"></script>
 <script>
     const pricingMatrix = JSON.parse(document.getElementById("pricing-matrix").textContent);
     const planField = document.getElementById("id_plan");
@@ -216,20 +217,17 @@
     const currencyPreview = document.getElementById("currency-preview");
     const ratePreview = document.getElementById("rate-preview");
 
-    function formatPreviewNumber(value, maximumFractionDigits = 2) {
-        return new Intl.NumberFormat(document.documentElement.lang || "fr", {
-            minimumFractionDigits: 2, maximumFractionDigits,
-        }).format(Number(value));
-    }
-
     function syncAmountPreview() {
         const key = `${planField.value}:${durationField.value}`;
-        const data = pricingMatrix[key];
-        amountUsdPreview.textContent = data ? formatPreviewNumber(data.amount_usd) : "—";
-        amountLocalPreview.textContent = data && data.estimated_amount != null ? formatPreviewNumber(data.estimated_amount) : "{{ conversion_unavailable|escapejs }}";
-        amountLocalPreview.parentElement.classList.toggle("is-unavailable", !data || data.estimated_amount == null);
-        currencyPreview.textContent = data ? data.currency_code : "{{ currency_code }}";
-        ratePreview.textContent = data && data.exchange_rate != null ? formatPreviewNumber(data.exchange_rate, 8) : "—";
+        const view = window.JoathamSubscriptionEstimate.present(
+            pricingMatrix[key], document.documentElement.lang,
+            "{{ currency_code|escapejs }}", "{{ conversion_unavailable|escapejs }}",
+        );
+        amountUsdPreview.textContent = view.reference;
+        amountLocalPreview.textContent = view.amount;
+        amountLocalPreview.parentElement.classList.toggle("is-unavailable", !view.available);
+        currencyPreview.textContent = view.currency;
+        ratePreview.textContent = view.rate;
     }
 
     if (planField && durationField) {

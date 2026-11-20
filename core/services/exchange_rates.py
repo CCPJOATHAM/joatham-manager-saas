@@ -101,6 +101,11 @@ def _fetch_exchangerate_api_rate(source_currency, target_currency, api_key):
 
     if not isinstance(payload, dict):
         raise ExchangeRateUnavailable(gettext_lazy('Réponse taux de change invalide.'))
+    if "base_code" in payload and (
+        not isinstance(payload["base_code"], str)
+        or normalize_currency_code(payload["base_code"]) != source_currency
+    ):
+        raise ExchangeRateUnavailable(gettext_lazy('Réponse taux de change invalide.'))
     if payload.get("result") != "success":
         logger.warning("Exchange rate provider returned error url=%s payload=%s", url, payload)
         raise ExchangeRateUnavailable(gettext_lazy("Provider taux de change indisponible."))

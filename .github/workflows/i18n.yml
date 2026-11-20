@@ -47,8 +47,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Test invoice preview arithmetic
-        run: node --test tests/js/invoice_totals.test.cjs
+      - name: Test browser preview calculations and conversion states
+        run: node --test tests/js/*.test.cjs
       - name: Compile and check both translation domains
         run: |
           python manage.py compilemessages -l fr -l en
