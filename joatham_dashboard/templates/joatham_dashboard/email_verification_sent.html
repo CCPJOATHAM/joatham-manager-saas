@@ -1,5 +1,5 @@
 
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 {% get_current_language as CURRENT_LANGUAGE %}
 <html lang="{{ CURRENT_LANGUAGE }}">
@@ -8,103 +8,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% trans "Confirmation email | JOATHAM Manager" %}</title>
     <style>
+        :root {
+            --bg-a: #0f172a;
+            --bg-b: #1d4ed8;
+            --panel: rgba(255, 255, 255, 0.95);
+            --border: rgba(148, 163, 184, 0.28);
+            --text: #0f172a;
+            --muted: #475569;
+            --accent: #0f766e;
+            --accent-soft: #ccfbf1;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             min-height: 100vh;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #eef4fb 0%, #f9fbfd 48%, #edf4f0 100%);
+            background:
+                radial-gradient(circle at top left, rgba(45, 212, 191, 0.22), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.28), transparent 38%),
+                linear-gradient(135deg, var(--bg-a) 0%, #10223f 42%, var(--bg-b) 100%);
+            color: var(--text);
             display: grid;
             place-items: center;
-            padding: 24px;
-            color: #10233f;
+            padding: 28px;
         }
-        .card {
+
+        .shell {
             width: 100%;
-            max-width: 640px;
-            background: #fff;
-            border-radius: 28px;
-            padding: 40px 34px;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
-            border: 1px solid rgba(255,255,255,0.75);
+            max-width: 1040px;
+            display: grid;
+            grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 32px 90px rgba(15, 23, 42, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
         }
-        h1 {
-            margin: 0 0 12px;
-            font-size: 2rem;
-            letter-spacing: -0.03em;
+
+        .hero {
+            padding: 52px 42px;
+            color: #f8fafc;
+            background: linear-gradient(180deg, rgba(15, 118, 110, 0.22), rgba(15, 23, 42, 0.12));
         }
-        p {
-            color: #64748b;
-            line-height: 1.7;
-        }
-        .email-box {
-            margin: 20px 0;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: #f8fafc;
-            border: 1px solid #dde7f0;
-            font-weight: 700;
-            color: #10233f;
-        }
-        .email-box small {
+
+        .brand-logo {
             display: block;
-            margin-bottom: 6px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: #64748b;
+            width: 240px;
+            max-width: 100%;
+            height: auto;
         }
-        .email-box a {
-            color: #0f766e;
-            word-break: break-all;
-            text-decoration: none;
+
+        .hero h1 {
+            margin: 28px 0 14px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
         }
+
+        .hero p {
+            margin: 0;
+            color: rgba(248, 250, 252, 0.82);
+            line-height: 1.75;
+            font-size: 1.02rem;
+        }
+
+        .panel {
+            background: var(--panel);
+            padding: 52px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .panel p {
+            margin: 0 0 16px;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
         .actions {
             display: flex;
-            gap: 12px;
             flex-wrap: wrap;
-            margin-top: 22px;
+            gap: 14px;
+            margin-top: 8px;
         }
+
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 44px;
-            padding: 0 18px;
-            border-radius: 14px;
-            border: 1px solid #cbd5e1;
-            background: #fff;
-            color: #10233f;
-            text-decoration: none;
+            min-height: 48px;
+            padding: 12px 18px;
+            font: inherit;
             font-weight: 700;
             cursor: pointer;
+            border-radius: 14px;
+            text-decoration: none;
         }
-        .btn.primary {
-            background: #0f766e;
-            border-color: #0f766e;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0f766e, #0b5f58);
             color: #fff;
+            border: 1px solid #0f766e;
+        }
+
+        .btn-secondary {
+            color: #0f172a;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 860px) {
+            .shell { grid-template-columns: 1fr; }
+            .brand-logo { width: 200px; }
+            .hero, .panel { padding: 36px 24px; }
+        }
+
+        :focus-visible { outline: 3px solid #087f72; outline-offset: 4px; }
+        .hero, .panel { min-width: 0; }
+        .email-box {
+            margin: 4px 0 24px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #f8fafc;
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+        .email-box small { display: block; margin-bottom: 8px; color: var(--muted); font-size: .85rem; }
+        .email-box a { color: var(--accent); font-size: .9rem; }
+        .actions form { margin: 0; }
+        @media (max-width: 860px) {
+            .actions { flex-direction: column; }
+            .actions .btn { width: 100%; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <main class="card">
-        <h1>{% trans "Confirmez votre adresse email" %}</h1>
-        <p>{% trans "Un email de confirmation a été envoyé. Veuillez cliquer sur le lien reçu avant d’utiliser JOATHAM Manager." %}</p>
-        {% if pending_email %}
-        <div class="email-box">{{ pending_email }}</div>
-        {% endif %}
-        <p>{% blocktrans count count=expiration_minutes %}Le lien reste valable pendant environ {{ count }} minute. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% plural %}Le lien reste valable pendant environ {{ count }} minutes. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% endblocktrans %}</p>
-        {% if debug_verification_url %}
-        <div class="email-box">
-            <small>{% trans "Lien local de vérification" %}</small>
-            <a href="{{ debug_verification_url }}">{{ debug_verification_url }}</a>
-        </div>
-        {% endif %}
-        <div class="actions">
-            <form method="post" action="{% url 'email_verification_resend' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn primary">{% trans "Renvoyer l’email" %}</button>
-            </form>
-            <a href="{% url 'login' %}" class="btn">{% trans "Retour à la connexion" %}</a>
-        </div>
+    <main class="shell">
+        <section class="hero" aria-labelledby="verification-heading">
+            <img class="brand-logo" src="{% static 'joatham_dashboard/img/login-logo.webp' %}" alt="JOATHAM Manager" width="600" height="234">
+            <h1 id="verification-heading">{% trans "Confirmez votre adresse email" %}</h1>
+        </section>
+        <section class="panel" aria-labelledby="verification-heading">
+            <p>{% trans "Un email de confirmation a été envoyé. Veuillez cliquer sur le lien reçu avant d’utiliser JOATHAM Manager." %}</p>
+            {% if pending_email %}
+            <div class="email-box">{{ pending_email }}</div>
+            {% endif %}
+            <p>{% blocktrans count count=expiration_minutes %}Le lien reste valable pendant environ {{ count }} minute. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% plural %}Le lien reste valable pendant environ {{ count }} minutes. Tant que cette adresse n’est pas confirmée, l’accès aux dashboards et aux modules reste bloqué.{% endblocktrans %}</p>
+            {% if debug_verification_url %}
+            <div class="email-box">
+                <small>{% trans "Lien local de vérification" %}</small>
+                <a href="{{ debug_verification_url }}">{{ debug_verification_url }}</a>
+            </div>
+            {% endif %}
+            <div class="actions">
+                <form method="post" action="{% url 'email_verification_resend' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">{% trans "Renvoyer l’email" %}</button>
+                </form>
+                <a href="{% url 'login' %}" class="btn btn-secondary">{% trans "Retour à la connexion" %}</a>
+            </div>
+        </section>
     </main>
 </body>
 </html>
