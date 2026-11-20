@@ -199,6 +199,8 @@ class FourRegressionTests(TestCase):
                                 self.assertIn(reverse(route), urls)
                             if not allowed_role:
                                 self.assertNotIn(reverse(route), urls)
+                            if module == "audit" and user.role == "comptable" and not get_module_access_state(self.company, module)["allowed"]:
+                                self.assertNotIn(reverse(route), urls)
 
     def test_bilingual_edit_preserves_zero_vat_and_machine_readable_prices(self):
         self.company.taux_tva_defaut = Decimal("18.50")

@@ -23,7 +23,7 @@ Les montants de TVA et réductions sont calculés sur le HT, comme dans `Facture
 |---|---|
 | Clients | Propriétaire/gestionnaire, puis politique du module clients. Le comptable ne possède pas `clients.view`. |
 | Services, produits, factures, proformas, dépenses, caisse, paiements, apprenants, comptabilité | Permission du rôle et politique du plan existantes ; la matrice de tests compare les liens aux accès réellement autorisés pour Gratuit, Starter, Pro et Premium. |
-| Audit | Propriétaire et désormais comptable, sous réserve de l'abonnement. Gestionnaire exclu ; aucune donnée d'une autre entreprise accessible. |
+| Audit | Propriétaire et désormais comptable, sous réserve de l'abonnement. Pour le comptable, la nouvelle entrée reste masquée si le module n'est pas autorisé par le plan. Gestionnaire exclu ; aucune donnée d'une autre entreprise accessible. |
 | RH | Propriétaire/gestionnaire avec droit au module ; masqué au comptable et lorsque le module est verrouillé. |
 | Rapports avancés | Propriétaire/comptable avec droit au module ; pas de nouveau droit au gestionnaire. |
 | Organisation, utilisateurs, abonnement, suggestions | Restrictions propriétaire existantes conservées. |
