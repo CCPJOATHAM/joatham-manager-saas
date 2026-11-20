@@ -1,0 +1,717 @@
+{
+  "source": "core.services.world.get_currency_choices",
+  "provider": "https://open.er-api.com/v6/latest/USD",
+  "provider_update_utc": "Fri, 20 Nov 2026 00:02:32 +0000",
+  "currencies": [
+    {
+      "code": "AED",
+      "name": "Dirham des Emirats arabes unis",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "AFN",
+      "name": "Afghani",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ALL",
+      "name": "Lek albanais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "AMD",
+      "name": "Dram armenien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "AOA",
+      "name": "Kwanza angolais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ARS",
+      "name": "Peso argentin",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "AUD",
+      "name": "Dollar australien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "AZN",
+      "name": "Manat azerbaidjanais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BAM",
+      "name": "Mark convertible",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BBD",
+      "name": "Dollar barbadien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BDT",
+      "name": "Taka bangladais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BGN",
+      "name": "Lev bulgare",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BHD",
+      "name": "Dinar bahreini",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BIF",
+      "name": "Franc burundais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BND",
+      "name": "Dollar brunien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BOB",
+      "name": "Boliviano",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BRL",
+      "name": "Real bresilien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BSD",
+      "name": "Dollar bahamien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BTN",
+      "name": "Ngultrum",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BWP",
+      "name": "Pula",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BYN",
+      "name": "Rouble bielorusse",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "BZD",
+      "name": "Dollar belizien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CAD",
+      "name": "Dollar canadien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CDF",
+      "name": "Franc congolais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CHF",
+      "name": "Franc suisse",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CLP",
+      "name": "Peso chilien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CNY",
+      "name": "Yuan chinois",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "COP",
+      "name": "Peso colombien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CRC",
+      "name": "Colon costaricien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CUP",
+      "name": "Peso cubain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CVE",
+      "name": "Escudo cap-verdien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "CZK",
+      "name": "Couronne tcheque",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "DJF",
+      "name": "Franc djiboutien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "DKK",
+      "name": "Couronne danoise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "DZD",
+      "name": "Dinar algerien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "EGP",
+      "name": "Livre egyptienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ERN",
+      "name": "Nakfa",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ETB",
+      "name": "Birr ethiopien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "FJD",
+      "name": "Dollar fidjien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GBP",
+      "name": "Livre sterling",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GEL",
+      "name": "Lari georgien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GHS",
+      "name": "Cedi ghanéen",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GMD",
+      "name": "Dalasi gambien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GNF",
+      "name": "Franc guineen",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GTQ",
+      "name": "Quetzal",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "GYD",
+      "name": "Dollar guyanien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "HNL",
+      "name": "Lempira",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "HTG",
+      "name": "Gourde haitienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "HUF",
+      "name": "Forint",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "IDR",
+      "name": "Roupie indonesienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ILS",
+      "name": "Shekel israélien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "INR",
+      "name": "Roupie indienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "IQD",
+      "name": "Dinar irakien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "IRR",
+      "name": "Rial iranien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ISK",
+      "name": "Couronne islandaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "JMD",
+      "name": "Dollar jamaicain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "JOD",
+      "name": "Dinar jordanien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "JPY",
+      "name": "Yen japonais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KES",
+      "name": "Shilling kenyan",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KGS",
+      "name": "Som kirghize",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KHR",
+      "name": "Riel cambodgien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KMF",
+      "name": "Franc comorien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KPW",
+      "name": "Won nord-coreen",
+      "provider_available_at_audit": false
+    },
+    {
+      "code": "KRW",
+      "name": "Won sud-coreen",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KWD",
+      "name": "Dinar koweitien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "KZT",
+      "name": "Tenge kazakh",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LAK",
+      "name": "Kip lao",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LBP",
+      "name": "Livre libanaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LKR",
+      "name": "Roupie sri-lankaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LRD",
+      "name": "Dollar liberien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LSL",
+      "name": "Loti",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "LYD",
+      "name": "Dinar libyen",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MAD",
+      "name": "Dirham marocain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MDL",
+      "name": "Leu moldave",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MGA",
+      "name": "Ariary",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MKD",
+      "name": "Denar macedonien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MMK",
+      "name": "Kyat",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MNT",
+      "name": "Tugrik",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MRU",
+      "name": "Ouguiya",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MUR",
+      "name": "Roupie mauricienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MVR",
+      "name": "Rufiyaa",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MWK",
+      "name": "Kwacha malawite",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MXN",
+      "name": "Peso mexicain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MYR",
+      "name": "Ringgit malaisien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "MZN",
+      "name": "Metical mozambicain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NAD",
+      "name": "Dollar namibien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NGN",
+      "name": "Naira",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NIO",
+      "name": "Cordoba",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NOK",
+      "name": "Couronne norvegienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NPR",
+      "name": "Roupie nepalaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "NZD",
+      "name": "Dollar neo-zelandais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "OMR",
+      "name": "Rial omanais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PAB",
+      "name": "Balboa",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PEN",
+      "name": "Sol",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PGK",
+      "name": "Kina",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PHP",
+      "name": "Peso philippin",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PKR",
+      "name": "Roupie pakistanaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PLN",
+      "name": "Zloty",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "PYG",
+      "name": "Guarani",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "QAR",
+      "name": "Riyal qatari",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "RON",
+      "name": "Leu roumain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "RSD",
+      "name": "Dinar serbe",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "RUB",
+      "name": "Rouble russe",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "RWF",
+      "name": "Franc rwandais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SAR",
+      "name": "Riyal saoudien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SBD",
+      "name": "Dollar des Salomon",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SCR",
+      "name": "Roupie seychelloise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SDG",
+      "name": "Livre soudanaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SEK",
+      "name": "Couronne suedoise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SGD",
+      "name": "Dollar de Singapour",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SLE",
+      "name": "Leone",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SOS",
+      "name": "Shilling somalien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SRD",
+      "name": "Dollar surinamais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SSP",
+      "name": "Livre sud-soudanaise",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "STN",
+      "name": "Dobra",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SYP",
+      "name": "Livre syrienne",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "SZL",
+      "name": "Lilangeni",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "THB",
+      "name": "Baht",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TJS",
+      "name": "Somoni",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TMT",
+      "name": "Manat turkmene",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TND",
+      "name": "Dinar tunisien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TOP",
+      "name": "Paanga",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TRY",
+      "name": "Livre turque",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TTD",
+      "name": "Dollar de Trinite-et-Tobago",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "TZS",
+      "name": "Shilling tanzanien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "UAH",
+      "name": "Hryvnia",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "UGX",
+      "name": "Shilling ougandais",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "USD",
+      "name": "Dollar americain",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "UYU",
+      "name": "Peso uruguayen",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "UZS",
+      "name": "Soum ouzbek",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "VES",
+      "name": "Bolivar",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "VND",
+      "name": "Dong",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "VUV",
+      "name": "Vatu",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "WST",
+      "name": "Tala",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "XAF",
+      "name": "Franc CFA",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "XCD",
+      "name": "Dollar des Caraibes orientales",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "XOF",
+      "name": "Franc CFA BCEAO",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "YER",
+      "name": "Rial yemenite",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ZAR",
+      "name": "Rand",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ZMW",
+      "name": "Kwacha zambien",
+      "provider_available_at_audit": true
+    },
+    {
+      "code": "ZWG",
+      "name": "Zimbabwe Gold",
+      "provider_available_at_audit": true
+    }
+  ]
+}

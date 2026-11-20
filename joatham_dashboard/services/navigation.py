@@ -217,7 +217,8 @@ NAV_ITEMS = [
         "url_name": "activity_log_list",
         "permission": "audit.view",
         "module": "audit",
-        "roles": ["proprietaire"],
+        "roles": ["proprietaire", "comptable"],
+        "hide_when_locked_roles": ["comptable"],
         "prefixes": ["/audit/"],
     },
     {
@@ -275,6 +276,8 @@ def _get_item_state(user, item):
                 return {"visible": False}
             if state.get("allowed"):
                 return {"visible": True}
+            if get_user_role(user) in item.get("hide_when_locked_roles", []):
+                return {"visible": False}
             if state.get("reason") == "module_not_in_plan":
                 return {"visible": False}
             if state.get("reason") in PREMIUM_DENIED_REASONS:

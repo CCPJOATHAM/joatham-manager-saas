@@ -342,6 +342,17 @@ CURRENCY_DETAILS = {
 }
 
 
+def normalize_currency_code(code):
+    # Legacy display symbols used in company profiles; XOF remains distinct.
+    normalized = (code or "").strip().upper()
+    return {"FC": "CDF", "FCFA": "XAF"}.get(normalized, normalized)
+
+
+def currency_code_aliases(code):
+    canonical = normalize_currency_code(code)
+    return {canonical} | {alias for alias in ("FC", "FCFA") if normalize_currency_code(alias) == canonical}
+
+
 def get_country_choices():
     return [(country_name, country_name) for _, country_name, _ in WORLD_COUNTRIES]
 

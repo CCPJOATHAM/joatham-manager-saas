@@ -271,8 +271,12 @@
             <article class="pricing-card">
                 <strong>{{ option.label }}</strong>
                 <div class="usd-value">{{ option.amount_usd }} USD</div>
+                {% if option.estimated_amount != None and option.exchange_rate != None %}
                 <span>{% trans "Montant estimatif dans votre devise :" %} {{ option.estimated_amount }} {{ option.currency_code }}</span>
                 <span>{% trans "Taux utilisé pour l'estimation :" %} {{ option.exchange_rate }}</span>
+                {% else %}
+                <span>{% trans "Conversion temporairement indisponible." %} {{ option.currency_code }}</span>
+                {% endif %}
             </article>
             {% endfor %}
         </div>

@@ -1,5 +1,6 @@
 from django.utils.translation import get_language, gettext_lazy
 from decimal import Decimal, ROUND_HALF_UP
+from core.services.world import normalize_currency_code
 
 
 DEFAULT_EXCHANGE_SOURCE = "manuel"
@@ -12,14 +13,14 @@ DEFAULT_CURRENCY_LABELS = {
     "XAF": gettext_lazy("Franc CFA"),
 }
 def _normalize_currency_code(currency_code):
-    return (currency_code or get_platform_default_currency()).strip().upper()
+    return normalize_currency_code(currency_code or get_platform_default_currency())
 
 
 def get_platform_default_currency():
     try:
         from core.models import PlatformSettings
 
-        return (PlatformSettings.get_solo().devise_defaut or HARDCODED_FALLBACK_CURRENCY).strip().upper()
+        return normalize_currency_code(PlatformSettings.get_solo().devise_defaut or HARDCODED_FALLBACK_CURRENCY)
     except Exception:
         return HARDCODED_FALLBACK_CURRENCY
 

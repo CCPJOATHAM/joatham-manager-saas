@@ -1,5 +1,5 @@
 {% extends "joatham_dashboard/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 
 {% block page_title %}{% trans "Paiement abonnement | JOATHAM Manager" %}{% endblock %}
@@ -13,6 +13,7 @@
 {% block content %}
 {{ pricing_matrix|json_script:"pricing-matrix" }}
 <style>
+    .amount-preview .value.is-unavailable { font-size: 1rem; line-height: 1.5; font-weight: 600; }
     .payment-layout {
         display: grid;
         grid-template-columns: minmax(320px, 1fr) minmax(280px, 0.8fr);
@@ -205,6 +206,8 @@
     </aside>
 </div>
 
+{% trans "Conversion temporairement indisponible." as conversion_unavailable %}
+<script src="{% static 'joatham_dashboard/js/subscription-estimate.js' %}"></script>
 <script>
     const pricingMatrix = JSON.parse(document.getElementById("pricing-matrix").textContent);
     const planField = document.getElementById("id_plan");
@@ -216,11 +219,15 @@
 
     function syncAmountPreview() {
         const key = `${planField.value}:${durationField.value}`;
-        const data = pricingMatrix[key];
-        amountUsdPreview.textContent = data ? data.amount_usd : "-";
-        amountLocalPreview.textContent = data ? data.estimated_amount : "-";
-        currencyPreview.textContent = data ? data.currency_code : "{{ currency_code }}";
-        ratePreview.textContent = data ? data.exchange_rate : "-";
+        const view = window.JoathamSubscriptionEstimate.present(
+            pricingMatrix[key], document.documentElement.lang,
+            "{{ currency_code|escapejs }}", "{{ conversion_unavailable|escapejs }}",
+        );
+        amountUsdPreview.textContent = view.reference;
+        amountLocalPreview.textContent = view.amount;
+        amountLocalPreview.parentElement.classList.toggle("is-unavailable", !view.available);
+        currencyPreview.textContent = view.currency;
+        ratePreview.textContent = view.rate;
     }
 
     if (planField && durationField) {

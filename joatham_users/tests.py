@@ -1266,7 +1266,7 @@ class UserManagementTests(TestCase):
                 "raison_sociale": "Entreprise Utilisateurs SARL",
                 "adresse": "Avenue Test 1",
                 "ville": "Kinshasa",
-                "pays": "CD",
+                "pays": "RDC",
                 "devise": "CDF",
                 "taux_tva_defaut": "18.50",
                 "referentiel_comptable": "pcg",

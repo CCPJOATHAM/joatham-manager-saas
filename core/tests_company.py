@@ -29,7 +29,7 @@ class CompanySettingsTests(TestCase):
                 "raison_sociale": "Enseigne Test",
                 "adresse": "Avenue 1",
                 "ville": "Matadi",
-                "pays": "CD",
+                "pays": "RDC",
                 "devise": "USD",
                 "taux_tva_defaut": "0.00",
                 "referentiel_comptable": "syscohada",
