@@ -678,8 +678,8 @@ def build_subscription_pricing_matrix(*, entreprise, plans):
             pricing_matrix[f"{plan.id}:{duree}"] = {
                 "amount_usd": str(estimate["amount_usd"]),
                 "currency_code": estimate["currency_code"],
-                "estimated_amount": str(estimate["estimated_amount"]),
-                "exchange_rate": str(estimate["exchange_rate"]),
+                "estimated_amount": str(estimate["estimated_amount"]) if estimate["estimated_amount"] is not None else None,
+                "exchange_rate": str(estimate["exchange_rate"]) if estimate["exchange_rate"] is not None else None,
                 "duration_label": details["label"],
             }
     return pricing_matrix

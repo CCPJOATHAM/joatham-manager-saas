@@ -13,6 +13,7 @@
 {% block content %}
 {{ pricing_matrix|json_script:"pricing-matrix" }}
 <style>
+    .amount-preview .value.is-unavailable { font-size: 1rem; line-height: 1.5; font-weight: 600; }
     .payment-layout {
         display: grid;
         grid-template-columns: minmax(320px, 1fr) minmax(280px, 0.8fr);
@@ -205,6 +206,7 @@
     </aside>
 </div>
 
+{% trans "Conversion temporairement indisponible." as conversion_unavailable %}
 <script>
     const pricingMatrix = JSON.parse(document.getElementById("pricing-matrix").textContent);
     const planField = document.getElementById("id_plan");
@@ -214,13 +216,20 @@
     const currencyPreview = document.getElementById("currency-preview");
     const ratePreview = document.getElementById("rate-preview");
 
+    function formatPreviewNumber(value, maximumFractionDigits = 2) {
+        return new Intl.NumberFormat(document.documentElement.lang || "fr", {
+            minimumFractionDigits: 2, maximumFractionDigits,
+        }).format(Number(value));
+    }
+
     function syncAmountPreview() {
         const key = `${planField.value}:${durationField.value}`;
         const data = pricingMatrix[key];
-        amountUsdPreview.textContent = data ? data.amount_usd : "-";
-        amountLocalPreview.textContent = data ? data.estimated_amount : "-";
+        amountUsdPreview.textContent = data ? formatPreviewNumber(data.amount_usd) : "—";
+        amountLocalPreview.textContent = data && data.estimated_amount != null ? formatPreviewNumber(data.estimated_amount) : "{{ conversion_unavailable|escapejs }}";
+        amountLocalPreview.parentElement.classList.toggle("is-unavailable", !data || data.estimated_amount == null);
         currencyPreview.textContent = data ? data.currency_code : "{{ currency_code }}";
-        ratePreview.textContent = data ? data.exchange_rate : "-";
+        ratePreview.textContent = data && data.exchange_rate != null ? formatPreviewNumber(data.exchange_rate, 8) : "—";
     }
 
     if (planField && durationField) {

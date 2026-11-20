@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from core.models import ExchangeRate, PaiementAbonnement, PlatformSettings
 from core.services.exchange_rates import get_company_currency, get_plan_price_for_company
 from core.services.subscription import get_commercial_plans_queryset
-from core.services.world import get_country_choices, get_currency_choices
+from core.services.world import get_country_choices, get_currency_choices, normalize_currency_code
 from joatham_users.models import Abonnement, Entreprise
 
 
@@ -55,10 +55,16 @@ class ExchangeRateManualForm(forms.ModelForm):
         self.fields["date_taux"].required = False
 
     def clean_devise_source(self):
-        return (self.cleaned_data["devise_source"] or "").strip().upper()
+        return normalize_currency_code(self.cleaned_data["devise_source"])
 
     def clean_devise_cible(self):
-        return (self.cleaned_data["devise_cible"] or "").strip().upper()
+        return normalize_currency_code(self.cleaned_data["devise_cible"])
+
+    def clean_taux(self):
+        rate = self.cleaned_data["taux"]
+        if not rate.is_finite() or rate <= 0:
+            raise forms.ValidationError(_("Taux de change invalide."))
+        return rate
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -74,9 +80,12 @@ class ExchangeRateManualForm(forms.ModelForm):
 
 
 class EntrepriseSettingsForm(forms.ModelForm):
+    pays = forms.ChoiceField(choices=(), required=False, label=_("Pays"))
+    devise = forms.ChoiceField(choices=(), label=_("Devise"))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        country_choices = list(get_country_choices())
+        country_choices = [("", "---------"), *get_country_choices()]
         currency_choices = list(get_currency_choices())
         current_country = (getattr(self.instance, "pays", "") or "").strip()
         current_currency = (getattr(self.instance, "devise", "") or "").strip().upper()
@@ -88,6 +97,8 @@ class EntrepriseSettingsForm(forms.ModelForm):
 
         self.fields["pays"].choices = country_choices
         self.fields["devise"].choices = currency_choices
+        self.initial["pays"] = current_country
+        self.initial["devise"] = current_currency
         self.fields["taux_tva_defaut"].widget.attrs.update(
             {
                 "placeholder": "0.00",
@@ -120,7 +131,6 @@ class EntrepriseSettingsForm(forms.ModelForm):
         widgets = {
             "adresse": forms.TextInput(attrs={"placeholder": gettext_lazy("Adresse de l'entreprise")}),
             "ville": forms.TextInput(attrs={"placeholder": gettext_lazy("Ville")}),
-            "pays": forms.TextInput(attrs={"placeholder": gettext_lazy("Pays")}),
             "telephone": forms.TextInput(attrs={"placeholder": "+243..."}),
             "email": forms.EmailInput(attrs={"placeholder": gettext_lazy("contact@entreprise.com")}),
             "banque": forms.TextInput(attrs={"placeholder": gettext_lazy("Banque")}),

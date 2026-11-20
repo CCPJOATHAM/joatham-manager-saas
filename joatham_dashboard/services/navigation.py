@@ -217,7 +217,7 @@ NAV_ITEMS = [
         "url_name": "activity_log_list",
         "permission": "audit.view",
         "module": "audit",
-        "roles": ["proprietaire"],
+        "roles": ["proprietaire", "comptable"],
         "prefixes": ["/audit/"],
     },
     {
