@@ -25,7 +25,7 @@ from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise
 
 
-DEFAULT_WHATSAPP_NUMBER = "243970258117"
+DEFAULT_WHATSAPP_NUMBER = "243819050191"
 DEFAULT_WHATSAPP_MESSAGE = "Je veux payer mon abonnement JOATHAM Pro"
 SUBSCRIPTION_PRICE_QUANTUM = Decimal("0.01")
 ANNUAL_SUBSCRIPTION_DISCOUNT_RATE = Decimal("0.20")
