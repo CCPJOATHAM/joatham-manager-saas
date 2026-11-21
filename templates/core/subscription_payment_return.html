@@ -8,8 +8,9 @@
 .payment-summary{max-width:850px;margin:auto;overflow-wrap:anywhere}.payment-summary dl{display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:14px 24px}.payment-summary dt{color:#526379}.payment-summary dd{margin:0;font-weight:700}.payment-notice{padding:18px;border-radius:10px;background:#edf5fa;margin:22px 0;line-height:1.6}.payment-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.payment-actions form{margin:0}.payment-actions button{cursor:pointer;font:inherit}.payment-state{font-size:1.15rem;font-weight:800}.payment-summary h2{line-height:1.4}@media(max-width:600px){.payment-summary dl{grid-template-columns:1fr;gap:6px}.payment-summary dd{margin-bottom:12px}.payment-actions>*{width:100%}}@media print{nav,aside,header,.sidebar,.payment-actions{display:none!important}.payment-summary{max-width:none;box-shadow:none}}
 </style>
 <section class="content-card payment-summary">
+<h2>{% trans "Suivi du paiement" %}</h2>
 {% if paiement %}
-<h2>{{ entreprise.nom }} — {{ plan_display_name }}</h2>
+<h3>{{ entreprise.nom }} — {{ plan_display_name }}</h3>
 <p class="payment-state" role="status">{{ paiement.get_statut_display }}</p>
 <dl>
 <dt>{% trans "Référence :" %}</dt><dd>{{ paiement.external_reference|default:paiement.reference_paiement|default:paiement.pk }}</dd>
@@ -59,6 +60,7 @@
 {% endif %}
 <div class="payment-actions" style="margin-top:24px">
 <a class="btn-link primary" href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
+<a class="btn-link" href="{% url 'subscription_plan_list' %}">{% trans "Voir les plans" %}</a>
 <a class="btn-link" href="{% url 'subscription_payment_history' %}">{% trans "Historique des paiements" %}</a>
 <a class="btn-link" href="https://wa.me/243970258117" rel="noopener" target="_blank">{% trans "Contacter via WhatsApp" %}</a>
 </div>

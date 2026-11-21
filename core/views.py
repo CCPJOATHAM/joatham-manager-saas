@@ -443,6 +443,7 @@ def subscription_payment_automatic_start(request, plan_id):
         )
     except (PaymentProviderError, ValueError) as exc:
         messages.error(request, str(exc))
+        messages.warning(request, gettext_lazy("Si vous avez été débité, ne payez pas une seconde fois. Conservez votre justificatif et contactez notre équipe avec cette référence. Un délai peut séparer le débit de la confirmation."))
         return redirect("subscription_plan_list")
 
     return redirect("subscription_payment_detail", payment_id=paiement.pk)

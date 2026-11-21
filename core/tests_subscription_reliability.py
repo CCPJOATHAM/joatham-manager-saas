@@ -3,7 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.db import close_old_connections, connection
+from django.db import close_old_connections, connection, connections
 from django.test import Client, TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone, translation
@@ -160,13 +160,12 @@ class SubscriptionReliabilityTests(PaymentFixtures, TestCase):
             self.assertEqual(response["Cache-Control"], "private, no-store")
             self.assertIn("attachment", response["Content-Disposition"])
             self.assertEqual(b"".join(response.streaming_content), b"Fictitious proof only")
-            response.close()
             self.assertEqual(self.client.get(reverse("subscription_payment_evidence_admin", args=[payment.pk])).status_code, 403)
             admin = User.objects.create_user(username="payment-admin", role="super_admin")
             self.client.force_login(admin)
             response = self.client.get(reverse("subscription_payment_evidence_admin", args=[payment.pk]))
             self.assertEqual(response.status_code, 200)
-            response.close()
+            self.assertEqual(b"".join(response.streaming_content), b"Fictitious proof only")
 
     def test_bilingual_statuses_history_and_confirmation_preserve_company(self):
         payment = self.payment()
@@ -231,7 +230,7 @@ class ConcurrentSubscriptionPaymentTests(PaymentFixtures, TransactionTestCase):
                 barrier.wait(timeout=10)
                 return apply_verified_subscription_payment("test", verified).activated
             finally:
-                close_old_connections()
+                connections.close_all()
         with ThreadPoolExecutor(max_workers=2) as pool:
             results = list(pool.map(lambda _: confirm(), range(2)))
         self.assertEqual(sorted(results), [False, True])

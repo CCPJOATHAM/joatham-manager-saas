@@ -3,6 +3,7 @@
 {% block content_title %}{% trans "Historique des paiements" %}{% endblock %}
 {% block content %}
 <section class="content-card">
+<h2>{% trans "Historique des paiements" %}</h2>
 {% for paiement in page %}
 <article style="padding:18px 0;border-bottom:1px solid #dbe7f3;overflow-wrap:anywhere">
 <p><strong>{{ paiement.plan.nom }} — {{ paiement.get_statut_display }}</strong></p>

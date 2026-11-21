@@ -42,7 +42,7 @@ def generate_external_reference():
 
 @transaction.atomic
 def resume_or_create_automatic_payment(**kwargs):
-    """Repeated checkout clicks resume the outstanding order, never charge twice."""
+    """Repeated checkout clicks resume the outstanding order for this selection."""
     Entreprise.objects.select_for_update().get(pk=kwargs["entreprise"].pk)
     pending = PaiementAbonnement.objects.filter(
         entreprise=kwargs["entreprise"], plan=kwargs["plan"], duree=kwargs["duree"],

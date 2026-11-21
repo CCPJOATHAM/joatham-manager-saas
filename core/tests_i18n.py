@@ -152,6 +152,10 @@ class BilingualJourneyTests(TestCase):
         self.assertEqual(self.customer.nom, "Montant encaisse")
 
     def test_subscription_payment_validation_has_accents_and_keeps_english(self):
+        paiement = PaiementAbonnement.objects.create(
+            entreprise=self.company, plan=Abonnement.objects.get(code="premium"),
+            duree="mensuel", montant=1, statut=PaiementAbonnement.Statut.REFUSE,
+        )
         for language, expected in (
             ("fr", "Seuls les paiements en attente peuvent être validés."),
             ("en", "Only pending payments can be approved."),
@@ -165,7 +169,7 @@ class BilingualJourneyTests(TestCase):
                 )
                 with self.assertRaisesMessage(ValueError, expected):
                     validate_subscription_payment(
-                        paiement=SimpleNamespace(statut=PaiementAbonnement.Statut.REFUSE),
+                        paiement=paiement,
                         super_admin=None,
                     )
 
