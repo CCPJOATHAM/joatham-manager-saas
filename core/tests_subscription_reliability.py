@@ -132,6 +132,19 @@ class SubscriptionReliabilityTests(PaymentFixtures, TestCase):
             provider.return_value.fetch_transaction_status.assert_called_once_with(payment.external_reference)
         self.assertEqual(result.statut, "valide")
 
+    def test_legacy_reconciliation_does_not_infer_api_version_from_raw_checkout(self):
+        payment = self.payment()
+        payment.provider = "cinetpay"
+        payment.raw_provider_payload = {"checkout": {"payment_url": "https://example.invalid/legacy"}}
+        payment.save(update_fields=["provider", "raw_provider_payload"])
+        with patch("core.services.subscription_payments.get_payment_provider") as provider:
+            provider.return_value._fetch_checkout_v2_transaction_status.return_value = self.verified(payment)
+            result = reconcile_subscription_payment(payment)
+            provider.return_value._ensure_legacy_webhook_configured.assert_called_once()
+            provider.return_value._fetch_checkout_v2_transaction_status.assert_called_once_with(payment.external_reference)
+            provider.return_value.fetch_transaction_status.assert_not_called()
+        self.assertEqual(result.statut, "valide")
+
     def test_forms_do_not_offer_fake_manual_automatic_confirmation(self):
         for form in (PaiementAbonnementForm(), ManualSubscriptionPaymentForm()):
             self.assertNotIn("automatique", dict(form.fields["methode_paiement"].choices))

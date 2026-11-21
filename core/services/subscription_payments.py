@@ -59,7 +59,7 @@ def reconcile_subscription_payment(paiement):
     if paiement.provider != "cinetpay" or paiement.methode_paiement != PaiementAbonnement.Methode.AUTOMATIQUE:
         raise PaymentProviderError(gettext_lazy("Ce paiement nécessite une vérification manuelle par notre équipe."))
     provider = get_payment_provider(paiement.provider)
-    if paiement.provider_notify_token or "checkout" in (paiement.raw_provider_payload or {}):
+    if paiement.provider_notify_token:
         verified = provider.fetch_transaction_status(paiement.external_reference)
     else:
         # Existing Checkout v2 sessions continue to use their original API.
