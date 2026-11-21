@@ -54,37 +54,52 @@
     </script>
 {% include "includes/javascript_i18n.html" %}
 </head>
-<body>
+<body id="accueil">
     <a class="skip-link" href="#contenu">{% trans "Aller au contenu" %}</a>
 
-    <header id="accueil" class="site-header" aria-label="{% trans 'En-tête du site' %}">
+    <header id="public-header" class="site-header" aria-label="{% trans 'En-tête du site' %}">
         <div class="landing-container header-inner">
             <a class="brand" href="{% url 'public_home' %}" aria-label="{% trans 'Accueil JOATHAM Manager' %}">
-                <span>
-                    <strong>JOATHAM Manager</strong>
-                    <small>{% trans "Gestion SaaS" %}</small>
-                </span>
+                <img class="brand-logo" src="{% static 'joatham_dashboard/img/login-logo.webp' %}" width="600" height="234" alt="JOATHAM Manager">
+                <small class="brand-tagline">{% trans "Gestion SaaS" %}</small>
             </a>
 
-            <nav class="main-nav" aria-label="{% trans 'Navigation principale' %}">
-                <a href="#accueil">{% trans "Accueil" %}</a>
-                <a href="#fonctionnalites">{% trans "Fonctionnalités" %}</a>
-                <a href="#tarifs">{% trans "Tarifs" %}</a>
-                <a href="#apropos">{% trans "À propos" %}</a>
-                <a href="#contact">{% trans "Contact" %}</a>
-            </nav>
+            <button class="menu-toggle" type="button" aria-controls="public-navigation" aria-expanded="false" aria-label="{% trans 'Afficher ou masquer la navigation' %}" data-menu-toggle>
+                <span class="menu-icon" aria-hidden="true"></span>{% trans "Menu" %}
+            </button>
 
-            <div class="header-actions">
-                <div class="language-holder">
-                    {% include "includes/language_selector.html" with language_selector_id="public-language-select" %}
+            <div class="language-holder">
+                <form action="{% url 'set_language' %}" method="post" class="language-switcher" data-public-language>
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <label for="public-language-select" class="language-label">{% trans "Langue" %}</label>
+                    {% get_available_languages as AVAILABLE_LANGUAGES %}
+                    <select id="public-language-select" name="language" class="language-select">
+                        {% for language_code, language_name in AVAILABLE_LANGUAGES %}
+                        <option value="{{ language_code }}" {% if language_code == CURRENT_LANGUAGE %}selected{% endif %}>{{ language_code|upper }} - {{ language_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="language-submit">{% trans "Appliquer la langue" %}</button>
+                </form>
+            </div>
+
+            <div id="public-navigation" class="header-navigation">
+                <nav class="main-nav" aria-label="{% trans 'Navigation principale' %}">
+                    <a href="#accueil">{% trans "Accueil" %}</a>
+                    <a href="#fonctionnalites">{% trans "Fonctionnalités" %}</a>
+                    <a href="#tarifs">{% trans "Tarifs" %}</a>
+                    <a href="#apropos">{% trans "À propos" %}</a>
+                    <a href="#contact">{% trans "Contact" %}</a>
+                </nav>
+                <div class="header-actions">
+                    <a class="btn btn-ghost" href="{% url 'login' %}">{% trans "Se connecter" %}</a>
+                    <a class="btn btn-primary" href="{% url 'signup' %}">{% trans "Commencer gratuitement" %}</a>
                 </div>
-                <a class="btn btn-ghost" href="{% url 'login' %}">{% trans "Se connecter" %}</a>
-                <a class="btn btn-primary" href="{% url 'signup' %}">{% trans "Commencer gratuitement" %}</a>
             </div>
         </div>
     </header>
 
-    <main id="contenu">
+    <main id="contenu" tabindex="-1">
         <section class="hero-section section-band">
             <div class="landing-container hero-grid">
                 <div class="hero-copy">
@@ -172,14 +187,14 @@
                         <p class="carousel-title" data-carousel-title aria-live="polite">{% trans "Tableau de bord" %}</p>
                         <button class="carousel-arrow" type="button" data-carousel-next aria-label="{% trans 'Écran suivant' %}">›</button>
                     </div>
-                    <div class="carousel-dots" role="tablist" aria-label="{% trans 'Choisir un écran JOATHAM Manager' %}">
-                        <button class="is-active" type="button" data-carousel-dot aria-label="{% trans 'Afficher Tableau de bord' %}" aria-selected="true">{% trans "Tableau de bord" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Facturation' %}" aria-selected="false">{% trans "Facturation" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Caisse / POS' %}" aria-selected="false">{% trans "Caisse / POS" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Stock & Produits' %}" aria-selected="false">{% trans "Stock & Produits" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Ressources humaines' %}" aria-selected="false">{% trans "Ressources humaines" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Apprenants' %}" aria-selected="false">{% trans "Apprenants" %}</button>
-                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Comptabilité' %}" aria-selected="false">{% trans "Comptabilité" %}</button>
+                    <div class="carousel-dots" role="group" aria-label="{% trans 'Choisir un écran JOATHAM Manager' %}">
+                        <button class="is-active" type="button" data-carousel-dot aria-label="{% trans 'Afficher Tableau de bord' %}" aria-pressed="true">{% trans "Tableau de bord" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Facturation' %}" aria-pressed="false">{% trans "Facturation" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Caisse / POS' %}" aria-pressed="false">{% trans "Caisse / POS" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Stock & Produits' %}" aria-pressed="false">{% trans "Stock & Produits" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Ressources humaines' %}" aria-pressed="false">{% trans "Ressources humaines" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Apprenants' %}" aria-pressed="false">{% trans "Apprenants" %}</button>
+                        <button type="button" data-carousel-dot aria-label="{% trans 'Afficher Comptabilité' %}" aria-pressed="false">{% trans "Comptabilité" %}</button>
                     </div>
                 </div>
             </div>
@@ -231,7 +246,7 @@
                 <div class="pricing-grid">
                     {% for card in public_plan_cards %}
                     <article class="price-card price-card-{{ card.tone }} {% if card.is_popular %}is-featured{% endif %}" data-pricing-card>
-                        {% if card.badge %}<span class="plan-badge">{{ card.badge }}</span>{% endif %}
+                        <div class="plan-badge-slot">{% if card.badge %}<span class="plan-badge">{{ card.badge }}</span>{% endif %}</div>
                         <div class="plan-icon" aria-hidden="true">{{ card.icon }}</div>
                         <div class="price-card-head">
                             <h3>{{ card.display_name }}</h3>
@@ -321,7 +336,8 @@
         <div class="landing-container footer-grid">
             <div class="footer-brand">
                 <a class="brand" href="{% url 'public_home' %}">
-                    <span><strong>JOATHAM Manager</strong><small>{% trans "Plateforme SaaS de gestion" %}</small></span>
+                    <img class="brand-logo" src="{% static 'joatham_dashboard/img/login-logo.webp' %}" width="600" height="234" alt="JOATHAM Manager" loading="lazy">
+                    <small class="brand-tagline">{% trans "Plateforme SaaS de gestion" %}</small>
                 </a>
                 <p>{% trans "Une solution en ligne pour centraliser les outils essentiels de gestion des entreprises." %}</p>
             </div>

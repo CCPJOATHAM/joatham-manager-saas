@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 13:48+0100\n"
+"POT-Creation-Date: 2026-11-21 18:08+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: French\n"
@@ -9480,3 +9480,13 @@ msgstr "Imprimer la confirmation"
 
 msgid "Télécharger mon justificatif"
 msgstr "Télécharger mon justificatif"
+
+
+msgid "Afficher ou masquer la navigation"
+msgstr "Afficher ou masquer la navigation"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Appliquer la langue"
+msgstr "Appliquer la langue"
