@@ -1,0 +1,1012 @@
+{
+  "results": [
+    {
+      "language": "FR - Français",
+      "width": 1440,
+      "height": 1000,
+      "scroll": 1425,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 112.828125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.125,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 113.46875,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 698.859375,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.125,
+        "header": 97
+      },
+      "menuVisible": false,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 1280,
+      "height": 900,
+      "scroll": 1265,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.453125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.640625,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.546875,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 599.09375,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.640625,
+        "header": 97
+      },
+      "menuVisible": false,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 1200,
+      "height": 900,
+      "scroll": 1185,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.1875,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.5,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 113.34375,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 598.578125,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.5,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 1024,
+      "height": 768,
+      "scroll": 1009,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.234375,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.296875,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.671875,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 466.59375,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.296875,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 768,
+      "height": 1024,
+      "scroll": 753,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 112.578125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.765625,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 113.390625,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 698.71875,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.765625,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 760,
+      "height": 900,
+      "scroll": 745,
+      "selectWidth": 658,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 16.484375,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 15.75,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 15.796875,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 169.15625,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 15.75,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 390,
+      "height": 844,
+      "scroll": 390,
+      "selectWidth": 303,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 16.09375,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 16.34375,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 16.203125,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 112.78125,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 16.34375,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 320,
+      "height": 720,
+      "scroll": 320,
+      "selectWidth": 233,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 15.828125,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 16.0625,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 15.671875,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 15.828125,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 16.0625,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "FR - Français",
+      "width": 844,
+      "height": 390,
+      "scroll": 829,
+      "selectWidth": 168,
+      "textWidth": 83.2911376953125,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.375,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.171875,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.984375,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 113.03125,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.171875,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 1440,
+      "height": 1000,
+      "scroll": 1425,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 112.828125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.125,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 113.46875,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 698.59375,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.125,
+        "header": 97
+      },
+      "menuVisible": false,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 1280,
+      "height": 900,
+      "scroll": 1265,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 112.796875,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.984375,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.890625,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 599.15625,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.984375,
+        "header": 97
+      },
+      "menuVisible": false,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 1200,
+      "height": 900,
+      "scroll": 1185,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.453125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.765625,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.609375,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 598.71875,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.765625,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 1024,
+      "height": 768,
+      "scroll": 1009,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.234375,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.296875,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.671875,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 466.390625,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.296875,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 768,
+      "height": 1024,
+      "scroll": 753,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 112.578125,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 112.8125,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 113.390625,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 698.5625,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 112.8125,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 760,
+      "height": 900,
+      "scroll": 745,
+      "selectWidth": 644,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 15.578125,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 15.890625,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 15.890625,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 169.484375,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 15.890625,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 390,
+      "height": 844,
+      "scroll": 390,
+      "selectWidth": 289,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 15.9375,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 15.609375,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 16.421875,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 112.828125,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 15.609375,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 320,
+      "height": 720,
+      "scroll": 320,
+      "selectWidth": 219,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 15.734375,
+          "header": 0
+        },
+        {
+          "target": "tarifs",
+          "top": 15.578125,
+          "header": 0
+        },
+        {
+          "target": "apropos",
+          "top": 16.09375,
+          "header": 0
+        },
+        {
+          "target": "contact",
+          "top": 15.546875,
+          "header": 0
+        }
+      ],
+      "deepLink": {
+        "top": 15.578125,
+        "header": 0
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    },
+    {
+      "language": "EN - English",
+      "width": 844,
+      "height": 390,
+      "scroll": 829,
+      "selectWidth": 168,
+      "textWidth": 78.79586791992188,
+      "logos": [
+        {
+          "complete": true,
+          "width": 600
+        },
+        {
+          "complete": true,
+          "width": 600
+        }
+      ],
+      "clipped": [],
+      "anchors": [
+        {
+          "target": "fonctionnalites",
+          "top": 113.296875,
+          "header": 97
+        },
+        {
+          "target": "tarifs",
+          "top": 113.28125,
+          "header": 97
+        },
+        {
+          "target": "apropos",
+          "top": 112.953125,
+          "header": 97
+        },
+        {
+          "target": "contact",
+          "top": 113.421875,
+          "header": 97
+        }
+      ],
+      "deepLink": {
+        "top": 113.28125,
+        "header": 97
+      },
+      "menuVisible": true,
+      "pricingUnchanged": true,
+      "carouselControls": true,
+      "languageSubmit": true
+    }
+  ],
+  "pricing": {
+    "beforefr": [
+      {
+        "title": "Gratuit",
+        "monthly": "0 USD/mois",
+        "yearly": "0 USD/an",
+        "monthlyUrl": "/signup/?plan=free&billing=monthly",
+        "yearlyUrl": "/signup/?plan=free&billing=yearly"
+      },
+      {
+        "title": "Starter",
+        "monthly": "10 USD/mois",
+        "yearly": "96 USD/an",
+        "monthlyUrl": "/signup/?plan=starter&billing=monthly",
+        "yearlyUrl": "/signup/?plan=starter&billing=yearly"
+      },
+      {
+        "title": "Pro",
+        "monthly": "15 USD/mois",
+        "yearly": "144 USD/an",
+        "monthlyUrl": "/signup/?plan=pro&billing=monthly",
+        "yearlyUrl": "/signup/?plan=pro&billing=yearly"
+      },
+      {
+        "title": "Premium Business",
+        "monthly": "20 USD/mois",
+        "yearly": "192 USD/an",
+        "monthlyUrl": "/signup/?plan=premium&billing=monthly",
+        "yearlyUrl": "/signup/?plan=premium&billing=yearly"
+      }
+    ],
+    "beforeen": [
+      {
+        "title": "Free",
+        "monthly": "0 USD/month",
+        "yearly": "0 USD/year",
+        "monthlyUrl": "/signup/?plan=free&billing=monthly",
+        "yearlyUrl": "/signup/?plan=free&billing=yearly"
+      },
+      {
+        "title": "Starter",
+        "monthly": "10 USD/month",
+        "yearly": "96 USD/year",
+        "monthlyUrl": "/signup/?plan=starter&billing=monthly",
+        "yearlyUrl": "/signup/?plan=starter&billing=yearly"
+      },
+      {
+        "title": "Pro",
+        "monthly": "15 USD/month",
+        "yearly": "144 USD/year",
+        "monthlyUrl": "/signup/?plan=pro&billing=monthly",
+        "yearlyUrl": "/signup/?plan=pro&billing=yearly"
+      },
+      {
+        "title": "Premium Business",
+        "monthly": "20 USD/month",
+        "yearly": "192 USD/year",
+        "monthlyUrl": "/signup/?plan=premium&billing=monthly",
+        "yearlyUrl": "/signup/?plan=premium&billing=yearly"
+      }
+    ],
+    "afterfr": [
+      {
+        "title": "Gratuit",
+        "monthly": "0 USD/mois",
+        "yearly": "0 USD/an",
+        "monthlyUrl": "/signup/?plan=free&billing=monthly",
+        "yearlyUrl": "/signup/?plan=free&billing=yearly"
+      },
+      {
+        "title": "Starter",
+        "monthly": "10 USD/mois",
+        "yearly": "96 USD/an",
+        "monthlyUrl": "/signup/?plan=starter&billing=monthly",
+        "yearlyUrl": "/signup/?plan=starter&billing=yearly"
+      },
+      {
+        "title": "Pro",
+        "monthly": "15 USD/mois",
+        "yearly": "144 USD/an",
+        "monthlyUrl": "/signup/?plan=pro&billing=monthly",
+        "yearlyUrl": "/signup/?plan=pro&billing=yearly"
+      },
+      {
+        "title": "Premium Business",
+        "monthly": "20 USD/mois",
+        "yearly": "192 USD/an",
+        "monthlyUrl": "/signup/?plan=premium&billing=monthly",
+        "yearlyUrl": "/signup/?plan=premium&billing=yearly"
+      }
+    ],
+    "afteren": [
+      {
+        "title": "Free",
+        "monthly": "0 USD/month",
+        "yearly": "0 USD/year",
+        "monthlyUrl": "/signup/?plan=free&billing=monthly",
+        "yearlyUrl": "/signup/?plan=free&billing=yearly"
+      },
+      {
+        "title": "Starter",
+        "monthly": "10 USD/month",
+        "yearly": "96 USD/year",
+        "monthlyUrl": "/signup/?plan=starter&billing=monthly",
+        "yearlyUrl": "/signup/?plan=starter&billing=yearly"
+      },
+      {
+        "title": "Pro",
+        "monthly": "15 USD/month",
+        "yearly": "144 USD/year",
+        "monthlyUrl": "/signup/?plan=pro&billing=monthly",
+        "yearlyUrl": "/signup/?plan=pro&billing=yearly"
+      },
+      {
+        "title": "Premium Business",
+        "monthly": "20 USD/month",
+        "yearly": "192 USD/year",
+        "monthlyUrl": "/signup/?plan=premium&billing=monthly",
+        "yearlyUrl": "/signup/?plan=premium&billing=yearly"
+      }
+    ]
+  },
+  "errors": [],
+  "noJavaScriptFallback": true,
+  "legacyLanguageSubmit": true,
+  "autoplayAndFocusPause": true
+}

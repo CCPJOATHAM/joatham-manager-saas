@@ -1,4 +1,61 @@
 (function () {
+    const header = document.querySelector('.site-header');
+    const toggle = document.querySelector('[data-menu-toggle]');
+    const navigation = document.getElementById('public-navigation');
+    if (!header || !toggle || !navigation) return;
+
+    const compact = window.matchMedia('(max-width: 1279px)');
+
+    function measureHeader() {
+        const position = window.getComputedStyle(header).position;
+        const height = position === 'sticky' || position === 'fixed' ? header.getBoundingClientRect().height : 0;
+        document.documentElement.style.setProperty('--header-height', `${Math.ceil(height)}px`);
+    }
+
+    function setMenu(open) {
+        header.dataset.menuOpen = String(open);
+        toggle.setAttribute('aria-expanded', String(open));
+        measureHeader();
+    }
+
+    toggle.addEventListener('click', () => setMenu(header.dataset.menuOpen !== 'true'));
+    header.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && compact.matches && header.dataset.menuOpen === 'true') {
+            setMenu(false);
+            toggle.focus();
+        }
+    });
+    navigation.addEventListener('click', (event) => {
+        if (compact.matches && event.target.closest('a')) setMenu(false);
+    });
+    if (compact.addEventListener) compact.addEventListener('change', () => setMenu(false));
+    else compact.addListener(() => setMenu(false));
+    window.addEventListener('resize', measureHeader);
+    if ('ResizeObserver' in window) new ResizeObserver(measureHeader).observe(header);
+    setMenu(false);
+
+    const languageForm = document.querySelector('[data-public-language]');
+    if (languageForm) {
+        languageForm.querySelector('select').addEventListener('change', () => {
+            languageForm.querySelector('[name="next"]').value = window.location.pathname + window.location.search + window.location.hash;
+            if (languageForm.requestSubmit) languageForm.requestSubmit();
+            else languageForm.submit();
+        });
+    }
+    document.documentElement.classList.add('has-public-js');
+    measureHeader();
+
+    // Native anchors also work without JavaScript. Recheck the initial fragment
+    // after the real (possibly wrapped) sticky header has been measured.
+    function alignInitialFragment() {
+        measureHeader();
+        const target = document.getElementById(window.location.hash.slice(1));
+        if (target) target.scrollIntoView({block: 'start', behavior: 'auto'});
+    }
+    window.addEventListener('pageshow', () => window.requestAnimationFrame(alignInitialFragment));
+}());
+
+(function () {
     const carousel = document.querySelector('[data-product-carousel]');
     if (!carousel) return;
 
@@ -24,7 +81,7 @@
         dots.forEach((dot, dotIndex) => {
             const isActive = dotIndex === currentIndex;
             dot.classList.toggle('is-active', isActive);
-            dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            dot.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         });
         if (title) {
             title.textContent = slides[currentIndex].querySelector('figcaption').textContent;
@@ -47,7 +104,9 @@
         stopAutoplay();
         if (resumeTimeoutId) window.clearTimeout(resumeTimeoutId);
         if (!prefersReducedMotion) {
-            resumeTimeoutId = window.setTimeout(startAutoplay, resumeDelayMs);
+            resumeTimeoutId = window.setTimeout(() => {
+                if (!carousel.contains(document.activeElement) && !carousel.matches(':hover')) startAutoplay();
+            }, resumeDelayMs);
         }
     }
 
@@ -92,9 +151,13 @@
     });
 
     carousel.addEventListener('mouseenter', stopAutoplay);
-    carousel.addEventListener('mouseleave', startAutoplay);
+    carousel.addEventListener('mouseleave', () => {
+        if (!carousel.contains(document.activeElement)) startAutoplay();
+    });
     carousel.addEventListener('focusin', stopAutoplay);
-    carousel.addEventListener('focusout', startAutoplay);
+    carousel.addEventListener('focusout', (event) => {
+        if (!carousel.contains(event.relatedTarget)) startAutoplay();
+    });
 
     setSlide(0);
     startAutoplay();
