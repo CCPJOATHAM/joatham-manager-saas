@@ -1,35 +1,66 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n %}
-
-
 {% block page_title %}{% trans "Retour paiement abonnement | JOATHAM Manager" %}{% endblock %}
-{% block content_title %}{% trans "Retour paiement abonnement" %}{% endblock %}
-{% block content_subtitle %}{% trans "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook." %}{% endblock %}
-
-{% block top_actions %}
-<a href="{% url 'subscription_overview' %}" class="btn-link">{% trans "Retour à mon abonnement" %}</a>
-{% endblock %}
-
+{% block content_title %}{% trans "Suivi du paiement" %}{% endblock %}
+{% block content_subtitle %}{% trans "L'activation dépend de la confirmation du paiement, jamais du seul retour du navigateur." %}{% endblock %}
 {% block content %}
-<section class="content-card">
-    {% if paiement %}
-        <p><strong>{% trans "Référence :" %}</strong> {{ paiement.external_reference|default:paiement.reference_paiement }}</p>
-        <p><strong>{% trans "Plan :" %}</strong> {{ paiement.plan.nom }}</p>
-        <p><strong>{% trans "Statut :" %}</strong> {{ paiement.get_statut_display }}</p>
-        {% if paiement.statut == "valide" %}
-            <p>{% trans "Votre paiement est confirmé. L'abonnement a été activé automatiquement." %}</p>
-        {% elif paiement.statut == "echoue" %}
-            <p>{% trans "Le paiement n'a pas été confirmé." %} {{ paiement.failure_reason }}</p>
-        {% else %}
-            <p>{% trans "Votre paiement est en cours de vérification. Vous pouvez revenir plus tard sur cette page." %}</p>
-        {% endif %}
-    {% else %}
-        <p>{% trans "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise." %}</p>
-        <p>{% trans "Si votre abonnement a été validé manuellement par le super admin, consultez votre page Mon abonnement." %}</p>
-    {% endif %}
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
-        <a class="btn-link primary" href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
-        <a class="btn-link" href="{% url 'subscription_plan_list' %}">{% trans "Voir les plans" %}</a>
-    </div>
+<style>
+.payment-summary{max-width:850px;margin:auto;overflow-wrap:anywhere}.payment-summary dl{display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:14px 24px}.payment-summary dt{color:#526379}.payment-summary dd{margin:0;font-weight:700}.payment-notice{padding:18px;border-radius:10px;background:#edf5fa;margin:22px 0;line-height:1.6}.payment-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.payment-actions form{margin:0}.payment-actions button{cursor:pointer;font:inherit}.payment-state{font-size:1.15rem;font-weight:800}.payment-summary h2{line-height:1.4}@media(max-width:600px){.payment-summary dl{grid-template-columns:1fr;gap:6px}.payment-summary dd{margin-bottom:12px}.payment-actions>*{width:100%}}@media print{nav,aside,header,.sidebar,.payment-actions{display:none!important}.payment-summary{max-width:none;box-shadow:none}}
+</style>
+<section class="content-card payment-summary">
+{% if paiement %}
+<h2>{{ entreprise.nom }} — {{ plan_display_name }}</h2>
+<p class="payment-state" role="status">{{ paiement.get_statut_display }}</p>
+<dl>
+<dt>{% trans "Référence :" %}</dt><dd>{{ paiement.external_reference|default:paiement.reference_paiement|default:paiement.pk }}</dd>
+<dt>{% trans "Plan :" %}</dt><dd>{{ plan_display_name }}</dd>
+<dt>{% trans "Période :" %}</dt><dd>{{ paiement.get_duree_display }}</dd>
+<dt>{% trans "Montant de référence :" %}</dt><dd>{{ paiement.montant_usd|default:paiement.montant }} USD</dd>
+{% if is_automatic %}
+{% if paiement.amount_expected != None %}<dt>{% trans "Total à payer au prestataire" %}</dt><dd>{{ paiement.amount_expected }} {{ paiement.paid_currency }}</dd>{% endif %}
+<dt>{% trans "Prestataire" %}</dt><dd>{{ provider_display_name }}</dd>
+{% else %}
+<dt>{% trans "Méthode de paiement" %}</dt><dd>{{ paiement.get_methode_paiement_display }}</dd>
+{% if paiement.telephone_paiement %}<dt>{% trans "Numéro de paiement" %}</dt><dd>{{ paiement.telephone_paiement }}</dd>{% endif %}
+{% endif %}
+{% if paiement.statut == "valide" %}
+{% if paiement.amount_paid != None %}<dt>{% trans "Montant payé" %}</dt><dd>{{ paiement.amount_paid }} {{ paiement.paid_currency }}</dd>{% endif %}
+<dt>{% trans "Date de confirmation" %}</dt><dd>{{ paiement.date_validation|date:"SHORT_DATETIME_FORMAT" }}</dd>
+<dt>{% trans "Période couverte" %}</dt><dd>{{ paiement.periode_debut|date:"SHORT_DATE_FORMAT" }} — {{ paiement.periode_fin|date:"SHORT_DATE_FORMAT" }}</dd>
+{% endif %}
+{% if paiement.provider_transaction_id %}<dt>{% trans "Transaction du prestataire" %}</dt><dd>{{ paiement.provider_transaction_id }}</dd>{% endif %}
+</dl>
+{% if can_resume %}<p><a class="btn-link primary" href="{{ paiement.checkout_url }}" rel="noreferrer">{% trans "Continuer vers le paiement sécurisé" %}</a></p>{% endif %}
+<div class="payment-notice">
+{% if is_plan_request %}
+<p>{% trans "Cette demande de plan ne constitue pas une preuve de paiement." %}</p>
+{% elif paiement.statut == "valide" %}
+<p>{% trans "Votre paiement est confirmé et votre abonnement a été activé ou renouvelé. Conservez cette référence et cette confirmation dans votre historique." %}</p>
+{% elif needs_review %}
+<p>{% trans "Paiement à vérifier : la confirmation reçue nécessite un contrôle. L'abonnement n'a pas été activé par cette tentative." %}</p>
+{% elif paiement.statut == "annule" %}<p>{% trans "Le paiement a été annulé. Cette tentative n'a pas activé l'abonnement." %}</p>
+{% elif paiement.statut == "expire" %}<p>{% trans "La session de paiement a expiré. Cette tentative n'a pas activé l'abonnement." %}</p>
+{% elif paiement.statut == "echoue" or paiement.statut == "refuse" %}<p>{% trans "Le paiement n'a pas été confirmé." %}</p>
+{% elif is_automatic %}<p>{% trans "Le paiement attend la confirmation du prestataire. Le retour sur cette page ne confirme pas un débit." %}</p>
+{% else %}<p>{% trans "Votre déclaration attend la vérification manuelle de notre équipe. Aucun prélèvement n'est effectué par ce formulaire." %}</p>{% endif %}
+{% if paiement.statut != "valide" and not is_plan_request %}<p>{% trans "Si vous avez été débité, ne payez pas une seconde fois. Conservez votre justificatif et contactez notre équipe avec cette référence. Un délai peut séparer le débit de la confirmation." %}</p>{% endif %}
+{% if can_resume %}<p>{% trans "CinetPay peut proposer Mobile Money selon votre pays et les opérateurs disponibles. Choisissez le moyen et l'opérateur sur sa page sécurisée ; vérifiez le numéro et le montant avant de confirmer. Ne communiquez jamais votre code secret." %}</p>
+<p>{% trans "Le total ci-dessus est celui de cette session. Une estimation dans une autre devise ne constitue pas le montant débité. Les frais éventuels de l'opérateur doivent être vérifiés avant votre accord." %}</p>{% endif %}
+</div>
+<div class="payment-actions">
+{% if can_check %}<form method="post" action="{% url 'subscription_payment_check' paiement.pk %}">{% csrf_token %}<button class="btn-link" type="submit">{% trans "Vérifier auprès du prestataire" %}</button></form>{% endif %}
+<a class="btn-link" href="{% url 'subscription_payment_detail' paiement.pk %}">{% trans "Actualiser le suivi" %}</a>
+{% if paiement.statut == "valide" %}<button type="button" class="btn-link" onclick="window.print()">{% trans "Imprimer la confirmation" %}</button>{% endif %}
+{% if paiement.preuve_paiement %}<a class="btn-link" href="{% url 'subscription_payment_evidence' paiement.pk %}">{% trans "Télécharger mon justificatif" %}</a>{% endif %}
+</div>
+{% else %}
+<p>{% trans "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise." %}</p>
+<p>{% trans "Si votre abonnement a été validé manuellement par le super admin, consultez votre page Mon abonnement." %}</p>
+{% endif %}
+<div class="payment-actions" style="margin-top:24px">
+<a class="btn-link primary" href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
+<a class="btn-link" href="{% url 'subscription_payment_history' %}">{% trans "Historique des paiements" %}</a>
+<a class="btn-link" href="https://wa.me/243970258117" rel="noopener" target="_blank">{% trans "Contacter via WhatsApp" %}</a>
+</div>
 </section>
 {% endblock %}

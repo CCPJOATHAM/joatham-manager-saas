@@ -305,14 +305,14 @@
             <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="duree" value="{{ plan_card.monthly_duration }}">
-                <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                <button type="submit" class="btn-request payment">
                     {% trans "Payer mensuel avec CinetPay" %}
                 </button>
             </form>
             <form method="post" action="{% url 'subscription_payment_automatic_start' plan.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="duree" value="{{ plan_card.annual_duration }}">
-                <button type="submit" class="btn-request payment" {% if plan_card.is_current or plan.id in pending_plan_ids %}disabled{% endif %}>
+                <button type="submit" class="btn-request payment">
                     {% trans "Payer annuel avec CinetPay" %}
                 </button>
             </form>

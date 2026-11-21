@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.contrib import messages
 from django.db import models
 from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.http import JsonResponse, FileResponse, Http404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from urllib.parse import quote
@@ -60,8 +60,9 @@ from core.services.payment_providers import (
     is_real_automatic_payment_provider_configured,
 )
 from core.services.subscription_payments import (
-    create_automatic_subscription_payment_request,
     handle_subscription_payment_webhook,
+    resume_or_create_automatic_payment,
+    reconcile_subscription_payment,
 )
 from core.services.super_admin import (
     activate_company_subscription,
@@ -241,7 +242,7 @@ def subscription_overview(request):
     subscription = refresh_subscription_status(entreprise)
     current_subscription = subscription or get_current_subscription(entreprise)
     payments_queryset = get_subscription_payments_by_entreprise(entreprise)
-    pending_payments_count = payments_queryset.filter(statut=PaiementAbonnement.Statut.EN_ATTENTE).count()
+    pending_payments_count = payments_queryset.filter(statut__in=[PaiementAbonnement.Statut.EN_ATTENTE, PaiementAbonnement.Statut.EN_COURS]).count()
     activation_payment = payments_queryset.filter(
         statut__in=[
             PaiementAbonnement.Statut.VALIDE,
@@ -302,6 +303,7 @@ def subscription_payment_create(request):
             plan=form.cleaned_data["plan"],
             duree=form.cleaned_data["duree"],
             telephone_paiement=form.cleaned_data.get("telephone_paiement", ""),
+            methode_paiement=form.cleaned_data.get("methode_paiement") or PaiementAbonnement.Methode.MANUEL,
             reference_paiement=form.cleaned_data["reference_paiement"],
             preuve_paiement=form.cleaned_data.get("preuve_paiement"),
             utilisateur=request.user,
@@ -344,8 +346,72 @@ def subscription_payment_return(request):
             "entreprise": entreprise,
             "paiement": paiement,
             "reference": reference,
+            **_payment_context(paiement),
         },
     )
+
+
+def _payment_context(paiement):
+    automatic = bool(paiement and paiement.methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE)
+    return {
+        "is_automatic": automatic,
+        "is_plan_request": bool(paiement and paiement.source_taux == "demande_plan"),
+        "can_resume": bool(automatic and paiement.checkout_url and paiement.statut == PaiementAbonnement.Statut.EN_ATTENTE),
+        "can_check": bool(automatic and paiement.provider == "cinetpay" and paiement.statut != PaiementAbonnement.Statut.VALIDE),
+        "needs_review": bool(paiement and paiement.failure_reason and not paiement.failure_reason.startswith("Statut provider:")),
+        "plan_display_name": get_plan_commercial_name(paiement.plan) if paiement else "",
+        "provider_display_name": "CinetPay" if paiement and paiement.provider == "cinetpay" else (paiement.provider.title() if paiement else ""),
+    }
+
+
+@permission_required("subscription.view")
+def subscription_payment_detail(request, payment_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    paiement = get_object_or_404(get_subscription_payments_by_entreprise(entreprise), pk=payment_id)
+    return render(request, "core/subscription_payment_return.html", {
+        "entreprise": entreprise, "paiement": paiement, **_payment_context(paiement),
+    })
+
+
+@permission_required("subscription.view")
+def subscription_payment_history(request):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    page = Paginator(get_subscription_payments_by_entreprise(entreprise), 25).get_page(request.GET.get("page"))
+    return render(request, "core/subscription_payment_history.html", {"entreprise": entreprise, "page": page})
+
+
+@permission_required("subscription.view")
+@require_POST
+def subscription_payment_check(request, payment_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    paiement = get_object_or_404(get_subscription_payments_by_entreprise(entreprise), pk=payment_id)
+    try:
+        reconcile_subscription_payment(paiement)
+        messages.info(request, gettext_lazy("Le statut du paiement a été vérifié auprès du prestataire."))
+    except PaymentProviderError:
+        messages.warning(request, gettext_lazy("La vérification est temporairement indisponible. Si vous avez été débité, ne payez pas une seconde fois et contactez notre équipe avec votre référence."))
+    return redirect("subscription_payment_detail", payment_id=paiement.pk)
+
+
+@permission_required("subscription.view")
+def subscription_payment_evidence(request, payment_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    paiement = get_object_or_404(get_subscription_payments_by_entreprise(entreprise), pk=payment_id)
+    return _payment_evidence_response(paiement)
+
+
+@permission_required("superadmin.view")
+def subscription_payment_evidence_admin(request, payment_id):
+    return _payment_evidence_response(get_object_or_404(PaiementAbonnement, pk=payment_id))
+
+
+def _payment_evidence_response(paiement):
+    if not paiement.preuve_paiement:
+        raise Http404
+    response = FileResponse(paiement.preuve_paiement.open("rb"), as_attachment=True)
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @permission_required("subscription.view")
@@ -362,18 +428,13 @@ def subscription_payment_automatic_start(request, plan_id):
         messages.error(request, gettext_lazy("Plan indisponible pour le paiement automatique."))
         return redirect("subscription_plan_list")
 
-    current_subscription = refresh_subscription_status(entreprise) or get_current_subscription(entreprise)
-    if current_subscription and current_subscription.actif and current_subscription.plan_id == plan.id:
-        messages.info(request, gettext_lazy("Votre entreprise utilise déjà ce plan."))
-        return redirect("subscription_plan_list")
-
     duree = request.POST.get("duree") or PaiementAbonnement.Duree.MENSUEL
     if duree not in get_subscription_payment_duration_options():
         messages.error(request, gettext_lazy("Durée d'abonnement invalide."))
         return redirect("subscription_plan_list")
 
     try:
-        paiement = create_automatic_subscription_payment_request(
+        paiement = resume_or_create_automatic_payment(
             entreprise=entreprise,
             plan=plan,
             duree=duree,
@@ -384,9 +445,7 @@ def subscription_payment_automatic_start(request, plan_id):
         messages.error(request, str(exc))
         return redirect("subscription_plan_list")
 
-    if paiement.checkout_url:
-        return redirect(paiement.checkout_url)
-    return redirect("subscription_payment_return")
+    return redirect("subscription_payment_detail", payment_id=paiement.pk)
 
 
 @csrf_exempt

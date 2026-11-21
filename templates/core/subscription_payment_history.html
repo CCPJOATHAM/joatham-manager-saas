@@ -1,0 +1,21 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+{% block content_title %}{% trans "Historique des paiements" %}{% endblock %}
+{% block content %}
+<section class="content-card">
+{% for paiement in page %}
+<article style="padding:18px 0;border-bottom:1px solid #dbe7f3;overflow-wrap:anywhere">
+<p><strong>{{ paiement.plan.nom }} — {{ paiement.get_statut_display }}</strong></p>
+<p>{{ paiement.date_creation|date:"SHORT_DATETIME_FORMAT" }} · {{ paiement.get_duree_display }}</p>
+<p>{% trans "Référence :" %} {{ paiement.external_reference|default:paiement.reference_paiement|default:paiement.pk }}</p>
+<a class="btn-link" href="{% url 'subscription_payment_detail' paiement.pk %}">{% trans "Voir le détail" %}</a>
+</article>
+{% empty %}<p>{% trans "Aucun paiement enregistré." %}</p>{% endfor %}
+<nav style="display:flex;gap:20px;flex-wrap:wrap;margin-top:20px" aria-label="{% trans 'Pagination' %}">
+{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">{% trans "Précédent" %}</a>{% endif %}
+<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>
+{% if page.has_next %}<a href="?page={{ page.next_page_number }}">{% trans "Suivant" %}</a>{% endif %}
+</nav>
+<a class="btn-link" href="{% url 'subscription_overview' %}">{% trans "Voir mon abonnement" %}</a>
+</section>
+{% endblock %}

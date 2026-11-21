@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 20:25+0100\n"
+"POT-Creation-Date: 2026-11-21 13:48+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: English\n"
@@ -1641,9 +1641,6 @@ msgstr "Automatic payments will be available soon. Please submit a manual paymen
 
 msgid "Plan indisponible pour le paiement automatique."
 msgstr "Plan not available for automatic payment."
-
-msgid "Votre entreprise utilise déjà ce plan."
-msgstr "Your company is already using this plan."
 
 #, python-format
 msgid "Votre demande pour le plan %(value_1)s a été envoyée au super admin."
@@ -8731,26 +8728,14 @@ msgstr "The amount shown in your currency is an estimate. Your subscription will
 msgid "Retour paiement abonnement | JOATHAM Manager"
 msgstr "Subscription payment result | JOATHAM Manager"
 
-msgid "Retour paiement abonnement"
-msgstr "Subscription payment result"
-
-msgid "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook."
-msgstr "This page displays the known status of the payment. Subscription is enabled only after secure confirmation of the webhook."
-
 msgid "Référence :"
 msgstr "Reference:"
 
 msgid "Plan :"
 msgstr "Plan:"
 
-msgid "Votre paiement est confirmé. L'abonnement a été activé automatiquement."
-msgstr "Your payment is confirmed. The subscription has been activated automatically."
-
 msgid "Le paiement n'a pas été confirmé."
 msgstr "The payment was not confirmed."
-
-msgid "Votre paiement est en cours de vérification. Vous pouvez revenir plus tard sur cette page."
-msgstr "Your payment is being verified. You can return later on this page."
 
 msgid "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise."
 msgstr "This page is reserved for the return of an automatic payment. No recent automatic payment has been found for your company."
@@ -9402,3 +9387,94 @@ msgstr "No user matches the filters."
 
 msgid "Changer"
 msgstr "Change"
+
+
+msgid "La session CinetPay ne permet pas une confirmation sécurisée. Contactez notre équipe avant de réessayer."
+msgstr "The CinetPay session cannot be confirmed securely. Contact our team before trying again."
+
+msgid "Un paiement automatique doit être confirmé par le prestataire."
+msgstr "An automatic payment must be confirmed by the payment provider."
+
+msgid "Ce paiement nécessite une vérification manuelle par notre équipe."
+msgstr "This payment requires a manual check by our team."
+
+msgid "Le statut du paiement a été vérifié auprès du prestataire."
+msgstr "The payment status has been checked with the payment provider."
+
+msgid "La vérification est temporairement indisponible. Si vous avez été débité, ne payez pas une seconde fois et contactez notre équipe avec votre référence."
+msgstr "Status checks are temporarily unavailable. If you have been charged, do not pay again. Contact our team with your reference."
+
+msgid "Ce formulaire déclare un paiement effectué hors plateforme. Mobile Money désigne un moyen de paiement ; CinetPay est un prestataire qui peut aussi le proposer. Aucun prélèvement n'est effectué ici."
+msgstr "Use this form to report a payment made outside the platform. Mobile Money is a payment method; CinetPay is a provider that may also offer it. This form does not charge you."
+
+msgid "Avant tout transfert manuel, demandez à notre équipe le bénéficiaire, le numéro, l'opérateur, le montant exact et la devise. Ne transférez pas d'argent vers un numéro non confirmé."
+msgstr "Before making a manual transfer, ask our team to confirm the recipient, number, operator, exact amount and currency. Do not send money to an unconfirmed number."
+
+msgid "Pagination"
+msgstr "Pagination"
+
+msgid "Suivi du paiement"
+msgstr "Payment tracking"
+
+msgid "L'activation dépend de la confirmation du paiement, jamais du seul retour du navigateur."
+msgstr "Activation requires payment confirmation. Returning from the payment page alone does not confirm payment."
+
+msgid "Total à payer au prestataire"
+msgstr "Total payable to the payment provider"
+
+msgid "Prestataire"
+msgstr "Payment provider"
+
+msgid "Date de confirmation"
+msgstr "Confirmation date"
+
+msgid "Période couverte"
+msgstr "Coverage period"
+
+msgid "Transaction du prestataire"
+msgstr "Provider transaction"
+
+msgid "Cette demande de plan ne constitue pas une preuve de paiement."
+msgstr "This plan request is not proof of payment."
+
+msgid "Votre paiement est confirmé et votre abonnement a été activé ou renouvelé. Conservez cette référence et cette confirmation dans votre historique."
+msgstr "Your payment is confirmed and your subscription has been activated or renewed. Keep this reference and confirmation in your payment history."
+
+msgid "Paiement à vérifier : la confirmation reçue nécessite un contrôle. L'abonnement n'a pas été activé par cette tentative."
+msgstr "Payment needs review: the confirmation received requires a check. This attempt has not activated your subscription."
+
+msgid "Le paiement a été annulé. Cette tentative n'a pas activé l'abonnement."
+msgstr "The payment was cancelled. This attempt has not activated your subscription."
+
+msgid "La session de paiement a expiré. Cette tentative n'a pas activé l'abonnement."
+msgstr "The payment session has expired. This attempt has not activated your subscription."
+
+msgid "Le paiement attend la confirmation du prestataire. Le retour sur cette page ne confirme pas un débit."
+msgstr "The payment is awaiting confirmation from the provider. Returning to this page does not confirm a charge."
+
+msgid "Votre déclaration attend la vérification manuelle de notre équipe. Aucun prélèvement n'est effectué par ce formulaire."
+msgstr "Your reported payment is awaiting a manual check by our team. This form does not charge you."
+
+msgid "Si vous avez été débité, ne payez pas une seconde fois. Conservez votre justificatif et contactez notre équipe avec cette référence. Un délai peut séparer le débit de la confirmation."
+msgstr "If you have been charged, do not pay again. Keep your proof of payment and contact our team with this reference. Confirmation may arrive after the charge."
+
+msgid "CinetPay peut proposer Mobile Money selon votre pays et les opérateurs disponibles. Choisissez le moyen et l'opérateur sur sa page sécurisée ; vérifiez le numéro et le montant avant de confirmer. Ne communiquez jamais votre code secret."
+msgstr "CinetPay may offer Mobile Money depending on your country and the operators available. Select the method and operator on its secure page; check the number and amount before confirming. Never share your PIN."
+
+msgid "Le total ci-dessus est celui de cette session. Une estimation dans une autre devise ne constitue pas le montant débité. Les frais éventuels de l'opérateur doivent être vérifiés avant votre accord."
+msgstr "The total above applies to this session. An estimate in another currency is not the amount charged. Check any operator fees before you agree to pay."
+
+msgid "Continuer vers le paiement sécurisé"
+msgstr "Continue to secure payment"
+
+msgid "Vérifier auprès du prestataire"
+msgstr "Check with the payment provider"
+
+msgid "Actualiser le suivi"
+msgstr "Refresh payment status"
+
+msgid "Imprimer la confirmation"
+msgstr "Print confirmation"
+
+msgid "Télécharger mon justificatif"
+msgstr "Download my proof of payment"

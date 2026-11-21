@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 20:25+0100\n"
+"POT-Creation-Date: 2026-11-21 13:48+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: French\n"
@@ -1641,9 +1641,6 @@ msgstr "Paiement automatique bientôt disponible. Utilisez la demande manuelle p
 
 msgid "Plan indisponible pour le paiement automatique."
 msgstr "Plan indisponible pour le paiement automatique."
-
-msgid "Votre entreprise utilise déjà ce plan."
-msgstr "Votre entreprise utilise déjà ce plan."
 
 #, python-format
 msgid "Votre demande pour le plan %(value_1)s a été envoyée au super admin."
@@ -8733,26 +8730,14 @@ msgstr "Le montant affiché dans votre devise est fourni à titre estimatif. L'a
 msgid "Retour paiement abonnement | JOATHAM Manager"
 msgstr "Retour paiement abonnement | JOATHAM Manager"
 
-msgid "Retour paiement abonnement"
-msgstr "Retour paiement abonnement"
-
-msgid "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook."
-msgstr "Cette page affiche l'état connu du paiement. L'abonnement est activé uniquement après confirmation sécurisée du webhook."
-
 msgid "Référence :"
 msgstr "Référence :"
 
 msgid "Plan :"
 msgstr "Plan :"
 
-msgid "Votre paiement est confirmé. L'abonnement a été activé automatiquement."
-msgstr "Votre paiement est confirmé. L'abonnement a été activé automatiquement."
-
 msgid "Le paiement n'a pas été confirmé."
 msgstr "Le paiement n'a pas été confirmé."
-
-msgid "Votre paiement est en cours de vérification. Vous pouvez revenir plus tard sur cette page."
-msgstr "Votre paiement est en cours de vérification. Vous pouvez revenir plus tard sur cette page."
 
 msgid "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise."
 msgstr "Cette page est réservée au retour d'un paiement automatique. Aucun paiement automatique récent n'a été trouvé pour votre entreprise."
@@ -9404,3 +9389,94 @@ msgstr "Aucun utilisateur ne correspond aux filtres."
 
 msgid "Changer"
 msgstr "Changer"
+
+
+msgid "La session CinetPay ne permet pas une confirmation sécurisée. Contactez notre équipe avant de réessayer."
+msgstr "La session CinetPay ne permet pas une confirmation sécurisée. Contactez notre équipe avant de réessayer."
+
+msgid "Un paiement automatique doit être confirmé par le prestataire."
+msgstr "Un paiement automatique doit être confirmé par le prestataire."
+
+msgid "Ce paiement nécessite une vérification manuelle par notre équipe."
+msgstr "Ce paiement nécessite une vérification manuelle par notre équipe."
+
+msgid "Le statut du paiement a été vérifié auprès du prestataire."
+msgstr "Le statut du paiement a été vérifié auprès du prestataire."
+
+msgid "La vérification est temporairement indisponible. Si vous avez été débité, ne payez pas une seconde fois et contactez notre équipe avec votre référence."
+msgstr "La vérification est temporairement indisponible. Si vous avez été débité, ne payez pas une seconde fois et contactez notre équipe avec votre référence."
+
+msgid "Ce formulaire déclare un paiement effectué hors plateforme. Mobile Money désigne un moyen de paiement ; CinetPay est un prestataire qui peut aussi le proposer. Aucun prélèvement n'est effectué ici."
+msgstr "Ce formulaire déclare un paiement effectué hors plateforme. Mobile Money désigne un moyen de paiement ; CinetPay est un prestataire qui peut aussi le proposer. Aucun prélèvement n'est effectué ici."
+
+msgid "Avant tout transfert manuel, demandez à notre équipe le bénéficiaire, le numéro, l'opérateur, le montant exact et la devise. Ne transférez pas d'argent vers un numéro non confirmé."
+msgstr "Avant tout transfert manuel, demandez à notre équipe le bénéficiaire, le numéro, l'opérateur, le montant exact et la devise. Ne transférez pas d'argent vers un numéro non confirmé."
+
+msgid "Pagination"
+msgstr "Pagination"
+
+msgid "Suivi du paiement"
+msgstr "Suivi du paiement"
+
+msgid "L'activation dépend de la confirmation du paiement, jamais du seul retour du navigateur."
+msgstr "L'activation dépend de la confirmation du paiement, jamais du seul retour du navigateur."
+
+msgid "Total à payer au prestataire"
+msgstr "Total à payer au prestataire"
+
+msgid "Prestataire"
+msgstr "Prestataire"
+
+msgid "Date de confirmation"
+msgstr "Date de confirmation"
+
+msgid "Période couverte"
+msgstr "Période couverte"
+
+msgid "Transaction du prestataire"
+msgstr "Transaction du prestataire"
+
+msgid "Cette demande de plan ne constitue pas une preuve de paiement."
+msgstr "Cette demande de plan ne constitue pas une preuve de paiement."
+
+msgid "Votre paiement est confirmé et votre abonnement a été activé ou renouvelé. Conservez cette référence et cette confirmation dans votre historique."
+msgstr "Votre paiement est confirmé et votre abonnement a été activé ou renouvelé. Conservez cette référence et cette confirmation dans votre historique."
+
+msgid "Paiement à vérifier : la confirmation reçue nécessite un contrôle. L'abonnement n'a pas été activé par cette tentative."
+msgstr "Paiement à vérifier : la confirmation reçue nécessite un contrôle. L'abonnement n'a pas été activé par cette tentative."
+
+msgid "Le paiement a été annulé. Cette tentative n'a pas activé l'abonnement."
+msgstr "Le paiement a été annulé. Cette tentative n'a pas activé l'abonnement."
+
+msgid "La session de paiement a expiré. Cette tentative n'a pas activé l'abonnement."
+msgstr "La session de paiement a expiré. Cette tentative n'a pas activé l'abonnement."
+
+msgid "Le paiement attend la confirmation du prestataire. Le retour sur cette page ne confirme pas un débit."
+msgstr "Le paiement attend la confirmation du prestataire. Le retour sur cette page ne confirme pas un débit."
+
+msgid "Votre déclaration attend la vérification manuelle de notre équipe. Aucun prélèvement n'est effectué par ce formulaire."
+msgstr "Votre déclaration attend la vérification manuelle de notre équipe. Aucun prélèvement n'est effectué par ce formulaire."
+
+msgid "Si vous avez été débité, ne payez pas une seconde fois. Conservez votre justificatif et contactez notre équipe avec cette référence. Un délai peut séparer le débit de la confirmation."
+msgstr "Si vous avez été débité, ne payez pas une seconde fois. Conservez votre justificatif et contactez notre équipe avec cette référence. Un délai peut séparer le débit de la confirmation."
+
+msgid "CinetPay peut proposer Mobile Money selon votre pays et les opérateurs disponibles. Choisissez le moyen et l'opérateur sur sa page sécurisée ; vérifiez le numéro et le montant avant de confirmer. Ne communiquez jamais votre code secret."
+msgstr "CinetPay peut proposer Mobile Money selon votre pays et les opérateurs disponibles. Choisissez le moyen et l'opérateur sur sa page sécurisée ; vérifiez le numéro et le montant avant de confirmer. Ne communiquez jamais votre code secret."
+
+msgid "Le total ci-dessus est celui de cette session. Une estimation dans une autre devise ne constitue pas le montant débité. Les frais éventuels de l'opérateur doivent être vérifiés avant votre accord."
+msgstr "Le total ci-dessus est celui de cette session. Une estimation dans une autre devise ne constitue pas le montant débité. Les frais éventuels de l'opérateur doivent être vérifiés avant votre accord."
+
+msgid "Continuer vers le paiement sécurisé"
+msgstr "Continuer vers le paiement sécurisé"
+
+msgid "Vérifier auprès du prestataire"
+msgstr "Vérifier auprès du prestataire"
+
+msgid "Actualiser le suivi"
+msgstr "Actualiser le suivi"
+
+msgid "Imprimer la confirmation"
+msgstr "Imprimer la confirmation"
+
+msgid "Télécharger mon justificatif"
+msgstr "Télécharger mon justificatif"
