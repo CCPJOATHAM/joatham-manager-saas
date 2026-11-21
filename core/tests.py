@@ -1438,7 +1438,7 @@ class SubscriptionPaymentTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], paiement.checkout_url)
+        self.assertEqual(response["Location"], reverse("subscription_payment_detail", args=[paiement.pk]))
         self.assertEqual(paiement.statut, PaiementAbonnement.Statut.EN_ATTENTE)
         self.assertEqual(paiement.provider, "test")
         self.assertIn(paiement.external_reference, paiement.checkout_url)
@@ -1736,7 +1736,7 @@ class SubscriptionPaymentTests(TestCase):
         payment_payload = payment_call.kwargs["json"]
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], paiement.checkout_url)
+        self.assertEqual(response["Location"], reverse("subscription_payment_detail", args=[paiement.pk]))
         self.assertEqual(auth_call.args[0], "https://api.cinetpay.net/v1/oauth/login")
         self.assertEqual(auth_payload, {"api_key": "api-key", "api_password": "api-password"})
         self.assertEqual(payment_call.args[0], "https://api.cinetpay.net/v1/payment")
@@ -1758,6 +1758,26 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(paiement.provider_notify_token, f"notify-{paiement.external_reference}")
         self.assertEqual(paiement.raw_provider_payload["checkout"]["data"]["notify_token"], "***")
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
+
+    def test_cinetpay_checkout_without_notify_token_is_not_offered(self):
+        with override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post") as post_mock:
+            payload = self._cinetpay_payment_response("demo").json()
+            payload["data"].pop("notify_token")
+            post_mock.side_effect = [self._cinetpay_auth_response(), self._cinetpay_http_response(payload)]
+            with self.assertRaises(PaymentProviderError):
+                create_automatic_subscription_payment_request(
+                    entreprise=self.entreprise, plan=self.plan_basic, duree="mensuel", provider="cinetpay",
+                )
+        self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise).exists())
+
+    def test_cinetpay_checkout_receives_active_english_language(self):
+        from django.utils.translation import override
+        with override("en"), override_settings(**self._complete_cinetpay_settings()), patch("core.services.payment_providers.requests.post") as post_mock:
+            self._mock_cinetpay_checkout(post_mock)
+            create_automatic_subscription_payment_request(
+                entreprise=self.entreprise, plan=self.plan_basic, duree="mensuel", provider="cinetpay",
+            )
+            self.assertEqual(post_mock.call_args_list[1].kwargs["json"]["lang"], "en")
 
     def test_cinetpay_authentication_error_is_safe_and_rolls_back_payment(self):
         response = self._cinetpay_http_response({"message": "INVALID_CREDENTIALS", "data": []}, status_code=401)
@@ -1791,7 +1811,7 @@ class SubscriptionPaymentTests(TestCase):
         self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
         self.assertEqual(paiement.montant_usd, Decimal("96.00"))
         self.assertEqual(paiement.amount_expected, Decimal("96.00"))
-        self.assertEqual(response["Location"], paiement.checkout_url)
+        self.assertEqual(response["Location"], reverse("subscription_payment_detail", args=[paiement.pk]))
 
     def test_cinetpay_cdf_currency_uses_converted_expected_amount(self):
         from django.utils import timezone
@@ -2457,7 +2477,7 @@ class SubscriptionPaymentTests(TestCase):
         response = self.client.get(reverse("subscription_payment_return"), {"reference": paiement.external_reference})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'en cours de vérification')
+        self.assertContains(response, 'Le paiement attend la confirmation du prestataire.')
         self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     @override_settings(

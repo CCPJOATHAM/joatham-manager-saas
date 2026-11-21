@@ -180,6 +180,11 @@
                 {{ form.telephone_paiement.errors }}
             </div>
             <div>
+                <label for="{{ form.methode_paiement.id_for_label }}">{{ form.methode_paiement.label }}</label>
+                {{ form.methode_paiement }}
+                {{ form.methode_paiement.errors }}
+            </div>
+            <div>
                 <label for="{{ form.reference_paiement.id_for_label }}">{{ form.reference_paiement.label }}</label>
                 {{ form.reference_paiement }}
                 {{ form.reference_paiement.errors }}
@@ -198,6 +203,8 @@
 
     <aside class="payment-card instructions">
         <h2>{% trans "Demande de paiement" %}</h2>
+        <p>{% trans "Ce formulaire déclare un paiement effectué hors plateforme. Mobile Money désigne un moyen de paiement ; CinetPay est un prestataire qui peut aussi le proposer. Aucun prélèvement n'est effectué ici." %}</p>
+        <p>{% trans "Avant tout transfert manuel, demandez à notre équipe le bénéficiaire, le numéro, l'opérateur, le montant exact et la devise. Ne transférez pas d'argent vers un numéro non confirmé." %}</p>
         <p><strong>1.</strong> {% trans "Choisissez le plan payant et la période souhaitée." %}</p>
         <p><strong>2.</strong> {% trans "Vérifiez le montant de référence en USD et son estimation dans la devise de votre entreprise." %}</p>
         <p><strong>3.</strong> {% trans "Effectuez votre paiement hors plateforme, puis ajoutez votre référence et votre preuve si disponible." %}</p>

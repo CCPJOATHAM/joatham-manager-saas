@@ -22,7 +22,7 @@ from core.services.exchange_rates import (
     get_platform_currency,
 )
 from core.services.tenancy import get_user_entreprise_or_raise
-from joatham_users.models import Abonnement, AbonnementEntreprise
+from joatham_users.models import Abonnement, AbonnementEntreprise, Entreprise
 
 
 DEFAULT_WHATSAPP_NUMBER = "243970258117"
@@ -557,7 +557,10 @@ def is_subscription_active(entreprise, *, as_of=None, allow_trial=True):
     return subscription.statut in allowed_statuses and not is_subscription_expired(subscription, as_of=as_of)
 
 
+@transaction.atomic
 def activate_subscription_for_entreprise(*, entreprise, plan, utilisateur=None, date_debut=None, duration_days=None, prolong_existing=False):
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
+    entreprise._state.fields_cache.pop("abonnement_entreprise", None)
     date_debut = date_debut or timezone.localdate()
     days = duration_days or plan.duree_jours
     current_subscription = get_current_subscription(entreprise)
@@ -694,11 +697,14 @@ def create_subscription_payment_request(
     reference_paiement,
     preuve_paiement=None,
     telephone_paiement="",
+    methode_paiement=PaiementAbonnement.Methode.MANUEL,
     utilisateur=None,
 ):
     if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
         raise ValueError(gettext_lazy("Plan indisponible."))
 
+    if methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE:
+        raise ValueError(gettext_lazy("Un paiement automatique doit être confirmé par le prestataire."))
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
     montant = estimate["amount_usd"]
     paiement = PaiementAbonnement.objects.create(
@@ -713,6 +719,7 @@ def create_subscription_payment_request(
         source_taux=estimate["exchange_source"],
         date_taux=estimate.get("exchange_rate_date"),
         telephone_paiement=(telephone_paiement or "").strip(),
+        methode_paiement=methode_paiement or PaiementAbonnement.Methode.MANUEL,
         reference_paiement=(reference_paiement or "").strip(),
         preuve_paiement=preuve_paiement,
         provider="manual",
@@ -811,6 +818,7 @@ def get_pending_subscription_plan_request(entreprise):
 
 @transaction.atomic
 def validate_subscription_plan_request(*, entreprise, super_admin=None):
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
     request = get_pending_subscription_plan_request(entreprise)
     if request is None:
         raise ValueError(gettext_lazy("Demande de plan introuvable."))
@@ -873,6 +881,7 @@ def validate_subscription_plan_request(*, entreprise, super_admin=None):
 
 @transaction.atomic
 def refuse_subscription_plan_request(*, entreprise, super_admin=None, notes_validation=""):
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
     request = get_pending_subscription_plan_request(entreprise)
     if request is None:
         raise ValueError(gettext_lazy("Demande de plan introuvable."))
@@ -898,6 +907,10 @@ def refuse_subscription_plan_request(*, entreprise, super_admin=None, notes_vali
 
 @transaction.atomic
 def validate_subscription_payment(*, paiement, super_admin, notes_validation=""):
+    Entreprise.objects.select_for_update().get(pk=paiement.entreprise_id)
+    paiement = PaiementAbonnement.objects.select_for_update().get(pk=paiement.pk)
+    if paiement.methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE or paiement.provider != "manual":
+        raise ValueError(gettext_lazy("Un paiement automatique doit être confirmé par le prestataire."))
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
         raise ValueError(gettext_lazy('Seuls les paiements en attente peuvent être validés.'))
     duration_days = get_subscription_payment_duration_days(paiement.duree)
@@ -912,7 +925,7 @@ def validate_subscription_payment(*, paiement, super_admin, notes_validation="")
     paiement.statut = PaiementAbonnement.Statut.VALIDE
     paiement.date_validation = timezone.now()
     paiement.date_paiement = paiement.date_paiement or paiement.date_validation
-    paiement.periode_debut = paiement.periode_debut or today
+    paiement.periode_debut = paiement.periode_debut or subscription.date_fin - timedelta(days=duration_days)
     paiement.periode_fin = paiement.periode_fin or subscription.date_fin
     paiement.valide_par = super_admin
     paiement.notes_validation = (notes_validation or "").strip()
@@ -959,8 +972,12 @@ def register_manual_subscription_payment(
     taux_change_reference=None,
     super_admin=None,
 ):
+    if methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE:
+        raise ValueError(gettext_lazy("Un paiement automatique doit être confirmé par le prestataire."))
     if entreprise is None:
         raise ValueError(gettext_lazy("Entreprise introuvable."))
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
+    entreprise._state.fields_cache.pop("abonnement_entreprise", None)
     if plan is None:
         raise ValueError(gettext_lazy('Veuillez sélectionner un plan.'))
     if not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
@@ -1106,6 +1123,10 @@ def register_manual_subscription_payment(
 
 @transaction.atomic
 def refuse_subscription_payment(*, paiement, super_admin, notes_validation=""):
+    Entreprise.objects.select_for_update().get(pk=paiement.entreprise_id)
+    paiement = PaiementAbonnement.objects.select_for_update().get(pk=paiement.pk)
+    if paiement.methode_paiement == PaiementAbonnement.Methode.AUTOMATIQUE or paiement.provider != "manual":
+        raise ValueError(gettext_lazy("Un paiement automatique doit être confirmé par le prestataire."))
     if paiement.statut != PaiementAbonnement.Statut.EN_ATTENTE:
         raise ValueError(gettext_lazy('Seuls les paiements en attente peuvent être refusés.'))
     paiement.statut = PaiementAbonnement.Statut.REFUSE

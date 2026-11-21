@@ -403,7 +403,7 @@ def _resume_subscription_intention_after_login(request, user):
 
     if result.status == SubscriptionIntentStatus.CHECKOUT and result.checkout_url:
         messages.info(request, _('Votre espace est créé. Finalisez le paiement pour activer le plan choisi.'))
-        return redirect(result.checkout_url)
+        return redirect("subscription_payment_detail", payment_id=result.paiement.pk)
 
     if result.status == SubscriptionIntentStatus.PROVIDER_UNAVAILABLE:
         messages.warning(

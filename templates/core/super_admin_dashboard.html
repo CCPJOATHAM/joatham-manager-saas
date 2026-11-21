@@ -249,13 +249,14 @@
                         <td>{{ paiement.reference_paiement }}</td>
                         <td>
                             {% if paiement.preuve_paiement %}
-                            <a href="{{ paiement.preuve_paiement.url }}" target="_blank" rel="noopener">{% trans "Voir la preuve" %}</a>
+                            <a href="{% url 'subscription_payment_evidence_admin' paiement.pk %}">{% trans "Voir la preuve" %}</a>
                             {% else %}
                             <span class="muted">{% trans "Aucune preuve" %}</span>
                             {% endif %}
                         </td>
                         <td>
                             <div class="super-admin-payment-actions">
+                                {% if paiement.methode_paiement != "automatique" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="paiement_id" value="{{ paiement.id }}">
@@ -268,6 +269,7 @@
                                     <input type="text" name="notes_validation" placeholder="{% trans 'Motif du refus (optionnel)' %}">
                                     <button type="submit" name="action" value="refuse_payment" class="btn-small danger">{% trans "Refuser le paiement" %}</button>
                                 </form>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

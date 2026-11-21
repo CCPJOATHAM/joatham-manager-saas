@@ -1144,7 +1144,7 @@ class OnboardingSignupTests(TestCase):
         expected_annual_amount = get_subscription_price_usd(plan=intention.plan, duree=PaiementAbonnement.Duree.ANNUEL)
 
         self.assertEqual(login_response.status_code, 302)
-        self.assertEqual(login_response["Location"], paiement.checkout_url)
+        self.assertEqual(login_response["Location"], reverse("subscription_payment_detail", args=[paiement.pk]))
         self.assertEqual(subscription.plan.code, "free")
         self.assertEqual(paiement.duree, PaiementAbonnement.Duree.ANNUEL)
         self.assertEqual(paiement.montant_usd, expected_annual_amount)
@@ -1158,7 +1158,7 @@ class OnboardingSignupTests(TestCase):
         )
 
         self.assertEqual(second_login_response.status_code, 302)
-        self.assertEqual(second_login_response["Location"], paiement.checkout_url)
+        self.assertEqual(second_login_response["Location"], reverse("subscription_payment_detail", args=[paiement.pk]))
         self.assertEqual(PaiementAbonnement.objects.filter(entreprise=entreprise, plan=intention.plan).count(), 1)
 
     def test_signup_rejects_duplicate_email_and_prompts_login(self):

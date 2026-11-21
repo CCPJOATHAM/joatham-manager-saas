@@ -29,6 +29,7 @@ def get_super_admin_entreprise_queryset(*, search=None, statut=None, include_ina
             last_payment_local_amount=Subquery(latest_payment.values("montant_devise_locale_estime")[:1]),
             last_payment_status=Subquery(latest_payment.values("statut")[:1]),
             last_payment_source=Subquery(latest_payment.values("source_taux")[:1]),
+            last_payment_method=Subquery(latest_payment.values("methode_paiement")[:1]),
             last_payment_created_at=Subquery(latest_payment.values("date_creation")[:1]),
             payment_request_count=Count("paiements_abonnement"),
         )

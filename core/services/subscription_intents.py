@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from core.audit import record_audit_event
 from core.models import IntentionAbonnement, PaiementAbonnement
+from joatham_users.models import Entreprise
 from core.services.subscription import (
     FREE_PLAN_CODE,
     OFFICIAL_PAID_PLAN_CODES,
@@ -153,6 +154,7 @@ def resolve_public_subscription_selection(*, plan_code, billing_cycle):
 
 @transaction.atomic
 def create_subscription_intention_from_public_selection(*, entreprise, utilisateur, plan_code, billing_cycle, source="landing"):
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
     selection = resolve_public_subscription_selection(plan_code=plan_code, billing_cycle=billing_cycle)
     if not selection.is_valid or not selection.is_paid:
         return None
@@ -224,8 +226,9 @@ def _expire_stale_waiting_intentions(*, entreprise):
 def resume_subscription_intention_payment(*, intention, provider, utilisateur=None):
     if intention is None:
         return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.NO_INTENT)
+    Entreprise.objects.select_for_update().get(pk=intention.entreprise_id)
     intention = (
-        IntentionAbonnement.objects.select_for_update()
+        IntentionAbonnement.objects.select_for_update(of=("self",))
         .select_related("entreprise", "plan")
         .get(pk=intention.pk)
     )
@@ -271,9 +274,9 @@ def resume_subscription_intention_payment(*, intention, provider, utilisateur=No
     if not provider:
         return SubscriptionIntentResumeResult(status=SubscriptionIntentStatus.PROVIDER_UNAVAILABLE, intention=intention)
 
-    from core.services.subscription_payments import create_automatic_subscription_payment_request
+    from core.services.subscription_payments import resume_or_create_automatic_payment
 
-    paiement = create_automatic_subscription_payment_request(
+    paiement = resume_or_create_automatic_payment(
         entreprise=intention.entreprise,
         plan=intention.plan,
         duree=intention.duree,
@@ -295,6 +298,7 @@ def mark_subscription_intention_consumed_for_payment(paiement):
     if paiement is None:
         return 0
     with transaction.atomic():
+        Entreprise.objects.select_for_update().get(pk=paiement.entreprise_id)
         intentions = IntentionAbonnement.objects.select_for_update().filter(
             paiement=paiement,
             statut__in=ACTIVE_INTENT_STATUSES,

@@ -144,6 +144,11 @@ class EntrepriseSettingsForm(forms.ModelForm):
 
 
 class PaiementAbonnementForm(forms.ModelForm):
+    methode_paiement = forms.ChoiceField(
+        label=_("Méthode de paiement"), required=False,
+        choices=[choice for choice in PaiementAbonnement.Methode.choices if choice[0] != PaiementAbonnement.Methode.AUTOMATIQUE],
+        initial=PaiementAbonnement.Methode.MANUEL,
+    )
     plan = forms.ModelChoiceField(
         queryset=Abonnement.objects.none(),
         label=_("Plan"),
@@ -152,7 +157,7 @@ class PaiementAbonnementForm(forms.ModelForm):
 
     class Meta:
         model = PaiementAbonnement
-        fields = ["plan", "duree", "telephone_paiement", "reference_paiement", "preuve_paiement"]
+        fields = ["plan", "duree", "methode_paiement", "telephone_paiement", "reference_paiement", "preuve_paiement"]
         labels = {
             "duree": _('Période'),
             "telephone_paiement": _('Numéro de paiement'),
@@ -197,7 +202,7 @@ class ManualSubscriptionPaymentForm(forms.Form):
         max_digits=14,
         decimal_places=4,
     )
-    methode_paiement = forms.ChoiceField(label=_('Méthode de paiement'), choices=PaiementAbonnement.Methode.choices)
+    methode_paiement = forms.ChoiceField(label=_('Méthode de paiement'), choices=[choice for choice in PaiementAbonnement.Methode.choices if choice[0] != PaiementAbonnement.Methode.AUTOMATIQUE])
     reference_paiement = forms.CharField(label=_('Référence ou note'), required=False, max_length=120)
     periode_jours = forms.TypedChoiceField(
         label=_('Période payée'),

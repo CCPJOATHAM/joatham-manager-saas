@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy
 import uuid
+from datetime import timedelta
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
@@ -9,6 +10,7 @@ from django.utils import timezone
 
 from core.audit import record_audit_event
 from core.models import PaiementAbonnement
+from joatham_users.models import Entreprise
 from core.services.exchange_rates import ExchangeRateUnavailable, convert_amount, get_platform_currency
 from core.services.payment_providers import (
     PaymentProviderError,
@@ -39,6 +41,36 @@ def generate_external_reference():
 
 
 @transaction.atomic
+def resume_or_create_automatic_payment(**kwargs):
+    """Repeated checkout clicks resume the outstanding order for this selection."""
+    Entreprise.objects.select_for_update().get(pk=kwargs["entreprise"].pk)
+    pending = PaiementAbonnement.objects.filter(
+        entreprise=kwargs["entreprise"], plan=kwargs["plan"], duree=kwargs["duree"],
+        provider=kwargs["provider"], methode_paiement=PaiementAbonnement.Methode.AUTOMATIQUE,
+        statut__in=[PaiementAbonnement.Statut.EN_ATTENTE, PaiementAbonnement.Statut.EN_COURS],
+    ).exclude(checkout_url="").order_by("date_creation", "pk").first()
+    return pending or create_automatic_subscription_payment_request(**kwargs)
+
+
+def reconcile_subscription_payment(paiement):
+    """An owner can request a server-side status check, never supply its result."""
+    if paiement.statut == PaiementAbonnement.Statut.VALIDE:
+        return paiement
+    if paiement.provider != "cinetpay" or paiement.methode_paiement != PaiementAbonnement.Methode.AUTOMATIQUE:
+        raise PaymentProviderError(gettext_lazy("Ce paiement nécessite une vérification manuelle par notre équipe."))
+    provider = get_payment_provider(paiement.provider)
+    if paiement.provider_notify_token:
+        verified = provider.fetch_transaction_status(paiement.external_reference)
+    else:
+        # Existing Checkout v2 sessions continue to use their original API.
+        provider._ensure_legacy_webhook_configured()
+        verified = provider._fetch_checkout_v2_transaction_status(paiement.external_reference)
+    if verified.external_reference != paiement.external_reference:
+        raise PaymentProviderVerificationError("Payment reference mismatch")
+    return apply_verified_subscription_payment(paiement.provider, verified).paiement
+
+
+@transaction.atomic
 def create_automatic_subscription_payment_request(
     *,
     entreprise,
@@ -49,6 +81,10 @@ def create_automatic_subscription_payment_request(
 ):
     if plan is None or not getattr(plan, "actif", False) or normalize_plan_code(plan) not in OFFICIAL_PAID_PLAN_CODES:
         raise ValueError(gettext_lazy("Plan indisponible."))
+
+    # All payment writers lock the company before payments/intentions. This also
+    # serializes renewals when the company has no subscription row yet.
+    Entreprise.objects.select_for_update().get(pk=entreprise.pk)
 
     estimate = build_subscription_payment_estimate(entreprise=entreprise, plan=plan, duree=duree)
     amount_usd = estimate["amount_usd"].quantize(Decimal("0.01"))
@@ -133,9 +169,20 @@ def handle_subscription_payment_webhook(provider, request):
         )
         raise
 
+    return apply_verified_subscription_payment(provider, verified_payment)
+
+
+def apply_verified_subscription_payment(provider, verified_payment):
+    """Apply only a provider-authenticated, server-checked result."""
     with transaction.atomic():
+        company_id = PaiementAbonnement.objects.filter(
+            external_reference=verified_payment.external_reference,
+            provider=(provider or "").strip().lower(),
+        ).values_list("entreprise_id", flat=True).first()
+        if company_id:
+            Entreprise.objects.select_for_update().get(pk=company_id)
         paiement = (
-            PaiementAbonnement.objects.select_for_update()
+            PaiementAbonnement.objects.select_for_update(of=("self",))
             .select_related("entreprise", "plan")
             .filter(external_reference=verified_payment.external_reference, provider=(provider or "").strip().lower())
             .first()
@@ -160,12 +207,7 @@ def handle_subscription_payment_webhook(provider, request):
         expected_currency = (paiement.paid_currency or get_platform_currency()).upper()
 
         if _is_duplicate_webhook(paiement, verified_payment):
-            paiement.raw_provider_payload = verified_payment.raw_payload
-            paiement.provider_status = verified_payment.provider_status
-            if verified_payment.event_id:
-                paiement.last_webhook_event_id = verified_payment.event_id
-            paiement.verified_at = timezone.now()
-            paiement.save(update_fields=["raw_provider_payload", "provider_status", "last_webhook_event_id", "verified_at"])
+            # Confirmed financial data is immutable, including on a late failure.
             if paiement.statut in {PaiementAbonnement.Statut.VALIDE, PaiementAbonnement.Statut.APPROUVEE}:
                 from core.services.subscription_intents import mark_subscription_intention_consumed_for_payment
 
@@ -270,7 +312,7 @@ def handle_subscription_payment_webhook(provider, request):
         paiement.date_paiement = verified_payment.paid_at or now
         paiement.paid_at = verified_payment.paid_at or now
         paiement.verified_at = now
-        paiement.periode_debut = paiement.periode_debut or timezone.localdate()
+        paiement.periode_debut = subscription.date_fin - timedelta(days=duration_days)
         paiement.periode_fin = subscription.date_fin
         paiement.amount_paid = verified_payment.amount
         paiement.paid_currency = verified_payment.currency
@@ -334,7 +376,10 @@ def handle_subscription_payment_webhook(provider, request):
 
 def mark_automatic_payment_failed(*, paiement, reason, provider_status="", raw_provider_payload=None, event_id=""):
     with transaction.atomic():
-        paiement = PaiementAbonnement.objects.select_for_update().select_related("entreprise", "plan").get(pk=paiement.pk)
+        Entreprise.objects.select_for_update().get(pk=paiement.entreprise_id)
+        paiement = PaiementAbonnement.objects.select_for_update(of=("self",)).select_related("entreprise", "plan").get(pk=paiement.pk)
+        if paiement.statut == PaiementAbonnement.Statut.VALIDE:
+            return paiement
         if raw_provider_payload is not None:
             paiement.raw_provider_payload = raw_provider_payload
         if event_id:
@@ -405,8 +450,6 @@ def _store_webhook_snapshot(paiement, verified_payment):
     paiement.raw_provider_payload = verified_payment.raw_payload
     paiement.provider_status = verified_payment.provider_status
     paiement.verified_at = timezone.now()
-    paiement.amount_paid = verified_payment.amount
-    paiement.paid_currency = verified_payment.currency
     if verified_payment.event_id:
         paiement.last_webhook_event_id = verified_payment.event_id
     paiement.save(
@@ -414,17 +457,14 @@ def _store_webhook_snapshot(paiement, verified_payment):
             "raw_provider_payload",
             "provider_status",
             "verified_at",
-            "amount_paid",
-            "paid_currency",
             "last_webhook_event_id",
         ]
     )
 
 
 def _is_duplicate_webhook(paiement, verified_payment):
-    if verified_payment.event_id and paiement.last_webhook_event_id == verified_payment.event_id:
-        return True
-    if verified_payment.status == "paid" and paiement.statut == PaiementAbonnement.Statut.VALIDE:
+    # A transaction id is not an event-state id: pending -> paid often reuses it.
+    if paiement.statut == PaiementAbonnement.Statut.VALIDE:
         return True
     if verified_payment.status == "failed" and paiement.statut == PaiementAbonnement.Statut.ECHOUE:
         return True

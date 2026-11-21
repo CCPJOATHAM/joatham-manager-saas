@@ -344,7 +344,7 @@
                                     <input type="hidden" name="entreprise_id" value="{{ entreprise.id }}">
                                     <button type="submit" name="action" value="refuse_plan_request" class="btn-small danger">{% trans "Refuser" %}</button>
                                 </form>
-                                {% elif entreprise.last_payment_source != "demande_plan" %}
+                                {% elif entreprise.last_payment_source != "demande_plan" and entreprise.last_payment_method != "automatique" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="paiement_id" value="{{ entreprise.last_payment_id }}">

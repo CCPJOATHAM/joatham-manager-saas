@@ -1,4 +1,4 @@
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy, get_language
 import json
 import hmac
 import hashlib
@@ -197,7 +197,7 @@ class CinetPayPaymentProvider(BasePaymentProvider):
             "currency": self.currency,
             "merchant_transaction_id": payment_request.external_reference,
             "amount": amount,
-            "lang": "fr",
+            "lang": "en" if (get_language() or "fr").startswith("en") else "fr",
             "designation": _safe_cinetpay_description(f"Abonnement JOATHAM Manager {payment_request.plan.nom}"),
             "client_email": _client_email(user, entreprise),
             "client_first_name": _client_first_name(user, entreprise),
@@ -232,12 +232,15 @@ class CinetPayPaymentProvider(BasePaymentProvider):
                 _redact_sensitive_payload(response_payload),
             )
             raise PaymentProviderError(gettext_lazy("CinetPay n'a pas retourné d'URL de paiement."))
+        notify_token = _pick(data, details, response_payload, "notify_token", "notifyToken").strip()
+        if not notify_token:
+            raise PaymentProviderError(gettext_lazy("La session CinetPay ne permet pas une confirmation sécurisée. Contactez notre équipe avant de réessayer."))
         return ProviderPaymentSession(
             provider_checkout_id=_pick(data, details, response_payload, "payment_token", "paymentToken").strip(),
             checkout_url=checkout_url,
             provider_status=_pick(data, details, response_payload, "status", "message", "code") or "created",
             provider_transaction_id=_pick(data, details, response_payload, "transaction_id", "transactionId").strip(),
-            notify_token=_pick(data, details, response_payload, "notify_token", "notifyToken").strip(),
+            notify_token=notify_token,
             raw_payload=_redact_sensitive_payload(response_payload),
         )
 

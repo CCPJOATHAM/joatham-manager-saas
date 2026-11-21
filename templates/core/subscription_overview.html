@@ -290,10 +290,12 @@
         {% endif %}
 
         <h2 style="margin-top:22px;">{% trans "Historique récent" %}</h2>
+        <a class="btn-link" href="{% url 'subscription_payment_history' %}">{% trans "Historique des paiements" %}</a>
         {% if paiements %}
         <div class="history-list">
             {% for paiement in paiements %}
             <article class="history-item">
+                <a href="{% url 'subscription_payment_detail' paiement.pk %}">{% trans "Voir le détail" %}</a>
                 <strong>{{ paiement.plan_display_name }} - {{ paiement.get_statut_display }}</strong>
                 <span>{% trans "Date :" %} {{ paiement.date_creation|date:"SHORT_DATETIME_FORMAT" }}</span>
                 {% if paiement.methode_paiement == "automatique" %}

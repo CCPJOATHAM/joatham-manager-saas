@@ -13,6 +13,7 @@ SUBSCRIPTION_PAYMENT_LIST_FIELDS = (
     "montant_devise_locale_estime",
     "statut",
     "reference_paiement",
+    "external_reference",
     "preuve_paiement",
     "date_creation",
     "date_validation",
