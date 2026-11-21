@@ -1376,7 +1376,7 @@ class SubscriptionPaymentTests(TestCase):
         self.assertContains(response, "Montant de référence")
         self.assertContains(response, "Montant estimatif dans votre devise")
         self.assertContains(response, "Contacter via WhatsApp")
-        self.assertContains(response, "243970258117")
+        self.assertContains(response, "243819050191")
 
     def test_subscription_overview_shows_actions_without_auto_payment_provider(self):
         create_subscription_payment_request(
