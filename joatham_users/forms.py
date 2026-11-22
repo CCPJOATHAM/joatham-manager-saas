@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 
+from core.file_widgets import OwnProfilePhotoInput
+
 
 User = get_user_model()
 
@@ -131,6 +133,7 @@ class ProfileUpdateForm(forms.ModelForm):
             "profile_photo": _("Photo de profil"),
         }
         widgets = {
+            "profile_photo": OwnProfilePhotoInput(),
             "telephone": forms.TextInput(attrs={"placeholder": "+243...", "autocomplete": "tel"}),
         }
 
