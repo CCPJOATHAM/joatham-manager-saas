@@ -84,6 +84,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "core.middleware.UserLanguageMiddleware",
+    "core.company_deletion_middleware.CompanyDeletionAccessMiddleware",
     "core.middleware.PlatformMaintenanceMiddleware",
     "joatham_dashboard.middleware.EmailVerificationRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -371,3 +372,7 @@ LOGGING = {
         },
     },
 }
+
+# Deletion is a separate workflow; no purge scheduler is installed automatically.
+JOATHAM_COMPANY_DELETION_GRACE_DAYS = int(os.getenv("JOATHAM_COMPANY_DELETION_GRACE_DAYS", "30"))
+JOATHAM_COMPANY_EXPORT_MAX_ROWS = int(os.getenv("JOATHAM_COMPANY_EXPORT_MAX_ROWS", "50000"))

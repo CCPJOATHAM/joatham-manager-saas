@@ -1,0 +1,788 @@
+{
+  "results": [
+    {
+      "language": "fr",
+      "state": "ready",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "ready",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "ready",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "pending",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "pending",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "pending",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "expired",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "expired",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "expired",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "cancelled",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "cancelled",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "cancelled",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "invalid",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "invalid",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    },
+    {
+      "language": "fr",
+      "state": "invalid",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "ready",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "ready",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "ready",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "pending",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "pending",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "pending",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "expired",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "expired",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "expired",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "cancel"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "cancelled",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "cancelled",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "cancelled",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": null,
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "invalid",
+      "width": 1440,
+      "scroll": 1425,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "invalid",
+      "width": 390,
+      "scroll": 390,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    },
+    {
+      "language": "en",
+      "state": "invalid",
+      "width": 320,
+      "scroll": 320,
+      "method": "post",
+      "csrf": true,
+      "actions": [
+        "export",
+        "schedule"
+      ],
+      "labels": [
+        {
+          "name": "confirmation_name",
+          "label": true,
+          "required": true
+        },
+        {
+          "name": "reason",
+          "label": true,
+          "required": true
+        }
+      ],
+      "invalid": "true",
+      "clipped": []
+    }
+  ],
+  "errors": [],
+  "fixtureOnly": true,
+  "noDatabaseAccess": true,
+  "noFormSubmitted": true
+}

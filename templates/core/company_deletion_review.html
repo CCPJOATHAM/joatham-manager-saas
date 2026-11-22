@@ -1,0 +1,49 @@
+{% extends "joatham_dashboard/base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Demande de suppression | JOATHAM Manager" %}{% endblock %}
+{% block content_title %}{% trans "Demande de suppression d'entreprise" %}{% endblock %}
+{% block content_subtitle %}{% trans "Mise à l'écart réversible, export et conservation des données." %}{% endblock %}
+{% block top_actions %}<a class="btn-link" href="{% url 'super_admin_company_list' %}">{% trans "Retour aux entreprises" %}</a>{% endblock %}
+{% block content %}
+<style>
+.deletion-review{max-width:960px;overflow-wrap:anywhere}.deletion-notice{padding:18px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;margin:20px 0;line-height:1.6}.deletion-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.deletion-counts div{padding:16px;background:#f8fafc;border:1px solid #dbe7f3;border-radius:10px}.deletion-counts strong{display:block;font-size:1.4rem}.deletion-form{display:grid;gap:16px;margin-top:24px}.deletion-form label{display:block;font-weight:700;margin-bottom:8px}.deletion-form input,.deletion-form textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid #94a3b8;border-radius:8px;font:inherit}.deletion-actions{display:flex;gap:12px;flex-wrap:wrap}.deletion-actions button{cursor:pointer;font:inherit;min-height:44px}.deletion-review code{white-space:pre-wrap;user-select:all}.errorlist{color:#991b1b}.deletion-form :focus-visible{outline:3px solid #146db3;outline-offset:3px}@media(max-width:760px){.deletion-counts{grid-template-columns:1fr}.deletion-actions>*{width:100%}}
+</style>
+<section class="content-card deletion-review">
+<h2>{% trans "Entreprise concernée" %}</h2>
+<p><strong>{{ entreprise.nom }}</strong> · {% trans "Identifiant" %} {{ entreprise.pk }}</p>
+<div class="deletion-notice" role="note">
+<strong>{% trans "Aucune purge irréversible dans ce processus." %}</strong>
+<p>{% trans "Les factures, paiements, écritures comptables et journaux d'audit sont conservés. Les règles de conservation applicables à la RDC doivent être validées avant toute évolution autorisant une purge." %}</p>
+{% if is_pending %}
+<p><strong>{% trans "Suppression programmée" %}</strong> · {{ deletion.requested_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+<p>{% trans "Fin de la période de récupération standard :" %} {{ deletion.recovery_until|date:"SHORT_DATETIME_FORMAT" }}</p>
+{% if window_expired %}<p>{% trans "La période standard est écoulée. Les données restent conservées et la purge reste bloquée. L'annulation est encore possible." %}</p>{% endif %}
+<p>{% trans "Motif enregistré :" %} {{ deletion.reason }}</p>
+{% else %}
+{% if deletion.status == "cancelled" %}<p><strong>{% trans "Suppression annulée" %}</strong> · {{ deletion.cancelled_at|date:"SHORT_DATETIME_FORMAT" }}</p><p>{% trans "Motif enregistré :" %} {{ deletion.cancellation_reason }}</p>{% endif %}
+<p>{% blocktranslate with days=grace_days %}La programmation bloque immédiatement l'accès de l'entreprise. La période de récupération standard est de {{ days }} jours ; elle ne constitue pas une durée légale de conservation.{% endblocktranslate %}</p>
+{% endif %}
+<p>{% trans "L'annulation restaure l'état d'accès antérieur. Les comptes déjà désactivés restent désactivés et les dates d'abonnement ne sont pas prolongées." %}</p>
+</div>
+<h3>{% trans "Principales catégories de données concernées" %}</h3>
+{% if inventory_error %}<p role="alert">{{ inventory_error }}</p>{% endif %}
+<div class="deletion-counts">{% for category in inventory %}<div>{{ category.label }}<strong>{{ category.count }}</strong></div>{% endfor %}</div>
+<h3 style="margin-top:24px">{% trans "Exporter avant de confirmer" %}</h3>
+<p>{% trans "L'export JSON contient les données structurées de cette entreprise, sans mots de passe, jetons, sessions ni données d'autres entreprises. Les fichiers joints et sauvegardes ne sont pas inclus : cet export ne remplace pas une sauvegarde complète." %}</p>
+<p>{% trans "Le bouton d'export ne programme pas de suppression. Les exports doivent être stockés dans un emplacement privé et leur conservation doit être maîtrisée." %}</p>
+<form method="post" class="deletion-form">
+{% csrf_token %}
+{% if form.non_field_errors %}<div role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<div><label for="{{ form.confirmation_name.id_for_label }}">{{ form.confirmation_name.label }}</label>
+<p>{% trans "Recopiez exactement :" %} <code>{{ entreprise.nom }}</code></p>
+{{ form.confirmation_name }}{{ form.confirmation_name.errors }}</div>
+<div><label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>{{ form.reason }}{{ form.reason.errors }}</div>
+<div class="deletion-actions">
+<button type="submit" name="action" value="export" class="btn-link">{% trans "Exporter les données structurées" %}</button>
+{% if is_pending %}<button type="submit" name="action" value="cancel" class="btn-link primary">{% trans "Annuler la demande et restaurer" %}</button>
+{% else %}<button type="submit" name="action" value="schedule" class="btn-link primary">{% trans "Programmer la suppression" %}</button>{% endif %}
+</div>
+</form>
+<p style="margin-top:24px">{% trans "La simulation administrative recense les données et les obstacles à une éventuelle purge. Aucune tâche automatique de purge n'est installée." %}</p>
+</section>
+{% endblock %}

@@ -24,6 +24,10 @@ MODULE_LABELS = {
 }
 
 ACTION_LABELS = {
+    'company_deletion_scheduled': _('Suppression programmée'),
+    'company_deletion_cancelled': _('Suppression annulée'),
+    'company_deletion_exported': _('Export structuré créé'),
+    'company_deletion_purge_blocked': _('Purge irréversible bloquée'),
     'abonnement_active': _('Abonnement activé'),
     'abonnement_expire': _('Abonnement expiré'),
     'abonnement_plan_demande': _('Changement de plan demandé'),
@@ -115,6 +119,10 @@ ACTION_LABELS = {
 }
 
 DESCRIPTION_PATTERNS = {
+    'company_deletion_scheduled': [(re.compile(r'Company deletion scheduled\.'), _("Demande de suppression programmée. Les données sont conservées."))],
+    'company_deletion_cancelled': [(re.compile(r'Company deletion cancelled\.'), _("Demande de suppression annulée. L'état d'accès antérieur est restauré."))],
+    'company_deletion_exported': [(re.compile(r'Company structured export created\.'), _("Export structuré de l'entreprise créé."))],
+    'company_deletion_purge_blocked': [(re.compile(r'Company irreversible purge blocked\.'), _("Purge irréversible bloquée dans l'attente des règles de conservation."))],
     'abonnement_active': [
         (re.compile('Abonnement\\ active\\ sur\\ le\\ plan\\ (?P<value_1>.*?)\\.', re.DOTALL), _('Abonnement activé sur le plan %(value_1)s.')),
     ],

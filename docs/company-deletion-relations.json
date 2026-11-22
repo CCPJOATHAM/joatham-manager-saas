@@ -1,0 +1,782 @@
+[
+  {
+    "model": "core.ActivityLog",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "core.ActivityLog",
+    "field": "utilisateur",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "core.PaiementAbonnement",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "core.PaiementAbonnement",
+    "field": "plan",
+    "target": "joatham_users.Abonnement",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "core.PaiementAbonnement",
+    "field": "valide_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "core.PaiementAbonnement",
+    "field": "created_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "core.IntentionAbonnement",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "core.IntentionAbonnement",
+    "field": "utilisateur",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "core.IntentionAbonnement",
+    "field": "plan",
+    "target": "joatham_users.Abonnement",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "core.IntentionAbonnement",
+    "field": "paiement",
+    "target": "core.PaiementAbonnement",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_users.Entreprise",
+    "field": "abonnement",
+    "target": "joatham_users.Abonnement",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_users.User_groups",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.User_groups",
+    "field": "group",
+    "target": "auth.Group",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.User_user_permissions",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.User_user_permissions",
+    "field": "permission",
+    "target": "auth.Permission",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.User",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.UserActiveSession",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.AbonnementEntreprise",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_users.AbonnementEntreprise",
+    "field": "plan",
+    "target": "joatham_users.Abonnement",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_clients.Client",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.FactureSequence",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.ProformaSequence",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.Facture",
+    "field": "client",
+    "target": "joatham_clients.Client",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.Facture",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.Proforma",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.Proforma",
+    "field": "client",
+    "target": "joatham_clients.Client",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.Proforma",
+    "field": "facture_convertie",
+    "target": "joatham_billing.Facture",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.Proforma",
+    "field": "created_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.EntreprisePrintSettings",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.LigneProforma",
+    "field": "proforma",
+    "target": "joatham_billing.Proforma",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.LigneProforma",
+    "field": "produit",
+    "target": "joatham_products.Produit",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.LigneProforma",
+    "field": "service",
+    "target": "joatham_billing.Service",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.LigneFacture",
+    "field": "facture",
+    "target": "joatham_billing.Facture",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.LigneFacture",
+    "field": "produit",
+    "target": "joatham_products.Produit",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.LigneFacture",
+    "field": "service",
+    "target": "joatham_billing.Service",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.Service",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.PaiementFacture",
+    "field": "facture",
+    "target": "joatham_billing.Facture",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.PaiementFacture",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.PaiementFacture",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.PaiementFacture",
+    "field": "session_caisse",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_billing.FactureHistorique",
+    "field": "facture",
+    "target": "joatham_billing.Facture",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.FactureHistorique",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_billing.FactureHistorique",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_messages.Conversation_participants",
+    "field": "conversation",
+    "target": "joatham_messages.Conversation",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Conversation_participants",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Conversation",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Conversation",
+    "field": "cree_par",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_messages.Message_lecteurs",
+    "field": "message",
+    "target": "joatham_messages.Message",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Message_lecteurs",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Message",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Message",
+    "field": "conversation",
+    "target": "joatham_messages.Conversation",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.Message",
+    "field": "expediteur",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_messages.MessageAttachment",
+    "field": "message",
+    "target": "joatham_messages.Message",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.SuggestionSuperAdmin",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_messages.SuggestionSuperAdmin",
+    "field": "utilisateur",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_messages.PublicQuestion",
+    "field": "invitation",
+    "target": "joatham_users.EntrepriseInvitation",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_messages.PublicQuestion",
+    "field": "repondu_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_depenses.Depense",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_depenses.Depense",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_depenses.Depense",
+    "field": "session_caisse",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_comptabilite.ExerciceComptable",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_comptabilite.CompteComptable",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_comptabilite.JournalComptable",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_comptabilite.EcritureComptable",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_comptabilite.EcritureComptable",
+    "field": "exercice",
+    "target": "joatham_comptabilite.ExerciceComptable",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_comptabilite.EcritureComptable",
+    "field": "journal",
+    "target": "joatham_comptabilite.JournalComptable",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_comptabilite.LigneEcritureComptable",
+    "field": "ecriture",
+    "target": "joatham_comptabilite.EcritureComptable",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_comptabilite.LigneEcritureComptable",
+    "field": "compte",
+    "target": "joatham_comptabilite.CompteComptable",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_products.Produit",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.StockMovement",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.StockMovement",
+    "field": "produit",
+    "target": "joatham_products.Produit",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.StockMovement",
+    "field": "created_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_products.InventorySession",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.InventorySession",
+    "field": "created_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_products.InventorySession",
+    "field": "validated_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_products.InventoryLine",
+    "field": "session",
+    "target": "joatham_products.InventorySession",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.InventoryLine",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_products.InventoryLine",
+    "field": "produit",
+    "target": "joatham_products.Produit",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.Apprenant",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.Formation",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.InscriptionFormation",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.InscriptionFormation",
+    "field": "apprenant",
+    "target": "joatham_apprenants.Apprenant",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.InscriptionFormation",
+    "field": "formation",
+    "target": "joatham_apprenants.Formation",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.InscriptionFormation",
+    "field": "facture",
+    "target": "joatham_billing.Facture",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_apprenants.PaiementInscription",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.PaiementInscription",
+    "field": "inscription",
+    "target": "joatham_apprenants.InscriptionFormation",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_apprenants.PaiementInscription",
+    "field": "utilisateur",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_caisse.Caisse",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.Caisse",
+    "field": "cree_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_caisse.SessionCaisse",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.SessionCaisse",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.SessionCaisse",
+    "field": "utilisateur_ouverture",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_caisse.SessionCaisse",
+    "field": "utilisateur_fermeture",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_caisse.MouvementCaisse",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.MouvementCaisse",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.MouvementCaisse",
+    "field": "session",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.MouvementCaisse",
+    "field": "cree_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_caisse.ValidationCaisse",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.ValidationCaisse",
+    "field": "session",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_caisse.ValidationCaisse",
+    "field": "validee_par",
+    "target": "joatham_users.User",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "validated_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "created_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "cancelled_by",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "facture",
+    "target": "joatham_billing.Facture",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "paiement_facture",
+    "target": "joatham_billing.PaiementFacture",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "depense",
+    "target": "joatham_depenses.Depense",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "session_caisse",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_payments.PaymentTransaction",
+    "field": "mouvement_caisse",
+    "target": "joatham_caisse.MouvementCaisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.Poste",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.Employe",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.Employe",
+    "field": "user",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.Employe",
+    "field": "poste",
+    "target": "joatham_rh.Poste",
+    "on_delete": "PROTECT"
+  },
+  {
+    "model": "joatham_rh.Presence",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.Presence",
+    "field": "employe",
+    "target": "joatham_rh.Employe",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.DemandeConge",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.DemandeConge",
+    "field": "employe",
+    "target": "joatham_rh.Employe",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.DemandeConge",
+    "field": "approuve_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.DocumentRH",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.DocumentRH",
+    "field": "employe",
+    "target": "joatham_rh.Employe",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.AvanceSalaire",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.AvanceSalaire",
+    "field": "employe",
+    "target": "joatham_rh.Employe",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.AvanceSalaire",
+    "field": "cree_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "entreprise",
+    "target": "joatham_users.Entreprise",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "employe",
+    "target": "joatham_rh.Employe",
+    "on_delete": "CASCADE"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "cree_par",
+    "target": "joatham_users.User",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "caisse",
+    "target": "joatham_caisse.Caisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "session_caisse",
+    "target": "joatham_caisse.SessionCaisse",
+    "on_delete": "SET_NULL"
+  },
+  {
+    "model": "joatham_rh.PaiementSalaire",
+    "field": "mouvement_caisse",
+    "target": "joatham_caisse.MouvementCaisse",
+    "on_delete": "SET_NULL"
+  }
+]
