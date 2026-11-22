@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.utils.dateparse import parse_date
 
 from core.services.currency import format_amount_for_entreprise
+from core.private_files import private_file_response
 from core.services.product_policy import can_access_module, module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_apprenants.services.export_service import build_report_metadata, build_xlsx_response
@@ -200,6 +201,14 @@ def payment_detail(request, payment_id):
             **_payment_context_flags(request.user),
         },
     )
+
+
+@permission_required("payments.view")
+@module_access_required("payments")
+def payment_attachment(request, payment_id):
+    entreprise = get_user_entreprise_or_raise(request.user)
+    payment = get_payment_transaction_for_entreprise(entreprise, payment_id)
+    return private_file_response(payment.attachment)
 
 
 @login_required
