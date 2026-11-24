@@ -10,6 +10,7 @@ urlpatterns = [
     path("rapports/export/excel/", views.payment_export_excel, name="payment_export_excel"),
     path("rapports/export/pdf/", views.payment_reports_pdf, name="payment_reports_pdf"),
     path("<int:payment_id>/", views.payment_detail, name="payment_detail"),
+    path("<int:payment_id>/piece/", views.payment_attachment, name="payment_attachment"),
     path("<int:payment_id>/confirmer/", views.payment_confirm, name="payment_confirm"),
     path("<int:payment_id>/rejeter/", views.payment_reject, name="payment_reject"),
     path("<int:payment_id>/annuler/", views.payment_cancel, name="payment_cancel"),
