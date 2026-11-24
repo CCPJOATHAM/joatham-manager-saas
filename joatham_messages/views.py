@@ -3,10 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
-from django.http import FileResponse, Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
+from core.private_files import private_file_response
 from core.services.product_policy import module_access_required
 from core.services.tenancy import get_user_entreprise_or_raise
 from joatham_users.permissions import permission_required
@@ -132,15 +132,10 @@ def send_conversation_message(request, conversation_id):
 @module_access_required("messages")
 def download_attachment(request, attachment_id):
     attachment = get_attachment_for_user(request.user, attachment_id)
-    try:
-        return FileResponse(
-            attachment.fichier.open("rb"),
-            as_attachment=True,
-            filename=attachment.nom_original,
-            content_type=attachment.type_contenu or None,
-        )
-    except FileNotFoundError as exc:
-        raise Http404(gettext_lazy('Pièce jointe introuvable.')) from exc
+    return private_file_response(
+        attachment.fichier, filename=attachment.nom_original,
+        not_found_message=gettext_lazy('Pièce jointe introuvable.'),
+    )
 
 
 @permission_required("suggestions.create")

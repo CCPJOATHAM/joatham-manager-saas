@@ -40,8 +40,8 @@ jobs:
         with:
           python-version: "3.14.10"
           cache: pip
-      - name: Install gettext and PDF system libraries
-        run: sudo apt-get update && sudo apt-get install -y gettext libcairo2 tzdata
+      - name: Install gettext, PDF libraries and test Nginx
+        run: sudo apt-get update && sudo apt-get install -y gettext libcairo2 tzdata nginx
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
       - uses: actions/setup-node@v4
@@ -49,6 +49,8 @@ jobs:
           node-version: "24"
       - name: Test browser preview calculations and conversion states
         run: node --test tests/js/*.test.cjs
+      - name: Test private media boundary with isolated Nginx and synthetic files
+        run: python tests/nginx/check_private_media.py
       - name: Compile and check both translation domains
         run: |
           python manage.py compilemessages -l fr -l en

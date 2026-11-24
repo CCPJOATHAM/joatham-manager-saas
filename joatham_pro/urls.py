@@ -7,6 +7,7 @@ from django.views.decorators.cache import never_cache
 
 from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
+from core.media_views import own_profile_photo, serve_public_logo
 from core import reports_views
 from core.company_deletion_views import company_deletion_review
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
@@ -15,6 +16,7 @@ from joatham_messages.views import public_question_create, public_question_succe
 from joatham_users.views import profile_view
 
 urlpatterns = [
+    path('profil/photo/', own_profile_photo, name='own_profile_photo'),
     path('super-admin/entreprises/<int:entreprise_id>/suppression/', company_deletion_review, name='super_admin_company_deletion'),
     path('i18n/javascript/', never_cache(JavaScriptCatalog.as_view()), name='javascript_catalog'),
     path('', public_home, name='public_home'),
@@ -71,4 +73,10 @@ if getattr(settings, "REST_FRAMEWORK_AVAILABLE", False):
     urlpatterns.append(path("api/", include("core.api_urls")))
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Public uploads are allowlisted. Never expose the mixed MEDIA_ROOT, even
+    # in development: anonymous media requests bypass tenant authentication.
+    urlpatterns += static(
+        settings.MEDIA_URL.rstrip('/') + '/entreprises/logos/',
+        view=serve_public_logo,
+        document_root=settings.MEDIA_ROOT / 'entreprises' / 'logos',
+    )

@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.db import models
+
+from core.file_widgets import MessageAttachmentInput
 
 from .models import Conversation, Message, MessageAttachment, PublicQuestion, SuggestionSuperAdmin
 
@@ -6,6 +9,7 @@ from .models import Conversation, Message, MessageAttachment, PublicQuestion, Su
 class MessageAttachmentInline(admin.TabularInline):
     model = MessageAttachment
     extra = 0
+    formfield_overrides = {models.FileField: {"widget": MessageAttachmentInput}}
 
 
 @admin.register(Conversation)

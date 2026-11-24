@@ -35,7 +35,7 @@
           <div><dt>{% trans "Caisse" %}</dt><dd>{% if payment.caisse %}<a href="{% url 'caisse_detail' payment.caisse.id %}">{{ payment.caisse.nom }}</a>{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Session caisse" %}</dt><dd>{% if payment.session_caisse %}<a href="{% url 'caisse_session_detail' payment.session_caisse.id %}">{{ payment.session_caisse.date_ouverture|date:"SHORT_DATETIME_FORMAT" }}</a>{% else %}-{% endif %}</dd></div>
           <div><dt>{% trans "Mouvement caisse" %}</dt><dd>{% if payment.mouvement_caisse %}<a href="{% url 'caisse_session_detail' payment.mouvement_caisse.session_id %}">{% trans "Voir mouvement" %}</a>{% else %}-{% endif %}</dd></div>
-          <div><dt>{% trans "Pièce" %}</dt><dd>{% if payment.attachment %}<a href="{{ payment.attachment.url }}" target="_blank">{% trans "Voir pièce" %}</a>{% else %}-{% endif %}</dd></div>
+          <div><dt>{% trans "Pièce" %}</dt><dd>{% if payment.attachment %}<a href="{% url 'payment_attachment' payment.id %}">{% trans "Voir pièce" %}</a>{% else %}-{% endif %}</dd></div>
         </dl>
       </div>
     </div>

@@ -4,13 +4,14 @@ from django.utils import timezone
 from django.contrib import messages
 from django.db import models
 from django.core.paginator import Paginator
-from django.http import JsonResponse, FileResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from urllib.parse import quote
 
 from core.audit import record_audit_event
+from core.private_files import private_file_response
 from core.forms import EntrepriseSettingsForm, ExchangeRateManualForm, ManualSubscriptionPaymentForm, PaiementAbonnementForm, PlatformSettingsForm
 from core.models import ActivityLog, ExchangeRate, PaiementAbonnement, PlatformSettings
 from core.services.subscription import (
@@ -406,12 +407,7 @@ def subscription_payment_evidence_admin(request, payment_id):
 
 
 def _payment_evidence_response(paiement):
-    if not paiement.preuve_paiement:
-        raise Http404
-    response = FileResponse(paiement.preuve_paiement.open("rb"), as_attachment=True)
-    response["Cache-Control"] = "private, no-store"
-    response["X-Content-Type-Options"] = "nosniff"
-    return response
+    return private_file_response(paiement.preuve_paiement)
 
 
 @permission_required("subscription.view")

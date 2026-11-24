@@ -382,7 +382,7 @@
         <div class="profile-identity">
             <div class="profile-photo">
                 {% if profile_user.profile_photo %}
-                <img src="{{ profile_user.profile_photo.url }}" alt="{% trans 'Photo de profil' %}">
+                <img src="{% url 'own_profile_photo' %}" alt="{% trans 'Photo de profil' %}">
                 {% else %}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M20 21a8 8 0 0 0-16 0"></path>
