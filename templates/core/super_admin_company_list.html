@@ -194,7 +194,9 @@
                 </td>
                 <td>{{ entreprise.owner_email|default:entreprise.email|default:"-" }}</td>
                 <td>
-                    {% if entreprise.is_active %}
+                    {% if entreprise.deletion_request.status == "pending" %}
+                    <span class="status-badge status-inactive">{% trans "Suppression programmée" %}</span>
+                    {% elif entreprise.is_active %}
                     <span class="status-badge status-active">{% trans "Active" %}</span>
                     {% else %}
                     <span class="status-badge status-inactive">{% trans "Désactivée" %}</span>
@@ -222,6 +224,7 @@
                 </td>
                 <td>
                     <div class="actions">
+                        <a href="{% url 'super_admin_company_deletion' entreprise.pk %}" class="btn-small danger">{% if entreprise.deletion_request.status == "pending" %}{% trans "Gérer la demande de suppression" %}{% else %}{% trans "Programmer la suppression" %}{% endif %}</a>
                         <a href="#entreprise-{{ entreprise.id }}" class="btn-small">{% trans "Voir" %}</a>
                         {% if entreprise.is_active %}
                         {% url 'super_admin_company_deactivate' entreprise.pk as deactivate_url %}

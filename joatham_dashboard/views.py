@@ -483,6 +483,10 @@ def login_view(request):
             if entreprise is not None and not getattr(entreprise, "is_active", True):
                 error = _("Votre entreprise est désactivée. Contactez l'administrateur JOATHAM.")
                 return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
+            from core.services.company_deletion import is_deletion_pending
+            if entreprise is not None and is_deletion_pending(entreprise.pk):
+                error = _("Cette entreprise fait l'objet d'une demande de suppression. Contactez le super-administrateur.")
+                return render(request, "joatham_dashboard/login.html", {"error": error, "app_name": "JOATHAM Manager"})
             if not getattr(user, "email_verified", True):
                 request.session["pending_verification_user_id"] = user.id
                 messages.info(request, _("Veuillez confirmer votre adresse email avant d'utiliser JOATHAM Manager."))

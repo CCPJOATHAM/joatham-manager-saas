@@ -935,7 +935,7 @@ def super_admin_company_list(request):
     entreprises = get_super_admin_entreprise_queryset(
         search=search or None,
         include_inactive=include_inactive,
-    )
+    ).select_related("deletion_request")
     if status == "active":
         entreprises = entreprises.filter(is_active=True)
     elif status == "inactive":

@@ -8,12 +8,14 @@ from django.views.decorators.cache import never_cache
 from core.health import database_health_check, health_check
 from core.language_views import set_language_preference
 from core import reports_views
+from core.company_deletion_views import company_deletion_review
 from core.views import super_admin_audit_list, super_admin_company_deactivate, super_admin_company_list, super_admin_dashboard, super_admin_exchange_rate_list, super_admin_settings, super_admin_subscription_list, super_admin_subscription_manual_payment, super_admin_user_list
 from joatham_dashboard.views import public_discover, public_home, public_preview_a, public_robots_txt, public_sitemap_xml
 from joatham_messages.views import public_question_create, public_question_success, public_question_thanks, send_public_question_invitation, super_admin_messages, super_admin_public_question_reply, update_lead_status
 from joatham_users.views import profile_view
 
 urlpatterns = [
+    path('super-admin/entreprises/<int:entreprise_id>/suppression/', company_deletion_review, name='super_admin_company_deletion'),
     path('i18n/javascript/', never_cache(JavaScriptCatalog.as_view()), name='javascript_catalog'),
     path('', public_home, name='public_home'),
     path('decouvrir/', public_discover, name='public_discover'),

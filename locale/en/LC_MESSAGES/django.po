@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JOATHAM Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 18:08+0100\n"
+"POT-Creation-Date: 2026-11-22 15:59+0100\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: JOATHAM Manager contributors\n"
 "Language-Team: English\n"
@@ -9488,3 +9488,155 @@ msgstr "Menu"
 
 msgid "Appliquer la langue"
 msgstr "Apply language"
+
+
+msgid "Suppression programmée"
+msgstr "Deletion scheduled"
+
+msgid "Suppression annulée"
+msgstr "Deletion cancelled"
+
+msgid "Export structuré créé"
+msgstr "Structured export created"
+
+msgid "Purge irréversible bloquée"
+msgstr "Irreversible purge blocked"
+
+msgid "Demande de suppression programmée. Les données sont conservées."
+msgstr "Deletion request scheduled. The data is retained."
+
+msgid "Demande de suppression annulée. L'état d'accès antérieur est restauré."
+msgstr "Deletion request cancelled. The previous access state is restored."
+
+msgid "Export structuré de l'entreprise créé."
+msgstr "Structured company export created."
+
+msgid "Purge irréversible bloquée dans l'attente des règles de conservation."
+msgstr "Irreversible purge blocked pending retention rules."
+
+msgid "Nom exact de l'entreprise"
+msgstr "Exact company name"
+
+msgid "Cette entreprise fait l'objet d'une demande de suppression. Contactez le super-administrateur."
+msgstr "This company has a pending deletion request. Contact the super administrator."
+
+msgid "La suppression est programmée et l'accès est bloqué. Aucune donnée métier n'a été supprimée."
+msgstr "Deletion is scheduled and access is blocked. No business data has been deleted."
+
+msgid "La demande est annulée. L'état d'accès antérieur est restauré sans prolonger l'abonnement."
+msgstr "The request is cancelled. The previous access state is restored without extending the subscription."
+
+msgid "Action non autorisée."
+msgstr "Action not permitted."
+
+msgid "Entreprise, comptes et accès"
+msgstr "Company, accounts and access"
+
+msgid "Factures et documents commerciaux"
+msgstr "Invoices and business documents"
+
+msgid "Produits et stock"
+msgstr "Products and stock"
+
+msgid "Abonnements et audit"
+msgstr "Subscriptions and audit"
+
+msgid "Action réservée au super-administrateur actif."
+msgstr "This action is restricted to an active super administrator."
+
+msgid "Un motif de 1 à 2 000 caractères est obligatoire."
+msgstr "A reason of 1 to 2,000 characters is required."
+
+msgid "Cette entreprise possède un compte privilégié de plateforme. Une vérification est nécessaire."
+msgstr "This company has a privileged platform account. A review is required."
+
+msgid "Le délai de restauration doit être un nombre positif de jours."
+msgstr "The recovery period must be a positive number of days."
+
+msgid "Une suppression est déjà programmée. Le délai initial est conservé."
+msgstr "Deletion is already scheduled. The original recovery period is retained."
+
+msgid "Aucune suppression en attente pour cette entreprise."
+msgstr "This company has no pending deletion request."
+
+msgid "La limite d'export doit être un entier positif."
+msgstr "The export limit must be a positive integer."
+
+msgid "Le volume dépasse la limite de cet export. Un export administratif dédié est nécessaire."
+msgstr "The data volume exceeds this export limit. A dedicated administrative export is required."
+
+msgid "Autres données"
+msgstr "Other data"
+
+msgid "L'export est bloqué par une relation entre entreprises. Une vérification administrative est nécessaire."
+msgstr "The export is blocked by a cross-company relationship. An administrative review is required."
+
+msgid "La purge irréversible est bloquée tant que les règles de conservation ne sont pas validées et qu'une évolution distincte n'est pas approuvée."
+msgstr "Irreversible purge is blocked until retention rules are validated and a separate change is approved."
+
+msgid "Demande de suppression | JOATHAM Manager"
+msgstr "Deletion request | JOATHAM Manager"
+
+msgid "Demande de suppression d'entreprise"
+msgstr "Company deletion request"
+
+msgid "Mise à l'écart réversible, export et conservation des données."
+msgstr "Reversible closure, export and data retention."
+
+msgid "Entreprise concernée"
+msgstr "Company concerned"
+
+msgid "Identifiant"
+msgstr "Identifier"
+
+msgid "Aucune purge irréversible dans ce processus."
+msgstr "This process does not allow irreversible purge."
+
+msgid "Les factures, paiements, écritures comptables et journaux d'audit sont conservés. Les règles de conservation applicables à la RDC doivent être validées avant toute évolution autorisant une purge."
+msgstr "Invoices, payments, accounting entries and audit logs are retained. Retention rules applicable in the DRC must be validated before any change allowing purge."
+
+msgid "Fin de la période de récupération standard :"
+msgstr "End of the standard recovery period:"
+
+msgid "La période standard est écoulée. Les données restent conservées et la purge reste bloquée. L'annulation est encore possible."
+msgstr "The standard period has elapsed. Data is still retained and purge remains blocked. Cancellation is still possible."
+
+msgid "Motif enregistré :"
+msgstr "Recorded reason:"
+
+#, python-format
+msgid "La programmation bloque immédiatement l'accès de l'entreprise. La période de récupération standard est de %(days)s jours ; elle ne constitue pas une durée légale de conservation."
+msgstr "Scheduling immediately blocks company access. The standard recovery period is %(days)s days; it is not a statutory retention period."
+
+msgid "L'annulation restaure l'état d'accès antérieur. Les comptes déjà désactivés restent désactivés et les dates d'abonnement ne sont pas prolongées."
+msgstr "Cancellation restores the previous access state. Accounts that were already disabled remain disabled and subscription dates are not extended."
+
+msgid "Principales catégories de données concernées"
+msgstr "Main data categories concerned"
+
+msgid "Exporter avant de confirmer"
+msgstr "Export before confirming"
+
+msgid "L'export JSON contient les données structurées de cette entreprise, sans mots de passe, jetons, sessions ni données d'autres entreprises. Les fichiers joints et sauvegardes ne sont pas inclus : cet export ne remplace pas une sauvegarde complète."
+msgstr "The JSON export contains this company's structured data, excluding passwords, tokens, sessions and other companies' data. Attachments and backups are not included: this export does not replace a full backup."
+
+msgid "Le bouton d'export ne programme pas de suppression. Les exports doivent être stockés dans un emplacement privé et leur conservation doit être maîtrisée."
+msgstr "The export button does not schedule deletion. Store exports in a private location and manage their retention."
+
+msgid "Recopiez exactement :"
+msgstr "Copy exactly:"
+
+msgid "Exporter les données structurées"
+msgstr "Export structured data"
+
+msgid "Annuler la demande et restaurer"
+msgstr "Cancel the request and restore"
+
+msgid "Programmer la suppression"
+msgstr "Schedule deletion"
+
+msgid "La simulation administrative recense les données et les obstacles à une éventuelle purge. Aucune tâche automatique de purge n'est installée."
+msgstr "The administrative simulation lists data and blockers to any future purge. No automatic purge task is installed."
+
+msgid "Gérer la demande de suppression"
+msgstr "Manage deletion request"

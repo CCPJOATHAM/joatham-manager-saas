@@ -201,7 +201,11 @@
                 <td>{% if log.entreprise %}{{ log.entreprise.nom }}{% else %}<span class="muted">-</span>{% endif %}</td>
                 <td><span class="badge">{{ log.display_module }}</span></td>
                 <td>{{ log.display_action }}</td>
-                <td>{{ log.display_description }}</td>
+                <td>{{ log.display_description }}
+                    {% if log.action == "company_deletion_scheduled" or log.action == "company_deletion_cancelled" or log.action == "company_deletion_exported" or log.action == "company_deletion_purge_blocked" %}
+                    <p><strong>{% trans "Motif" %}</strong> {{ log.metadata.reason }}</p>
+                    {% endif %}
+                </td>
                 <td>
                     {% if log.objet_type or log.objet_id %}
                     {{ log.objet_type|default:_('Objet') }} #{{ log.objet_id|default:"-" }}

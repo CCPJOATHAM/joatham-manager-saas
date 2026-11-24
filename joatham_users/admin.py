@@ -9,6 +9,9 @@ class EntrepriseAdmin(admin.ModelAdmin):
     list_display = ("id", "nom", "abonnement", "date_expiration")
     search_fields = ("nom", "raison_sociale", "email")
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Abonnement)
 class AbonnementAdmin(admin.ModelAdmin):

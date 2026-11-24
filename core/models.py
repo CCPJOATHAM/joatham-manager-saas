@@ -8,7 +8,7 @@ from joatham_users.models import AbonnementEntreprise as SaaSSubscription
 class ActivityLog(models.Model):
     entreprise = models.ForeignKey(
         "joatham_users.Entreprise",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="activity_logs",
@@ -285,3 +285,27 @@ class Abonnement(SaaSSubscription):
         proxy = True
         verbose_name = _("Abonnement SaaS")
         verbose_name_plural = _("Abonnements SaaS")
+
+class CompanyDeletionRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Suppression programmée")
+        CANCELLED = "cancelled", _("Suppression annulée")
+
+    # PROTECT prevents an ORM/admin cascade from bypassing this workflow.
+    # No detach or irreversible purge is implemented while retention remains unapproved.
+    entreprise = models.OneToOneField(
+        "joatham_users.Entreprise", on_delete=models.PROTECT,
+        related_name="deletion_request",
+    )
+    company_id_snapshot = models.PositiveBigIntegerField()
+    company_name_snapshot = models.CharField(max_length=100)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    reason = models.TextField()
+    requested_by = models.ForeignKey("joatham_users.User", on_delete=models.SET_NULL, null=True, related_name="company_deletions_requested")
+    requested_at = models.DateTimeField()
+    recovery_until = models.DateTimeField(db_index=True)
+    company_was_active = models.BooleanField()
+    cancelled_by = models.ForeignKey("joatham_users.User", on_delete=models.SET_NULL, null=True, related_name="company_deletions_cancelled")
+    cancelled_at = models.DateTimeField(null=True)
+    cancellation_reason = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
