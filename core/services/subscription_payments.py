@@ -37,7 +37,9 @@ class SubscriptionPaymentWebhookResult:
 
 
 def generate_external_reference():
-    return f"SUB-{uuid.uuid4().hex}"
+    # CinetPay v1 accepts at most 30 characters; keep existing references intact.
+    # Keep 26 hexadecimal UUID characters and the database collision check.
+    return f"SUB-{uuid.uuid4().hex[:26]}"
 
 
 @transaction.atomic

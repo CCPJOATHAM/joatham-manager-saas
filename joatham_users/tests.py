@@ -418,6 +418,14 @@ class SubscriptionAccessTests(TestCase):
         self.assertContains(response, "J'ai effectué le paiement")
 
     def test_subscription_payment_estimate_returns_local_currency_snapshot(self):
+        from core.models import ExchangeRate
+        # Explicit local FX fixture: this test must succeed without network.
+        self.entreprise.devise = "CDF"
+        self.entreprise.save(update_fields=["devise"])
+        ExchangeRate.objects.create(
+            devise_source="USD", devise_cible="CDF", taux=Decimal("2300"),
+            source_provider="test_fixture", date_taux=timezone.now(),
+        )
         estimate = build_subscription_payment_estimate(
             entreprise=self.entreprise,
             plan=self.plan,
@@ -427,6 +435,7 @@ class SubscriptionAccessTests(TestCase):
         self.assertEqual(estimate["amount_usd"], Decimal("49.00"))
         self.assertEqual(estimate["currency_code"], self.entreprise.devise)
         self.assertGreater(estimate["estimated_amount"], Decimal("0.00"))
+        self.assertEqual(estimate["estimated_amount"], Decimal("112700.00"))
 
 
 class ProductPolicyTests(TestCase):

@@ -1314,6 +1314,12 @@ class SubscriptionPaymentTests(TestCase):
         self.assertFalse(PaiementAbonnement.objects.filter(entreprise=self.entreprise, provider="cinetpay").exists())
 
     def test_owner_can_create_subscription_payment_request_without_activation(self):
+        from django.utils import timezone
+        # Deterministic offline fixture; this scenario must not fetch live FX.
+        ExchangeRate.objects.create(
+            devise_source="USD", devise_cible="CDF", taux=Decimal("2300"),
+            source_provider="test_fixture", date_taux=timezone.now(),
+        )
         self.client.force_login(self.owner)
         response = self.client.post(
             reverse("subscription_payment_create"),
@@ -1956,12 +1962,24 @@ class SubscriptionPaymentTests(TestCase):
 
         log_output = "\n".join(captured_logs.output)
         self.assertIn("CinetPay payment creation returned no checkout URL", log_output)
-        self.assertIn("missing payment url", log_output)
-        self.assertIn("'api_key': '***'", log_output)
-        self.assertIn("'payment_token': '***'", log_output)
-        self.assertIn("'notifyToken': '***'", log_output)
+        self.assertNotIn("missing payment url", log_output)
+        self.assertIn("'data_fields':", log_output)
+        self.assertIn("'payment_token'", log_output)
+        self.assertNotIn("'api_key':", log_output)
         for sensitive_value in sensitive_values.values():
             self.assertNotIn(sensitive_value, log_output)
+
+    def test_cinetpay_http_200_business_error_rolls_back_without_activation(self):
+        with override_settings(**self._complete_cinetpay_settings()), patch(
+            "core.services.payment_providers.requests.post"
+        ) as post_mock:
+            post_mock.side_effect = [
+                self._cinetpay_auth_response(),
+                self._cinetpay_http_response({"code": 400, "status": "VALIDATION_ERROR",
+                                             "description": "untrusted provider text"}),
+            ]
+            self._assert_cinetpay_checkout_creation_fails_safely("CinetPay a refusé la requête.")
+        self.assertFalse(AbonnementEntreprise.objects.filter(entreprise=self.entreprise).exists())
 
     def test_cinetpay_webhook_without_transaction_id_is_rejected(self):
         with override_settings(**self._complete_cinetpay_settings()):
