@@ -1,9 +1,13 @@
 {% extends "joatham_dashboard/base.html" %}
-{% load i18n %}
+{% load i18n static %}
+
+{% block extra_styles %}<link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard-company-logo.css' %}">{% endblock %}
 
 {% block page_title %}{% trans "Dashboard Propriétaire" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Tableau de bord" %}{% endblock %}
 {% block content_card_class %}owner-content-card{% endblock %}
+
+{% block topbar_heading %}{% include "joatham_dashboard/includes/company_heading.html" %}{% endblock %}
 
 {% block content %}
 <div class="owner-dashboard dashboard-owner-premium">

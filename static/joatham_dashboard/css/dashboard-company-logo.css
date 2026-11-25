@@ -1,0 +1,108 @@
+.dashboard-company-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.dashboard-company-logo {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: 0 0 128px;
+    width: 128px;
+    height: 104px;
+    overflow: hidden;
+    border: 1px solid #dce7ee;
+    border-radius: 14px;
+    background: #fff;
+    color: #075c72;
+    box-shadow: 0 3px 12px rgb(15 40 65 / 5%);
+}
+
+.dashboard-company-initial {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.dashboard-company-logo img {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 3px;
+    /* Preserve aspect ratio and never enlarge a small raster past its native size. */
+    object-fit: scale-down;
+    background: #fff;
+}
+
+.dashboard-company-logo img[hidden] { display: none; }
+.dashboard-company-copy { min-width: 0; }
+
+.topbar .dashboard-company-heading h1.topbar-company-title {
+    font-size: clamp(1.25rem, 2.2vw, 1.9rem);
+    line-height: 1.2;
+    text-transform: none;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-company-secondary {
+    display: block;
+    margin-top: 4px;
+    font-size: .7em;
+    font-weight: 600;
+    color: var(--jm-muted, #64748b);
+}
+
+@media (max-width: 640px) {
+    .dashboard-company-heading { align-items: flex-start; gap: 12px; }
+    .dashboard-company-logo { flex-basis: 96px; width: 96px; height: 88px; border-radius: 11px; }
+    .dashboard-company-logo img { padding: 2px; }
+    .dashboard-company-initial { font-size: 1.4rem; }
+
+    /* This file is loaded only by the three tenant dashboards. Keep all
+       controls and form actions; override the shared mobile full-width rules. */
+    .topbar { gap: 12px; padding: 16px 12px 12px; }
+    .topbar .identity-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+    .topbar .topbar-meta,
+    .topbar .top-actions { display: contents; }
+    .topbar .language-switcher {
+        display: flex;
+        flex: 1 1 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 8px;
+        width: 100%;
+    }
+    .topbar .language-select { flex: 1 1 0; width: auto; min-height: 44px; }
+    .topbar .language-submit { flex: 0 0 auto; width: auto; min-height: 44px; }
+    .topbar .topbar-meta .profile-link,
+    .topbar .top-actions > .btn-link,
+    .topbar .logout-form,
+    .topbar .logout-form .btn-link { width: auto; min-height: 44px; }
+    .topbar .topbar-meta > span.badge {
+        order: 1;
+        width: auto;
+        max-width: 100%;
+        min-height: 0;
+        padding: 3px 5px;
+        border: 0;
+        background: transparent;
+        font-size: .78rem;
+        text-align: start;
+    }
+    .topbar .topbar-note {
+        margin-top: 8px;
+        padding-top: 8px;
+        font-size: .76rem;
+        line-height: 1.35;
+    }
+}

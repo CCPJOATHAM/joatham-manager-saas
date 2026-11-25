@@ -1,0 +1,18 @@
+{% load i18n static %}
+<div class="dashboard-company-heading">
+    <span class="dashboard-company-logo" aria-hidden="true">
+        <span class="dashboard-company-initial">{{ entreprise_identity.primary_name|first|upper|default:"–" }}</span>
+        {% if entreprise_identity.logo_url %}
+        <img src="{{ entreprise_identity.logo_url }}" alt="" width="96" height="72" data-company-logo decoding="async">
+        {% endif %}
+    </span>
+    <div class="dashboard-company-copy">
+        <h1 class="topbar-company-title">
+            {% if entreprise_identity.primary_name %}{{ entreprise_identity.primary_name }}{% else %}{% trans "Mon entreprise" %}{% endif %}
+            {% if entreprise_identity.secondary_name %}<span class="dashboard-company-secondary">{{ entreprise_identity.secondary_name }}</span>{% endif %}
+        </h1>
+        <div class="topbar-subtitle">{% if dashboard_identity_subtitle %}{{ dashboard_identity_subtitle }}{% else %}{{ user_role_label }}{% endif %}</div>
+    </div>
+</div>
+<div class="topbar-note">{% trans "JOATHAM Manager — Un espace de gestion structuré pour une utilisation SaaS claire selon le rôle" %}</div>
+<script src="{% static 'joatham_dashboard/js/dashboard-company-logo.js' %}" defer></script>
