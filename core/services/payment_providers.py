@@ -225,11 +225,19 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         )
         data = _response_data(response_payload)
         details = data.get("details") if isinstance(data.get("details"), dict) else {}
+        _ensure_cinetpay_initialization_success(response_payload)
         checkout_url = _pick(data, details, response_payload, "payment_url", "paymentUrl").strip()
+        try:
+            parsed_url = urlsplit(checkout_url)
+            valid_url = parsed_url.scheme == "https" and bool(parsed_url.hostname) and not parsed_url.username and not parsed_url.password
+        except ValueError:
+            valid_url = False
+        if not valid_url:
+            checkout_url = ""
         if not checkout_url:
             logger.warning(
                 "CinetPay payment creation returned no checkout URL: %s",
-                _redact_sensitive_payload(response_payload),
+                _safe_cinetpay_response_summary(response_payload),
             )
             raise PaymentProviderError(gettext_lazy("CinetPay n'a pas retourné d'URL de paiement."))
         notify_token = _pick(data, details, response_payload, "notify_token", "notifyToken").strip()
@@ -391,6 +399,8 @@ class CinetPayPaymentProvider(BasePaymentProvider):
         data = _response_data(response_payload)
         token = _pick(data, response_payload, "access_token", "token").strip()
         if not token:
+            logger.warning("CinetPay authentication returned no token: %s",
+                           _safe_cinetpay_response_summary(response_payload))
             raise PaymentProviderError(gettext_lazy("Authentification CinetPay invalide."))
         return token
 
@@ -522,6 +532,8 @@ def _cinetpay_status_url(url_template, merchant_transaction_id):
 
 def _url_looks_like_sandbox(url):
     normalized = str(url or "").strip().lower()
+    if urlsplit(normalized).hostname in {"api.cinetpay.net", "secure.cinetpay.net"}:
+        return True
     return any(marker in normalized for marker in ("sandbox", "test", "preprod"))
 
 
@@ -594,6 +606,43 @@ def _response_data(response_payload):
     return data if isinstance(data, dict) else {}
 
 
+def _safe_cinetpay_response_summary(payload):
+    """Allowlist diagnostics, never log bodies, arbitrary messages or URLs."""
+    if not isinstance(payload, dict):
+        return {"shape": "not_object"}
+    code = payload.get("code")
+    safe_code = str(code) if type(code) in (str, int) and str(code).isascii() and str(code).isdigit() and len(str(code)) <= 6 else "unknown"
+    statuses = {"OK", "SUCCESS", "ERROR", "FAILED", "INVALID_CREDENTIALS",
+                "INVALID_TOKEN", "EXPIRED_TOKEN", "TRANSACTION_EXIST",
+                "INVALID_AMOUNT", "INVALID_CURRENCY", "VALIDATION_ERROR"}
+    status = payload.get("status")
+    safe_status = status if isinstance(status, str) and status in statuses else "unknown"
+    field_names = {"code", "status", "description", "message", "data", "details",
+                   "payment_url", "paymentUrl", "payment_token", "paymentToken",
+                   "notify_token", "notifyToken", "access_token", "token",
+                   "transaction_id", "merchant_transaction_id", "errors"}
+    def fields(value):
+        return sorted(field_names.intersection(value)) if isinstance(value, dict) else []
+    return {"api_code": safe_code, "api_status": safe_status,
+            "fields": fields(payload), "data_fields": fields(payload.get("data")),
+            "details_fields": fields(payload.get("details")),
+            "has_data_object": isinstance(payload.get("data"), dict),
+            "has_details_object": isinstance(payload.get("details"), dict)}
+
+
+def _ensure_cinetpay_initialization_success(payload):
+    # Only initialization: transaction-check codes have different semantics.
+    # Keep no-code historical wrappers; recognized numeric codes follow the SDK.
+    code = payload.get("code")
+    error_status = payload.get("status") in (
+        "ERROR", "FAILED", "INVALID_CREDENTIALS", "INVALID_TOKEN",
+        "EXPIRED_TOKEN", "TRANSACTION_EXIST", "INVALID_AMOUNT", "INVALID_CURRENCY", "VALIDATION_ERROR",
+    )
+    if error_status or (code is not None and str(code) not in {"100", "200", "2001", "2002"}):
+        logger.warning("CinetPay initialization rejected: %s", _safe_cinetpay_response_summary(payload))
+        raise PaymentProviderError(gettext_lazy('CinetPay a refusé la requête.'))
+
+
 def _pick(*args):
     sources = [arg for arg in args if isinstance(arg, dict)]
     keys = [arg for arg in args if not isinstance(arg, dict)]
@@ -653,13 +702,23 @@ def _post_json(url, payload, *, timeout, headers=None):
             timeout=timeout,
         )
     except requests.RequestException as exc:
-        raise PaymentProviderError(gettext_lazy("CinetPay est temporairement indisponible.")) from exc
+        logger.warning("CinetPay transport failure")
+        raise PaymentProviderError(gettext_lazy("CinetPay est temporairement indisponible.")) from None
     try:
         response_payload = response.json()
     except ValueError as exc:
-        raise PaymentProviderError(gettext_lazy('Réponse CinetPay invalide.')) from exc
+        logger.warning("CinetPay response is not JSON: http_status=%s", response.status_code)
+        if response.status_code >= 400:
+            raise PaymentProviderError(gettext_lazy('CinetPay a refusé la requête.')) from None
+        raise PaymentProviderError(gettext_lazy('Réponse CinetPay invalide.')) from None
+    logger.info("CinetPay HTTP response: http_status=%s response=%s",
+                response.status_code, _safe_cinetpay_response_summary(response_payload))
     if response.status_code >= 400:
+        logger.warning("CinetPay HTTP rejection: http_status=%s response=%s",
+                       response.status_code, _safe_cinetpay_response_summary(response_payload))
         raise PaymentProviderError(gettext_lazy('CinetPay a refusé la requête.'))
+    if not isinstance(response_payload, dict):
+        raise PaymentProviderError(gettext_lazy('Réponse CinetPay invalide.'))
     return response_payload
 
 
