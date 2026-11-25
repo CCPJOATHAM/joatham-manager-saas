@@ -1,11 +1,18 @@
 {% extends "joatham_dashboard/base.html" %}
-{% load i18n %}
+{% load i18n static %}
+
+{% block extra_styles %}<link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard-company-logo.css' %}">{% endblock %}
 
 
 {% block page_title %}{% trans "Dashboard Gestionnaire | JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Pilotage quotidien" %}{% endblock %}
 {% block content_subtitle %}{% trans "Espace gestionnaire / opérations courantes" %}{% endblock %}
 {% block content_card_class %}manager-content-card{% endblock %}
+
+{% block topbar_heading %}
+{% trans "Espace gestionnaire / opérations courantes" as dashboard_identity_subtitle %}
+{% include "joatham_dashboard/includes/company_heading.html" %}
+{% endblock %}
 
 {% block top_actions %}
 <a href="{% url 'facture_list' %}" class="btn-link">{% trans "Factures" %}</a>
