@@ -1,0 +1,227 @@
+.jm-sidebar {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    padding: 12px;
+    background: linear-gradient(160deg, #dceff0, #d2e9e9 58%, #e0ecf3);
+}
+.jm-sidebar-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+}
+.jm-brand {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 36px;
+    padding: 4px 10px;
+    color: #244e5b;
+    font-size: .88rem;
+    font-weight: 750;
+    line-height: 1.3;
+}
+.jm-sidebar-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+.jm-sidebar-panel[hidden], .jm-menu-toggle[hidden] {
+    display: none;
+}
+.jm-sidebar .jm-company-card {
+    flex: 0 0 auto;
+    gap: 5px;
+    margin-top: 12px;
+    padding: 11px 12px;
+    border: 1px solid #e1eaf0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .78);
+}
+.jm-company-card strong {
+    font-size: .84rem;
+    line-height: 1.35;
+}
+.jm-company-card .muted {
+    font-size: .74rem;
+    overflow-wrap: anywhere;
+}
+.jm-company-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.jm-company-meta .role-chip {
+    min-height: 22px;
+    padding: 2px 7px;
+    font-size: .69rem;
+}
+.jm-sidebar .jm-sidebar-nav {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-content: start;
+    gap: 14px;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #bed5de transparent;
+    padding: 16px 2px;
+}
+.jm-nav-group {
+    display: grid;
+    gap: 3px;
+}
+.jm-sidebar .nav-section-label {
+    margin: 0 10px 5px;
+    font-size: .66rem;
+    line-height: 1.3;
+    letter-spacing: .08em;
+    color: #486171;
+    font-weight: 750;
+}
+.jm-sidebar .nav a, .jm-sidebar .nav-disabled {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    min-height: 44px;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #405567;
+    font-size: .82rem;
+}
+.jm-sidebar .nav a:hover {
+    background: #f2f7fa;
+    border-color: #e2ecf1;
+}
+.jm-sidebar .nav a.is-active {
+    color: #006d78;
+    background: #e7f5f6;
+    border-color: #c3e8e9;
+    box-shadow: inset 3px 0 #008b91;
+    font-weight: 800;
+}
+.jm-sidebar .nav-main {
+    min-width: 0;
+    gap: 10px;
+}
+.jm-sidebar .nav-label {
+    overflow-wrap: anywhere;
+}
+.jm-sidebar .nav-icon {
+    flex: 0 0 19px;
+    width: 19px;
+    height: 19px;
+}
+.jm-sidebar .nav-icon svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+}
+.jm-sidebar .nav-badge-group {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.jm-sidebar .nav-badge {
+    min-height: 20px;
+    padding: 2px 6px;
+    font-size: .61rem;
+}
+.jm-sidebar .nav-badge-count {
+    color: #fff;
+    background: #087b88;
+    border-color: #087b88;
+}
+.jm-sidebar .nav-badge-feature {
+    color: #85621d;
+    border-color: #e8dcbd;
+    background: #fffbef;
+}
+.jm-sidebar .nav-disabled {
+    color: #7b8b96;
+    background: #f7f9fb;
+}
+.jm-sidebar .jm-sidebar-footer {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding: 10px 4px 0;
+    font-size: .66rem;
+    line-height: 1.4;
+    color: #486171;
+    border-top: 1px solid #e5edf2;
+}
+.jm-sidebar a:focus-visible, .jm-sidebar-nav:focus-visible, .jm-menu-toggle:focus-visible {
+    outline: 3px solid #20b5bc;
+    outline-offset: 2px;
+}
+.jm-menu-toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid #d7e6ed;
+    border-radius: 9px;
+    background: #fff;
+    color: #0a5365;
+    font: inherit;
+    font-size: .75rem;
+    cursor: pointer;
+}
+.jm-menu-toggle svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+/* The shared shell clips horizontal overflow, so sticky would follow its
+   scroll container instead of the viewport. Reserve its grid column explicitly. */
+@media (min-width: 1121px) {
+    .jm-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+    }
+    .jm-sidebar + .main {
+        grid-column: 2;
+        min-width: 0;
+    }
+}
+@media (max-width: 1120px) {
+    .jm-sidebar {
+        position: relative;
+        height: auto;
+        min-height: 0;
+        padding: 10px 12px;
+    }
+    .jm-brand {
+        padding: 4px 2px;
+    }
+    .jm-sidebar-panel {
+        height: min(70vh, 580px);
+        height: min(70dvh, 580px);
+        max-height: calc(100dvh - 76px);
+    }
+    .jm-sidebar .nav a, .jm-sidebar .nav-disabled {
+        min-height: 44px;
+    }
+    .jm-sidebar .jm-company-card {
+        margin-top: 10px;
+    }
+}

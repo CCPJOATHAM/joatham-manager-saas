@@ -4419,14 +4419,8 @@ msgstr "Open cash register"
 msgid "Gérer les produits"
 msgstr "Manage products"
 
-msgid "Interface SaaS claire pour piloter les modules de votre entreprise."
-msgstr "SaaS clear interface to drive your company modules."
-
 msgid "Plateforme JOATHAM Manager"
 msgstr "JOATHAM Manager Platform"
-
-msgid "Pilotage global SaaS"
-msgstr "Global SaaS management"
 
 msgid "Multi"
 msgstr "Multi"
@@ -9479,7 +9473,6 @@ msgstr "Print confirmation"
 msgid "Télécharger mon justificatif"
 msgstr "Download my proof of payment"
 
-
 msgid "Afficher ou masquer la navigation"
 msgstr "Show or hide navigation"
 
@@ -9488,7 +9481,6 @@ msgstr "Menu"
 
 msgid "Appliquer la langue"
 msgstr "Apply language"
-
 
 msgid "Suppression programmée"
 msgstr "Deletion scheduled"
@@ -9640,3 +9632,18 @@ msgstr "The administrative simulation lists data and blockers to any future purg
 
 msgid "Gérer la demande de suppression"
 msgstr "Manage deletion request"
+
+msgid "Espace de travail"
+msgstr "Workspace"
+
+msgid "Ventes et services"
+msgstr "Sales and services"
+
+msgid "Activités et équipes"
+msgstr "Operations and teams"
+
+msgid "Finances et suivi"
+msgstr "Finance and reporting"
+
+msgid "Autres"
+msgstr "Other"
