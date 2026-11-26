@@ -6,98 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block page_title %}JOATHAM Manager{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'joatham_dashboard/css/sidebar.css' %}">
     {% block extra_styles %}{% endblock %}
 {% include "includes/javascript_i18n.html" %}
 </head>
 <body>
     <div class="app-shell dashboard-layout-premium">
-        <aside class="sidebar premium-sidebar">
-            <div class="brand">
-                <div class="brand-title">JOATHAM Manager</div>
-                <div class="brand-subtitle">{% trans "Interface SaaS claire pour piloter les modules de votre entreprise." %}</div>
-            </div>
-
-            <div class="company-card">
-                <span class="label">
-                    {% if entreprise_identity.primary_name %}
-                        {{ entreprise_identity.primary_name }}
-                    {% elif user_role_key == "super_admin" %}
-                        {% trans "Plateforme JOATHAM Manager" %}
-                    {% else %}
-                        {% trans "Mon entreprise" %}
-                    {% endif %}
-                </span>
-                {% if entreprise_identity.secondary_name %}
-                <div class="muted">{{ entreprise_identity.secondary_name }}</div>
-                {% elif user_role_key == "super_admin" %}
-                <div class="muted">{% trans "Pilotage global SaaS" %}</div>
-                {% endif %}
-                {% if user_role_label %}
-                <span class="role-chip">{{ user_role_label }}</span>
-                {% endif %}
-                {% trans "Multi" as multi_currency_label %}
-                <div class="muted">{% trans "Devise" %}: {{ entreprise_identity.currency_code|default:multi_currency_label }}</div>
-            </div>
-
-            <nav class="nav" aria-label="{% trans 'Menu principal' %}">
-                <span class="nav-section-label">{% trans "Menu principal" %}</span>
-                {% for item in dashboard_navigation %}
-                    {% if item.is_disabled %}
-                    <span class="nav-disabled" aria-disabled="true">
-                    {% else %}
-                    <a href="{{ item.url }}" class="{% if item.is_active %}is-active{% endif %}">
-                    {% endif %}
-                        <span class="nav-main">
-                            <span class="nav-icon" aria-hidden="true">
-                                {% if item.label == "Dashboard" or item.label == "Pilotage SaaS" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>
-                                {% elif item.label == "Messagerie" or item.label == "Demandes SaaS" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
-                                {% elif item.label == "Suggestions" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z"></path></svg>
-                                {% elif item.label == "Organisation" or item.label == "Entreprises" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16"></path><path d="M17 9h3v12"></path><path d="M8 7h5"></path><path d="M8 11h5"></path><path d="M8 15h5"></path></svg>
-                                {% elif item.label == "Clients" or item.label == "Utilisateurs" or item.label == "Apprenants" or item.label == "Ressources humaines" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                {% elif item.label == "Services" or item.label == "Produits" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h4"></path><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path><path d="M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"></path></svg>
-                                {% elif item.label == "Factures" or item.label == "Proformas" or item.label == "Depenses" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2Z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
-                                {% elif item.label == "Caisse" or item.label == "Paiements" or item.label == "Mon abonnement" or item.label == "Abonnements" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path><path d="M16 15h1"></path></svg>
-                                {% elif item.label == "Comptabilite" or item.label == "Taux de change" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h2"></path><path d="M12 10h2"></path><path d="M16 10h.01"></path><path d="M8 14h2"></path><path d="M12 14h2"></path><path d="M16 14h.01"></path><path d="M8 18h8"></path></svg>
-                                {% elif item.label == "Rapports avances" or item.label == "Audit" or item.label == "Audit / logs" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M8 19V9"></path><path d="M12 19v-6"></path><path d="M16 19V7"></path><path d="M20 19v-9"></path></svg>
-                                {% elif item.label == "Parametres plateforme" %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 .9-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5.9H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z"></path></svg>
-                                {% else %}
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 3"></path></svg>
-                                {% endif %}
-                            </span>
-                            <span class="nav-label">{% if item.translate_label %}{% trans item.label %}{% else %}{{ item.label }}{% endif %}</span>
-                        </span>
-                        <span class="nav-badge-group">
-                            {% if item.badge_count %}
-                            <span class="nav-badge nav-badge-count">{{ item.badge_count }}</span>
-                            {% endif %}
-                            {% if item.badge %}
-                            <span class="nav-badge nav-badge-feature {% if item.badge == 'Premium' %}is-premium{% elif item.badge == 'Abonnement requis' %}is-subscription{% endif %}">{% trans item.badge %}</span>
-                            {% endif %}
-                        </span>
-                    {% if item.is_disabled %}
-                    </span>
-                    {% else %}
-                    </a>
-                    {% endif %}
-                {% endfor %}
-            </nav>
-
-            <div class="sidebar-footer">
-                <span>{% trans "© 2026 JOATHAM Manager" %}</span>
-                <span>{% trans "Gestion SaaS sécurisée par JOATHAM Manager." %}</span>
-            </div>
-        </aside>
+        {% include "joatham_dashboard/includes/sidebar.html" %}
 
         <main class="main">
             <div class="topbar">
@@ -170,6 +85,7 @@
             </div>
         </main>
     </div>
+    <script src="{% static 'joatham_dashboard/js/sidebar.js' %}" defer></script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

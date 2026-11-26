@@ -4419,14 +4419,8 @@ msgstr "Ouvrir la caisse"
 msgid "Gérer les produits"
 msgstr "Gérer les produits"
 
-msgid "Interface SaaS claire pour piloter les modules de votre entreprise."
-msgstr "Interface SaaS claire pour piloter les modules de votre entreprise."
-
 msgid "Plateforme JOATHAM Manager"
 msgstr "Plateforme JOATHAM Manager"
-
-msgid "Pilotage global SaaS"
-msgstr "Pilotage global SaaS"
 
 msgid "Multi"
 msgstr "Multi"
@@ -9481,7 +9475,6 @@ msgstr "Imprimer la confirmation"
 msgid "Télécharger mon justificatif"
 msgstr "Télécharger mon justificatif"
 
-
 msgid "Afficher ou masquer la navigation"
 msgstr "Afficher ou masquer la navigation"
 
@@ -9490,7 +9483,6 @@ msgstr "Menu"
 
 msgid "Appliquer la langue"
 msgstr "Appliquer la langue"
-
 
 msgid "Suppression programmée"
 msgstr "Suppression programmée"
@@ -9642,3 +9634,18 @@ msgstr "La simulation administrative recense les données et les obstacles à un
 
 msgid "Gérer la demande de suppression"
 msgstr "Gérer la demande de suppression"
+
+msgid "Espace de travail"
+msgstr "Espace de travail"
+
+msgid "Ventes et services"
+msgstr "Ventes et services"
+
+msgid "Activités et équipes"
+msgstr "Activités et équipes"
+
+msgid "Finances et suivi"
+msgstr "Finances et suivi"
+
+msgid "Autres"
+msgstr "Autres"

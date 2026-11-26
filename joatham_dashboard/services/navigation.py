@@ -343,6 +343,7 @@ def build_navigation_for_request(request):
         )
         items.append(
             {
+                "key": item["url_name"] or "dashboard",
                 "label": item["label"],
                 "url": url,
                 "is_active": is_active,
