@@ -5,7 +5,7 @@
     max-height: none;
     overflow: hidden;
     padding: 12px;
-    background: linear-gradient(160deg, #dceff0, #d2e9e9 58%, #e0ecf3);
+    background: #b9d8e5;
 }
 .jm-sidebar-header {
     display: flex;
@@ -19,9 +19,9 @@
     width: 100%;
     min-height: 36px;
     padding: 4px 10px;
-    color: #244e5b;
-    font-size: .88rem;
-    font-weight: 750;
+    color: #123d53;
+    font-size: 1.1rem;
+    font-weight: 800;
     line-height: 1.3;
 }
 .jm-sidebar-panel {
@@ -34,21 +34,49 @@
     display: none;
 }
 .jm-sidebar .jm-company-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     flex: 0 0 auto;
-    gap: 5px;
+    gap: 8px;
     margin-top: 12px;
-    padding: 11px 12px;
-    border: 1px solid #e1eaf0;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, .78);
+    min-height: 126px;
+    padding: 16px;
+    border: 1px solid #25495d;
+    border-radius: 16px;
+    background: #14384d;
+    box-shadow: 0 12px 24px rgba(20, 56, 77, .12);
 }
-.jm-company-card strong {
-    font-size: .84rem;
+.jm-company-card::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -62px;
+    right: -42px;
+    width: 128px;
+    height: 128px;
+    border: 24px solid rgba(97, 208, 204, .08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.jm-sidebar .jm-company-card strong {
+    color: #fff;
+    font-size: .88rem;
+    font-weight: 800;
     line-height: 1.35;
 }
-.jm-company-card .muted {
+.jm-sidebar .jm-company-card .jm-company-secondary {
+    color: #61d0cc;
+    font-weight: 750;
+}
+.jm-sidebar .jm-company-card .muted {
     font-size: .74rem;
     overflow-wrap: anywhere;
+}
+.jm-sidebar .jm-company-meta .muted {
+    color: #b8d5e3;
+    font-size: .65rem;
+    font-weight: 650;
 }
 .jm-company-meta {
     display: flex;
@@ -61,31 +89,38 @@
     min-height: 22px;
     padding: 2px 7px;
     font-size: .69rem;
+    color: #4c452e;
+    background: #d7bf7a;
+    border-color: #d7bf7a;
 }
 .jm-sidebar .jm-sidebar-nav {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     align-content: start;
-    gap: 14px;
+    gap: 22px;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: #bed5de transparent;
-    padding: 16px 2px;
+    padding: 28px 2px 16px;
 }
 .jm-nav-group {
     display: grid;
     gap: 3px;
+}
+.jm-nav-group + .jm-nav-group {
+    padding-top: 18px;
+    border-top: 1px solid rgba(18, 61, 83, .09);
 }
 .jm-sidebar .nav-section-label {
     margin: 0 10px 5px;
     font-size: .66rem;
     line-height: 1.3;
     letter-spacing: .08em;
-    color: #486171;
+    color: #3c5c6d;
     font-weight: 750;
 }
 .jm-sidebar .nav a, .jm-sidebar .nav-disabled {
@@ -98,18 +133,19 @@
     padding: 9px 10px;
     border: 1px solid transparent;
     border-radius: 9px;
-    color: #405567;
+    color: #123d53;
     font-size: .82rem;
 }
-.jm-sidebar .nav a:hover {
-    background: #f2f7fa;
-    border-color: #e2ecf1;
+.jm-sidebar .nav a:not(.is-active):hover {
+    background: #fff;
+    border-color: transparent;
 }
-.jm-sidebar .nav a.is-active {
-    color: #006d78;
-    background: #e7f5f6;
-    border-color: #c3e8e9;
-    box-shadow: inset 3px 0 #008b91;
+.jm-sidebar .nav a.is-active,
+.jm-sidebar .nav a.is-active:hover {
+    color: #005a6d;
+    background: #d8eef2;
+    border-color: #cae6ec;
+    box-shadow: inset 4px 0 #1caaa6;
     font-weight: 800;
 }
 .jm-sidebar .nav-main {
@@ -159,8 +195,9 @@
     padding: 10px 4px 0;
     font-size: .66rem;
     line-height: 1.4;
-    color: #486171;
-    border-top: 1px solid #e5edf2;
+    color: #315668;
+    border-top: 1px solid rgba(255, 255, 255, .4);
+    background: rgba(255, 255, 255, .15);
 }
 .jm-sidebar a:focus-visible, .jm-sidebar-nav:focus-visible, .jm-menu-toggle:focus-visible {
     outline: 3px solid #20b5bc;

@@ -10,7 +10,7 @@
     <div class="jm-sidebar-panel" id="jm-sidebar-panel">
         <div class="company-card jm-company-card">
             <strong>{% if entreprise_identity.primary_name %}{{ entreprise_identity.primary_name }}{% elif user_role_key == "super_admin" %}{% trans "Plateforme JOATHAM Manager" %}{% else %}{% trans "Mon entreprise" %}{% endif %}</strong>
-            {% if entreprise_identity.secondary_name %}<div class="muted">{{ entreprise_identity.secondary_name }}</div>{% endif %}
+            {% if entreprise_identity.secondary_name %}<div class="muted jm-company-secondary">{{ entreprise_identity.secondary_name }}</div>{% endif %}
             <div class="jm-company-meta">
                 {% if user_role_label %}<span class="role-chip">{{ user_role_label }}</span>{% endif %}
                 {% trans "Multi" as multi_currency_label %}
