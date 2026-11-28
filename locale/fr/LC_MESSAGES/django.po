@@ -4272,23 +4272,11 @@ msgstr "Mon entreprise"
 msgid "Indicateurs principaux"
 msgstr "Indicateurs principaux"
 
-msgid "Total des ventes et factures enregistrées"
-msgstr "Total des ventes et factures enregistrées"
-
 msgid "Donnée calculée depuis les factures de l'entreprise"
 msgstr "Donnée calculée depuis les factures de l'entreprise"
 
 msgid "Encaissements"
 msgstr "Encaissements"
-
-msgid "Montants perçus via paiements validés"
-msgstr "Montants perçus via paiements validés"
-
-#, python-format
-msgid "%(count)s facture payée"
-msgid_plural "%(count)s factures payées"
-msgstr[0] "%(count)s facture payée"
-msgstr[1] "%(count)s factures payées"
 
 msgid "Montants encore dus par les clients"
 msgstr "Montants encore dus par les clients"
@@ -4331,9 +4319,6 @@ msgstr "Impayées"
 
 msgid "Statut des factures"
 msgstr "Statut des factures"
-
-msgid "Répartition des factures payées et impayées."
-msgstr "Répartition des factures payées et impayées."
 
 msgid "Factures impayées"
 msgstr "Factures impayées"
@@ -9649,3 +9634,117 @@ msgstr "Finances et suivi"
 
 msgid "Autres"
 msgstr "Autres"
+
+msgid "La date de fin doit être postérieure ou égale à la date de début."
+msgstr "La date de fin doit être postérieure ou égale à la date de début."
+
+msgid "Chiffre d'affaires facturé"
+msgstr "Chiffre d'affaires facturé"
+
+msgid "Total HT des factures enregistrées pendant la période, avant remises, hors brouillons et factures annulées."
+msgstr "Total HT des factures enregistrées pendant la période, avant remises, hors brouillons et factures annulées."
+
+msgid "Comment est calculé le chiffre d'affaires ?"
+msgstr "Comment est calculé le chiffre d'affaires ?"
+
+msgid "Total HT des factures de cette entreprise enregistrées pendant la période, avant remises, hors brouillons et factures annulées. La date retenue est la date d'enregistrement de la facture, indépendamment de la date des paiements. Ce montant n'est pas le total TTC encaissé. Les avoirs ne sont pas gérés par les modèles actuels et ne sont donc pas déduits automatiquement."
+msgstr "Total HT des factures de cette entreprise enregistrées pendant la période, avant remises, hors brouillons et factures annulées. La date retenue est la date d'enregistrement de la facture, indépendamment de la date des paiements. Ce montant n'est pas le total TTC encaissé. Les avoirs ne sont pas gérés par les modèles actuels et ne sont donc pas déduits automatiquement."
+
+msgid "Encaissements validés"
+msgstr "Encaissements validés"
+
+msgid "Paiements reçus, remboursements confirmés déduits"
+msgstr "Paiements reçus, remboursements confirmés déduits"
+
+#, python-format
+msgid "%(count)s encaissement validé pendant la période"
+msgid_plural "%(count)s encaissements validés pendant la période"
+msgstr[0] "%(count)s encaissement validé pendant la période"
+msgstr[1] "%(count)s encaissements validés pendant la période"
+
+msgid "Comment sont calculés les encaissements ?"
+msgstr "Comment sont calculés les encaissements ?"
+
+msgid "Paiements de factures validés selon la date du paiement de facture, plus encaissements libres confirmés selon la date de transaction du module Paiements, moins remboursements confirmés selon la date de transaction du module Paiements. Un paiement lié aux deux modules n'est compté qu'une fois. Les opérations en attente, rejetées ou annulées sont exclues. Les paiements peuvent concerner des factures d'une autre période, même désormais annulées ; seule l'annulation du paiement l'exclut."
+msgstr "Paiements de factures validés selon la date du paiement de facture, plus encaissements libres confirmés selon la date de transaction du module Paiements, moins remboursements confirmés selon la date de transaction du module Paiements. Un paiement lié aux deux modules n'est compté qu'une fois. Les opérations en attente, rejetées ou annulées sont exclues. Les paiements peuvent concerner des factures d'une autre période, même désormais annulées ; seule l'annulation du paiement l'exclut."
+
+msgid "Les paiements et remboursements du module Paiements doivent être dans la devise affichée. Les autres devises sont exclues sans conversion estimée. Les paiements de factures, sans devise historique propre, utilisent la devise de l'entreprise ; un changement historique de devise nécessite une vérification des données."
+msgstr "Les paiements et remboursements du module Paiements doivent être dans la devise affichée. Les autres devises sont exclues sans conversion estimée. Les paiements de factures, sans devise historique propre, utilisent la devise de l'entreprise ; un changement historique de devise nécessite une vérification des données."
+
+msgid "Encaissements bruts"
+msgstr "Encaissements bruts"
+
+msgid "Remboursements confirmés"
+msgstr "Remboursements confirmés"
+
+#, python-format
+msgid "%(count)s opération dans une autre devise est exclue."
+msgid_plural "%(count)s opérations dans d'autres devises sont exclues."
+msgstr[0] "%(count)s opération dans une autre devise est exclue."
+msgstr[1] "%(count)s opérations dans d'autres devises sont exclues."
+
+msgid "Que signifie une facture soldée ?"
+msgstr "Que signifie une facture soldée ?"
+
+msgid "Pour les factures émises ou payées enregistrées dans la période, le solde actuel est recalculé avec tous leurs paiements validés : montant payé positif et reste à payer nul. Le compteur utilise les montants, pas seulement le statut déclaré. Un paiement partiel peut donc produire des encaissements sans aucune facture entièrement soldée. Ce n'est pas un état historique à la date de fin."
+msgstr "Pour les factures émises ou payées enregistrées dans la période, le solde actuel est recalculé avec tous leurs paiements validés : montant payé positif et reste à payer nul. Le compteur utilise les montants, pas seulement le statut déclaré. Un paiement partiel peut donc produire des encaissements sans aucune facture entièrement soldée. Ce n'est pas un état historique à la date de fin."
+
+#, python-format
+msgid "%(count)s facture de la période est partiellement payée."
+msgid_plural "%(count)s factures de la période sont partiellement payées."
+msgstr[0] "%(count)s facture de la période est partiellement payée."
+msgstr[1] "%(count)s factures de la période sont partiellement payées."
+
+msgid "Solde actuel des factures émises ou payées enregistrées dans la période."
+msgstr "Solde actuel des factures émises ou payées enregistrées dans la période."
+
+msgid "Évolution financière de la période"
+msgstr "Évolution financière de la période"
+
+msgid "Données mensuelles réelles de la même période et de la même devise"
+msgstr "Données mensuelles réelles de la même période et de la même devise"
+
+msgid "CA facturé HT avant remises"
+msgstr "CA facturé HT avant remises"
+
+msgid "Encaissements nets validés"
+msgstr "Encaissements nets validés"
+
+msgid "Aucune opération financière pour cette période."
+msgstr "Aucune opération financière pour cette période."
+
+msgid "Les barres utilisent une échelle commune ; les montants négatifs sont affichés en rouge. Les montants chiffrés du tableau restent la référence. Les encaissements peuvent différer du CA HT en raison de la TVA, des remises, des paiements partiels et des dates."
+msgstr "Les barres utilisent une échelle commune ; les montants négatifs sont affichés en rouge. Les montants chiffrés du tableau restent la référence. Les encaissements peuvent différer du CA HT en raison de la TVA, des remises, des paiements partiels et des dates."
+
+msgid "Période des indicateurs financiers"
+msgstr "Période des indicateurs financiers"
+
+msgid "Période invalide"
+msgstr "Période invalide"
+
+#, python-format
+msgid "Du %(start)s au %(end)s inclus"
+msgstr "Du %(start)s au %(end)s inclus"
+
+#, python-format
+msgid "Depuis le %(start)s inclus"
+msgstr "Depuis le %(start)s inclus"
+
+#, python-format
+msgid "Jusqu'au %(end)s inclus"
+msgstr "Jusqu'au %(end)s inclus"
+
+msgid "Tout l'historique, sans filtre de date"
+msgstr "Tout l'historique, sans filtre de date"
+
+msgid "Appliquer la période"
+msgstr "Appliquer la période"
+
+msgid "Tout l'historique"
+msgstr "Tout l'historique"
+
+msgid "Les dates sont inclusives, dans le fuseau horaire de l'application. Les clients, le stock et les activités récentes restent des informations actuelles, hors filtre financier."
+msgstr "Les dates sont inclusives, dans le fuseau horaire de l'application. Les clients, le stock et les activités récentes restent des informations actuelles, hors filtre financier."
+
+msgid "Période invalide : aucun indicateur financier n'est affiché."
+msgstr "Période invalide : aucun indicateur financier n'est affiché."

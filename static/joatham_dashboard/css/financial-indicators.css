@@ -1,0 +1,23 @@
+.financial-period { margin-bottom: 24px; }
+.financial-period h2 { margin: 0 0 8px; font-size: 1.1rem; }
+.financial-period-form { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; }
+.financial-period-form p { display: grid; gap: 6px; margin: 0; }
+.financial-period-form input { min-height: 44px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; max-width: 100%; }
+.financial-period-form .errorlist { color: #a5132c; }
+.financial-help { color: #475569; font-size: .85rem; line-height: 1.6; }
+.financial-definition { margin-top: 12px; font-size: .85rem; line-height: 1.6; }
+.financial-definition summary { cursor: pointer; font-weight: 700; color: #07586a; padding: 6px 0; }
+.financial-definition summary:focus-visible { outline: 3px solid #20b5bc; outline-offset: 3px; }
+.financial-series { overflow-x: auto; margin: 24px 0; }
+.financial-series table { width: 100%; border-collapse: collapse; }
+.financial-series th, .financial-series td { text-align: start; padding: 12px; border-bottom: 1px solid #dbe5ee; }
+.financial-series caption { text-align: start; font-weight: 750; padding-bottom: 12px; }
+.financial-series .amount-bar { display: block; min-height: 5px; margin-top: 6px; border-radius: 4px; background: #2476db; }
+.financial-series .cash-bar { background: #078b6d; }
+.financial-series .negative-bar { background: #bd2947; }
+@media (max-width: 600px) {
+    .financial-period-form { align-items: stretch; }
+    .financial-period-form p { flex: 1 1 100%; min-width: 0; }
+    .financial-period-form button, .financial-period-form a { min-height: 44px; }
+    .financial-series th, .financial-series td { padding: 8px 5px; font-size: .76rem; }
+}
