@@ -647,7 +647,16 @@ def signup_view(request):
 @module_access_required("dashboard")
 def admin_dashboard(request):
     entreprise = get_user_entreprise_or_raise(request.user)
-    return render(request, "joatham_dashboard/admin.html", build_dashboard_context(entreprise, request.user))
+    from .forms import DashboardPeriodForm
+    from .services.financial_context import build_executive_context
+
+    period_form = DashboardPeriodForm(request.GET)
+    if not period_form.is_valid():
+        return render(request, "joatham_dashboard/admin.html", {
+            "period_form": period_form, "financial_period_invalid": True,
+        }, status=400)
+    return render(request, "joatham_dashboard/admin.html",
+                  build_executive_context(entreprise, request.user, period_form))
 
 
 @permission_required("dashboard.management")

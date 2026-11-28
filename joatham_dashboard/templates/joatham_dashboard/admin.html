@@ -1,7 +1,7 @@
 {% extends "joatham_dashboard/base.html" %}
 {% load i18n static %}
 
-{% block extra_styles %}<link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard-company-logo.css' %}">{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{% static 'joatham_dashboard/css/dashboard-company-logo.css' %}"><link rel="stylesheet" href="{% static 'joatham_dashboard/css/financial-indicators.css' %}">{% endblock %}
 
 {% block page_title %}{% trans "Dashboard Propriétaire" %} {% trans "| JOATHAM Manager" %}{% endblock %}
 {% block content_title %}{% trans "Tableau de bord" %}{% endblock %}
@@ -10,6 +10,8 @@
 {% block topbar_heading %}{% include "joatham_dashboard/includes/company_heading.html" %}{% endblock %}
 
 {% block content %}
+{% include "joatham_dashboard/includes/financial_period.html" %}
+{% if not financial_period_invalid %}
 <div class="owner-dashboard dashboard-owner-premium">
     <section class="owner-hero" aria-label="{% trans 'Tableau de bord exécutif' %}">
         <div class="hero-copy">
@@ -43,31 +45,40 @@
         <article class="kpi-card is-revenue">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">{% trans "Chiffre d'affaires" %}</span>
+                    <span class="kpi-label">{% trans "Chiffre d'affaires facturé" %}</span>
                     <strong class="kpi-value">{{ total_ca }}</strong>
-                    <span class="kpi-subtitle">{% trans "Total des ventes et factures enregistrées" %}</span>
+                    <span class="kpi-subtitle">{% trans "Total HT des factures enregistrées pendant la période, avant remises, hors brouillons et factures annulées." %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"></path><path d="M14 7h7v7"></path></svg>
                 </span>
             </div>
-            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="kpi-note">{% trans "Donnée calculée depuis les factures de l'entreprise" %}</div>
+            <details class="financial-definition">
+                <summary>{% trans "Comment est calculé le chiffre d'affaires ?" %}</summary>
+                <p>{% trans "Total HT des factures de cette entreprise enregistrées pendant la période, avant remises, hors brouillons et factures annulées. La date retenue est la date d'enregistrement de la facture, indépendamment de la date des paiements. Ce montant n'est pas le total TTC encaissé. Les avoirs ne sont pas gérés par les modèles actuels et ne sont donc pas déduits automatiquement." %}</p>
+            </details>
         </article>
 
         <article class="kpi-card is-cash">
             <div class="kpi-header">
                 <div>
-                    <span class="kpi-label">{% trans "Encaissements" %}</span>
+                    <span class="kpi-label">{% trans "Encaissements validés" %}</span>
                     <strong class="kpi-value">{{ total_encaisse }}</strong>
-                    <span class="kpi-subtitle">{% trans "Montants perçus via paiements validés" %}</span>
+                    <span class="kpi-subtitle">{% trans "Paiements reçus, remboursements confirmés déduits" %}</span>
                 </div>
                 <span class="kpi-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
                 </span>
             </div>
-            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <div class="kpi-note">{% blocktrans count count=payees %}{{ count }} facture payée{% plural %}{{ count }} factures payées{% endblocktrans %}</div>
+            <div class="kpi-note">{% blocktrans count count=receipt_count %}{{ count }} encaissement validé pendant la période{% plural %}{{ count }} encaissements validés pendant la période{% endblocktrans %}</div>
+            <details class="financial-definition">
+                <summary>{% trans "Comment sont calculés les encaissements ?" %}</summary>
+                <p>{% trans "Paiements de factures validés selon la date du paiement de facture, plus encaissements libres confirmés selon la date de transaction du module Paiements, moins remboursements confirmés selon la date de transaction du module Paiements. Un paiement lié aux deux modules n'est compté qu'une fois. Les opérations en attente, rejetées ou annulées sont exclues. Les paiements peuvent concerner des factures d'une autre période, même désormais annulées ; seule l'annulation du paiement l'exclut." %}</p>
+                <p>{% trans "Les paiements et remboursements du module Paiements doivent être dans la devise affichée. Les autres devises sont exclues sans conversion estimée. Les paiements de factures, sans devise historique propre, utilisent la devise de l'entreprise ; un changement historique de devise nécessite une vérification des données." %}</p>
+                <p>{% trans "Encaissements bruts" %} : {{ gross_receipts }} · {% trans "Remboursements confirmés" %} : {{ refunds }}</p>
+            </details>
+            {% if excluded_currency %}<p role="status" class="financial-help">{% blocktrans count count=excluded_currency %}{{ count }} opération dans une autre devise est exclue.{% plural %}{{ count }} opérations dans d'autres devises sont exclues.{% endblocktrans %}</p>{% endif %}
         </article>
 
         <article class="kpi-card is-due">
@@ -81,8 +92,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
                 </span>
             </div>
-            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="kpi-note">{% blocktrans count count=impayees %}{{ count }} facture à suivre{% plural %}{{ count }} factures à suivre{% endblocktrans %}</div>
+            <details class="financial-definition"><summary>{% trans "Que signifie une facture soldée ?" %}</summary>
+                <p>{% trans "Pour les factures émises ou payées enregistrées dans la période, le solde actuel est recalculé avec tous leurs paiements validés : montant payé positif et reste à payer nul. Le compteur utilise les montants, pas seulement le statut déclaré. Un paiement partiel peut donc produire des encaissements sans aucune facture entièrement soldée. Ce n'est pas un état historique à la date de fin." %}</p>
+                <p>{% blocktrans count count=partial_invoices %}{{ count }} facture de la période est partiellement payée.{% plural %}{{ count }} factures de la période sont partiellement payées.{% endblocktrans %}</p>
+            </details>
         </article>
 
         <article class="kpi-card is-clients">
@@ -96,7 +110,6 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 </span>
             </div>
-            <div class="kpi-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <div class="kpi-note">{% blocktrans count count=nombre_apprenants %}{{ count }} apprenant actif{% plural %}{{ count }} apprenants actifs{% endblocktrans %}</div>
         </article>
     </section>
@@ -128,7 +141,7 @@
             <div class="section-heading">
                 <div>
                     <h3>{% trans "Statut des factures" %}</h3>
-                    <span class="section-kicker">{% trans "Répartition des factures payées et impayées." %}</span>
+                    <span class="section-kicker">{% trans "Solde actuel des factures émises ou payées enregistrées dans la période." %}</span>
                 </div>
             </div>
             <div class="invoice-donut-layout">
@@ -184,6 +197,19 @@
                 <a href="{% url 'facture_list' %}" class="btn-link client-action primary">{% trans "Voir factures" %}</a>
             </div>
         </article>
+    </section>
+
+    <section class="owner-panel financial-series" aria-label="{% trans 'Évolution financière de la période' %}">
+        <table>
+            <caption>{% trans "Données mensuelles réelles de la même période et de la même devise" %}</caption>
+            <thead><tr><th scope="col">{% trans "Mois" %}</th><th scope="col">{% trans "CA facturé HT avant remises" %}</th><th scope="col">{% trans "Encaissements nets validés" %}</th></tr></thead>
+            <tbody>{% for row in financial_series %}<tr>
+                <th scope="row">{{ row.month|date:"F Y" }}</th>
+                <td>{{ row.revenue_display }}<span class="amount-bar" style="width: {{ row.revenue_width }}%" aria-hidden="true"></span></td>
+                <td>{{ row.receipts_display }}<span class="amount-bar cash-bar{% if row.net_receipts < 0 %} negative-bar{% endif %}" style="width: {{ row.receipts_width }}%" aria-hidden="true"></span></td>
+            </tr>{% empty %}<tr><td colspan="3">{% trans "Aucune opération financière pour cette période." %}</td></tr>{% endfor %}</tbody>
+        </table>
+        <p class="financial-help">{% trans "Les barres utilisent une échelle commune ; les montants négatifs sont affichés en rouge. Les montants chiffrés du tableau restent la référence. Les encaissements peuvent différer du CA HT en raison de la TVA, des remises, des paiements partiels et des dates." %}</p>
     </section>
 
     <section class="owner-panel" aria-label="{% trans 'Activité récente' %}">
@@ -362,6 +388,7 @@
         </div>
     </section>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
@@ -375,8 +402,9 @@
     const paid = Number.parseInt(donut.dataset.paid || "0", 10) || 0;
     const unpaid = Number.parseInt(donut.dataset.unpaid || "0", 10) || 0;
     const denominator = paid + unpaid;
-    const paidPercent = denominator > 0 ? Math.round((paid / denominator) * 1000) / 10 : 0;
-    const unpaidPercent = denominator > 0 ? Math.round((unpaid / denominator) * 1000) / 10 : 0;
+    const percentFormat = new Intl.NumberFormat(document.documentElement.lang || "fr", {
+        style: "percent", maximumFractionDigits: 1,
+    });
     const paidAngle = denominator > 0 ? (paid / denominator) * 360 : 0;
 
     donut.style.setProperty("--paid-angle", String(paidAngle) + "deg");
@@ -385,10 +413,10 @@
     const paidTarget = document.querySelector("[data-donut-paid-percent]");
     const unpaidTarget = document.querySelector("[data-donut-unpaid-percent]");
     if (paidTarget) {
-        paidTarget.textContent = `${paidPercent}%`;
+        paidTarget.textContent = percentFormat.format(denominator > 0 ? paid / denominator : 0);
     }
     if (unpaidTarget) {
-        unpaidTarget.textContent = `${unpaidPercent}%`;
+        unpaidTarget.textContent = percentFormat.format(denominator > 0 ? unpaid / denominator : 0);
     }
 })();
 </script>

@@ -13,6 +13,19 @@ from core.services.world import get_country_choices, get_currency_choices
 User = get_user_model()
 
 
+class DashboardPeriodForm(forms.Form):
+    date_debut = forms.DateField(label=_("Date de début"), required=False,
+                                widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))
+    date_fin = forms.DateField(label=_("Date de fin"), required=False,
+                              widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))
+
+    def clean(self):
+        data = super().clean()
+        if data.get('date_debut') and data.get('date_fin') and data['date_debut'] > data['date_fin']:
+            raise forms.ValidationError(_("La date de fin doit être postérieure ou égale à la date de début."))
+        return data
+
+
 class SignupForm(forms.Form):
     company_name = forms.CharField(max_length=100, label=_("Nom de l'entreprise"))
     raison_sociale = forms.CharField(max_length=150, required=False, label=_("Raison sociale"))

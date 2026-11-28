@@ -1,0 +1,19 @@
+{% load i18n %}
+<section class="owner-panel financial-period" aria-labelledby="financial-period-title">
+    <h2 id="financial-period-title">{% trans "Période des indicateurs financiers" %}</h2>
+    <p>
+        {% if financial_period_invalid %}{% trans "Période invalide" %}
+        {% elif period_start and period_end %}{% blocktrans with start=period_start|date:"DATE_FORMAT" end=period_end|date:"DATE_FORMAT" %}Du {{ start }} au {{ end }} inclus{% endblocktrans %}
+        {% elif period_start %}{% blocktrans with start=period_start|date:"DATE_FORMAT" %}Depuis le {{ start }} inclus{% endblocktrans %}
+        {% elif period_end %}{% blocktrans with end=period_end|date:"DATE_FORMAT" %}Jusqu'au {{ end }} inclus{% endblocktrans %}
+        {% else %}{% trans "Tout l'historique, sans filtre de date" %}{% endif %}
+        {% if currency_code %} · {% trans "Devise" %} : <strong>{{ currency_code }}</strong>{% endif %}
+    </p>
+    <form method="get" class="financial-period-form">
+        {{ period_form.as_p }}
+        <button type="submit" class="btn-link primary">{% trans "Appliquer la période" %}</button>
+        <a href="{% url 'admin_dashboard' %}" class="btn-link">{% trans "Tout l'historique" %}</a>
+    </form>
+    <p class="financial-help">{% trans "Les dates sont inclusives, dans le fuseau horaire de l'application. Les clients, le stock et les activités récentes restent des informations actuelles, hors filtre financier." %}</p>
+    {% if financial_period_invalid %}<p role="alert">{% trans "Période invalide : aucun indicateur financier n'est affiché." %}</p>{% endif %}
+</section>

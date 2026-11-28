@@ -4272,23 +4272,11 @@ msgstr "My company"
 msgid "Indicateurs principaux"
 msgstr "Key indicators"
 
-msgid "Total des ventes et factures enregistrées"
-msgstr "Total sales and invoices recorded"
-
 msgid "Donnée calculée depuis les factures de l'entreprise"
 msgstr "Data calculated from company invoices"
 
 msgid "Encaissements"
 msgstr "Receipts"
-
-msgid "Montants perçus via paiements validés"
-msgstr "Amounts received through validated payments"
-
-#, python-format
-msgid "%(count)s facture payée"
-msgid_plural "%(count)s factures payées"
-msgstr[0] "%(count)s paid invoice"
-msgstr[1] "%(count)s paid invoices"
 
 msgid "Montants encore dus par les clients"
 msgstr "Amounts still due from customers"
@@ -4331,9 +4319,6 @@ msgstr "Unpaid"
 
 msgid "Statut des factures"
 msgstr "Invoice status"
-
-msgid "Répartition des factures payées et impayées."
-msgstr "Distribution of invoices paid and unpaid."
 
 msgid "Factures impayées"
 msgstr "Unpaid invoices"
@@ -9647,3 +9632,117 @@ msgstr "Finance and reporting"
 
 msgid "Autres"
 msgstr "Other"
+
+msgid "La date de fin doit être postérieure ou égale à la date de début."
+msgstr "The end date must be on or after the start date."
+
+msgid "Chiffre d'affaires facturé"
+msgstr "Invoiced revenue"
+
+msgid "Total HT des factures enregistrées pendant la période, avant remises, hors brouillons et factures annulées."
+msgstr "Total excluding tax for invoices recorded during the period, before discounts, excluding drafts and cancelled invoices."
+
+msgid "Comment est calculé le chiffre d'affaires ?"
+msgstr "How is invoiced revenue calculated?"
+
+msgid "Total HT des factures de cette entreprise enregistrées pendant la période, avant remises, hors brouillons et factures annulées. La date retenue est la date d'enregistrement de la facture, indépendamment de la date des paiements. Ce montant n'est pas le total TTC encaissé. Les avoirs ne sont pas gérés par les modèles actuels et ne sont donc pas déduits automatiquement."
+msgstr "Total excluding tax for this company's invoices recorded during the period, before discounts, excluding drafts and cancelled invoices. The invoice creation date determines inclusion, independently of payment dates. This is not the tax-inclusive cash received. Credit notes are not supported by the current models and are therefore not deducted automatically."
+
+msgid "Encaissements validés"
+msgstr "Validated receipts"
+
+msgid "Paiements reçus, remboursements confirmés déduits"
+msgstr "Payments received, less confirmed refunds"
+
+#, python-format
+msgid "%(count)s encaissement validé pendant la période"
+msgid_plural "%(count)s encaissements validés pendant la période"
+msgstr[0] "%(count)s validated receipt during the period"
+msgstr[1] "%(count)s validated receipts during the period"
+
+msgid "Comment sont calculés les encaissements ?"
+msgstr "How are receipts calculated?"
+
+msgid "Paiements de factures validés selon la date du paiement de facture, plus encaissements libres confirmés selon la date de transaction du module Paiements, moins remboursements confirmés selon la date de transaction du module Paiements. Un paiement lié aux deux modules n'est compté qu'une fois. Les opérations en attente, rejetées ou annulées sont exclues. Les paiements peuvent concerner des factures d'une autre période, même désormais annulées ; seule l'annulation du paiement l'exclut."
+msgstr "Validated invoice payments selected by the invoice payment date, plus confirmed standalone receipts selected by the Payments transaction date, less confirmed refunds selected by the Payments transaction date. A payment linked across both modules is counted only once. Pending, rejected and cancelled entries are excluded. Payments may relate to invoices from another period, including invoices now cancelled; cancelling the payment itself excludes it."
+
+msgid "Les paiements et remboursements du module Paiements doivent être dans la devise affichée. Les autres devises sont exclues sans conversion estimée. Les paiements de factures, sans devise historique propre, utilisent la devise de l'entreprise ; un changement historique de devise nécessite une vérification des données."
+msgstr "Receipts and refunds from the Payments module must use the displayed currency. Other currencies are excluded without an estimated conversion. Invoice payments have no historical currency field and use the company's currency; historical currency changes require a data review."
+
+msgid "Encaissements bruts"
+msgstr "Gross receipts"
+
+msgid "Remboursements confirmés"
+msgstr "Confirmed refunds"
+
+#, python-format
+msgid "%(count)s opération dans une autre devise est exclue."
+msgid_plural "%(count)s opérations dans d'autres devises sont exclues."
+msgstr[0] "%(count)s entry in another currency is excluded."
+msgstr[1] "%(count)s entries in other currencies are excluded."
+
+msgid "Que signifie une facture soldée ?"
+msgstr "What does a fully settled invoice mean?"
+
+msgid "Pour les factures émises ou payées enregistrées dans la période, le solde actuel est recalculé avec tous leurs paiements validés : montant payé positif et reste à payer nul. Le compteur utilise les montants, pas seulement le statut déclaré. Un paiement partiel peut donc produire des encaissements sans aucune facture entièrement soldée. Ce n'est pas un état historique à la date de fin."
+msgstr "For issued or paid invoices created during the period, the current balance is recalculated using all their validated payments: a positive paid amount and no outstanding balance. The count uses amounts, not just the declared status. Partial payments can therefore produce receipts with no fully settled invoices. This is not a historical balance as of the end date."
+
+#, python-format
+msgid "%(count)s facture de la période est partiellement payée."
+msgid_plural "%(count)s factures de la période sont partiellement payées."
+msgstr[0] "%(count)s invoice from the period is partially paid."
+msgstr[1] "%(count)s invoices from the period are partially paid."
+
+msgid "Solde actuel des factures émises ou payées enregistrées dans la période."
+msgstr "Current balance of issued or paid invoices created during the period."
+
+msgid "Évolution financière de la période"
+msgstr "Financial activity during the period"
+
+msgid "Données mensuelles réelles de la même période et de la même devise"
+msgstr "Actual monthly figures for the same period and currency"
+
+msgid "CA facturé HT avant remises"
+msgstr "Invoiced revenue excluding tax, before discounts"
+
+msgid "Encaissements nets validés"
+msgstr "Validated net receipts"
+
+msgid "Aucune opération financière pour cette période."
+msgstr "No financial activity during this period."
+
+msgid "Les barres utilisent une échelle commune ; les montants négatifs sont affichés en rouge. Les montants chiffrés du tableau restent la référence. Les encaissements peuvent différer du CA HT en raison de la TVA, des remises, des paiements partiels et des dates."
+msgstr "Bars use a common scale; negative amounts are shown in red. The numeric amounts in the table remain the reference. Receipts may differ from revenue excluding tax because of VAT, discounts, partial payments and dates."
+
+msgid "Période des indicateurs financiers"
+msgstr "Financial reporting period"
+
+msgid "Période invalide"
+msgstr "Invalid period"
+
+#, python-format
+msgid "Du %(start)s au %(end)s inclus"
+msgstr "From %(start)s to %(end)s inclusive"
+
+#, python-format
+msgid "Depuis le %(start)s inclus"
+msgstr "From %(start)s inclusive"
+
+#, python-format
+msgid "Jusqu'au %(end)s inclus"
+msgstr "Through %(end)s inclusive"
+
+msgid "Tout l'historique, sans filtre de date"
+msgstr "All history, with no date filter"
+
+msgid "Appliquer la période"
+msgstr "Apply period"
+
+msgid "Tout l'historique"
+msgstr "All history"
+
+msgid "Les dates sont inclusives, dans le fuseau horaire de l'application. Les clients, le stock et les activités récentes restent des informations actuelles, hors filtre financier."
+msgstr "Dates are inclusive in the application's time zone. Customers, stock and recent activity remain current information outside the financial date filter."
+
+msgid "Période invalide : aucun indicateur financier n'est affiché."
+msgstr "Invalid period: no financial indicators are displayed."
